@@ -29,9 +29,16 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
+	// Serve static files
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "index.html")
 	})
+
+	r.Get("/signup", handlers.SignUpPageHandler)
+	r.Post("/signup", handlers.SignUpHandler)
+	r.Get("/terms", handlers.TermsHandler)
 
 	r.Post("/users", handlers.AddUserHandler)
 
