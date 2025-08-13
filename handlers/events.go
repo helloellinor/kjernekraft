@@ -1,0 +1,29 @@
+package handlers
+
+import (
+	"database/sql"
+	"html/template"
+	"net/http"
+)
+
+type EventHandler struct {
+	DB       *sql.DB
+	Template *template.Template
+}
+
+func NewEventHandler(db *sql.DB) *EventHandler {
+	return &EventHandler{DB: db}
+}
+
+func (h *EventHandler) ListEvents(w http.ResponseWriter, r *http.Request) {
+	startDate := r.URL.Query().Get("start_date")
+	endDate := r.URL.Query().Get("end_date")
+	location := r.URL.Query().Get("location")
+
+	events, err := h.DB.GetFilteredEvents(startDate, endDate, location)
+	if err != nil {
+		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
+		return
+	}
+	h.Template.Execute(w, events)
+}
