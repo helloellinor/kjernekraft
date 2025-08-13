@@ -58,6 +58,9 @@ func main() {
 	r.Get("/api/events", handlers.GetAllEventsHandler)
 	r.Post("/api/events", handlers.CreateEventHandler)
 
+	// Test data routes (for development)
+	r.Post("/api/shuffle-test-data", handlers.ShuffleTestDataHandler)
+
 	// Elev dashboard routes
 	r.Get("/elev", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)
