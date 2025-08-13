@@ -92,6 +92,62 @@ func Migrate(db *sql.DB) error {
 		FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id)
 	);
 	`
+	membershipsTableSQL := `
+	CREATE TABLE IF NOT EXISTS memberships (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		price INTEGER NOT NULL,
+		commitment_months INTEGER DEFAULT 0,
+		is_student_senior BOOLEAN DEFAULT FALSE,
+		is_special_offer BOOLEAN DEFAULT FALSE,
+		description TEXT,
+		features TEXT,
+		active BOOLEAN DEFAULT TRUE
+	);
+	`
+	userMembershipsTableSQL := `
+	CREATE TABLE IF NOT EXISTS user_memberships (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		membership_id INTEGER NOT NULL,
+		status TEXT DEFAULT 'active',
+		start_date DATETIME NOT NULL,
+		renewal_date DATETIME NOT NULL,
+		end_date DATETIME,
+		binding_end DATETIME,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		FOREIGN KEY (membership_id) REFERENCES memberships(id)
+	);
+	`
+	klippekortPackagesTableSQL := `
+	CREATE TABLE IF NOT EXISTS klippekort_packages (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		category TEXT NOT NULL,
+		klipp_count INTEGER NOT NULL,
+		price INTEGER NOT NULL,
+		price_per_session INTEGER NOT NULL,
+		description TEXT,
+		valid_days INTEGER DEFAULT 365,
+		active BOOLEAN DEFAULT TRUE,
+		is_popular BOOLEAN DEFAULT FALSE
+	);
+	`
+	userKlippekortTableSQL := `
+	CREATE TABLE IF NOT EXISTS user_klippekort (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		package_id INTEGER NOT NULL,
+		total_klipp INTEGER NOT NULL,
+		remaining_klipp INTEGER NOT NULL,
+		expiry_date DATETIME NOT NULL,
+		purchase_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+		is_active BOOLEAN DEFAULT TRUE,
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		FOREIGN KEY (package_id) REFERENCES klippekort_packages(id)
+	);
+	`
 
 	log.Println("Kjører migrering (setter opp databasetabeller)...")
 	if _, err := db.Exec(eventsTableSQL); err != nil {
@@ -110,6 +166,18 @@ func Migrate(db *sql.DB) error {
 		return err
 	}
 	if _, err := db.Exec(userPaymentMethodsTableSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(membershipsTableSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(userMembershipsTableSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(klippekortPackagesTableSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(userKlippekortTableSQL); err != nil {
 		return err
 	}
 
@@ -391,4 +459,113 @@ func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 		events = append(events, event)
 	}
 	return events, nil
+}
+
+// Membership-related database methods
+
+// GetAllMemberships fetches all active memberships
+func (db *Database) GetAllMemberships() ([]models.Membership, error) {
+	rows, err := db.Conn.Query("SELECT id, name, price, commitment_months, is_student_senior, is_special_offer, description, features, active FROM memberships WHERE active = TRUE")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var memberships []models.Membership
+	for rows.Next() {
+		var m models.Membership
+		if err := rows.Scan(&m.ID, &m.Name, &m.Price, &m.CommitmentMonths, &m.IsStudentSenior, &m.IsSpecialOffer, &m.Description, &m.Features, &m.Active); err != nil {
+			return nil, err
+		}
+		memberships = append(memberships, m)
+	}
+	return memberships, nil
+}
+
+// GetUserMembership fetches a user's current membership
+func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetails, error) {
+	query := `
+		SELECT um.id, um.user_id, um.membership_id, um.status, um.start_date, um.renewal_date, um.end_date, um.binding_end, um.created_at,
+		       m.name, m.price, m.commitment_months, m.is_student_senior, m.is_special_offer, m.description, m.features, m.active
+		FROM user_memberships um
+		JOIN memberships m ON um.membership_id = m.id
+		WHERE um.user_id = ? AND um.status = 'active'
+		ORDER BY um.created_at DESC
+		LIMIT 1
+	`
+	
+	var membership models.MembershipWithDetails
+	err := db.Conn.QueryRow(query, userID).Scan(
+		&membership.UserMembership.ID, &membership.UserMembership.UserID, &membership.UserMembership.MembershipID,
+		&membership.UserMembership.Status, &membership.UserMembership.StartDate, &membership.UserMembership.RenewalDate,
+		&membership.UserMembership.EndDate, &membership.UserMembership.BindingEnd, &membership.UserMembership.CreatedAt,
+		&membership.Membership.Name, &membership.Membership.Price, &membership.Membership.CommitmentMonths,
+		&membership.Membership.IsStudentSenior, &membership.Membership.IsSpecialOffer, &membership.Membership.Description,
+		&membership.Membership.Features, &membership.Membership.Active,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No active membership found
+		}
+		return nil, err
+	}
+	
+	return &membership, nil
+}
+
+// Klippekort-related database methods
+
+// GetAllKlippekortPackages fetches all active klippekort packages grouped by category
+func (db *Database) GetAllKlippekortPackages() ([]models.KlippekortPackage, error) {
+	rows, err := db.Conn.Query("SELECT id, name, category, klipp_count, price, price_per_session, description, valid_days, active, is_popular FROM klippekort_packages WHERE active = TRUE ORDER BY category, price")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var packages []models.KlippekortPackage
+	for rows.Next() {
+		var p models.KlippekortPackage
+		if err := rows.Scan(&p.ID, &p.Name, &p.Category, &p.KlippCount, &p.Price, &p.PricePerSession, &p.Description, &p.ValidDays, &p.Active, &p.IsPopular); err != nil {
+			return nil, err
+		}
+		packages = append(packages, p)
+	}
+	return packages, nil
+}
+
+// GetUserKlippekort fetches all active klippekort for a user
+func (db *Database) GetUserKlippekort(userID int64) ([]models.KlippekortWithDetails, error) {
+	query := `
+		SELECT uk.id, uk.user_id, uk.package_id, uk.total_klipp, uk.remaining_klipp, uk.expiry_date, uk.purchase_date, uk.is_active,
+		       kp.name, kp.category, kp.klipp_count, kp.price, kp.price_per_session, kp.description, kp.valid_days, kp.active, kp.is_popular
+		FROM user_klippekort uk
+		JOIN klippekort_packages kp ON uk.package_id = kp.id
+		WHERE uk.user_id = ? AND uk.is_active = TRUE AND uk.expiry_date > datetime('now')
+		ORDER BY uk.expiry_date ASC
+	`
+	
+	rows, err := db.Conn.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var klippekort []models.KlippekortWithDetails
+	for rows.Next() {
+		var k models.KlippekortWithDetails
+		if err := rows.Scan(
+			&k.UserKlippekort.ID, &k.UserKlippekort.UserID, &k.UserKlippekort.PackageID,
+			&k.UserKlippekort.TotalKlipp, &k.UserKlippekort.RemainingKlipp,
+			&k.UserKlippekort.ExpiryDate, &k.UserKlippekort.PurchaseDate, &k.UserKlippekort.IsActive,
+			&k.KlippekortPackage.Name, &k.KlippekortPackage.Category, &k.KlippekortPackage.KlippCount,
+			&k.KlippekortPackage.Price, &k.KlippekortPackage.PricePerSession, &k.KlippekortPackage.Description,
+			&k.KlippekortPackage.ValidDays, &k.KlippekortPackage.Active, &k.KlippekortPackage.IsPopular,
+		); err != nil {
+			return nil, err
+		}
+		klippekort = append(klippekort, k)
+	}
+	return klippekort, nil
 }
