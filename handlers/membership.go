@@ -548,10 +548,8 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
         
         <div class="selector-container">
             <form class="question-form" 
-                  hx-post="/api/membership-recommendations" 
-                  hx-trigger="change" 
-                  hx-target="#membership-results"
-                  hx-indicator="#loading">
+                  action="/medlemskap/recommendations" 
+                  method="post">
                 
                 <h2 class="form-title">Fortell oss om deg</h2>
                 
@@ -604,6 +602,10 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
                         </label>
                     </div>
                 </div>
+                
+                <button type="submit" style="background: #007cba; color: white; border: none; padding: 1rem 2rem; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 1rem;">
+                    Se anbefalinger
+                </button>
             </form>
             
             <div class="results-container">
@@ -621,7 +623,7 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(tmpl))
 }
 
-// MembershipRecommendationsHandler provides HTMX endpoint for membership filtering
+// MembershipRecommendationsHandler provides endpoint for membership filtering
 func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -681,16 +683,20 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Generate HTML response
-	data := struct {
-		Recommendations []models.Membership
-		ShowAutumnOffer bool
-	}{
-		Recommendations: recommendations,
-		ShowAutumnOffer: startTime == "august",
-	}
+	// Check if this is an HTMX request
+	isHTMX := r.Header.Get("HX-Request") != ""
+	
+	if isHTMX {
+		// Return HTML fragment for HTMX
+		data := struct {
+			Recommendations []models.Membership
+			ShowAutumnOffer bool
+		}{
+			Recommendations: recommendations,
+			ShowAutumnOffer: startTime == "august",
+		}
 
-	tmpl := `{{if .Recommendations}}
+		tmpl := `{{if .Recommendations}}
 <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
     <h3 style="margin-bottom: 1.5rem; color: #333; font-size: 1.25rem;">Våre anbefalinger for deg:</h3>
     
@@ -736,44 +742,176 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 </div>
 {{end}}`
 
-	// Parse template with custom functions
-	tmplFuncs := template.FuncMap{
-		"divf": func(a, b interface{}) float64 {
-			var aFloat, bFloat float64
-			
-			switch v := a.(type) {
-			case int:
-				aFloat = float64(v)
-			case float64:
-				aFloat = v
-			default:
-				return 0
-			}
-			
-			switch v := b.(type) {
-			case int:
-				bFloat = float64(v)
-			case float64:
-				bFloat = v
-			default:
-				return 0
-			}
-			
-			if bFloat == 0 {
-				return 0
-			}
-			return aFloat / bFloat
-		},
-	}
+		// Parse template with custom functions
+		tmplFuncs := template.FuncMap{
+			"divf": func(a, b interface{}) float64 {
+				var aFloat, bFloat float64
+				
+				switch v := a.(type) {
+				case int:
+					aFloat = float64(v)
+				case float64:
+					aFloat = v
+				default:
+					return 0
+				}
+				
+				switch v := b.(type) {
+				case int:
+					bFloat = float64(v)
+				case float64:
+					bFloat = v
+				default:
+					return 0
+				}
+				
+				if bFloat == 0 {
+					return 0
+				}
+				return aFloat / bFloat
+			},
+		}
 
-	t, err := template.New("recommendations").Funcs(tmplFuncs).Parse(tmpl)
-	if err != nil {
-		http.Error(w, "Template error", http.StatusInternalServerError)
-		return
-	}
+		t, err := template.New("recommendations").Funcs(tmplFuncs).Parse(tmpl)
+		if err != nil {
+			http.Error(w, "Template error", http.StatusInternalServerError)
+			return
+		}
 
-	w.Header().Set("Content-Type", "text/html")
-	if err := t.Execute(w, data); err != nil {
-		http.Error(w, "Template execution error", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "text/html")
+		if err := t.Execute(w, data); err != nil {
+			http.Error(w, "Template execution error", http.StatusInternalServerError)
+		}
+	} else {
+		// Return full page for regular form submission
+		data := struct {
+			Recommendations []models.Membership
+			ShowAutumnOffer bool
+			IsStudentSenior bool
+			Commitment      string
+			StartTime       string
+		}{
+			Recommendations: recommendations,
+			ShowAutumnOffer: startTime == "august",
+			IsStudentSenior: isStudentSenior,
+			Commitment:      commitment,
+			StartTime:       startTime,
+		}
+
+		tmpl := `<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medlemskapsanbefalinger - Kjernekraft</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; color: #333; }
+        .header { background-color: #007cba; color: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header h1 { font-size: 1.5rem; font-weight: 600; }
+        .nav { background-color: #005a87; padding: 0.5rem 0; }
+        .nav-list { list-style: none; display: flex; gap: 2rem; max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        .nav-item a { color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s; }
+        .nav-item a:hover { background-color: rgba(255,255,255,0.1); }
+        .main { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        .page-title { font-size: 2rem; margin-bottom: 2rem; color: #333; text-align: center; }
+        .recommendations { display: grid; gap: 1.5rem; }
+        .recommendation-card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #e0e0e0; }
+        .recommendation-card.special { border-color: #ff6b35; background: linear-gradient(135deg, #fff5f0, #ffffff); }
+        .special-badge { background: #ff6b35; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-bottom: 1rem; }
+        .card-title { font-size: 1.5rem; font-weight: 600; color: #333; margin-bottom: 0.5rem; }
+        .card-description { color: #666; margin-bottom: 1.5rem; }
+        .price { font-size: 2rem; font-weight: 700; color: #007cba; margin-bottom: 0.5rem; }
+        .commitment { color: #666; margin-bottom: 1.5rem; }
+        .back-link { display: inline-block; margin-top: 2rem; padding: 0.75rem 1.5rem; background: #6c757d; color: white; text-decoration: none; border-radius: 6px; }
+        .back-link:hover { background: #5a6268; }
+    </style>
+</head>
+<body>
+    <header class="header"><h1>Kjernekraft - Medlemskapsanbefalinger</h1></header>
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="/elev/hjem">Hjem</a></li>
+            <li class="nav-item"><a href="/elev/timeplan">Timeplan</a></li>
+            <li class="nav-item"><a href="/klippekort">Klippekort</a></li>
+            <li class="nav-item"><a href="/medlemskap">Medlemskap</a></li>
+        </ul>
+    </nav>
+    
+    <main class="main">
+        <h1 class="page-title">Våre anbefalinger for deg</h1>
+        
+        {{if .ShowAutumnOffer}}
+        <div style="background: linear-gradient(135deg, #ff6b35, #f7931e); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; text-align: center;">
+            <strong style="font-size: 1.2rem;">🍂 Spesielt Høsttilbud!</strong><br>
+            Få 12-måneders pris med kun 4 måneders binding
+        </div>
+        {{end}}
+        
+        <div class="recommendations">
+            {{range .Recommendations}}
+            <div class="recommendation-card {{if .IsSpecialOffer}}special{{end}}">
+                {{if .IsSpecialOffer}}
+                <div class="special-badge">Spesialtilbud</div>
+                {{end}}
+                
+                <h2 class="card-title">{{.Name}}</h2>
+                <p class="card-description">{{.Description}}</p>
+                
+                <div class="price">{{printf "%.0f" (divf .Price 100)}} kr/mnd</div>
+                {{if gt .CommitmentMonths 0}}
+                <div class="commitment">{{.CommitmentMonths}} måneders binding</div>
+                {{else}}
+                <div class="commitment">Ingen binding</div>
+                {{end}}
+            </div>
+            {{end}}
+        </div>
+        
+        <a href="/medlemskap" class="back-link">← Tilbake til spørreskjema</a>
+    </main>
+</body>
+</html>`
+
+		// Parse template with custom functions
+		tmplFuncs := template.FuncMap{
+			"divf": func(a, b interface{}) float64 {
+				var aFloat, bFloat float64
+				
+				switch v := a.(type) {
+				case int:
+					aFloat = float64(v)
+				case float64:
+					aFloat = v
+				default:
+					return 0
+				}
+				
+				switch v := b.(type) {
+				case int:
+					bFloat = float64(v)
+				case float64:
+					bFloat = v
+				default:
+					return 0
+				}
+				
+				if bFloat == 0 {
+					return 0
+				}
+				return aFloat / bFloat
+			},
+		}
+
+		t, err := template.New("membership-results").Funcs(tmplFuncs).Parse(tmpl)
+		if err != nil {
+			http.Error(w, "Template error", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html")
+		if err := t.Execute(w, data); err != nil {
+			http.Error(w, "Template execution error", http.StatusInternalServerError)
+		}
 	}
 }
