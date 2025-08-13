@@ -61,6 +61,15 @@ func main() {
 	// Test data routes (for development)
 	r.Post("/api/shuffle-test-data", handlers.ShuffleTestDataHandler)
 
+	// Membership and klippekort routes
+	r.Get("/klippekort", handlers.KlippekortPageHandler)
+	r.Get("/medlemskap", handlers.MembershipSelectorHandler)
+	r.Post("/api/membership-recommendations", handlers.MembershipRecommendationsHandler)
+
+	// Dashboard component routes (HTMX endpoints)
+	r.Get("/api/user/klippekort", handlers.UserKlippekortHandler)
+	r.Get("/api/user/membership", handlers.UserMembershipHandler)
+
 	// Elev dashboard routes
 	r.Get("/elev", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)

@@ -209,6 +209,20 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             background-color: #adb5bd;
             cursor: not-allowed;
         }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-style: italic;
+        }
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #dc3545;
+            background-color: #f8d7da;
+            border-radius: 6px;
+            border: 1px solid #f1aeb5;
+        }
     </style>
 </head>
 <body>
@@ -263,6 +277,20 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             </div>
             
             <div class="module">
+                <h2 class="module-title">Ditt medlemskap</h2>
+                <div id="membership-container">
+                    <div class="loading">Laster medlemskap...</div>
+                </div>
+            </div>
+            
+            <div class="module">
+                <h2 class="module-title">Dine klippekort</h2>
+                <div id="klippekort-container">
+                    <div class="loading">Laster klippekort...</div>
+                </div>
+            </div>
+            
+            <div class="module">
                 <h2 class="module-title">Aktivitet</h2>
                 <div class="activity-placeholder">
                     Aktivitetsporing kommer snart...
@@ -311,6 +339,39 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
                 btn.textContent = '🎲 Generer nye testdata';
             }
         }
+
+        // Load dashboard components
+        async function loadMembership() {
+            try {
+                const response = await fetch('/api/user/membership?user_id=1');
+                if (response.ok) {
+                    const html = await response.text();
+                    document.getElementById('membership-container').innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error loading membership:', error);
+                document.getElementById('membership-container').innerHTML = '<div class="error">Kunne ikke laste medlemskap</div>';
+            }
+        }
+
+        async function loadKlippekort() {
+            try {
+                const response = await fetch('/api/user/klippekort?user_id=1');
+                if (response.ok) {
+                    const html = await response.text();
+                    document.getElementById('klippekort-container').innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error loading klippekort:', error);
+                document.getElementById('klippekort-container').innerHTML = '<div class="error">Kunne ikke laste klippekort</div>';
+            }
+        }
+
+        // Load components when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMembership();
+            loadKlippekort();
+        });
     </script>
 </body>
 </html>`
