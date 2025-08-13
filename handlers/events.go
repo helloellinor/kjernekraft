@@ -1,17 +1,17 @@
 package handlers
 
 import (
-	"database/sql"
 	"html/template"
+	"kjernekraft/database"
 	"net/http"
 )
 
 type EventHandler struct {
-	DB       *sql.DB
+	DB       *database.Database
 	Template *template.Template
 }
 
-func NewEventHandler(db *sql.DB) *EventHandler {
+func NewEventHandler(db *database.Database) *EventHandler {
 	return &EventHandler{DB: db}
 }
 

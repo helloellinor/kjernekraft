@@ -240,3 +240,37 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 	}
 	return users, nil
 }
+
+func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]models.Event, error) {
+	query := "SELECT id, title, description, start_time, end_time, location FROM events WHERE 1=1"
+	var args []interface{}
+
+	if startDate != "" {
+		query += " AND start_time >= ?"
+		args = append(args, startDate)
+	}
+	if endDate != "" {
+		query += " AND end_time <= ?"
+		args = append(args, endDate)
+	}
+	if location != "" {
+		query += " AND location = ?"
+		args = append(args, location)
+	}
+
+	rows, err := db.Conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var events []models.Event
+	for rows.Next() {
+		var event models.Event
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location); err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	return events, nil
+}

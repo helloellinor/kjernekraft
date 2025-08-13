@@ -3,9 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"html/template"
-	"net/http"
 	"kjernekraft/database"
 	"kjernekraft/models"
+	"net/http"
 )
 
 var AdminDB *database.Database
@@ -17,7 +17,7 @@ type AdminData struct {
 func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// For now, we'll skip authentication check
 	// TODO: Add proper authentication to check if user has admin role
-	
+
 	users, err := AdminDB.GetAllUsers()
 	if err != nil {
 		http.Error(w, "Kunne ikke hente brukere", http.StatusInternalServerError)
@@ -94,7 +94,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetUsersAPIHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: Add authentication check for admin role
-	
+
 	users, err := AdminDB.GetAllUsers()
 	if err != nil {
 		http.Error(w, "Kunne ikke hente brukere", http.StatusInternalServerError)
