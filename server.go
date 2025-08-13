@@ -44,6 +44,11 @@ func main() {
 	// Admin routes
 	r.Get("/admin", handlers.AdminPageHandler)
 	r.Get("/api/admin/users", handlers.GetUsersAPIHandler)
+	r.Post("/api/admin/events/update-time", handlers.UpdateEventTimeHandler)
+
+	// Event routes
+	r.Get("/api/events", handlers.GetAllEventsHandler)
+	r.Post("/api/events", handlers.CreateEventHandler)
 
 	log.Println("Serving on http://localhost:8080")
 	err = http.ListenAndServe(":8080", r)

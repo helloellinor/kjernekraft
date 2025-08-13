@@ -1,34 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Homepage</title>
+    <title>Kjernekraft - Hjemmeside</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }
-        table { border-collapse: collapse; width: 100%; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; }
         th { background-color: #f2f2f2; }
         tr:hover { background-color: #f5f5f5; }
+        .section { margin-bottom: 40px; }
+        .registration-form { background: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 30px; }
+        .form-group { margin: 15px 0; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005a87; }
+        .success { color: green; padding: 10px; background: #e8f5e8; border-radius: 4px; margin: 10px 0; }
+        .error { color: red; padding: 10px; background: #ffe8e8; border-radius: 4px; margin: 10px 0; }
+        h1, h2 { color: #333; }
+        .admin-link { margin: 20px 0; }
+        .admin-link a { background: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; }
+        .admin-link a:hover { background: #1e7e34; }
     </style>
 </head>
 <body>
-    <h1>Events</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Location</th>
-                <th>Organizer</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Event rows will go here -->
-        </tbody>
-    </table>
+    <h1>Kjernekraft - Hjemmeside</h1>
+    
+    <div class="admin-link">
+        <a href="/admin">Admin Panel</a>
+    </div>
+
+    <div class="section registration-form">
+        <h2>Registrer ny bruker</h2>
+        <div id="message"></div>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="name">Navn:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="birthdate">Fødselsdato:</label>
+                <input type="date" id="birthdate" name="birthdate" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-post:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Telefon:</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="role">Rolle:</label>
+                <select id="role" name="role" required>
+                    <option value="">Velg rolle</option>
+                    <option value="user">Bruker</option>
+                    <option value="reformer">Reformer</option>
+                    <option value="plutocrat">Plutokrat</option>
+                </select>
+            </div>
+            <button type="submit">Registrer bruker</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h2>Events</h2>
+        <table id="eventsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tittel</th>
+                    <th>Beskrivelse</th>
+                    <th>Starttid</th>
+                    <th>Sluttid</th>
+                    <th>Lokasjon</th>
+                    <th>Organisator</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Event rows will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Load events when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEvents();
+        });
+
+        function loadEvents() {
+            fetch('/api/events')
+                .then(response => response.json())
+                .then(events => {
+                    const tbody = document.querySelector('#eventsTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    if (events && events.length > 0) {
+                        events.forEach(event => {
+                            const row = tbody.insertRow();
+                            row.innerHTML = `
+                                <td>${event.id}</td>
+                                <td>${event.title || '-'}</td>
+                                <td>${event.description || '-'}</td>
+                                <td>${event.start_time ? new Date(event.start_time).toLocaleString('no-NO') : '-'}</td>
+                                <td>${event.end_time ? new Date(event.end_time).toLocaleString('no-NO') : '-'}</td>
+                                <td>${event.location || '-'}</td>
+                                <td>${event.organizer || '-'}</td>
+                            `;
+                        });
+                    } else {
+                        const row = tbody.insertRow();
+                        row.innerHTML = '<td colspan="7" style="text-align: center; color: #666;">Ingen events funnet</td>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Feil ved lasting av events:', error);
+                    const tbody = document.querySelector('#eventsTable tbody');
+                    tbody.innerHTML = '<td colspan="7" style="text-align: center; color: red;">Feil ved lasting av events</td>';
+                });
+        }
+
+        // Handle form submission
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                birthdate: document.getElementById('birthdate').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                roles: [document.getElementById('role').value]
+            };
+
+            fetch('/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Feil ved registrering');
+                }
+            })
+            .then(data => {
+                document.getElementById('message').innerHTML = 
+                    '<div class="success">Bruker registrert med ID: ' + data.id + '</div>';
+                document.getElementById('registrationForm').reset();
+            })
+            .catch(error => {
+                document.getElementById('message').innerHTML = 
+                    '<div class="error">Feil: ' + error.message + '</div>';
+            });
+        });
+    </script>
 </body>
 </html>

@@ -274,3 +274,43 @@ func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]mo
 	}
 	return events, nil
 }
+
+// CreateEvent creates a new event in the database
+func (db *Database) CreateEvent(event models.Event) (int64, error) {
+	res, err := db.Conn.Exec(
+		"INSERT INTO events (title, description, start_time, end_time, location, organizer) VALUES (?, ?, ?, ?, ?, ?)",
+		event.Title, event.Description, event.StartTime, event.EndTime, event.Location, event.Organizer,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+// UpdateEventTime updates the start and end time of an event
+func (db *Database) UpdateEventTime(eventID int64, startTime, endTime string) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET start_time = ?, end_time = ? WHERE id = ?",
+		startTime, endTime, eventID,
+	)
+	return err
+}
+
+// GetAllEvents fetches all events from the database
+func (db *Database) GetAllEvents() ([]models.Event, error) {
+	rows, err := db.Conn.Query("SELECT id, title, description, start_time, end_time, location, organizer FROM events")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var events []models.Event
+	for rows.Next() {
+		var event models.Event
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer); err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	return events, nil
+}
