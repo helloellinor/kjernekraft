@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"kjernekraft/models"
 	"log"
 
@@ -42,7 +43,14 @@ func Migrate(db *sql.DB) error {
 		name TEXT NOT NULL,
 		birthdate TEXT NOT NULL,
 		email TEXT NOT NULL UNIQUE,
-		phone TEXT NOT NULL,
+		phone TEXT NOT NULL UNIQUE,
+		address TEXT,
+		postal_code TEXT,
+		city TEXT,
+		country TEXT,
+		password TEXT NOT NULL,
+		newsletter_subscription BOOLEAN DEFAULT FALSE,
+		terms_accepted BOOLEAN DEFAULT FALSE,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
 	`
@@ -172,9 +180,23 @@ func (db *Database) GetUserPaymentMethods(userID int64) ([]struct{ Provider, Pro
 
 // CreateUser inserts a new user into the users table
 func (db *Database) CreateUser(u models.User) (int64, error) {
+	// Check if email already exists
+	var existingID int
+	err := db.Conn.QueryRow("SELECT id FROM users WHERE email = ?", u.Email).Scan(&existingID)
+	if err == nil {
+		return 0, fmt.Errorf("e-post er allerede i bruk")
+	}
+	
+	// Check if phone already exists
+	err = db.Conn.QueryRow("SELECT id FROM users WHERE phone = ?", u.Phone).Scan(&existingID)
+	if err == nil {
+		return 0, fmt.Errorf("telefonnummer er allerede i bruk")
+	}
+
 	res, err := db.Conn.Exec(
-		"INSERT INTO users (name, birthdate, email, phone) VALUES (?, ?, ?, ?)",
-		u.Name, u.Birthdate, u.Email, u.Phone,
+		`INSERT INTO users (name, birthdate, email, phone, address, postal_code, city, country, password, newsletter_subscription, terms_accepted) 
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		u.Name, u.Birthdate, u.Email, u.Phone, u.Address, u.PostalCode, u.City, u.Country, u.Password, u.NewsletterSubscription, u.TermsAccepted,
 	)
 	if err != nil {
 		return 0, err
@@ -216,7 +238,7 @@ func (db *Database) GetOrCreateRole(name string) (int64, error) {
 
 // GetAllUsers fetches all users from the database
 func (db *Database) GetAllUsers() ([]models.User, error) {
-	rows, err := db.Conn.Query("SELECT id, name, birthdate, email, phone FROM users")
+	rows, err := db.Conn.Query("SELECT id, name, birthdate, email, phone, address, postal_code, city, country, newsletter_subscription, terms_accepted FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +247,7 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 	for rows.Next() {
 		var u models.User
-		if err := rows.Scan(&u.ID, &u.Name, &u.Birthdate, &u.Email, &u.Phone); err != nil {
+		if err := rows.Scan(&u.ID, &u.Name, &u.Birthdate, &u.Email, &u.Phone, &u.Address, &u.PostalCode, &u.City, &u.Country, &u.NewsletterSubscription, &u.TermsAccepted); err != nil {
 			return nil, err
 		}
 

@@ -2,10 +2,15 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
+	"html"
 	"kjernekraft/database"
 	"kjernekraft/models"
 	"net/http"
 	"strconv"
+	"strings"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var DB *database.Database // Set this from main
@@ -98,4 +103,86 @@ func AddUserHandler(w http.ResponseWriter, r *http.Request) {
 	u.ID = int(userID)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(u)
+}
+
+func SignUpHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse multipart form data
+	err := r.ParseMultipartForm(32 << 20) // 32 MB max memory
+	if err != nil {
+		// Fallback to regular form parsing
+		err = r.ParseForm()
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`<div class="error">Ugyldig skjemadata</div>`))
+			return
+		}
+	}
+
+	// Extract form values
+	name := strings.TrimSpace(r.FormValue("name"))
+	birthdate := strings.TrimSpace(r.FormValue("birthdate"))
+	email := strings.TrimSpace(r.FormValue("email"))
+	phone := strings.TrimSpace(r.FormValue("phone"))
+	address := strings.TrimSpace(r.FormValue("address"))
+	postalCode := strings.TrimSpace(r.FormValue("postal_code"))
+	city := strings.TrimSpace(r.FormValue("city"))
+	country := strings.TrimSpace(r.FormValue("country"))
+	password := r.FormValue("password")
+	newsletter := r.FormValue("newsletter") == "on"
+	termsAccepted := r.FormValue("terms_accepted") == "on"
+
+	// Validate required fields
+	if name == "" || birthdate == "" || email == "" || phone == "" || password == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`<div class="error">Alle påkrevde felt må fylles ut</div>`))
+		return
+	}
+
+	if !termsAccepted {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`<div class="error">Du må akseptere handelsbetingelsene</div>`))
+		return
+	}
+
+	// Hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`<div class="error">Feil ved behandling av passord</div>`))
+		return
+	}
+
+	// Create user object
+	user := models.User{
+		Name:                   name,
+		Birthdate:              birthdate,
+		Email:                  email,
+		Phone:                  phone,
+		Address:                address,
+		PostalCode:             postalCode,
+		City:                   city,
+		Country:                country,
+		Password:               string(hashedPassword),
+		NewsletterSubscription: newsletter,
+		TermsAccepted:          termsAccepted,
+		Roles:                  []string{"user"}, // Default role
+	}
+
+	// Create user in database
+	userID, err := DB.CreateUser(user)
+	if err != nil {
+		w.WriteHeader(http.StatusConflict)
+		errorMsg := html.EscapeString(err.Error())
+		w.Write([]byte(`<div class="error">` + errorMsg + `</div>`))
+		return
+	}
+
+	// Success response
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`<div class="success">Bruker registrert med suksess! Bruker ID: ` + strconv.FormatInt(userID, 10) + `</div>`))
 }
