@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kjernekraft - Registrering</title>
+    <script src="/static/js/htmx.min.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #333; 
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group { 
+            margin: 15px 0; 
+        }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+        }
+        .required { 
+            color: red; 
+        }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            box-sizing: border-box;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .checkbox-group {
+            margin: 20px 0;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        .checkbox-group label {
+            display: inline;
+            font-weight: normal;
+        }
+        button { 
+            background: #007cba; 
+            color: white; 
+            padding: 12px 30px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover { 
+            background: #005a87; 
+        }
+        .success { 
+            color: green; 
+            padding: 15px; 
+            background: #e8f5e8; 
+            border-radius: 4px; 
+            margin: 15px 0; 
+            border: 1px solid #4caf50;
+        }
+        .error { 
+            color: red; 
+            padding: 15px; 
+            background: #ffe8e8; 
+            border-radius: 4px; 
+            margin: 15px 0; 
+            border: 1px solid #f44336;
+        }
+        .terms-link {
+            color: #007cba;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .terms-link:hover {
+            color: #005a87;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80%;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close {
+            background: #007cba;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            float: right;
+        }
+        .modal-close:hover {
+            background: #005a87;
+        }
+        .fieldset {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .fieldset legend {
+            font-weight: bold;
+            padding: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registrer deg hos Kjernekraft</h1>
+        
+        <div id="message"></div>
+        
+        <form hx-post="/signup" hx-target="#message">
+            <div class="form-group">
+                <label for="name">Navn <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="birthdate">Fødselsdag <span class="required">*</span></label>
+                <input type="date" id="birthdate" name="birthdate" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">E-post <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Telefon <span class="required">*</span></label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+            
+            <fieldset class="fieldset">
+                <legend>Adresse (valgfritt)</legend>
+                <div class="form-group">
+                    <label for="address">Adresse</label>
+                    <input type="text" id="address" name="address">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="postal_code">Postnummer</label>
+                        <input type="text" id="postal_code" name="postal_code">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">By</label>
+                        <input type="text" id="city" name="city">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="country">Land</label>
+                    <input type="text" id="country" name="country">
+                </div>
+            </fieldset>
+            
+            <div class="form-group">
+                <label for="password">Passord <span class="required">*</span></label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="newsletter" name="newsletter">
+                <label for="newsletter">Jeg vil gjerne motta nyhetsbrev</label>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="terms_accepted" name="terms_accepted" required>
+                <label for="terms_accepted">
+                    Jeg har lest og er enig i 
+                    <span class="terms-link" onclick="openTermsModal()">handelsbetingelsene</span>
+                    <span class="required">*</span>
+                </label>
+            </div>
+            
+            <button type="submit">Registrer deg</button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/">Tilbake til hovedsiden</a>
+        </div>
+    </div>
+    
+    <!-- Terms Modal -->
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <h2>Handelsbetingelser</h2>
+            <div id="termsContent">
+                <p>Laster vilkår...</p>
+            </div>
+            <button class="modal-close" onclick="closeTermsModal()">Lukk</button>
+        </div>
+    </div>
+    
+    <script>
+        function openTermsModal() {
+            document.getElementById('termsModal').style.display = 'block';
+            // Load terms content
+            fetch('/terms')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('termsContent').innerHTML = html;
+                })
+                .catch(error => {
+                    document.getElementById('termsContent').innerHTML = '<p>Feil ved lasting av vilkår.</p>';
+                });
+        }
+        
+        function closeTermsModal() {
+            document.getElementById('termsModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('termsModal');
+            if (event.target == modal) {
+                closeTermsModal();
+            }
+        }
+    </script>
+</body>
+</html>
