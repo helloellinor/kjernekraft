@@ -64,6 +64,7 @@ func main() {
 	// Membership and klippekort routes
 	r.Get("/klippekort", handlers.KlippekortPageHandler)
 	r.Get("/medlemskap", handlers.MembershipSelectorHandler)
+	r.Post("/medlemskap/recommendations", handlers.MembershipRecommendationsHandler)
 	r.Post("/api/membership-recommendations", handlers.MembershipRecommendationsHandler)
 
 	// Dashboard component routes (HTMX endpoints)
