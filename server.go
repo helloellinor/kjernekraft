@@ -33,7 +33,8 @@ func main() {
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "index.html")
+		// Redirect to Elev dashboard for now (in the future this could be role-based)
+		http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)
 	})
 
 	r.Get("/signup", handlers.SignUpPageHandler)
@@ -56,6 +57,16 @@ func main() {
 	// Event routes
 	r.Get("/api/events", handlers.GetAllEventsHandler)
 	r.Post("/api/events", handlers.CreateEventHandler)
+
+	// Test data routes (for development)
+	r.Post("/api/shuffle-test-data", handlers.ShuffleTestDataHandler)
+
+	// Elev dashboard routes
+	r.Get("/elev", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)
+	})
+	r.Get("/elev/hjem", handlers.ElevDashboardHandler)
+	r.Get("/elev/timeplan", handlers.ElevTimeplanHandler)
 
 	log.Println("Serving on http://localhost:8080")
 	err = http.ListenAndServe(":8080", r)
