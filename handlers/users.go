@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"html"
 	"kjernekraft/database"
 	"kjernekraft/models"

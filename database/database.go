@@ -34,7 +34,12 @@ func Migrate(db *sql.DB) error {
 		end_time DATETIME,
 		location TEXT,
 		organizer TEXT,
-		attendees TEXT
+		attendees TEXT,
+		class_type TEXT DEFAULT '',
+		teacher_name TEXT DEFAULT '',
+		capacity INTEGER DEFAULT 0,
+		current_enrolment INTEGER DEFAULT 0,
+		color TEXT DEFAULT ''
 	);
 	`
 	usersTableSQL := `
@@ -264,7 +269,7 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 }
 
 func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]models.Event, error) {
-	query := "SELECT id, title, description, start_time, end_time, location FROM events WHERE 1=1"
+	query := "SELECT id, title, description, start_time, end_time, location, class_type, teacher_name, capacity, current_enrolment, color FROM events WHERE 1=1"
 	var args []interface{}
 
 	if startDate != "" {
@@ -289,7 +294,7 @@ func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]mo
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -300,8 +305,8 @@ func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]mo
 // CreateEvent creates a new event in the database
 func (db *Database) CreateEvent(event models.Event) (int64, error) {
 	res, err := db.Conn.Exec(
-		"INSERT INTO events (title, description, start_time, end_time, location, organizer) VALUES (?, ?, ?, ?, ?, ?)",
-		event.Title, event.Description, event.StartTime, event.EndTime, event.Location, event.Organizer,
+		"INSERT INTO events (title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		event.Title, event.Description, event.StartTime, event.EndTime, event.Location, event.Organizer, event.ClassType, event.TeacherName, event.Capacity, event.CurrentEnrolment, event.Color,
 	)
 	if err != nil {
 		return 0, err
@@ -320,7 +325,7 @@ func (db *Database) UpdateEventTime(eventID int64, startTime, endTime string) er
 
 // GetAllEvents fetches all events from the database
 func (db *Database) GetAllEvents() ([]models.Event, error) {
-	rows, err := db.Conn.Query("SELECT id, title, description, start_time, end_time, location, organizer FROM events")
+	rows, err := db.Conn.Query("SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color FROM events")
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +334,58 @@ func (db *Database) GetAllEvents() ([]models.Event, error) {
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	return events, nil
+}
+
+// GetTodaysEvents fetches events for today
+func (db *Database) GetTodaysEvents() ([]models.Event, error) {
+	query := `
+		SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color 
+		FROM events 
+		WHERE DATE(start_time) = DATE('now', 'localtime')
+		ORDER BY start_time ASC
+	`
+	rows, err := db.Conn.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var events []models.Event
+	for rows.Next() {
+		var event models.Event
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	return events, nil
+}
+
+// GetThisWeeksEvents fetches events for the current week
+func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
+	query := `
+		SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color 
+		FROM events 
+		WHERE DATE(start_time) >= DATE('now', 'weekday 0', '-6 days', 'localtime') 
+		AND DATE(start_time) <= DATE('now', 'weekday 0', 'localtime')
+		ORDER BY start_time ASC
+	`
+	rows, err := db.Conn.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var events []models.Event
+	for rows.Next() {
+		var event models.Event
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
