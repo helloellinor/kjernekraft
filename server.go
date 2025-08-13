@@ -16,6 +16,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Kjør migrering
+	if err := database.Migrate(dbConn); err != nil {
+		log.Fatal(err)
+	}
+
 	db := &database.Database{Conn: dbConn}
 	handlers.DB = db
 	handlers.AdminDB = db
@@ -27,7 +33,6 @@ func main() {
 		http.ServeFile(w, r, "index.html")
 	})
 
-	r.Post("/events", handlers.AddEventHandler)
 	r.Post("/users", handlers.AddUserHandler)
 
 	r.Post("/users/assign-role", handlers.AssignRoleToUserHandler)
