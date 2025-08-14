@@ -53,6 +53,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		"Today":        now.Format("2006-01-02"),
 		"IsAdmin":      false, // TODO: Implement proper role checking
 		"ExternalCSS":  []string{"/static/css/event-card.css"},
+		"CurrentPage":  "timeplan",
 	}
 
 	// Use the new template system

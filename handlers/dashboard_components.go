@@ -34,10 +34,9 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 	for i := range klippekort {
 		k := &klippekort[i]
 
-		// Calculate progress percentage
+		// Calculate progress percentage (remaining klipps)
 		if k.TotalKlipp > 0 {
-			used := k.TotalKlipp - k.RemainingKlipp
-			k.ProgressPercentage = (used * 100) / k.TotalKlipp
+			k.ProgressPercentage = (k.RemainingKlipp * 100) / k.TotalKlipp
 		}
 
 		// Calculate days until expiry

@@ -811,13 +811,13 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
             border-color: #007cba;
             background-color: #f8f9fa;
         }
-        .option-label input[type="radio"] {
+        .option-label input[type="radio"], .option-label input[type="checkbox"] {
             margin-right: 0.75rem;
         }
-        .option-label input[type="radio"]:checked + span {
+        .option-label input[type="radio"]:checked + span, .option-label input[type="checkbox"]:checked + span {
             font-weight: 600;
         }
-        .option-label:has(input[type="radio"]:checked) {
+        .option-label:has(input[type="radio"]:checked), .option-label:has(input[type="checkbox"]:checked) {
             border-color: #007cba;
             background-color: #e8f4fd;
         }
@@ -958,21 +958,7 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
                   action="/medlemskap/recommendations" 
                   method="post">
                 
-                <h2 class="form-title">Fortell oss om deg</h2>
-                
-                <div class="question-group">
-                    <label class="question-label">Er du student eller senior?</label>
-                    <div class="question-options">
-                        <label class="option-label">
-                            <input type="radio" name="is_student_senior" value="true">
-                            <span>Ja, jeg er student eller 67+ år</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="radio" name="is_student_senior" value="false">
-                            <span>Nei</span>
-                        </label>
-                    </div>
-                </div>
+                <h2 class="form-title" style="border-bottom: 2px solid #007cba; padding-bottom: 0.5rem;">Fortell oss om deg</h2>
                 
                 <div class="question-group">
                     <label class="question-label">Hvor lenge ønsker du å binde deg?</label>
@@ -980,6 +966,10 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
                         <label class="option-label">
                             <input type="radio" name="commitment" value="12">
                             <span>12 måneder (best pris)</span>
+                        </label>
+                        <label class="option-label" style="border: 2px solid #ff6b35; background: linear-gradient(135deg, #fff5f0, #ffffff);">
+                            <input type="radio" name="commitment" value="autumn_special">
+                            <span>🍂 Høsttilbud: 12-måneders pris med 4 måneders binding!</span>
                         </label>
                         <label class="option-label">
                             <input type="radio" name="commitment" value="6">
@@ -992,6 +982,16 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
                         <label class="option-label">
                             <input type="radio" name="commitment" value="trial">
                             <span>Jeg vil bare prøve</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="question-group">
+                    <label class="question-label">Er du student eller senior?</label>
+                    <div class="question-options">
+                        <label class="option-label">
+                            <input type="checkbox" name="is_student_senior" value="true">
+                            <span>Ja, jeg er student eller 67+ år</span>
                         </label>
                     </div>
                 </div>
@@ -1012,7 +1012,7 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
             </form>
             
             <div class="checkout-container">
-                <h2 class="checkout-title">Ditt medlemskap</h2>
+                <h2 class="checkout-title" style="border-bottom: 2px solid #007cba; padding-bottom: 0.5rem;">Ditt medlemskap</h2>
                 
                 <div id="special-offer" class="special-offer-notice" style="display: none;">
                     🍂 Høsttilbud: 12-måneders pris med kun 4 måneders binding!
@@ -1033,9 +1033,9 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
                         <span>Binding:</span>
                         <span id="binding-period">Ingen</span>
                     </div>
-                    <div class="detail-row">
+                    <div class="detail-row" id="discount-row" style="display: none;">
                         <span>Student/Senior rabatt:</span>
-                        <span id="discount-status">Nei</span>
+                        <span id="discount-status">20%</span>
                     </div>
                     <div class="detail-row">
                         <span>Total pris per måned:</span>
@@ -1078,10 +1078,15 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
             let membershipType = 'Ingen binding';
             let bindingText = 'Ingen';
 
-            if (commitment === '12') {
+            if (commitment === '12' || commitment === 'autumn_special') {
                 priceKey = '12_months';
-                membershipType = '12-måneder';
-                bindingText = '12 måneder';
+                if (commitment === 'autumn_special') {
+                    membershipType = 'Høsttilbud (12-måneders pris, 4 måneders binding)';
+                    bindingText = '4 måneder (høsttilbud)';
+                } else {
+                    membershipType = '12-måneder';
+                    bindingText = '12 måneder';
+                }
             } else if (commitment === '6') {
                 priceKey = '6_months';
                 membershipType = '6-måneder';
@@ -1100,21 +1105,24 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
             document.getElementById('current-price').textContent = Math.round(currentPrice / 100) + ' kr/mnd';
             document.getElementById('membership-type').textContent = membershipType;
             document.getElementById('binding-period').textContent = bindingText;
-            document.getElementById('discount-status').textContent = isStudentSenior ? 'Ja (20%)' : 'Nei';
             document.getElementById('total-price').textContent = Math.round(currentPrice / 100) + ' kr';
 
             // Show/hide discount elements
+            const discountRow = document.getElementById('discount-row');
             if (isStudentSenior && priceKey !== 'trial') {
                 document.getElementById('original-price').textContent = Math.round(originalPrice / 100) + ' kr/mnd';
                 document.getElementById('original-price').style.display = 'block';
                 document.getElementById('discount-badge').style.display = 'inline-block';
+                discountRow.style.display = 'flex';
+                document.getElementById('discount-status').textContent = '20%';
             } else {
                 document.getElementById('original-price').style.display = 'none';
                 document.getElementById('discount-badge').style.display = 'none';
+                discountRow.style.display = 'none';
             }
 
             // Show/hide special offer notice
-            if (startTime === 'august') {
+            if (startTime === 'august' || commitment === 'autumn_special') {
                 document.getElementById('special-offer').style.display = 'block';
             } else {
                 document.getElementById('special-offer').style.display = 'none';
@@ -1133,7 +1141,7 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
             
             form.addEventListener('change', function(e) {
                 if (e.target.name === 'is_student_senior') {
-                    currentSelection.isStudentSenior = e.target.value === 'true';
+                    currentSelection.isStudentSenior = e.target.checked;
                 } else if (e.target.name === 'commitment') {
                     currentSelection.commitment = e.target.value;
                 } else if (e.target.name === 'start_time') {

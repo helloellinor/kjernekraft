@@ -10,48 +10,6 @@
         background-color: #f5f5f5;
         color: #333;
     }
-    .header {
-        background-color: #007cba;
-        color: white;
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .header h1 {
-        font-size: 1.5rem;
-        font-weight: 600;
-    }
-    .nav {
-        background: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .nav-list {
-        display: flex;
-        list-style: none;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0;
-    }
-    .nav-item {
-        border-right: 1px solid #e0e0e0;
-    }
-    .nav-item:last-child {
-        border-right: none;
-    }
-    .nav-link {
-        display: block;
-        padding: 1rem 1.5rem;
-        text-decoration: none;
-        color: #666;
-        transition: all 0.2s;
-    }
-    .nav-link:hover {
-        background: #f8f9fa;
-        color: #007cba;
-    }
-    .nav-link.active {
-        background: #007cba;
-        color: white;
-    }
     .main-content {
         max-width: 1200px;
         margin: 2rem auto;
@@ -59,6 +17,16 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 2rem;
+    }
+    .page-title {
+        font-size: 2rem;
+        margin: 2rem auto 1rem auto;
+        max-width: 1200px;
+        padding: 0 2rem;
+        color: #333;
+        font-weight: 600;
+        border-bottom: 2px solid #007cba;
+        padding-bottom: 0.5rem;
     }
     .content-section {
         background: white;
@@ -80,6 +48,21 @@
         gap: 0.75rem;
         max-height: 400px;
         overflow-y: auto;
+        padding-right: 0.5rem; /* Add padding to prevent shadow cutoff */
+    }
+    .events-grid::-webkit-scrollbar {
+        width: 6px;
+    }
+    .events-grid::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    .events-grid::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    .events-grid::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
     }
     .activity-placeholder {
         text-align: center;
@@ -90,51 +73,24 @@
     
     /* Responsive styles */
     @media (max-width: 767px) {
-        .nav-list {
-            flex-direction: column;
-        }
-        .nav-item {
-            border-right: none;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .nav-item:last-child {
-            border-bottom: none;
-        }
         .main-content {
             padding: 1rem;
             grid-template-columns: 1fr;
         }
+        .page-title {
+            padding: 0 1rem;
+        }
     }
 </style>
 
-<header class="header">
-    <h1>Kjernekraft - Elev Dashboard</h1>
-</header>
+{{template "navigation" .}}
 
-<nav class="nav">
-    <ul class="nav-list">
-        <li class="nav-item">
-            <a href="/elev/hjem" class="nav-link active">Hjem</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/timeplan" class="nav-link">Timeplan</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/klippekort" class="nav-link">Klippekort</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/medlemskap" class="nav-link">Medlemskap</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/min-profil" class="nav-link">Min profil</a>
-        </li>
-    </ul>
-</nav>
+<h1 class="page-title">Velkommen, {{.UserName}}!</h1>
 
 <div class="main-content">
     <div class="content-section">
         <h2 class="section-title">Dagens klasser</h2>
-        <div class="events-grid">
+        <div class="events-grid" id="todays-classes">
             {{if .TodaysEvents}}
                 {{range .TodaysEvents}}
                 {{template "event_card" .}}
@@ -142,6 +98,13 @@
             {{else}}
                 <div class="activity-placeholder">Ingen kommende klasser i dag</div>
             {{end}}
+        </div>
+    </div>
+    
+    <div class="content-section">
+        <h2 class="section-title">Påmeldt</h2>
+        <div class="events-grid" id="signed-up-classes">
+            <div class="activity-placeholder">Du er ikke påmeldt noen klasser ennå</div>
         </div>
     </div>
     
@@ -158,14 +121,12 @@
             <div class="activity-placeholder">Laster klippekort...</div>
         </div>
     </div>
-    
-    <div class="content-section">
-        <h2 class="section-title">Siste aktivitet</h2>
-        <div class="activity-placeholder">Ingen nylig aktivitet</div>
-    </div>
 </div>
 
 <script>
+    // Track signed up classes
+    let signedUpClasses = new Set();
+
     function toggleEventCard(element) {
         const isExpanded = element.classList.contains('expanded');
         
@@ -185,8 +146,92 @@
     }
 
     function signupForClass(eventId) {
-        // TODO: Implement signup functionality
-        alert('Påmelding for klasse ' + eventId + ' kommer snart!');
+        // Check if already signed up
+        if (signedUpClasses.has(eventId)) {
+            alert('Du er allerede påmeldt denne klassen!');
+            return;
+        }
+
+        // Find the event card
+        const eventCard = document.querySelector(`[data-event-id="${eventId}"]`);
+        if (!eventCard) {
+            alert('Kunne ikke finne klassen. Prøv å laste siden på nytt.');
+            return;
+        }
+
+        // Add to signed up set
+        signedUpClasses.add(eventId);
+
+        // Clone the card for the signed-up section
+        const clonedCard = eventCard.cloneNode(true);
+        clonedCard.classList.remove('expanded');
+        
+        // Update the signup button in the cloned card
+        const signupButton = clonedCard.querySelector('.signup-button');
+        if (signupButton) {
+            signupButton.textContent = 'Påmeldt ✓';
+            signupButton.style.background = '#28a745';
+            signupButton.onclick = () => cancelSignup(eventId);
+        }
+
+        // Remove from today's classes
+        eventCard.style.transform = 'translateX(100%)';
+        eventCard.style.opacity = '0';
+        
+        setTimeout(() => {
+            eventCard.remove();
+            
+            // Add to signed-up section
+            const signedUpContainer = document.getElementById('signed-up-classes');
+            if (signedUpContainer.querySelector('.activity-placeholder')) {
+                signedUpContainer.innerHTML = '';
+            }
+            
+            // Add animation for the new card
+            clonedCard.style.transform = 'translateX(-100%)';
+            clonedCard.style.opacity = '0';
+            signedUpContainer.appendChild(clonedCard);
+            
+            // Animate in
+            setTimeout(() => {
+                clonedCard.style.transform = 'translateX(0)';
+                clonedCard.style.opacity = '1';
+            }, 50);
+            
+            // Check if today's classes is empty
+            const todaysContainer = document.getElementById('todays-classes');
+            if (todaysContainer.children.length === 0) {
+                todaysContainer.innerHTML = '<div class="activity-placeholder">Ingen kommende klasser i dag</div>';
+            }
+        }, 300);
+    }
+
+    function cancelSignup(eventId) {
+        if (!signedUpClasses.has(eventId)) {
+            return;
+        }
+
+        signedUpClasses.delete(eventId);
+
+        // Find and remove from signed-up section
+        const signedUpCard = document.querySelector(`#signed-up-classes [data-event-id="${eventId}"]`);
+        if (signedUpCard) {
+            signedUpCard.style.transform = 'translateX(-100%)';
+            signedUpCard.style.opacity = '0';
+            
+            setTimeout(() => {
+                signedUpCard.remove();
+                
+                // Check if signed-up section is empty
+                const signedUpContainer = document.getElementById('signed-up-classes');
+                if (signedUpContainer.children.length === 0) {
+                    signedUpContainer.innerHTML = '<div class="activity-placeholder">Du er ikke påmeldt noen klasser ennå</div>';
+                }
+            }, 300);
+        }
+
+        // TODO: Add back to today's classes if it's still today
+        alert('Avmelding fullført. Klassen vises igjen i "Dagens klasser" hvis den fortsatt er i dag.');
     }
 
     async function loadMembership() {
@@ -219,6 +264,13 @@
     document.addEventListener('DOMContentLoaded', function() {
         loadMembership();
         loadKlippekort();
+        
+        // Add event IDs to cards for signup functionality
+        document.querySelectorAll('.event-card').forEach((card, index) => {
+            if (!card.hasAttribute('data-event-id')) {
+                card.setAttribute('data-event-id', `event-${index + 1}`);
+            }
+        });
     });
 </script>
 {{end}}
