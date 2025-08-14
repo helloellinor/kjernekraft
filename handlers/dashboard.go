@@ -1,17 +1,6 @@
 package handlers
 
 import (
-    "html/template"
-    "kjernekraft/models"
-    "net/http"
-    "os"
-    "path/filepath"
-    "time"
-)
-
-var OsloLoc *time.Location
-
-import (
 	"html/template"
 	"kjernekraft/models"
 	"net/http"
@@ -19,6 +8,8 @@ import (
 	"path/filepath"
 	"time"
 )
+
+var OsloLoc *time.Location
 
 // parseTemplateWithEventCard creates a template with the event card partial
 func parseTemplateWithEventCard(mainTemplate string) (*template.Template, error) {
