@@ -34,6 +34,8 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		"TodaysEvents": upcomingEvents,
 		"IsAdmin":      false, // TODO: Implement proper role checking
 		"ExternalCSS":  []string{"/static/css/event-card.css"},
+		"CurrentPage":  "hjem",
+		"UserName":     "Test Bruker", // TODO: Get from session/auth
 	}
 
 	// Use the new template system
