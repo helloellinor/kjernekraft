@@ -332,24 +332,46 @@
         const commitment = currentSelection.commitment;
         const startTime = currentSelection.startTime;
 
+        // Disable høsttilbud if "Annen dato" is selected
+        const autumnOfferOption = document.querySelector('input[value="autumn_special"]');
+        const autumnOfferLabel = autumnOfferOption.closest('.option-label');
+        
+        if (startTime === 'custom') {
+            autumnOfferOption.disabled = true;
+            autumnOfferLabel.style.opacity = '0.5';
+            autumnOfferLabel.style.cursor = 'not-allowed';
+            autumnOfferLabel.style.pointerEvents = 'none';
+            // If høsttilbud was selected, switch to 12 months
+            if (commitment === 'autumn_special') {
+                currentSelection.commitment = '12';
+                document.querySelector('input[value="12"]').checked = true;
+                autumnOfferOption.checked = false;
+            }
+        } else {
+            autumnOfferOption.disabled = false;
+            autumnOfferLabel.style.opacity = '1';
+            autumnOfferLabel.style.cursor = 'pointer';
+            autumnOfferLabel.style.pointerEvents = 'auto';
+        }
+
         let priceKey = 'no_binding';
         let membershipType = 'Ingen binding';
         let bindingText = 'Ingen';
 
-        if (commitment === '12' || commitment === 'autumn_special') {
+        if (currentSelection.commitment === '12' || currentSelection.commitment === 'autumn_special') {
             priceKey = '12_months';
-            if (commitment === 'autumn_special') {
+            if (currentSelection.commitment === 'autumn_special') {
                 membershipType = 'Høsttilbud (12-måneders pris, 4 måneders binding)';
                 bindingText = '4 måneder (høsttilbud)';
             } else {
                 membershipType = '12-måneder';
                 bindingText = '12 måneder';
             }
-        } else if (commitment === '6') {
+        } else if (currentSelection.commitment === '6') {
             priceKey = '6_months';
             membershipType = '6-måneder';
             bindingText = '6 måneder';
-        } else if (commitment === 'trial') {
+        } else if (currentSelection.commitment === 'trial') {
             priceKey = 'trial';
             membershipType = 'Prøvemedlemskap';
             bindingText = '2 uker';
@@ -380,7 +402,7 @@
         }
 
         // Show/hide special offer notice
-        if (commitment === 'autumn_special') {
+        if (currentSelection.commitment === 'autumn_special') {
             document.getElementById('special-offer').style.display = 'block';
         } else {
             document.getElementById('special-offer').style.display = 'none';
