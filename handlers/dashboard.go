@@ -127,71 +127,116 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             font-weight: 600;
         }
         .class-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            position: relative;
+            min-height: 200px;
+            perspective: 1000px;
         }
-        .class-item {
+        .event-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
             background: white;
             border: 1px solid #e0e0e0;
             border-radius: 6px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .class-item.expanded {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-        .class-header {
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border-left: 4px solid #007cba;
+            cursor: pointer;
+            transform-origin: center bottom;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .class-title-line {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        
+        /* Stacked/fan-out effect */
+        .event-card:nth-child(1) {
+            z-index: 10;
+            transform: translateY(0px) rotate(0deg);
         }
-        .class-time {
-            font-size: 0.875rem;
+        .event-card:nth-child(2) {
+            z-index: 9;
+            transform: translateY(8px) rotate(-1deg);
+        }
+        .event-card:nth-child(3) {
+            z-index: 8;
+            transform: translateY(16px) rotate(1deg);
+        }
+        .event-card:nth-child(4) {
+            z-index: 7;
+            transform: translateY(24px) rotate(-0.5deg);
+        }
+        .event-card:nth-child(5) {
+            z-index: 6;
+            transform: translateY(32px) rotate(0.5deg);
+        }
+        .event-card:nth-child(6) {
+            z-index: 5;
+            transform: translateY(40px) rotate(-0.3deg);
+        }
+        
+        /* Hover effect - spread out the stack */
+        .class-stack:hover .event-card:nth-child(1) {
+            transform: translateY(-5px) rotate(0deg);
+        }
+        .class-stack:hover .event-card:nth-child(2) {
+            transform: translateY(5px) rotate(-2deg);
+        }
+        .class-stack:hover .event-card:nth-child(3) {
+            transform: translateY(15px) rotate(2deg);
+        }
+        .class-stack:hover .event-card:nth-child(4) {
+            transform: translateY(25px) rotate(-1deg);
+        }
+        .class-stack:hover .event-card:nth-child(5) {
+            transform: translateY(35px) rotate(1deg);
+        }
+        .class-stack:hover .event-card:nth-child(6) {
+            transform: translateY(45px) rotate(-0.5deg);
+        }
+        
+        /* Active/expanded state */
+        .event-card.expanded {
+            z-index: 20 !important;
+            transform: translateY(-10px) rotate(0deg) scale(1.02) !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        /* Push other cards down when one is expanded */
+        .class-stack.has-expanded .event-card:not(.expanded) {
+            transform: translateY(100px) rotate(0deg) !important;
+            opacity: 0.7;
+        }
+        
+        .event-time {
+            font-size: 0.75rem;
             color: #666;
             font-weight: 500;
         }
-        .class-title {
-            font-size: 1rem;
+        .event-title {
+            font-size: 0.875rem;
             font-weight: 600;
+            margin: 0.25rem 0;
             color: #333;
         }
-        .class-expand-icon {
-            font-size: 1.2rem;
-            color: #007cba;
-            transition: transform 0.3s ease;
-        }
-        .class-item.expanded .class-expand-icon {
-            transform: rotate(180deg);
-        }
-        .class-details {
-            padding: 0 1rem 1rem 1rem;
-            display: none;
-            border-top: 1px solid #f0f0f0;
-            background: #fafafa;
-        }
-        .class-item.expanded .class-details {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-        .class-teacher {
-            font-size: 0.875rem;
+        .event-teacher {
+            font-size: 0.75rem;
             color: #666;
-            margin-bottom: 0.5rem;
         }
-        .class-spaces {
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
+        .event-spaces {
+            font-size: 0.75rem;
             color: #333;
+            margin-top: 0.25rem;
+        }
+        
+        /* Additional details that show on expansion */
+        .event-details {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #f0f0f0;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .event-card.expanded .event-details {
+            display: block;
         }
         .signup-btn {
             width: 100%;
@@ -203,6 +248,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             font-size: 0.875rem;
             cursor: pointer;
             transition: background-color 0.2s;
+            margin-top: 0.5rem;
         }
         .signup-btn:hover {
             background-color: #005a87;
@@ -213,14 +259,22 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
         .signup-btn.waitlist:hover {
             background-color: #e55a2b;
         }
-        @keyframes slideDown {
+        
+        /* Color scheme for different class types */
+        .event-card.yoga { border-left-color: #8e44ad; }
+        .event-card.pilates { border-left-color: #27ae60; }
+        .event-card.strength { border-left-color: #e74c3c; }
+        .event-card.cardio { border-left-color: #f39c12; }
+        .event-card.flexibility { border-left-color: #3498db; }
+        
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                max-height: 0;
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
-                max-height: 200px;
+                transform: translateY(0);
             }
         }
         .enrolled-classes {
@@ -326,23 +380,18 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
                 {{if .TodaysEvents}}
                     <div class="class-stack">
                         {{range .TodaysEvents}}
-                        <div class="class-item" onclick="toggleClass(this)">
-                            <div class="class-header">
-                                <div class="class-title-line">
-                                    <span class="class-time">{{.StartTime.Format "15:04"}}</span>
-                                    <span class="class-title">{{.Title}}</span>
-                                </div>
-                                <span class="class-expand-icon">▼</span>
+                        <div class="event-card {{.ClassType}}" onclick="toggleEventCard(this)">
+                            <div class="event-time">{{.StartTime.Format "15:04"}}-{{.EndTime.Format "15:04"}}</div>
+                            <div class="event-title">{{.Title}}</div>
+                            <div class="event-teacher">{{.TeacherName}}</div>
+                            <div class="event-spaces">
+                                {{if lt .CurrentEnrolment .Capacity}}
+                                    {{sub .Capacity .CurrentEnrolment}} plasser igjen
+                                {{else}}
+                                    Venteliste
+                                {{end}}
                             </div>
-                            <div class="class-details">
-                                <div class="class-teacher">{{.TeacherName}}</div>
-                                <div class="class-spaces">
-                                    {{if lt .CurrentEnrolment .Capacity}}
-                                        {{sub .Capacity .CurrentEnrolment}} plasser igjen
-                                    {{else}}
-                                        Venteliste
-                                    {{end}}
-                                </div>
+                            <div class="event-details">
                                 <button class="signup-btn {{if ge .CurrentEnrolment .Capacity}}waitlist{{end}}" 
                                         onclick="signupForClass({{.ID}}); event.stopPropagation();">
                                     Meld på
@@ -398,17 +447,28 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
     </main>
 
     <script>
-        function toggleClass(element) {
-            // Close other expanded classes
-            const allItems = document.querySelectorAll('.class-item');
-            allItems.forEach(item => {
-                if (item !== element) {
-                    item.classList.remove('expanded');
+        function toggleEventCard(element) {
+            const stack = element.closest('.class-stack');
+            const allCards = stack.querySelectorAll('.event-card');
+            
+            // Check if this card is already expanded
+            const isExpanded = element.classList.contains('expanded');
+            
+            // Close all other expanded cards first
+            allCards.forEach(card => {
+                if (card !== element) {
+                    card.classList.remove('expanded');
                 }
             });
             
-            // Toggle the clicked class
-            element.classList.toggle('expanded');
+            // Toggle the clicked card and stack state
+            if (isExpanded) {
+                element.classList.remove('expanded');
+                stack.classList.remove('has-expanded');
+            } else {
+                element.classList.add('expanded');
+                stack.classList.add('has-expanded');
+            }
         }
         
         function signupForClass(classId) {

@@ -1599,6 +1599,22 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
         .edit-profile-btn:hover {
             background: #005a87;
         }
+        /* Responsive styles */
+        @media (max-width: 767px) {
+            .nav-list {
+                flex-direction: column;
+            }
+            .nav-item {
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            .nav-item:last-child {
+                border-bottom: none;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+        }
         @media (max-width: 768px) {
             .profile-header {
                 flex-direction: column;
