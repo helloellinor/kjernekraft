@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -12,6 +13,13 @@ import (
 )
 
 func main() {
+	var err error
+	// Set Oslo timezone globally
+	handlers.OsloLoc, err = time.LoadLocation("Europe/Oslo")
+	if err != nil {
+		log.Fatal("Could not load Oslo timezone: ", err)
+	}
+
 	dbConn, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)

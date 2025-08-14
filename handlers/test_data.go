@@ -69,7 +69,7 @@ func shuffleTestData() error {
 	var events []models.Event
 
 	// Generate events for the current week (Monday to Sunday)
-	now := time.Now()
+	now := time.Now().In(handlers.OsloLoc)
 	monday := getStartOfWeek(now)
 
 	// Generate 5-12 events per day with randomization

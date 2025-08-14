@@ -16,7 +16,7 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 	if userIDStr == "" {
 		userIDStr = "1" // Default test user
 	}
-	
+
 	userID, err := strconv.ParseInt(userIDStr, 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
@@ -33,24 +33,24 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 	// Calculate additional fields for display
 	for i := range klippekort {
 		k := &klippekort[i]
-		
+
 		// Calculate progress percentage
 		if k.TotalKlipp > 0 {
 			used := k.TotalKlipp - k.RemainingKlipp
 			k.ProgressPercentage = (used * 100) / k.TotalKlipp
 		}
-		
+
 		// Calculate days until expiry
-		now := time.Now()
+    now := time.Now().In(OsloLoc)
 		k.DaysUntilExpiry = int(k.ExpiryDate.Sub(now).Hours() / 24)
 		k.IsExpiring = k.DaysUntilExpiry <= 30 && k.DaysUntilExpiry > 0
 	}
 
 	data := struct {
-		Klippekort []models.KlippekortWithDetails
+		Klippekort    []models.KlippekortWithDetails
 		HasKlippekort bool
 	}{
-		Klippekort: klippekort,
+		Klippekort:    klippekort,
 		HasKlippekort: len(klippekort) > 0,
 	}
 
@@ -233,7 +233,7 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	if userIDStr == "" {
 		userIDStr = "1" // Default test user
 	}
-	
+
 	userID, err := strconv.ParseInt(userIDStr, 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
@@ -249,12 +249,12 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Calculate additional fields if membership exists
 	if membership != nil {
-		now := time.Now()
+    now := time.Now().In(OsloLoc)
 		membership.DaysUntilRenewal = int(membership.RenewalDate.Sub(now).Hours() / 24)
-		
+
 		// Business logic for what actions are available
 		membership.CanPause = membership.Status == "active"
-		
+
 		// Can cancel if no binding period OR if binding period has ended
 		if membership.BindingEnd == nil {
 			membership.CanCancel = true
@@ -547,7 +547,7 @@ function cancelMembership() {
 	tmplFuncs := template.FuncMap{
 		"divf": func(a, b interface{}) float64 {
 			var aFloat, bFloat float64
-			
+
 			switch v := a.(type) {
 			case int:
 				aFloat = float64(v)
@@ -556,7 +556,7 @@ function cancelMembership() {
 			default:
 				return 0
 			}
-			
+
 			switch v := b.(type) {
 			case int:
 				bFloat = float64(v)
@@ -565,7 +565,7 @@ function cancelMembership() {
 			default:
 				return 0
 			}
-			
+
 			if bFloat == 0 {
 				return 0
 			}

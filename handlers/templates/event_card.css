@@ -1,0 +1,97 @@
+/* Event Card Styles */
+.event-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-left: 4px solid #007cba;
+    cursor: pointer;
+    transform-origin: center bottom;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.event-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.event-time {
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.event-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0.25rem 0;
+    color: #333;
+}
+
+.event-teacher {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.event-spaces {
+    font-size: 0.75rem;
+    color: #333;
+    margin-top: 0.25rem;
+}
+
+/* Additional details that show on expansion */
+.event-details {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f0f0f0;
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.event-card.expanded .event-details {
+    display: block;
+}
+
+.signup-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #007cba;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 0.5rem;
+}
+
+.signup-btn:hover {
+    background-color: #005a87;
+}
+
+.signup-btn.waitlist {
+    background-color: #ff6b35;
+}
+
+.signup-btn.waitlist:hover {
+    background-color: #e55a2b;
+}
+
+/* Color scheme for different class types */
+.event-card.yoga { border-left-color: #8e44ad; }
+.event-card.pilates { border-left-color: #27ae60; }
+.event-card.strength { border-left-color: #e74c3c; }
+.event-card.cardio { border-left-color: #f39c12; }
+.event-card.flexibility { border-left-color: #3498db; }
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
