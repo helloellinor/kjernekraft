@@ -375,18 +375,6 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 	// Use the new template system
 	tm := GetTemplateManager()
 	if tmpl, exists := tm.GetTemplate("pages/min-profil"); exists {
-		tmpl.Funcs(map[string]interface{}{
-			"substr": func(s string, start int, length int) string {
-				if start >= len(s) {
-					return ""
-				}
-				end := start + length
-				if end > len(s) {
-					end = len(s)
-				}
-				return s[start:end]
-			},
-		})
 		w.Header().Set("Content-Type", "text/html")
 		if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
 			http.Error(w, "Template execution error", http.StatusInternalServerError)

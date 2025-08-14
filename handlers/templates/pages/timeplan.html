@@ -148,10 +148,7 @@
                     <div class="day-events">
                         {{if $events}}
                             {{range $events}}
-                            {{$eventStarted := lt .StartTime.Format "2006-01-02T15:04" (currentTime.Format "2006-01-02T15:04")}}
-                            <div class="event-wrapper {{if $eventStarted}}event-started{{end}}">
-                                {{template "event_card" .}}
-                            </div>
+                            {{template "event_card" .}}
                             {{end}}
                         {{else}}
                             <div class="no-events">Ingen klasser</div>
