@@ -10,16 +10,25 @@ import (
 // ElevDashboardHandler serves the Elev dashboard home page
 func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// Get today's events
-	todaysEvents, err := DB.GetTodaysEvents()
+	allTodaysEvents, err := DB.GetTodaysEvents()
 	if err != nil {
 		http.Error(w, "Could not fetch today's events", http.StatusInternalServerError)
 		return
 	}
 
+	// Filter out events that have already started
+	now := time.Now()
+	var upcomingEvents []models.Event
+	for _, event := range allTodaysEvents {
+		if event.StartTime.After(now) {
+			upcomingEvents = append(upcomingEvents, event)
+		}
+	}
+
 	data := struct {
 		TodaysEvents []models.Event
 	}{
-		TodaysEvents: todaysEvents,
+		TodaysEvents: upcomingEvents,
 	}
 
 	tmpl := `<!DOCTYPE html>
@@ -96,7 +105,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
         }
         @media (min-width: 768px) {
             .modules-grid {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                grid-template-columns: 2fr 1fr;
             }
         }
         @media (min-width: 992px) {
@@ -117,49 +126,62 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             color: #333;
             font-weight: 600;
         }
-        .class-grid {
+        .class-stack {
             display: flex;
-            gap: 1rem;
-            overflow-x: auto;
-            padding-bottom: 0.5rem;
+            flex-direction: column;
+            gap: 0.5rem;
         }
-        @media (max-width: 767px) {
-            .class-grid {
-                flex-direction: column;
-                overflow-x: visible;
-            }
-        }
-        .class-card {
-            min-width: 200px;
-            flex-shrink: 0;
+        .class-item {
             background: white;
-            border-radius: 8px;
             border: 1px solid #e0e0e0;
+            border-radius: 6px;
             overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
-        .class-card:hover {
-            transform: translateY(-2px);
+        .class-item.expanded {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
         }
-        .class-color-bar {
-            height: 4px;
-            width: 100%;
-        }
-        .class-content {
+        .class-header {
             padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #007cba;
+        }
+        .class-title-line {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
         .class-time {
             font-size: 0.875rem;
             color: #666;
-            margin-bottom: 0.5rem;
             font-weight: 500;
         }
         .class-title {
             font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
             color: #333;
+        }
+        .class-expand-icon {
+            font-size: 1.2rem;
+            color: #007cba;
+            transition: transform 0.3s ease;
+        }
+        .class-item.expanded .class-expand-icon {
+            transform: rotate(180deg);
+        }
+        .class-details {
+            padding: 0 1rem 1rem 1rem;
+            display: none;
+            border-top: 1px solid #f0f0f0;
+            background: #fafafa;
+        }
+        .class-item.expanded .class-details {
+            display: block;
+            animation: slideDown 0.3s ease;
         }
         .class-teacher {
             font-size: 0.875rem;
@@ -173,7 +195,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
         }
         .signup-btn {
             width: 100%;
-            padding: 0.5rem;
+            padding: 0.75rem;
             background-color: #007cba;
             color: white;
             border: none;
@@ -190,6 +212,34 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
         }
         .signup-btn.waitlist:hover {
             background-color: #e55a2b;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 200px;
+            }
+        }
+        .enrolled-classes {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .enrolled-section {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        .enrolled-subtitle {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e0e0e0;
         }
         .no-classes {
             text-align: center;
@@ -227,25 +277,17 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
         /* Responsive styles */
         @media (max-width: 767px) {
             .nav-list {
-                flex-wrap: wrap;
+                flex-direction: column;
             }
             .nav-item {
                 border-right: none;
                 border-bottom: 1px solid #e0e0e0;
-                flex: 1;
-                min-width: calc(50% - 1px);
             }
-            .nav-item:nth-child(even) {
-                border-right: 1px solid #e0e0e0;
-            }
-            .nav-item:nth-last-child(-n+2) {
+            .nav-item:last-child {
                 border-bottom: none;
             }
             .main-content {
                 padding: 1rem;
-            }
-            .class-card {
-                min-width: 100%;
             }
         }
     </style>
@@ -282,13 +324,17 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             <div class="module">
                 <h2 class="module-title">I dag</h2>
                 {{if .TodaysEvents}}
-                    <div class="class-grid">
+                    <div class="class-stack">
                         {{range .TodaysEvents}}
-                        <div class="class-card">
-                            <div class="class-color-bar {{.ClassType}}"></div>
-                            <div class="class-content">
-                                <div class="class-time">{{.StartTime.Format "15:04"}}-{{.EndTime.Format "15:04"}}</div>
-                                <div class="class-title">{{.Title}}</div>
+                        <div class="class-item" onclick="toggleClass(this)">
+                            <div class="class-header">
+                                <div class="class-title-line">
+                                    <span class="class-time">{{.StartTime.Format "15:04"}}</span>
+                                    <span class="class-title">{{.Title}}</span>
+                                </div>
+                                <span class="class-expand-icon">▼</span>
+                            </div>
+                            <div class="class-details">
                                 <div class="class-teacher">{{.TeacherName}}</div>
                                 <div class="class-spaces">
                                     {{if lt .CurrentEnrolment .Capacity}}
@@ -298,7 +344,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
                                     {{end}}
                                 </div>
                                 <button class="signup-btn {{if ge .CurrentEnrolment .Capacity}}waitlist{{end}}" 
-                                        onclick="signupForClass({{.ID}})">
+                                        onclick="signupForClass({{.ID}}); event.stopPropagation();">
                                     Meld på
                                 </button>
                             </div>
@@ -308,6 +354,24 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
                 {{else}}
                     <div class="no-classes">Ingen klasser i dag</div>
                 {{end}}
+            </div>
+            
+            <div class="module">
+                <h2 class="module-title">Påmeldte timer</h2>
+                <div class="enrolled-classes">
+                    <div class="enrolled-section">
+                        <h3 class="enrolled-subtitle">Neste</h3>
+                        <div id="next-class-container">
+                            <div class="loading">Laster neste time...</div>
+                        </div>
+                    </div>
+                    <div class="enrolled-section">
+                        <h3 class="enrolled-subtitle">Alle</h3>
+                        <div id="all-classes-container">
+                            <div class="loading">Laster påmeldte timer...</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="module">
@@ -334,6 +398,19 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
     </main>
 
     <script>
+        function toggleClass(element) {
+            // Close other expanded classes
+            const allItems = document.querySelectorAll('.class-item');
+            allItems.forEach(item => {
+                if (item !== element) {
+                    item.classList.remove('expanded');
+                }
+            });
+            
+            // Toggle the clicked class
+            element.classList.toggle('expanded');
+        }
+        
         function signupForClass(classId) {
             // TODO: Implement class signup functionality
             alert('Påmelding for klasse ' + classId + ' - kommer snart!');
@@ -599,6 +676,30 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
             color: #999;
             font-style: italic;
             padding: 1rem;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 767px) {
+            .nav-list {
+                flex-direction: column;
+            }
+            .nav-item {
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            .nav-item:last-child {
+                border-bottom: none;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+            .week-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .day-column {
+                min-height: auto;
+            }
         }
     </style>
 </head>
