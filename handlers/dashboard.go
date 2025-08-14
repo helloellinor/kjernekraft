@@ -82,6 +82,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            overflow-x: hidden;
         }
         .page-title {
             font-size: 2rem;
@@ -90,12 +91,17 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
         }
         .modules-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: 1fr;
             gap: 2rem;
+        }
+        @media (min-width: 768px) {
+            .modules-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
         }
         @media (min-width: 992px) {
             .modules-grid {
-                grid-template-columns: 2fr 1fr;
+                grid-template-columns: 2fr 1fr 1fr 1fr;
             }
         }
         .module {
@@ -103,6 +109,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             border-radius: 8px;
             padding: 1.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            min-width: 0; /* Allow grid items to shrink */
         }
         .module-title {
             font-size: 1.25rem;
@@ -116,8 +123,15 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             overflow-x: auto;
             padding-bottom: 0.5rem;
         }
+        @media (max-width: 767px) {
+            .class-grid {
+                flex-direction: column;
+                overflow-x: visible;
+            }
+        }
         .class-card {
             min-width: 200px;
+            flex-shrink: 0;
             background: white;
             border-radius: 8px;
             border: 1px solid #e0e0e0;
@@ -208,6 +222,31 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             background-color: #f8d7da;
             border-radius: 6px;
             border: 1px solid #f1aeb5;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 767px) {
+            .nav-list {
+                flex-wrap: wrap;
+            }
+            .nav-item {
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+                flex: 1;
+                min-width: calc(50% - 1px);
+            }
+            .nav-item:nth-child(even) {
+                border-right: 1px solid #e0e0e0;
+            }
+            .nav-item:nth-last-child(-n+2) {
+                border-bottom: none;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+            .class-card {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
