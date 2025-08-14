@@ -14,6 +14,48 @@ import (
 
 var DB *database.Database // Set this from main
 
+// InnloggingHandler serves the login page
+func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		data := map[string]interface{}{
+			"Title":       "Innlogging",
+			"CurrentPage": "innlogging",
+		}
+
+		// Use the new template system
+		tm := GetTemplateManager()
+		if tmpl, exists := tm.GetTemplate("pages/innlogging"); exists {
+			w.Header().Set("Content-Type", "text/html")
+			if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
+				http.Error(w, "Template execution error", http.StatusInternalServerError)
+			}
+			return
+		}
+
+		// If template doesn't exist, return error
+		http.Error(w, "Template not found", http.StatusInternalServerError)
+		return
+	}
+
+	if r.Method == "POST" {
+		// Handle login form submission
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+
+		// TODO: Implement actual authentication logic
+		// For now, redirect to dashboard
+		if email != "" && password != "" {
+			http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)
+		} else {
+			// Redirect back to login with error
+			http.Redirect(w, r, "/innlogging?error=invalid", http.StatusTemporaryRedirect)
+		}
+		return
+	}
+
+	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+}
+
 func AssignRoleToUserHandler(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get("user_id")
 	roleName := r.URL.Query().Get("role")
