@@ -74,6 +74,8 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
             font-size: 2rem;
             margin-bottom: 1rem;
             color: #333;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 0.5rem;
         }
         .page-description {
             font-size: 1.1rem;
@@ -753,6 +755,8 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
             margin-bottom: 1rem;
             color: #333;
             text-align: center;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 0.5rem;
         }
         .page-description {
             font-size: 1.1rem;
@@ -1343,7 +1347,7 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
         .nav-link { display: block; padding: 1rem 2rem; text-decoration: none; color: #333; font-weight: 500; transition: background-color 0.2s; }
         .nav-link:hover, .nav-link.active { background-color: #f0f8ff; color: #007cba; }
         .main { max-width: 800px; margin: 0 auto; padding: 2rem; }
-        .page-title { font-size: 2rem; margin-bottom: 2rem; color: #333; text-align: center; }
+        .page-title { font-size: 2rem; margin-bottom: 2rem; color: #333; text-align: center; border-bottom: 2px solid #007cba; padding-bottom: 0.5rem; }
         .recommendations { display: grid; gap: 1.5rem; }
         .recommendation-card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #e0e0e0; }
         .recommendation-card.special { border-color: #ff6b35; background: linear-gradient(135deg, #fff5f0, #ffffff); }
@@ -1528,6 +1532,8 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
             font-size: 2rem;
             margin-bottom: 2rem;
             color: #333;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 0.5rem;
         }
         .profile-card {
             background: white;
@@ -1789,6 +1795,8 @@ func TestDataPageHandler(w http.ResponseWriter, r *http.Request) {
             font-size: 2rem;
             margin-bottom: 1rem;
             color: #333;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 0.5rem;
         }
         .dev-warning {
             background: #fff3cd;
