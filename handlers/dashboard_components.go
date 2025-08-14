@@ -74,7 +74,14 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
             </div>
             
             <div class="progress-bar">
-                <div class="progress-fill" style="width: {{.ProgressPercentage}}%;"></div>
+                <div class="progress-segments">
+                    {{range $i := seq .RemainingKlipp}}
+                    <div class="progress-segment filled"></div>
+                    {{end}}
+                    {{range $i := seq (sub .TotalKlipp .RemainingKlipp)}}
+                    <div class="progress-segment"></div>
+                    {{end}}
+                </div>
             </div>
             
             <div class="expiry-info">
@@ -172,18 +179,28 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 
 .progress-bar {
     width: 100%;
-    height: 8px;
+    height: 12px;
     background: #e0e0e0;
-    border-radius: 4px;
+    border-radius: 6px;
     overflow: hidden;
     margin-bottom: 0.75rem;
+    padding: 2px;
 }
 
-.progress-fill {
+.progress-segments {
+    display: flex;
     height: 100%;
+    gap: 1px;
+}
+
+.progress-segment {
+    flex: 1;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+
+.progress-segment.filled {
     background: linear-gradient(90deg, #007cba, #4a9fd1);
-    border-radius: 4px;
-    transition: width 0.3s ease;
 }
 
 .expiry-info {
@@ -214,7 +231,21 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 }
 </style>`
 
-	t, err := template.New("klippekort").Parse(tmpl)
+	// Parse template with custom functions
+	tmplFuncs := template.FuncMap{
+		"seq": func(n int) []int {
+			result := make([]int, n)
+			for i := 0; i < n; i++ {
+				result[i] = i
+			}
+			return result
+		},
+		"sub": func(a, b int) int {
+			return a - b
+		},
+	}
+
+	t, err := template.New("klippekort").Funcs(tmplFuncs).Parse(tmpl)
 	if err != nil {
 		http.Error(w, "Template error", http.StatusInternalServerError)
 		return
@@ -281,9 +312,10 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     <div class="membership-header">
         <h3 class="membership-name">{{.Membership.Name}}</h3>
         <div class="membership-status status-{{.Membership.Status}}">
-            {{if eq .Membership.Status "active"}}Aktiv
-            {{else if eq .Membership.Status "paused"}}Pause
-            {{else if eq .Membership.Status "cancelled"}}Kansellert
+            {{if eq .Membership.Status "active"}}AKTIV
+            {{else if eq .Membership.Status "paused"}}FRYST 🧊
+            {{else if eq .Membership.Status "freeze_requested"}}FORESPØRSEL SENDT
+            {{else if eq .Membership.Status "cancelled"}}KANSELLERT
             {{end}}
         </div>
     </div>
@@ -299,6 +331,10 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
         </div>
         
         <div class="dates-info">
+            <div class="billing-info">
+                <strong>Sist fakturert:</strong> {{.Membership.LastBilled.Format "2. January 2006"}}
+            </div>
+            
             {{if gt .Membership.DaysUntilRenewal 0}}
             <div class="renewal-date">
                 <strong>Neste fornyelse:</strong> {{.Membership.RenewalDate.Format "2. January 2006"}}
@@ -318,11 +354,18 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
         </div>
     </div>
     
-    {{if or .Membership.CanPause .Membership.CanCancel}}
     <div class="membership-actions">
-        {{if .Membership.CanPause}}
-        <button class="action-btn pause-btn" onclick="pauseMembership()">
-            Sett på pause
+        {{if eq .Membership.Status "active"}}
+        <button class="action-btn freeze-btn" onclick="freezeMembership()">
+            Frys
+        </button>
+        {{else if eq .Membership.Status "freeze_requested"}}
+        <button class="action-btn cancel-request-btn" onclick="cancelFreezeRequest()">
+            Trekk forespørsel
+        </button>
+        {{else if eq .Membership.Status "paused"}}
+        <button class="action-btn unfreeze-btn" onclick="unfreezeMembership()">
+            Smelt
         </button>
         {{end}}
         
@@ -332,7 +375,6 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
         </button>
         {{end}}
     </div>
-    {{end}}
 </div>
 {{else}}
 <div class="no-membership">
@@ -353,13 +395,16 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     max-width: 500px;
 }
 
-.membership-card.active {
-    border-color: #28a745;
+.membership-card.freeze_requested {
+    border-color: #ffc107;
+    background: linear-gradient(135deg, #fff9c4, #ffffff);
+    opacity: 0.7;
 }
 
 .membership-card.paused {
-    border-color: #ffc107;
-    background: linear-gradient(135deg, #fff9c4, #ffffff);
+    border-color: #6c757d;
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+    opacity: 0.7;
 }
 
 .membership-card.cancelled {
@@ -406,9 +451,14 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     color: #155724;
 }
 
-.status-paused {
+.status-freeze_requested {
     background: #fff3cd;
     color: #856404;
+}
+
+.status-paused {
+    background: #e2e3e5;
+    color: #495057;
 }
 
 .status-cancelled {
@@ -444,7 +494,7 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     color: #666;
 }
 
-.renewal-date, .binding-end {
+.billing-info, .renewal-date, .binding-end {
     margin-bottom: 0.5rem;
 }
 
@@ -475,12 +525,21 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     flex: 1;
 }
 
-.pause-btn {
+.freeze-btn, .unfreeze-btn {
+    background: #007cba;
+    color: white;
+}
+
+.freeze-btn:hover, .unfreeze-btn:hover {
+    background: #005a87;
+}
+
+.cancel-request-btn {
     background: #ffc107;
     color: #000;
 }
 
-.pause-btn:hover {
+.cancel-request-btn:hover {
     background: #e0a800;
 }
 
@@ -529,10 +588,30 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 </style>
 
 <script>
-function pauseMembership() {
-    if (confirm('Er du sikker på at du vil sette medlemskapet på pause?')) {
-        // TODO: Implement pause functionality
-        alert('Pause-funksjonalitet kommer snart!');
+function freezeMembership() {
+    if (confirm('Er du sikker på at du vil fryse medlemskapet?')) {
+        // TODO: Send request to freeze membership
+        // For now, simulate the change
+        location.reload(); // This would be replaced with actual AJAX call
+        alert('Forespørsel om frysing er sendt til admin!');
+    }
+}
+
+function cancelFreezeRequest() {
+    if (confirm('Er du sikker på at du vil trekke tilbake forespørselen om frysing?')) {
+        // TODO: Cancel freeze request
+        // For now, simulate the change
+        location.reload(); // This would be replaced with actual AJAX call
+        alert('Forespørsel om frysing er trukket tilbake. Medlemskapet er aktivt igjen.');
+    }
+}
+
+function unfreezeMembership() {
+    if (confirm('Er du sikker på at du vil smelte/reaktivere medlemskapet?')) {
+        // TODO: Unfreeze membership
+        // For now, simulate the change
+        location.reload(); // This would be replaced with actual AJAX call
+        alert('Medlemskapet er reaktivert!');
     }
 }
 
