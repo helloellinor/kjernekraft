@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kjernekraft/models"
 	"log"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -459,6 +460,75 @@ func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 		events = append(events, event)
 	}
 	return events, nil
+}
+
+// GetEventsForWeek fetches events for a specific week starting from the given Monday
+func (db *Database) GetEventsForWeek(mondayDate time.Time) ([]models.Event, error) {
+	// Calculate the Sunday of the same week
+	sundayDate := mondayDate.AddDate(0, 0, 6)
+	
+	query := `
+		SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color 
+		FROM events 
+		WHERE DATE(start_time) >= DATE(?) 
+		AND DATE(start_time) <= DATE(?)
+		ORDER BY start_time ASC
+	`
+	rows, err := db.Conn.Query(query, mondayDate.Format("2006-01-02"), sundayDate.Format("2006-01-02"))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var events []models.Event
+	for rows.Next() {
+		var event models.Event
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	return events, nil
+}
+
+// GetDistinctTeachers fetches all distinct teacher names from events
+func (db *Database) GetDistinctTeachers() ([]string, error) {
+	query := `SELECT DISTINCT teacher_name FROM events WHERE teacher_name != '' ORDER BY teacher_name`
+	rows, err := db.Conn.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var teachers []string
+	for rows.Next() {
+		var teacher string
+		if err := rows.Scan(&teacher); err != nil {
+			return nil, err
+		}
+		teachers = append(teachers, teacher)
+	}
+	return teachers, nil
+}
+
+// GetDistinctClassTypes fetches all distinct class titles from events
+func (db *Database) GetDistinctClassTypes() ([]string, error) {
+	query := `SELECT DISTINCT title FROM events WHERE title != '' ORDER BY title`
+	rows, err := db.Conn.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var classTypes []string
+	for rows.Next() {
+		var classType string
+		if err := rows.Scan(&classType); err != nil {
+			return nil, err
+		}
+		classTypes = append(classTypes, classType)
+	}
+	return classTypes, nil
 }
 
 // Membership-related database methods
