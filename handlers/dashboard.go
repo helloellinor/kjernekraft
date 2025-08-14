@@ -90,8 +90,13 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
         }
         .modules-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
+        }
+        @media (min-width: 992px) {
+            .modules-grid {
+                grid-template-columns: 2fr 1fr;
+            }
         }
         .module {
             background: white;
@@ -190,25 +195,6 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
         .strength { background-color: #e74c3c; }
         .cardio { background-color: #f39c12; }
         .flexibility { background-color: #3498db; }
-        
-        .dev-btn {
-            width: 100%;
-            padding: 0.5rem;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .dev-btn:hover {
-            background-color: #5a6268;
-        }
-        .dev-btn:disabled {
-            background-color: #adb5bd;
-            cursor: not-allowed;
-        }
         .loading {
             text-align: center;
             padding: 2rem;
@@ -237,6 +223,15 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
             </li>
             <li class="nav-item">
                 <a href="/elev/timeplan" class="nav-link">Timeplan</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/klippekort" class="nav-link">Klippekort</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/medlemskap" class="nav-link">Medlemskap</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/min-profil" class="nav-link">Min profil</a>
             </li>
         </ul>
     </nav>
@@ -295,12 +290,6 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
                 <div class="activity-placeholder">
                     Aktivitetsporing kommer snart...
                 </div>
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">
-                    <small style="color: #666; margin-bottom: 0.5rem; display: block;">🧪 Utviklingsverktøy</small>
-                    <button id="shuffleBtn" class="dev-btn" onclick="shuffleTestData()">
-                        🎲 Generer nye testdata
-                    </button>
-                </div>
             </div>
         </div>
     </main>
@@ -309,35 +298,6 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
         function signupForClass(classId) {
             // TODO: Implement class signup functionality
             alert('Påmelding for klasse ' + classId + ' - kommer snart!');
-        }
-
-        async function shuffleTestData() {
-            const btn = document.getElementById('shuffleBtn');
-            btn.disabled = true;
-            btn.textContent = '🔄 Genererer...';
-            
-            try {
-                const response = await fetch('/api/shuffle-test-data', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                
-                if (response.ok) {
-                    // Reload the page to show new data
-                    window.location.reload();
-                } else {
-                    alert('Feil ved generering av testdata');
-                    btn.disabled = false;
-                    btn.textContent = '🎲 Generer nye testdata';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Feil ved generering av testdata');
-                btn.disabled = false;
-                btn.textContent = '🎲 Generer nye testdata';
-            }
         }
 
         // Load dashboard components
@@ -615,6 +575,15 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
             </li>
             <li class="nav-item">
                 <a href="/elev/timeplan" class="nav-link active">Timeplan</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/klippekort" class="nav-link">Klippekort</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/medlemskap" class="nav-link">Medlemskap</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/min-profil" class="nav-link">Min profil</a>
             </li>
         </ul>
     </nav>
