@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -12,6 +13,13 @@ import (
 )
 
 func main() {
+	var err error
+	// Set Oslo timezone globally
+	handlers.OsloLoc, err = time.LoadLocation("Europe/Oslo")
+	if err != nil {
+		log.Fatal("Could not load Oslo timezone: ", err)
+	}
+
 	dbConn, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -60,6 +68,25 @@ func main() {
 
 	// Test data routes (for development)
 	r.Post("/api/shuffle-test-data", handlers.ShuffleTestDataHandler)
+	r.Post("/api/shuffle-memberships", handlers.ShuffleMembershipsHandler)
+	r.Post("/api/shuffle-user-klippekort", handlers.ShuffleUserKlippekortHandler)
+	r.Post("/api/shuffle-all-test-data", handlers.ShuffleAllTestDataHandler)
+
+	// Membership and klippekort routes (for compatibility, redirects to elev routes)
+	r.Get("/klippekort", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/elev/klippekort", http.StatusMovedPermanently)
+	})
+	r.Get("/medlemskap", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/elev/medlemskap", http.StatusMovedPermanently)
+	})
+	r.Post("/medlemskap/recommendations", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/elev/medlemskap/recommendations", http.StatusMovedPermanently)
+	})
+	r.Post("/api/membership-recommendations", handlers.MembershipRecommendationsHandler)
+
+	// Dashboard component routes (HTMX endpoints)
+	r.Get("/api/user/klippekort", handlers.UserKlippekortHandler)
+	r.Get("/api/user/membership", handlers.UserMembershipHandler)
 
 	// Elev dashboard routes
 	r.Get("/elev", func(w http.ResponseWriter, r *http.Request) {
@@ -67,6 +94,11 @@ func main() {
 	})
 	r.Get("/elev/hjem", handlers.ElevDashboardHandler)
 	r.Get("/elev/timeplan", handlers.ElevTimeplanHandler)
+	r.Get("/elev/klippekort", handlers.KlippekortPageHandler)
+	r.Get("/elev/medlemskap", handlers.MembershipSelectorHandler)
+	r.Post("/elev/medlemskap/recommendations", handlers.MembershipRecommendationsHandler)
+	r.Get("/elev/min-profil", handlers.MinProfilHandler)
+	r.Get("/elev/testdata", handlers.TestDataPageHandler)
 
 	log.Println("Serving on http://localhost:8080")
 	err = http.ListenAndServe(":8080", r)
