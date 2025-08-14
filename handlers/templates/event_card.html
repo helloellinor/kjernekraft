@@ -1,6 +1,6 @@
 {{define "event_card"}}
 <div class="event-card {{.ClassType}}" onclick="toggleEventCard(this)">
-    <div class="event-time">{{.StartTime.Format "15:04"}}-{{.EndTime.Format "15:04"}}</div>
+    <div class="event-time">{{formatTimeShort .StartTime}}-{{formatTimeShort .EndTime}}</div>
     <div class="event-title">{{.Title}}</div>
     <div class="event-teacher">{{.TeacherName}}</div>
     {{$remaining := sub .Capacity .CurrentEnrolment}}

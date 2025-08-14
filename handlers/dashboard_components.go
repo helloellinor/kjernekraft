@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"html/template"
+	"kjernekraft/handlers/config"
 	"kjernekraft/models"
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 // UserKlippekortHandler provides HTMX endpoint for user's klippekort display
@@ -34,14 +34,14 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 	for i := range klippekort {
 		k := &klippekort[i]
 
-		// Calculate progress percentage
+		// Calculate progress percentage (remaining klipps)
 		if k.TotalKlipp > 0 {
-			used := k.TotalKlipp - k.RemainingKlipp
-			k.ProgressPercentage = (used * 100) / k.TotalKlipp
+			k.ProgressPercentage = (k.RemainingKlipp * 100) / k.TotalKlipp
 		}
 
 		// Calculate days until expiry
-    now := time.Now().In(OsloLoc)
+		settings := config.GetInstance()
+		now := settings.GetCurrentTime()
 		k.DaysUntilExpiry = int(k.ExpiryDate.Sub(now).Hours() / 24)
 		k.IsExpiring = k.DaysUntilExpiry <= 30 && k.DaysUntilExpiry > 0
 	}
@@ -249,7 +249,8 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Calculate additional fields if membership exists
 	if membership != nil {
-    now := time.Now().In(OsloLoc)
+		settings := config.GetInstance()
+		now := settings.GetCurrentTime()
 		membership.DaysUntilRenewal = int(membership.RenewalDate.Sub(now).Hours() / 24)
 
 		// Business logic for what actions are available
