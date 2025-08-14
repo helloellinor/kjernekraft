@@ -77,6 +77,21 @@
         gap: 0.5rem;
     }
     
+    .event-wrapper.event-started {
+        opacity: 0.5;
+        filter: grayscale(50%);
+    }
+    
+    .event-wrapper.event-started .event-card {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+    
+    .event-wrapper.event-started .event-card:hover {
+        transform: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
     .no-events {
         text-align: center;
         color: #999;
@@ -133,7 +148,10 @@
                     <div class="day-events">
                         {{if $events}}
                             {{range $events}}
-                            {{template "event_card" .}}
+                            {{$eventStarted := lt .StartTime.Format "2006-01-02T15:04" (currentTime.Format "2006-01-02T15:04")}}
+                            <div class="event-wrapper {{if $eventStarted}}event-started{{end}}">
+                                {{template "event_card" .}}
+                            </div>
                             {{end}}
                         {{else}}
                             <div class="no-events">Ingen klasser</div>

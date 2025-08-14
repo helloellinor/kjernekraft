@@ -48,7 +48,8 @@
         gap: 0.75rem;
         max-height: 400px;
         overflow-y: auto;
-        padding-right: 0.5rem; /* Add padding to prevent shadow cutoff */
+        padding: 0.5rem; /* Add padding around all sides to prevent shadow cutoff */
+        margin: -0.5rem; /* Negative margin to counteract padding and maintain alignment */
     }
     .events-grid::-webkit-scrollbar {
         width: 6px;
