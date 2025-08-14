@@ -1,0 +1,32 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Kjernekraft</title>
+    {{if .CSS}}
+    <style>{{.CSS}}</style>
+    {{end}}
+    {{range .ExternalCSS}}
+    <link rel="stylesheet" href="{{.}}">
+    {{end}}
+    {{block "head" .}}{{end}}
+</head>
+<body>
+    {{template "navigation" .}}
+    
+    <main>
+        {{block "content" .}}{{end}}
+    </main>
+    
+    {{if .JS}}
+    <script>{{.JS}}</script>
+    {{end}}
+    {{range .ExternalJS}}
+    <script src="{{.}}"></script>
+    {{end}}
+    {{block "scripts" .}}{{end}}
+</body>
+</html>
+{{end}}

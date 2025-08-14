@@ -1,0 +1,136 @@
+{{define "admin_settings"}}
+<div class="admin-settings-section">
+    <h3>Systeminnstillinger</h3>
+    
+    <div class="settings-form">
+        <div class="form-group">
+            <label for="timezone-select">Tidssone:</label>
+            <select id="timezone-select" onchange="updateTimezone()">
+                <option value="Europe/Oslo" {{if eq (currentTimezone) "Europe/Oslo"}}selected{{end}}>Oslo (Europe/Oslo)</option>
+                <option value="UTC" {{if eq (currentTimezone) "UTC"}}selected{{end}}>UTC</option>
+                <option value="America/New_York" {{if eq (currentTimezone) "America/New_York"}}selected{{end}}>New York (America/New_York)</option>
+                <option value="Europe/London" {{if eq (currentTimezone) "Europe/London"}}selected{{end}}>London (Europe/London)</option>
+                <option value="Asia/Tokyo" {{if eq (currentTimezone) "Asia/Tokyo"}}selected{{end}}>Tokyo (Asia/Tokyo)</option>
+            </select>
+        </div>
+        
+        <div class="current-time">
+            <strong>Gjeldende tid:</strong> <span id="current-time">{{formatDateTime (currentTime)}}</span>
+        </div>
+    </div>
+    
+    <div id="settings-message" class="message" style="display: none;"></div>
+</div>
+
+<style>
+.admin-settings-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.admin-settings-section h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 10px;
+}
+
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group label {
+    min-width: 100px;
+    font-weight: 600;
+}
+
+.form-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 200px;
+}
+
+.current-time {
+    font-size: 14px;
+    color: #666;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.message {
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+</style>
+
+<script>
+function updateTimezone() {
+    const timezone = document.getElementById('timezone-select').value;
+    const messageDiv = document.getElementById('settings-message');
+    
+    fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ timezone: timezone })
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error('Failed to update timezone');
+    })
+    .then(data => {
+        messageDiv.textContent = 'Tidssone oppdatert! Siden vil lastes på nytt.';
+        messageDiv.className = 'message success';
+        messageDiv.style.display = 'block';
+        
+        // Reload page after 1 second to show updated timezone
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    })
+    .catch(error => {
+        messageDiv.textContent = 'Feil ved oppdatering av tidssone: ' + error.message;
+        messageDiv.className = 'message error';
+        messageDiv.style.display = 'block';
+    });
+}
+
+// Update current time every second
+function updateCurrentTime() {
+    // This will be updated when the page reloads after timezone change
+    // For real-time updates, we could use WebSocket or periodic fetch
+}
+
+setInterval(updateCurrentTime, 1000);
+</script>
+{{end}}

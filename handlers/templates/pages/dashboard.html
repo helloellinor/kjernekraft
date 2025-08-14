@@ -1,0 +1,210 @@
+{{define "content"}}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+    }
+    .nav {
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .nav-list {
+        display: flex;
+        list-style: none;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0;
+    }
+    .nav-item {
+        border-right: 1px solid #e0e0e0;
+    }
+    .nav-item:last-child {
+        border-right: none;
+    }
+    .nav-link {
+        display: block;
+        padding: 1rem 1.5rem;
+        text-decoration: none;
+        color: #666;
+        transition: all 0.2s;
+    }
+    .nav-link:hover {
+        background: #f8f9fa;
+        color: #007cba;
+    }
+    .nav-link.active {
+        background: #007cba;
+        color: white;
+    }
+    .main-content {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    .content-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .section-title {
+        margin-bottom: 1rem;
+        color: #333;
+        font-size: 1.25rem;
+        font-weight: 600;
+        border-bottom: 2px solid #007cba;
+        padding-bottom: 0.5rem;
+    }
+    .events-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .activity-placeholder {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 2rem;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 767px) {
+        .nav-list {
+            flex-direction: column;
+        }
+        .nav-item {
+            border-right: none;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .nav-item:last-child {
+            border-bottom: none;
+        }
+        .main-content {
+            padding: 1rem;
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<nav class="nav">
+    <ul class="nav-list">
+        <li class="nav-item">
+            <a href="/elev/hjem" class="nav-link active">Hjem</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/timeplan" class="nav-link">Timeplan</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/klippekort" class="nav-link">Klippekort</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/medlemskap" class="nav-link">Medlemskap</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/min-profil" class="nav-link">Min profil</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="main-content">
+    <div class="content-section">
+        <h2 class="section-title">Dagens klasser</h2>
+        <div class="events-grid">
+            {{if .TodaysEvents}}
+                {{range .TodaysEvents}}
+                {{template "event_card" .}}
+                {{end}}
+            {{else}}
+                <div class="activity-placeholder">Ingen kommende klasser i dag</div>
+            {{end}}
+        </div>
+    </div>
+    
+    <div class="content-section">
+        <h2 class="section-title">Mitt medlemskap</h2>
+        <div id="membership-container">
+            <div class="activity-placeholder">Laster medlemskap...</div>
+        </div>
+    </div>
+    
+    <div class="content-section">
+        <h2 class="section-title">Mine klippekort</h2>
+        <div id="klippekort-container">
+            <div class="activity-placeholder">Laster klippekort...</div>
+        </div>
+    </div>
+    
+    <div class="content-section">
+        <h2 class="section-title">Siste aktivitet</h2>
+        <div class="activity-placeholder">Ingen nylig aktivitet</div>
+    </div>
+</div>
+
+<script>
+    function toggleEventCard(element) {
+        const isExpanded = element.classList.contains('expanded');
+        
+        // Close all other expanded cards first
+        document.querySelectorAll('.event-card.expanded').forEach(card => {
+            if (card !== element) {
+                card.classList.remove('expanded');
+            }
+        });
+        
+        // Toggle the clicked card
+        if (isExpanded) {
+            element.classList.remove('expanded');
+        } else {
+            element.classList.add('expanded');
+        }
+    }
+
+    function signupForClass(eventId) {
+        // TODO: Implement signup functionality
+        alert('Påmelding for klasse ' + eventId + ' kommer snart!');
+    }
+
+    async function loadMembership() {
+        try {
+            const response = await fetch('/api/user/membership?user_id=1');
+            if (response.ok) {
+                const html = await response.text();
+                document.getElementById('membership-container').innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Error loading membership:', error);
+            document.getElementById('membership-container').innerHTML = '<div class="error">Kunne ikke laste medlemskap</div>';
+        }
+    }
+
+    async function loadKlippekort() {
+        try {
+            const response = await fetch('/api/user/klippekort?user_id=1');
+            if (response.ok) {
+                const html = await response.text();
+                document.getElementById('klippekort-container').innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Error loading klippekort:', error);
+            document.getElementById('klippekort-container').innerHTML = '<div class="error">Kunne ikke laste klippekort</div>';
+        }
+    }
+
+    // Load components when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadMembership();
+        loadKlippekort();
+    });
+</script>
+{{end}}

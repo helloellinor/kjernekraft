@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"kjernekraft/handlers/config"
 	"kjernekraft/models"
 	"net/http"
 	"time"
@@ -17,7 +18,8 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Group events by day
 	eventsByDay := make(map[string][]models.Event)
-    now := time.Now().In(OsloLoc)
+	settings := config.GetInstance()
+	now := settings.GetCurrentTime()
 
 	// Calculate this week's dates (Monday to Sunday)
 	weekdays := []string{"Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag", "Søndag"}
