@@ -1,0 +1,31 @@
+/* Shared Event Card Styles */
+.event-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 4px solid #007cba;
+  cursor: pointer;
+  position: relative; /* default flow positioning */
+}
+.event-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.event-card.expanded { box-shadow: 0 6px 20px rgba(0,0,0,0.18); }
+.event-time { font-size: .75rem; color:#666; font-weight:500; }
+.event-title { font-size:.875rem; font-weight:600; margin:.25rem 0; color:#333; }
+.event-teacher { font-size:.75rem; color:#666; }
+.event-spaces { font-size:.75rem; color:#333; margin-top:.25rem; }
+.event-details { margin-top:.75rem; padding-top:.75rem; border-top:1px solid #f0f0f0; display:none; animation: fadeIn .3s ease; }
+.event-card.expanded .event-details { display:block; }
+.signup-btn { width:100%; padding:.75rem; background:#007cba; color:#fff; border:none; border-radius:4px; font-size:.875rem; cursor:pointer; transition:background .2s; margin-top:.5rem; }
+.signup-btn:hover { background:#005a87; }
+.signup-btn.waitlist { background:#ff6b35; }
+.signup-btn.waitlist:hover { background:#e55a2b; }
+/* Class type color accents */
+.event-card.yoga { border-left-color:#8e44ad; }
+.event-card.pilates { border-left-color:#27ae60; }
+.event-card.strength { border-left-color:#e74c3c; }
+.event-card.cardio { border-left-color:#f39c12; }
+.event-card.flexibility { border-left-color:#3498db; }
+@keyframes fadeIn { from {opacity:0; transform:translateY(-6px);} to {opacity:1; transform:translateY(0);} }
+
