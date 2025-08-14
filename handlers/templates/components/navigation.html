@@ -1,0 +1,84 @@
+{{define "navigation"}}
+<style>
+    .header {
+        background-color: #007cba;
+        color: white;
+        padding: 1rem 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    .nav {
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .nav-list {
+        display: flex;
+        list-style: none;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0;
+    }
+    .nav-item {
+        border-right: 1px solid #e0e0e0;
+    }
+    .nav-item:last-child {
+        border-right: none;
+    }
+    .nav-link {
+        display: block;
+        padding: 1rem 1.5rem;
+        text-decoration: none;
+        color: #666;
+        transition: all 0.2s;
+    }
+    .nav-link:hover {
+        background: #f8f9fa;
+        color: #007cba;
+    }
+    .nav-link.active {
+        background: #007cba;
+        color: white;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 767px) {
+        .nav-list {
+            flex-direction: column;
+        }
+        .nav-item {
+            border-right: none;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .nav-item:last-child {
+            border-bottom: none;
+        }
+    }
+</style>
+
+<header class="header">
+    <h1>Kjernekraft - Elev Dashboard</h1>
+</header>
+
+<nav class="nav">
+    <ul class="nav-list">
+        <li class="nav-item">
+            <a href="/elev/hjem" class="nav-link {{if eq .CurrentPage "hjem"}}active{{end}}">Hjem</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/timeplan" class="nav-link {{if eq .CurrentPage "timeplan"}}active{{end}}">Timeplan</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/klippekort" class="nav-link {{if eq .CurrentPage "klippekort"}}active{{end}}">Klippekort</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/medlemskap" class="nav-link {{if eq .CurrentPage "medlemskap"}}active{{end}}">Medlemskap</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/min-profil" class="nav-link {{if eq .CurrentPage "profil"}}active{{end}}">Min profil</a>
+        </li>
+    </ul>
+</nav>
+{{end}}

@@ -1,0 +1,448 @@
+{{define "content"}}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+    }
+    .main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .page-title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #333;
+        text-align: center;
+        border-bottom: 2px solid #007cba;
+        padding-bottom: 0.5rem;
+    }
+    .page-description {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 3rem;
+        text-align: center;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 3rem;
+    }
+    .selector-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+    .question-form {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .form-title {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+        border-bottom: 2px solid #007cba;
+        padding-bottom: 0.5rem;
+    }
+    .question-group {
+        margin-bottom: 1.5rem;
+    }
+    .question-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+    .question-options {
+        display: grid;
+        gap: 0.5rem;
+    }
+    .option-label {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .option-label:hover {
+        border-color: #007cba;
+        background-color: #f8f9fa;
+    }
+    .option-label input[type="radio"], .option-label input[type="checkbox"] {
+        margin-right: 0.75rem;
+    }
+    .option-label input[type="radio"]:checked + span, .option-label input[type="checkbox"]:checked + span {
+        font-weight: 600;
+    }
+    .option-label:has(input[type="radio"]:checked), .option-label:has(input[type="checkbox"]:checked) {
+        border-color: #007cba;
+        background-color: #e8f4fd;
+    }
+    .checkout-container {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 2rem;
+    }
+    .checkout-title {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+        text-align: center;
+        border-bottom: 2px solid #007cba;
+        padding-bottom: 0.5rem;
+    }
+    .price-display {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    .current-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #007cba;
+        margin-bottom: 0.5rem;
+    }
+    .original-price {
+        font-size: 1.1rem;
+        color: #666;
+        text-decoration: line-through;
+        margin-bottom: 0.5rem;
+    }
+    .discount-badge {
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .membership-details {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+    }
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .detail-row:last-child {
+        margin-bottom: 0;
+        font-weight: 600;
+        padding-top: 0.5rem;
+        border-top: 1px solid #e0e0e0;
+    }
+    .checkout-btn {
+        width: 100%;
+        background: #007cba;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-bottom: 1rem;
+    }
+    .checkout-btn:hover {
+        background: #005a87;
+    }
+    .checkout-btn:disabled {
+        background: #adb5bd;
+        cursor: not-allowed;
+    }
+    .special-offer-notice {
+        background: linear-gradient(135deg, #ff6b35, #f7931e);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        text-align: center;
+        font-weight: 600;
+    }
+    .date-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+    .date-input:focus {
+        border-color: #007cba;
+        outline: none;
+    }
+    @media (max-width: 768px) {
+        .selector-container {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+    }
+</style>
+
+{{template "navigation" .}}
+
+<main class="main">
+    <h1 class="page-title">Finn ditt perfekte medlemskap</h1>
+    <p class="page-description">
+        Svar på noen enkle spørsmål så viser vi deg medlemskapet som passer best for deg.
+    </p>
+    
+    <div class="selector-container">
+        <form class="question-form" 
+              action="/medlemskap/recommendations" 
+              method="post">
+            
+            <h2 class="form-title">Fortell oss om deg</h2>
+            
+            <div class="question-group">
+                <label class="question-label">Hvor lenge ønsker du å binde deg?</label>
+                <div class="question-options">
+                    <label class="option-label">
+                        <input type="radio" name="commitment" value="12">
+                        <span>12 måneder (best pris)</span>
+                    </label>
+                    <label class="option-label" style="border: 2px solid #ff6b35; background: linear-gradient(135deg, #fff5f0, #ffffff);">
+                        <input type="radio" name="commitment" value="autumn_special">
+                        <span>🍂 Høsttilbud: 12-måneders pris med 4 måneders binding!</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="commitment" value="6">
+                        <span>6 måneder</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="commitment" value="0">
+                        <span>Ingen binding (mest fleksibelt)</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="commitment" value="trial">
+                        <span>Jeg vil bare prøve</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="question-group">
+                <label class="question-label">Er du student eller senior?</label>
+                <div class="question-options">
+                    <label class="option-label">
+                        <input type="checkbox" name="is_student_senior" value="true">
+                        <span>Ja, jeg er student eller 67+ år</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="question-group">
+                <label class="question-label">Når vil du starte?</label>
+                <div class="question-options">
+                    <label class="option-label">
+                        <input type="radio" name="start_time" value="now" checked>
+                        <span>Så snart som mulig</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="start_time" value="custom">
+                        <span>Annen dato</span>
+                    </label>
+                </div>
+                <div id="custom-date-container" style="display: none; margin-top: 1rem;">
+                    <input type="date" name="custom_start_date" class="date-input" id="custom-start-date">
+                </div>
+            </div>
+        </form>
+        
+        <div class="checkout-container">
+            <h2 class="checkout-title">Ditt medlemskap</h2>
+            
+            <div id="special-offer" class="special-offer-notice" style="display: none;">
+                🍂 Høsttilbud: 12-måneders pris med kun 4 måneders binding!
+            </div>
+            
+            <div class="price-display">
+                <div id="current-price" class="current-price">1490 kr/mnd</div>
+                <div id="original-price" class="original-price" style="display: none;"></div>
+                <div id="discount-badge" class="discount-badge" style="display: none;">20% rabatt</div>
+            </div>
+            
+            <div class="membership-details">
+                <div class="detail-row">
+                    <span>Medlemskap:</span>
+                    <span id="membership-type">Ingen binding</span>
+                </div>
+                <div class="detail-row">
+                    <span>Binding:</span>
+                    <span id="binding-period">Ingen</span>
+                </div>
+                <div class="detail-row" id="discount-row" style="display: none;">
+                    <span>Student/Senior rabatt:</span>
+                    <span id="discount-status">20%</span>
+                </div>
+                <div class="detail-row">
+                    <span>Total pris per måned:</span>
+                    <span id="total-price">1490 kr</span>
+                </div>
+            </div>
+            
+            <button class="checkout-btn" onclick="proceedToCheckout()">
+                Fortsett til betaling
+            </button>
+            
+            <p style="font-size: 0.9rem; color: #666; text-align: center;">
+                Ingen skjulte kostnader. Avbryt når som helst.
+            </p>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Default pricing data (most expensive, no commitment option)
+    const pricingData = {
+        'no_binding': { regular: 149000, student: 119200 }, // 1490kr, 20% discount = 1192kr
+        '6_months': { regular: 129000, student: 103200 },   // 1290kr, 20% discount = 1032kr  
+        '12_months': { regular: 104000, student: 83200 },   // 1040kr, 20% discount = 832kr
+        'trial': { regular: 39900, student: 39900 }         // 399kr (trial price same for all)
+    };
+
+    let currentSelection = {
+        isStudentSenior: false,
+        commitment: '0', // Default to no binding (most expensive)
+        startTime: 'now',
+        customStartDate: null
+    };
+
+    function updatePricing() {
+        const isStudentSenior = currentSelection.isStudentSenior;
+        const commitment = currentSelection.commitment;
+        const startTime = currentSelection.startTime;
+
+        // Disable høsttilbud if "Annen dato" is selected
+        const autumnOfferOption = document.querySelector('input[value="autumn_special"]');
+        const autumnOfferLabel = autumnOfferOption.closest('.option-label');
+        
+        if (startTime === 'custom') {
+            autumnOfferOption.disabled = true;
+            autumnOfferLabel.style.opacity = '0.5';
+            autumnOfferLabel.style.cursor = 'not-allowed';
+            autumnOfferLabel.style.pointerEvents = 'none';
+            // If høsttilbud was selected, switch to 12 months
+            if (commitment === 'autumn_special') {
+                currentSelection.commitment = '12';
+                document.querySelector('input[value="12"]').checked = true;
+                autumnOfferOption.checked = false;
+            }
+        } else {
+            autumnOfferOption.disabled = false;
+            autumnOfferLabel.style.opacity = '1';
+            autumnOfferLabel.style.cursor = 'pointer';
+            autumnOfferLabel.style.pointerEvents = 'auto';
+        }
+
+        let priceKey = 'no_binding';
+        let membershipType = 'Ingen binding';
+        let bindingText = 'Ingen';
+
+        if (currentSelection.commitment === '12' || currentSelection.commitment === 'autumn_special') {
+            priceKey = '12_months';
+            if (currentSelection.commitment === 'autumn_special') {
+                membershipType = 'Høsttilbud (12-måneders pris, 4 måneders binding)';
+                bindingText = '4 måneder (høsttilbud)';
+            } else {
+                membershipType = '12-måneder';
+                bindingText = '12 måneder';
+            }
+        } else if (currentSelection.commitment === '6') {
+            priceKey = '6_months';
+            membershipType = '6-måneder';
+            bindingText = '6 måneder';
+        } else if (currentSelection.commitment === 'trial') {
+            priceKey = 'trial';
+            membershipType = 'Prøvemedlemskap';
+            bindingText = '2 uker';
+        }
+
+        const pricing = pricingData[priceKey];
+        const originalPrice = pricing.regular;
+        const currentPrice = isStudentSenior ? pricing.student : pricing.regular;
+
+        // Update UI elements
+        document.getElementById('current-price').textContent = Math.round(currentPrice / 100) + ' kr/mnd';
+        document.getElementById('membership-type').textContent = membershipType;
+        document.getElementById('binding-period').textContent = bindingText;
+        document.getElementById('total-price').textContent = Math.round(currentPrice / 100) + ' kr';
+
+        // Show/hide discount elements
+        const discountRow = document.getElementById('discount-row');
+        if (isStudentSenior && priceKey !== 'trial') {
+            document.getElementById('original-price').textContent = Math.round(originalPrice / 100) + ' kr/mnd';
+            document.getElementById('original-price').style.display = 'block';
+            document.getElementById('discount-badge').style.display = 'inline-block';
+            discountRow.style.display = 'flex';
+            document.getElementById('discount-status').textContent = '20%';
+        } else {
+            document.getElementById('original-price').style.display = 'none';
+            document.getElementById('discount-badge').style.display = 'none';
+            discountRow.style.display = 'none';
+        }
+
+        // Show/hide special offer notice
+        if (currentSelection.commitment === 'autumn_special') {
+            document.getElementById('special-offer').style.display = 'block';
+        } else {
+            document.getElementById('special-offer').style.display = 'none';
+        }
+    }
+
+    function proceedToCheckout() {
+        alert('Checkout funksjonalitet kommer snart! Valgt medlemskap: ' + 
+              document.getElementById('membership-type').textContent + 
+              ' til ' + document.getElementById('total-price').textContent);
+    }
+
+    // Event listeners for form changes
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('.question-form');
+        
+        form.addEventListener('change', function(e) {
+            if (e.target.name === 'is_student_senior') {
+                currentSelection.isStudentSenior = e.target.checked;
+            } else if (e.target.name === 'commitment') {
+                currentSelection.commitment = e.target.value;
+            } else if (e.target.name === 'start_time') {
+                currentSelection.startTime = e.target.value;
+                
+                // Show/hide custom date input
+                const customDateContainer = document.getElementById('custom-date-container');
+                if (e.target.value === 'custom') {
+                    customDateContainer.style.display = 'block';
+                } else {
+                    customDateContainer.style.display = 'none';
+                }
+            } else if (e.target.name === 'custom_start_date') {
+                currentSelection.customStartDate = e.target.value;
+            }
+            
+            updatePricing();
+        });
+
+        // Initialize with default pricing
+        updatePricing();
+    });
+</script>
+{{end}}
