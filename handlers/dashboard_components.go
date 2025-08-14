@@ -99,8 +99,8 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 
 <style>
 .klippekort-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
 }
 

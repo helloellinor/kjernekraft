@@ -278,16 +278,14 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
                 grid-template-columns: 1fr;
             }
             .nav-list {
-                flex-wrap: wrap;
+                flex-direction: column;
             }
             .nav-item {
                 border-right: none;
                 border-bottom: 1px solid #e0e0e0;
-                flex: 1;
-                min-width: calc(50% - 1px);
             }
-            .nav-item:nth-child(even) {
-                border-right: 1px solid #e0e0e0;
+            .nav-item:last-child {
+                border-bottom: none;
             }
         }
     </style>
