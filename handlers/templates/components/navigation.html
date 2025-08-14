@@ -6,9 +6,39 @@
         padding: 1rem 2rem;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
     .header h1 {
         font-size: 1.5rem;
         font-weight: 600;
+        margin: 0;
+    }
+    .auth-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .user-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .auth-link {
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 4px;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    .auth-link:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.5);
     }
     .nav {
         background: white;
@@ -59,7 +89,13 @@
 </style>
 
 <header class="header">
-    <h1>Kjernekraft - Elev Dashboard</h1>
+    <div class="header-content">
+        <h1>Kjernekraft - Elev Dashboard</h1>
+        <div class="auth-controls">
+            <span class="user-name">Test Bruker</span>
+            <a href="/innlogging" class="auth-link">Logg ut</a>
+        </div>
+    </div>
 </header>
 
 <nav class="nav">

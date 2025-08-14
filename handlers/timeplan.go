@@ -91,7 +91,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	} else if weekOffset == 1 {
 		weekTitle = "Uka som kommer"
 	} else {
-		weekTitle = "Uka " + strconv.Itoa(targetWeek)
+		weekTitle = "Uke " + strconv.Itoa(targetWeek)
 	}
 
 	// Get distinct teachers and class types for filters
