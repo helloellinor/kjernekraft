@@ -3,22 +3,22 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
 	"kjernekraft/database"
 	"kjernekraft/handlers"
+	"kjernekraft/handlers/config"
 )
 
 func main() {
-	var err error
-	// Set Oslo timezone globally
-	handlers.OsloLoc, err = time.LoadLocation("Europe/Oslo")
-	if err != nil {
-		log.Fatal("Could not load Oslo timezone: ", err)
-	}
+	// Initialize global settings (this will set up Oslo timezone by default)
+	settings := config.GetInstance()
+	log.Printf("Application started with timezone: %s", settings.GetTimezone())
+
+	// Keep backward compatibility with OsloLoc
+	handlers.OsloLoc = settings.GetLocation()
 
 	dbConn, err := database.Connect()
 	if err != nil {
@@ -61,6 +61,10 @@ func main() {
 	r.Get("/admin", handlers.AdminPageHandler)
 	r.Get("/api/admin/users", handlers.GetUsersAPIHandler)
 	r.Post("/api/admin/events/update-time", handlers.UpdateEventTimeHandler)
+	r.Route("/api/admin/settings", func(r chi.Router) {
+		r.Get("/", handlers.AdminSettingsHandler)
+		r.Post("/", handlers.AdminSettingsHandler)
+	})
 
 	// Event routes
 	r.Get("/api/events", handlers.GetAllEventsHandler)

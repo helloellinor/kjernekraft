@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"html/template"
+	"kjernekraft/handlers/config"
 	"kjernekraft/models"
 	"net/http"
 	"os"
@@ -44,6 +45,9 @@ func parseTemplateWithEventCard(mainTemplate string) (*template.Template, error)
 
 // ElevDashboardHandler serves the Elev dashboard home page
 func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
+	settings := config.GetInstance()
+	now := settings.GetCurrentTime()
+
 	// Get today's events
 	allTodaysEvents, err := DB.GetTodaysEvents()
 	if err != nil {
@@ -52,7 +56,6 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Filter out events that have already started
-    now := time.Now().In(OsloLoc)
 	var upcomingEvents []models.Event
 	for _, event := range allTodaysEvents {
 		if event.StartTime.After(now) {
@@ -60,11 +63,24 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data := struct {
-		TodaysEvents []models.Event
-	}{
-		TodaysEvents: upcomingEvents,
+	data := map[string]interface{}{
+		"Title":        "Elev Dashboard",
+		"TodaysEvents": upcomingEvents,
+		"IsAdmin":      false, // TODO: Implement proper role checking
+		"ExternalCSS":  []string{"/static/css/event-card.css"},
 	}
+
+	// Try to use the new template system
+	tm := GetTemplateManager()
+	if tmpl, exists := tm.GetTemplate("pages/dashboard"); exists {
+		w.Header().Set("Content-Type", "text/html")
+		if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
+			http.Error(w, "Template execution error", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Fallback to old template system if new template doesn't exist
 
 	tmpl := `<!DOCTYPE html>
 <html lang="no">

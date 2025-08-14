@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"html/template"
 	"kjernekraft/database"
 	"kjernekraft/models"
 	"net/http"
@@ -63,6 +62,8 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 </head>
 <body>
     <h1>Admin - Brukeradministrasjon</h1>
+    
+    {{template "admin_settings" .}}
     
     <div class="stats">
         <strong>Totalt antall brukere:</strong> {{len .Users}} | 
@@ -172,7 +173,9 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 </body>
 </html>`
 
-	t, err := template.New("admin").Parse(tmpl)
+	// Try to use the new template system with components
+	tm := GetTemplateManager()
+	t, err := tm.ParseTemplate(tmpl, "admin")
 	if err != nil {
 		http.Error(w, "Template-feil", http.StatusInternalServerError)
 		return
