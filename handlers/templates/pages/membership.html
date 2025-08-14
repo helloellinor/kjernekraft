@@ -33,6 +33,31 @@
         margin-right: auto;
         margin-bottom: 3rem;
     }
+    
+    /* Current membership section */
+    .current-membership-section {
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .current-membership-section .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+        text-align: center;
+        border-bottom: 2px solid #007cba;
+        padding-bottom: 0.5rem;
+    }
+    
+    .loading-placeholder {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 2rem;
+    }
     .selector-container {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -202,10 +227,27 @@
 {{template "navigation" .}}
 
 <main class="main">
-    <h1 class="page-title">Finn ditt perfekte medlemskap</h1>
+    {{if .HasCurrentMembership}}
+    <!-- Current Membership Section -->
+    <div class="current-membership-section">
+        <h2 class="section-title">Medlemskapet mitt</h2>
+        <div id="current-membership-container">
+            <!-- This will be loaded via AJAX -->
+            <div class="loading-placeholder">Laster medlemskap...</div>
+        </div>
+    </div>
+    {{end}}
+    
+    <h1 class="page-title">{{.PageTitle}}</h1>
+    {{if not .HasHadMembership}}
     <p class="page-description">
         Svar på noen enkle spørsmål så viser vi deg medlemskapet som passer best for deg.
     </p>
+    {{else}}
+    <p class="page-description">
+        Velg et nytt medlemskap som passer dine behov.
+    </p>
+    {{end}}
     
     <div class="selector-container">
         <form class="question-form" 
@@ -221,10 +263,12 @@
                         <input type="radio" name="commitment" value="12">
                         <span>12 måneder (best pris)</span>
                     </label>
+                    {{if .ShowSpecialOffer}}
                     <label class="option-label" style="border: 2px solid #ff6b35; background: linear-gradient(135deg, #fff5f0, #ffffff);">
                         <input type="radio" name="commitment" value="autumn_special">
                         <span>🍂 Høsttilbud: 12-måneders pris med 4 måneders binding!</span>
                     </label>
+                    {{end}}
                     <label class="option-label">
                         <input type="radio" name="commitment" value="6">
                         <span>6 måneder</span>
@@ -415,8 +459,26 @@
               ' til ' + document.getElementById('total-price').textContent);
     }
 
+    async function loadCurrentMembership() {
+        try {
+            const response = await fetch('/api/user/membership?user_id=1');
+            if (response.ok) {
+                const html = await response.text();
+                document.getElementById('current-membership-container').innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Error loading current membership:', error);
+            document.getElementById('current-membership-container').innerHTML = '<div class="error">Kunne ikke laste medlemskap</div>';
+        }
+    }
+
     // Event listeners for form changes
     document.addEventListener('DOMContentLoaded', function() {
+        // Load current membership if user has one
+        {{if .HasCurrentMembership}}
+        loadCurrentMembership();
+        {{end}}
+        
         const form = document.querySelector('.question-form');
         
         form.addEventListener('change', function(e) {

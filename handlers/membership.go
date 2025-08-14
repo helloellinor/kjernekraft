@@ -30,9 +30,37 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 
 // MembershipSelectorHandler serves the interactive membership selector page
 func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
+	// For now, use a test user. In a real app, this would come from session/auth
+	userID := int64(1)
+	
+	// Check if user has a membership
+	membership, err := DB.GetUserMembership(userID)
+	hasCurrentMembership := membership != nil && err == nil
+	
+	// Check if user has ever had a membership (for hiding offers)
+	// For now, we'll just use the current membership check
+	hasHadMembership := hasCurrentMembership
+	
+	// Determine page title and show special offer
+	pageTitle := "Finn ditt perfekte medlemskap"
+	showSpecialOffer := true
+	
+	if hasCurrentMembership {
+		pageTitle = "Bytt medlemskapet mitt"
+	}
+	
+	if hasHadMembership {
+		showSpecialOffer = false
+	}
+	
 	data := map[string]interface{}{
-		"Title":       "Medlemskap",
-		"CurrentPage": "medlemskap",
+		"Title":                "Medlemskap",
+		"CurrentPage":          "medlemskap",
+		"PageTitle":            pageTitle,
+		"HasCurrentMembership": hasCurrentMembership,
+		"HasHadMembership":     hasHadMembership,
+		"ShowSpecialOffer":     showSpecialOffer,
+		"UserMembership":       membership,
 	}
 
 	// Use the new template system

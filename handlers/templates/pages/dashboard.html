@@ -71,6 +71,22 @@
         font-style: italic;
         padding: 2rem;
     }
+    .timeplan-btn {
+        display: inline-block;
+        background-color: #007cba;
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        margin-top: 1rem;
+    }
+    .timeplan-btn:hover {
+        background-color: #005a87;
+        color: white;
+        text-decoration: none;
+    }
     
     /* Responsive styles */
     @media (max-width: 767px) {
@@ -90,6 +106,17 @@
 
 <div class="main-content">
     <div class="content-section">
+        <h2 class="section-title">Påmeldt</h2>
+        <div class="events-grid" id="signed-up-classes">
+            <div class="activity-placeholder">
+                Du er ikke påmeldt noen klasser ennå
+                <br><br>
+                <a href="/elev/timeplan" class="timeplan-btn">Se timeplan</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="content-section">
         <h2 class="section-title">Dagens klasser</h2>
         <div class="events-grid" id="todays-classes">
             {{if .TodaysEvents}}
@@ -99,13 +126,6 @@
             {{else}}
                 <div class="activity-placeholder">Ingen kommende klasser i dag</div>
             {{end}}
-        </div>
-    </div>
-    
-    <div class="content-section">
-        <h2 class="section-title">Påmeldt</h2>
-        <div class="events-grid" id="signed-up-classes">
-            <div class="activity-placeholder">Du er ikke påmeldt noen klasser ennå</div>
         </div>
     </div>
     
@@ -226,7 +246,7 @@
                 // Check if signed-up section is empty
                 const signedUpContainer = document.getElementById('signed-up-classes');
                 if (signedUpContainer.children.length === 0) {
-                    signedUpContainer.innerHTML = '<div class="activity-placeholder">Du er ikke påmeldt noen klasser ennå</div>';
+                    signedUpContainer.innerHTML = '<div class="activity-placeholder">Du er ikke påmeldt noen klasser ennå<br><br><a href="/elev/timeplan" class="timeplan-btn">Se timeplan</a></div>';
                 }
             }, 300);
         }
