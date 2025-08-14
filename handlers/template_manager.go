@@ -41,6 +41,16 @@ func getTemplateFuncs() template.FuncMap {
 		"sub": func(a, b int) int {
 			return a - b
 		},
+		"substr": func(s string, start int, length int) string {
+			if start >= len(s) {
+				return ""
+			}
+			end := start + length
+			if end > len(s) {
+				end = len(s)
+			}
+			return s[start:end]
+		},
 		"divf": func(a, b interface{}) float64 {
 			var aFloat, bFloat float64
 			switch v := a.(type) {
