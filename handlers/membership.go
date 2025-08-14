@@ -173,48 +173,6 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
             color: #333;
             font-weight: 500;
         }
-        .value-graph {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .graph-title {
-            text-align: center;
-            margin-bottom: 1rem;
-            font-weight: 600;
-            color: #333;
-        }
-        .graph-bars {
-            display: flex;
-            align-items: end;
-            justify-content: space-around;
-            height: 120px;
-            gap: 0.5rem;
-        }
-        .graph-bar {
-            background: linear-gradient(to top, #007cba, #4a9fd1);
-            border-radius: 4px 4px 0 0;
-            min-width: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-        .bar-label {
-            font-size: 0.7rem;
-            color: #666;
-            margin-top: 0.5rem;
-            text-align: center;
-        }
-        .bar-value {
-            position: absolute;
-            top: -25px;
-            font-size: 0.7rem;
-            color: #333;
-            font-weight: 600;
-        }
         @media (max-width: 768px) {
             .packages-grid {
                 grid-template-columns: 1fr;
@@ -234,16 +192,19 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
     <nav class="nav">
         <ul class="nav-list">
             <li class="nav-item">
-                <a href="/elev/hjem">Hjem</a>
+                <a href="/elev/hjem" class="nav-link">Hjem</a>
             </li>
             <li class="nav-item">
-                <a href="/elev/timeplan">Timeplan</a>
+                <a href="/elev/timeplan" class="nav-link">Timeplan</a>
             </li>
             <li class="nav-item">
-                <a href="/klippekort" class="active">Klippekort</a>
+                <a href="/elev/klippekort" class="nav-link active">Klippekort</a>
             </li>
             <li class="nav-item">
-                <a href="/medlemskap">Medlemskap</a>
+                <a href="/elev/medlemskap" class="nav-link">Medlemskap</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/min-profil" class="nav-link">Min profil</a>
             </li>
         </ul>
     </nav>
@@ -275,18 +236,6 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
                     </div>
                 </div>
                 {{end}}
-            </div>
-            
-            <div class="value-graph">
-                <div class="graph-title">Pris per økt - {{$category}}</div>
-                <div class="graph-bars">
-                    {{range $packages}}
-                    <div class="graph-bar" style="height: {{printf "%.0f" (multf (divf (subf 80000 .PricePerSession) 80000) 100)}}%;">
-                        <div class="bar-value">{{printf "%.0f" (divf .PricePerSession 100)}} kr</div>
-                        <div class="bar-label">{{.KlippCount}} klipp</div>
-                    </div>
-                    {{end}}
-                </div>
             </div>
         </section>
         {{end}}
@@ -321,32 +270,6 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 				return 0
 			}
 			return aFloat / bFloat
-		},
-		"subf": func(a, b interface{}) float64 {
-			var aFloat, bFloat float64
-			
-			switch v := a.(type) {
-			case int:
-				aFloat = float64(v)
-			case float64:
-				aFloat = v
-			default:
-				return 0
-			}
-			
-			switch v := b.(type) {
-			case int:
-				bFloat = float64(v)
-			case float64:
-				bFloat = v
-			default:
-				return 0
-			}
-			
-			return aFloat - bFloat
-		},
-		"multf": func(a, b float64) float64 {
-			return a * b
 		},
 	}
 
@@ -492,19 +415,94 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
             border-color: #007cba;
             background-color: #e8f4fd;
         }
-        .results-container {
-            min-height: 400px;
-        }
-        .results-placeholder {
+        .checkout-container {
             background: white;
             border-radius: 12px;
-            padding: 3rem 2rem;
+            padding: 2rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
-            color: #666;
+            position: sticky;
+            top: 2rem;
         }
-        .loading {
+        .checkout-title {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+            text-align: center;
+        }
+        .price-display {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .current-price {
+            font-size: 2.5rem;
+            font-weight: 700;
             color: #007cba;
+            margin-bottom: 0.5rem;
+        }
+        .original-price {
+            font-size: 1.1rem;
+            color: #666;
+            text-decoration: line-through;
+            margin-bottom: 0.5rem;
+        }
+        .discount-badge {
+            background: #28a745;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .membership-details {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .detail-row:last-child {
+            margin-bottom: 0;
+            font-weight: 600;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        .checkout-btn {
+            width: 100%;
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 1rem;
+        }
+        .checkout-btn:hover {
+            background: #005a87;
+        }
+        .checkout-btn:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+        }
+        .special-offer-notice {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 600;
         }
         @media (max-width: 768px) {
             .selector-container {
@@ -526,16 +524,19 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
     <nav class="nav">
         <ul class="nav-list">
             <li class="nav-item">
-                <a href="/elev/hjem">Hjem</a>
+                <a href="/elev/hjem" class="nav-link">Hjem</a>
             </li>
             <li class="nav-item">
-                <a href="/elev/timeplan">Timeplan</a>
+                <a href="/elev/timeplan" class="nav-link">Timeplan</a>
             </li>
             <li class="nav-item">
-                <a href="/klippekort">Klippekort</a>
+                <a href="/elev/klippekort" class="nav-link">Klippekort</a>
             </li>
             <li class="nav-item">
-                <a href="/medlemskap" class="active">Medlemskap</a>
+                <a href="/elev/medlemskap" class="nav-link active">Medlemskap</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/min-profil" class="nav-link">Min profil</a>
             </li>
         </ul>
     </nav>
@@ -593,29 +594,153 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
                     <label class="question-label">Når vil du starte?</label>
                     <div class="question-options">
                         <label class="option-label">
+                            <input type="radio" name="start_time" value="now" checked>
+                            <span>Så snart som mulig</span>
+                        </label>
+                        <label class="option-label">
                             <input type="radio" name="start_time" value="august">
                             <span>I august (Høsttilbud!)</span>
                         </label>
-                        <label class="option-label">
-                            <input type="radio" name="start_time" value="now">
-                            <span>Så snart som mulig</span>
-                        </label>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="checkout-container">
+                <h2 class="checkout-title">Ditt medlemskap</h2>
+                
+                <div id="special-offer" class="special-offer-notice" style="display: none;">
+                    🍂 Høsttilbud: 12-måneders pris med kun 4 måneders binding!
+                </div>
+                
+                <div class="price-display">
+                    <div id="current-price" class="current-price">1490 kr/mnd</div>
+                    <div id="original-price" class="original-price" style="display: none;"></div>
+                    <div id="discount-badge" class="discount-badge" style="display: none;">20% rabatt</div>
+                </div>
+                
+                <div class="membership-details">
+                    <div class="detail-row">
+                        <span>Medlemskap:</span>
+                        <span id="membership-type">Ingen binding</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Binding:</span>
+                        <span id="binding-period">Ingen</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Student/Senior rabatt:</span>
+                        <span id="discount-status">Nei</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Total pris per måned:</span>
+                        <span id="total-price">1490 kr</span>
                     </div>
                 </div>
                 
-                <button type="submit" style="background: #007cba; color: white; border: none; padding: 1rem 2rem; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 1rem;">
-                    Se anbefalinger
+                <button class="checkout-btn" onclick="proceedToCheckout()">
+                    Fortsett til betaling
                 </button>
-            </form>
-            
-            <div class="results-container">
-                <div id="membership-results" class="results-placeholder">
-                    <p>Velg alternativene til venstre for å se våre anbefalinger</p>
-                    <div id="loading" class="loading" style="display:none;">Laster anbefalinger...</div>
-                </div>
+                
+                <p style="font-size: 0.9rem; color: #666; text-align: center;">
+                    Ingen skjulte kostnader. Avbryt når som helst.
+                </p>
             </div>
         </div>
     </main>
+
+    <script>
+        // Default pricing data (most expensive, no commitment option)
+        const pricingData = {
+            'no_binding': { regular: 149000, student: 119200 }, // 1490kr, 20% discount = 1192kr
+            '6_months': { regular: 129000, student: 103200 },   // 1290kr, 20% discount = 1032kr  
+            '12_months': { regular: 104000, student: 83200 },   // 1040kr, 20% discount = 832kr
+            'trial': { regular: 39900, student: 39900 }         // 399kr (trial price same for all)
+        };
+
+        let currentSelection = {
+            isStudentSenior: false,
+            commitment: '0', // Default to no binding (most expensive)
+            startTime: 'now'
+        };
+
+        function updatePricing() {
+            const isStudentSenior = currentSelection.isStudentSenior;
+            const commitment = currentSelection.commitment;
+            const startTime = currentSelection.startTime;
+
+            let priceKey = 'no_binding';
+            let membershipType = 'Ingen binding';
+            let bindingText = 'Ingen';
+
+            if (commitment === '12') {
+                priceKey = '12_months';
+                membershipType = '12-måneder';
+                bindingText = '12 måneder';
+            } else if (commitment === '6') {
+                priceKey = '6_months';
+                membershipType = '6-måneder';
+                bindingText = '6 måneder';
+            } else if (commitment === 'trial') {
+                priceKey = 'trial';
+                membershipType = 'Prøvemedlemskap';
+                bindingText = '2 uker';
+            }
+
+            const pricing = pricingData[priceKey];
+            const originalPrice = pricing.regular;
+            const currentPrice = isStudentSenior ? pricing.student : pricing.regular;
+
+            // Update UI elements
+            document.getElementById('current-price').textContent = Math.round(currentPrice / 100) + ' kr/mnd';
+            document.getElementById('membership-type').textContent = membershipType;
+            document.getElementById('binding-period').textContent = bindingText;
+            document.getElementById('discount-status').textContent = isStudentSenior ? 'Ja (20%)' : 'Nei';
+            document.getElementById('total-price').textContent = Math.round(currentPrice / 100) + ' kr';
+
+            // Show/hide discount elements
+            if (isStudentSenior && priceKey !== 'trial') {
+                document.getElementById('original-price').textContent = Math.round(originalPrice / 100) + ' kr/mnd';
+                document.getElementById('original-price').style.display = 'block';
+                document.getElementById('discount-badge').style.display = 'inline-block';
+            } else {
+                document.getElementById('original-price').style.display = 'none';
+                document.getElementById('discount-badge').style.display = 'none';
+            }
+
+            // Show/hide special offer notice
+            if (startTime === 'august') {
+                document.getElementById('special-offer').style.display = 'block';
+            } else {
+                document.getElementById('special-offer').style.display = 'none';
+            }
+        }
+
+        function proceedToCheckout() {
+            alert('Checkout funksjonalitet kommer snart! Valgt medlemskap: ' + 
+                  document.getElementById('membership-type').textContent + 
+                  ' til ' + document.getElementById('total-price').textContent);
+        }
+
+        // Event listeners for form changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.question-form');
+            
+            form.addEventListener('change', function(e) {
+                if (e.target.name === 'is_student_senior') {
+                    currentSelection.isStudentSenior = e.target.value === 'true';
+                } else if (e.target.name === 'commitment') {
+                    currentSelection.commitment = e.target.value;
+                } else if (e.target.name === 'start_time') {
+                    currentSelection.startTime = e.target.value;
+                }
+                
+                updatePricing();
+            });
+
+            // Initialize with default pricing
+            updatePricing();
+        });
+    </script>
 </body>
 </html>`
 
@@ -914,4 +1039,549 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Template execution error", http.StatusInternalServerError)
 		}
 	}
+}
+
+// MinProfilHandler serves the user profile page
+func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
+	// For now, use a test user. In a real app, this would come from session/auth
+	user := struct {
+		ID       int64
+		Name     string
+		Email    string
+		JoinDate string
+		Phone    string
+	}{
+		ID:       1,
+		Name:     "Test Bruker",
+		Email:    "test@example.com",
+		JoinDate: "1. januar 2024",
+		Phone:    "+47 123 45 678",
+	}
+
+	tmpl := `<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Min profil - Kjernekraft</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background-color: #007cba;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .nav {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0;
+        }
+        .nav-list {
+            display: flex;
+            list-style: none;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .nav-item {
+            border-right: 1px solid #e0e0e0;
+        }
+        .nav-item:last-child {
+            border-right: none;
+        }
+        .nav-link {
+            display: block;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: #f0f8ff;
+            color: #007cba;
+        }
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #007cba, #4a9fd1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: 600;
+            margin-right: 1.5rem;
+        }
+        .profile-info h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .profile-info .email {
+            color: #666;
+            font-size: 1rem;
+        }
+        .profile-details {
+            display: grid;
+            gap: 1rem;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+        .detail-value {
+            color: #666;
+        }
+        .edit-profile-btn {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 1rem;
+        }
+        .edit-profile-btn:hover {
+            background: #005a87;
+        }
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Kjernekraft - Min profil</h1>
+    </header>
+    
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="/elev/hjem" class="nav-link">Hjem</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/timeplan" class="nav-link">Timeplan</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/klippekort" class="nav-link">Klippekort</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/medlemskap" class="nav-link">Medlemskap</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/min-profil" class="nav-link active">Min profil</a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <h1 class="page-title">Min profil</h1>
+        
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">{{substr .Name 0 1}}</div>
+                <div class="profile-info">
+                    <h2>{{.Name}}</h2>
+                    <div class="email">{{.Email}}</div>
+                </div>
+            </div>
+            
+            <div class="profile-details">
+                <div class="detail-item">
+                    <span class="detail-label">Fullt navn:</span>
+                    <span class="detail-value">{{.Name}}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">E-post:</span>
+                    <span class="detail-value">{{.Email}}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Telefon:</span>
+                    <span class="detail-value">{{.Phone}}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Medlem siden:</span>
+                    <span class="detail-value">{{.JoinDate}}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Bruker-ID:</span>
+                    <span class="detail-value">#{{.ID}}</span>
+                </div>
+            </div>
+            
+            <button class="edit-profile-btn" onclick="editProfile()">
+                Rediger profil
+            </button>
+        </div>
+    </main>
+
+    <script>
+        function editProfile() {
+            alert('Redigering av profil kommer snart!');
+        }
+    </script>
+</body>
+</html>`
+
+	t, err := template.New("min-profil").Funcs(template.FuncMap{
+		"substr": func(s string, start int, length int) string {
+			if start >= len(s) {
+				return ""
+			}
+			end := start + length
+			if end > len(s) {
+				end = len(s)
+			}
+			return s[start:end]
+		},
+	}).Parse(tmpl)
+	if err != nil {
+		http.Error(w, "Template error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	t.Execute(w, user)
+}
+
+// TestDataPageHandler serves the test data generation page
+func TestDataPageHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := `<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testdata - Kjernekraft</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background-color: #007cba;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .nav {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0;
+        }
+        .nav-list {
+            display: flex;
+            list-style: none;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .nav-item {
+            border-right: 1px solid #e0e0e0;
+        }
+        .nav-item:last-child {
+            border-right: none;
+        }
+        .nav-link {
+            display: block;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: #f0f8ff;
+            color: #007cba;
+        }
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .dev-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .section-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        .test-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .test-btn:hover {
+            background: #5a6268;
+        }
+        .test-btn:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+        }
+        .test-btn.danger {
+            background: #dc3545;
+        }
+        .test-btn.danger:hover {
+            background: #c82333;
+        }
+        .result-area {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            display: none;
+        }
+        .result-area.show {
+            display: block;
+        }
+        .result-area.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .result-area.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1aeb5;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Kjernekraft - Testdata</h1>
+    </header>
+    
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="/elev/hjem" class="nav-link">Hjem</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/timeplan" class="nav-link">Timeplan</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/klippekort" class="nav-link">Klippekort</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/medlemskap" class="nav-link">Medlemskap</a>
+            </li>
+            <li class="nav-item">
+                <a href="/elev/min-profil" class="nav-link">Min profil</a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <h1 class="page-title">🧪 Testdata generering</h1>
+        
+        <div class="dev-warning">
+            <strong>⚠️ Utviklingsverktøy</strong><br>
+            Denne siden er kun tilgjengelig i utviklingsmiljø og vil generere testdata for demonstrasjon.
+        </div>
+        
+        <div class="test-section">
+            <h2 class="section-title">Kalenderdata</h2>
+            <p class="section-description">
+                Generer nye tilfeldige treningsklasser for denne og neste uke. Dette vil erstatte alle eksisterende kalenderoppføringer.
+            </p>
+            <button class="test-btn" onclick="shuffleEvents()">
+                🗓️ Generer kalenderdata
+            </button>
+            <div id="events-result" class="result-area"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="section-title">Medlemskapsdata</h2>
+            <p class="section-description">
+                Generer nye tilfeldige medlemskapsnavn og priser. Dette vil oppdatere eksisterende medlemskapstyper med nye verdier.
+            </p>
+            <button class="test-btn" onclick="shuffleMemberships()">
+                💳 Generer medlemskapsdata
+            </button>
+            <div id="memberships-result" class="result-area"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="section-title">Brukerdata</h2>
+            <p class="section-description">
+                Oppdater den innloggede brukerens klippekort med nye tilfeldige verdier. Dette endrer antall gjenværende klipp.
+            </p>
+            <button class="test-btn" onclick="shuffleUserKlippekort()">
+                🎫 Generer brukerklippekort
+            </button>
+            <div id="user-result" class="result-area"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="section-title">Generer alt</h2>
+            <p class="section-description">
+                Generer alle testdata på en gang. Dette vil oppdatere kalenderen, medlemskap og brukerdata samtidig.
+            </p>
+            <button class="test-btn danger" onclick="shuffleAll()">
+                🎲 Generer alle testdata
+            </button>
+            <div id="all-result" class="result-area"></div>
+        </div>
+    </main>
+
+    <script>
+        async function makeRequest(endpoint, btnElement, resultElement, successMessage) {
+            btnElement.disabled = true;
+            btnElement.textContent = '🔄 Genererer...';
+            resultElement.className = 'result-area';
+            resultElement.style.display = 'none';
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.className = 'result-area success show';
+                    resultElement.textContent = successMessage + (data.message ? ': ' + data.message : '');
+                } else {
+                    throw new Error('Request failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultElement.className = 'result-area error show';
+                resultElement.textContent = 'Feil ved generering av testdata';
+            } finally {
+                btnElement.disabled = false;
+                btnElement.textContent = btnElement.textContent.replace('🔄 Genererer...', btnElement.getAttribute('data-original-text'));
+            }
+        }
+
+        function shuffleEvents() {
+            const btn = event.target;
+            btn.setAttribute('data-original-text', '🗓️ Generer kalenderdata');
+            const result = document.getElementById('events-result');
+            makeRequest('/api/shuffle-test-data', btn, result, 'Kalenderdata generert');
+        }
+
+        function shuffleMemberships() {
+            const btn = event.target;
+            btn.setAttribute('data-original-text', '💳 Generer medlemskapsdata');
+            const result = document.getElementById('memberships-result');
+            makeRequest('/api/shuffle-memberships', btn, result, 'Medlemskapsdata generert');
+        }
+
+        function shuffleUserKlippekort() {
+            const btn = event.target;
+            btn.setAttribute('data-original-text', '🎫 Generer brukerklippekort');
+            const result = document.getElementById('user-result');
+            makeRequest('/api/shuffle-user-klippekort', btn, result, 'Brukerklippekort generert');
+        }
+
+        function shuffleAll() {
+            const btn = event.target;
+            btn.setAttribute('data-original-text', '🎲 Generer alle testdata');
+            const result = document.getElementById('all-result');
+            makeRequest('/api/shuffle-all-test-data', btn, result, 'Alle testdata generert');
+        }
+    </script>
+</body>
+</html>`
+
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte(tmpl))
 }

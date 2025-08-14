@@ -60,11 +60,20 @@ func main() {
 
 	// Test data routes (for development)
 	r.Post("/api/shuffle-test-data", handlers.ShuffleTestDataHandler)
+	r.Post("/api/shuffle-memberships", handlers.ShuffleMembershipsHandler)
+	r.Post("/api/shuffle-user-klippekort", handlers.ShuffleUserKlippekortHandler)
+	r.Post("/api/shuffle-all-test-data", handlers.ShuffleAllTestDataHandler)
 
-	// Membership and klippekort routes
-	r.Get("/klippekort", handlers.KlippekortPageHandler)
-	r.Get("/medlemskap", handlers.MembershipSelectorHandler)
-	r.Post("/medlemskap/recommendations", handlers.MembershipRecommendationsHandler)
+	// Membership and klippekort routes (for compatibility, redirects to elev routes)
+	r.Get("/klippekort", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/elev/klippekort", http.StatusMovedPermanently)
+	})
+	r.Get("/medlemskap", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/elev/medlemskap", http.StatusMovedPermanently)
+	})
+	r.Post("/medlemskap/recommendations", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/elev/medlemskap/recommendations", http.StatusMovedPermanently)
+	})
 	r.Post("/api/membership-recommendations", handlers.MembershipRecommendationsHandler)
 
 	// Dashboard component routes (HTMX endpoints)
@@ -77,6 +86,11 @@ func main() {
 	})
 	r.Get("/elev/hjem", handlers.ElevDashboardHandler)
 	r.Get("/elev/timeplan", handlers.ElevTimeplanHandler)
+	r.Get("/elev/klippekort", handlers.KlippekortPageHandler)
+	r.Get("/elev/medlemskap", handlers.MembershipSelectorHandler)
+	r.Post("/elev/medlemskap/recommendations", handlers.MembershipRecommendationsHandler)
+	r.Get("/elev/min-profil", handlers.MinProfilHandler)
+	r.Get("/elev/testdata", handlers.TestDataPageHandler)
 
 	log.Println("Serving on http://localhost:8080")
 	err = http.ListenAndServe(":8080", r)
