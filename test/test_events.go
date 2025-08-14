@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func main() {
+func test_events() {
 	dbConn, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)

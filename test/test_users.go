@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func main() {
+func test_users() {
 	dbConn, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Alle Arrangementer - Kjernekraft</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+        .event { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+        .event h2 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>Alle Arrangementer</h1>
+
+    {{range .}}
+    <div class="event">
+        <h2>{{.Title}}</h2>
+        <p>{{.Description}}</p>
+        <p><strong>Sted:</strong> {{.Location}}</p>
+        <p>
+            <strong>Tid:</strong> {{.StartTime.Format "02. Jan 2006 kl. 15:04"}}
+            til {{.EndTime.Format "15:04"}}
+        </p>
+    </div>
+    {{else}}
+        <p>Det er ingen planlagte arrangementer.</p>
+    {{end}}
+
+</body>
+</html>

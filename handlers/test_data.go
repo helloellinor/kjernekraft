@@ -69,7 +69,7 @@ func shuffleTestData() error {
 	var events []models.Event
 
 	// Generate events for the current week (Monday to Sunday)
-	now := time.Now()
+	now := time.Now().In(handlers.OsloLoc)
 	monday := getStartOfWeek(now)
 
 	// Generate 5-12 events per day with randomization
@@ -215,4 +215,148 @@ func getStartOfWeek(t time.Time) time.Time {
 	}
 	monday := t.AddDate(0, 0, -int(weekday)+1)
 	return time.Date(monday.Year(), monday.Month(), monday.Day(), 0, 0, 0, 0, monday.Location())
+}
+
+// ShuffleMembershipsHandler provides an endpoint to shuffle membership data
+func ShuffleMembershipsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := shuffleMembershipData()
+	if err != nil {
+		log.Printf("Error shuffling membership data: %v", err)
+		http.Error(w, "Failed to shuffle membership data", http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]interface{}{
+		"success": true,
+		"message": "Membership data successfully shuffled!",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// ShuffleUserKlippekortHandler provides an endpoint to shuffle user klippekort
+func ShuffleUserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := shuffleUserKlippekortData()
+	if err != nil {
+		log.Printf("Error shuffling user klippekort: %v", err)
+		http.Error(w, "Failed to shuffle user klippekort", http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]interface{}{
+		"success": true,
+		"message": "User klippekort successfully shuffled!",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// ShuffleAllTestDataHandler provides an endpoint to shuffle all test data
+func ShuffleAllTestDataHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Shuffle events
+	err := shuffleTestData()
+	if err != nil {
+		log.Printf("Error shuffling test data: %v", err)
+		http.Error(w, "Failed to shuffle test data", http.StatusInternalServerError)
+		return
+	}
+
+	// Shuffle memberships
+	err = shuffleMembershipData()
+	if err != nil {
+		log.Printf("Error shuffling membership data: %v", err)
+		// Continue even if this fails
+	}
+
+	// Shuffle user klippekort
+	err = shuffleUserKlippekortData()
+	if err != nil {
+		log.Printf("Error shuffling user klippekort: %v", err)
+		// Continue even if this fails
+	}
+
+	response := map[string]interface{}{
+		"success": true,
+		"message": "All test data successfully shuffled!",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// shuffleMembershipData shuffles membership names and prices
+func shuffleMembershipData() error {
+	membershipNames := []string{
+		"Basis", "Standard", "Premium", "VIP", "Student", "Senior", 
+		"Familie", "Duo", "Unlimited", "Flex", "Morning", "Evening",
+		"Weekend", "Prøve", "Høst Special", "Vinter Deal", "Sommer Pass",
+	}
+
+	descriptions := []string{
+		"Perfekt for nybegynnere", "Vårt mest populære tilbud", "All-inclusive pakke",
+		"Eksklusive fordeler", "Rabatt for studenter", "Senior rabatt",
+		"For hele familien", "For to personer", "Ubegrenset tilgang",
+		"Fleksibel løsning", "Morgen-trening", "Kveldstrening",
+		"Kun helger", "Prøv oss først", "Spesialtilbud", "Vinter tilbud", "Sommer pakke",
+	}
+
+	// Update existing memberships with random names and prices
+	query := `UPDATE memberships SET 
+		name = ?, 
+		description = ?, 
+		price = ? 
+		WHERE id = ?`
+
+	for i := 1; i <= 10; i++ { // Assume we have 10 memberships
+		name := membershipNames[rand.Intn(len(membershipNames))]
+		description := descriptions[rand.Intn(len(descriptions))]
+		// Random price between 300-1500 kr (30000-150000 øre)
+		price := 30000 + rand.Intn(120000)
+
+		_, err := DB.Conn.Exec(query, name, description, price, i)
+		if err != nil {
+			log.Printf("Error updating membership %d: %v", i, err)
+		}
+	}
+
+	log.Println("Successfully shuffled membership data")
+	return nil
+}
+
+// shuffleUserKlippekortData shuffles user's klippekort remaining amounts
+func shuffleUserKlippekortData() error {
+	// Random remaining klipp between 0 and total_klipp
+	userKlippekort, err := DB.GetUserKlippekort(1)
+	if err != nil {
+		return err
+	}
+
+	for _, klipp := range userKlippekort {
+		newRemaining := rand.Intn(klipp.TotalKlipp + 1)
+		_, err := DB.Conn.Exec(`UPDATE user_klippekort SET remaining_klipp = ? WHERE id = ?`, 
+			newRemaining, klipp.UserKlippekort.ID)
+		if err != nil {
+			log.Printf("Error updating user klippekort %d: %v", klipp.UserKlippekort.ID, err)
+		}
+	}
+
+	log.Println("Successfully shuffled user klippekort data")
+	return nil
 }
