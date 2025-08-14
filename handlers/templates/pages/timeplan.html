@@ -99,6 +99,78 @@
         padding: 1rem;
     }
     
+    /* Week navigation and filters */
+    .week-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .filters {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .filter-group label {
+        font-size: 0.875rem;
+        color: #666;
+        font-weight: 500;
+    }
+    
+    .filter-group select {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .week-navigation {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .week-nav-btn {
+        background: #007cba;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: background 0.2s;
+    }
+    
+    .week-nav-btn:hover:not(:disabled) {
+        background: #005a87;
+    }
+    
+    .week-nav-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    
+    .week-input {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        width: 80px;
+        text-align: center;
+    }
+    
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -122,6 +194,17 @@
         .day-column {
             min-height: auto;
         }
+        .week-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .filters {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .week-navigation {
+            justify-content: center;
+        }
     }
 </style>
 
@@ -131,7 +214,37 @@
     <h1 class="page-title">Timeplan</h1>
     
     <div class="module">
-        <h2 class="module-title">Denne uka</h2>
+        <h2 class="module-title">{{.WeekTitle}}</h2>
+        
+        <div class="week-controls">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="teacher-filter">Lærer:</label>
+                    <select id="teacher-filter" onchange="applyFilters()">
+                        <option value="">Alle lærere</option>
+                        {{range .Teachers}}
+                        <option value="{{.}}" {{if eq . $.SelectedTeacher}}selected{{end}}>{{.}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="class-filter">Klasse:</label>
+                    <select id="class-filter" onchange="applyFilters()">
+                        <option value="">Alle klasser</option>
+                        {{range .ClassTypes}}
+                        <option value="{{.}}" {{if eq . $.SelectedClass}}selected{{end}}>{{.}}</option>
+                        {{end}}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="week-navigation">
+                <button class="week-nav-btn" onclick="navigateWeek(-1)" {{if not .CanGoBack}}disabled{{end}}>&lt;</button>
+                <input type="number" class="week-input" id="week-input" value="{{.WeekNumber}}" onchange="jumpToWeek()" min="{{.WeekNumber}}">
+                <button class="week-nav-btn" onclick="navigateWeek(1)">&gt;</button>
+            </div>
+        </div>
+        
         <div class="week-grid">
             {{range $index, $day := .WeekDays}}
             {{$date := index $.WeekDates $index}}
@@ -184,5 +297,77 @@
         // TODO: Implement class signup functionality
         alert('Påmelding for klasse ' + classId + ' - kommer snart!');
     }
+    
+    function navigateWeek(direction) {
+        const currentWeekOffset = {{.WeekOffset}};
+        const newWeekOffset = currentWeekOffset + direction;
+        
+        // Prevent going to past weeks
+        if (newWeekOffset < 0) {
+            return;
+        }
+        
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('week', newWeekOffset);
+        window.location.href = currentUrl.toString();
+    }
+    
+    function jumpToWeek() {
+        const weekInput = document.getElementById('week-input');
+        const targetWeek = parseInt(weekInput.value);
+        const currentWeekNumber = {{.WeekNumber}};
+        
+        // Prevent jumping to past weeks
+        if (targetWeek < currentWeekNumber && {{.WeekOffset}} === 0) {
+            weekInput.value = currentWeekNumber;
+            return;
+        }
+        
+        // Calculate week offset based on target week
+        const weekOffset = targetWeek - currentWeekNumber + {{.WeekOffset}};
+        
+        if (weekOffset < 0) {
+            weekInput.value = currentWeekNumber;
+            return;
+        }
+        
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('week', weekOffset);
+        window.location.href = currentUrl.toString();
+    }
+    
+    function applyFilters() {
+        const teacherFilter = document.getElementById('teacher-filter').value;
+        const classFilter = document.getElementById('class-filter').value;
+        
+        const currentUrl = new URL(window.location);
+        
+        if (teacherFilter) {
+            currentUrl.searchParams.set('teacher', teacherFilter);
+        } else {
+            currentUrl.searchParams.delete('teacher');
+        }
+        
+        if (classFilter) {
+            currentUrl.searchParams.set('class', classFilter);
+        } else {
+            currentUrl.searchParams.delete('class');
+        }
+        
+        window.location.href = currentUrl.toString();
+    }
+    
+    // Update week input minimum based on current week
+    document.addEventListener('DOMContentLoaded', function() {
+        const weekInput = document.getElementById('week-input');
+        const currentWeekNumber = {{.WeekNumber}};
+        const weekOffset = {{.WeekOffset}};
+        
+        if (weekOffset === 0) {
+            weekInput.min = currentWeekNumber;
+        } else {
+            weekInput.min = currentWeekNumber;
+        }
+    });
 </script>
 {{end}}
