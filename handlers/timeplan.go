@@ -70,9 +70,21 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		weekEvents = filteredEvents
 	}
 
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
+	loc := GetLocalization()
+
 	// Group events by day
 	eventsByDay := make(map[string][]models.Event)
-	weekdays := []string{"Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag", "Søndag"}
+	weekdays := []string{
+		loc.T(lang, "timeplan.monday"),
+		loc.T(lang, "timeplan.tuesday"),
+		loc.T(lang, "timeplan.wednesday"),
+		loc.T(lang, "timeplan.thursday"),
+		loc.T(lang, "timeplan.friday"),
+		loc.T(lang, "timeplan.saturday"),
+		loc.T(lang, "timeplan.sunday"),
+	}
 	weekDates := make([]time.Time, 7)
 
 	for i := 0; i < 7; i++ {
@@ -94,11 +106,11 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	_, targetWeek := targetMonday.ISOWeek()
 	
 	if weekOffset == 0 {
-		weekTitle = "Denne uka"
+		weekTitle = loc.T(lang, "timeplan.this_week")
 	} else if weekOffset == 1 {
-		weekTitle = "Uka som kommer"
+		weekTitle = loc.T(lang, "timeplan.next_week")
 	} else {
-		weekTitle = "Uke " + strconv.Itoa(targetWeek)
+		weekTitle = loc.T(lang, "timeplan.week") + " " + strconv.Itoa(targetWeek)
 	}
 
 	// Get distinct teachers and class types for filters
@@ -111,9 +123,6 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		classTypes = []string{} // Continue with empty list if error
 	}
-
-	// Get language from cookies/request (using new system)
-	lang := GetLanguageFromRequest(r)
 
 	data := map[string]interface{}{
 		"Title":        "Timeplan",

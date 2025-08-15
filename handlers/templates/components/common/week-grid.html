@@ -1,0 +1,28 @@
+{{define "week_grid"}}
+<div class="week-grid">
+    {{range $index, $day := .WeekDays}}
+    {{$date := index $.WeekDates $index}}
+    {{$dateKey := $date.Format "2006-01-02"}}
+    {{$events := index $.EventsByDay $dateKey}}
+    <div class="day-column {{if lt $dateKey $.Today}}past{{end}}">
+        <div class="day-header">
+            <div class="day-name">{{$day}}</div>
+            <div class="day-date">{{formatDateShort $date}}</div>
+        </div>
+        {{if lt $dateKey $.Today}}
+            <div class="day-content">{{t $.Lang "timeplan.finished"}}</div>
+        {{else}}
+            <div class="day-events">
+                {{if $events}}
+                    {{range $events}}
+                    {{template "event_card" .}}
+                    {{end}}
+                {{else}}
+                    <div class="no-events">{{t $.Lang "timeplan.no_classes"}}</div>
+                {{end}}
+            </div>
+        {{end}}
+    </div>
+    {{end}}
+</div>
+{{end}}

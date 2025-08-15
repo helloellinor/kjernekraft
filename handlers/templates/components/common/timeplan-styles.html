@@ -1,0 +1,230 @@
+{{define "timeplan_styles"}}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+    }
+    .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .module {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-top: 2rem;
+    }
+    .module-title {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+        font-weight: 600;
+        border-bottom: 2px solid #007cba;
+        padding-bottom: 0.5rem;
+    }
+    .week-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1rem;
+        min-width: 0; /* Allow grid items to shrink below their content size */
+    }
+    .day-column {
+        min-height: 300px;
+        min-width: 0; /* Allow columns to shrink */
+        overflow: hidden; /* Prevent content from breaking out */
+    }
+    .day-header {
+        text-align: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    .day-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+    .day-date {
+        font-size: 0.875rem;
+        color: #666;
+    }
+    .day-column.past {
+        opacity: 0.5;
+    }
+    .day-column.past .day-content {
+        background-color: #f0f0f0;
+        border-radius: 4px;
+        padding: 1rem;
+        text-align: center;
+        color: #999;
+        font-style: italic;
+    }
+    .day-events {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+        overflow: hidden;
+        min-width: 0; /* Allow flex container to shrink */
+    }
+    
+    .event-wrapper.event-started {
+        opacity: 0.5;
+        filter: grayscale(50%);
+    }
+    
+    .event-wrapper.event-started .event-card {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+    
+    .event-wrapper.event-started .event-card:hover {
+        transform: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .no-events {
+        text-align: center;
+        color: #999;
+        font-style: italic;
+        padding: 1rem;
+    }
+    
+    /* Week navigation and filters */
+    .week-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .filters {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .filter-group label {
+        font-size: 0.875rem;
+        color: #666;
+        font-weight: 500;
+    }
+    
+    .filter-group select {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .week-navigation {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .week-nav-btn {
+        background: #007cba;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: background 0.2s;
+    }
+    
+    .week-nav-btn:hover:not(:disabled) {
+        background: #005a87;
+    }
+    
+    .week-nav-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    
+    .week-input {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        width: 80px;
+        text-align: center;
+        -moz-appearance: textfield; /* Hide increment/decrement buttons in Firefox */
+    }
+    
+    /* Hide increment/decrement buttons in webkit browsers */
+    .week-input::-webkit-outer-spin-button,
+    .week-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 1024px) {
+        .week-grid {
+            grid-template-columns: repeat(5, 1fr); /* Show 5 columns on tablet */
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .main-content {
+            padding: 1rem;
+        }
+        .week-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        .day-column {
+            min-height: auto;
+        }
+        .week-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .filters {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .week-navigation {
+            justify-content: center;
+        }
+    }
+    
+    @media (max-width: 600px) {
+        .week-grid {
+            grid-template-columns: 1fr; /* Force single column on very small screens */
+        }
+    }
+</style>
+{{end}}
