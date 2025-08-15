@@ -286,7 +286,7 @@
     </p>
     {{end}}
     
-    <div class="selector-container">
+    <div class="selector-container" id="membership-selector">
         <form class="question-form" 
               action="/medlemskap/recommendations" 
               method="post">
@@ -616,9 +616,14 @@
 
     // Event listeners for form changes
     document.addEventListener('DOMContentLoaded', function() {
-        // Scroll to current membership section if hash is present
+        // Scroll to specific sections if hash is present
         if (window.location.hash === '#current-membership') {
             const element = document.getElementById('current-membership');
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        } else if (window.location.hash === '#membership-selector') {
+            const element = document.getElementById('membership-selector');
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth' });
             }

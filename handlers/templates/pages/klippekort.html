@@ -281,7 +281,7 @@
     <div class="packages-section" id="packages-gruppetimer-sal">
         <h2 class="step-title">Steg 2: Velg antall klipp for Gruppetimer Sal</h2>
         <div class="packages-grid">
-            <div class="package-card" data-package="gruppetimer-5" onclick="selectPackage('gruppetimer-sal', 5, 1200, 'Perfekt for å prøve ut')">
+            <div class="package-card" data-package="gruppetimer-5" data-package-id="1" onclick="selectPackage('gruppetimer-sal', 5, 1200, 'Perfekt for å prøve ut')">>
                 <h3 class="package-name">5 klipp</h3>
                 <p class="package-description">Perfekt for å prøve ut</p>
                 <div class="package-details">
@@ -291,7 +291,7 @@
                 </div>
             </div>
             
-            <div class="package-card popular" data-package="gruppetimer-10" onclick="selectPackage('gruppetimer-sal', 10, 2200, 'Mest populære pakke')">
+            <div class="package-card popular" data-package="gruppetimer-10" data-package-id="2" onclick="selectPackage('gruppetimer-sal', 10, 2200, 'Mest populære pakke')">>
                 <div class="popular-badge">Mest populær</div>
                 <h3 class="package-name">10 klipp</h3>
                 <p class="package-description">Mest populære pakke</p>
@@ -303,7 +303,7 @@
                 </div>
             </div>
             
-            <div class="package-card" data-package="gruppetimer-20" onclick="selectPackage('gruppetimer-sal', 20, 4000, 'Beste verdi')">
+            <div class="package-card" data-package="gruppetimer-20" data-package-id="3" onclick="selectPackage('gruppetimer-sal', 20, 4000, 'Beste verdi')">>
                 <h3 class="package-name">20 klipp</h3>
                 <p class="package-description">Beste verdi</p>
                 <div class="package-details">
@@ -320,7 +320,7 @@
     <div class="packages-section" id="packages-reformer-apparatus">
         <h2 class="step-title">Steg 2: Velg antall klipp for Reformer/Apparatus</h2>
         <div class="packages-grid">
-            <div class="package-card" data-package="reformer-5" onclick="selectPackage('reformer-apparatus', 5, 1500, 'Perfekt for å prøve ut')">
+            <div class="package-card" data-package="reformer-5" data-package-id="4" onclick="selectPackage('reformer-apparatus', 5, 1500, 'Perfekt for å prøve ut')">>
                 <h3 class="package-name">5 klipp</h3>
                 <p class="package-description">Perfekt for å prøve ut</p>
                 <div class="package-details">
@@ -330,7 +330,7 @@
                 </div>
             </div>
             
-            <div class="package-card popular" data-package="reformer-10" onclick="selectPackage('reformer-apparatus', 10, 2800, 'Mest populære pakke')">
+            <div class="package-card popular" data-package="reformer-10" data-package-id="5" onclick="selectPackage('reformer-apparatus', 10, 2800, 'Mest populære pakke')">>
                 <div class="popular-badge">Mest populær</div>
                 <h3 class="package-name">10 klipp</h3>
                 <p class="package-description">Mest populære pakke</p>
@@ -342,7 +342,7 @@
                 </div>
             </div>
             
-            <div class="package-card" data-package="reformer-20" onclick="selectPackage('reformer-apparatus', 20, 5200, 'Beste verdi')">
+            <div class="package-card" data-package="reformer-20" data-package-id="999" onclick="selectPackage('reformer-apparatus', 20, 5200, 'Beste verdi')">>
                 <h3 class="package-name">20 klipp</h3>
                 <p class="package-description">Beste verdi</p>
                 <div class="package-details">
@@ -592,8 +592,46 @@
             return;
         }
         
-        // TODO: Implement actual purchase functionality
-        alert('Kjøp av ' + selectedPackage.clips + ' klipp for ' + selectedPackage.price + ' kr - kommer snart!');
+        // Find the package ID based on selected package details
+        let packageId = null;
+        document.querySelectorAll('.package-card').forEach(card => {
+            if (card.classList.contains('selected')) {
+                packageId = card.getAttribute('data-package-id');
+            }
+        });
+        
+        if (!packageId) {
+            alert('Kunne ikke finne pakke-ID');
+            return;
+        }
+        
+        if (!confirm('Er du sikker på at du vil kjøpe ' + selectedPackage.clips + ' klipp for ' + selectedPackage.price + ' kr?')) {
+            return;
+        }
+        
+        // Call purchase API
+        fetch('/api/klippekort/purchase', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'package_id=' + encodeURIComponent(packageId)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Kunne ikke kjøpe klippekort');
+            }
+        })
+        .then(data => {
+            alert('Klippekort kjøpt! ' + selectedPackage.clips + ' klipp for ' + selectedPackage.price + ' kr');
+            window.location.href = '/elev/hjem'; // Redirect to dashboard
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved kjøp av klippekort: ' + error.message);
+        });
     }
 </script>
 {{end}}
