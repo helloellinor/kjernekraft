@@ -22,10 +22,17 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)
 			return
 		}
+
+		// Get language from request (default to Norwegian bokmål)
+		lang := r.URL.Query().Get("lang")
+		if lang == "" {
+			lang = "nb"
+		}
 		
 		data := map[string]interface{}{
 			"Title":       "Innlogging",
 			"CurrentPage": "innlogging",
+			"Lang":        lang,
 		}
 
 		// Use the new template system

@@ -112,6 +112,12 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		classTypes = []string{} // Continue with empty list if error
 	}
 
+	// Get language from request (default to Norwegian bokmål)
+	lang := r.URL.Query().Get("lang")
+	if lang == "" {
+		lang = "nb"
+	}
+
 	data := map[string]interface{}{
 		"Title":        "Timeplan",
 		"WeekTitle":    weekTitle,
@@ -131,6 +137,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		"CurrentPage":  "timeplan",
 		"UserName":     user.Name,
 		"User":         user,
+		"Lang":         lang,
 	}
 
 	// Use the new template system
