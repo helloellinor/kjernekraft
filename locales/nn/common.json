@@ -14,6 +14,13 @@
     "payments": "Betalingar",
     "my_profile": "Min profil"
   },
+  "events": {
+    "sign_up": "Meld på",
+    "join_waitlist": "Stå på venteliste", 
+    "spots_remaining": "plassar igjen",
+    "spots_remaining_singular": "plass igjen",
+    "waitlist": "Venteliste"
+  },
   "dashboard": {
     "welcome_user": "Velkommen, {{.UserName}}!",
     "signed_up": "Påmeldt",
