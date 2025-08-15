@@ -3,8 +3,11 @@ package handlers
 import (
 	"html/template"
 	"kjernekraft/models"
+	"log"
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -165,37 +168,7 @@ func ChargesHandler(w http.ResponseWriter, r *http.Request) {
 		HasCharges: len(charges) > 0,
 	}
 
-	tmpl := `{{if .HasCharges}}
-<div class="charges-list">
-    {{range .Charges}}
-    <div class="charge-item">
-        <div class="charge-info">
-            <div class="charge-description">{{.Description}}</div>
-            <div class="charge-date">{{.ChargeDate.Format "2. January 2006"}}</div>
-            {{if and .PaymentMethodBrand .PaymentMethodLast4}}
-            <div class="charge-payment-method">{{.PaymentMethodBrand | title}} •••• {{.PaymentMethodLast4}}</div>
-            {{else}}
-            <div class="charge-payment-method">Betalingsmetode fjernet</div>
-            {{end}}
-        </div>
-        <div class="charge-amount">{{printf "%.0f" (divf .Amount 100)}} kr</div>
-        <div class="charge-status {{.Status}}">
-            {{if eq .Status "succeeded"}}Vellykket
-            {{else if eq .Status "failed"}}Mislykket
-            {{else if eq .Status "pending"}}Venter
-            {{else}}{{.Status}}
-            {{end}}
-        </div>
-    </div>
-    {{end}}
-</div>
-{{else}}
-<div class="no-data">
-    Ingen belastninger funnet.
-</div>
-{{end}}`
-
-	// Parse template with custom functions
+	// Load and parse the component template directly
 	tmplFuncs := template.FuncMap{
 		"divf": func(a, b interface{}) float64 {
 			var aFloat, bFloat float64
@@ -227,19 +200,22 @@ func ChargesHandler(w http.ResponseWriter, r *http.Request) {
 			if len(s) == 0 {
 				return s
 			}
-			return string(s[0]-32) + s[1:]
+			return strings.ToUpper(s[:1]) + s[1:]
 		},
 	}
 
-	t, err := template.New("charges").Funcs(tmplFuncs).Parse(tmpl)
+	templatePath := filepath.Join("handlers", "templates", "components", "charges.html")
+	t, err := template.New("charges_component").Funcs(tmplFuncs).ParseFiles(templatePath)
 	if err != nil {
 		http.Error(w, "Template error", http.StatusInternalServerError)
+		log.Printf("Error parsing charges template: %v", err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	if err := t.Execute(w, data); err != nil {
+	if err := t.ExecuteTemplate(w, "charges_component", data); err != nil {
 		http.Error(w, "Template execution error", http.StatusInternalServerError)
+		log.Printf("Error executing charges template: %v", err)
 	}
 }
 

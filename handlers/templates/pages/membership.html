@@ -37,13 +37,36 @@
     /* Current membership section */
     .current-membership-section {
         margin-bottom: 3rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+    
+    .membership-module {
         padding: 2rem;
         background: white;
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     
-    .current-membership-section .section-title {
+    .membership-module .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+        text-align: center;
+        border-bottom: 2px solid #007cba;
+        padding-bottom: 0.5rem;
+    }
+    
+    .charges-module {
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .charges-module .section-title {
         font-size: 1.5rem;
         margin-bottom: 1.5rem;
         color: #333;
@@ -57,22 +80,6 @@
         color: #666;
         font-style: italic;
         padding: 2rem;
-    }
-    
-    /* Charges section in membership page */
-    .charges-section {
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 1px solid #e0e0e0;
-    }
-    
-    .charges-title {
-        font-size: 1.25rem;
-        margin-bottom: 1rem;
-        color: #333;
-        text-align: center;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
     }
     .selector-container {
         display: grid;
@@ -237,6 +244,11 @@
             grid-template-columns: 1fr;
             gap: 2rem;
         }
+        
+        .current-membership-section {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
     }
 </style>
 
@@ -246,15 +258,16 @@
     {{if .HasCurrentMembership}}
     <!-- Current Membership Section -->
     <div class="current-membership-section" id="current-membership">
-        <h2 class="section-title">Medlemskapet mitt</h2>
-        <div id="current-membership-container">
-            <!-- This will be loaded via AJAX -->
-            <div class="loading-placeholder">Laster medlemskap...</div>
+        <div class="membership-module">
+            <h2 class="section-title">Medlemskapet mitt</h2>
+            <div id="current-membership-container">
+                <!-- This will be loaded via AJAX -->
+                <div class="loading-placeholder">Laster medlemskap...</div>
+            </div>
         </div>
         
-        <!-- Charges/Billing History -->
-        <div class="charges-section">
-            <h3 class="charges-title">Belastninger</h3>
+        <div class="charges-module">
+            <h2 class="section-title">Belastninger</h2>
             <div id="membership-charges-container">
                 <div class="loading-placeholder">Laster belastninger...</div>
             </div>
@@ -402,24 +415,27 @@
 
         // Disable høsttilbud if "Annen dato" is selected
         const autumnOfferOption = document.querySelector('input[value="autumn_special"]');
-        const autumnOfferLabel = autumnOfferOption.closest('.option-label');
         
-        if (startTime === 'custom') {
-            autumnOfferOption.disabled = true;
-            autumnOfferLabel.style.opacity = '0.5';
-            autumnOfferLabel.style.cursor = 'not-allowed';
-            autumnOfferLabel.style.pointerEvents = 'none';
-            // If høsttilbud was selected, switch to 12 months
-            if (commitment === 'autumn_special') {
-                currentSelection.commitment = '12';
-                document.querySelector('input[value="12"]').checked = true;
-                autumnOfferOption.checked = false;
+        if (autumnOfferOption) {
+            const autumnOfferLabel = autumnOfferOption.closest('.option-label');
+            
+            if (startTime === 'custom') {
+                autumnOfferOption.disabled = true;
+                autumnOfferLabel.style.opacity = '0.5';
+                autumnOfferLabel.style.cursor = 'not-allowed';
+                autumnOfferLabel.style.pointerEvents = 'none';
+                // If høsttilbud was selected, switch to 12 months
+                if (commitment === 'autumn_special') {
+                    currentSelection.commitment = '12';
+                    document.querySelector('input[value="12"]').checked = true;
+                    autumnOfferOption.checked = false;
+                }
+            } else {
+                autumnOfferOption.disabled = false;
+                autumnOfferLabel.style.opacity = '1';
+                autumnOfferLabel.style.cursor = 'pointer';
+                autumnOfferLabel.style.pointerEvents = 'auto';
             }
-        } else {
-            autumnOfferOption.disabled = false;
-            autumnOfferLabel.style.opacity = '1';
-            autumnOfferLabel.style.cursor = 'pointer';
-            autumnOfferLabel.style.pointerEvents = 'auto';
         }
 
         let priceKey = 'no_binding';
