@@ -20,6 +20,9 @@ func main() {
 	// Keep backward compatibility with OsloLoc
 	handlers.OsloLoc = settings.GetLocation()
 
+	// Initialize session store
+	handlers.InitializeSessionStore()
+
 	dbConn, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -50,6 +53,7 @@ func main() {
 	r.Get("/terms", handlers.TermsHandler)
 	r.Get("/innlogging", handlers.InnloggingHandler)
 	r.Post("/innlogging", handlers.InnloggingHandler)
+	r.Get("/logout", handlers.LogoutHandler)
 
 	r.Post("/users", handlers.AddUserHandler)
 
@@ -77,6 +81,7 @@ func main() {
 	r.Post("/api/shuffle-memberships", handlers.ShuffleMembershipsHandler)
 	r.Post("/api/shuffle-user-klippekort", handlers.ShuffleUserKlippekortHandler)
 	r.Post("/api/shuffle-all-test-data", handlers.ShuffleAllTestDataHandler)
+	r.Post("/api/setup-test-data", handlers.SetupTestDataHandler)
 
 	// Membership and klippekort routes (for compatibility, redirects to elev routes)
 	r.Get("/klippekort", func(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +98,11 @@ func main() {
 	// Dashboard component routes (HTMX endpoints)
 	r.Get("/api/user/klippekort", handlers.UserKlippekortHandler)
 	r.Get("/api/user/membership", handlers.UserMembershipHandler)
+
+	// Membership management API routes
+	r.Post("/api/membership/freeze", handlers.FreezeMembershipHandler)
+	r.Post("/api/membership/cancel-freeze", handlers.CancelFreezeRequestHandler)
+	r.Post("/api/membership/unfreeze", handlers.UnfreezeMembershipHandler)
 
 	// Elev dashboard routes
 	r.Get("/elev", func(w http.ResponseWriter, r *http.Request) {

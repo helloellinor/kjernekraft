@@ -6,23 +6,18 @@ import (
 	"kjernekraft/models"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 // UserKlippekortHandler provides HTMX endpoint for user's klippekort display
 func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
-	// For now, use a test user ID. In a real app, this would come from session/auth
-	userIDStr := r.URL.Query().Get("user_id")
-	if userIDStr == "" {
-		userIDStr = "1" // Default test user
-	}
-
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// Get user from session
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
+	userID := int64(user.ID)
 	klippekort, err := DB.GetUserKlippekort(userID)
 	if err != nil {
 		http.Error(w, "Could not fetch user klippekort", http.StatusInternalServerError)
@@ -259,18 +254,14 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 
 // UserMembershipHandler provides HTMX endpoint for user's membership display
 func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
-	// For now, use a test user ID. In a real app, this would come from session/auth
-	userIDStr := r.URL.Query().Get("user_id")
-	if userIDStr == "" {
-		userIDStr = "1" // Default test user
-	}
-
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// Get user from session
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
+	userID := int64(user.ID)
 	membership, err := DB.GetUserMembership(userID)
 	if err != nil {
 		http.Error(w, "Could not fetch user membership", http.StatusInternalServerError)
@@ -590,28 +581,67 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 <script>
 function freezeMembership() {
     if (confirm('Er du sikker på at du vil fryse medlemskapet?')) {
-        // TODO: Send request to freeze membership
-        // For now, simulate the change
-        location.reload(); // This would be replaced with actual AJAX call
-        alert('Forespørsel om frysing er sendt til admin!');
+        fetch('/api/membership/freeze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Feil ved frysing av medlemskap');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved frysing av medlemskap');
+        });
     }
 }
 
 function cancelFreezeRequest() {
     if (confirm('Er du sikker på at du vil trekke tilbake forespørselen om frysing?')) {
-        // TODO: Cancel freeze request
-        // For now, simulate the change
-        location.reload(); // This would be replaced with actual AJAX call
-        alert('Forespørsel om frysing er trukket tilbake. Medlemskapet er aktivt igjen.');
+        fetch('/api/membership/cancel-freeze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Feil ved trekking av forespørsel');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved trekking av forespørsel');
+        });
     }
 }
 
 function unfreezeMembership() {
     if (confirm('Er du sikker på at du vil smelte/reaktivere medlemskapet?')) {
-        // TODO: Unfreeze membership
-        // For now, simulate the change
-        location.reload(); // This would be replaced with actual AJAX call
-        alert('Medlemskapet er reaktivert!');
+        fetch('/api/membership/unfreeze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Feil ved reaktivering av medlemskap');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved reaktivering av medlemskap');
+        });
     }
 }
 

@@ -257,10 +257,12 @@
 
     async function loadMembership() {
         try {
-            const response = await fetch('/api/user/membership?user_id=1');
+            const response = await fetch('/api/user/membership');
             if (response.ok) {
                 const html = await response.text();
                 document.getElementById('membership-container').innerHTML = html;
+            } else {
+                document.getElementById('membership-container').innerHTML = '<div class="error">Kunne ikke laste medlemskap</div>';
             }
         } catch (error) {
             console.error('Error loading membership:', error);
@@ -270,10 +272,12 @@
 
     async function loadKlippekort() {
         try {
-            const response = await fetch('/api/user/klippekort?user_id=1');
+            const response = await fetch('/api/user/klippekort');
             if (response.ok) {
                 const html = await response.text();
                 document.getElementById('klippekort-container').innerHTML = html;
+            } else {
+                document.getElementById('klippekort-container').innerHTML = '<div class="error">Kunne ikke laste klippekort</div>';
             }
         } catch (error) {
             console.error('Error loading klippekort:', error);

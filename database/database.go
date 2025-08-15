@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"kjernekraft/models"
 	"log"
+	"strings"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -116,6 +118,7 @@ func Migrate(db *sql.DB) error {
 		renewal_date DATETIME NOT NULL,
 		end_date DATETIME,
 		binding_end DATETIME,
+		last_billed DATETIME DEFAULT CURRENT_TIMESTAMP,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id),
 		FOREIGN KEY (membership_id) REFERENCES memberships(id)
@@ -183,7 +186,31 @@ func Migrate(db *sql.DB) error {
 	}
 
 	log.Println("Migrering fullført: alle tabeller oppretta.")
+	
+	// Check if last_billed column exists and add it if missing
+	var columnExists bool
+	err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('user_memberships') WHERE name='last_billed'").Scan(&columnExists)
+	if err == nil && !columnExists {
+		_, err = db.Exec("ALTER TABLE user_memberships ADD COLUMN last_billed DATETIME")
+		if err != nil {
+			return err
+		}
+		
+		// Update existing rows with a default value
+		_, err = db.Exec("UPDATE user_memberships SET last_billed = CURRENT_TIMESTAMP WHERE last_billed IS NULL")
+		if err != nil {
+			return err
+		}
+		
+		log.Println("Added last_billed column to user_memberships table")
+	}
+	
 	return nil
+}
+
+// isColumnExistsError checks if the error is due to column already existing
+func isColumnExistsError(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "duplicate column name")
 }
 
 // AddRole adds a new role to the roles table
@@ -555,11 +582,11 @@ func (db *Database) GetAllMemberships() ([]models.Membership, error) {
 // GetUserMembership fetches a user's current membership
 func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetails, error) {
 	query := `
-		SELECT um.id, um.user_id, um.membership_id, um.status, um.start_date, um.renewal_date, um.end_date, um.binding_end, um.created_at,
+		SELECT um.id, um.user_id, um.membership_id, um.status, um.start_date, um.renewal_date, um.end_date, um.binding_end, um.last_billed, um.created_at,
 		       m.name, m.price, m.commitment_months, m.is_student_senior, m.is_special_offer, m.description, m.features, m.active
 		FROM user_memberships um
 		JOIN memberships m ON um.membership_id = m.id
-		WHERE um.user_id = ? AND um.status = 'active'
+		WHERE um.user_id = ? AND (um.status = 'active' OR um.status = 'paused' OR um.status = 'freeze_requested')
 		ORDER BY um.created_at DESC
 		LIMIT 1
 	`
@@ -568,7 +595,7 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 	err := db.Conn.QueryRow(query, userID).Scan(
 		&membership.UserMembership.ID, &membership.UserMembership.UserID, &membership.UserMembership.MembershipID,
 		&membership.UserMembership.Status, &membership.UserMembership.StartDate, &membership.UserMembership.RenewalDate,
-		&membership.UserMembership.EndDate, &membership.UserMembership.BindingEnd, &membership.UserMembership.CreatedAt,
+		&membership.UserMembership.EndDate, &membership.UserMembership.BindingEnd, &membership.UserMembership.LastBilled, &membership.UserMembership.CreatedAt,
 		&membership.Membership.Name, &membership.Membership.Price, &membership.Membership.CommitmentMonths,
 		&membership.Membership.IsStudentSenior, &membership.Membership.IsSpecialOffer, &membership.Membership.Description,
 		&membership.Membership.Features, &membership.Membership.Active,
@@ -582,6 +609,13 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 	}
 	
 	return &membership, nil
+}
+
+// UpdateMembershipStatus updates the status of a user's membership
+func (db *Database) UpdateMembershipStatus(userID int64, status string) error {
+	query := `UPDATE user_memberships SET status = ? WHERE user_id = ? AND (status = 'active' OR status = 'paused' OR status = 'freeze_requested')`
+	_, err := db.Conn.Exec(query, status, userID)
+	return err
 }
 
 // Klippekort-related database methods
@@ -638,4 +672,73 @@ func (db *Database) GetUserKlippekort(userID int64) ([]models.KlippekortWithDeta
 		klippekort = append(klippekort, k)
 	}
 	return klippekort, nil
+}
+
+// Authentication methods
+
+// AuthenticateUser verifies user credentials and returns user info if valid
+func (db *Database) AuthenticateUser(email, password string) (*models.User, error) {
+	var user models.User
+	var hashedPassword string
+	
+	query := `SELECT id, name, email, phone, address, postal_code, city, country, password, newsletter_subscription, terms_accepted
+	          FROM users WHERE email = ?`
+	
+	err := db.Conn.QueryRow(query, email).Scan(
+		&user.ID, &user.Name, &user.Email, &user.Phone, &user.Address,
+		&user.PostalCode, &user.City, &user.Country, &hashedPassword,
+		&user.NewsletterSubscription, &user.TermsAccepted,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("ugyldig e-post eller passord")
+		}
+		return nil, err
+	}
+	
+	// Verify password
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err != nil {
+		return nil, fmt.Errorf("ugyldig e-post eller passord")
+	}
+	
+	// Get user roles
+	roles, err := db.GetUserRoles(int64(user.ID))
+	if err != nil {
+		return nil, err
+	}
+	user.Roles = roles
+	
+	return &user, nil
+}
+
+// GetUserByID fetches a user by their ID
+func (db *Database) GetUserByID(userID int64) (*models.User, error) {
+	var user models.User
+	
+	query := `SELECT id, name, email, phone, address, postal_code, city, country, newsletter_subscription, terms_accepted
+	          FROM users WHERE id = ?`
+	
+	err := db.Conn.QueryRow(query, userID).Scan(
+		&user.ID, &user.Name, &user.Email, &user.Phone, &user.Address,
+		&user.PostalCode, &user.City, &user.Country,
+		&user.NewsletterSubscription, &user.TermsAccepted,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("bruker ikke funnet")
+		}
+		return nil, err
+	}
+	
+	// Get user roles
+	roles, err := db.GetUserRoles(userID)
+	if err != nil {
+		return nil, err
+	}
+	user.Roles = roles
+	
+	return &user, nil
 }
