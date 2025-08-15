@@ -13,11 +13,18 @@ func BetalingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get language from request (default to Norwegian bokmål)
+	lang := r.URL.Query().Get("lang")
+	if lang == "" {
+		lang = "nb"
+	}
+
 	data := map[string]interface{}{
 		"Title":       "Betaling",
 		"CurrentPage": "betaling",
 		"UserName":    user.Name,
 		"User":        user,
+		"Lang":        lang,
 	}
 
 	// Use the new template system

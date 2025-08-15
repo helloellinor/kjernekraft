@@ -36,6 +36,12 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Get language from request (default to Norwegian bokmål)
+	lang := r.URL.Query().Get("lang")
+	if lang == "" {
+		lang = "nb"
+	}
+
 	data := map[string]interface{}{
 		"Title":        "Elev Dashboard",
 		"TodaysEvents": upcomingEvents,
@@ -44,6 +50,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		"CurrentPage":  "hjem",
 		"UserName":     user.Name,
 		"User":         user,
+		"Lang":         lang,
 	}
 
 	// Use the new template system
