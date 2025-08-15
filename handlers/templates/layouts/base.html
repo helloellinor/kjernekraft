@@ -16,6 +16,7 @@
             font-weight: 600;
             border-bottom: 2px solid #007cba;
             padding-bottom: 0.5rem;
+            text-align: center;
         }
         
         /* Responsive styles */
@@ -25,6 +26,9 @@
             }
         }
     </style>
+    {{template "common_styles"}}
+    {{template "module_styles"}}
+    {{template "button_styles"}}
     {{if .CSS}}
     <style>{{.CSS}}</style>
     {{end}}
