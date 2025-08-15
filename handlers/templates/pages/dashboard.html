@@ -297,5 +297,82 @@
             }
         });
     });
+
+    // Membership management functions (global scope for HTMX-loaded content)
+    function freezeMembership() {
+        if (confirm('Er du sikker på at du vil fryse medlemskapet?')) {
+            fetch('/api/membership/freeze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Reload the membership component
+                    loadMembership();
+                } else {
+                    alert('Feil ved frysing av medlemskap');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Feil ved frysing av medlemskap');
+            });
+        }
+    }
+
+    function cancelFreezeRequest() {
+        if (confirm('Er du sikker på at du vil trekke tilbake forespørselen om frysing?')) {
+            fetch('/api/membership/cancel-freeze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Reload the membership component
+                    loadMembership();
+                } else {
+                    alert('Feil ved trekking av forespørsel');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Feil ved trekking av forespørsel');
+            });
+        }
+    }
+
+    function unfreezeMembership() {
+        if (confirm('Er du sikker på at du vil smelte/reaktivere medlemskapet?')) {
+            fetch('/api/membership/unfreeze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Reload the membership component
+                    loadMembership();
+                } else {
+                    alert('Feil ved reaktivering av medlemskap');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Feil ved reaktivering av medlemskap');
+            });
+        }
+    }
+
+    function cancelMembership() {
+        if (confirm('Er du sikker på at du vil si opp medlemskapet? Dette kan ikke angres.')) {
+            // TODO: Implement cancellation functionality
+            alert('Oppsigelse-funksjonalitet kommer snart!');
+        }
+    }
 </script>
 {{end}}
