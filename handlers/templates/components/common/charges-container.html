@@ -1,0 +1,19 @@
+{{define "charges_container"}}
+<div class="module">
+    <h2 class="module-title">{{t .Lang "charges.title"}}</h2>
+    
+    <div class="charges-filter">
+        <label for="charges-status-filter">{{t .Lang "payments.filter_by_status"}}:</label>
+        <select id="charges-status-filter" onchange="filterCharges(this.value)">
+            <option value="">{{t .Lang "payments.all_statuses"}}</option>
+            <option value="succeeded">{{t .Lang "charges.status.succeeded"}}</option>
+            <option value="pending">{{t .Lang "charges.status.pending"}}</option>
+            <option value="failed">{{t .Lang "charges.status.failed"}}</option>
+        </select>
+    </div>
+    
+    <div id="charges-container">
+        <div class="loading-placeholder">{{t .Lang "payments.loading_charges"}}</div>
+    </div>
+</div>
+{{end}}

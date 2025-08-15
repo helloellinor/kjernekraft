@@ -7,21 +7,21 @@
     <div class="event-spaces">
         {{if lt .CurrentEnrolment .Capacity}}
             {{if eq $remaining 1}}
-                1 {{t $.Lang "events.spots_remaining_singular"}}
+                1 plass igjen
             {{else}}
-                {{$remaining}} {{t $.Lang "events.spots_remaining"}}
+                {{$remaining}} plasser igjen
             {{end}}
         {{else}}
-            {{t $.Lang "events.waitlist"}}
+            Venteliste
         {{end}}
     </div>
     <div class="event-details">
         <button class="signup-button {{if ge .CurrentEnrolment .Capacity}}waitlist{{end}}" 
                 onclick="signupForClass({{.ID}}); event.stopPropagation();">
             {{if lt .CurrentEnrolment .Capacity}}
-                {{t $.Lang "events.sign_up"}}
+                Meld på
             {{else}}
-                {{t $.Lang "events.join_waitlist"}}
+                Venteliste
             {{end}}
         </button>
     </div>

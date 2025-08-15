@@ -54,6 +54,25 @@
     "spots_remaining_singular": "spot remaining",
     "waitlist": "Waitlist"
   },
+  "timeplan": {
+    "title": "Schedule",
+    "this_week": "This week",
+    "next_week": "Next week",
+    "week": "Week",
+    "teacher_filter": "Teacher:",
+    "class_filter": "Class:",
+    "all_teachers": "All teachers",
+    "all_classes": "All classes",
+    "no_classes": "No classes",
+    "finished": "Finished",
+    "monday": "Monday",
+    "tuesday": "Tuesday", 
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  },
   "dashboard": {
     "welcome_user": "Welcome, {{.UserName}}!",
     "signed_up": "Signed up",
@@ -92,6 +111,16 @@
       "failed": "Failed",
       "pending": "Pending"
     }
+  },
+  "payments": {
+    "title": "Payments",
+    "description": "Manage your payment methods and view payment history.",
+    "payment_methods": "Payment methods",
+    "add_payment_method": "Add payment method",
+    "loading_payment_methods": "Loading payment methods...",
+    "loading_charges": "Loading payment history...",
+    "filter_by_status": "Filter by status",
+    "all_statuses": "All statuses"
   },
   "membership": {
     "title": "Membership",

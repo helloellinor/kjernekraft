@@ -55,14 +55,14 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get template manager and render
 	tm := GetTemplateManager()
-	tmpl, exists := tm.GetTemplate("modules/klippekort")
+	tmpl, exists := tm.GetTemplate("modules/membership/klippekort")
 	if !exists {
 		http.Error(w, "Template not found", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	if err := tmpl.Execute(w, moduleData); err != nil {
+	if err := tmpl.ExecuteTemplate(w, "klippekort_module", moduleData); err != nil {
 		log.Printf("Error executing klippekort template: %v", err)
 		http.Error(w, "Template execution error", http.StatusInternalServerError)
 	}
@@ -117,14 +117,14 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get template manager and render
 	tm := GetTemplateManager()
-	tmpl, exists := tm.GetTemplate("modules/membership")
+	tmpl, exists := tm.GetTemplate("modules/membership/membership")
 	if !exists {
 		http.Error(w, "Template not found", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	if err := tmpl.Execute(w, moduleData); err != nil {
+	if err := tmpl.ExecuteTemplate(w, "membership_module", moduleData); err != nil {
 		log.Printf("Error executing membership template: %v", err)
 		http.Error(w, "Template execution error", http.StatusInternalServerError)
 	}
