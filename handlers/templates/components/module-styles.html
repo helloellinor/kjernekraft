@@ -1,0 +1,63 @@
+{{define "module_styles"}}
+<style>
+/* Standard Module Container */
+.module {
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 2px solid #e0e0e0;
+}
+
+.module.no-border {
+    border: none;
+}
+
+/* Module Title */
+.module-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 0.5rem;
+}
+
+/* Content Sections within Modules */
+.module-content {
+    margin-top: 1rem;
+}
+
+.module-section {
+    margin-bottom: 1.5rem;
+}
+
+.module-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Module Variants */
+.module.charges-module {
+    /* Specific styling for charges modules if needed */
+}
+
+.module.membership-module {
+    /* Specific styling for membership modules if needed */
+}
+
+.module.payment-module {
+    /* Specific styling for payment modules if needed */
+}
+
+/* Responsive Module Styles */
+@media (max-width: 768px) {
+    .module {
+        padding: 1.5rem;
+    }
+    
+    .module-title {
+        font-size: 1.3rem;
+    }
+}
+</style>
+{{end}}

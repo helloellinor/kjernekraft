@@ -1,0 +1,85 @@
+{{define "common_styles"}}
+<style>
+/* Common CSS Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Page Description */
+.page-description {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 3rem;
+    text-align: center;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 3rem;
+}
+
+/* Section Group Title */
+.section-group-title {
+    font-size: 1.8rem;
+    margin: 2rem auto 1.5rem auto;
+    max-width: 1200px;
+    padding: 0 2rem;
+    color: #333;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Loading Placeholder */
+.loading-placeholder {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 2rem;
+}
+
+/* Common Layout Patterns */
+.two-column-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.three-column-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+/* Responsive Grid */
+@media (max-width: 768px) {
+    .two-column-grid,
+    .three-column-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .main {
+        padding: 1rem;
+    }
+    
+    .section-group-title {
+        padding: 0 1rem;
+    }
+}
+</style>
+{{end}}

@@ -1,102 +1,17 @@
 {{define "content"}}
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f5f5f5;
-        color: #333;
-    }
-    .main {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    .page-title {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: #333;
-        text-align: center;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
-    }
-    .page-description {
-        font-size: 1.1rem;
-        color: #666;
-        margin-bottom: 3rem;
-        text-align: center;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: 3rem;
-    }
-    
-    .section-group-title {
-        font-size: 1.8rem;
-        margin: 2rem auto 1.5rem auto;
-        max-width: 1200px;
-        padding: 0 2rem;
-        color: #333;
-        font-weight: 600;
-        text-align: center;
-    }
-    
     /* Current membership section */
     .current-membership-section {
         margin-bottom: 3rem;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        align-items: start;
     }
     
-    .membership-module {
-        padding: 2rem;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .membership-module .section-title {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-        color: #333;
-        text-align: center;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
-    }
-    
-    .charges-module {
-        padding: 2rem;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .charges-module .section-title {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-        color: #333;
-        text-align: center;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
-    }
-    
-    .loading-placeholder {
-        text-align: center;
-        color: #666;
-        font-style: italic;
-        padding: 2rem;
-    }
     .selector-container {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 3rem;
         align-items: start;
     }
+    
     .question-form {
         background: white;
         border-radius: 12px;
@@ -208,26 +123,6 @@
         padding-top: 0.5rem;
         border-top: 1px solid #e0e0e0;
     }
-    .checkout-btn {
-        width: 100%;
-        background: #007cba;
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        margin-bottom: 1rem;
-    }
-    .checkout-btn:hover {
-        background: #005a87;
-    }
-    .checkout-btn:disabled {
-        background: #adb5bd;
-        cursor: not-allowed;
-    }
     .special-offer-notice {
         background: linear-gradient(135deg, #ff6b35, #f7931e);
         color: white;
@@ -254,11 +149,6 @@
             grid-template-columns: 1fr;
             gap: 2rem;
         }
-        
-        .current-membership-section {
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
     }
 </style>
 
@@ -268,17 +158,17 @@
     {{if .HasCurrentMembership}}
     <!-- Current Membership Section -->
     <h2 class="section-group-title">Behandle medlemskap</h2>
-    <div class="current-membership-section" id="current-membership">
-        <div class="membership-module">
-            <h2 class="section-title">Medlemskapet mitt</h2>
+    <div class="current-membership-section two-column-grid" id="current-membership">
+        <div class="module no-border membership-module">
+            <h2 class="module-title">Medlemskapet mitt</h2>
             <div id="current-membership-container">
                 <!-- This will be loaded via AJAX -->
                 <div class="loading-placeholder">Laster medlemskap...</div>
             </div>
         </div>
         
-        <div class="charges-module">
-            <h2 class="section-title">Belastninger</h2>
+        <div class="module no-border charges-module">
+            <h2 class="module-title">Belastninger</h2>
             <div id="membership-charges-container">
                 <div class="loading-placeholder">Laster belastninger...</div>
             </div>
