@@ -16,7 +16,7 @@ type KlippekortModuleData struct {
 // NewKlippekortModule creates a new klippekort module with the given data
 func NewKlippekortModule(klippekort interface{}, lang string) (*KlippekortModuleData, error) {
 	// Load CSS content
-	cssPath := filepath.Join("handlers", "templates", "modules", "klippekort.css")
+	cssPath := filepath.Join("handlers", "templates", "modules", "membership", "klippekort.css")
 	cssContent, err := ioutil.ReadFile(cssPath)
 	if err != nil {
 		cssContent = []byte("/* CSS loading failed */")

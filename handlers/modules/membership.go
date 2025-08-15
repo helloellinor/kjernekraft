@@ -16,7 +16,7 @@ type MembershipModuleData struct {
 // NewMembershipModule creates a new membership module with the given data
 func NewMembershipModule(membership interface{}, lang string) (*MembershipModuleData, error) {
 	// Load CSS content
-	cssPath := filepath.Join("handlers", "templates", "modules", "membership.css")
+	cssPath := filepath.Join("handlers", "templates", "modules", "membership", "membership.css")
 	cssContent, err := ioutil.ReadFile(cssPath)
 	if err != nil {
 		cssContent = []byte("/* CSS loading failed */")

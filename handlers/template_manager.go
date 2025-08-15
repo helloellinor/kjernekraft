@@ -129,6 +129,20 @@ func getTemplateFuncs() template.FuncMap {
 			}
 			return result
 		},
+		"dict": func(values ...interface{}) map[string]interface{} {
+			if len(values)%2 != 0 {
+				return nil // Must have even number of arguments (key-value pairs)
+			}
+			dict := make(map[string]interface{})
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					continue // Skip non-string keys
+				}
+				dict[key] = values[i+1]
+			}
+			return dict
+		},
 	}
 }
 

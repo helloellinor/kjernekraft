@@ -54,6 +54,25 @@
     "spots_remaining_singular": "plass igjen",
     "waitlist": "Venteliste"
   },
+  "timeplan": {
+    "title": "Timeplan",
+    "this_week": "Denne veka",
+    "next_week": "Veka som kjem",
+    "week": "Veke",
+    "teacher_filter": "Lærar:",
+    "class_filter": "Klasse:",
+    "all_teachers": "Alle lærarar",
+    "all_classes": "Alle klassar",
+    "no_classes": "Ingen klassar",
+    "finished": "Avslutta",
+    "monday": "Måndag",
+    "tuesday": "Tysdag", 
+    "wednesday": "Onsdag",
+    "thursday": "Torsdag",
+    "friday": "Fredag",
+    "saturday": "Laurdag",
+    "sunday": "Sundag"
+  },
   "dashboard": {
     "welcome_user": "Velkommen, {{.UserName}}!",
     "signed_up": "Påmeldt",
@@ -92,6 +111,16 @@
       "failed": "Mislukka",
       "pending": "Ventar"
     }
+  },
+  "payments": {
+    "title": "Betalinger",
+    "description": "Administrer betalingsmåtane dine og sjå betalingshistorikk.",
+    "payment_methods": "Betalingsmåtar",
+    "add_payment_method": "Legg til betalingsmåte",
+    "loading_payment_methods": "Lastar betalingsmåtar...",
+    "loading_charges": "Lastar betalingshistorikk...",
+    "filter_by_status": "Filtrer etter status",
+    "all_statuses": "Alle statusar"
   },
   "membership": {
     "title": "Medlemskap",

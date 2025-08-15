@@ -1,47 +1,18 @@
 {{define "content"}}
+{{template "betaling_styles"}}
 {{template "navigation" .}}
 
 <main class="main-content">
-    <h1 class="page-title">Betalinger</h1>
+    <h1 class="page-title">{{t .Lang "payments.title"}}</h1>
     <p class="page-description">
-        Administrer dine betalingsmetoder og se betalingshistorikk.
+        {{t .Lang "payments.description"}}
     </p>
     
     <div class="content-grid two-column-grid">
-        <!-- Payment Methods Module -->
-        <div class="module">
-            <h2 class="module-title">Betalingsmetoder</h2>
-            
-            <div id="payment-methods-container">
-                <div class="loading-placeholder">Laster betalingsmetoder...</div>
-            </div>
-            
-            <button class="add-payment-method-btn" onclick="addPaymentMethod()">
-                + Legg til betalingsmetode
-            </button>
-        </div>
-        
-        <!-- Charges Module -->
-        <div class="module">
-            <h2 class="module-title">Betalingshistorikk</h2>
-            
-            <div class="charges-filter">
-                <label for="charges-status-filter">Filter etter status:</label>
-                <select id="charges-status-filter" onchange="filterCharges(this.value)">
-                    <option value="">Alle statuser</option>
-                    <option value="succeeded">Vellykkede</option>
-                    <option value="pending">Ventende</option>
-                    <option value="failed">Mislykkede</option>
-                </select>
-            </div>
-            
-            <div id="charges-container">
-                <div class="loading-placeholder">Laster betalingshistorikk...</div>
-            </div>
-        </div>
+        {{template "payment_methods_container" .}}
+        {{template "charges_container" .}}
     </div>
 </main>
 
-{{template "betaling_styles"}}
-{{template "betaling_scripts"}}
+{{template "betaling_scripts" .}}
 {{end}}
