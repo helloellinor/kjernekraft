@@ -152,3 +152,41 @@ func CanChangeMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
 }
+
+// PurchaseKlippekortHandler handles purchasing klippekort packages
+func PurchaseKlippekortHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get user from session
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Get package ID from form
+	packageIDStr := r.FormValue("package_id")
+	packageID, err := strconv.ParseInt(packageIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid package ID", http.StatusBadRequest)
+		return
+	}
+
+	userID := int64(user.ID)
+	err = DB.PurchaseKlippekort(userID, packageID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	response := map[string]interface{}{
+		"success": true,
+		"message": "Klippekort kjøpt!",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}

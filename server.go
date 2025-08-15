@@ -116,6 +116,9 @@ func main() {
 	r.Get("/api/membership/can-change", handlers.CanChangeMembershipHandler)
 	r.Post("/api/membership/remove", handlers.RemoveMembershipHandler)
 
+	// Klippekort management API routes
+	r.Post("/api/klippekort/purchase", handlers.PurchaseKlippekortHandler)
+
 	// Elev dashboard routes
 	r.Get("/elev", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)

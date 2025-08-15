@@ -921,3 +921,33 @@ func (db *Database) CanChangeMembership(userID int64, newMembershipID int64) (bo
 
 	return true, ""
 }
+
+// PurchaseKlippekort creates a new klippekort for a user
+func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
+	// Get package details
+	var pkg models.KlippekortPackage
+	query := `SELECT id, name, category, klipp_count, price, price_per_session, description, valid_days, active, is_popular 
+	          FROM klippekort_packages WHERE id = ? AND active = TRUE`
+	
+	err := db.Conn.QueryRow(query, packageID).Scan(
+		&pkg.ID, &pkg.Name, &pkg.Category, &pkg.KlippCount, &pkg.Price,
+		&pkg.PricePerSession, &pkg.Description, &pkg.ValidDays, &pkg.Active, &pkg.IsPopular,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("klippekort-pakke ikke funnet")
+		}
+		return err
+	}
+
+	// Create klippekort for user
+	now := time.Now()
+	expiryDate := now.AddDate(0, 0, pkg.ValidDays)
+
+	insertQuery := `INSERT INTO user_klippekort (user_id, package_id, total_klipp, remaining_klipp, expiry_date, purchase_date, is_active)
+	                VALUES (?, ?, ?, ?, ?, ?, TRUE)`
+	
+	_, err = db.Conn.Exec(insertQuery, userID, packageID, pkg.KlippCount, pkg.KlippCount, expiryDate, now)
+	return err
+}
