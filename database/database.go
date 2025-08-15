@@ -742,3 +742,60 @@ func (db *Database) GetUserByID(userID int64) (*models.User, error) {
 	
 	return &user, nil
 }
+
+// GetPendingFreezeRequests returns all memberships with freeze_requested status
+func (db *Database) GetPendingFreezeRequests() ([]models.FreezeRequest, error) {
+	query := `
+		SELECT um.id, um.user_id, um.status, um.start_date, um.renewal_date, um.end_date, um.binding_end, um.last_billed, um.created_at,
+		       u.name, u.email, u.phone,
+		       m.name, m.price, m.commitment_months
+		FROM user_memberships um
+		JOIN users u ON um.user_id = u.id
+		JOIN memberships m ON um.membership_id = m.id
+		WHERE um.status = 'freeze_requested'
+		ORDER BY um.created_at DESC`
+	
+	rows, err := db.Conn.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	var requests []models.FreezeRequest
+	for rows.Next() {
+		var req models.FreezeRequest
+		err := rows.Scan(
+			&req.MembershipID, &req.UserID, &req.Status, &req.StartDate, &req.RenewalDate, &req.EndDate, &req.BindingEnd, &req.LastBilled, &req.CreatedAt,
+			&req.UserName, &req.UserEmail, &req.UserPhone,
+			&req.MembershipName, &req.MembershipPrice, &req.CommitmentMonths,
+		)
+		if err != nil {
+			return nil, err
+		}
+		requests = append(requests, req)
+	}
+	
+	return requests, nil
+}
+
+// ApproveFreezeRequest approves a freeze request by setting status to 'paused'
+func (db *Database) ApproveFreezeRequest(userID int64) error {
+	query := `UPDATE user_memberships SET status = 'paused' WHERE user_id = ? AND status = 'freeze_requested'`
+	_, err := db.Conn.Exec(query, userID)
+	return err
+}
+
+// RejectFreezeRequest rejects a freeze request by setting status back to 'active'
+func (db *Database) RejectFreezeRequest(userID int64) error {
+	query := `UPDATE user_memberships SET status = 'active' WHERE user_id = ? AND status = 'freeze_requested'`
+	_, err := db.Conn.Exec(query, userID)
+	return err
+}
+
+// UpdateUser updates user profile information
+func (db *Database) UpdateUser(user *models.User) error {
+	query := `UPDATE users SET name = ?, email = ?, phone = ?, address = ?, postal_code = ?, city = ?, country = ?, birthdate = ? 
+	          WHERE id = ?`
+	_, err := db.Conn.Exec(query, user.Name, user.Email, user.Phone, user.Address, user.PostalCode, user.City, user.Country, user.Birthdate, user.ID)
+	return err
+}

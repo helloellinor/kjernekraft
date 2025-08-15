@@ -388,7 +388,7 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// MinProfilHandler serves the user profile page
+// MinProfilHandler serves the user profile page and handles profile updates
 func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if user is logged in
 	user := GetUserFromSession(r)
@@ -396,6 +396,46 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
 		return
 	}
+
+	// Handle POST request for profile updates
+	if r.Method == http.MethodPost {
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "Invalid form data", http.StatusBadRequest)
+			return
+		}
+
+		// Update user data from form
+		user.Name = r.FormValue("name")
+		user.Email = r.FormValue("email")
+		user.Phone = r.FormValue("phone")
+		user.Address = r.FormValue("address")
+		user.PostalCode = r.FormValue("postal_code")
+		user.City = r.FormValue("city")
+		user.Country = r.FormValue("country")
+		user.Birthdate = r.FormValue("birthdate")
+
+		// Update user in database
+		err = DB.UpdateUser(user)
+		if err != nil {
+			http.Error(w, "Could not update profile", http.StatusInternalServerError)
+			return
+		}
+
+		// Update session with new user data
+		err = SetUserInSession(w, r, user)
+		if err != nil {
+			http.Error(w, "Session error", http.StatusInternalServerError)
+			return
+		}
+
+		// Redirect to avoid re-submission on refresh
+		http.Redirect(w, r, "/elev/min-profil?updated=true", http.StatusSeeOther)
+		return
+	}
+
+	// Handle GET request
+	showSuccess := r.URL.Query().Get("updated") == "true"
 
 	data := map[string]interface{}{
 		"Title":       "Min profil",
@@ -412,6 +452,7 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 		"City":        user.City,
 		"Country":     user.Country,
 		"Birthdate":   user.Birthdate,
+		"ShowSuccess": showSuccess,
 	}
 
 	// Use the new template system
