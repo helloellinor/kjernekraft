@@ -1,56 +1,10 @@
 {{define "content"}}
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f5f5f5;
-        color: #333;
-    }
-    .main {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    .page-title {
-        text-align: center;
-    }
-    .page-description {
-        font-size: 1.1rem;
-        color: #666;
-        margin-bottom: 3rem;
-        text-align: center;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: 3rem;
-    }
-    
     .content-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 3rem;
         align-items: start;
-    }
-    
-    .module {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border: 2px solid #e0e0e0;
-    }
-    
-    .module-title {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-        color: #333;
-        text-align: center;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
     }
     
     /* Payment Methods Module */
@@ -149,23 +103,6 @@
     
     .remove-btn:hover {
         background: #c82333;
-    }
-    
-    .add-payment-method-btn {
-        width: 100%;
-        background: #007cba;
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    
-    .add-payment-method-btn:hover {
-        background: #005a87;
     }
     
     .default-badge {
@@ -288,13 +225,6 @@
         }
     }
     
-    .loading-placeholder {
-        text-align: center;
-        color: #666;
-        font-style: italic;
-        padding: 2rem;
-    }
-    
     .charges-filter {
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
@@ -333,7 +263,7 @@
         Administrer dine betalingsmetoder og se betalingshistorikk.
     </p>
     
-    <div class="content-grid">
+    <div class="content-grid two-column-grid">
         <!-- Payment Methods Module -->
         <div class="module">
             <h2 class="module-title">Betalingsmetoder</h2>

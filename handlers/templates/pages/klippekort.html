@@ -1,79 +1,8 @@
 {{define "content"}}
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f5f5f5;
-        color: #333;
-    }
-    .main {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    .page-title {
-        text-align: center;
-    }
-    .page-description {
-        font-size: 1.1rem;
-        color: #666;
-        margin-bottom: 3rem;
-        text-align: center;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: 3rem;
-    }
-    
     /* Top section with existing klippekort and charges */
     .top-section {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
         margin-bottom: 3rem;
-    }
-    
-    .klippekort-mine-module {
-        padding: 2rem;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .klippekort-mine-module .section-title {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-        color: #333;
-        text-align: center;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
-    }
-    
-    .charges-module {
-        padding: 2rem;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .charges-module .section-title {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-        color: #333;
-        text-align: center;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
-    }
-    
-    .loading-placeholder {
-        text-align: center;
-        color: #666;
-        font-style: italic;
-        padding: 2rem;
     }
     
     /* Step 1: Category Selection */
@@ -295,17 +224,17 @@
     
     <!-- Top section with user's existing klippekort and charges -->
     <h2 class="section-group-title">Behandle klipp</h2>
-    <div class="top-section">
-        <div class="klippekort-mine-module">
-            <h2 class="section-title">Klippekorta mine</h2>
+    <div class="top-section two-column-grid">
+        <div class="module no-border klippekort-mine-module">
+            <h2 class="module-title">Klippekorta mine</h2>
             <div id="user-klippekort-container">
                 <!-- This will be loaded via AJAX -->
                 <div class="loading-placeholder">Laster klippekort...</div>
             </div>
         </div>
         
-        <div class="charges-module">
-            <h2 class="section-title">Belastninger</h2>
+        <div class="module no-border charges-module">
+            <h2 class="module-title">Belastninger</h2>
             <div id="klippekort-charges-container">
                 <div class="loading-placeholder">Laster belastninger...</div>
             </div>

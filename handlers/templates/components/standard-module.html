@@ -1,0 +1,14 @@
+{{define "standard_module"}}
+<div class="module {{if .ModuleClass}}{{.ModuleClass}}{{end}}">
+    {{if .Title}}
+    <h2 class="module-title">{{.Title}}</h2>
+    {{end}}
+    <div class="module-content">
+        {{if .Content}}
+            {{.Content}}
+        {{else}}
+            {{block "module_content" .}}{{end}}
+        {{end}}
+    </div>
+</div>
+{{end}}
