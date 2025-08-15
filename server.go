@@ -67,6 +67,8 @@ func main() {
 	r.Get("/admin", handlers.AdminPageHandler)
 	r.Get("/api/admin/users", handlers.GetUsersAPIHandler)
 	r.Post("/api/admin/events/update-time", handlers.UpdateEventTimeHandler)
+	r.Post("/api/admin/freeze-requests/approve", handlers.ApproveFreezeRequestHandler)
+	r.Post("/api/admin/freeze-requests/reject", handlers.RejectFreezeRequestHandler)
 	r.Route("/api/admin/settings", func(r chi.Router) {
 		r.Get("/", handlers.AdminSettingsHandler)
 		r.Post("/", handlers.AdminSettingsHandler)
@@ -114,6 +116,7 @@ func main() {
 	r.Get("/elev/medlemskap", handlers.MembershipSelectorHandler)
 	r.Post("/elev/medlemskap/recommendations", handlers.MembershipRecommendationsHandler)
 	r.Get("/elev/min-profil", handlers.MinProfilHandler)
+	r.Post("/elev/min-profil", handlers.MinProfilHandler)
 	r.Get("/elev/testdata", handlers.TestDataPageHandler)
 
 	log.Println("Serving on http://localhost:8080")
