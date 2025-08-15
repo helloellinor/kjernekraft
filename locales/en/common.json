@@ -14,6 +14,13 @@
     "payments": "Payments",
     "my_profile": "My profile"
   },
+  "events": {
+    "sign_up": "Sign up",
+    "join_waitlist": "Join waitlist", 
+    "spots_remaining": "spots remaining",
+    "spots_remaining_singular": "spot remaining",
+    "waitlist": "Waitlist"
+  },
   "dashboard": {
     "welcome_user": "Welcome, {{.UserName}}!",
     "signed_up": "Signed up",
