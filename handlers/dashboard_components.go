@@ -99,7 +99,7 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 {{else}}
 <div class="no-klippekort">
     <p>Du har ingen aktive klippekort</p>
-    <a href="/elev/klippekort" class="buy-klippekort-btn">Kjøp klippekort</a>
+    <a href="/elev/klippekort#kjop-klipp" class="buy-klippekort-btn">Kjøp klippekort</a>
 </div>
 {{end}}
 

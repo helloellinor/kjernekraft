@@ -1,5 +1,5 @@
 {{define "event_card"}}
-<div class="event-card {{.ClassType}}" onclick="toggleEventCard(this)">
+<div class="event-card {{.ClassType}}" data-event-id="{{.ID}}" onclick="toggleEventCard(this)">
     <div class="event-time">{{formatTimeShort .StartTime}}-{{formatTimeShort .EndTime}}</div>
     <div class="event-title">{{.Title}}</div>
     <div class="event-teacher">{{.TeacherName}}</div>

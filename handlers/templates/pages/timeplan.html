@@ -15,13 +15,7 @@
         margin: 0 auto;
         padding: 2rem;
     }
-    .page-title {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: #333;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
-    }
+
     .module {
         background: white;
         border-radius: 8px;
@@ -175,6 +169,14 @@
         font-size: 0.875rem;
         width: 80px;
         text-align: center;
+        -moz-appearance: textfield; /* Hide increment/decrement buttons in Firefox */
+    }
+    
+    /* Hide increment/decrement buttons in webkit browsers */
+    .week-input::-webkit-outer-spin-button,
+    .week-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
     
     @keyframes fadeIn {
@@ -312,8 +314,80 @@
     }
     
     function signupForClass(classId) {
-        // TODO: Implement class signup functionality
-        alert('Påmelding for klasse ' + classId + ' - kommer snart!');
+        const eventCard = document.querySelector(`[data-event-id="${classId}"]`);
+        if (!eventCard) {
+            alert('Kunne ikke finne klassen. Prøv å laste siden på nytt.');
+            return;
+        }
+        
+        const signupBtn = eventCard.querySelector('.signup-btn');
+        if (!signupBtn) {
+            alert('Kunne ikke finne påmeldingsknapp.');
+            return;
+        }
+        
+        // Check if already signed up (button shows "Avmeld")
+        if (signupBtn.textContent.includes('Avmeld')) {
+            // Handle cancellation
+            if (!confirm('Er du sikker på at du vil avmelde deg fra denne klassen?')) {
+                return;
+            }
+            
+            // Call API to cancel signup
+            fetch('/api/events/cancel-signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'event_id=' + encodeURIComponent(classId)
+            })
+            .then(response => {
+                if (response.ok) {
+                    signupBtn.textContent = 'Meld på';
+                    signupBtn.classList.remove('signed-up');
+                    alert('Du er nå avmeldt fra klassen.');
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Feil ved avmelding: ' + error.message);
+            });
+            
+            return;
+        }
+        
+        // Handle signup
+        if (!confirm('Vil du melde deg på denne klassen?')) {
+            return;
+        }
+        
+        // Call API to signup for class
+        fetch('/api/events/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'event_id=' + encodeURIComponent(classId)
+        })
+        .then(response => {
+            if (response.ok) {
+                signupBtn.textContent = 'Avmeld';
+                signupBtn.classList.add('signed-up');
+                alert('Du er nå påmeldt klassen!');
+            } else {
+                return response.text().then(text => {
+                    throw new Error(text);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved påmelding: ' + error.message);
+        });
     }
     
     function navigateWeek(direction) {
