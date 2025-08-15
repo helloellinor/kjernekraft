@@ -1,0 +1,24 @@
+{{define "admin_stats_module"}}
+<style>
+{{template "admin_stats_module_styles"}}
+</style>
+
+<div class="admin-stats">
+    <div class="stat-item">
+        <span class="stat-value">{{.TotalUsers}}</span>
+        <span class="stat-label">{{t .Lang "admin.total_users"}}</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-value">{{.TotalEvents}}</span>
+        <span class="stat-label">{{t .Lang "admin.total_events"}}</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-value">{{.PendingFreezeRequests}}</span>
+        <span class="stat-label">{{t .Lang "admin.pending_freeze_requests"}}</span>
+    </div>
+</div>
+{{end}}
+
+{{define "admin_stats_module_styles"}}
+{{.AdminStatsCSS}}
+{{end}}
