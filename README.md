@@ -1,53 +1,96 @@
 # Kjernekraft
 Yoga studio management system in Oslo
 
-## File Structure Organization
+## Architecture Overview
 
-The project follows a clean architecture with files organized by scope of influence. This makes it easy to find related files and understand the system's modular structure.
+This application uses a scope-based file organization system with comprehensive multi-language support and modular template architecture.
 
 ### Template Organization
 
+The template system is organized by scope of influence, making it easy to find and maintain related files:
+
 ```
 handlers/templates/
-├── layouts/           # Site-wide layouts
-│   └── base.html     # Main page layout with navigation and common structure
-├── pages/            # Complete page templates (page-specific scope)
-│   ├── admin.html    # Admin dashboard page
-│   ├── dashboard.html # User dashboard page
+├── layouts/            # Site-wide scope (affects all pages)
+│   └── base.html      # Main layout with navigation, styles, and structure
+├── pages/             # Page-specific scope (individual page templates)
+│   ├── dashboard.html # User dashboard
+│   ├── admin.html     # Admin dashboard  
 │   ├── innlogging.html # Login page
-│   ├── membership.html # Membership selection page
-│   ├── klippekort.html # Punch cards page
-│   ├── betaling.html  # Payment page
-│   ├── timeplan.html  # Schedule page
-│   └── min-profil.html # User profile page
-├── components/       # Reusable UI components (cross-page scope)
-│   ├── navigation/   # Navigation component and styles
+│   ├── min-profil.html # User profile
+│   ├── membership.html # Membership selection
+│   ├── klippekort.html # Punch cards
+│   ├── betaling.html  # Payments
+│   └── timeplan.html  # Schedule
+├── components/        # Cross-page scope (reusable UI elements)
+│   ├── navigation/    # Site navigation
 │   │   ├── navigation.html
 │   │   └── navigation-styles.html
-│   └── common/       # Common styles and components
-│       ├── button-styles.html
-│       ├── common-styles.html
-│       ├── module-styles.html
-│       └── standard-module.html
-└── modules/          # Feature-specific modules (feature scope)
-    ├── dashboard/    # Dashboard-specific modules
+│   └── common/        # Shared components and styles
+│       ├── common-styles.html      # Base styles for all pages
+│       ├── event-card-styles.html  # Event card styling
+│       ├── language-selector.html  # Language switching component
+│       ├── profile-styles.html     # Profile page styles
+│       ├── betaling-styles.html    # Payment page styles
+│       └── login-styles.html       # Login page styles
+└── modules/           # Feature-specific scope (related functionality)
+    ├── dashboard/     # Dashboard-specific modules
     │   ├── signed-up-classes.html
     │   ├── todays-classes.html
     │   ├── dashboard-membership.html
     │   ├── dashboard-klippekort.html
-    │   ├── dashboard-scripts.html
-    │   └── dashboard-layout.html
-    ├── admin/        # Admin panel modules
+    │   └── dashboard-scripts.html
+    ├── admin/         # Admin panel modules
     │   ├── admin-users-table.html
     │   ├── admin-events-table.html
     │   ├── admin-freeze-requests-table.html
     │   ├── admin-scripts.html
-    │   ├── admin-styles.html
-    │   ├── admin-stats.html
-    │   ├── admin-stats.css
-    │   └── admin_settings.html
-    ├── membership/   # Membership and payment modules
+    │   └── admin-styles.html
+    ├── membership/    # Membership management
     │   ├── membership.html
+    │   ├── charges.html
+    │   └── klippekort.html
+    └── events/        # Event-related functionality
+        └── event_card.html
+```
+
+### Component vs Module Distinction
+
+- **Components** (`components/`): Reusable UI elements that can be used across multiple pages
+  - Navigation, styles, language selectors, common layouts
+  - Think "building blocks" that many pages might need
+
+- **Modules** (`modules/`): Feature-specific functionality grouped by business domain
+  - Dashboard widgets, admin tools, membership features
+  - Think "feature packages" that belong to specific areas of the app
+
+### Language System
+
+The application supports three languages with cookie-based persistence:
+
+- **Norwegian Bokmål** (nb) 🇩🇰 - Default language
+- **Norwegian Nynorsk** (nn) 🇳🇴  
+- **English** (en) 🇺🇸
+
+Language preferences are:
+1. Stored in cookies with 1-year expiration
+2. Available on all pages including login (before authentication)
+3. Automatically detected from cookies or URL parameters
+4. Integrated into user profile for easy switching
+
+### Adding New Features
+
+1. **New Page**: Create in `pages/` directory using `{{define "content"}}` 
+2. **Reusable Component**: Add to `components/common/` for cross-page use
+3. **Feature Module**: Create in `modules/[feature-name]/` for domain-specific functionality
+4. **Localization**: Add keys to all three language files in `locales/`
+
+### Development Guidelines
+
+- All pages use the base layout system - no custom HTML structure
+- All text must use localization keys - no hardcoded strings
+- Related files (HTML, CSS, JS) should be co-located by feature
+- Use the scope hierarchy to determine file placement
     │   ├── membership.css
     │   ├── klippekort.html
     │   ├── klippekort.css
