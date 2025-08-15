@@ -882,3 +882,42 @@ func (db *Database) GetMembershipByID(membershipID int64) (*models.Membership, e
 	
 	return &membership, nil
 }
+
+// CanChangeMembership checks if a user can change to a specific membership
+func (db *Database) CanChangeMembership(userID int64, newMembershipID int64) (bool, string) {
+	// Get current membership
+	currentMembership, err := db.GetUserMembership(userID)
+	if err != nil || currentMembership == nil {
+		return false, "Bruker har ingen aktivt medlemskap"
+	}
+
+	// Get new membership details
+	newMembership, err := db.GetMembershipByID(newMembershipID)
+	if err != nil {
+		return false, "Ugyldig nytt medlemskap"
+	}
+
+	// Check if current membership allows changes (must be active or frozen, not binding)
+	if currentMembership.Status != "active" && currentMembership.Status != "paused" {
+		return false, "Medlemskap må være aktivt eller fryst for å bytte"
+	}
+
+	// Check binding period
+	now := time.Now()
+	if currentMembership.BindingEnd != nil && now.Before(*currentMembership.BindingEnd) {
+		return false, "Kan ikke bytte medlemskap under bindingsperiode"
+	}
+
+	// Check if new membership is lower price
+	if newMembership.Price > currentMembership.Price {
+		return false, "Kan kun bytte til billigere medlemskap"
+	}
+
+	// Check if switching involves adding a discount (would require admin approval)
+	if newMembership.IsStudentSenior && !currentMembership.IsStudentSenior {
+		// This would require admin approval - for now we block it
+		return false, "Bytte til student/senior-rabatt krever godkjenning fra admin"
+	}
+
+	return true, ""
+}

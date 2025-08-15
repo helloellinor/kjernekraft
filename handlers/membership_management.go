@@ -67,6 +67,14 @@ func ChangeMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := int64(user.ID)
+	
+	// Check if membership change is allowed
+	canChange, reason := DB.CanChangeMembership(userID, membershipID)
+	if !canChange {
+		http.Error(w, reason, http.StatusBadRequest)
+		return
+	}
+
 	err = DB.ChangeUserMembership(userID, membershipID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -110,4 +118,37 @@ func RemoveMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+// CanChangeMembershipHandler checks if a user can change to a specific membership
+func CanChangeMembershipHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get user from session
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Get membership ID from query parameter
+	membershipIDStr := r.URL.Query().Get("membership_id")
+	membershipID, err := strconv.ParseInt(membershipIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid membership ID", http.StatusBadRequest)
+		return
+	}
+
+	userID := int64(user.ID)
+	canChange, reason := DB.CanChangeMembership(userID, membershipID)
+	if !canChange {
+		http.Error(w, reason, http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
