@@ -1,14 +1,8 @@
-{{define "admin_page"}}
-<!DOCTYPE html>
-<html lang="{{.Lang}}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{t .Lang "admin.title"}}</title>
-    {{template "admin_styles"}}
-</head>
-<body>
-    <h1>{{t .Lang "admin.title"}}</h1>
+{{define "content"}}
+{{template "navigation" .}}
+
+<main class="main-content">
+    <h1 class="page-title">{{t .Lang "admin.title"}}</h1>
     
     {{template "admin_settings" .}}
     
@@ -19,8 +13,7 @@
     {{template "admin_freeze_requests_table" .}}
 
     {{template "admin_events_table" .}}
+</main>
 
-    {{template "admin_scripts" .}}
-</body>
-</html>
+{{template "admin_scripts" .}}
 {{end}}
