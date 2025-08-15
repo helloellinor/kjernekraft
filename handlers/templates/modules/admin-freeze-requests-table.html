@@ -1,0 +1,40 @@
+{{define "admin_freeze_requests_table"}}
+<div class="section">
+    <h2>{{t .Lang "admin.freeze_requests_title"}}</h2>
+    {{if .FreezeRequests}}
+    <table>
+        <thead>
+            <tr>
+                <th>{{t .Lang "admin.freeze_table.user"}}</th>
+                <th>{{t .Lang "admin.freeze_table.email"}}</th>
+                <th>{{t .Lang "admin.freeze_table.phone"}}</th>
+                <th>{{t .Lang "admin.freeze_table.membership"}}</th>
+                <th>{{t .Lang "admin.freeze_table.price"}}</th>
+                <th>{{t .Lang "admin.freeze_table.commitment"}}</th>
+                <th>{{t .Lang "admin.freeze_table.created"}}</th>
+                <th>{{t .Lang "admin.freeze_table.actions"}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .FreezeRequests}}
+            <tr>
+                <td>{{.UserName}}</td>
+                <td>{{.UserEmail}}</td>
+                <td>{{.UserPhone}}</td>
+                <td>{{.MembershipName}}</td>
+                <td>{{.MembershipPrice}} kr/mnd</td>
+                <td>{{.CommitmentMonths}}</td>
+                <td>{{.CreatedAt.Format "02.01.2006 15:04"}}</td>
+                <td>
+                    <button onclick="approveFreezeRequest({{.UserID}})" style="background: #28a745; margin-right: 5px;">{{t $.Lang "admin.approve"}}</button>
+                    <button onclick="rejectFreezeRequest({{.UserID}})" style="background: #dc3545;">{{t $.Lang "admin.reject"}}</button>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+    {{else}}
+    <p style="font-style: italic; color: #666;">{{t .Lang "admin.no_pending_requests"}}</p>
+    {{end}}
+</div>
+{{end}}

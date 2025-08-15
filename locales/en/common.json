@@ -1,4 +1,48 @@
 {
+  "site": {
+    "title": "Kjernekraft",
+    "welcome": "Welcome"
+  },
+  "navigation": {
+    "dashboard_title": "Kjernekraft - Student Dashboard",
+    "logout": "Log out",
+    "login": "Log in",
+    "home": "Home",
+    "schedule": "Schedule",
+    "punch_cards": "Punch cards",
+    "membership": "Membership",
+    "payments": "Payments",
+    "my_profile": "My profile"
+  },
+  "dashboard": {
+    "welcome_user": "Welcome, {{.UserName}}!",
+    "signed_up": "Signed up",
+    "todays_classes": "Today's classes",
+    "my_membership": "My membership",
+    "my_punch_cards": "My punch cards",
+    "no_signed_up_classes": "You are not signed up for any classes yet",
+    "see_schedule": "See schedule",
+    "no_classes_today": "No upcoming classes today",
+    "loading_membership": "Loading membership...",
+    "loading_punch_cards": "Loading punch cards...",
+    "signed_up_checkmark": "Signed up ✓",
+    "could_not_find_class": "Could not find the class. Try refreshing the page.",
+    "already_signed_up": "You are already signed up for this class!",
+    "cancellation_complete": "Cancellation complete. The class will appear again in \"Today's classes\" if it's still today.",
+    "could_not_load_membership": "Could not load membership",
+    "could_not_load_punch_cards": "Could not load punch cards"
+  },
+  "membership_actions": {
+    "freeze_confirm": "Are you sure you want to freeze your membership?",
+    "cancel_freeze_confirm": "Are you sure you want to cancel the freeze request?",
+    "unfreeze_confirm": "Are you sure you want to reactivate your membership?",
+    "cancel_membership_confirm": "Are you sure you want to cancel your membership? This cannot be undone.",
+    "freeze_error": "Error freezing membership",
+    "cancel_freeze_error": "Error cancelling freeze request",
+    "unfreeze_error": "Error reactivating membership",
+    "cancel_membership_error": "Error cancelling membership",
+    "error_prefix": "Error: "
+  },
   "charges": {
     "title": "Charges",
     "no_charges": "No charges found.",
@@ -38,8 +82,54 @@
     "users": "Users",
     "events": "Events",
     "freeze_requests": "Freeze requests",
+    "freeze_requests_title": "Freeze Requests",
     "approve": "Approve",
     "reject": "Reject",
-    "no_pending_requests": "No pending freeze requests"
+    "no_pending_requests": "No pending freeze requests",
+    "user_management": "User Administration",
+    "statistics": "Statistics",
+    "user_details": "User Details",
+    "membership_management": "Membership Management",
+    "freeze_request_management": "Freeze Requests",
+    "event_time_administration": "Event Time Administration",
+    "user_table": {
+      "id": "ID",
+      "name": "Name",
+      "birthdate": "Birth Date",
+      "email": "Email",
+      "phone": "Phone",
+      "roles": "Roles",
+      "created": "Created"
+    },
+    "freeze_table": {
+      "user": "User",
+      "email": "Email",
+      "phone": "Phone",
+      "membership": "Membership",
+      "price": "Price",
+      "commitment": "Commitment (months)",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "event_table": {
+      "id": "ID",
+      "title": "Title",
+      "start_time": "Start Time",
+      "end_time": "End Time",
+      "location": "Location",
+      "actions": "Actions",
+      "start": "Start",
+      "end": "End",
+      "update_time": "Update Time"
+    },
+    "alerts": {
+      "approve_freeze_confirm": "Are you sure you want to approve the freeze request?",
+      "reject_freeze_confirm": "Are you sure you want to reject the freeze request?",
+      "freeze_approved": "Freeze request approved!",
+      "freeze_rejected": "Freeze request rejected!",
+      "event_updated": "Event time updated!",
+      "time_fields_required": "Both time fields must be filled",
+      "error_prefix": "Error: "
+    }
   }
 }

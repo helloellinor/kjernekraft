@@ -112,6 +112,16 @@ func getTemplateFuncs() template.FuncMap {
 			loc := GetLocalization()
 			return loc.T(lang, key)
 		},
+		"toJS": func(s string) template.JS {
+			// Escape string for JavaScript use
+			escaped := strings.ReplaceAll(s, "\\", "\\\\")
+			escaped = strings.ReplaceAll(escaped, "\"", "\\\"")
+			escaped = strings.ReplaceAll(escaped, "'", "\\'")
+			escaped = strings.ReplaceAll(escaped, "\n", "\\n")
+			escaped = strings.ReplaceAll(escaped, "\r", "\\r")
+			escaped = strings.ReplaceAll(escaped, "\t", "\\t")
+			return template.JS("\"" + escaped + "\"")
+		},
 		"seq": func(n int) []int {
 			var result []int
 			for i := 0; i < n; i++ {
