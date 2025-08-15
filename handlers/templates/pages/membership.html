@@ -58,6 +58,22 @@
         font-style: italic;
         padding: 2rem;
     }
+    
+    /* Charges section in membership page */
+    .charges-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .charges-title {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: #333;
+        text-align: center;
+        border-bottom: 2px solid #007cba;
+        padding-bottom: 0.5rem;
+    }
     .selector-container {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -229,11 +245,19 @@
 <main class="main">
     {{if .HasCurrentMembership}}
     <!-- Current Membership Section -->
-    <div class="current-membership-section">
+    <div class="current-membership-section" id="current-membership">
         <h2 class="section-title">Medlemskapet mitt</h2>
         <div id="current-membership-container">
             <!-- This will be loaded via AJAX -->
             <div class="loading-placeholder">Laster medlemskap...</div>
+        </div>
+        
+        <!-- Charges/Billing History -->
+        <div class="charges-section">
+            <h3 class="charges-title">Belastninger</h3>
+            <div id="membership-charges-container">
+                <div class="loading-placeholder">Laster belastninger...</div>
+            </div>
         </div>
     </div>
     {{end}}
@@ -345,7 +369,7 @@
             </div>
             
             <button class="checkout-btn" onclick="proceedToCheckout()">
-                Fortsett til betaling
+                {{if .HasCurrentMembership}}Bytt{{else}}Fortsett til betaling{{end}}
             </button>
             
             <p style="font-size: 0.9rem; color: #666; text-align: center;">
@@ -507,6 +531,20 @@
     }
 
     async function changeMembershipTo(membershipId, membershipName, price) {
+        // First check if change is allowed
+        try {
+            const checkResponse = await fetch(`/api/membership/can-change?membership_id=${membershipId}`);
+            if (!checkResponse.ok) {
+                const errorText = await checkResponse.text();
+                alert('Kan ikke bytte medlemskap: ' + errorText);
+                return;
+            }
+        } catch (error) {
+            console.error('Error checking membership change:', error);
+            alert('Feil ved sjekking av medlemskapsbytte');
+            return;
+        }
+        
         if (!confirm('Er du sikker på at du vil bytte til ' + membershipName + ' til ' + price + '?')) {
             return;
         }
@@ -547,11 +585,33 @@
         }
     }
 
+    async function loadMembershipCharges() {
+        try {
+            const response = await fetch('/api/charges');
+            if (response.ok) {
+                const html = await response.text();
+                document.getElementById('membership-charges-container').innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Error loading charges:', error);
+            document.getElementById('membership-charges-container').innerHTML = '<div class="error">Kunne ikke laste belastninger</div>';
+        }
+    }
+
     // Event listeners for form changes
     document.addEventListener('DOMContentLoaded', function() {
+        // Scroll to current membership section if hash is present
+        if (window.location.hash === '#current-membership') {
+            const element = document.getElementById('current-membership');
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
         // Load current membership if user has one
         {{if .HasCurrentMembership}}
         loadCurrentMembership();
+        loadMembershipCharges();
         {{end}}
         
         const form = document.querySelector('.question-form');

@@ -101,12 +101,19 @@ func main() {
 	r.Get("/api/user/klippekort", handlers.UserKlippekortHandler)
 	r.Get("/api/user/membership", handlers.UserMembershipHandler)
 
+	// Payment API routes
+	r.Get("/api/payment-methods", handlers.PaymentMethodsHandler)
+	r.Get("/api/charges", handlers.ChargesHandler)
+	r.Post("/api/payment-methods/set-default", handlers.SetDefaultPaymentMethodHandler)
+	r.Post("/api/payment-methods/remove", handlers.RemovePaymentMethodHandler)
+
 	// Membership management API routes
 	r.Post("/api/membership/freeze", handlers.FreezeMembershipHandler)
 	r.Post("/api/membership/cancel-freeze", handlers.CancelFreezeRequestHandler)
 	r.Post("/api/membership/unfreeze", handlers.UnfreezeMembershipHandler)
 	r.Post("/api/membership/add", handlers.AddMembershipHandler)
 	r.Post("/api/membership/change", handlers.ChangeMembershipHandler)
+	r.Get("/api/membership/can-change", handlers.CanChangeMembershipHandler)
 	r.Post("/api/membership/remove", handlers.RemoveMembershipHandler)
 
 	// Elev dashboard routes
@@ -118,6 +125,7 @@ func main() {
 	r.Get("/elev/klippekort", handlers.KlippekortPageHandler)
 	r.Get("/elev/medlemskap", handlers.MembershipSelectorHandler)
 	r.Post("/elev/medlemskap/recommendations", handlers.MembershipRecommendationsHandler)
+	r.Get("/elev/betaling", handlers.BetalingHandler)
 	r.Get("/elev/min-profil", handlers.MinProfilHandler)
 	r.Post("/elev/min-profil", handlers.MinProfilHandler)
 	r.Get("/elev/testdata", handlers.TestDataPageHandler)

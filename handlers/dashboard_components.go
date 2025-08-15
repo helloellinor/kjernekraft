@@ -346,12 +346,12 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     </div>
     
     <div class="membership-actions">
-        {{if eq .Membership.Status "active"}}
+        {{else if eq .Membership.Status "active"}}
         <button class="action-btn freeze-btn" onclick="freezeMembership()">
             Frys
         </button>
         <button class="action-btn change-btn" onclick="changeMembership()">
-            Bytt medlemskap
+            Bytt
         </button>
         {{else if eq .Membership.Status "freeze_requested"}}
         <button class="action-btn cancel-request-btn" onclick="cancelFreezeRequest()">
@@ -362,13 +362,13 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
             Smelt
         </button>
         <button class="action-btn change-btn" onclick="changeMembership()">
-            Bytt medlemskap
+            Bytt
         </button>
         {{end}}
         
         {{if .Membership.CanCancel}}
         <button class="action-btn cancel-btn" onclick="cancelMembership()">
-            Si opp medlemskap
+            Si opp
         </button>
         {{end}}
     </div>
@@ -395,13 +395,11 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 .membership-card.freeze_requested {
     border-color: #ffc107;
     background: linear-gradient(135deg, #fff9c4, #ffffff);
-    opacity: 0.7;
 }
 
 .membership-card.paused {
-    border-color: #6c757d;
-    background: linear-gradient(135deg, #f8f9fa, #ffffff);
-    opacity: 0.7;
+    border-color: #007cba;
+    background: linear-gradient(135deg, #e8f4fd, #ffffff);
 }
 
 .membership-card.cancelled {
