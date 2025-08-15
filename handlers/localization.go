@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -28,6 +29,51 @@ func GetLocalization() *Localization {
 		localization.loadTranslations()
 	})
 	return localization
+}
+
+// GetLanguageFromRequest gets the user's preferred language from cookies or URL
+func GetLanguageFromRequest(r *http.Request) string {
+	// First try to get from URL parameter
+	if lang := r.URL.Query().Get("lang"); lang != "" {
+		if IsValidLanguage(lang) {
+			return lang
+		}
+	}
+	
+	// Then try to get from cookie
+	if cookie, err := r.Cookie("preferred_language"); err == nil {
+		if IsValidLanguage(cookie.Value) {
+			return cookie.Value
+		}
+	}
+	
+	// Default to Norwegian bokmål
+	return "nb"
+}
+
+// SetLanguageCookie sets the language preference cookie
+func SetLanguageCookie(w http.ResponseWriter, lang string) {
+	if IsValidLanguage(lang) {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "preferred_language",
+			Value:    lang,
+			Path:     "/",
+			MaxAge:   365 * 24 * 60 * 60, // 1 year
+			HttpOnly: false,              // Allow JavaScript access for dynamic switching
+			SameSite: http.SameSiteLaxMode,
+		})
+	}
+}
+
+// IsValidLanguage checks if a language code is supported
+func IsValidLanguage(lang string) bool {
+	validLangs := []string{"nb", "nn", "en"}
+	for _, validLang := range validLangs {
+		if lang == validLang {
+			return true
+		}
+	}
+	return false
 }
 
 // loadTranslations loads all translation files
@@ -112,4 +158,17 @@ func (l *Localization) GetLanguageName(code string) string {
 		return name
 	}
 	return code
+}
+
+// GetLanguageFlag returns the flag emoji for a language code
+func (l *Localization) GetLanguageFlag(code string) string {
+	flags := map[string]string{
+		"nb": "🇩🇰", // Danish flag for Bokmål as requested
+		"nn": "🇳🇴", // Norwegian flag for Nynorsk
+		"en": "🇺🇸", // US flag for English
+	}
+	if flag, exists := flags[code]; exists {
+		return flag
+	}
+	return "🏳️"
 }

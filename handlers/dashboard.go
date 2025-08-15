@@ -36,11 +36,8 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
 
 	data := map[string]interface{}{
 		"Title":        "Elev Dashboard",

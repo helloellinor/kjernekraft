@@ -14,6 +14,39 @@
     "payments": "Payments",
     "my_profile": "My profile"
   },
+  "login": {
+    "title": "Login",
+    "subtitle": "Log in to your Kjernekraft account",
+    "email": "Email",
+    "password": "Password",
+    "login_button": "Log in",
+    "forgot_password": "Forgot password?",
+    "no_account": "Don't have an account yet?",
+    "create_account": "Create account"
+  },
+  "profile": {
+    "title": "My profile",
+    "edit_profile": "Edit profile",
+    "save_changes": "Save changes",
+    "cancel": "Cancel",
+    "profile_updated": "Your profile has been updated!",
+    "full_name": "Full name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "postal_code": "Postal code",
+    "city": "City",
+    "country": "Country",
+    "birthdate": "Birth date",
+    "member_since": "Member since",
+    "user_id": "User ID"
+  },
+  "language": {
+    "select_language": "Select language",
+    "bokmal": "Norsk bokmål",
+    "nynorsk": "Norsk nynorsk",
+    "english": "English"
+  },
   "events": {
     "sign_up": "Sign up",
     "join_waitlist": "Join waitlist", 

@@ -14,6 +14,39 @@
     "payments": "Betalingar",
     "my_profile": "Min profil"
   },
+  "login": {
+    "title": "Innlogging",
+    "subtitle": "Logg inn på din Kjernekraft konto",
+    "email": "E-post",
+    "password": "Passord",
+    "login_button": "Logg inn",
+    "forgot_password": "Gløymt passord?",
+    "no_account": "Har du ikkje konto enno?",
+    "create_account": "Opprett konto"
+  },
+  "profile": {
+    "title": "Min profil",
+    "edit_profile": "Rediger profil",
+    "save_changes": "Lagre endringar",
+    "cancel": "Avbryt",
+    "profile_updated": "Profilen din har blitt oppdatert!",
+    "full_name": "Fullt namn",
+    "email": "E-post",
+    "phone": "Telefon",
+    "address": "Adresse",
+    "postal_code": "Postnummer",
+    "city": "By",
+    "country": "Land",
+    "birthdate": "Fødselsdato",
+    "member_since": "Medlem sidan",
+    "user_id": "Brukar-ID"
+  },
+  "language": {
+    "select_language": "Vel språk",
+    "bokmal": "Norsk bokmål",
+    "nynorsk": "Norsk nynorsk",
+    "english": "English"
+  },
   "events": {
     "sign_up": "Meld på",
     "join_waitlist": "Stå på venteliste", 
