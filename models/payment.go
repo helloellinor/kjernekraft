@@ -28,6 +28,7 @@ type Charge struct {
 	Currency          string    `json:"currency"`          // "NOK"
 	Status            string    `json:"status"`            // "succeeded", "failed", "pending"
 	Description       string    `json:"description"`       // What the charge was for
+	Type              string    `json:"type"`              // "medlemskap", "klippekort", "utdanninger"
 	ChargeDate        time.Time `json:"charge_date"`
 	FailureReason     *string   `json:"failure_reason"`    // NULL if successful
 	CreatedAt         time.Time `json:"created_at"`

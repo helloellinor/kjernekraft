@@ -292,6 +292,42 @@
             align-self: flex-start;
         }
     }
+    
+    .loading-placeholder {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 2rem;
+    }
+    
+    .charges-filter {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .charges-filter label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .charges-filter select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+    
+    .charges-filter select:focus {
+        outline: none;
+        border-color: #007cba;
+    }
 </style>
 
 {{template "navigation" .}}
@@ -320,6 +356,17 @@
         <div class="module">
             <h2 class="module-title">Belastninger</h2>
             
+            <!-- Filter controls -->
+            <div class="charges-filter">
+                <label for="charge-type-filter">Filtrer etter type:</label>
+                <select id="charge-type-filter" onchange="filterCharges()">
+                    <option value="">Alle</option>
+                    <option value="medlemskap">Medlemskap</option>
+                    <option value="klippekort">Klippekort</option>
+                    <option value="utdanninger">Utdanninger</option>
+                </select>
+            </div>
+            
             <div id="charges-container">
                 <div class="loading-placeholder">Laster belastninger...</div>
             </div>
@@ -343,9 +390,14 @@
         }
     }
     
-    async function loadCharges() {
+    async function loadCharges(typeFilter = '') {
         try {
-            const response = await fetch('/api/charges');
+            let url = '/api/charges';
+            if (typeFilter) {
+                url += '?type=' + encodeURIComponent(typeFilter);
+            }
+            
+            const response = await fetch(url);
             if (response.ok) {
                 const html = await response.text();
                 document.getElementById('charges-container').innerHTML = html;
@@ -356,6 +408,11 @@
             console.error('Error loading charges:', error);
             document.getElementById('charges-container').innerHTML = '<div class="no-data">Feil ved lasting av belastninger</div>';
         }
+    }
+    
+    function filterCharges() {
+        const filter = document.getElementById('charge-type-filter').value;
+        loadCharges(filter);
     }
     
     function addPaymentMethod() {

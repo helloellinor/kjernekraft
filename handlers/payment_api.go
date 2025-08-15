@@ -114,8 +114,11 @@ func ChargesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get filter type from query parameter
+	filterType := r.URL.Query().Get("type")
+
 	// For now, return mock data
-	charges := []models.ChargeWithDetails{
+	allCharges := []models.ChargeWithDetails{
 		{
 			Charge: models.Charge{
 				ID:            1,
@@ -126,6 +129,7 @@ func ChargesHandler(w http.ResponseWriter, r *http.Request) {
 				Description:   "12-måneder medlemskap",
 				ChargeDate:    time.Now().AddDate(0, 0, -15), // 15 days ago
 				FailureReason: nil,
+				Type:          "medlemskap",
 			},
 			PaymentMethodLast4: stringPtr("4242"),
 			PaymentMethodBrand: stringPtr("visa"),
@@ -140,6 +144,7 @@ func ChargesHandler(w http.ResponseWriter, r *http.Request) {
 				Description:   "12-måneder medlemskap",
 				ChargeDate:    time.Now().AddDate(0, -1, -15), // 1 month and 15 days ago
 				FailureReason: nil,
+				Type:          "medlemskap",
 			},
 			PaymentMethodLast4: stringPtr("4242"),
 			PaymentMethodBrand: stringPtr("visa"),
@@ -154,10 +159,53 @@ func ChargesHandler(w http.ResponseWriter, r *http.Request) {
 				Description:   "12-måneder medlemskap",
 				ChargeDate:    time.Now().AddDate(0, -2, -10), // 2 months and 10 days ago
 				FailureReason: stringPtr("Insufficient funds"),
+				Type:          "medlemskap",
 			},
 			PaymentMethodLast4: stringPtr("5555"),
 			PaymentMethodBrand: stringPtr("mastercard"),
 		},
+		{
+			Charge: models.Charge{
+				ID:            4,
+				UserID:        user.ID,
+				Amount:        220000, // 2200 kr
+				Currency:      "NOK",
+				Status:        "succeeded",
+				Description:   "10 klipp Gruppetimer Sal",
+				ChargeDate:    time.Now().AddDate(0, 0, -5), // 5 days ago
+				FailureReason: nil,
+				Type:          "klippekort",
+			},
+			PaymentMethodLast4: stringPtr("4242"),
+			PaymentMethodBrand: stringPtr("visa"),
+		},
+		{
+			Charge: models.Charge{
+				ID:            5,
+				UserID:        user.ID,
+				Amount:        280000, // 2800 kr
+				Currency:      "NOK",
+				Status:        "succeeded",
+				Description:   "10 klipp Reformer/Apparatus",
+				ChargeDate:    time.Now().AddDate(0, 0, -20), // 20 days ago
+				FailureReason: nil,
+				Type:          "klippekort",
+			},
+			PaymentMethodLast4: stringPtr("4242"),
+			PaymentMethodBrand: stringPtr("visa"),
+		},
+	}
+
+	// Filter charges by type if specified
+	var charges []models.ChargeWithDetails
+	if filterType != "" {
+		for _, charge := range allCharges {
+			if charge.Type == filterType {
+				charges = append(charges, charge)
+			}
+		}
+	} else {
+		charges = allCharges
 	}
 
 	data := struct {
