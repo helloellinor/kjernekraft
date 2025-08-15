@@ -66,12 +66,18 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	tm := GetTemplateManager()
 	tmpl, exists := tm.GetTemplate("pages/admin")
 	if !exists {
-		http.Error(w, "Template not found", http.StatusInternalServerError)
-		return
+		// Try to reload templates in case they weren't loaded
+		tm.ReloadTemplates()
+		tmpl, exists = tm.GetTemplate("pages/admin")
+		if !exists {
+			log.Printf("Available templates: %v", tm.GetAvailableTemplates())
+			http.Error(w, "Admin template not found", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	if err := tmpl.Execute(w, data); err != nil {
+	if err := tmpl.ExecuteTemplate(w, "admin_page", data); err != nil {
 		log.Printf("Error executing admin template: %v", err)
 		http.Error(w, "Template execution error", http.StatusInternalServerError)
 	}
