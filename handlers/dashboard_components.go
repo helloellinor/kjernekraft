@@ -346,7 +346,7 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     </div>
     
     <div class="membership-actions">
-        {{else if eq .Membership.Status "active"}}
+        {{if eq .Membership.Status "active"}}
         <button class="action-btn freeze-btn" onclick="freezeMembership()">
             Frys
         </button>
