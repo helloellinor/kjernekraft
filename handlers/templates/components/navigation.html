@@ -92,8 +92,12 @@
     <div class="header-content">
         <h1>Kjernekraft - Elev Dashboard</h1>
         <div class="auth-controls">
-            <span class="user-name">Test Bruker</span>
-            <a href="/innlogging" class="auth-link">Logg ut</a>
+            {{if .UserName}}
+            <span class="user-name">{{.UserName}}</span>
+            <a href="/logout" class="auth-link">Logg ut</a>
+            {{else}}
+            <a href="/innlogging" class="auth-link">Logg inn</a>
+            {{end}}
         </div>
     </div>
 </header>

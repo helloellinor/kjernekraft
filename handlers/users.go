@@ -17,6 +17,12 @@ var DB *database.Database // Set this from main
 // InnloggingHandler serves the login page
 func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
+		// Check if user is already logged in
+		if IsLoggedIn(r) {
+			http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)
+			return
+		}
+		
 		data := map[string]interface{}{
 			"Title":       "Innlogging",
 			"CurrentPage": "innlogging",
@@ -42,18 +48,38 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
 
-		// TODO: Implement actual authentication logic
-		// For now, redirect to dashboard
-		if email != "" && password != "" {
-			http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)
-		} else {
+		// Validate credentials
+		user, err := DB.AuthenticateUser(email, password)
+		if err != nil {
 			// Redirect back to login with error
 			http.Redirect(w, r, "/innlogging?error=invalid", http.StatusTemporaryRedirect)
+			return
 		}
+
+		// Set user in session
+		err = SetUserInSession(w, r, user)
+		if err != nil {
+			http.Error(w, "Session error", http.StatusInternalServerError)
+			return
+		}
+
+		// Redirect to dashboard
+		http.Redirect(w, r, "/elev/hjem", http.StatusSeeOther)
 		return
 	}
 
 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+}
+
+// LogoutHandler handles user logout
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	err := ClearUserSession(w, r)
+	if err != nil {
+		http.Error(w, "Logout error", http.StatusInternalServerError)
+		return
+	}
+	
+	http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
 }
 
 func AssignRoleToUserHandler(w http.ResponseWriter, r *http.Request) {
