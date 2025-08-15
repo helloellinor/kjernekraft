@@ -1,0 +1,12 @@
+{{define "signed_up_classes_container"}}
+<div class="content-section">
+    <h2 class="section-title">{{t .Lang "dashboard.signed_up"}}</h2>
+    <div class="events-grid" id="signed-up-classes">
+        <div class="activity-placeholder">
+            {{t .Lang "dashboard.no_signed_up_classes"}}
+            <br><br>
+            <a href="/elev/timeplan" class="timeplan-btn">{{t .Lang "dashboard.see_schedule"}}</a>
+        </div>
+    </div>
+</div>
+{{end}}

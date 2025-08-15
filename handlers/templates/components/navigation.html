@@ -1,102 +1,15 @@
 {{define "navigation"}}
-<style>
-    .header {
-        background-color: #007cba;
-        color: white;
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    .header h1 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0;
-    }
-    .auth-controls {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    .user-name {
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-    .auth-link {
-        color: white;
-        text-decoration: none;
-        padding: 0.5rem 1rem;
-        border: 1px solid rgba(255,255,255,0.3);
-        border-radius: 4px;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-    }
-    .auth-link:hover {
-        background: rgba(255,255,255,0.1);
-        border-color: rgba(255,255,255,0.5);
-    }
-    .nav {
-        background: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .nav-list {
-        display: flex;
-        list-style: none;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0;
-    }
-    .nav-item {
-        border-right: 1px solid #e0e0e0;
-    }
-    .nav-item:last-child {
-        border-right: none;
-    }
-    .nav-link {
-        display: block;
-        padding: 1rem 1.5rem;
-        text-decoration: none;
-        color: #666;
-        transition: all 0.2s;
-    }
-    .nav-link:hover {
-        background: #f8f9fa;
-        color: #007cba;
-    }
-    .nav-link.active {
-        background: #007cba;
-        color: white;
-    }
-    
-    /* Responsive styles */
-    @media (max-width: 767px) {
-        .nav-list {
-            flex-direction: column;
-        }
-        .nav-item {
-            border-right: none;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .nav-item:last-child {
-            border-bottom: none;
-        }
-    }
-</style>
+{{template "navigation_styles"}}
 
 <header class="header">
     <div class="header-content">
-        <h1>Kjernekraft - Elev Dashboard</h1>
+        <h1>{{t .Lang "navigation.dashboard_title"}}</h1>
         <div class="auth-controls">
             {{if .UserName}}
             <span class="user-name">{{.UserName}}</span>
-            <a href="/logout" class="auth-link">Logg ut</a>
+            <a href="/logout" class="auth-link">{{t .Lang "navigation.logout"}}</a>
             {{else}}
-            <a href="/innlogging" class="auth-link">Logg inn</a>
+            <a href="/innlogging" class="auth-link">{{t .Lang "navigation.login"}}</a>
             {{end}}
         </div>
     </div>
@@ -105,22 +18,22 @@
 <nav class="nav">
     <ul class="nav-list">
         <li class="nav-item">
-            <a href="/elev/hjem" class="nav-link {{if eq .CurrentPage "hjem"}}active{{end}}">Hjem</a>
+            <a href="/elev/hjem" class="nav-link {{if eq .CurrentPage "hjem"}}active{{end}}">{{t .Lang "navigation.home"}}</a>
         </li>
         <li class="nav-item">
-            <a href="/elev/timeplan" class="nav-link {{if eq .CurrentPage "timeplan"}}active{{end}}">Timeplan</a>
+            <a href="/elev/timeplan" class="nav-link {{if eq .CurrentPage "timeplan"}}active{{end}}">{{t .Lang "navigation.schedule"}}</a>
         </li>
         <li class="nav-item">
-            <a href="/elev/klippekort" class="nav-link {{if eq .CurrentPage "klippekort"}}active{{end}}">Klippekort</a>
+            <a href="/elev/klippekort" class="nav-link {{if eq .CurrentPage "klippekort"}}active{{end}}">{{t .Lang "navigation.punch_cards"}}</a>
         </li>
         <li class="nav-item">
-            <a href="/elev/medlemskap" class="nav-link {{if eq .CurrentPage "medlemskap"}}active{{end}}">Medlemskap</a>
+            <a href="/elev/medlemskap" class="nav-link {{if eq .CurrentPage "medlemskap"}}active{{end}}">{{t .Lang "navigation.membership"}}</a>
         </li>
         <li class="nav-item">
-            <a href="/elev/betaling" class="nav-link {{if eq .CurrentPage "betaling"}}active{{end}}">Betalinger</a>
+            <a href="/elev/betaling" class="nav-link {{if eq .CurrentPage "betaling"}}active{{end}}">{{t .Lang "navigation.payments"}}</a>
         </li>
         <li class="nav-item">
-            <a href="/elev/min-profil" class="nav-link {{if eq .CurrentPage "profil"}}active{{end}}">Min profil</a>
+            <a href="/elev/min-profil" class="nav-link {{if eq .CurrentPage "profil"}}active{{end}}">{{t .Lang "navigation.my_profile"}}</a>
         </li>
     </ul>
 </nav>

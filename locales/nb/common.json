@@ -1,4 +1,48 @@
 {
+  "site": {
+    "title": "Kjernekraft",
+    "welcome": "Velkommen"
+  },
+  "navigation": {
+    "dashboard_title": "Kjernekraft - Elev Dashboard",
+    "logout": "Logg ut",
+    "login": "Logg inn",
+    "home": "Hjem",
+    "schedule": "Timeplan",
+    "punch_cards": "Klippekort",
+    "membership": "Medlemskap",
+    "payments": "Betalinger",
+    "my_profile": "Min profil"
+  },
+  "dashboard": {
+    "welcome_user": "Velkommen, {{.UserName}}!",
+    "signed_up": "Påmeldt",
+    "todays_classes": "Dagens klasser",
+    "my_membership": "Mitt medlemskap",
+    "my_punch_cards": "Mine klippekort",
+    "no_signed_up_classes": "Du er ikke påmeldt noen klasser ennå",
+    "see_schedule": "Se timeplan",
+    "no_classes_today": "Ingen kommende klasser i dag",
+    "loading_membership": "Laster medlemskap...",
+    "loading_punch_cards": "Laster klippekort...",
+    "signed_up_checkmark": "Påmeldt ✓",
+    "could_not_find_class": "Kunne ikke finne klassen. Prøv å laste siden på nytt.",
+    "already_signed_up": "Du er allerede påmeldt denne klassen!",
+    "cancellation_complete": "Avmelding fullført. Klassen vises igjen i \"Dagens klasser\" hvis den fortsatt er i dag.",
+    "could_not_load_membership": "Kunne ikke laste medlemskap",
+    "could_not_load_punch_cards": "Kunne ikke laste klippekort"
+  },
+  "membership_actions": {
+    "freeze_confirm": "Er du sikker på at du vil fryse medlemskapet ditt?",
+    "cancel_freeze_confirm": "Er du sikker på at du vil trekke tilbake frysingsforespørselen?",
+    "unfreeze_confirm": "Er du sikker på at du vil reaktivere medlemskapet ditt?",
+    "cancel_membership_confirm": "Er du sikker på at du vil si opp medlemskapet ditt? Dette kan ikke angres.",
+    "freeze_error": "Feil ved frysing av medlemskap",
+    "cancel_freeze_error": "Feil ved tilbaketrekking av frysingsforespørsel",
+    "unfreeze_error": "Feil ved reaktivering av medlemskap",
+    "cancel_membership_error": "Feil ved oppsigelse av medlemskap",
+    "error_prefix": "Feil: "
+  },
   "charges": {
     "title": "Belastninger",
     "no_charges": "Ingen belastninger funnet.",
@@ -38,6 +82,7 @@
     "users": "Brukere",
     "events": "Events",
     "freeze_requests": "Frysingsforespørsler",
+    "freeze_requests_title": "Frysingsforespørsler",
     "approve": "Godkjenn",
     "reject": "Avvis",
     "no_pending_requests": "Ingen ventende frysingsforespørsler",
@@ -45,6 +90,46 @@
     "statistics": "Statistikk",
     "user_details": "Brukerdetaljer",
     "membership_management": "Medlemskapsadministrasjon",
-    "freeze_request_management": "Frysingsforespørsler"
+    "freeze_request_management": "Frysingsforespørsler",
+    "event_time_administration": "Event Tidsadministrasjon",
+    "user_table": {
+      "id": "ID",
+      "name": "Navn",
+      "birthdate": "Fødselsdato",
+      "email": "E-post",
+      "phone": "Telefon",
+      "roles": "Roller",
+      "created": "Opprettet"
+    },
+    "freeze_table": {
+      "user": "Bruker",
+      "email": "E-post",
+      "phone": "Telefon",
+      "membership": "Medlemskap",
+      "price": "Pris",
+      "commitment": "Binding (mnd)",
+      "created": "Opprettet",
+      "actions": "Handlinger"
+    },
+    "event_table": {
+      "id": "ID",
+      "title": "Tittel",
+      "start_time": "Starttid",
+      "end_time": "Sluttid",
+      "location": "Lokasjon",
+      "actions": "Handlinger",
+      "start": "Start",
+      "end": "Slutt",
+      "update_time": "Oppdater tid"
+    },
+    "alerts": {
+      "approve_freeze_confirm": "Er du sikker på at du vil godkjenne frysingsforespørselen?",
+      "reject_freeze_confirm": "Er du sikker på at du vil avvise frysingsforespørselen?",
+      "freeze_approved": "Frysingsforespørsel godkjent!",
+      "freeze_rejected": "Frysingsforespørsel avvist!",
+      "event_updated": "Event tid oppdatert!",
+      "time_fields_required": "Begge tidsfelt må fylles ut",
+      "error_prefix": "Feil: "
+    }
   }
 }
