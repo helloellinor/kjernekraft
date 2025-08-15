@@ -1,25 +1,21 @@
 {{define "admin_page"}}
 <!DOCTYPE html>
-<html lang="no">
+<html lang="{{.Lang}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Brukeradministrasjon</title>
+    <title>{{t .Lang "admin.title"}}</title>
     {{template "admin_styles"}}
 </head>
 <body>
-    <h1>Admin - Brukeradministrasjon</h1>
+    <h1>{{t .Lang "admin.title"}}</h1>
     
     {{template "admin_settings" .}}
     
-    <div class="stats">
-        <strong>Totalt antall brukere:</strong> {{len .Users}} | 
-        <strong>Totalt antall events:</strong> {{len .Events}} |
-        <strong>Ventende frysingsforespørsler:</strong> {{len .FreezeRequests}}
-    </div>
+    {{template "admin_stats_module" .Stats}}
 
     <div class="section">
-        <h2>Brukere</h2>
+        <h2>{{t .Lang "admin.users"}}</h2>
         <table>
             <thead>
                 <tr>

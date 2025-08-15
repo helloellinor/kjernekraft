@@ -40,6 +40,11 @@
     "freeze_requests": "Frysingsforespørsler",
     "approve": "Godkjenn",
     "reject": "Avvis",
-    "no_pending_requests": "Ingen ventende frysingsforespørsler"
+    "no_pending_requests": "Ingen ventende frysingsforespørsler",
+    "user_management": "Brukeradministrasjon",
+    "statistics": "Statistikk",
+    "user_details": "Brukerdetaljer",
+    "membership_management": "Medlemskapsadministrasjon",
+    "freeze_request_management": "Frysingsforespørsler"
   }
 }
