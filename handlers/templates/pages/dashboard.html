@@ -298,6 +298,108 @@
         });
     });
 
+    // Membership management functions
+    async function freezeMembership() {
+        if (!confirm('Er du sikker på at du vil fryse medlemskapet ditt?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/membership/freeze', {
+                method: 'POST'
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message);
+                loadMembership(); // Reload membership display
+            } else {
+                const errorText = await response.text();
+                alert('Feil: ' + errorText);
+            }
+        } catch (error) {
+            console.error('Error freezing membership:', error);
+            alert('Feil ved frysing av medlemskap');
+        }
+    }
+
+    async function cancelFreezeRequest() {
+        if (!confirm('Er du sikker på at du vil trekke tilbake frysingsforespørselen?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/membership/cancel-freeze', {
+                method: 'POST'
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message);
+                loadMembership(); // Reload membership display
+            } else {
+                const errorText = await response.text();
+                alert('Feil: ' + errorText);
+            }
+        } catch (error) {
+            console.error('Error cancelling freeze request:', error);
+            alert('Feil ved tilbaketrekking av frysingsforespørsel');
+        }
+    }
+
+    async function unfreezeMembership() {
+        if (!confirm('Er du sikker på at du vil reaktivere medlemskapet ditt?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/membership/unfreeze', {
+                method: 'POST'
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message);
+                loadMembership(); // Reload membership display
+            } else {
+                const errorText = await response.text();
+                alert('Feil: ' + errorText);
+            }
+        } catch (error) {
+            console.error('Error unfreezing membership:', error);
+            alert('Feil ved reaktivering av medlemskap');
+        }
+    }
+
+    function changeMembership() {
+        // Redirect to membership page in "change" mode
+        window.location.href = '/elev/medlemskap';
+    }
+
+    async function cancelMembership() {
+        if (!confirm('Er du sikker på at du vil si opp medlemskapet ditt? Dette kan ikke angres.')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/membership/remove', {
+                method: 'POST'
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message);
+                loadMembership(); // Reload membership display
+            } else {
+                const errorText = await response.text();
+                alert('Feil: ' + errorText);
+            }
+        } catch (error) {
+            console.error('Error cancelling membership:', error);
+            alert('Feil ved oppsigelse av medlemskap');
+        }
+    }
+
     // Membership management functions (global scope for HTMX-loaded content)
     function freezeMembership() {
         if (confirm('Er du sikker på at du vil fryse medlemskapet?')) {

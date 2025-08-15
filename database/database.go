@@ -799,3 +799,86 @@ func (db *Database) UpdateUser(user *models.User) error {
 	_, err := db.Conn.Exec(query, user.Name, user.Email, user.Phone, user.Address, user.PostalCode, user.City, user.Country, user.Birthdate, user.ID)
 	return err
 }
+
+// AddUserMembership creates a new user membership
+func (db *Database) AddUserMembership(userID int64, membershipID int64) error {
+	// First, check if user already has an active membership
+	existingMembership, _ := db.GetUserMembership(userID)
+	if existingMembership != nil {
+		return fmt.Errorf("bruker har allerede et aktivt medlemskap")
+	}
+
+	// Get membership details for start/end dates
+	membership, err := db.GetMembershipByID(membershipID)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+	startDate := now.Format("2006-01-02")
+	renewalDate := now.AddDate(0, 1, 0).Format("2006-01-02") // Next month
+	endDate := now.AddDate(0, membership.CommitmentMonths, 0).Format("2006-01-02")
+	bindingEnd := endDate // Binding period same as commitment
+
+	query := `INSERT INTO user_memberships (user_id, membership_id, status, start_date, renewal_date, end_date, binding_end, last_billed, created_at)
+	          VALUES (?, ?, 'active', ?, ?, ?, ?, ?, ?)`
+	
+	_, err = db.Conn.Exec(query, userID, membershipID, startDate, renewalDate, endDate, bindingEnd, startDate, now)
+	return err
+}
+
+// ChangeUserMembership changes a user's membership to a different type
+func (db *Database) ChangeUserMembership(userID int64, newMembershipID int64) error {
+	// Get current membership
+	currentMembership, err := db.GetUserMembership(userID)
+	if err != nil {
+		return err
+	}
+	if currentMembership == nil {
+		return fmt.Errorf("bruker har ingen aktivt medlemskap")
+	}
+
+	// Get new membership details
+	newMembership, err := db.GetMembershipByID(newMembershipID)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+	renewalDate := now.AddDate(0, 1, 0).Format("2006-01-02")
+	newEndDate := now.AddDate(0, newMembership.CommitmentMonths, 0).Format("2006-01-02")
+	newBindingEnd := newEndDate
+
+	query := `UPDATE user_memberships 
+	          SET membership_id = ?, renewal_date = ?, end_date = ?, binding_end = ? 
+	          WHERE user_id = ? AND status IN ('active', 'paused', 'freeze_requested')`
+	
+	_, err = db.Conn.Exec(query, newMembershipID, renewalDate, newEndDate, newBindingEnd, userID)
+	return err
+}
+
+// RemoveUserMembership deactivates a user's membership
+func (db *Database) RemoveUserMembership(userID int64) error {
+	query := `UPDATE user_memberships SET status = 'cancelled' WHERE user_id = ? AND status IN ('active', 'paused', 'freeze_requested')`
+	_, err := db.Conn.Exec(query, userID)
+	return err
+}
+
+// GetMembershipByID gets a membership by its ID
+func (db *Database) GetMembershipByID(membershipID int64) (*models.Membership, error) {
+	query := `SELECT id, name, price, commitment_months, is_student_senior, is_special_offer, description, features, active 
+	          FROM memberships WHERE id = ?`
+	
+	var membership models.Membership
+	err := db.Conn.QueryRow(query, membershipID).Scan(
+		&membership.ID, &membership.Name, &membership.Price, &membership.CommitmentMonths,
+		&membership.IsStudentSenior, &membership.IsSpecialOffer, &membership.Description,
+		&membership.Features, &membership.Active,
+	)
+	
+	if err != nil {
+		return nil, err
+	}
+	
+	return &membership, nil
+}

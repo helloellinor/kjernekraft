@@ -350,6 +350,9 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
         <button class="action-btn freeze-btn" onclick="freezeMembership()">
             Frys
         </button>
+        <button class="action-btn change-btn" onclick="changeMembership()">
+            Bytt medlemskap
+        </button>
         {{else if eq .Membership.Status "freeze_requested"}}
         <button class="action-btn cancel-request-btn" onclick="cancelFreezeRequest()">
             Trekk forespørsel
@@ -357,6 +360,9 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
         {{else if eq .Membership.Status "paused"}}
         <button class="action-btn unfreeze-btn" onclick="unfreezeMembership()">
             Smelt
+        </button>
+        <button class="action-btn change-btn" onclick="changeMembership()">
+            Bytt medlemskap
         </button>
         {{end}}
         
@@ -523,6 +529,15 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 .freeze-btn:hover, .unfreeze-btn:hover {
     background: #005a87;
+}
+
+.change-btn {
+    background: #28a745;
+    color: white;
+}
+
+.change-btn:hover {
+    background: #218838;
 }
 
 .cancel-request-btn {
