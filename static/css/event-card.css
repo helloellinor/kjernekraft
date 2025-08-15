@@ -8,12 +8,28 @@
   border-left: 4px solid #007cba;
   cursor: pointer;
   position: relative; /* default flow positioning */
+  min-width: 0; /* Allow card to shrink below content size */
+  word-wrap: break-word; /* Break long words */
+  overflow-wrap: break-word; /* Modern way to break words */
 }
 .event-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .event-card.expanded { box-shadow: 0 6px 20px rgba(0,0,0,0.18); }
 .event-time { font-size: .75rem; color:#666; font-weight:500; }
-.event-title { font-size:.875rem; font-weight:600; margin:.25rem 0; color:#333; }
-.event-teacher { font-size:.75rem; color:#666; }
+.event-title { 
+  font-size:.875rem; 
+  font-weight:600; 
+  margin:.25rem 0; 
+  color:#333; 
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.event-teacher { 
+  font-size:.75rem; 
+  color:#666; 
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
 .event-spaces { font-size:.75rem; color:#333; margin-top:.25rem; }
 .event-details { margin-top:.75rem; padding-top:.75rem; border-top:1px solid #f0f0f0; display:none; animation: fadeIn .3s ease; }
 .event-card.expanded .event-details { display:block; }
