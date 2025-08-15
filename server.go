@@ -105,6 +105,9 @@ func main() {
 	r.Post("/api/membership/freeze", handlers.FreezeMembershipHandler)
 	r.Post("/api/membership/cancel-freeze", handlers.CancelFreezeRequestHandler)
 	r.Post("/api/membership/unfreeze", handlers.UnfreezeMembershipHandler)
+	r.Post("/api/membership/add", handlers.AddMembershipHandler)
+	r.Post("/api/membership/change", handlers.ChangeMembershipHandler)
+	r.Post("/api/membership/remove", handlers.RemoveMembershipHandler)
 
 	// Elev dashboard routes
 	r.Get("/elev", func(w http.ResponseWriter, r *http.Request) {

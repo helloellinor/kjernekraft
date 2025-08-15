@@ -454,9 +454,84 @@
     }
 
     function proceedToCheckout() {
-        alert('Checkout funksjonalitet kommer snart! Valgt medlemskap: ' + 
-              document.getElementById('membership-type').textContent + 
-              ' til ' + document.getElementById('total-price').textContent);
+        // Get the membership data from the form
+        let membershipName = document.getElementById('membership-type').textContent;
+        let price = document.getElementById('total-price').textContent;
+        
+        // Map membership type to membership ID (you'll need to adjust these IDs based on your database)
+        let membershipId;
+        if (membershipName.includes('Prøvemedlemskap')) {
+            membershipId = 1; // Trial membership
+        } else if (membershipName.includes('Høsttilbud')) {
+            membershipId = 2; // Autumn special
+        } else if (membershipName.includes('12-måneder')) {
+            membershipId = 3; // 12 month membership
+        } else if (membershipName.includes('6-måneder')) {
+            membershipId = 4; // 6 month membership
+        } else {
+            membershipId = 5; // No binding membership
+        }
+        
+        // Check if user already has a membership
+        {{if .HasCurrentMembership}}
+        // If user has membership, change it
+        changeMembershipTo(membershipId, membershipName, price);
+        {{else}}
+        // If user doesn't have membership, add it
+        addMembership(membershipId, membershipName, price);
+        {{end}}
+    }
+
+    async function addMembership(membershipId, membershipName, price) {
+        try {
+            const formData = new FormData();
+            formData.append('membership_id', membershipId);
+            
+            const response = await fetch('/api/membership/add', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert('Medlemskap lagt til! ' + membershipName + ' til ' + price);
+                window.location.href = '/elev/hjem'; // Redirect to dashboard
+            } else {
+                const errorText = await response.text();
+                alert('Feil ved tillegging av medlemskap: ' + errorText);
+            }
+        } catch (error) {
+            console.error('Error adding membership:', error);
+            alert('Feil ved tillegging av medlemskap');
+        }
+    }
+
+    async function changeMembershipTo(membershipId, membershipName, price) {
+        if (!confirm('Er du sikker på at du vil bytte til ' + membershipName + ' til ' + price + '?')) {
+            return;
+        }
+        
+        try {
+            const formData = new FormData();
+            formData.append('membership_id', membershipId);
+            
+            const response = await fetch('/api/membership/change', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert('Medlemskap endret! Nytt medlemskap: ' + membershipName + ' til ' + price);
+                window.location.href = '/elev/hjem'; // Redirect to dashboard
+            } else {
+                const errorText = await response.text();
+                alert('Feil ved endring av medlemskap: ' + errorText);
+            }
+        } catch (error) {
+            console.error('Error changing membership:', error);
+            alert('Feil ved endring av medlemskap');
+        }
     }
 
     async function loadCurrentMembership() {
