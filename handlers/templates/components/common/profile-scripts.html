@@ -1,0 +1,15 @@
+{{define "profile_scripts"}}
+<script>
+function editProfile() {
+    document.getElementById('profile-view').style.display = 'none';
+    document.getElementById('profile-edit').style.display = 'block';
+    document.getElementById('edit-btn').style.display = 'none';
+}
+
+function cancelEdit() {
+    document.getElementById('profile-view').style.display = 'block';
+    document.getElementById('profile-edit').style.display = 'none';
+    document.getElementById('edit-btn').style.display = 'block';
+}
+</script>
+{{end}}

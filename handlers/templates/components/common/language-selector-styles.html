@@ -1,0 +1,51 @@
+{{define "language_selector_styles"}}
+<style>
+.language-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.language-label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.language-select {
+    padding: 0.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    min-width: 200px;
+    transition: border-color 0.2s;
+}
+
+.language-select:hover {
+    border-color: #007cba;
+}
+
+.language-select:focus {
+    outline: none;
+    border-color: #007cba;
+    box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .language-selector {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .language-select {
+        width: 100%;
+        min-width: unset;
+    }
+}
+</style>
+{{end}}

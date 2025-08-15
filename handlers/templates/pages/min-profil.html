@@ -1,185 +1,13 @@
 {{define "content"}}
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f5f5f5;
-        color: #333;
-    }
-    .main-content {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    .page-title {
-        font-size: 2rem;
-        margin-bottom: 2rem;
-        color: #333;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
-    }
-    .profile-card {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
-    }
-    .profile-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e0e0e0;
-    }
-    .profile-avatar {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, #007cba, #4a9fd1);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        color: white;
-        font-weight: 600;
-        margin-right: 1.5rem;
-    }
-    .profile-info h2 {
-        font-size: 1.5rem;
-        color: #333;
-        margin-bottom: 0.5rem;
-    }
-    .profile-info .email {
-        color: #666;
-        font-size: 1rem;
-    }
-    .profile-details {
-        display: grid;
-        gap: 1rem;
-    }
-    .detail-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 1rem 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    .detail-item:last-child {
-        border-bottom: none;
-    }
-    .detail-label {
-        font-weight: 600;
-        color: #333;
-    }
-    .detail-value {
-        color: #666;
-    }
-    .edit-profile-btn {
-        background: #007cba;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        margin-top: 1rem;
-    }
-    .edit-profile-btn:hover {
-        background: #005a87;
-    }
-    .edit-form {
-        display: none;
-    }
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-        color: #333;
-    }
-    .form-group input {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-size: 1rem;
-        transition: border-color 0.2s;
-    }
-    .form-group input:focus {
-        outline: none;
-        border-color: #007cba;
-        box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.2);
-    }
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-    .save-btn {
-        background: #28a745;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    .save-btn:hover {
-        background: #218838;
-    }
-    .cancel-btn {
-        background: #6c757d;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    .cancel-btn:hover {
-        background: #5a6268;
-    }
-    .success-message {
-        background: #d4edda;
-        color: #155724;
-        padding: 1rem;
-        border-radius: 6px;
-        margin-bottom: 1rem;
-        border: 1px solid #c3e6cb;
-    }
-    @media (max-width: 768px) {
-        .profile-header {
-            flex-direction: column;
-            text-align: center;
-        }
-        .profile-avatar {
-            margin-right: 0;
-            margin-bottom: 1rem;
-        }
-        .main-content {
-            padding: 1rem;
-        }
-    }
-</style>
-
 {{template "navigation" .}}
 
 <main class="main-content">
-    <h1 class="page-title">Min profil</h1>
+    <h1 class="page-title">{{t .Lang "profile.title"}}</h1>
     
     <div class="profile-card">
         {{if .ShowSuccess}}
         <div class="success-message">
-            Profilen din har blitt oppdatert!
+            {{t .Lang "profile.profile_updated"}}
         </div>
         {{end}}
         
@@ -191,115 +19,110 @@
             </div>
         </div>
         
+        <!-- Language Selector Section -->
+        <div class="profile-section">
+            <h3 class="section-title">{{t .Lang "language.select_language"}}</h3>
+            {{template "language_selector" .}}
+        </div>
+        
         <div class="profile-details" id="profile-view">
             <div class="detail-item">
-                <span class="detail-label">Fullt navn:</span>
+                <span class="detail-label">{{t .Lang "profile.full_name"}}:</span>
                 <span class="detail-value">{{.Name}}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">E-post:</span>
+                <span class="detail-label">{{t .Lang "profile.email"}}:</span>
                 <span class="detail-value">{{.Email}}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">Telefon:</span>
+                <span class="detail-label">{{t .Lang "profile.phone"}}:</span>
                 <span class="detail-value">{{if .Phone}}{{.Phone}}{{else}}-{{end}}</span>
             </div>
             {{if .Address}}
             <div class="detail-item">
-                <span class="detail-label">Adresse:</span>
+                <span class="detail-label">{{t .Lang "profile.address"}}:</span>
                 <span class="detail-value">{{.Address}}</span>
             </div>
             {{end}}
             {{if .PostalCode}}
             <div class="detail-item">
-                <span class="detail-label">Postnummer:</span>
+                <span class="detail-label">{{t .Lang "profile.postal_code"}}:</span>
                 <span class="detail-value">{{.PostalCode}}</span>
             </div>
             {{end}}
             {{if .City}}
             <div class="detail-item">
-                <span class="detail-label">By:</span>
+                <span class="detail-label">{{t .Lang "profile.city"}}:</span>
                 <span class="detail-value">{{.City}}</span>
             </div>
             {{end}}
             {{if .Country}}
             <div class="detail-item">
-                <span class="detail-label">Land:</span>
+                <span class="detail-label">{{t .Lang "profile.country"}}:</span>
                 <span class="detail-value">{{.Country}}</span>
             </div>
             {{end}}
             {{if .Birthdate}}
             <div class="detail-item">
-                <span class="detail-label">Fødselsdato:</span>
+                <span class="detail-label">{{t .Lang "profile.birthdate"}}:</span>
                 <span class="detail-value">{{.Birthdate}}</span>
             </div>
             {{end}}
             <div class="detail-item">
-                <span class="detail-label">Medlem siden:</span>
+                <span class="detail-label">{{t .Lang "profile.member_since"}}:</span>
                 <span class="detail-value">{{.JoinDate}}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">Bruker-ID:</span>
+                <span class="detail-label">{{t .Lang "profile.user_id"}}:</span>
                 <span class="detail-value">#{{.ID}}</span>
             </div>
         </div>
         
         <form class="edit-form" id="profile-edit" method="POST" action="/elev/min-profil">
             <div class="form-group">
-                <label for="name">Fullt navn:</label>
+                <label for="name">{{t .Lang "profile.full_name"}}:</label>
                 <input type="text" id="name" name="name" value="{{.Name}}" required>
             </div>
             <div class="form-group">
-                <label for="email">E-post:</label>
+                <label for="email">{{t .Lang "profile.email"}}:</label>
                 <input type="email" id="email" name="email" value="{{.Email}}" required>
             </div>
             <div class="form-group">
-                <label for="phone">Telefon:</label>
+                <label for="phone">{{t .Lang "profile.phone"}}:</label>
                 <input type="tel" id="phone" name="phone" value="{{.Phone}}">
             </div>
             <div class="form-group">
-                <label for="address">Adresse:</label>
+                <label for="address">{{t .Lang "profile.address"}}:</label>
                 <input type="text" id="address" name="address" value="{{.Address}}">
             </div>
             <div class="form-group">
-                <label for="postal_code">Postnummer:</label>
+                <label for="postal_code">{{t .Lang "profile.postal_code"}}:</label>
                 <input type="text" id="postal_code" name="postal_code" value="{{.PostalCode}}">
             </div>
             <div class="form-group">
-                <label for="city">By:</label>
+                <label for="city">{{t .Lang "profile.city"}}:</label>
                 <input type="text" id="city" name="city" value="{{.City}}">
             </div>
             <div class="form-group">
-                <label for="country">Land:</label>
+                <label for="country">{{t .Lang "profile.country"}}:</label>
                 <input type="text" id="country" name="country" value="{{.Country}}">
             </div>
             <div class="form-group">
-                <label for="birthdate">Fødselsdato:</label>
+                <label for="birthdate">{{t .Lang "profile.birthdate"}}:</label>
                 <input type="date" id="birthdate" name="birthdate" value="{{.Birthdate}}">
             </div>
             <div class="form-actions">
-                <button type="submit" class="save-btn">Lagre endringer</button>
-                <button type="button" class="cancel-btn" onclick="cancelEdit()">Avbryt</button>
+                <button type="submit" class="save-btn">{{t .Lang "profile.save_changes"}}</button>
+                <button type="button" class="cancel-btn" onclick="cancelEdit()">{{t .Lang "profile.cancel"}}</button>
             </div>
         </form>
         
         <button class="edit-profile-btn" id="edit-btn" onclick="editProfile()">
-            Rediger profil
+            {{t .Lang "profile.edit_profile"}}
         </button>
     </div>
 </main>
 
-<script>
-    function editProfile() {
-        document.getElementById('profile-view').style.display = 'none';
-        document.getElementById('profile-edit').style.display = 'block';
-        document.getElementById('edit-btn').style.display = 'none';
-    }
-
-    function cancelEdit() {
-        document.getElementById('profile-view').style.display = 'block';
-        document.getElementById('profile-edit').style.display = 'none';
-        document.getElementById('edit-btn').style.display = 'block';
-    }
-</script>
+{{template "profile_styles"}}
+{{template "profile_scripts"}}
 {{end}}

@@ -16,11 +16,8 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
 	
 	data := map[string]interface{}{
 		"Title":       "Klippekort",
@@ -73,11 +70,8 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
 		showSpecialOffer = false
 	}
 
-	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
 	
 	data := map[string]interface{}{
 		"Title":                "Medlemskap",
@@ -451,11 +445,8 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 	// Handle GET request
 	showSuccess := r.URL.Query().Get("updated") == "true"
 
-	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
 
 	data := map[string]interface{}{
 		"Title":       "Min profil",
