@@ -34,6 +34,16 @@
         margin-bottom: 3rem;
     }
     
+    .section-group-title {
+        font-size: 1.8rem;
+        margin: 2rem auto 1.5rem auto;
+        max-width: 1200px;
+        padding: 0 2rem;
+        color: #333;
+        font-weight: 600;
+        text-align: center;
+    }
+    
     /* Current membership section */
     .current-membership-section {
         margin-bottom: 3rem;
@@ -257,6 +267,7 @@
 <main class="main">
     {{if .HasCurrentMembership}}
     <!-- Current Membership Section -->
+    <h2 class="section-group-title">Behandle medlemskap</h2>
     <div class="current-membership-section" id="current-membership">
         <div class="membership-module">
             <h2 class="section-title">Medlemskapet mitt</h2>

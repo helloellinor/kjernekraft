@@ -119,6 +119,10 @@ func main() {
 	// Klippekort management API routes
 	r.Post("/api/klippekort/purchase", handlers.PurchaseKlippekortHandler)
 
+	// Event signup API routes
+	r.Post("/api/events/signup", handlers.EventSignupHandler)
+	r.Post("/api/events/cancel-signup", handlers.EventCancelSignupHandler)
+
 	// Elev dashboard routes
 	r.Get("/elev", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)

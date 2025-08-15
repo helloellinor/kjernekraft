@@ -19,14 +19,7 @@
         gap: 2rem;
     }
     .page-title {
-        font-size: 2rem;
-        margin: 2rem auto 1rem auto;
-        max-width: 1200px;
-        padding: 0 2rem;
-        color: #333;
-        font-weight: 600;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
+        text-align: left;
     }
     .content-section {
         background: white;
@@ -93,9 +86,6 @@
         .main-content {
             padding: 1rem;
             grid-template-columns: 1fr;
-        }
-        .page-title {
-            padding: 0 1rem;
         }
     }
 </style>
@@ -475,6 +465,11 @@
             // TODO: Implement cancellation functionality
             alert('Oppsigelse-funksjonalitet kommer snart!');
         }
+    }
+    
+    // Global function for klippekort fill-up
+    function fillUpKlippekort(category) {
+        window.location.href = '/elev/klippekort?fill=' + encodeURIComponent(category) + '#kjop-klipp';
     }
 </script>
 {{end}}

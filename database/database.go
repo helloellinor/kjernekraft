@@ -152,6 +152,17 @@ func Migrate(db *sql.DB) error {
 		FOREIGN KEY (package_id) REFERENCES klippekort_packages(id)
 	);
 	`
+	eventSignupsTableSQL := `
+	CREATE TABLE IF NOT EXISTS event_signups (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		event_id INTEGER NOT NULL,
+		signup_date DATETIME NOT NULL,
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		FOREIGN KEY (event_id) REFERENCES events(id),
+		UNIQUE(user_id, event_id)
+	);
+	`
 
 	log.Println("Kjører migrering (setter opp databasetabeller)...")
 	if _, err := db.Exec(eventsTableSQL); err != nil {
@@ -182,6 +193,9 @@ func Migrate(db *sql.DB) error {
 		return err
 	}
 	if _, err := db.Exec(userKlippekortTableSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(eventSignupsTableSQL); err != nil {
 		return err
 	}
 
@@ -942,7 +956,7 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 	}
 
 	// Check if user already has an active klippekort for this category
-	existingQuery := `SELECT id, total_klipp, remaining_klipp, expiry_date 
+	existingQuery := `SELECT uk.id, uk.total_klipp, uk.remaining_klipp, uk.expiry_date 
 	                  FROM user_klippekort uk
 	                  JOIN klippekort_packages kp ON uk.package_id = kp.id
 	                  WHERE uk.user_id = ? AND kp.category = ? AND uk.is_active = TRUE AND uk.expiry_date > datetime('now')
@@ -991,5 +1005,91 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 	                WHERE id = ?`
 	
 	_, err = db.Conn.Exec(updateQuery, newTotal, newRemaining, finalExpiryDate, packageID, existingID)
+	return err
+}
+
+// Event signup related methods
+
+// GetEventByID fetches a single event by ID
+func (db *Database) GetEventByID(eventID int64) (*models.Event, error) {
+	var event models.Event
+	query := `SELECT id, title, description, start_time, end_time, teacher_name, capacity, current_enrolment, class_type
+	          FROM events WHERE id = ?`
+	
+	err := db.Conn.QueryRow(query, eventID).Scan(
+		&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime,
+		&event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.ClassType,
+	)
+	
+	if err != nil {
+		return nil, err
+	}
+	
+	return &event, nil
+}
+
+// SignupUserForEvent signs up a user for an event
+func (db *Database) SignupUserForEvent(userID, eventID int64) error {
+	// Check if user is already signed up
+	var exists int
+	checkQuery := `SELECT COUNT(*) FROM event_signups WHERE user_id = ? AND event_id = ?`
+	err := db.Conn.QueryRow(checkQuery, userID, eventID).Scan(&exists)
+	if err != nil {
+		return err
+	}
+	
+	if exists > 0 {
+		return fmt.Errorf("user already signed up for this event")
+	}
+	
+	// Check if event has capacity
+	var currentEnrolment, capacity int
+	capacityQuery := `SELECT current_enrolment, capacity FROM events WHERE id = ?`
+	err = db.Conn.QueryRow(capacityQuery, eventID).Scan(&currentEnrolment, &capacity)
+	if err != nil {
+		return err
+	}
+	
+	if currentEnrolment >= capacity {
+		return fmt.Errorf("event is full")
+	}
+	
+	// Create signup record
+	insertQuery := `INSERT INTO event_signups (user_id, event_id, signup_date) VALUES (?, ?, ?)`
+	_, err = db.Conn.Exec(insertQuery, userID, eventID, time.Now())
+	if err != nil {
+		return err
+	}
+	
+	// Update event enrolment count
+	updateQuery := `UPDATE events SET current_enrolment = current_enrolment + 1 WHERE id = ?`
+	_, err = db.Conn.Exec(updateQuery, eventID)
+	return err
+}
+
+// CancelUserSignupForEvent cancels a user's signup for an event
+func (db *Database) CancelUserSignupForEvent(userID, eventID int64) error {
+	// Check if user is signed up
+	var exists int
+	checkQuery := `SELECT COUNT(*) FROM event_signups WHERE user_id = ? AND event_id = ?`
+	err := db.Conn.QueryRow(checkQuery, userID, eventID).Scan(&exists)
+	if err != nil {
+		return err
+	}
+	
+	if exists == 0 {
+		return fmt.Errorf("user is not signed up for this event")
+	}
+	
+	// Remove signup record
+	deleteQuery := `DELETE FROM event_signups WHERE user_id = ? AND event_id = ?`
+	_, err = db.Conn.Exec(deleteQuery, userID, eventID)
+	if err != nil {
+		return err
+	}
+	
+	// Update event enrolment count
+	updateQuery := `UPDATE events SET current_enrolment = current_enrolment - 1 WHERE id = ?`
+	_, err = db.Conn.Exec(updateQuery, eventID)
 	return err
 }

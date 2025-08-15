@@ -16,11 +16,7 @@
         padding: 2rem;
     }
     .page-title {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: #333;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
+        text-align: center;
     }
     .page-description {
         font-size: 1.1rem;
@@ -88,6 +84,16 @@
         font-size: 1.5rem;
         margin-bottom: 1.5rem;
         color: #333;
+        text-align: center;
+    }
+    
+    .section-group-title {
+        font-size: 1.8rem;
+        margin: 2rem auto 1.5rem auto;
+        max-width: 1200px;
+        padding: 0 2rem;
+        color: #333;
+        font-weight: 600;
         text-align: center;
     }
     .categories-grid {
@@ -288,6 +294,7 @@
     </p>
     
     <!-- Top section with user's existing klippekort and charges -->
+    <h2 class="section-group-title">Behandle klipp</h2>
     <div class="top-section">
         <div class="klippekort-mine-module">
             <h2 class="section-title">Klippekorta mine</h2>
@@ -306,6 +313,7 @@
     </div>
     
     <!-- Step 1: Category Selection -->
+    <h2 class="section-group-title" id="kjop-klipp">Kjøp klipp</h2>
     <div class="step" id="step1">
         <h2 class="step-title">Steg 1: Velg type trening</h2>
         <div class="categories-grid">
@@ -774,5 +782,11 @@
             }
         }
     });
+    
+    // Function called from dashboard to fill up klippekort
+    function fillUpKlippekort(category) {
+        // Auto-select category and jump to 10 klipp option
+        window.location.href = '/elev/klippekort?fill=' + encodeURIComponent(category) + '#kjop-klipp';
+    }
 </script>
 {{end}}
