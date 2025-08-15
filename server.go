@@ -20,6 +20,9 @@ func main() {
 	// Keep backward compatibility with OsloLoc
 	handlers.OsloLoc = settings.GetLocation()
 
+	// Initialize session store
+	handlers.InitializeSessionStore()
+
 	dbConn, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -48,6 +51,9 @@ func main() {
 	r.Get("/signup", handlers.SignUpPageHandler)
 	r.Post("/signup", handlers.SignUpHandler)
 	r.Get("/terms", handlers.TermsHandler)
+	r.Get("/innlogging", handlers.InnloggingHandler)
+	r.Post("/innlogging", handlers.InnloggingHandler)
+	r.Get("/logout", handlers.LogoutHandler)
 
 	r.Post("/users", handlers.AddUserHandler)
 
@@ -61,6 +67,8 @@ func main() {
 	r.Get("/admin", handlers.AdminPageHandler)
 	r.Get("/api/admin/users", handlers.GetUsersAPIHandler)
 	r.Post("/api/admin/events/update-time", handlers.UpdateEventTimeHandler)
+	r.Post("/api/admin/freeze-requests/approve", handlers.ApproveFreezeRequestHandler)
+	r.Post("/api/admin/freeze-requests/reject", handlers.RejectFreezeRequestHandler)
 	r.Route("/api/admin/settings", func(r chi.Router) {
 		r.Get("/", handlers.AdminSettingsHandler)
 		r.Post("/", handlers.AdminSettingsHandler)
@@ -75,6 +83,7 @@ func main() {
 	r.Post("/api/shuffle-memberships", handlers.ShuffleMembershipsHandler)
 	r.Post("/api/shuffle-user-klippekort", handlers.ShuffleUserKlippekortHandler)
 	r.Post("/api/shuffle-all-test-data", handlers.ShuffleAllTestDataHandler)
+	r.Post("/api/setup-test-data", handlers.SetupTestDataHandler)
 
 	// Membership and klippekort routes (for compatibility, redirects to elev routes)
 	r.Get("/klippekort", func(w http.ResponseWriter, r *http.Request) {
@@ -92,6 +101,28 @@ func main() {
 	r.Get("/api/user/klippekort", handlers.UserKlippekortHandler)
 	r.Get("/api/user/membership", handlers.UserMembershipHandler)
 
+	// Payment API routes
+	r.Get("/api/payment-methods", handlers.PaymentMethodsHandler)
+	r.Get("/api/charges", handlers.ChargesHandler)
+	r.Post("/api/payment-methods/set-default", handlers.SetDefaultPaymentMethodHandler)
+	r.Post("/api/payment-methods/remove", handlers.RemovePaymentMethodHandler)
+
+	// Membership management API routes
+	r.Post("/api/membership/freeze", handlers.FreezeMembershipHandler)
+	r.Post("/api/membership/cancel-freeze", handlers.CancelFreezeRequestHandler)
+	r.Post("/api/membership/unfreeze", handlers.UnfreezeMembershipHandler)
+	r.Post("/api/membership/add", handlers.AddMembershipHandler)
+	r.Post("/api/membership/change", handlers.ChangeMembershipHandler)
+	r.Get("/api/membership/can-change", handlers.CanChangeMembershipHandler)
+	r.Post("/api/membership/remove", handlers.RemoveMembershipHandler)
+
+	// Klippekort management API routes
+	r.Post("/api/klippekort/purchase", handlers.PurchaseKlippekortHandler)
+
+	// Event signup API routes
+	r.Post("/api/events/signup", handlers.EventSignupHandler)
+	r.Post("/api/events/cancel-signup", handlers.EventCancelSignupHandler)
+
 	// Elev dashboard routes
 	r.Get("/elev", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)
@@ -101,7 +132,9 @@ func main() {
 	r.Get("/elev/klippekort", handlers.KlippekortPageHandler)
 	r.Get("/elev/medlemskap", handlers.MembershipSelectorHandler)
 	r.Post("/elev/medlemskap/recommendations", handlers.MembershipRecommendationsHandler)
+	r.Get("/elev/betaling", handlers.BetalingHandler)
 	r.Get("/elev/min-profil", handlers.MinProfilHandler)
+	r.Post("/elev/min-profil", handlers.MinProfilHandler)
 	r.Get("/elev/testdata", handlers.TestDataPageHandler)
 
 	log.Println("Serving on http://localhost:8080")

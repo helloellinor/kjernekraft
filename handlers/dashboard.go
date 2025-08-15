@@ -11,6 +11,13 @@ var OsloLoc *time.Location
 
 // ElevDashboardHandler serves the Elev dashboard home page
 func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if user is logged in
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
+		return
+	}
+	
 	settings := config.GetInstance()
 	now := settings.GetCurrentTime()
 
@@ -35,7 +42,8 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		"IsAdmin":      false, // TODO: Implement proper role checking
 		"ExternalCSS":  []string{"/static/css/event-card.css"},
 		"CurrentPage":  "hjem",
-		"UserName":     "Test Bruker", // TODO: Get from session/auth
+		"UserName":     user.Name,
+		"User":         user,
 	}
 
 	// Use the new template system

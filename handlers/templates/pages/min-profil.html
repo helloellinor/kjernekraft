@@ -92,6 +92,70 @@
     .edit-profile-btn:hover {
         background: #005a87;
     }
+    .edit-form {
+        display: none;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+        outline: none;
+        border-color: #007cba;
+        box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.2);
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .save-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .save-btn:hover {
+        background: #218838;
+    }
+    .cancel-btn {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .cancel-btn:hover {
+        background: #5a6268;
+    }
+    .success-message {
+        background: #d4edda;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        border: 1px solid #c3e6cb;
+    }
     @media (max-width: 768px) {
         .profile-header {
             flex-direction: column;
@@ -113,6 +177,12 @@
     <h1 class="page-title">Min profil</h1>
     
     <div class="profile-card">
+        {{if .ShowSuccess}}
+        <div class="success-message">
+            Profilen din har blitt oppdatert!
+        </div>
+        {{end}}
+        
         <div class="profile-header">
             <div class="profile-avatar">{{substr .Name 0 1}}</div>
             <div class="profile-info">
@@ -121,7 +191,7 @@
             </div>
         </div>
         
-        <div class="profile-details">
+        <div class="profile-details" id="profile-view">
             <div class="detail-item">
                 <span class="detail-label">Fullt navn:</span>
                 <span class="detail-value">{{.Name}}</span>
@@ -132,8 +202,38 @@
             </div>
             <div class="detail-item">
                 <span class="detail-label">Telefon:</span>
-                <span class="detail-value">{{.Phone}}</span>
+                <span class="detail-value">{{if .Phone}}{{.Phone}}{{else}}-{{end}}</span>
             </div>
+            {{if .Address}}
+            <div class="detail-item">
+                <span class="detail-label">Adresse:</span>
+                <span class="detail-value">{{.Address}}</span>
+            </div>
+            {{end}}
+            {{if .PostalCode}}
+            <div class="detail-item">
+                <span class="detail-label">Postnummer:</span>
+                <span class="detail-value">{{.PostalCode}}</span>
+            </div>
+            {{end}}
+            {{if .City}}
+            <div class="detail-item">
+                <span class="detail-label">By:</span>
+                <span class="detail-value">{{.City}}</span>
+            </div>
+            {{end}}
+            {{if .Country}}
+            <div class="detail-item">
+                <span class="detail-label">Land:</span>
+                <span class="detail-value">{{.Country}}</span>
+            </div>
+            {{end}}
+            {{if .Birthdate}}
+            <div class="detail-item">
+                <span class="detail-label">Fødselsdato:</span>
+                <span class="detail-value">{{.Birthdate}}</span>
+            </div>
+            {{end}}
             <div class="detail-item">
                 <span class="detail-label">Medlem siden:</span>
                 <span class="detail-value">{{.JoinDate}}</span>
@@ -144,7 +244,46 @@
             </div>
         </div>
         
-        <button class="edit-profile-btn" onclick="editProfile()">
+        <form class="edit-form" id="profile-edit" method="POST" action="/elev/min-profil">
+            <div class="form-group">
+                <label for="name">Fullt navn:</label>
+                <input type="text" id="name" name="name" value="{{.Name}}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-post:</label>
+                <input type="email" id="email" name="email" value="{{.Email}}" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Telefon:</label>
+                <input type="tel" id="phone" name="phone" value="{{.Phone}}">
+            </div>
+            <div class="form-group">
+                <label for="address">Adresse:</label>
+                <input type="text" id="address" name="address" value="{{.Address}}">
+            </div>
+            <div class="form-group">
+                <label for="postal_code">Postnummer:</label>
+                <input type="text" id="postal_code" name="postal_code" value="{{.PostalCode}}">
+            </div>
+            <div class="form-group">
+                <label for="city">By:</label>
+                <input type="text" id="city" name="city" value="{{.City}}">
+            </div>
+            <div class="form-group">
+                <label for="country">Land:</label>
+                <input type="text" id="country" name="country" value="{{.Country}}">
+            </div>
+            <div class="form-group">
+                <label for="birthdate">Fødselsdato:</label>
+                <input type="date" id="birthdate" name="birthdate" value="{{.Birthdate}}">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="save-btn">Lagre endringer</button>
+                <button type="button" class="cancel-btn" onclick="cancelEdit()">Avbryt</button>
+            </div>
+        </form>
+        
+        <button class="edit-profile-btn" id="edit-btn" onclick="editProfile()">
             Rediger profil
         </button>
     </div>
@@ -152,7 +291,15 @@
 
 <script>
     function editProfile() {
-        alert('Redigering av profil kommer snart!');
+        document.getElementById('profile-view').style.display = 'none';
+        document.getElementById('profile-edit').style.display = 'block';
+        document.getElementById('edit-btn').style.display = 'none';
+    }
+
+    function cancelEdit() {
+        document.getElementById('profile-view').style.display = 'block';
+        document.getElementById('profile-edit').style.display = 'none';
+        document.getElementById('edit-btn').style.display = 'block';
     }
 </script>
 {{end}}

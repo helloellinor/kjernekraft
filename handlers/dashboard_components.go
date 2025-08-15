@@ -6,23 +6,18 @@ import (
 	"kjernekraft/models"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 // UserKlippekortHandler provides HTMX endpoint for user's klippekort display
 func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
-	// For now, use a test user ID. In a real app, this would come from session/auth
-	userIDStr := r.URL.Query().Get("user_id")
-	if userIDStr == "" {
-		userIDStr = "1" // Default test user
-	}
-
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// Get user from session
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
+	userID := int64(user.ID)
 	klippekort, err := DB.GetUserKlippekort(userID)
 	if err != nil {
 		http.Error(w, "Could not fetch user klippekort", http.StatusInternalServerError)
@@ -63,8 +58,16 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
         {{end}}
         
         <div class="card-header">
-            <h4 class="card-title">{{.Name}}</h4>
-            <span class="card-category">{{.Category}}</span>
+            <h4 class="card-title">{{.Category}}</h4>
+            <span class="card-expiry">
+                {{if gt .DaysUntilExpiry 0}}
+                    Utløper om {{.DaysUntilExpiry}} dager
+                {{else if eq .DaysUntilExpiry 0}}
+                    Utløper i dag
+                {{else}}
+                    Utløpt
+                {{end}}
+            </span>
         </div>
         
         <div class="card-content">
@@ -74,17 +77,20 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
             </div>
             
             <div class="progress-bar">
-                <div class="progress-fill" style="width: {{.ProgressPercentage}}%;"></div>
+                <div class="progress-segments">
+                    {{range $i := seq .RemainingKlipp}}
+                    <div class="progress-segment filled"></div>
+                    {{end}}
+                    {{range $i := seq (sub .TotalKlipp .RemainingKlipp)}}
+                    <div class="progress-segment"></div>
+                    {{end}}
+                </div>
             </div>
             
-            <div class="expiry-info">
-                {{if gt .DaysUntilExpiry 0}}
-                    Utløper om {{.DaysUntilExpiry}} dager
-                {{else if eq .DaysUntilExpiry 0}}
-                    Utløper i dag
-                {{else}}
-                    Utløpt
-                {{end}}
+            <div class="card-actions">
+                <button class="fill-up-btn" onclick="fillUpKlippekort('{{.Category}}')">
+                    Fyll på
+                </button>
             </div>
         </div>
     </div>
@@ -93,7 +99,7 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 {{else}}
 <div class="no-klippekort">
     <p>Du har ingen aktive klippekort</p>
-    <a href="/klippekort" class="buy-klippekort-btn">Kjøp klippekort</a>
+    <a href="/elev/klippekort#kjop-klipp" class="buy-klippekort-btn">Kjøp klippekort</a>
 </div>
 {{end}}
 
@@ -147,7 +153,7 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
     margin-bottom: 0.25rem;
 }
 
-.card-category {
+.card-expiry {
     font-size: 0.85rem;
     color: #666;
     background: #f0f0f0;
@@ -172,23 +178,51 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 
 .progress-bar {
     width: 100%;
-    height: 8px;
+    height: 12px;
     background: #e0e0e0;
-    border-radius: 4px;
+    border-radius: 6px;
     overflow: hidden;
     margin-bottom: 0.75rem;
+    padding: 2px;
 }
 
-.progress-fill {
+.progress-segments {
+    display: flex;
     height: 100%;
-    background: linear-gradient(90deg, #007cba, #4a9fd1);
-    border-radius: 4px;
-    transition: width 0.3s ease;
+    gap: 1px;
 }
 
-.expiry-info {
-    font-size: 0.85rem;
-    color: #666;
+.progress-segment {
+    flex: 1;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+
+.progress-segment.filled {
+    background: linear-gradient(90deg, #007cba, #4a9fd1);
+}
+
+.card-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.fill-up-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+}
+
+.fill-up-btn:hover {
+    background: #218838;
 }
 
 .no-klippekort {
@@ -212,9 +246,30 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 .buy-klippekort-btn:hover {
     background: #005a87;
 }
-</style>`
+</style>
 
-	t, err := template.New("klippekort").Parse(tmpl)
+<script>
+function fillUpKlippekort(category) {
+    // Redirect to klippekort page and auto-select the category
+    window.location.href = '/elev/klippekort?fill=' + encodeURIComponent(category);
+}
+</script>`
+
+	// Parse template with custom functions
+	tmplFuncs := template.FuncMap{
+		"seq": func(n int) []int {
+			result := make([]int, n)
+			for i := 0; i < n; i++ {
+				result[i] = i
+			}
+			return result
+		},
+		"sub": func(a, b int) int {
+			return a - b
+		},
+	}
+
+	t, err := template.New("klippekort").Funcs(tmplFuncs).Parse(tmpl)
 	if err != nil {
 		http.Error(w, "Template error", http.StatusInternalServerError)
 		return
@@ -228,18 +283,14 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 
 // UserMembershipHandler provides HTMX endpoint for user's membership display
 func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
-	// For now, use a test user ID. In a real app, this would come from session/auth
-	userIDStr := r.URL.Query().Get("user_id")
-	if userIDStr == "" {
-		userIDStr = "1" // Default test user
-	}
-
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+	// Get user from session
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
+	userID := int64(user.ID)
 	membership, err := DB.GetUserMembership(userID)
 	if err != nil {
 		http.Error(w, "Could not fetch user membership", http.StatusInternalServerError)
@@ -281,9 +332,10 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     <div class="membership-header">
         <h3 class="membership-name">{{.Membership.Name}}</h3>
         <div class="membership-status status-{{.Membership.Status}}">
-            {{if eq .Membership.Status "active"}}Aktiv
-            {{else if eq .Membership.Status "paused"}}Pause
-            {{else if eq .Membership.Status "cancelled"}}Kansellert
+            {{if eq .Membership.Status "active"}}AKTIV
+            {{else if eq .Membership.Status "paused"}}FRYST 🧊
+            {{else if eq .Membership.Status "freeze_requested"}}FORESPØRSEL SENDT
+            {{else if eq .Membership.Status "cancelled"}}KANSELLERT
             {{end}}
         </div>
     </div>
@@ -299,6 +351,10 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
         </div>
         
         <div class="dates-info">
+            <div class="billing-info">
+                <strong>Sist fakturert:</strong> {{.Membership.LastBilled.Format "2. January 2006"}}
+            </div>
+            
             {{if gt .Membership.DaysUntilRenewal 0}}
             <div class="renewal-date">
                 <strong>Neste fornyelse:</strong> {{.Membership.RenewalDate.Format "2. January 2006"}}
@@ -318,21 +374,33 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
         </div>
     </div>
     
-    {{if or .Membership.CanPause .Membership.CanCancel}}
     <div class="membership-actions">
-        {{if .Membership.CanPause}}
-        <button class="action-btn pause-btn" onclick="pauseMembership()">
-            Sett på pause
+        {{if eq .Membership.Status "active"}}
+        <button class="action-btn freeze-btn" onclick="freezeMembership()">
+            Frys
+        </button>
+        <button class="action-btn change-btn" onclick="changeMembership()">
+            Bytt
+        </button>
+        {{else if eq .Membership.Status "freeze_requested"}}
+        <button class="action-btn cancel-request-btn" onclick="cancelFreezeRequest()">
+            Trekk forespørsel
+        </button>
+        {{else if eq .Membership.Status "paused"}}
+        <button class="action-btn unfreeze-btn" onclick="unfreezeMembership()">
+            Smelt
+        </button>
+        <button class="action-btn change-btn" onclick="changeMembership()">
+            Bytt
         </button>
         {{end}}
         
         {{if .Membership.CanCancel}}
         <button class="action-btn cancel-btn" onclick="cancelMembership()">
-            Si opp medlemskap
+            Si opp
         </button>
         {{end}}
     </div>
-    {{end}}
 </div>
 {{else}}
 <div class="no-membership">
@@ -353,13 +421,14 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     max-width: 500px;
 }
 
-.membership-card.active {
-    border-color: #28a745;
+.membership-card.freeze_requested {
+    border-color: #ffc107;
+    background: linear-gradient(135deg, #fff9c4, #ffffff);
 }
 
 .membership-card.paused {
-    border-color: #ffc107;
-    background: linear-gradient(135deg, #fff9c4, #ffffff);
+    border-color: #007cba;
+    background: linear-gradient(135deg, #e8f4fd, #ffffff);
 }
 
 .membership-card.cancelled {
@@ -406,9 +475,14 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     color: #155724;
 }
 
-.status-paused {
+.status-freeze_requested {
     background: #fff3cd;
     color: #856404;
+}
+
+.status-paused {
+    background: #e2e3e5;
+    color: #495057;
 }
 
 .status-cancelled {
@@ -444,7 +518,7 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     color: #666;
 }
 
-.renewal-date, .binding-end {
+.billing-info, .renewal-date, .binding-end {
     margin-bottom: 0.5rem;
 }
 
@@ -475,12 +549,30 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
     flex: 1;
 }
 
-.pause-btn {
+.freeze-btn, .unfreeze-btn {
+    background: #007cba;
+    color: white;
+}
+
+.freeze-btn:hover, .unfreeze-btn:hover {
+    background: #005a87;
+}
+
+.change-btn {
+    background: #28a745;
+    color: white;
+}
+
+.change-btn:hover {
+    background: #218838;
+}
+
+.cancel-request-btn {
     background: #ffc107;
     color: #000;
 }
 
-.pause-btn:hover {
+.cancel-request-btn:hover {
     background: #e0a800;
 }
 
@@ -529,10 +621,69 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 </style>
 
 <script>
-function pauseMembership() {
-    if (confirm('Er du sikker på at du vil sette medlemskapet på pause?')) {
-        // TODO: Implement pause functionality
-        alert('Pause-funksjonalitet kommer snart!');
+function freezeMembership() {
+    if (confirm('Er du sikker på at du vil fryse medlemskapet?')) {
+        fetch('/api/membership/freeze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Feil ved frysing av medlemskap');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved frysing av medlemskap');
+        });
+    }
+}
+
+function cancelFreezeRequest() {
+    if (confirm('Er du sikker på at du vil trekke tilbake forespørselen om frysing?')) {
+        fetch('/api/membership/cancel-freeze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Feil ved trekking av forespørsel');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved trekking av forespørsel');
+        });
+    }
+}
+
+function unfreezeMembership() {
+    if (confirm('Er du sikker på at du vil smelte/reaktivere medlemskapet?')) {
+        fetch('/api/membership/unfreeze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Feil ved reaktivering av medlemskap');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved reaktivering av medlemskap');
+        });
     }
 }
 

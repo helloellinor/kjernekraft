@@ -10,8 +10,9 @@ import (
 var AdminDB *database.Database
 
 type AdminData struct {
-	Users  []models.User
-	Events []models.Event
+	Users          []models.User
+	Events         []models.Event
+	FreezeRequests []models.FreezeRequest
 }
 
 func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,9 +31,16 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	freezeRequests, err := AdminDB.GetPendingFreezeRequests()
+	if err != nil {
+		http.Error(w, "Kunne ikke hente frysingsforespørsler", http.StatusInternalServerError)
+		return
+	}
+
 	data := AdminData{
-		Users:  users,
-		Events: events,
+		Users:          users,
+		Events:         events,
+		FreezeRequests: freezeRequests,
 	}
 
 	tmpl := `
@@ -67,7 +75,8 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
     
     <div class="stats">
         <strong>Totalt antall brukere:</strong> {{len .Users}} | 
-        <strong>Totalt antall events:</strong> {{len .Events}}
+        <strong>Totalt antall events:</strong> {{len .Events}} |
+        <strong>Ventende frysingsforespørsler:</strong> {{len .FreezeRequests}}
     </div>
 
     <div class="section">
@@ -98,6 +107,45 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
                 {{end}}
             </tbody>
         </table>
+    </div>
+
+    <div class="section">
+        <h2>Frysingsforespørsler</h2>
+        {{if .FreezeRequests}}
+        <table>
+            <thead>
+                <tr>
+                    <th>Bruker</th>
+                    <th>E-post</th>
+                    <th>Telefon</th>
+                    <th>Medlemskap</th>
+                    <th>Pris</th>
+                    <th>Binding (mnd)</th>
+                    <th>Opprettet</th>
+                    <th>Handlinger</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .FreezeRequests}}
+                <tr>
+                    <td>{{.UserName}}</td>
+                    <td>{{.UserEmail}}</td>
+                    <td>{{.UserPhone}}</td>
+                    <td>{{.MembershipName}}</td>
+                    <td>{{.MembershipPrice}} kr/mnd</td>
+                    <td>{{.CommitmentMonths}}</td>
+                    <td>{{.CreatedAt.Format "02.01.2006 15:04"}}</td>
+                    <td>
+                        <button onclick="approveFreezeRequest({{.UserID}})" style="background: #28a745; margin-right: 5px;">Godkjenn</button>
+                        <button onclick="rejectFreezeRequest({{.UserID}})" style="background: #dc3545;">Avvis</button>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p style="font-style: italic; color: #666;">Ingen ventende frysingsforespørsler</p>
+        {{end}}
     </div>
 
     <div class="section">
@@ -169,6 +217,40 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
                 })
                 .catch(error => alert('Feil: ' + error));
         }
+
+        function approveFreezeRequest(userId) {
+            if (!confirm('Er du sikker på at du vil godkjenne frysingsforespørselen?')) {
+                return;
+            }
+            
+            fetch('/api/admin/freeze-requests/approve?user_id=' + userId, { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Frysingsforespørsel godkjent!');
+                        location.reload();
+                    } else {
+                        response.text().then(text => alert('Feil: ' + text));
+                    }
+                })
+                .catch(error => alert('Feil: ' + error));
+        }
+
+        function rejectFreezeRequest(userId) {
+            if (!confirm('Er du sikker på at du vil avvise frysingsforespørselen?')) {
+                return;
+            }
+            
+            fetch('/api/admin/freeze-requests/reject?user_id=' + userId, { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Frysingsforespørsel avvist!');
+                        location.reload();
+                    } else {
+                        response.text().then(text => alert('Feil: ' + text));
+                    }
+                })
+                .catch(error => alert('Feil: ' + error));
+        }
     </script>
 </body>
 </html>`
@@ -196,4 +278,83 @@ func GetUsersAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
+}
+
+// ApproveFreezeRequestHandler handles approval of freeze requests
+func ApproveFreezeRequestHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// TODO: Add authentication check for admin role
+
+	userIDStr := r.URL.Query().Get("user_id")
+	if userIDStr == "" {
+		http.Error(w, "Missing user_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	userID := parseInt64(userIDStr)
+	if userID == 0 {
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	err := AdminDB.ApproveFreezeRequest(userID)
+	if err != nil {
+		http.Error(w, "Could not approve freeze request", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Freeze request approved"))
+}
+
+// RejectFreezeRequestHandler handles rejection of freeze requests
+func RejectFreezeRequestHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// TODO: Add authentication check for admin role
+
+	userIDStr := r.URL.Query().Get("user_id")
+	if userIDStr == "" {
+		http.Error(w, "Missing user_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	userID := parseInt64(userIDStr)
+	if userID == 0 {
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	err := AdminDB.RejectFreezeRequest(userID)
+	if err != nil {
+		http.Error(w, "Could not reject freeze request", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Freeze request rejected"))
+}
+
+// Helper function to parse int64 from string
+func parseInt64(s string) int64 {
+	if s == "" {
+		return 0
+	}
+	// Simple conversion - in production, use strconv.ParseInt with error handling
+	var result int64
+	for _, r := range s {
+		if r >= '0' && r <= '9' {
+			result = result*10 + int64(r-'0')
+		} else {
+			return 0
+		}
+	}
+	return result
 }

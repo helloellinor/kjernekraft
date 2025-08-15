@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"html/template"
+	"io"
 	"io/fs"
 	"kjernekraft/handlers/config"
 	"os"
@@ -94,6 +96,12 @@ func getTemplateFuncs() template.FuncMap {
 		},
 		"currentTimezone": func() string {
 			return settings.GetTimezone()
+		},
+		"title": func(s string) string {
+			if len(s) == 0 {
+				return s
+			}
+			return strings.ToUpper(s[:1]) + s[1:]
 		},
 	}
 }
@@ -196,4 +204,13 @@ func (tm *TemplateManager) ParseTemplate(content string, name string) (*template
 
 	// Parse the main template content
 	return t.Parse(content)
+}
+
+// ExecuteTemplate executes a template by name with the given data
+func (tm *TemplateManager) ExecuteTemplate(w io.Writer, name string, data interface{}) error {
+	tmpl, exists := tm.GetTemplate(name)
+	if !exists {
+		return errors.New("template not found: " + name)
+	}
+	return tmpl.ExecuteTemplate(w, name, data)
 }
