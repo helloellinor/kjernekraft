@@ -31,6 +31,7 @@
     {{template "button_styles"}}
     {{template "event_card_styles"}}
     {{template "language_selector_styles"}}
+    {{if eq .CurrentPage "admin"}}{{template "admin_styles"}}{{end}}
     {{if .CSS}}
     <style>{{.CSS}}</style>
     {{end}}

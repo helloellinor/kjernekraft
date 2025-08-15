@@ -16,6 +16,7 @@ type AdminData struct {
 	FreezeRequests []models.FreezeRequest
 	Stats          *modules.AdminStatsModuleData
 	Lang           string
+	CurrentPage    string
 }
 
 func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -60,6 +61,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		FreezeRequests: freezeRequests,
 		Stats:          statsModule,
 		Lang:           lang,
+		CurrentPage:    "admin",
 	}
 
 	// Use template manager instead of inline template
@@ -77,7 +79,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	if err := tmpl.ExecuteTemplate(w, "admin_page", data); err != nil {
+	if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
 		log.Printf("Error executing admin template: %v", err)
 		http.Error(w, "Template execution error", http.StatusInternalServerError)
 	}
