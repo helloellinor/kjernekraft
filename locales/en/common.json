@@ -1,0 +1,45 @@
+{
+  "charges": {
+    "title": "Charges",
+    "no_charges": "No charges found.",
+    "payment_method_removed": "Payment method removed",
+    "status": {
+      "succeeded": "Successful",
+      "failed": "Failed",
+      "pending": "Pending"
+    }
+  },
+  "membership": {
+    "title": "Membership",
+    "no_membership": "No membership found.",
+    "freeze": "Freeze",
+    "unfreeze": "Unfreeze",
+    "change": "Change",
+    "cancel": "Cancel",
+    "cancel_request": "Cancel request",
+    "price_per_month": "per month",
+    "commitment_months": "month commitment",
+    "frozen_until": "Frozen until"
+  },
+  "klippekort": {
+    "title": "Punch cards",
+    "no_klippekort": "No punch cards found.",
+    "remaining": "remaining",
+    "days_until_expiry": "days until expiry",
+    "expires": "expires",
+    "expired": "expired",
+    "fill_up": "Top up"
+  },
+  "admin": {
+    "title": "Admin - User Administration",
+    "total_users": "Total number of users",
+    "total_events": "Total number of events",
+    "pending_freeze_requests": "Pending freeze requests",
+    "users": "Users",
+    "events": "Events",
+    "freeze_requests": "Freeze requests",
+    "approve": "Approve",
+    "reject": "Reject",
+    "no_pending_requests": "No pending freeze requests"
+  }
+}

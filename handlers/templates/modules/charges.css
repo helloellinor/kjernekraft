@@ -1,0 +1,94 @@
+/* Charges Module Styles */
+.charges-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.charge-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.charge-item:last-child {
+    border-bottom: none;
+}
+
+.charge-info {
+    flex: 1;
+}
+
+.charge-description {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.charge-date {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.charge-payment-method {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.charge-amount {
+    font-weight: 600;
+    color: #333;
+    text-align: right;
+}
+
+.charge-status {
+    margin-left: 1rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.charge-status.succeeded {
+    background: #d4edda;
+    color: #155724;
+}
+
+.charge-status.failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.charge-status.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.charges-module .no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 2rem;
+}
+
+@media (max-width: 768px) {
+    .charge-item {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: left;
+    }
+    
+    .charge-amount {
+        text-align: left;
+        margin-top: 0.5rem;
+    }
+    
+    .charge-status {
+        margin-left: 0;
+        margin-top: 0.5rem;
+        align-self: flex-start;
+    }
+}

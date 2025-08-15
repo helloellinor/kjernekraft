@@ -1,0 +1,45 @@
+{
+  "charges": {
+    "title": "Avgifter",
+    "no_charges": "Inga avgifter funne.",
+    "payment_method_removed": "Betalingsmåte fjerna",
+    "status": {
+      "succeeded": "Vellukka",
+      "failed": "Mislukka",
+      "pending": "Ventar"
+    }
+  },
+  "membership": {
+    "title": "Medlemskap",
+    "no_membership": "Inga medlemskap funne.",
+    "freeze": "Frys",
+    "unfreeze": "Opphev frysing",
+    "change": "Endre",
+    "cancel": "Kanseller",
+    "cancel_request": "Kanseller førespurnad",
+    "price_per_month": "kr/mnd",
+    "commitment_months": "månadars binding",
+    "frozen_until": "Frosen til"
+  },
+  "klippekort": {
+    "title": "Klippekort",
+    "no_klippekort": "Inga klippekort funne.",
+    "remaining": "gjenverande",
+    "days_until_expiry": "dagar til utløp",
+    "expires": "går ut",
+    "expired": "utgått",
+    "fill_up": "Fyll på"
+  },
+  "admin": {
+    "title": "Admin - Brukaradministrasjon",
+    "total_users": "Totalt antal brukarar",
+    "total_events": "Totalt antal hendingar",
+    "pending_freeze_requests": "Ventande frysingsførespurnader",
+    "users": "Brukarar",
+    "events": "Hendingar",
+    "freeze_requests": "Frysingsførespurnader",
+    "approve": "Godkjenn",
+    "reject": "Avvis",
+    "no_pending_requests": "Inga ventande frysingsførespurnader"
+  }
+}

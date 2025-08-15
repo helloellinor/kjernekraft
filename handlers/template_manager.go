@@ -103,6 +103,14 @@ func getTemplateFuncs() template.FuncMap {
 			}
 			return strings.ToUpper(s[:1]) + s[1:]
 		},
+		"t": func(lang, key string) string {
+			loc := GetLocalization()
+			return loc.T(lang, key)
+		},
+		"translate": func(lang, key string) string {
+			loc := GetLocalization()
+			return loc.T(lang, key)
+		},
 	}
 }
 
@@ -153,6 +161,17 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 		filepath.WalkDir(componentsPath, func(compPath string, d fs.DirEntry, err error) error {
 			if err == nil && !d.IsDir() && strings.HasSuffix(compPath, ".html") {
 				t, _ = t.ParseFiles(compPath)
+			}
+			return nil
+		})
+	}
+
+	// Load all modules
+	modulesPath := filepath.Join(tm.basePath, "modules")
+	if _, err := os.Stat(modulesPath); err == nil {
+		filepath.WalkDir(modulesPath, func(modPath string, d fs.DirEntry, err error) error {
+			if err == nil && !d.IsDir() && strings.HasSuffix(modPath, ".html") {
+				t, _ = t.ParseFiles(modPath)
 			}
 			return nil
 		})
