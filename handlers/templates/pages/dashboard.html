@@ -1,39 +1,10 @@
 {{define "content"}}
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f5f5f5;
-        color: #333;
-    }
-    .main-content {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 2rem;
+        .selector-container {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-    }
-    .page-title {
-        text-align: left;
-    }
-    .content-section {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .section-title {
-        margin-bottom: 1rem;
-        color: #333;
-        font-size: 1.25rem;
-        font-weight: 600;
-        border-bottom: 2px solid #007cba;
-        padding-bottom: 0.5rem;
+        gap: 3rem;
+        align-items: start;
     }
     .events-grid {
         display: flex;
@@ -80,21 +51,21 @@
         color: white;
         text-decoration: none;
     }
-    
-    /* Responsive styles */
-    @media (max-width: 767px) {
-        .main-content {
-            padding: 1rem;
+    @media (max-width: 768px) {
+        .selector-container {
             grid-template-columns: 1fr;
+            gap: 2rem;
         }
     }
+    
 </style>
 
 {{template "navigation" .}}
 
-<h1 class="page-title">Velkommen, {{.UserName}}!</h1>
-
-<div class="main-content">
+<main class="main-content">
+    <h1 class="page-title">Velkommen, {{.UserName}}!</h1>
+    
+    <div class="content-grid two-column-grid">
     <div class="content-section">
         <h2 class="section-title">Påmeldt</h2>
         <div class="events-grid" id="signed-up-classes">
@@ -132,7 +103,8 @@
             <div class="activity-placeholder">Laster klippekort...</div>
         </div>
     </div>
-</div>
+    </div>
+</main>
 
 <script>
     // Track signed up classes
@@ -465,11 +437,6 @@
             // TODO: Implement cancellation functionality
             alert('Oppsigelse-funksjonalitet kommer snart!');
         }
-    }
-    
-    // Global function for klippekort fill-up
-    function fillUpKlippekort(category) {
-        window.location.href = '/elev/klippekort?fill=' + encodeURIComponent(category) + '#kjop-klipp';
     }
 </script>
 {{end}}
