@@ -9,9 +9,18 @@ import (
 
 // KlippekortPageHandler serves the klippekort two-step selection page
 func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if user is logged in
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
+		return
+	}
+	
 	data := map[string]interface{}{
 		"Title":       "Klippekort",
 		"CurrentPage": "klippekort",
+		"UserName":    user.Name,
+		"User":        user,
 	}
 
 	// Use the new template system
@@ -30,11 +39,15 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 
 // MembershipSelectorHandler serves the interactive membership selector page
 func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
-	// For now, use a test user. In a real app, this would come from session/auth
-	userID := int64(1)
+	// Check if user is logged in
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
+		return
+	}
 	
 	// Check if user has a membership
-	membership, err := DB.GetUserMembership(userID)
+	membership, err := DB.GetUserMembership(int64(user.ID))
 	hasCurrentMembership := membership != nil && err == nil
 	
 	// Check if user has ever had a membership (for hiding offers)
@@ -61,6 +74,8 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
 		"HasHadMembership":     hasHadMembership,
 		"ShowSpecialOffer":     showSpecialOffer,
 		"UserMembership":       membership,
+		"UserName":             user.Name,
+		"User":                 user,
 	}
 
 	// Use the new template system
@@ -375,29 +390,28 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 
 // MinProfilHandler serves the user profile page
 func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
-	// For now, use a test user. In a real app, this would come from session/auth
-	user := struct {
-		ID       int64
-		Name     string
-		Email    string
-		JoinDate string
-		Phone    string
-	}{
-		ID:       1,
-		Name:     "Test Bruker",
-		Email:    "test@example.com",
-		JoinDate: "1. januar 2024",
-		Phone:    "+47 123 45 678",
+	// Check if user is logged in
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
+		return
 	}
 
 	data := map[string]interface{}{
 		"Title":       "Min profil",
 		"CurrentPage": "profil",
+		"UserName":    user.Name,
+		"User":        user,
 		"ID":          user.ID,
 		"Name":        user.Name,
 		"Email":       user.Email,
-		"JoinDate":    user.JoinDate,
+		"JoinDate":    "1. januar 2024", // TODO: Add join date to user model
 		"Phone":       user.Phone,
+		"Address":     user.Address,
+		"PostalCode":  user.PostalCode,
+		"City":        user.City,
+		"Country":     user.Country,
+		"Birthdate":   user.Birthdate,
 	}
 
 	// Use the new template system

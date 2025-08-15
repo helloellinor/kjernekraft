@@ -10,6 +10,13 @@ import (
 
 // ElevTimeplanHandler serves the Elev timeplan (schedule) page
 func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if user is logged in
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
+		return
+	}
+	
 	settings := config.GetInstance()
 	now := settings.GetCurrentTime()
 
@@ -122,6 +129,8 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		"IsAdmin":      false, // TODO: Implement proper role checking
 		"ExternalCSS":  []string{"/static/css/event-card.css"},
 		"CurrentPage":  "timeplan",
+		"UserName":     user.Name,
+		"User":         user,
 	}
 
 	// Use the new template system
