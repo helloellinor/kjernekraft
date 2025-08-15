@@ -58,8 +58,16 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
         {{end}}
         
         <div class="card-header">
-            <h4 class="card-title">{{.Name}}</h4>
-            <span class="card-category">{{.Category}}</span>
+            <h4 class="card-title">{{.Category}}</h4>
+            <span class="card-expiry">
+                {{if gt .DaysUntilExpiry 0}}
+                    Utløper om {{.DaysUntilExpiry}} dager
+                {{else if eq .DaysUntilExpiry 0}}
+                    Utløper i dag
+                {{else}}
+                    Utløpt
+                {{end}}
+            </span>
         </div>
         
         <div class="card-content">
@@ -79,14 +87,10 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
                 </div>
             </div>
             
-            <div class="expiry-info">
-                {{if gt .DaysUntilExpiry 0}}
-                    Utløper om {{.DaysUntilExpiry}} dager
-                {{else if eq .DaysUntilExpiry 0}}
-                    Utløper i dag
-                {{else}}
-                    Utløpt
-                {{end}}
+            <div class="card-actions">
+                <button class="fill-up-btn" onclick="fillUpKlippekort('{{.Category}}')">
+                    Fyll på
+                </button>
             </div>
         </div>
     </div>
@@ -95,7 +99,7 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 {{else}}
 <div class="no-klippekort">
     <p>Du har ingen aktive klippekort</p>
-    <a href="/klippekort" class="buy-klippekort-btn">Kjøp klippekort</a>
+    <a href="/elev/klippekort" class="buy-klippekort-btn">Kjøp klippekort</a>
 </div>
 {{end}}
 
@@ -149,7 +153,7 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
     margin-bottom: 0.25rem;
 }
 
-.card-category {
+.card-expiry {
     font-size: 0.85rem;
     color: #666;
     background: #f0f0f0;
@@ -198,9 +202,27 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
     background: linear-gradient(90deg, #007cba, #4a9fd1);
 }
 
-.expiry-info {
-    font-size: 0.85rem;
-    color: #666;
+.card-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.fill-up-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+}
+
+.fill-up-btn:hover {
+    background: #218838;
 }
 
 .no-klippekort {
@@ -224,7 +246,14 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 .buy-klippekort-btn:hover {
     background: #005a87;
 }
-</style>`
+</style>
+
+<script>
+function fillUpKlippekort(category) {
+    // Redirect to klippekort page and auto-select the category
+    window.location.href = '/elev/klippekort?fill=' + encodeURIComponent(category);
+}
+</script>`
 
 	// Parse template with custom functions
 	tmplFuncs := template.FuncMap{

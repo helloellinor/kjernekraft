@@ -922,7 +922,7 @@ func (db *Database) CanChangeMembership(userID int64, newMembershipID int64) (bo
 	return true, ""
 }
 
-// PurchaseKlippekort creates a new klippekort for a user
+// PurchaseKlippekort creates a new klippekort for a user or adds to existing one
 func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 	// Get package details
 	var pkg models.KlippekortPackage
@@ -941,13 +941,55 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 		return err
 	}
 
-	// Create klippekort for user
-	now := time.Now()
-	expiryDate := now.AddDate(0, 0, pkg.ValidDays)
-
-	insertQuery := `INSERT INTO user_klippekort (user_id, package_id, total_klipp, remaining_klipp, expiry_date, purchase_date, is_active)
-	                VALUES (?, ?, ?, ?, ?, ?, TRUE)`
+	// Check if user already has an active klippekort for this category
+	existingQuery := `SELECT id, total_klipp, remaining_klipp, expiry_date 
+	                  FROM user_klippekort uk
+	                  JOIN klippekort_packages kp ON uk.package_id = kp.id
+	                  WHERE uk.user_id = ? AND kp.category = ? AND uk.is_active = TRUE AND uk.expiry_date > datetime('now')
+	                  ORDER BY uk.expiry_date DESC
+	                  LIMIT 1`
 	
-	_, err = db.Conn.Exec(insertQuery, userID, packageID, pkg.KlippCount, pkg.KlippCount, expiryDate, now)
+	var existingID int
+	var totalKlipp, remainingKlipp int
+	var expiryDate time.Time
+	
+	err = db.Conn.QueryRow(existingQuery, userID, pkg.Category).Scan(&existingID, &totalKlipp, &remainingKlipp, &expiryDate)
+	
+	now := time.Now()
+	newExpiryDate := now.AddDate(0, 0, pkg.ValidDays)
+	
+	if err == sql.ErrNoRows {
+		// No existing klippekort, create new one
+		insertQuery := `INSERT INTO user_klippekort (user_id, package_id, total_klipp, remaining_klipp, expiry_date, purchase_date, is_active)
+		                VALUES (?, ?, ?, ?, ?, ?, TRUE)`
+		
+		_, err = db.Conn.Exec(insertQuery, userID, packageID, pkg.KlippCount, pkg.KlippCount, newExpiryDate, now)
+		return err
+	} else if err != nil {
+		return err
+	}
+	
+	// Existing klippekort found - add to it
+	// Check if adding would exceed maximum allowed (20 by default)
+	maxKlipp := 20 // TODO: Make this configurable in admin settings
+	newTotal := totalKlipp + pkg.KlippCount
+	newRemaining := remainingKlipp + pkg.KlippCount
+	
+	if newTotal > maxKlipp {
+		return fmt.Errorf("kan ikke kjøpe flere klipp. Maksimum %d klipp per kort (du har %d)", maxKlipp, totalKlipp)
+	}
+	
+	// Use the longer expiry date (existing or new)
+	finalExpiryDate := expiryDate
+	if newExpiryDate.After(expiryDate) {
+		finalExpiryDate = newExpiryDate
+	}
+	
+	// Update existing klippekort
+	updateQuery := `UPDATE user_klippekort 
+	                SET total_klipp = ?, remaining_klipp = ?, expiry_date = ?, package_id = ?
+	                WHERE id = ?`
+	
+	_, err = db.Conn.Exec(updateQuery, newTotal, newRemaining, finalExpiryDate, packageID, existingID)
 	return err
 }
