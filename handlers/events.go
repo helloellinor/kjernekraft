@@ -98,3 +98,83 @@ func GetAllEventsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(events)
 }
+
+// EventSignupHandler handles user signup for events
+func EventSignupHandler(w http.ResponseWriter, r *http.Request) {
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	eventIDStr := r.FormValue("event_id")
+	eventID, err := strconv.ParseInt(eventIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid event ID", http.StatusBadRequest)
+		return
+	}
+
+	// Get event details to check timing restrictions
+	event, err := DB.GetEventByID(eventID)
+	if err != nil {
+		http.Error(w, "Event not found", http.StatusNotFound)
+		return
+	}
+
+	// Check if event is within 2 hours
+	now := time.Now()
+	if event.StartTime.Sub(now).Hours() < 2 {
+		http.Error(w, "Cannot sign up for classes within 2 hours of start time", http.StatusBadRequest)
+		return
+	}
+
+	// Sign up user for event
+	err = DB.SignupUserForEvent(int64(user.ID), eventID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Successfully signed up for event"))
+}
+
+// EventCancelSignupHandler handles user cancellation of event signup
+func EventCancelSignupHandler(w http.ResponseWriter, r *http.Request) {
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	eventIDStr := r.FormValue("event_id")
+	eventID, err := strconv.ParseInt(eventIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid event ID", http.StatusBadRequest)
+		return
+	}
+
+	// Get event details to check timing restrictions
+	event, err := DB.GetEventByID(eventID)
+	if err != nil {
+		http.Error(w, "Event not found", http.StatusNotFound)
+		return
+	}
+
+	// Check if event is within 2 hours
+	now := time.Now()
+	if event.StartTime.Sub(now).Hours() < 2 {
+		http.Error(w, "Cannot cancel signup for classes within 2 hours of start time", http.StatusBadRequest)
+		return
+	}
+
+	// Cancel user signup for event
+	err = DB.CancelUserSignupForEvent(int64(user.ID), eventID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Successfully cancelled signup for event"))
+}

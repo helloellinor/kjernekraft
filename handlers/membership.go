@@ -9,9 +9,18 @@ import (
 
 // KlippekortPageHandler serves the klippekort two-step selection page
 func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if user is logged in
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
+		return
+	}
+	
 	data := map[string]interface{}{
 		"Title":       "Klippekort",
 		"CurrentPage": "klippekort",
+		"UserName":    user.Name,
+		"User":        user,
 	}
 
 	// Use the new template system
@@ -30,9 +39,43 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 
 // MembershipSelectorHandler serves the interactive membership selector page
 func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if user is logged in
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
+		return
+	}
+	
+	// Check if user has a membership
+	membership, err := DB.GetUserMembership(int64(user.ID))
+	hasCurrentMembership := membership != nil && err == nil
+	
+	// Check if user has ever had a membership (for hiding offers)
+	// For now, we'll just use the current membership check
+	hasHadMembership := hasCurrentMembership
+	
+	// Determine page title and show special offer
+	pageTitle := "Finn ditt perfekte medlemskap"
+	showSpecialOffer := true
+	
+	if hasCurrentMembership {
+		pageTitle = "Bytt medlemskapet mitt"
+	}
+	
+	if hasHadMembership {
+		showSpecialOffer = false
+	}
+	
 	data := map[string]interface{}{
-		"Title":       "Medlemskap",
-		"CurrentPage": "medlemskap",
+		"Title":                "Medlemskap",
+		"CurrentPage":          "medlemskap",
+		"PageTitle":            pageTitle,
+		"HasCurrentMembership": hasCurrentMembership,
+		"HasHadMembership":     hasHadMembership,
+		"ShowSpecialOffer":     showSpecialOffer,
+		"UserMembership":       membership,
+		"UserName":             user.Name,
+		"User":                 user,
 	}
 
 	// Use the new template system
@@ -345,31 +388,71 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// MinProfilHandler serves the user profile page
+// MinProfilHandler serves the user profile page and handles profile updates
 func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
-	// For now, use a test user. In a real app, this would come from session/auth
-	user := struct {
-		ID       int64
-		Name     string
-		Email    string
-		JoinDate string
-		Phone    string
-	}{
-		ID:       1,
-		Name:     "Test Bruker",
-		Email:    "test@example.com",
-		JoinDate: "1. januar 2024",
-		Phone:    "+47 123 45 678",
+	// Check if user is logged in
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
+		return
 	}
+
+	// Handle POST request for profile updates
+	if r.Method == http.MethodPost {
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "Invalid form data", http.StatusBadRequest)
+			return
+		}
+
+		// Update user data from form
+		user.Name = r.FormValue("name")
+		user.Email = r.FormValue("email")
+		user.Phone = r.FormValue("phone")
+		user.Address = r.FormValue("address")
+		user.PostalCode = r.FormValue("postal_code")
+		user.City = r.FormValue("city")
+		user.Country = r.FormValue("country")
+		user.Birthdate = r.FormValue("birthdate")
+
+		// Update user in database
+		err = DB.UpdateUser(user)
+		if err != nil {
+			http.Error(w, "Could not update profile", http.StatusInternalServerError)
+			return
+		}
+
+		// Update session with new user data
+		err = SetUserInSession(w, r, user)
+		if err != nil {
+			http.Error(w, "Session error", http.StatusInternalServerError)
+			return
+		}
+
+		// Redirect to avoid re-submission on refresh
+		http.Redirect(w, r, "/elev/min-profil?updated=true", http.StatusSeeOther)
+		return
+	}
+
+	// Handle GET request
+	showSuccess := r.URL.Query().Get("updated") == "true"
 
 	data := map[string]interface{}{
 		"Title":       "Min profil",
 		"CurrentPage": "profil",
+		"UserName":    user.Name,
+		"User":        user,
 		"ID":          user.ID,
 		"Name":        user.Name,
 		"Email":       user.Email,
-		"JoinDate":    user.JoinDate,
+		"JoinDate":    "1. januar 2024", // TODO: Add join date to user model
 		"Phone":       user.Phone,
+		"Address":     user.Address,
+		"PostalCode":  user.PostalCode,
+		"City":        user.City,
+		"Country":     user.Country,
+		"Birthdate":   user.Birthdate,
+		"ShowSuccess": showSuccess,
 	}
 
 	// Use the new template system

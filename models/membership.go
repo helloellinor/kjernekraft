@@ -20,11 +20,12 @@ type UserMembership struct {
 	ID            int       `json:"id"`
 	UserID        int       `json:"user_id"`
 	MembershipID  int       `json:"membership_id"`
-	Status        string    `json:"status"`        // "active", "paused", "cancelled"
+	Status        string    `json:"status"`        // "active", "paused", "cancelled", "freeze_requested"
 	StartDate     time.Time `json:"start_date"`
 	RenewalDate   time.Time `json:"renewal_date"`
 	EndDate       *time.Time `json:"end_date"`     // NULL if ongoing
 	BindingEnd    *time.Time `json:"binding_end"`  // When binding period ends
+	LastBilled    time.Time `json:"last_billed"`   // When user was last billed
 	CreatedAt     time.Time `json:"created_at"`
 }
 
