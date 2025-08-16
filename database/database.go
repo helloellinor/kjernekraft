@@ -1132,3 +1132,40 @@ func (db *Database) GetUserSignupsForEvents(userID int64, eventIDs []int64) (map
 	
 	return signups, rows.Err()
 }
+
+// GetUserUpcomingSignups returns all upcoming events that the user is signed up for
+func (db *Database) GetUserUpcomingSignups(userID int64) ([]models.Event, error) {
+	query := `
+		SELECT e.id, e.title, e.description, e.role_requirements, e.start_time, e.end_time, 
+		       e.location, e.organizer, e.attendees, e.class_type, e.teacher_name, 
+		       e.capacity, e.current_enrolment, e.color
+		FROM events e
+		INNER JOIN event_signups es ON e.id = es.event_id
+		WHERE es.user_id = ? AND e.start_time > ?
+		ORDER BY e.start_time ASC
+	`
+	
+	now := time.Now()
+	rows, err := db.Conn.Query(query, userID, now)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	var events []models.Event
+	for rows.Next() {
+		var event models.Event
+		err := rows.Scan(
+			&event.ID, &event.Title, &event.Description, &event.RoleRequirements,
+			&event.StartTime, &event.EndTime, &event.Location, &event.Organizer,
+			&event.Attendees, &event.ClassType, &event.TeacherName,
+			&event.Capacity, &event.CurrentEnrolment, &event.Color,
+		)
+		if err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	
+	return events, rows.Err()
+}

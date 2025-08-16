@@ -31,24 +31,20 @@
         </div>
         
         <div class="dates-info">
-            <div class="billing-info">
-                <strong>Sist fakturert:</strong> {{.Membership.LastBilled.Format "2. January 2006"}}
-            </div>
-            
             {{if gt .Membership.DaysUntilRenewal 0}}
             <div class="renewal-date">
-                <strong>Neste fornyelse:</strong> {{.Membership.RenewalDate.Format "2. January 2006"}}
-                <span class="days-until">(om {{.Membership.DaysUntilRenewal}} dager)</span>
+                <strong>{{t .Lang "membership.next_renewal"}}:</strong> {{.Membership.RenewalDate.Format "2. January 2006"}}
+                <span class="days-until">({{t .Lang "membership.in"}} {{.Membership.DaysUntilRenewal}} {{t .Lang "membership.days"}})</span>
             </div>
             {{else if eq .Membership.DaysUntilRenewal 0}}
             <div class="renewal-date urgent">
-                <strong>Fornyes i dag!</strong>
+                <strong>{{t .Lang "membership.renews_today"}}!</strong>
             </div>
             {{end}}
             
             {{if .Membership.BindingEnd}}
             <div class="binding-end">
-                <strong>Binding utløper:</strong> {{.Membership.BindingEnd.Format "2. January 2006"}}
+                <strong>{{t .Lang "membership.binding_expires_in"}} {{.Membership.MonthsUntilBindingEnd}} {{if eq .Membership.MonthsUntilBindingEnd 1}}{{t .Lang "membership.month"}}{{else}}{{t .Lang "membership.months"}}{{end}}</strong>
             </div>
             {{end}}
         </div>
