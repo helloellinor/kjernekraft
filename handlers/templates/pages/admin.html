@@ -1,65 +1,44 @@
 {{define "content"}}
-{{template "navigation" .}}
-
 <main class="main-content admin-content">
-    <h1 class="page-title admin-title">{{t .Lang "admin.title"}}</h1>
-    <p class="page-description admin-description">{{t .Lang "admin.description"}}</p>
+    <h1 class="page-title admin-title">Admin Dashboard</h1>
+    <p class="page-description admin-description">Manage users, events, and system settings</p>
     
     <div class="admin-grid single-column">
         <!-- Admin Settings Section -->
         <div class="content-section admin-settings-section">
-            <h2 class="section-title">{{t .Lang "admin.settings"}}</h2>
+            <h2 class="section-title">Settings</h2>
             <div class="section-content">
-                {{template "admin_settings" .}}
+                <p>Admin settings will be available here.</p>
             </div>
         </div>
         
         <!-- Statistics Section -->
         <div class="content-section admin-stats-section">
-            <h2 class="section-title">{{t .Lang "admin.statistics"}}</h2>
+            <h2 class="section-title">Statistics</h2>
             <div class="section-content">
-                {{template "admin_stats_module" .Stats}}
-            </div>
-        </div>
-        
-        <!-- Membership Management Section -->
-        <div class="content-section admin-membership-section">
-            <h2 class="section-title">{{t .Lang "admin.membership_management"}}</h2>
-            <div class="section-content">
-                {{template "admin_membership_rules" .}}
+                <p>System statistics will be displayed here.</p>
             </div>
         </div>
         
         <!-- User Management Section -->
         <div class="content-section admin-users-section">
-            <h2 class="section-title">{{t .Lang "admin.user_management"}}</h2>
+            <h2 class="section-title">User Management</h2>
             <div class="section-content">
-                {{template "admin_users_table" .}}
-            </div>
-        </div>
-        
-        <!-- Freeze Requests Section -->
-        <div class="content-section admin-freeze-section">
-            <h2 class="section-title">{{t .Lang "admin.freeze_requests"}}</h2>
-            <div class="section-content">
-                {{template "admin_freeze_requests_table" .}}
+                <p>{{len .Users}} users in the system</p>
             </div>
         </div>
         
         <!-- Events Management Section -->
         <div class="content-section admin-events-section">
-            <h2 class="section-title">{{t .Lang "admin.events_management"}}</h2>
+            <h2 class="section-title">Events Management</h2>
             <div class="section-content">
-                {{template "admin_events_table" .}}
+                <p>{{len .Events}} events scheduled</p>
             </div>
         </div>
     </div>
 </main>
 
-{{template "shared_styles"}}
 {{template "admin_scripts" .}}
-{{template "membership_actions_script"}}
-{{template "klippekort_actions_script"}}
 
 <style>
 .admin-content {

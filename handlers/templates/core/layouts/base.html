@@ -40,26 +40,9 @@
             }
         }
     </style>
-    {{if .CSS}}
-    <style>{{.CSS}}</style>
-    {{end}}
-    {{range .ExternalCSS}}
-    <link rel="stylesheet" href="{{.}}">
-    {{end}}
-    {{block "head" .}}{{end}}
 </head>
 <body>
-    <main>
-        {{block "content" .}}{{end}}
-    </main>
-    
-    {{if .JS}}
-    <script>{{.JS}}</script>
-    {{end}}
-    {{range .ExternalJS}}
-    <script src="{{.}}"></script>
-    {{end}}
-    {{block "scripts" .}}{{end}}
+    {{block "content" .}}{{end}}
 </body>
 </html>
 {{end}}

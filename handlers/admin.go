@@ -11,6 +11,7 @@ import (
 var AdminDB *database.Database
 
 type AdminData struct {
+	Title          string
 	Users          []models.User
 	Events         []models.Event
 	FreezeRequests []models.FreezeRequest
@@ -18,6 +19,10 @@ type AdminData struct {
 	Stats          *modules.AdminStatsModuleData
 	Lang           string
 	CurrentPage    string
+	CSS            string
+	JS             string
+	ExternalCSS    []string
+	ExternalJS     []string
 }
 
 func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +68,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := AdminData{
+		Title:          "Admin",
 		Users:          users,
 		Events:         events,
 		FreezeRequests: freezeRequests,
@@ -70,6 +76,10 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		Stats:          statsModule,
 		Lang:           lang,
 		CurrentPage:    "admin",
+		CSS:            "",
+		JS:             "",
+		ExternalCSS:    []string{},
+		ExternalJS:     []string{},
 	}
 
 	// Use template manager instead of inline template
