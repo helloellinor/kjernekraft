@@ -1,0 +1,279 @@
+{{define "klippekort_category_selector"}}
+{{template "base_card_styles"}}
+{{template "klippekort_category_styles"}}
+
+<div class="klippekort-category-selector">
+    <h2 class="section-title">{{t .Lang "klippekort.select_training_type"}}</h2>
+    <div class="categories-grid">
+        {{range .Categories}}
+        <div class="category-card" data-category="{{.ID}}" onclick="selectCategory('{{.ID}}')">
+            <div class="category-icon">{{.Icon}}</div>
+            <h3 class="category-name">{{.Name}}</h3>
+            <p class="category-description">{{.Description}}</p>
+        </div>
+        {{end}}
+    </div>
+</div>
+
+<style>
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.category-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: 2px solid transparent;
+    text-align: center;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #f39c12;
+}
+
+.category-card.selected {
+    border-color: #f39c12;
+    background-color: #fef9e7;
+}
+
+.category-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #f39c12;
+}
+
+.category-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.category-description {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{{end}}
+
+{{define "klippekort_package_selector"}}
+{{template "base_card_styles"}}
+{{template "klippekort_package_styles"}}
+
+<div class="klippekort-packages-section {{if .IsActive}}active{{end}}" id="packages-{{.CategoryID}}">
+    <h2 class="section-title">{{printf "%s %s" (t .Lang "klippekort.select_package_for") .CategoryName}}</h2>
+    <div class="packages-grid">
+        {{range .Packages}}
+        <div class="package-card {{if .IsPopular}}popular{{end}}" 
+             data-package="{{.ID}}" 
+             data-package-id="{{.ID}}" 
+             onclick="selectPackage('{{$.CategoryID}}', {{.ClipCount}}, {{.Price}}, '{{.Description}}')">
+            {{if .IsPopular}}
+            <div class="popular-badge">{{t $.Lang "klippekort.most_popular"}}</div>
+            {{end}}
+            <h3 class="package-name">{{.ClipCount}} {{t $.Lang "klippekort.clips"}}</h3>
+            <p class="package-description">{{.Description}}</p>
+            <div class="package-details">
+                <div class="package-price">{{printf "%.0f" (divf .Price 100)}} kr</div>
+                <div class="package-count">{{.ClipCount}} {{t $.Lang "klippekort.clips"}}</div>
+                <div class="price-per-session">{{printf "%.0f" (divf .Price .ClipCount 100)}} {{t $.Lang "klippekort.kr_per_session"}}</div>
+                {{if .Savings}}
+                <div class="savings">{{t $.Lang "klippekort.save"}} {{printf "%.0f" (divf .Savings 100)}} kr!</div>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+    </div>
+</div>
+
+<style>
+.klippekort-packages-section {
+    display: none;
+    margin-top: 3rem;
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.klippekort-packages-section.active {
+    display: block;
+}
+
+.packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.package-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.package-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #f39c12;
+}
+
+.package-card.selected {
+    border-color: #f39c12;
+    background-color: #fef9e7;
+}
+
+.package-card.popular {
+    border-color: #ff6b35;
+}
+
+.popular-badge {
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    background: #ff6b35;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.package-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.package-description {
+    color: #666;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.package-details {
+    margin-bottom: 1.5rem;
+}
+
+.package-price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #f39c12;
+    margin-bottom: 0.5rem;
+}
+
+.package-count {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.price-per-session {
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.savings {
+    color: #27ae60;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .packages-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{{end}}
+
+{{define "klippekort_purchase_summary"}}
+{{template "base_card_styles"}}
+
+<div class="purchase-section {{if .IsActive}}active{{end}}" id="purchase-section">
+    <h2 class="purchase-title">{{t .Lang "klippekort.confirm_selection"}}</h2>
+    <div class="selected-details">
+        <h3 id="selected-package-name"></h3>
+        <p id="selected-package-description"></p>
+        <div class="price" id="selected-package-price"></div>
+        <p id="selected-package-details"></p>
+    </div>
+    {{template "base_button" (dict 
+        "Class" "primary purchase-btn"
+        "OnClick" "purchasePackage()"
+        "Text" (t .Lang "klippekort.purchase_punch_card")
+    )}}
+</div>
+
+<style>
+.purchase-section {
+    display: none;
+    margin-top: 3rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.purchase-section.active {
+    display: block;
+}
+
+.purchase-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+    text-align: center;
+}
+
+.selected-details {
+    background: #fef9e7;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.selected-details h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #f39c12;
+}
+
+.selected-details .price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f39c12;
+    margin: 1rem 0;
+}
+
+.purchase-btn {
+    width: 100%;
+}
+</style>
+{{end}}

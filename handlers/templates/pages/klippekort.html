@@ -1,558 +1,334 @@
 {{define "content"}}
-<style>
-    /* Top section with existing klippekort and charges */
-    .top-section {
-        margin-bottom: 3rem;
-    }
-    
-    /* Step 1: Category Selection */
-    .step {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border: 1px solid #e0e0e0;
-    }
-    .step-title {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-        color: #333;
-        text-align: center;
-    }
-    
-    .section-group-title {
-        font-size: 1.8rem;
-        margin: 2rem auto 1.5rem auto;
-        max-width: 1200px;
-        padding: 0 2rem;
-        color: #333;
-        font-weight: 600;
-        text-align: center;
-    }
-    .categories-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    .category-card {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        transition: transform 0.2s, box-shadow 0.2s;
-        cursor: pointer;
-        border: 2px solid transparent;
-        text-align: center;
-    }
-    .category-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        border-color: #007cba;
-    }
-    .category-card.selected {
-        border-color: #007cba;
-        background-color: #f0f8ff;
-    }
-    .category-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        color: #007cba;
-    }
-    .category-name {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #333;
-    }
-    .category-description {
-        color: #666;
-        font-size: 0.9rem;
-    }
-    
-    /* Step 2: Package Selection */
-    .packages-section {
-        display: none;
-        margin-top: 3rem;
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border: 1px solid #e0e0e0;
-    }
-    .packages-section.active {
-        display: block;
-    }
-    .packages-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    .package-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        transition: transform 0.2s, box-shadow 0.2s;
-        position: relative;
-        border: 2px solid transparent;
-        cursor: pointer;
-    }
-    .package-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        border-color: #007cba;
-    }
-    .package-card.selected {
-        border-color: #007cba;
-        background-color: #f0f8ff;
-    }
-    .package-card.popular {
-        border-color: #ff6b35;
-    }
-    .popular-badge {
-        position: absolute;
-        top: -10px;
-        right: 15px;
-        background: #ff6b35;
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    .package-name {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #333;
-    }
-    .package-description {
-        color: #666;
-        margin-bottom: 1rem;
-        font-size: 0.9rem;
-    }
-    .package-details {
-        margin-bottom: 1.5rem;
-    }
-    .package-price {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #007cba;
-        margin-bottom: 0.5rem;
-    }
-    .package-count {
-        font-size: 1rem;
-        color: #666;
-        margin-bottom: 0.5rem;
-    }
-    .price-per-session {
-        font-size: 0.9rem;
-        color: #333;
-        font-weight: 500;
-    }
-    .savings {
-        color: #27ae60;
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-    }
-    
-    /* Purchase Section */
-    .purchase-section {
-        display: none;
-        margin-top: 3rem;
-        padding: 2rem;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .purchase-section.active {
-        display: block;
-    }
-    .purchase-title {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-        color: #333;
-        text-align: center;
-    }
-    .selected-details {
-        background: #f0f8ff;
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin-bottom: 2rem;
-        text-align: center;
-    }
-    .selected-details h3 {
-        font-size: 1.25rem;
-        margin-bottom: 0.5rem;
-        color: #007cba;
-    }
-    .selected-details .price {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #007cba;
-        margin: 1rem 0;
-    }
-    .purchase-btn {
-        width: 100%;
-        padding: 1rem 2rem;
-        background-color: #007cba;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    .purchase-btn:hover {
-        background-color: #005a87;
-    }
-    
-    @media (max-width: 768px) {
-        .categories-grid, .packages-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .top-section {
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-    }
-</style>
-
 {{template "navigation" .}}
 
-<main class="main">
-    <h1 class="page-title">Behandle klipp</h1>
-    <p class="page-description">
-        Rediger dette seinere.
-    </p>
+<main class="main-content user-content">
+    <h1 class="page-title user-title">{{t .Lang "klippekort.manage_punch_cards"}}</h1>
+    <p class="page-description user-description">{{t .Lang "klippekort.page_description"}}</p>
     
     <!-- Top section with user's existing klippekort and charges -->
-    <div class="top-section two-column-grid">
-        <div class="module no-border klippekort-mine-module">
-            <h2 class="module-title">Klippekorta mine</h2>
+    <div class="user-grid two-column" style="margin-bottom: 3rem;">
+        <div class="content-section klippekort-section">
+            <h2 class="section-title">{{t .Lang "klippekort.my_punch_cards"}}</h2>
             <div id="user-klippekort-container">
-                <!-- This will be loaded via AJAX -->
-                <div class="loading-placeholder">Laster klippekort...</div>
+                <div class="loading-placeholder">{{t .Lang "klippekort.loading_punch_cards"}}</div>
             </div>
         </div>
         
-        <div class="module no-border charges-module">
-            <h2 class="module-title">Belastninger</h2>
+        <div class="content-section charges-section">
+            <h2 class="section-title">{{t .Lang "klippekort.charges"}}</h2>
             <div id="klippekort-charges-container">
-                <div class="loading-placeholder">Laster belastninger...</div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Step 1: Category Selection -->
-    <h1 class="page-title">Kjøp klipp</h1>
-    <p class="page-description">
-        Velg type trening og antall klipp. Jo flere klipp du kjøper, desto mindre blir prisen per økt.
-    </p>
-    <div class="step" id="step1">
-        <h2 class="step-title">Steg 1: Velg type trening</h2>
-        <div class="categories-grid">
-            <div class="category-card" data-category="gruppetimer-sal" onclick="selectCategory('gruppetimer-sal')">
-                <div class="category-icon">🧘‍♀️</div>
-                <h3 class="category-name">Gruppetimer Sal</h3>
-                <p class="category-description">Yoga, Pilates Mat, og andre sal-baserte gruppetimer</p>
-            </div>
-            
-            <div class="category-card" data-category="reformer-apparatus" onclick="selectCategory('reformer-apparatus')">
-                <div class="category-icon">💪</div>
-                <h3 class="category-name">Reformer/Apparatus</h3>
-                <p class="category-description">Spesialisert Pilates utstyr og apparatus-trening</p>
-            </div>
-            
-            <div class="category-card" data-category="self-practice" onclick="selectCategory('self-practice')">
-                <div class="category-icon">🏃‍♂️</div>
-                <h3 class="category-name">Self Practice Pilates Apparatus</h3>
-                <p class="category-description">Selvstendig trening på Pilates apparatus</p>
-            </div>
-            
-            <div class="category-card" data-category="online-gruppetimer" onclick="selectCategory('online-gruppetimer')">
-                <div class="category-icon">💻</div>
-                <h3 class="category-name">Online Gruppetimer</h3>
-                <p class="category-description">Live streaming og on-demand klasser</p>
-            </div>
-            
-            <div class="category-card" data-category="personlig-trening" onclick="selectCategory('personlig-trening')">
-                <div class="category-icon">👨‍💼</div>
-                <h3 class="category-name">Personlig Trening</h3>
-                <p class="category-description">One-on-one trening med personlig trener</p>
-            </div>
-            
-            <div class="category-card" data-category="stressmestring" onclick="selectCategory('stressmestring')">
-                <div class="category-icon">🧠</div>
-                <h3 class="category-name">Stressmestring</h3>
-                <p class="category-description">Avslapning, meditasjon og stresshåndtering</p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Step 2: Package Selection for each category -->
-    <div class="packages-section" id="packages-gruppetimer-sal">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Gruppetimer Sal</h2>
-        <div class="packages-grid">
-            <div class="package-card" data-package="gruppetimer-1" data-package-id="1" onclick="selectPackage('gruppetimer-sal', 1, 250, 'Prøv en gang')">
-                <h3 class="package-name">1 klipp</h3>
-                <p class="package-description">Prøv en gang</p>
-                <div class="package-details">
-                    <div class="package-price">250 kr</div>
-                    <div class="package-count">1 klipp</div>
-                    <div class="price-per-session">250 kr per økt</div>
-                </div>
-            </div>
-            
-            <div class="package-card" data-package="gruppetimer-5" data-package-id="2" onclick="selectPackage('gruppetimer-sal', 5, 1100, 'Perfekt for å prøve ut')">
-                <h3 class="package-name">5 klipp</h3>
-                <p class="package-description">Perfekt for å prøve ut</p>
-                <div class="package-details">
-                    <div class="package-price">1100 kr</div>
-                    <div class="package-count">5 klipp</div>
-                    <div class="price-per-session">220 kr per økt</div>
-                    <div class="savings">Spar 150 kr!</div>
-                </div>
-            </div>
-            
-            <div class="package-card popular" data-package="gruppetimer-10" data-package-id="3" onclick="selectPackage('gruppetimer-sal', 10, 2000, 'Mest populære pakke')">
-                <div class="popular-badge">Mest populær</div>
-                <h3 class="package-name">10 klipp</h3>
-                <p class="package-description">Mest populære pakke</p>
-                <div class="package-details">
-                    <div class="package-price">2000 kr</div>
-                    <div class="package-count">10 klipp</div>
-                    <div class="price-per-session">200 kr per økt</div>
-                    <div class="savings">Spar 500 kr!</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Reformer/Apparatus packages -->
-    <div class="packages-section" id="packages-reformer-apparatus">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Reformer/Apparatus</h2>
-        <div class="packages-grid">
-            <div class="package-card" data-package="reformer-1" data-package-id="4" onclick="selectPackage('reformer-apparatus', 1, 300, 'Prøv en gang')">
-                <h3 class="package-name">1 klipp</h3>
-                <p class="package-description">Prøv en gang</p>
-                <div class="package-details">
-                    <div class="package-price">300 kr</div>
-                    <div class="package-count">1 klipp</div>
-                    <div class="price-per-session">300 kr per økt</div>
-                </div>
-            </div>
-            
-            <div class="package-card" data-package="reformer-5" data-package-id="5" onclick="selectPackage('reformer-apparatus', 5, 1400, 'Perfekt for å prøve ut')">
-                <h3 class="package-name">5 klipp</h3>
-                <p class="package-description">Perfekt for å prøve ut</p>
-                <div class="package-details">
-                    <div class="package-price">1400 kr</div>
-                    <div class="package-count">5 klipp</div>
-                    <div class="price-per-session">280 kr per økt</div>
-                    <div class="savings">Spar 100 kr!</div>
-                </div>
-            </div>
-            
-            <div class="package-card popular" data-package="reformer-10" data-package-id="6" onclick="selectPackage('reformer-apparatus', 10, 2500, 'Mest populære pakke')">
-                <div class="popular-badge">Mest populær</div>
-                <h3 class="package-name">10 klipp</h3>
-                <p class="package-description">Mest populære pakke</p>
-                <div class="package-details">
-                    <div class="package-price">2500 kr</div>
-                    <div class="package-count">10 klipp</div>
-                    <div class="price-per-session">250 kr per økt</div>
-                    <div class="savings">Spar 500 kr!</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Self Practice packages -->
-    <div class="packages-section" id="packages-self-practice">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Self Practice Pilates Apparatus</h2>
-        <div class="packages-grid">
-            <div class="package-card" data-package="self-practice-5" onclick="selectPackage('self-practice', 5, 800, 'Perfekt for å prøve ut')">
-                <h3 class="package-name">5 klipp</h3>
-                <p class="package-description">Perfekt for å prøve ut</p>
-                <div class="package-details">
-                    <div class="package-price">800 kr</div>
-                    <div class="package-count">5 klipp</div>
-                    <div class="price-per-session">160 kr per økt</div>
-                </div>
-            </div>
-            
-            <div class="package-card popular" data-package="self-practice-10" onclick="selectPackage('self-practice', 10, 1400, 'Mest populære pakke')">
-                <div class="popular-badge">Mest populær</div>
-                <h3 class="package-name">10 klipp</h3>
-                <p class="package-description">Mest populære pakke</p>
-                <div class="package-details">
-                    <div class="package-price">1400 kr</div>
-                    <div class="package-count">10 klipp</div>
-                    <div class="price-per-session">140 kr per økt</div>
-                    <div class="savings">Spar 200 kr!</div>
-                </div>
-            </div>
-            
-            <div class="package-card" data-package="self-practice-20" onclick="selectPackage('self-practice', 20, 2400, 'Beste verdi')">
-                <h3 class="package-name">20 klipp</h3>
-                <p class="package-description">Beste verdi</p>
-                <div class="package-details">
-                    <div class="package-price">2400 kr</div>
-                    <div class="package-count">20 klipp</div>
-                    <div class="price-per-session">120 kr per økt</div>
-                    <div class="savings">Spar 800 kr!</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Online Gruppetimer packages -->
-    <div class="packages-section" id="packages-online-gruppetimer">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Online Gruppetimer</h2>
-        <div class="packages-grid">
-            <div class="package-card" data-package="online-5" onclick="selectPackage('online-gruppetimer', 5, 600, 'Perfekt for å prøve ut')">
-                <h3 class="package-name">5 klipp</h3>
-                <p class="package-description">Perfekt for å prøve ut</p>
-                <div class="package-details">
-                    <div class="package-price">600 kr</div>
-                    <div class="package-count">5 klipp</div>
-                    <div class="price-per-session">120 kr per økt</div>
-                </div>
-            </div>
-            
-            <div class="package-card popular" data-package="online-10" onclick="selectPackage('online-gruppetimer', 10, 1000, 'Mest populære pakke')">
-                <div class="popular-badge">Mest populær</div>
-                <h3 class="package-name">10 klipp</h3>
-                <p class="package-description">Mest populære pakke</p>
-                <div class="package-details">
-                    <div class="package-price">1000 kr</div>
-                    <div class="package-count">10 klipp</div>
-                    <div class="price-per-session">100 kr per økt</div>
-                    <div class="savings">Spar 200 kr!</div>
-                </div>
-            </div>
-            
-            <div class="package-card" data-package="online-20" onclick="selectPackage('online-gruppetimer', 20, 1600, 'Beste verdi')">
-                <h3 class="package-name">20 klipp</h3>
-                <p class="package-description">Beste verdi</p>
-                <div class="package-details">
-                    <div class="package-price">1600 kr</div>
-                    <div class="package-count">20 klipp</div>
-                    <div class="price-per-session">80 kr per økt</div>
-                    <div class="savings">Spar 800 kr!</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Personlig Trening packages -->
-    <div class="packages-section" id="packages-personlig-trening">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Personlig Trening</h2>
-        <div class="packages-grid">
-            <div class="package-card" data-package="personlig-5" onclick="selectPackage('personlig-trening', 5, 4500, 'Perfekt for å prøve ut')">
-                <h3 class="package-name">5 klipp</h3>
-                <p class="package-description">Perfekt for å prøve ut</p>
-                <div class="package-details">
-                    <div class="package-price">4500 kr</div>
-                    <div class="package-count">5 klipp</div>
-                    <div class="price-per-session">900 kr per økt</div>
-                </div>
-            </div>
-            
-            <div class="package-card popular" data-package="personlig-10" onclick="selectPackage('personlig-trening', 10, 8000, 'Mest populære pakke')">
-                <div class="popular-badge">Mest populær</div>
-                <h3 class="package-name">10 klipp</h3>
-                <p class="package-description">Mest populære pakke</p>
-                <div class="package-details">
-                    <div class="package-price">8000 kr</div>
-                    <div class="package-count">10 klipp</div>
-                    <div class="price-per-session">800 kr per økt</div>
-                    <div class="savings">Spar 1000 kr!</div>
-                </div>
-            </div>
-            
-            <div class="package-card" data-package="personlig-20" onclick="selectPackage('personlig-trening', 20, 14000, 'Beste verdi')">
-                <h3 class="package-name">20 klipp</h3>
-                <p class="package-description">Beste verdi</p>
-                <div class="package-details">
-                    <div class="package-price">14000 kr</div>
-                    <div class="package-count">20 klipp</div>
-                    <div class="price-per-session">700 kr per økt</div>
-                    <div class="savings">Spar 4000 kr!</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Stressmestring packages -->
-    <div class="packages-section" id="packages-stressmestring">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Stressmestring</h2>
-        <div class="packages-grid">
-            <div class="package-card" data-package="stress-5" onclick="selectPackage('stressmestring', 5, 750, 'Perfekt for å prøve ut')">
-                <h3 class="package-name">5 klipp</h3>
-                <p class="package-description">Perfekt for å prøve ut</p>
-                <div class="package-details">
-                    <div class="package-price">750 kr</div>
-                    <div class="package-count">5 klipp</div>
-                    <div class="price-per-session">150 kr per økt</div>
-                </div>
-            </div>
-            
-            <div class="package-card popular" data-package="stress-10" onclick="selectPackage('stressmestring', 10, 1300, 'Mest populære pakke')">
-                <div class="popular-badge">Mest populær</div>
-                <h3 class="package-name">10 klipp</h3>
-                <p class="package-description">Mest populære pakke</p>
-                <div class="package-details">
-                    <div class="package-price">1300 kr</div>
-                    <div class="package-count">10 klipp</div>
-                    <div class="price-per-session">130 kr per økt</div>
-                    <div class="savings">Spar 200 kr!</div>
-                </div>
-            </div>
-            
-            <div class="package-card" data-package="stress-20" onclick="selectPackage('stressmestring', 20, 2200, 'Beste verdi')">
-                <h3 class="package-name">20 klipp</h3>
-                <p class="package-description">Beste verdi</p>
-                <div class="package-details">
-                    <div class="package-price">2200 kr</div>
-                    <div class="package-count">20 klipp</div>
-                    <div class="price-per-session">110 kr per økt</div>
-                    <div class="savings">Spar 800 kr!</div>
-                </div>
+                <div class="loading-placeholder">{{t .Lang "klippekort.loading_charges"}}</div>
             </div>
         </div>
     </div>
     
     <!-- Purchase Section -->
-    <div class="purchase-section" id="purchase-section">
-        <h2 class="purchase-title">Bekreft ditt valg</h2>
-        <div class="selected-details">
-            <h3 id="selected-package-name"></h3>
-            <p id="selected-package-description"></p>
-            <div class="price" id="selected-package-price"></div>
-            <p id="selected-package-details"></p>
+    <h1 class="page-title">{{t .Lang "klippekort.purchase_clips"}}</h1>
+    <p class="page-description">{{t .Lang "klippekort.purchase_description"}}</p>
+    
+    <div class="user-grid single-column">
+        <!-- Category Selector -->
+        <div class="klippekort-category-selector">
+            <h2 class="section-title">{{t .Lang "klippekort.select_training_type"}}</h2>
+            <div class="categories-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
         </div>
-        <button class="purchase-btn" onclick="purchasePackage()">Kjøp klippekort</button>
+        
+        <!-- Package Selectors -->
+        <div class="klippekort-packages-section" id="packages-gruppetimer-sal">
+            <h2 class="section-title">Velg antall klipp for Gruppetimer Sal</h2>
+            <div class="packages-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="klippekort-packages-section" id="packages-reformer-apparatus">
+            <h2 class="section-title">Velg antall klipp for Reformer/Apparatus</h2>
+            <div class="packages-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Purchase Summary -->
+        <div class="purchase-section" id="purchase-section">
+            <h2 class="purchase-title">{{t .Lang "klippekort.confirm_selection"}}</h2>
+            <div class="selected-details">
+                <h3 id="selected-package-name"></h3>
+                <p id="selected-package-description"></p>
+                <div class="price" id="selected-package-price"></div>
+                <p id="selected-package-details"></p>
+            </div>
+            <button class="base-btn primary purchase-btn" onclick="purchasePackage()">
+                {{t .Lang "klippekort.purchase_punch_card"}}
+            </button>
+        </div>
     </div>
 </main>
+
+{{template "common_styles"}}
+{{template "module_styles"}}
+{{template "base_card_styles"}}
+{{template "base_button_styles"}}
+{{template "klippekort_actions_script"}}
+
+<style>
+/* Category Selector Styles */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.category-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: 2px solid transparent;
+    text-align: center;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #f39c12;
+}
+
+.category-card.selected {
+    border-color: #f39c12;
+    background-color: #fef9e7;
+}
+
+.category-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #f39c12;
+}
+
+.category-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.category-description {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Package Selector Styles */
+.klippekort-packages-section {
+    display: none;
+    margin-top: 3rem;
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.klippekort-packages-section.active {
+    display: block;
+}
+
+.packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.package-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.package-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #f39c12;
+}
+
+.package-card.selected {
+    border-color: #f39c12;
+    background-color: #fef9e7;
+}
+
+.package-card.popular {
+    border-color: #ff6b35;
+}
+
+.popular-badge {
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    background: #ff6b35;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.package-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.package-description {
+    color: #666;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.package-details {
+    margin-bottom: 1.5rem;
+}
+
+.package-price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #f39c12;
+    margin-bottom: 0.5rem;
+}
+
+.package-count {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.price-per-session {
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.savings {
+    color: #27ae60;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Purchase Summary Styles */
+.purchase-section {
+    display: none;
+    margin-top: 3rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.purchase-section.active {
+    display: block;
+}
+
+.purchase-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+    text-align: center;
+}
+
+.selected-details {
+    background: #fef9e7;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.selected-details h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #f39c12;
+}
+
+.selected-details .price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f39c12;
+    margin: 1rem 0;
+}
+
+.purchase-btn {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .categories-grid, .packages-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 
 <script>
     let selectedCategory = null;
     let selectedPackage = null;
+    
+    // Category data for the selector
+    const categoryData = {
+        categories: [
+            {
+                id: 'gruppetimer-sal',
+                icon: '🧘‍♀️',
+                name: 'Gruppetimer Sal',
+                description: 'Yoga, Pilates Mat, og andre sal-baserte gruppetimer'
+            },
+            {
+                id: 'reformer-apparatus',
+                icon: '💪',
+                name: 'Reformer/Apparatus',
+                description: 'Spesialisert Pilates utstyr og apparatus-trening'
+            },
+            {
+                id: 'self-practice',
+                icon: '🏃‍♂️',
+                name: 'Self Practice Pilates Apparatus',
+                description: 'Selvstendig trening på Pilates apparatus'
+            },
+            {
+                id: 'online-gruppetimer',
+                icon: '💻',
+                name: 'Online Gruppetimer',
+                description: 'Live streaming og on-demand klasser'
+            },
+            {
+                id: 'personlig-trening',
+                icon: '👨‍💼',
+                name: 'Personlig Trening',
+                description: 'One-on-one trening med personlig trener'
+            },
+            {
+                id: 'stressmestring',
+                icon: '🧠',
+                name: 'Stressmestring',
+                description: 'Avslapning, meditasjon og stresshåndtering'
+            }
+        ]
+    };
     
     function selectCategory(category) {
         // Clear previous selections
         document.querySelectorAll('.category-card').forEach(card => {
             card.classList.remove('selected');
         });
-        document.querySelectorAll('.packages-section').forEach(section => {
+        document.querySelectorAll('.klippekort-packages-section').forEach(section => {
             section.classList.remove('active');
         });
         document.getElementById('purchase-section').classList.remove('active');
@@ -597,8 +373,8 @@
         
         document.getElementById('selected-package-name').textContent = clips + ' klipp ' + categoryNames[category];
         document.getElementById('selected-package-description').textContent = description;
-        document.getElementById('selected-package-price').textContent = price + ' kr';
-        document.getElementById('selected-package-details').textContent = clips + ' klipp • ' + Math.round(selectedPackage.pricePerSession) + ' kr per økt';
+        document.getElementById('selected-package-price').textContent = (price / 100) + ' kr';
+        document.getElementById('selected-package-details').textContent = clips + ' klipp • ' + Math.round(selectedPackage.pricePerSession / 100) + ' kr per økt';
         
         // Show purchase section
         document.getElementById('purchase-section').classList.add('active');
@@ -612,7 +388,7 @@
         }
         
         // Show alert about Stripe integration being incomplete
-        alert('Betalingsintegrasjon er ikke komplett. Stripe-integrasjon er under utvikling. Klippekort: ' + selectedPackage.clips + ' klipp for ' + selectedPackage.price + ' kr');
+        alert('Betalingsintegrasjon er ikke komplett. Stripe-integrasjon er under utvikling. Klippekort: ' + selectedPackage.clips + ' klipp for ' + (selectedPackage.price / 100) + ' kr');
         
         // Find the package ID based on selected package details
         let packageId = null;
@@ -627,7 +403,7 @@
             return;
         }
         
-        if (!confirm('Er du sikker på at du vil kjøpe ' + selectedPackage.clips + ' klipp for ' + selectedPackage.price + ' kr?')) {
+        if (!confirm('Er du sikker på at du vil kjøpe ' + selectedPackage.clips + ' klipp for ' + (selectedPackage.price / 100) + ' kr?')) {
             return;
         }
         
@@ -649,7 +425,7 @@
             }
         })
         .then(data => {
-            alert('Klippekort kjøpt! ' + selectedPackage.clips + ' klipp for ' + selectedPackage.price + ' kr');
+            alert('Klippekort kjøpt! ' + selectedPackage.clips + ' klipp for ' + (selectedPackage.price / 100) + ' kr');
             // Reload the user's klippekort display
             loadUserKlippekort();
             loadKlippekortCharges();
@@ -696,11 +472,14 @@
         loadUserKlippekort();
         loadKlippekortCharges();
         
+        // Generate category selector HTML
+        generateCategorySelector();
+        generatePackageSelectors();
+        
         // Check if we have a fill parameter to auto-select a category
         const urlParams = new URLSearchParams(window.location.search);
         const fillCategory = urlParams.get('fill');
         if (fillCategory) {
-            // Map category names to category IDs
             const categoryMap = {
                 'Gruppetimer Sal': 'gruppetimer-sal',
                 'Reformer/Apparatus': 'reformer-apparatus',
@@ -713,7 +492,6 @@
             const categoryId = categoryMap[fillCategory];
             if (categoryId) {
                 selectCategory(categoryId);
-                // Pre-select the 10 klipp option (highest allowed)
                 setTimeout(() => {
                     const tenKlippCard = document.querySelector(`#packages-${categoryId} .package-card[data-package*="10"]`);
                     if (tenKlippCard) {
@@ -724,10 +502,67 @@
         }
     });
     
+    function generateCategorySelector() {
+        const container = document.querySelector('.klippekort-category-selector .categories-grid');
+        if (!container) return;
+        
+        container.innerHTML = categoryData.categories.map(category => `
+            <div class="category-card" data-category="${category.id}" onclick="selectCategory('${category.id}')">
+                <div class="category-icon">${category.icon}</div>
+                <h3 class="category-name">${category.name}</h3>
+                <p class="category-description">${category.description}</p>
+            </div>
+        `).join('');
+    }
+    
+    function generatePackageSelectors() {
+        // Package data would normally come from the backend
+        // For now, we'll generate the HTML dynamically
+        const packageData = {
+            'gruppetimer-sal': [
+                { id: 1, clips: 1, price: 25000, description: 'Prøv en gang', popular: false, savings: 0 },
+                { id: 2, clips: 5, price: 110000, description: 'Perfekt for å prøve ut', popular: false, savings: 15000 },
+                { id: 3, clips: 10, price: 200000, description: 'Mest populære pakke', popular: true, savings: 50000 }
+            ],
+            'reformer-apparatus': [
+                { id: 4, clips: 1, price: 30000, description: 'Prøv en gang', popular: false, savings: 0 },
+                { id: 5, clips: 5, price: 140000, description: 'Perfekt for å prøve ut', popular: false, savings: 10000 },
+                { id: 6, clips: 10, price: 250000, description: 'Mest populære pakke', popular: true, savings: 50000 }
+            ]
+            // Add other categories as needed
+        };
+        
+        // Generate package selector HTML for each category
+        Object.keys(packageData).forEach(categoryId => {
+            const packages = packageData[categoryId];
+            const container = document.getElementById(`packages-${categoryId}`);
+            if (container) {
+                const packagesGrid = container.querySelector('.packages-grid');
+                if (packagesGrid) {
+                    packagesGrid.innerHTML = packages.map(pkg => `
+                        <div class="package-card ${pkg.popular ? 'popular' : ''}" 
+                             data-package="${pkg.id}" 
+                             data-package-id="${pkg.id}" 
+                             onclick="selectPackage('${categoryId}', ${pkg.clips}, ${pkg.price}, '${pkg.description}')">
+                            ${pkg.popular ? '<div class="popular-badge">Mest populær</div>' : ''}
+                            <h3 class="package-name">${pkg.clips} klipp</h3>
+                            <p class="package-description">${pkg.description}</p>
+                            <div class="package-details">
+                                <div class="package-price">${Math.round(pkg.price / 100)} kr</div>
+                                <div class="package-count">${pkg.clips} klipp</div>
+                                <div class="price-per-session">${Math.round(pkg.price / pkg.clips / 100)} kr per økt</div>
+                                ${pkg.savings ? `<div class="savings">Spar ${Math.round(pkg.savings / 100)} kr!</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+        });
+    }
+    
     // Function called from dashboard to fill up klippekort
     function fillUpKlippekort(category) {
-        // Auto-select category and jump to 10 klipp option
-        window.location.href = '/elev/klippekort?fill=' + encodeURIComponent(category) + '#kjop-klipp';
+        window.location.href = '/elev/klippekort?fill=' + encodeURIComponent(category) + '#purchase';
     }
 </script>
 {{end}}
