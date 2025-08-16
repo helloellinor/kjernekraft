@@ -1,0 +1,341 @@
+{{define "shared_styles"}}
+{{template "common_styles"}}
+{{template "module_styles"}}
+{{template "base_card_styles"}}
+{{template "base_button_styles"}}
+{{template "base_form_styles"}}
+
+<style>
+/* Shared Layout Styles */
+.content-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 2px solid #e0e0e0;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+.loading-placeholder {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 2rem;
+}
+
+/* Status Indicators */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-paused {
+    background: #cce7ff;
+    color: #004085;
+}
+
+.status-expired {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* Error and Success Messages */
+.error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #f5c6cb;
+    margin: 1rem 0;
+}
+
+.success {
+    background: #d4edda;
+    color: #155724;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #c3e6cb;
+    margin: 1rem 0;
+}
+
+.warning {
+    background: #fff3cd;
+    color: #856404;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ffeaa7;
+    margin: 1rem 0;
+}
+
+.info {
+    background: #cce7ff;
+    color: #004085;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #b8daff;
+    margin: 1rem 0;
+}
+
+/* Progress Bars */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.membership {
+    background: linear-gradient(90deg, #007cba, #005a87);
+}
+
+.progress-fill.klippekort {
+    background: linear-gradient(90deg, #f39c12, #e67e22);
+}
+
+.progress-fill.success {
+    background: linear-gradient(90deg, #28a745, #218838);
+}
+
+.progress-fill.warning {
+    background: linear-gradient(90deg, #ffc107, #e0a800);
+}
+
+/* Special Offers and Badges */
+.special-offer-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transform: rotate(10deg);
+    z-index: 5;
+}
+
+.popular-badge {
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    background: #ff6b35;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 5;
+}
+
+/* Price Display Components */
+.price-display {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.current-price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #007cba;
+    margin-bottom: 0.5rem;
+}
+
+.original-price {
+    font-size: 1.1rem;
+    color: #666;
+    text-decoration: line-through;
+    margin-bottom: 0.5rem;
+}
+
+.discount-badge {
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* Detail Rows */
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.detail-row:last-child {
+    margin-bottom: 0;
+    font-weight: 600;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.detail-row.highlight {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+/* Responsive Utilities */
+.hide-mobile {
+    display: block;
+}
+
+.show-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none;
+    }
+    
+    .show-mobile {
+        display: block;
+    }
+    
+    .content-section {
+        padding: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+    }
+    
+    .current-price {
+        font-size: 2rem;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+.slide-up {
+    animation: slideUp 0.3s ease;
+}
+
+.bounce-in {
+    animation: bounceIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+    .fade-in, .slide-up, .bounce-in {
+        animation: none;
+    }
+    
+    .progress-fill {
+        transition: none;
+    }
+    
+    .category-card, .package-card, .membership-card, .klippekort-card {
+        transition: none;
+    }
+}
+
+/* Focus improvements for keyboard navigation */
+.category-card:focus,
+.package-card:focus,
+.membership-card:focus,
+.klippekort-card:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .category-card,
+    .package-card,
+    .membership-card,
+    .klippekort-card {
+        border-width: 3px;
+    }
+    
+    .section-title {
+        border-bottom-width: 3px;
+    }
+}
+</style>
+{{end}}

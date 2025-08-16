@@ -1,0 +1,156 @@
+{{define "admin_membership_management"}}
+<div class="content-section admin-membership-section">
+    <h2 class="section-title">{{t .Lang "admin.membership_management"}}</h2>
+    
+    <div class="admin-grid two-column">
+        <!-- Membership Types Management -->
+        <div class="membership-types-section">
+            <h3>{{t .Lang "admin.membership_types"}}</h3>
+            <div id="admin-membership-types">
+                {{range .MembershipTypes}}
+                {{template "membership_card" (dict 
+                    "ID" .ID
+                    "Name" .Name
+                    "Price" .Price
+                    "CommitmentMonths" .CommitmentMonths
+                    "Description" .Description
+                    "IsSpecialOffer" .IsSpecialOffer
+                    "AdminMode" true
+                    "Status" "active"
+                )}}
+                {{end}}
+            </div>
+            
+            <button class="base-btn success" onclick="addNewMembershipType()">
+                {{t .Lang "admin.add_new_membership_type"}}
+            </button>
+        </div>
+        
+        <!-- Membership Statistics -->
+        <div class="membership-stats-section">
+            <h3>{{t .Lang "admin.membership_statistics"}}</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{.Stats.ActiveMemberships}}</div>
+                    <div class="stat-label">{{t .Lang "admin.active_memberships"}}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{.Stats.FrozenMemberships}}</div>
+                    <div class="stat-label">{{t .Lang "admin.frozen_memberships"}}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{.Stats.MonthlyRevenue}}</div>
+                    <div class="stat-label">{{t .Lang "admin.monthly_revenue"}}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{.Stats.ChurnRate}}%</div>
+                    <div class="stat-label">{{t .Lang "admin.churn_rate"}}</div>
+                </div>
+            </div>
+            
+            <!-- Membership Rules Section -->
+            <div class="membership-rules-section">
+                {{template "admin_membership_rules" .}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-membership-section {
+    border-left: 4px solid #007cba;
+}
+
+.membership-types-section,
+.membership-stats-section {
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 2px solid #e0e0e0;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: #007cba;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #007cba;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.membership-rules-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e0e0e0;
+}
+</style>
+
+<script>
+function addNewMembershipType() {
+    // Create a new membership type
+    const name = prompt('{{t .Lang "admin.enter_membership_name"}}:');
+    if (!name) return;
+    
+    const price = prompt('{{t .Lang "admin.enter_monthly_price_kr"}}:');
+    if (!price || isNaN(price)) return;
+    
+    const commitmentMonths = prompt('{{t .Lang "admin.enter_commitment_months"}} (0 for no binding):');
+    if (commitmentMonths === null || isNaN(commitmentMonths)) return;
+    
+    const description = prompt('{{t .Lang "admin.enter_description"}}:') || '';
+    
+    const isSpecialOffer = confirm('{{t .Lang "admin.mark_as_special_offer"}}?');
+    
+    // Call API to create new membership type
+    fetch('/api/admin/membership-type', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: name,
+            price: parseInt(price) * 100, // Convert to cents
+            commitment_months: parseInt(commitmentMonths),
+            description: description,
+            is_special_offer: isSpecialOffer
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('{{t .Lang "admin.membership_type_created"}}');
+            window.location.reload();
+        } else {
+            return response.text().then(text => {
+                throw new Error(text);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{t .Lang "admin.error_creating_membership_type"}}: ' + error.message);
+    });
+}
+</script>
+{{end}}
