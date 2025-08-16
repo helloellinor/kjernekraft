@@ -1,11 +1,10 @@
 /* Shared Event Card Styles */
 .event-card {
   background: white;
-  border: 1px solid #e0e0e0;
+  box-shadow: -4px 0 0 0 #007cba, 0 2px 4px rgba(0,0,0,0.1);
   border-radius: 6px;
   padding: 0.75rem;
   transition: transform 0.2s, box-shadow 0.2s;
-  border-left: 4px solid #007cba;
   cursor: pointer;
   position: relative; /* default flow positioning */
   min-width: 0; /* Allow card to shrink below content size */
@@ -38,10 +37,10 @@
 .signup-btn.waitlist { background:#ff6b35; }
 .signup-btn.waitlist:hover { background:#e55a2b; }
 /* Class type color accents */
-.event-card.yoga { border-left-color:#8e44ad; }
-.event-card.pilates { border-left-color:#27ae60; }
-.event-card.strength { border-left-color:#e74c3c; }
-.event-card.cardio { border-left-color:#f39c12; }
-.event-card.flexibility { border-left-color:#3498db; }
+.event-card.yoga { box-shadow: -4px 0 0 0 #8e44ad, 0 2px 4px rgba(0,0,0,0.1); }
+.event-card.pilates { box-shadow: -4px 0 0 0 #27ae60, 0 2px 4px rgba(0,0,0,0.1); }
+.event-card.strength { box-shadow: -4px 0 0 0 #e74c3c, 0 2px 4px rgba(0,0,0,0.1); }
+.event-card.cardio { box-shadow: -4px 0 0 0 #f39c12, 0 2px 4px rgba(0,0,0,0.1); }
+.event-card.flexibility { box-shadow: -4px 0 0 0 #3498db, 0 2px 4px rgba(0,0,0,0.1); }
 @keyframes fadeIn { from {opacity:0; transform:translateY(-6px);} to {opacity:1; transform:translateY(0);} }
 
