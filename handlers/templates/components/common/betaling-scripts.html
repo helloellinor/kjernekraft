@@ -15,11 +15,11 @@ async function loadPaymentMethods() {
     }
 }
 
-async function loadCharges(statusFilter = '') {
+async function loadCharges(typeFilter = '') {
     try {
         let url = '/api/charges';
-        if (statusFilter) {
-            url += '?status=' + encodeURIComponent(statusFilter);
+        if (typeFilter) {
+            url += '?type=' + encodeURIComponent(typeFilter);
         }
         
         const response = await fetch(url);
@@ -35,8 +35,8 @@ async function loadCharges(statusFilter = '') {
     }
 }
 
-function filterCharges(status) {
-    loadCharges(status);
+function filterCharges(type) {
+    loadCharges(type);
 }
 
 function addPaymentMethod() {

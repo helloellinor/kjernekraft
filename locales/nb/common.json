@@ -84,6 +84,10 @@
     "no_classes_today": "Ingen kommende klasser i dag",
     "loading_membership": "Laster medlemskap...",
     "loading_punch_cards": "Laster klippekort...",
+    "loading_signups": "Laster påmeldinger...",
+    "cancel_signup": "Avmeld",
+    "confirm_cancel_signup": "Er du sikker på at du vil melde deg av denne klassen?",
+    "cancel_signup_error": "Feil ved avmelding. Prøv igjen.",
     "signed_up_checkmark": "Påmeldt ✓",
     "could_not_find_class": "Kunne ikke finne klassen. Prøv å laste siden på nytt.",
     "already_signed_up": "Du er allerede påmeldt denne klassen!",
@@ -120,7 +124,11 @@
     "loading_payment_methods": "Laster betalingsmetoder...",
     "loading_charges": "Laster betalingshistorikk...",
     "filter_by_status": "Filter etter status",
-    "all_statuses": "Alle statuser"
+    "all_statuses": "Alle statuser",
+    "filter_by_type": "Filter etter type",
+    "all_types": "Alle typer",
+    "membership": "Medlemskap",
+    "klippekort": "Klippekort"
   },
   "membership": {
     "title": "Medlemskap",
@@ -132,7 +140,14 @@
     "cancel_request": "Kanseller forespørsel",
     "price_per_month": "kr/mnd",
     "commitment_months": "måneders binding",
-    "frozen_until": "Frossent til"
+    "frozen_until": "Frossent til",
+    "next_renewal": "Neste fornyelse",
+    "in": "om",
+    "days": "dager",
+    "renews_today": "Fornyes i dag",
+    "binding_expires_in": "Binding utløper om",
+    "month": "måned",
+    "months": "måneder"
   },
   "klippekort": {
     "title": "Klippekort",

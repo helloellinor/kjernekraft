@@ -84,6 +84,10 @@
     "no_classes_today": "No upcoming classes today",
     "loading_membership": "Loading membership...",
     "loading_punch_cards": "Loading punch cards...",
+    "loading_signups": "Loading signups...",
+    "cancel_signup": "Cancel signup",
+    "confirm_cancel_signup": "Are you sure you want to cancel this class signup?",
+    "cancel_signup_error": "Error cancelling signup. Please try again.",
     "signed_up_checkmark": "Signed up ✓",
     "could_not_find_class": "Could not find the class. Try refreshing the page.",
     "already_signed_up": "You are already signed up for this class!",
@@ -120,7 +124,11 @@
     "loading_payment_methods": "Loading payment methods...",
     "loading_charges": "Loading payment history...",
     "filter_by_status": "Filter by status",
-    "all_statuses": "All statuses"
+    "all_statuses": "All statuses",
+    "filter_by_type": "Filter by type",
+    "all_types": "All types",
+    "membership": "Membership",
+    "klippekort": "Punch cards"
   },
   "membership": {
     "title": "Membership",
@@ -132,7 +140,14 @@
     "cancel_request": "Cancel request",
     "price_per_month": "per month",
     "commitment_months": "month commitment",
-    "frozen_until": "Frozen until"
+    "frozen_until": "Frozen until",
+    "next_renewal": "Next renewal",
+    "in": "in",
+    "days": "days",
+    "renews_today": "Renews today",
+    "binding_expires_in": "Binding expires in",
+    "month": "month",
+    "months": "months"
   },
   "klippekort": {
     "title": "Punch cards",

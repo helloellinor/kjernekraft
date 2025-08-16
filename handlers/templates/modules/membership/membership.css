@@ -4,24 +4,28 @@
     border-radius: 12px;
     padding: 2rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border: 2px solid #e0e0e0;
     position: relative;
     max-width: 500px;
 }
 
 .membership-card.freeze_requested {
-    border-color: #ffc107;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
     background: linear-gradient(135deg, #fff9c4, #ffffff);
 }
 
 .membership-card.paused {
-    border-color: #007cba;
+    box-shadow: 0 4px 12px rgba(0, 124, 186, 0.3);
     background: linear-gradient(135deg, #e8f4fd, #ffffff);
 }
 
 .membership-card.cancelled {
-    border-color: #dc3545;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
     background: linear-gradient(135deg, #f8d7da, #ffffff);
+}
+
+.membership-card.active {
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    background: linear-gradient(135deg, #f8fff9, #ffffff);
 }
 
 .special-offer-badge {
@@ -51,31 +55,34 @@
 }
 
 .membership-status {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
+    position: absolute;
+    top: -10px;
+    left: 15px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
 }
 
 .status-active {
-    background: #d4edda;
-    color: #155724;
+    background: #28a745;
+    color: white;
 }
 
 .status-freeze_requested {
-    background: #fff3cd;
+    background: #ffc107;
     color: #856404;
 }
 
 .status-paused {
-    background: #e2e3e5;
-    color: #495057;
+    background: #007cba;
+    color: white;
 }
 
 .status-cancelled {
-    background: #f8d7da;
-    color: #721c24;
+    background: #dc3545;
+    color: white;
 }
 
 .membership-details {

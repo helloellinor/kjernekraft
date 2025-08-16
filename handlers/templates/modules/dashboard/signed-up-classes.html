@@ -1,12 +1,191 @@
 {{define "signed_up_classes_container"}}
 <div class="content-section">
     <h2 class="section-title">{{t .Lang "dashboard.signed_up"}}</h2>
-    <div class="events-grid" id="signed-up-classes">
-        <div class="activity-placeholder">
-            {{t .Lang "dashboard.no_signed_up_classes"}}
-            <br><br>
-            <a href="/elev/timeplan" class="timeplan-btn">{{t .Lang "dashboard.see_schedule"}}</a>
-        </div>
+    <div class="events-grid" id="signed-up-classes" hx-get="/api/user/signups" hx-trigger="load" hx-indicator="#loading-signups">
+        <div id="loading-signups" class="loading-placeholder">{{t .Lang "dashboard.loading_signups"}}</div>
     </div>
 </div>
+{{end}}
+
+{{define "signed_up_classes_module"}}
+{{if .HasSignups}}
+<div class="events-grid">
+    {{range .Signups}}
+    <div class="event-card signed-up">
+        <div class="event-header">
+            <h4 class="event-title">{{.Title}}</h4>
+            <span class="event-type">{{.ClassType}}</span>
+        </div>
+        <div class="event-details">
+            <div class="event-time">
+                <strong>{{.StartTime.Format "15:04"}}</strong>
+                {{if .EndTime}}
+                - {{.EndTime.Format "15:04"}}
+                {{end}}
+            </div>
+            <div class="event-date">{{.StartTime.Format "2. January 2006"}}</div>
+            {{if .Location}}
+            <div class="event-location">📍 {{.Location}}</div>
+            {{end}}
+            {{if .TeacherName}}
+            <div class="event-teacher">👨‍🏫 {{.TeacherName}}</div>
+            {{end}}
+        </div>
+        <div class="event-actions">
+            <button class="cancel-signup-btn" onclick="cancelSignup({{.ID}})">
+                {{t .Lang "dashboard.cancel_signup"}}
+            </button>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{else}}
+<div class="activity-placeholder">
+    {{t .Lang "dashboard.no_signed_up_classes"}}
+    <br><br>
+    <a href="/elev/timeplan" class="timeplan-btn">{{t .Lang "dashboard.see_schedule"}}</a>
+</div>
+{{end}}
+
+<script>
+function cancelSignup(eventId) {
+    if (confirm('{{t .Lang "dashboard.confirm_cancel_signup"}}')) {
+        fetch('/api/events/cancel-signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'event_id=' + eventId
+        })
+        .then(response => {
+            if (response.ok) {
+                // Reload the signups section
+                htmx.trigger('#signed-up-classes', 'load');
+            } else {
+                alert('{{t .Lang "dashboard.cancel_signup_error"}}');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('{{t .Lang "dashboard.cancel_signup_error"}}');
+        });
+    }
+}
+</script>
+
+<style>
+.events-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.event-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 4px solid #007cba;
+}
+
+.event-card.signed-up {
+    border-left-color: #28a745;
+    background: linear-gradient(135deg, #f8fff9, #ffffff);
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.event-title {
+    font-size: 1.1rem;
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+}
+
+.event-type {
+    background: #007cba;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.event-details {
+    margin-bottom: 1rem;
+}
+
+.event-time {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.event-date {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.event-location, .event-teacher {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.event-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.cancel-signup-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.cancel-signup-btn:hover {
+    background: #c82333;
+}
+
+.activity-placeholder {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #666;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.timeplan-btn {
+    display: inline-block;
+    background: #007cba;
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.timeplan-btn:hover {
+    background: #0056b3;
+}
+
+.loading-placeholder {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+</style>
 {{end}}
