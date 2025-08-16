@@ -1093,3 +1093,42 @@ func (db *Database) CancelUserSignupForEvent(userID, eventID int64) error {
 	_, err = db.Conn.Exec(updateQuery, eventID)
 	return err
 }
+
+// GetUserSignupsForEvents returns a map of event IDs that the user is signed up for
+func (db *Database) GetUserSignupsForEvents(userID int64, eventIDs []int64) (map[int64]bool, error) {
+	if len(eventIDs) == 0 {
+		return make(map[int64]bool), nil
+	}
+	
+	// Build query with placeholders for event IDs
+	placeholders := make([]string, len(eventIDs))
+	args := make([]interface{}, len(eventIDs)+1)
+	args[0] = userID
+	
+	for i, eventID := range eventIDs {
+		placeholders[i] = "?"
+		args[i+1] = eventID
+	}
+	
+	query := fmt.Sprintf(
+		`SELECT event_id FROM event_signups WHERE user_id = ? AND event_id IN (%s)`,
+		strings.Join(placeholders, ","),
+	)
+	
+	rows, err := db.Conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	signups := make(map[int64]bool)
+	for rows.Next() {
+		var eventID int64
+		if err := rows.Scan(&eventID); err != nil {
+			return nil, err
+		}
+		signups[eventID] = true
+	}
+	
+	return signups, rows.Err()
+}

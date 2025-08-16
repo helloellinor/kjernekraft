@@ -16,9 +16,11 @@
         {{end}}
     </div>
     <div class="event-details">
-        <button class="signup-button {{if ge .CurrentEnrolment .Capacity}}waitlist{{end}}" 
+        <button class="signup-button {{if .IsUserSignedUp}}signed-up{{else if ge .CurrentEnrolment .Capacity}}waitlist{{end}}" 
                 onclick="signupForClass({{.ID}}); event.stopPropagation();">
-            {{if lt .CurrentEnrolment .Capacity}}
+            {{if .IsUserSignedUp}}
+                Avmeld
+            {{else if lt .CurrentEnrolment .Capacity}}
                 Meld på
             {{else}}
                 Venteliste

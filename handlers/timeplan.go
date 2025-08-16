@@ -70,6 +70,25 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		weekEvents = filteredEvents
 	}
 
+	// Get user signups for these events
+	if len(weekEvents) > 0 {
+		eventIDs := make([]int64, len(weekEvents))
+		for i, event := range weekEvents {
+			eventIDs[i] = int64(event.ID)
+		}
+		
+		userSignups, err := DB.GetUserSignupsForEvents(int64(user.ID), eventIDs)
+		if err != nil {
+			// Log error but don't fail the request
+			// Just continue without signup information
+		} else {
+			// Update events with signup information
+			for i := range weekEvents {
+				weekEvents[i].IsUserSignedUp = userSignups[int64(weekEvents[i].ID)]
+			}
+		}
+	}
+
 	// Get language from cookies/request (using new system)
 	lang := GetLanguageFromRequest(r)
 	loc := GetLocalization()
