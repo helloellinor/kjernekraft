@@ -242,7 +242,7 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 	t := template.New(name).Funcs(getTemplateFuncs())
 
 	// Try to load base layout first
-	baseLayoutPath := filepath.Join(tm.basePath, "layouts", "base.html")
+	baseLayoutPath := filepath.Join(tm.basePath, "core", "layouts", "base.html")
 	if _, err := os.Stat(baseLayoutPath); err == nil {
 		var parseErr error
 		t, parseErr = t.ParseFiles(baseLayoutPath)
