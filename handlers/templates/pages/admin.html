@@ -1,21 +1,144 @@
 {{define "content"}}
 {{template "navigation" .}}
 
-<main class="main-content">
-    <h1 class="page-title">{{t .Lang "admin.title"}}</h1>
+<main class="main-content admin-content">
+    <h1 class="page-title admin-title">{{t .Lang "admin.title"}}</h1>
+    <p class="page-description admin-description">{{t .Lang "admin.description"}}</p>
     
-    {{template "admin_settings" .}}
-    
-    {{template "admin_stats_module" .Stats}}
-
-    {{template "admin_membership_rules" .}}
-
-    {{template "admin_users_table" .}}
-
-    {{template "admin_freeze_requests_table" .}}
-
-    {{template "admin_events_table" .}}
+    <div class="admin-grid single-column">
+        <!-- Admin Settings Section -->
+        <div class="content-section admin-settings-section">
+            <h2 class="section-title">{{t .Lang "admin.settings"}}</h2>
+            <div class="section-content">
+                {{template "admin_settings" .}}
+            </div>
+        </div>
+        
+        <!-- Statistics Section -->
+        <div class="content-section admin-stats-section">
+            <h2 class="section-title">{{t .Lang "admin.statistics"}}</h2>
+            <div class="section-content">
+                {{template "admin_stats_module" .Stats}}
+            </div>
+        </div>
+        
+        <!-- Membership Management Section -->
+        <div class="content-section admin-membership-section">
+            <h2 class="section-title">{{t .Lang "admin.membership_management"}}</h2>
+            <div class="section-content">
+                {{template "admin_membership_rules" .}}
+            </div>
+        </div>
+        
+        <!-- User Management Section -->
+        <div class="content-section admin-users-section">
+            <h2 class="section-title">{{t .Lang "admin.user_management"}}</h2>
+            <div class="section-content">
+                {{template "admin_users_table" .}}
+            </div>
+        </div>
+        
+        <!-- Freeze Requests Section -->
+        <div class="content-section admin-freeze-section">
+            <h2 class="section-title">{{t .Lang "admin.freeze_requests"}}</h2>
+            <div class="section-content">
+                {{template "admin_freeze_requests_table" .}}
+            </div>
+        </div>
+        
+        <!-- Events Management Section -->
+        <div class="content-section admin-events-section">
+            <h2 class="section-title">{{t .Lang "admin.events_management"}}</h2>
+            <div class="section-content">
+                {{template "admin_events_table" .}}
+            </div>
+        </div>
+    </div>
 </main>
 
+{{template "common_styles"}}
+{{template "module_styles"}}
+{{template "base_card_styles"}}
+{{template "base_button_styles"}}
 {{template "admin_scripts" .}}
+{{template "membership_actions_script"}}
+{{template "klippekort_actions_script"}}
+
+<style>
+.admin-content {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.admin-title {
+    color: #333;
+    border-bottom: 3px solid #28a745;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.admin-title::before {
+    content: "⚙️ ";
+    margin-right: 0.5rem;
+}
+
+.admin-description {
+    background: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #28a745;
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+.admin-grid {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+}
+
+.admin-grid.single-column {
+    grid-template-columns: 1fr;
+}
+
+.content-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 2px solid #e0e0e0;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+    border-bottom: 2px solid #28a745;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+.section-content {
+    margin-top: 1rem;
+}
+
+/* Admin-specific styling */
+.admin-settings-section { border-left: 4px solid #007cba; }
+.admin-stats-section { border-left: 4px solid #28a745; }
+.admin-membership-section { border-left: 4px solid #ffc107; }
+.admin-users-section { border-left: 4px solid #17a2b8; }
+.admin-freeze-section { border-left: 4px solid #fd7e14; }
+.admin-events-section { border-left: 4px solid #6f42c1; }
+
+@media (max-width: 768px) {
+    .content-section {
+        padding: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+    }
+}
+</style>
 {{end}}

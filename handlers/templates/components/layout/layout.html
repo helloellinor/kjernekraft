@@ -1,0 +1,172 @@
+{{define "admin_layout"}}
+{{template "common_styles"}}
+{{template "module_styles"}}
+{{template "base_card_styles"}}
+{{template "base_button_styles"}}
+
+<main class="main-content admin-content">
+    {{if .Title}}
+    <h1 class="page-title admin-title">{{.Title}}</h1>
+    {{end}}
+    
+    {{if .Description}}
+    <p class="page-description admin-description">{{.Description}}</p>
+    {{end}}
+    
+    <div class="admin-grid {{.GridClass}}">
+        {{.Content}}
+    </div>
+</main>
+
+<style>
+.admin-content {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.admin-title {
+    color: #333;
+    border-bottom: 3px solid #28a745;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.admin-title::before {
+    content: "⚙️ ";
+    margin-right: 0.5rem;
+}
+
+.admin-description {
+    background: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #28a745;
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+.admin-grid {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+}
+
+.admin-grid.single-column {
+    grid-template-columns: 1fr;
+}
+
+.admin-grid.two-column {
+    grid-template-columns: 1fr 1fr;
+}
+
+.admin-grid.three-column {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.admin-grid.sidebar-layout {
+    grid-template-columns: 300px 1fr;
+}
+
+@media (max-width: 968px) {
+    .admin-grid.two-column,
+    .admin-grid.three-column,
+    .admin-grid.sidebar-layout {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{{end}}
+
+{{define "user_layout"}}
+{{template "common_styles"}}
+{{template "module_styles"}}
+{{template "base_card_styles"}}
+{{template "base_button_styles"}}
+
+<main class="main-content user-content">
+    {{if .Title}}
+    <h1 class="page-title user-title">{{.Title}}</h1>
+    {{end}}
+    
+    {{if .Description}}
+    <p class="page-description user-description">{{.Description}}</p>
+    {{end}}
+    
+    <div class="user-grid {{.GridClass}}">
+        {{.Content}}
+    </div>
+</main>
+
+<style>
+.user-content {
+    background: #f5f5f5;
+}
+
+.user-title {
+    color: #333;
+    border-bottom: 3px solid #007cba;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.user-description {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 3rem;
+    text-align: center;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 3rem;
+}
+
+.user-grid {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+}
+
+.user-grid.single-column {
+    grid-template-columns: 1fr;
+}
+
+.user-grid.two-column {
+    grid-template-columns: 1fr 1fr;
+}
+
+.user-grid.three-column {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+    .user-grid.two-column,
+    .user-grid.three-column {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{{end}}
+
+{{define "content_section"}}
+<div class="content-section {{.Class}}">
+    {{if .Title}}
+    <h2 class="section-title">{{.Title}}</h2>
+    {{end}}
+    
+    <div class="section-content">
+        {{.Content}}
+    </div>
+    
+    {{if .Actions}}
+    <div class="section-actions">
+        {{.Actions}}
+    </div>
+    {{end}}
+</div>
+{{end}}
+
+{{define "loading_container"}}
+<div class="loading-container" id="{{.ID}}">
+    <div class="loading-placeholder">{{.Text}}</div>
+</div>
+{{end}}

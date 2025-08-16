@@ -1,11 +1,10 @@
 {{define "content"}}
-{{template "dashboard_layout_styles"}}
 {{template "navigation" .}}
 
-<main class="main-content">
-    <h1 class="page-title">{{t .Lang "site.welcome"}}, {{.UserName}}!</h1>
+<main class="main-content user-content">
+    <h1 class="page-title user-title">{{t .Lang "site.welcome"}}, {{.UserName}}!</h1>
     
-    <div class="selector-container">
+    <div class="user-grid two-column">
         {{template "signed_up_classes_container" .}}
         {{template "todays_classes_container" .}}
         {{template "dashboard_membership_container" .}}
@@ -13,5 +12,11 @@
     </div>
 </main>
 
+{{template "common_styles"}}
+{{template "module_styles"}}
+{{template "base_card_styles"}}
+{{template "base_button_styles"}}
 {{template "dashboard_scripts" .}}
+{{template "membership_actions_script"}}
+{{template "klippekort_actions_script"}}
 {{end}}

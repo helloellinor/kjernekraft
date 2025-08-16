@@ -1,0 +1,276 @@
+{{define "klippekort_card"}}
+{{template "base_card_styles"}}
+{{template "klippekort_card_styles"}}
+
+<div class="klippekort-card {{if .AdminMode}}admin-mode{{end}}" data-klippekort-id="{{.ID}}">
+    <div class="klippekort-header">
+        <h3 class="klippekort-name">
+            {{if .AdminMode}}
+            <input type="text" class="editable-name" value="{{.Name}}" onchange="updateKlippekortName(this, {{.ID}})">
+            {{else}}
+            {{.Name}}
+            {{end}}
+        </h3>
+        <div class="klippekort-status">
+            {{if .IsActive}}{{t .Lang "klippekort.active"}}{{else}}{{t .Lang "klippekort.expired"}}{{end}}
+        </div>
+    </div>
+    
+    <div class="klippekort-details">
+        <div class="price-info">
+            {{if .AdminMode}}
+            <div class="editable-price">
+                <input type="number" class="price-input" value="{{printf "%.0f" (divf .Price 100)}}" onchange="updateKlippekortPrice(this, {{.ID}})">
+                <span class="currency">{{t .Lang "klippekort.price"}}</span>
+            </div>
+            {{else}}
+            <span class="price">{{printf "%.0f" (divf .Price 100)}} {{t .Lang "klippekort.price"}}</span>
+            {{end}}
+        </div>
+        
+        <div class="usage-info">
+            <div class="punches-remaining">
+                <span class="count">{{.PunchesRemaining}}</span>
+                <span class="total">/ {{.TotalPunches}}</span>
+                <span class="label">{{t .Lang "klippekort.punches_remaining"}}</span>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{printf "%.0f" (mulf (divf .PunchesUsed .TotalPunches) 100)}}%"></div>
+            </div>
+        </div>
+        
+        {{if not .AdminMode}}
+        <div class="dates-info">
+            {{if .ExpiryDate}}
+            <div class="expiry-date {{if .IsExpiringSoon}}warning{{end}}">
+                <strong>{{t .Lang "klippekort.expires"}}:</strong> {{.ExpiryDate.Format "2. January 2006"}}
+                {{if .IsExpiringSoon}}
+                <span class="expiry-warning">⚠️ {{t .Lang "klippekort.expiring_soon"}}</span>
+                {{end}}
+            </div>
+            {{end}}
+        </div>
+        {{end}}
+        
+        {{if .AdminMode}}
+        <div class="admin-controls">
+            <label>{{t .Lang "admin.klippekort_description"}}:</label>
+            <textarea class="editable-description" onchange="updateKlippekortDescription(this, {{.ID}})">{{.Description}}</textarea>
+            
+            <label>{{t .Lang "admin.total_punches"}}:</label>
+            <input type="number" class="punches-input" value="{{.TotalPunches}}" onchange="updateKlippekortPunches(this, {{.ID}})">
+            
+            <label>{{t .Lang "admin.validity_months"}}:</label>
+            <input type="number" class="validity-input" value="{{.ValidityMonths}}" onchange="updateKlippekortValidity(this, {{.ID}})">
+        </div>
+        {{end}}
+    </div>
+    
+    <div class="klippekort-actions">
+        {{if .AdminMode}}
+        <button class="action-btn danger" onclick="deleteKlippekort({{.ID}})">
+            {{t .Lang "admin.delete_klippekort"}}
+        </button>
+        <button class="action-btn success" onclick="saveKlippekortChanges({{.ID}})">
+            {{t .Lang "admin.save_changes"}}
+        </button>
+        {{else}}
+        {{if .IsActive}}
+        <button class="action-btn primary" onclick="buyMore()">
+            {{t .Lang "klippekort.buy_more"}}
+        </button>
+        {{end}}
+        {{if .CanRefund}}
+        <button class="action-btn danger" onclick="requestRefund({{.ID}})">
+            {{t .Lang "klippekort.request_refund"}}
+        </button>
+        {{end}}
+        {{end}}
+    </div>
+</div>
+{{end}}
+
+{{define "klippekort_card_styles"}}
+<style>
+.klippekort-card {
+    position: relative;
+    transition: all 0.3s;
+}
+
+.klippekort-card.admin-mode {
+    border-left: 4px solid #f39c12;
+}
+
+.klippekort-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.klippekort-name {
+    font-size: 1.25rem;
+    color: #333;
+    margin: 0;
+}
+
+.editable-name {
+    border: 1px solid #ddd;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    background: #f8f9fa;
+}
+
+.klippekort-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: #d4edda;
+    color: #155724;
+}
+
+.klippekort-details {
+    margin-bottom: 1.5rem;
+}
+
+.price-info {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.price {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #f39c12;
+}
+
+.editable-price {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.price-input {
+    border: 1px solid #ddd;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    width: 80px;
+    background: #f8f9fa;
+}
+
+.usage-info {
+    margin-bottom: 1rem;
+}
+
+.punches-remaining {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.count {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f39c12;
+}
+
+.total {
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-left: 0.5rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f39c12, #e67e22);
+    transition: width 0.3s;
+}
+
+.dates-info {
+    margin-top: 1rem;
+}
+
+.expiry-date {
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.expiry-date.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.expiry-warning {
+    display: block;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.admin-controls {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.admin-controls label {
+    display: block;
+    margin: 0.5rem 0;
+    font-weight: 600;
+    color: #333;
+}
+
+.editable-description {
+    width: 100%;
+    min-height: 60px;
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: #f8f9fa;
+    resize: vertical;
+}
+
+.punches-input,
+.validity-input {
+    border: 1px solid #ddd;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    width: 80px;
+    background: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+    .klippekort-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .punches-remaining {
+        flex-wrap: wrap;
+    }
+}
+</style>
+{{end}}
