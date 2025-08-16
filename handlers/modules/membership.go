@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"html/template"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -10,7 +11,7 @@ type MembershipModuleData struct {
 	HasMembership bool
 	Membership    interface{} // This will be *models.MembershipWithDetails in practice
 	Lang          string
-	MembershipCSS string
+	MembershipCSS template.CSS
 }
 
 // NewMembershipModule creates a new membership module with the given data
@@ -28,7 +29,7 @@ func NewMembershipModule(membership interface{}, lang string) (*MembershipModule
 		HasMembership: hasMembership,
 		Membership:    membership,
 		Lang:          lang,
-		MembershipCSS: string(cssContent),
+		MembershipCSS: template.CSS(cssContent),
 	}, nil
 }
 
