@@ -1,0 +1,299 @@
+{{define "membership_card"}}
+{{template "base_card_styles"}}
+{{template "membership_card_styles"}}
+
+<div class="membership-card {{.Status}} {{if .AdminMode}}admin-mode{{end}}">
+    {{if .SpecialOffer}}
+    <div class="special-offer-badge">{{t .Lang "membership.special_offer"}}</div>
+    {{end}}
+    
+    <div class="membership-header">
+        <h3 class="membership-name">
+            {{if .AdminMode}}
+            <input type="text" class="editable-name" value="{{.Name}}" onchange="updateMembershipName(this, {{.ID}})">
+            {{else}}
+            {{.Name}}
+            {{end}}
+        </h3>
+        <div class="membership-status status-{{.Status}}">
+            {{if eq .Status "active"}}{{t .Lang "membership.status_active"}}
+            {{else if eq .Status "paused"}}{{t .Lang "membership.status_frozen"}} 🧊
+            {{else if eq .Status "freeze_requested"}}{{t .Lang "membership.status_freeze_requested"}}
+            {{else if eq .Status "cancelled"}}{{t .Lang "membership.status_cancelled"}}
+            {{end}}
+        </div>
+    </div>
+    
+    {{if .BindingEnd}}
+    <div class="binding-info">
+        <strong>{{t .Lang "membership.binding_expires_in"}} {{.MonthsUntilBindingEnd}} {{if eq .MonthsUntilBindingEnd 1}}{{t .Lang "membership.month"}}{{else}}{{t .Lang "membership.months"}}{{end}}</strong>
+    </div>
+    {{end}}
+    
+    <div class="membership-details">
+        <div class="price-info">
+            {{if .AdminMode}}
+            <div class="editable-price">
+                <input type="number" class="price-input" value="{{printf "%.0f" (divf .Price 100)}}" onchange="updateMembershipPrice(this, {{.ID}})">
+                <span class="currency">{{t .Lang "membership.price_per_month"}}</span>
+            </div>
+            {{else}}
+            <span class="price">{{printf "%.0f" (divf .Price 100)}} {{t .Lang "membership.price_per_month"}}</span>
+            {{end}}
+            
+            {{if gt .CommitmentMonths 0}}
+            <span class="commitment">{{.CommitmentMonths}} {{t .Lang "membership.commitment_months"}}</span>
+            {{else}}
+            <span class="commitment">{{t .Lang "membership.no_binding"}}</span>
+            {{end}}
+        </div>
+        
+        {{if not .AdminMode}}
+        <div class="dates-info">
+            {{if gt .DaysUntilRenewal 0}}
+            <div class="renewal-date">
+                <strong>{{t .Lang "membership.next_renewal"}}:</strong> {{.RenewalDate.Format "2. January 2006"}}
+                <span class="days-until">({{t .Lang "membership.in"}} {{.DaysUntilRenewal}} {{t .Lang "membership.days"}})</span>
+            </div>
+            {{else if eq .DaysUntilRenewal 0}}
+            <div class="renewal-date urgent">
+                <strong>{{t .Lang "membership.renews_today"}}!</strong>
+            </div>
+            {{end}}
+        </div>
+        {{end}}
+        
+        {{if .AdminMode}}
+        <div class="admin-controls">
+            <label>{{t .Lang "admin.membership_description"}}:</label>
+            <textarea class="editable-description" onchange="updateMembershipDescription(this, {{.ID}})">{{.Description}}</textarea>
+            
+            <label>
+                <input type="checkbox" {{if .IsSpecialOffer}}checked{{end}} onchange="toggleSpecialOffer(this, {{.ID}})">
+                {{t .Lang "admin.mark_as_special_offer"}}
+            </label>
+        </div>
+        {{end}}
+    </div>
+    
+    <div class="membership-actions">
+        {{if .AdminMode}}
+        <button class="action-btn danger" onclick="deleteMembership({{.ID}})">
+            {{t .Lang "admin.delete_membership"}}
+        </button>
+        <button class="action-btn success" onclick="saveMembershipChanges({{.ID}})">
+            {{t .Lang "admin.save_changes"}}
+        </button>
+        {{else}}
+        {{if eq .Status "active"}}
+        <button class="action-btn freeze-btn" onclick="freezeMembership()">
+            {{t .Lang "membership.freeze"}}
+        </button>
+        <button class="action-btn change-btn" onclick="changeMembership()">
+            {{t .Lang "membership.change"}}
+        </button>
+        {{else if eq .Status "freeze_requested"}}
+        <button class="action-btn cancel-request-btn" onclick="cancelFreezeRequest()">
+            {{t .Lang "membership.cancel_request"}}
+        </button>
+        {{else if eq .Status "paused"}}
+        <button class="action-btn unfreeze-btn" onclick="unfreezeMembership()">
+            {{t .Lang "membership.unfreeze"}}
+        </button>
+        <button class="action-btn change-btn" onclick="changeMembership()">
+            {{t .Lang "membership.change"}}
+        </button>
+        {{end}}
+        
+        {{if .CanCancel}}
+        <button class="action-btn cancel-btn" onclick="cancelMembership()">
+            {{t .Lang "membership.cancel"}}
+        </button>
+        {{end}}
+        {{end}}
+    </div>
+</div>
+{{end}}
+
+{{define "membership_card_styles"}}
+<style>
+.membership-card {
+    position: relative;
+    transition: all 0.3s;
+}
+
+.membership-card.admin-mode {
+    border-left: 4px solid #28a745;
+}
+
+.special-offer-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transform: rotate(10deg);
+}
+
+.membership-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.membership-name {
+    font-size: 1.25rem;
+    color: #333;
+    margin: 0;
+}
+
+.editable-name {
+    border: 1px solid #ddd;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    background: #f8f9fa;
+}
+
+.membership-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-paused {
+    background: #cce7ff;
+    color: #004085;
+}
+
+.status-freeze_requested {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.binding-info {
+    background: #e8f4fd;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: #007cba;
+}
+
+.membership-details {
+    margin-bottom: 1.5rem;
+}
+
+.price-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.price {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #007cba;
+}
+
+.editable-price {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.price-input {
+    border: 1px solid #ddd;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    width: 80px;
+    background: #f8f9fa;
+}
+
+.commitment {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.dates-info {
+    margin-top: 1rem;
+}
+
+.renewal-date {
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.renewal-date.urgent {
+    background: #fff3cd;
+    color: #856404;
+    font-weight: 600;
+}
+
+.days-until {
+    color: #666;
+    font-weight: normal;
+}
+
+.admin-controls {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.admin-controls label {
+    display: block;
+    margin: 0.5rem 0;
+    font-weight: 600;
+    color: #333;
+}
+
+.editable-description {
+    width: 100%;
+    min-height: 60px;
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: #f8f9fa;
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    .membership-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .price-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+</style>
+{{end}}

@@ -1,0 +1,390 @@
+{{define "membership_actions_script"}}
+<script>
+// Membership Actions - Handles both user and admin functionality
+class MembershipActions {
+    constructor(options = {}) {
+        this.isAdminMode = options.isAdminMode || false;
+        this.lang = options.lang || 'no';
+        this.apiBase = '/api';
+        
+        // Initialize admin functionality if in admin mode
+        if (this.isAdminMode) {
+            this.initAdminMode();
+        }
+    }
+    
+    // User Actions
+    async freezeMembership() {
+        if (!confirm(this.getText('membership_actions.freeze_confirm'))) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${this.apiBase}/membership/freeze`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message || this.getText('membership_actions.freeze_success'));
+                this.reloadMembershipDisplay();
+            } else {
+                const errorText = await response.text();
+                alert(this.getText('membership_actions.error_prefix') + errorText);
+            }
+        } catch (error) {
+            console.error('Error freezing membership:', error);
+            alert(this.getText('membership_actions.freeze_error'));
+        }
+    }
+    
+    async unfreezeMembership() {
+        if (!confirm(this.getText('membership_actions.unfreeze_confirm'))) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${this.apiBase}/membership/unfreeze`, {
+                method: 'POST'
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message || this.getText('membership_actions.unfreeze_success'));
+                this.reloadMembershipDisplay();
+            } else {
+                const errorText = await response.text();
+                alert(this.getText('membership_actions.error_prefix') + errorText);
+            }
+        } catch (error) {
+            console.error('Error unfreezing membership:', error);
+            alert(this.getText('membership_actions.unfreeze_error'));
+        }
+    }
+    
+    changeMembership() {
+        // Redirect to membership page
+        window.location.href = '/elev/medlemskap#membership-selector';
+    }
+    
+    async cancelMembership() {
+        if (!confirm(this.getText('membership_actions.cancel_membership_confirm'))) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${this.apiBase}/membership/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message || this.getText('membership_actions.cancel_success'));
+                this.reloadMembershipDisplay();
+            } else {
+                const errorText = await response.text();
+                alert(this.getText('membership_actions.error_prefix') + errorText);
+            }
+        } catch (error) {
+            console.error('Error cancelling membership:', error);
+            alert(this.getText('membership_actions.cancel_error'));
+        }
+    }
+    
+    async cancelFreezeRequest() {
+        if (!confirm(this.getText('membership_actions.cancel_freeze_request_confirm'))) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${this.apiBase}/membership/cancel-freeze`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message || this.getText('membership_actions.cancel_freeze_success'));
+                this.reloadMembershipDisplay();
+            } else {
+                const errorText = await response.text();
+                alert(this.getText('membership_actions.error_prefix') + errorText);
+            }
+        } catch (error) {
+            console.error('Error cancelling freeze request:', error);
+            alert(this.getText('membership_actions.cancel_freeze_error'));
+        }
+    }
+    
+    // Admin Actions
+    initAdminMode() {
+        // Set up auto-save debouncing for admin edits
+        this.saveTimeout = null;
+        this.pendingChanges = {};
+    }
+    
+    async updateMembershipName(input, membershipId) {
+        const newName = input.value.trim();
+        if (!newName) return;
+        
+        this.scheduleSave(membershipId, { name: newName });
+    }
+    
+    async updateMembershipPrice(input, membershipId) {
+        const newPrice = parseInt(input.value) * 100; // Convert to cents
+        if (isNaN(newPrice) || newPrice < 0) return;
+        
+        this.scheduleSave(membershipId, { price: newPrice });
+    }
+    
+    async updateMembershipDescription(textarea, membershipId) {
+        const newDescription = textarea.value.trim();
+        this.scheduleSave(membershipId, { description: newDescription });
+    }
+    
+    async toggleSpecialOffer(checkbox, membershipId) {
+        const isSpecialOffer = checkbox.checked;
+        this.scheduleSave(membershipId, { is_special_offer: isSpecialOffer });
+    }
+    
+    scheduleSave(membershipId, changes) {
+        // Store pending changes
+        if (!this.pendingChanges[membershipId]) {
+            this.pendingChanges[membershipId] = {};
+        }
+        Object.assign(this.pendingChanges[membershipId], changes);
+        
+        // Clear existing timeout
+        if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+        }
+        
+        // Schedule save after 1 second of no changes
+        this.saveTimeout = setTimeout(() => {
+            this.saveMembershipChanges(membershipId);
+        }, 1000);
+    }
+    
+    async saveMembershipChanges(membershipId) {
+        const changes = this.pendingChanges[membershipId];
+        if (!changes || Object.keys(changes).length === 0) return;
+        
+        try {
+            const response = await fetch(`${this.apiBase}/admin/membership/${membershipId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(changes)
+            });
+            
+            if (response.ok) {
+                // Clear pending changes
+                delete this.pendingChanges[membershipId];
+                
+                // Show subtle success indicator
+                this.showSaveIndicator(membershipId, 'success');
+            } else {
+                const errorText = await response.text();
+                alert(this.getText('admin.error_saving_membership') + ': ' + errorText);
+                this.showSaveIndicator(membershipId, 'error');
+            }
+        } catch (error) {
+            console.error('Error saving membership changes:', error);
+            alert(this.getText('admin.error_saving_membership'));
+            this.showSaveIndicator(membershipId, 'error');
+        }
+    }
+    
+    async deleteMembership(membershipId) {
+        if (!confirm(this.getText('admin.confirm_delete_membership'))) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${this.apiBase}/admin/membership/${membershipId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                // Remove the membership card from DOM
+                const membershipCard = document.querySelector(`[data-membership-id="${membershipId}"]`);
+                if (membershipCard) {
+                    membershipCard.remove();
+                }
+                alert(this.getText('admin.membership_deleted_successfully'));
+            } else {
+                const errorText = await response.text();
+                alert(this.getText('admin.error_deleting_membership') + ': ' + errorText);
+            }
+        } catch (error) {
+            console.error('Error deleting membership:', error);
+            alert(this.getText('admin.error_deleting_membership'));
+        }
+    }
+    
+    showSaveIndicator(membershipId, type) {
+        // Create or update save indicator
+        let indicator = document.querySelector(`[data-save-indicator="${membershipId}"]`);
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.setAttribute('data-save-indicator', membershipId);
+            indicator.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                z-index: 10;
+            `;
+            
+            const membershipCard = document.querySelector(`[data-membership-id="${membershipId}"]`);
+            if (membershipCard) {
+                membershipCard.style.position = 'relative';
+                membershipCard.appendChild(indicator);
+            }
+        }
+        
+        if (type === 'success') {
+            indicator.textContent = '✓ ' + this.getText('admin.saved');
+            indicator.style.backgroundColor = '#d4edda';
+            indicator.style.color = '#155724';
+        } else {
+            indicator.textContent = '✗ ' + this.getText('admin.save_error');
+            indicator.style.backgroundColor = '#f8d7da';
+            indicator.style.color = '#721c24';
+        }
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            if (indicator.parentNode) {
+                indicator.remove();
+            }
+        }, 3000);
+    }
+    
+    // Utility Methods
+    reloadMembershipDisplay() {
+        // Reload the membership container if it exists
+        if (this.isAdminMode) {
+            window.location.reload();
+        } else {
+            const membershipContainer = document.getElementById('membership-container');
+            if (membershipContainer) {
+                this.loadMembership();
+            } else {
+                window.location.reload();
+            }
+        }
+    }
+    
+    async loadMembership() {
+        try {
+            const response = await fetch('/api/user/membership');
+            if (response.ok) {
+                const html = await response.text();
+                document.getElementById('membership-container').innerHTML = html;
+            } else {
+                document.getElementById('membership-container').innerHTML = 
+                    `<div class="error">${this.getText('dashboard.could_not_load_membership')}</div>`;
+            }
+        } catch (error) {
+            console.error('Error loading membership:', error);
+            document.getElementById('membership-container').innerHTML = 
+                `<div class="error">${this.getText('dashboard.could_not_load_membership')}</div>`;
+        }
+    }
+    
+    getText(key) {
+        // In a real app, this would connect to the localization system
+        // For now, return the key as fallback
+        const texts = {
+            'membership_actions.freeze_confirm': 'Er du sikker på at du vil fryse medlemskapet?',
+            'membership_actions.unfreeze_confirm': 'Er du sikker på at du vil smelte medlemskapet?',
+            'membership_actions.cancel_membership_confirm': 'Er du sikker på at du vil si opp medlemskapet? Dette kan ikke angres.',
+            'membership_actions.cancel_freeze_request_confirm': 'Er du sikker på at du vil trekke tilbake forespørselen?',
+            'membership_actions.error_prefix': 'Feil: ',
+            'admin.confirm_delete_membership': 'Er du sikker på at du vil slette dette medlemskapet?',
+            'admin.saved': 'Lagret',
+            'admin.save_error': 'Feil',
+            'dashboard.could_not_load_membership': 'Kunne ikke laste medlemskap'
+        };
+        
+        return texts[key] || key;
+    }
+}
+
+// Global functions for backward compatibility
+let membershipActions;
+
+function initMembershipActions(isAdminMode = false) {
+    membershipActions = new MembershipActions({ 
+        isAdminMode: isAdminMode,
+        lang: document.documentElement.lang || 'no'
+    });
+}
+
+// User action functions
+function freezeMembership() {
+    if (membershipActions) membershipActions.freezeMembership();
+}
+
+function unfreezeMembership() {
+    if (membershipActions) membershipActions.unfreezeMembership();
+}
+
+function changeMembership() {
+    if (membershipActions) membershipActions.changeMembership();
+}
+
+function cancelMembership() {
+    if (membershipActions) membershipActions.cancelMembership();
+}
+
+function cancelFreezeRequest() {
+    if (membershipActions) membershipActions.cancelFreezeRequest();
+}
+
+// Admin action functions
+function updateMembershipName(input, membershipId) {
+    if (membershipActions) membershipActions.updateMembershipName(input, membershipId);
+}
+
+function updateMembershipPrice(input, membershipId) {
+    if (membershipActions) membershipActions.updateMembershipPrice(input, membershipId);
+}
+
+function updateMembershipDescription(textarea, membershipId) {
+    if (membershipActions) membershipActions.updateMembershipDescription(textarea, membershipId);
+}
+
+function toggleSpecialOffer(checkbox, membershipId) {
+    if (membershipActions) membershipActions.toggleSpecialOffer(checkbox, membershipId);
+}
+
+function saveMembershipChanges(membershipId) {
+    if (membershipActions) membershipActions.saveMembershipChanges(membershipId);
+}
+
+function deleteMembership(membershipId) {
+    if (membershipActions) membershipActions.deleteMembership(membershipId);
+}
+
+// Auto-initialize on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're in admin mode by looking for admin-specific elements
+    const isAdminMode = document.querySelector('.admin-mode') !== null;
+    initMembershipActions(isAdminMode);
+});
+</script>
+{{end}}

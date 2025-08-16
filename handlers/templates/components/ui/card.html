@@ -1,0 +1,72 @@
+{{define "base_card"}}
+<div class="base-card {{.Class}}">
+    {{if .Title}}
+    <h2 class="card-title">{{.Title}}</h2>
+    {{end}}
+    <div class="card-content">
+        {{.Content}}
+    </div>
+    {{if .Actions}}
+    <div class="card-actions">
+        {{.Actions}}
+    </div>
+    {{end}}
+</div>
+{{end}}
+
+{{define "base_card_styles"}}
+<style>
+.base-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 2px solid #e0e0e0;
+    margin-bottom: 2rem;
+}
+
+.base-card.no-border {
+    border: none;
+}
+
+.base-card.compact {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+.card-content {
+    margin-bottom: 1rem;
+}
+
+.card-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .base-card {
+        padding: 1.5rem;
+    }
+    
+    .card-title {
+        font-size: 1.3rem;
+    }
+    
+    .card-actions {
+        flex-direction: column;
+    }
+}
+</style>
+{{end}}

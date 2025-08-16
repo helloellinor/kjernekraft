@@ -1,0 +1,262 @@
+{{define "membership_selector_form"}}
+{{template "base_form_styles"}}
+
+<div class="membership-selector-container">
+    {{template "base_form" (dict 
+        "Class" "membership-question-form"
+        "Action" "/medlemskap/recommendations"
+        "Method" "post"
+        "Title" (t .Lang "membership.tell_us_about_you")
+        "Content" (template "membership_form_content" .)
+    )}}
+    
+    <div class="membership-checkout-card">
+        {{template "membership_checkout_content" .}}
+    </div>
+</div>
+
+<style>
+.membership-selector-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.membership-checkout-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .membership-selector-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+</style>
+{{end}}
+
+{{define "membership_form_content"}}
+{{template "form_option_group" (dict 
+    "Label" (t .Lang "membership.commitment_length")
+    "Class" "commitment-group"
+    "Options" (template "commitment_options" .)
+)}}
+
+{{template "form_option_group" (dict 
+    "Label" (t .Lang "membership.student_senior_question")
+    "Class" "student-group"
+    "Options" (template "student_option" .)
+)}}
+
+{{template "form_option_group" (dict 
+    "Label" (t .Lang "membership.start_time_question")
+    "Class" "start-time-group"
+    "Options" (template "start_time_options" .)
+)}}
+
+<div id="custom-date-container" style="display: none; margin-top: 1rem;">
+    {{template "form_input" (dict 
+        "Type" "date"
+        "Name" "custom_start_date"
+        "ID" "custom-start-date"
+        "Class" "date-input"
+    )}}
+</div>
+{{end}}
+
+{{define "commitment_options"}}
+{{template "form_option" (dict 
+    "Type" "radio"
+    "Name" "commitment"
+    "Value" "12"
+    "Text" (t .Lang "membership.12_months_best_price")
+)}}
+
+{{if .ShowSpecialOffer}}
+{{template "form_option" (dict 
+    "Type" "radio"
+    "Name" "commitment"
+    "Value" "autumn_special"
+    "Text" (printf "🍂 %s" (t .Lang "membership.autumn_special"))
+    "Class" "special"
+)}}
+{{end}}
+
+{{template "form_option" (dict 
+    "Type" "radio"
+    "Name" "commitment"
+    "Value" "6"
+    "Text" (t .Lang "membership.6_months")
+)}}
+
+{{template "form_option" (dict 
+    "Type" "radio"
+    "Name" "commitment"
+    "Value" "0"
+    "Text" (t .Lang "membership.no_binding_flexible")
+)}}
+
+{{template "form_option" (dict 
+    "Type" "radio"
+    "Name" "commitment"
+    "Value" "trial"
+    "Text" (t .Lang "membership.trial_only")
+)}}
+{{end}}
+
+{{define "student_option"}}
+{{template "form_option" (dict 
+    "Type" "checkbox"
+    "Name" "is_student_senior"
+    "Value" "true"
+    "Text" (t .Lang "membership.student_senior_yes")
+)}}
+{{end}}
+
+{{define "start_time_options"}}
+{{template "form_option" (dict 
+    "Type" "radio"
+    "Name" "start_time"
+    "Value" "now"
+    "Checked" true
+    "Text" (t .Lang "membership.start_asap")
+)}}
+
+{{template "form_option" (dict 
+    "Type" "radio"
+    "Name" "start_time"
+    "Value" "custom"
+    "Text" (t .Lang "membership.start_custom_date")
+)}}
+{{end}}
+
+{{define "membership_checkout_content"}}
+<h2 class="checkout-title">
+    {{if .HasHadMembership}}{{t .Lang "membership.your_new_membership"}}{{else}}{{t .Lang "membership.your_membership"}}{{end}}
+</h2>
+
+<div id="special-offer" class="special-offer-notice" style="display: none;">
+    🍂 {{t .Lang "membership.autumn_special_notice"}}
+</div>
+
+<div class="price-display">
+    <div id="current-price" class="current-price">1490 kr/mnd</div>
+    <div id="original-price" class="original-price" style="display: none;"></div>
+    <div id="discount-badge" class="discount-badge" style="display: none;">20% {{t .Lang "membership.discount"}}</div>
+</div>
+
+<div class="membership-details">
+    <div class="detail-row">
+        <span>{{t .Lang "membership.membership_type"}}:</span>
+        <span id="membership-type">{{t .Lang "membership.no_binding"}}</span>
+    </div>
+    <div class="detail-row">
+        <span>{{t .Lang "membership.binding"}}:</span>
+        <span id="binding-period">{{t .Lang "membership.none"}}</span>
+    </div>
+    <div class="detail-row" id="discount-row" style="display: none;">
+        <span>{{t .Lang "membership.student_senior_discount"}}:</span>
+        <span id="discount-status">20%</span>
+    </div>
+    <div class="detail-row">
+        <span>{{t .Lang "membership.total_price_per_month"}}:</span>
+        <span id="total-price">1490 kr</span>
+    </div>
+</div>
+
+{{template "base_button" (dict 
+    "Class" "primary checkout-btn"
+    "OnClick" "proceedToCheckout()"
+    "Text" (if .HasCurrentMembership (t .Lang "membership.change") (t .Lang "membership.proceed_to_payment"))
+)}}
+
+<p style="font-size: 0.9rem; color: #666; text-align: center;">
+    {{t .Lang "membership.no_hidden_costs"}}
+</p>
+
+<style>
+.checkout-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+.special-offer-notice {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.price-display {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.current-price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #007cba;
+    margin-bottom: 0.5rem;
+}
+
+.original-price {
+    font-size: 1.1rem;
+    color: #666;
+    text-decoration: line-through;
+    margin-bottom: 0.5rem;
+}
+
+.discount-badge {
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.membership-details {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.detail-row:last-child {
+    margin-bottom: 0;
+    font-weight: 600;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.checkout-btn {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+</style>
+{{end}}

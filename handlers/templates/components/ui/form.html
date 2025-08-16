@@ -1,0 +1,234 @@
+{{define "base_form"}}
+<form class="base-form {{.Class}}" 
+      {{if .Action}}action="{{.Action}}"{{end}} 
+      {{if .Method}}method="{{.Method}}"{{end}}>
+    {{if .Title}}
+    <h2 class="form-title">{{.Title}}</h2>
+    {{end}}
+    {{.Content}}
+</form>
+{{end}}
+
+{{define "form_group"}}
+<div class="form-group {{.Class}}">
+    {{if .Label}}
+    <label class="form-label" {{if .For}}for="{{.For}}"{{end}}>{{.Label}}</label>
+    {{end}}
+    {{.Content}}
+    {{if .Help}}
+    <div class="form-help">{{.Help}}</div>
+    {{end}}
+</div>
+{{end}}
+
+{{define "form_input"}}
+<input class="form-input {{.Class}}" 
+       {{if .Type}}type="{{.Type}}"{{else}}type="text"{{end}}
+       {{if .Name}}name="{{.Name}}"{{end}}
+       {{if .ID}}id="{{.ID}}"{{end}}
+       {{if .Value}}value="{{.Value}}"{{end}}
+       {{if .Placeholder}}placeholder="{{.Placeholder}}"{{end}}
+       {{if .Required}}required{{end}}
+       {{if .Disabled}}disabled{{end}}>
+{{end}}
+
+{{define "form_select"}}
+<select class="form-select {{.Class}}" 
+        {{if .Name}}name="{{.Name}}"{{end}}
+        {{if .ID}}id="{{.ID}}"{{end}}
+        {{if .Required}}required{{end}}
+        {{if .Disabled}}disabled{{end}}
+        {{if .OnChange}}onchange="{{.OnChange}}"{{end}}>
+    {{.Options}}
+</select>
+{{end}}
+
+{{define "form_option_group"}}
+<div class="option-group {{.Class}}">
+    {{if .Label}}
+    <label class="option-group-label">{{.Label}}</label>
+    {{end}}
+    <div class="option-items">
+        {{.Options}}
+    </div>
+</div>
+{{end}}
+
+{{define "form_option"}}
+<label class="option-item {{.Class}}">
+    <input type="{{.Type}}" 
+           {{if .Name}}name="{{.Name}}"{{end}}
+           {{if .Value}}value="{{.Value}}"{{end}}
+           {{if .Checked}}checked{{end}}
+           {{if .Disabled}}disabled{{end}}>
+    <span class="option-text">{{.Text}}</span>
+</label>
+{{end}}
+
+{{define "base_form_styles"}}
+<style>
+/* Base Form Styles */
+.base-form {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.form-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-help {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+/* Form Inputs */
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus {
+    border-color: #007cba;
+    outline: none;
+}
+
+.form-input:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+/* Form Select */
+.form-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.form-select:focus {
+    border-color: #007cba;
+    outline: none;
+}
+
+.form-select:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Option Groups */
+.option-group {
+    margin-bottom: 1.5rem;
+}
+
+.option-group-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.option-items {
+    display: grid;
+    gap: 0.5rem;
+}
+
+/* Option Items */
+.option-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.option-item:hover {
+    border-color: #007cba;
+    background-color: #f8f9fa;
+}
+
+.option-item input[type="radio"], 
+.option-item input[type="checkbox"] {
+    margin-right: 0.75rem;
+    margin-bottom: 0;
+}
+
+.option-item input[type="radio"]:checked + .option-text, 
+.option-item input[type="checkbox"]:checked + .option-text {
+    font-weight: 600;
+}
+
+.option-item:has(input[type="radio"]:checked), 
+.option-item:has(input[type="checkbox"]:checked) {
+    border-color: #007cba;
+    background-color: #e8f4fd;
+}
+
+.option-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.option-text {
+    flex: 1;
+}
+
+/* Special Option Styles */
+.option-item.special {
+    border: 2px solid #ff6b35;
+    background: linear-gradient(135deg, #fff5f0, #ffffff);
+}
+
+.option-item.special:hover {
+    border-color: #e55a2b;
+}
+
+@media (max-width: 768px) {
+    .base-form {
+        padding: 1.5rem;
+    }
+    
+    .form-title {
+        font-size: 1.1rem;
+    }
+}
+</style>
+{{end}}

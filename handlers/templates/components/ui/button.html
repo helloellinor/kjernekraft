@@ -1,0 +1,182 @@
+{{define "base_button"}}
+<button class="base-btn {{.Class}}" 
+        {{if .OnClick}}onclick="{{.OnClick}}"{{end}}
+        {{if .Disabled}}disabled{{end}}
+        {{if .Type}}type="{{.Type}}"{{end}}>
+    {{.Text}}
+</button>
+{{end}}
+
+{{define "action_button"}}
+<button class="action-btn {{.Variant}}" 
+        {{if .OnClick}}onclick="{{.OnClick}}"{{end}}
+        {{if .Disabled}}disabled{{end}}
+        {{if .Type}}type="{{.Type}}"{{end}}>
+    {{.Text}}
+</button>
+{{end}}
+
+{{define "base_button_styles"}}
+<style>
+/* Base Button Styles */
+.base-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    min-width: 120px;
+}
+
+.base-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.base-btn.primary {
+    background: #007cba;
+    color: white;
+}
+
+.base-btn.primary:hover:not(:disabled) {
+    background: #005a87;
+}
+
+.base-btn.secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.base-btn.secondary:hover:not(:disabled) {
+    background: #545b62;
+}
+
+.base-btn.success {
+    background: #28a745;
+    color: white;
+}
+
+.base-btn.success:hover:not(:disabled) {
+    background: #218838;
+}
+
+.base-btn.danger {
+    background: #dc3545;
+    color: white;
+}
+
+.base-btn.danger:hover:not(:disabled) {
+    background: #c82333;
+}
+
+.base-btn.warning {
+    background: #ff6b35;
+    color: white;
+}
+
+.base-btn.warning:hover:not(:disabled) {
+    background: #e55a2b;
+}
+
+.base-btn.outline {
+    background: transparent;
+    border: 2px solid #007cba;
+    color: #007cba;
+}
+
+.base-btn.outline:hover:not(:disabled) {
+    background: #007cba;
+    color: white;
+}
+
+/* Action Button Styles (for backward compatibility) */
+.action-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    min-width: 100px;
+}
+
+.action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.action-btn.freeze-btn {
+    background: #ff6b35;
+    color: white;
+}
+
+.action-btn.freeze-btn:hover:not(:disabled) {
+    background: #e55a2b;
+}
+
+.action-btn.unfreeze-btn {
+    background: #28a745;
+    color: white;
+}
+
+.action-btn.unfreeze-btn:hover:not(:disabled) {
+    background: #218838;
+}
+
+.action-btn.change-btn {
+    background: #007cba;
+    color: white;
+}
+
+.action-btn.change-btn:hover:not(:disabled) {
+    background: #005a87;
+}
+
+.action-btn.cancel-btn, .action-btn.cancel-request-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.action-btn.cancel-btn:hover:not(:disabled), 
+.action-btn.cancel-request-btn:hover:not(:disabled) {
+    background: #c82333;
+}
+
+/* Checkout/Primary Action Button */
+.checkout-btn {
+    width: 100%;
+    padding: 1rem 2rem;
+    background: #007cba;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 1rem;
+}
+
+.checkout-btn:hover {
+    background: #005a87;
+}
+
+.checkout-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .base-btn, .action-btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+{{end}}

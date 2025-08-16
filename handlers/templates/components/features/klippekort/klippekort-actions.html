@@ -1,0 +1,314 @@
+{{define "klippekort_actions_script"}}
+<script>
+// Klippekort Actions - Handles both user and admin functionality
+class KlippekortActions {
+    constructor(options = {}) {
+        this.isAdminMode = options.isAdminMode || false;
+        this.lang = options.lang || 'no';
+        this.apiBase = '/api';
+        
+        // Initialize admin functionality if in admin mode
+        if (this.isAdminMode) {
+            this.initAdminMode();
+        }
+    }
+    
+    // User Actions
+    buyMore() {
+        // Redirect to klippekort purchase page
+        window.location.href = '/elev/klippekort#purchase';
+    }
+    
+    async requestRefund(klippekortId) {
+        if (!confirm(this.getText('klippekort_actions.refund_confirm'))) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${this.apiBase}/klippekort/${klippekortId}/refund`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message || this.getText('klippekort_actions.refund_requested'));
+                this.reloadKlippekortDisplay();
+            } else {
+                const errorText = await response.text();
+                alert(this.getText('klippekort_actions.error_prefix') + errorText);
+            }
+        } catch (error) {
+            console.error('Error requesting refund:', error);
+            alert(this.getText('klippekort_actions.refund_error'));
+        }
+    }
+    
+    // Admin Actions
+    initAdminMode() {
+        // Set up auto-save debouncing for admin edits
+        this.saveTimeout = null;
+        this.pendingChanges = {};
+    }
+    
+    async updateKlippekortName(input, klippekortId) {
+        const newName = input.value.trim();
+        if (!newName) return;
+        
+        this.scheduleSave(klippekortId, { name: newName });
+    }
+    
+    async updateKlippekortPrice(input, klippekortId) {
+        const newPrice = parseInt(input.value) * 100; // Convert to cents
+        if (isNaN(newPrice) || newPrice < 0) return;
+        
+        this.scheduleSave(klippekortId, { price: newPrice });
+    }
+    
+    async updateKlippekortDescription(textarea, klippekortId) {
+        const newDescription = textarea.value.trim();
+        this.scheduleSave(klippekortId, { description: newDescription });
+    }
+    
+    async updateKlippekortPunches(input, klippekortId) {
+        const totalPunches = parseInt(input.value);
+        if (isNaN(totalPunches) || totalPunches < 1) return;
+        
+        this.scheduleSave(klippekortId, { total_punches: totalPunches });
+    }
+    
+    async updateKlippekortValidity(input, klippekortId) {
+        const validityMonths = parseInt(input.value);
+        if (isNaN(validityMonths) || validityMonths < 1) return;
+        
+        this.scheduleSave(klippekortId, { validity_months: validityMonths });
+    }
+    
+    scheduleSave(klippekortId, changes) {
+        // Store pending changes
+        if (!this.pendingChanges[klippekortId]) {
+            this.pendingChanges[klippekortId] = {};
+        }
+        Object.assign(this.pendingChanges[klippekortId], changes);
+        
+        // Clear existing timeout
+        if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+        }
+        
+        // Schedule save after 1 second of no changes
+        this.saveTimeout = setTimeout(() => {
+            this.saveKlippekortChanges(klippekortId);
+        }, 1000);
+    }
+    
+    async saveKlippekortChanges(klippekortId) {
+        const changes = this.pendingChanges[klippekortId];
+        if (!changes || Object.keys(changes).length === 0) return;
+        
+        try {
+            const response = await fetch(`${this.apiBase}/admin/klippekort/${klippekortId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(changes)
+            });
+            
+            if (response.ok) {
+                // Clear pending changes
+                delete this.pendingChanges[klippekortId];
+                
+                // Show subtle success indicator
+                this.showSaveIndicator(klippekortId, 'success');
+            } else {
+                const errorText = await response.text();
+                alert(this.getText('admin.error_saving_klippekort') + ': ' + errorText);
+                this.showSaveIndicator(klippekortId, 'error');
+            }
+        } catch (error) {
+            console.error('Error saving klippekort changes:', error);
+            alert(this.getText('admin.error_saving_klippekort'));
+            this.showSaveIndicator(klippekortId, 'error');
+        }
+    }
+    
+    async deleteKlippekort(klippekortId) {
+        if (!confirm(this.getText('admin.confirm_delete_klippekort'))) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${this.apiBase}/admin/klippekort/${klippekortId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                // Remove the klippekort card from DOM
+                const klippekortCard = document.querySelector(`[data-klippekort-id="${klippekortId}"]`);
+                if (klippekortCard) {
+                    klippekortCard.remove();
+                }
+                alert(this.getText('admin.klippekort_deleted_successfully'));
+            } else {
+                const errorText = await response.text();
+                alert(this.getText('admin.error_deleting_klippekort') + ': ' + errorText);
+            }
+        } catch (error) {
+            console.error('Error deleting klippekort:', error);
+            alert(this.getText('admin.error_deleting_klippekort'));
+        }
+    }
+    
+    showSaveIndicator(klippekortId, type) {
+        // Create or update save indicator
+        let indicator = document.querySelector(`[data-save-indicator="${klippekortId}"]`);
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.setAttribute('data-save-indicator', klippekortId);
+            indicator.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                z-index: 10;
+            `;
+            
+            const klippekortCard = document.querySelector(`[data-klippekort-id="${klippekortId}"]`);
+            if (klippekortCard) {
+                klippekortCard.style.position = 'relative';
+                klippekortCard.appendChild(indicator);
+            }
+        }
+        
+        if (type === 'success') {
+            indicator.textContent = '✓ ' + this.getText('admin.saved');
+            indicator.style.backgroundColor = '#d4edda';
+            indicator.style.color = '#155724';
+        } else {
+            indicator.textContent = '✗ ' + this.getText('admin.save_error');
+            indicator.style.backgroundColor = '#f8d7da';
+            indicator.style.color = '#721c24';
+        }
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            if (indicator.parentNode) {
+                indicator.remove();
+            }
+        }, 3000);
+    }
+    
+    // Utility Methods
+    reloadKlippekortDisplay() {
+        // Reload the klippekort container if it exists
+        if (this.isAdminMode) {
+            window.location.reload();
+        } else {
+            const klippekortContainer = document.getElementById('klippekort-container');
+            if (klippekortContainer) {
+                this.loadKlippekort();
+            } else {
+                window.location.reload();
+            }
+        }
+    }
+    
+    async loadKlippekort() {
+        try {
+            const response = await fetch('/api/user/klippekort');
+            if (response.ok) {
+                const html = await response.text();
+                document.getElementById('klippekort-container').innerHTML = html;
+            } else {
+                document.getElementById('klippekort-container').innerHTML = 
+                    `<div class="error">${this.getText('dashboard.could_not_load_klippekort')}</div>`;
+            }
+        } catch (error) {
+            console.error('Error loading klippekort:', error);
+            document.getElementById('klippekort-container').innerHTML = 
+                `<div class="error">${this.getText('dashboard.could_not_load_klippekort')}</div>`;
+        }
+    }
+    
+    getText(key) {
+        // In a real app, this would connect to the localization system
+        // For now, return the key as fallback
+        const texts = {
+            'klippekort_actions.refund_confirm': 'Er du sikker på at du vil be om refusjon for dette klippekortet?',
+            'klippekort_actions.refund_requested': 'Refusjonsforespørsel sendt',
+            'klippekort_actions.refund_error': 'Feil ved sending av refusjonsforespørsel',
+            'klippekort_actions.error_prefix': 'Feil: ',
+            'admin.confirm_delete_klippekort': 'Er du sikker på at du vil slette dette klippekortet?',
+            'admin.saved': 'Lagret',
+            'admin.save_error': 'Feil',
+            'dashboard.could_not_load_klippekort': 'Kunne ikke laste klippekort'
+        };
+        
+        return texts[key] || key;
+    }
+}
+
+// Global functions for backward compatibility
+let klippekortActions;
+
+function initKlippekortActions(isAdminMode = false) {
+    klippekortActions = new KlippekortActions({ 
+        isAdminMode: isAdminMode,
+        lang: document.documentElement.lang || 'no'
+    });
+}
+
+// User action functions
+function buyMore() {
+    if (klippekortActions) klippekortActions.buyMore();
+}
+
+function requestRefund(klippekortId) {
+    if (klippekortActions) klippekortActions.requestRefund(klippekortId);
+}
+
+// Admin action functions
+function updateKlippekortName(input, klippekortId) {
+    if (klippekortActions) klippekortActions.updateKlippekortName(input, klippekortId);
+}
+
+function updateKlippekortPrice(input, klippekortId) {
+    if (klippekortActions) klippekortActions.updateKlippekortPrice(input, klippekortId);
+}
+
+function updateKlippekortDescription(textarea, klippekortId) {
+    if (klippekortActions) klippekortActions.updateKlippekortDescription(textarea, klippekortId);
+}
+
+function updateKlippekortPunches(input, klippekortId) {
+    if (klippekortActions) klippekortActions.updateKlippekortPunches(input, klippekortId);
+}
+
+function updateKlippekortValidity(input, klippekortId) {
+    if (klippekortActions) klippekortActions.updateKlippekortValidity(input, klippekortId);
+}
+
+function saveKlippekortChanges(klippekortId) {
+    if (klippekortActions) klippekortActions.saveKlippekortChanges(klippekortId);
+}
+
+function deleteKlippekort(klippekortId) {
+    if (klippekortActions) klippekortActions.deleteKlippekort(klippekortId);
+}
+
+// Auto-initialize on DOMContentLoaded if not already initialized by membership actions
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're in admin mode by looking for admin-specific elements
+    const isAdminMode = document.querySelector('.admin-mode') !== null;
+    if (!window.klippekortActions) {
+        initKlippekortActions(isAdminMode);
+    }
+});
+</script>
+{{end}}
