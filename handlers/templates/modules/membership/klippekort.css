@@ -9,8 +9,7 @@
     background: white;
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border: 2px solid #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     position: relative;
     transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -21,7 +20,7 @@
 }
 
 .klippekort-card.expiring {
-    border-color: #ff6b35;
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
     background: linear-gradient(135deg, #fff5f0, #ffffff);
 }
 

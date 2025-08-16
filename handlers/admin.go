@@ -14,6 +14,7 @@ type AdminData struct {
 	Users          []models.User
 	Events         []models.Event
 	FreezeRequests []models.FreezeRequest
+	Memberships    []models.Membership
 	Stats          *modules.AdminStatsModuleData
 	Lang           string
 	CurrentPage    string
@@ -41,6 +42,12 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	memberships, err := AdminDB.GetAllMemberships()
+	if err != nil {
+		http.Error(w, "Kunne ikke hente medlemskap", http.StatusInternalServerError)
+		return
+	}
+
 	// Get language from request (default to Norwegian bokmål)
 	lang := r.URL.Query().Get("lang")
 	if lang == "" {
@@ -59,6 +66,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		Users:          users,
 		Events:         events,
 		FreezeRequests: freezeRequests,
+		Memberships:    memberships,
 		Stats:          statsModule,
 		Lang:           lang,
 		CurrentPage:    "admin",

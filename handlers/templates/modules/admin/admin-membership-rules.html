@@ -1,0 +1,217 @@
+{{define "admin_membership_rules"}}
+<div class="admin-section">
+    <h3>{{t .Lang "admin.membership_rules"}}</h3>
+    
+    <div class="rules-container">
+        <div class="rule-section">
+            <h4>{{t .Lang "admin.upgrade_rules"}}</h4>
+            <div class="rule-item">
+                <label>
+                    <input type="checkbox" id="allow-upgrades" checked> 
+                    {{t .Lang "admin.allow_membership_upgrades"}}
+                </label>
+                <p class="rule-description">{{t .Lang "admin.upgrade_rules_description"}}</p>
+            </div>
+            
+            <div class="rule-item">
+                <label>
+                    <input type="checkbox" id="combine-binding-periods" checked> 
+                    {{t .Lang "admin.combine_binding_periods"}}
+                </label>
+                <p class="rule-description">{{t .Lang "admin.combine_binding_description"}}</p>
+            </div>
+        </div>
+        
+        <div class="rule-section">
+            <h4>{{t .Lang "admin.downgrade_rules"}}</h4>
+            <div class="rule-item">
+                <label>
+                    <input type="checkbox" id="allow-downgrades"> 
+                    {{t .Lang "admin.allow_membership_downgrades"}}
+                </label>
+                <p class="rule-description">{{t .Lang "admin.downgrade_rules_description"}}</p>
+            </div>
+        </div>
+        
+        <div class="rule-section">
+            <h4>{{t .Lang "admin.binding_rules"}}</h4>
+            <div class="rule-item">
+                <label>
+                    <input type="checkbox" id="allow-change-during-binding"> 
+                    {{t .Lang "admin.allow_changes_during_binding"}}
+                </label>
+                <p class="rule-description">{{t .Lang "admin.binding_change_description"}}</p>
+            </div>
+        </div>
+        
+        <div class="rule-section">
+            <h4>{{t .Lang "admin.default_membership"}}</h4>
+            <div class="rule-item">
+                <label for="default-membership">{{t .Lang "admin.default_membership_for_new_users"}}:</label>
+                <select id="default-membership">
+                    <option value="">{{t .Lang "admin.no_default"}}</option>
+                    {{range .Memberships}}
+                    <option value="{{.ID}}" {{if .IsSpecialOffer}}selected{{end}}>{{.Name}} - {{printf "%.0f" (divf .Price 100)}} kr</option>
+                    {{end}}
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <button class="save-rules-btn" onclick="saveMembershipRules()">
+        {{t .Lang "admin.save_rules"}}
+    </button>
+</div>
+
+<style>
+.admin-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.admin-section h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 10px;
+}
+
+.rules-container {
+    display: grid;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.rule-section {
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.rule-section h4 {
+    margin-top: 0;
+    color: #007cba;
+    font-size: 1.1rem;
+}
+
+.rule-item {
+    margin-bottom: 1.5rem;
+}
+
+.rule-item:last-child {
+    margin-bottom: 0;
+}
+
+.rule-item label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rule-item input[type="checkbox"] {
+    transform: scale(1.2);
+}
+
+.rule-item select {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 6px;
+    margin-top: 0.5rem;
+}
+
+.rule-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+.save-rules-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 1rem;
+}
+
+.save-rules-btn:hover {
+    background: #218838;
+}
+
+@media (max-width: 768px) {
+    .admin-section {
+        padding: 1rem;
+    }
+    
+    .rules-container {
+        gap: 1rem;
+    }
+    
+    .rule-section {
+        padding: 1rem;
+    }
+}
+</style>
+
+<script>
+function saveMembershipRules() {
+    const rules = {
+        allow_upgrades: document.getElementById('allow-upgrades').checked,
+        combine_binding_periods: document.getElementById('combine-binding-periods').checked,
+        allow_downgrades: document.getElementById('allow-downgrades').checked,
+        allow_change_during_binding: document.getElementById('allow-change-during-binding').checked,
+        default_membership_id: document.getElementById('default-membership').value || null
+    };
+    
+    fetch('/api/admin/membership-rules', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(rules)
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('{{t .Lang "admin.rules_saved_successfully"}}');
+        } else {
+            throw new Error('Failed to save rules');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{t .Lang "admin.error_saving_rules"}}');
+    });
+}
+
+// Load current rules on page load
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/admin/membership-rules')
+        .then(response => response.json())
+        .then(rules => {
+            document.getElementById('allow-upgrades').checked = rules.allow_upgrades || false;
+            document.getElementById('combine-binding-periods').checked = rules.combine_binding_periods || false;
+            document.getElementById('allow-downgrades').checked = rules.allow_downgrades || false;
+            document.getElementById('allow-change-during-binding').checked = rules.allow_change_during_binding || false;
+            if (rules.default_membership_id) {
+                document.getElementById('default-membership').value = rules.default_membership_id;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading rules:', error);
+        });
+});
+</script>
+{{end}}

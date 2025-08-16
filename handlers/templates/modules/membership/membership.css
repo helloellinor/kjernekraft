@@ -117,6 +117,13 @@
     margin-bottom: 0.5rem;
 }
 
+.membership-header + .binding-end {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: #007cba;
+}
+
 .renewal-date.urgent {
     color: #dc3545;
     font-weight: 600;
