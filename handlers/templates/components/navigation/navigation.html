@@ -1,0 +1,40 @@
+{{define "navigation"}}
+{{template "navigation_styles"}}
+
+<header class="header">
+    <div class="header-content">
+        <h1>{{t .Lang "navigation.dashboard_title"}}</h1>
+        <div class="auth-controls">
+            {{if .UserName}}
+            <span class="user-name">{{.UserName}}</span>
+            <a href="/logout" class="auth-link">{{t .Lang "navigation.logout"}}</a>
+            {{else}}
+            <a href="/innlogging" class="auth-link">{{t .Lang "navigation.login"}}</a>
+            {{end}}
+        </div>
+    </div>
+</header>
+
+<nav class="nav">
+    <ul class="nav-list">
+        <li class="nav-item">
+            <a href="/elev/hjem" class="nav-link {{if eq .CurrentPage "hjem"}}active{{end}}">{{t .Lang "navigation.home"}}</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/timeplan" class="nav-link {{if eq .CurrentPage "timeplan"}}active{{end}}">{{t .Lang "navigation.schedule"}}</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/klippekort" class="nav-link {{if eq .CurrentPage "klippekort"}}active{{end}}">{{t .Lang "navigation.punch_cards"}}</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/medlemskap" class="nav-link {{if eq .CurrentPage "medlemskap"}}active{{end}}">{{t .Lang "navigation.membership"}}</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/betaling" class="nav-link {{if eq .CurrentPage "betaling"}}active{{end}}">{{t .Lang "navigation.payments"}}</a>
+        </li>
+        <li class="nav-item">
+            <a href="/elev/min-profil" class="nav-link {{if eq .CurrentPage "profil"}}active{{end}}">{{t .Lang "navigation.my_profile"}}</a>
+        </li>
+    </ul>
+</nav>
+{{end}}

@@ -1,0 +1,103 @@
+{{define "betaling_scripts"}}
+<script>
+async function loadPaymentMethods() {
+    try {
+        const response = await fetch('/api/payment-methods');
+        if (response.ok) {
+            const html = await response.text();
+            document.getElementById('payment-methods-container').innerHTML = html;
+        } else {
+            document.getElementById('payment-methods-container').innerHTML = '<div class="no-data">Kunne ikke laste betalingsmetoder</div>';
+        }
+    } catch (error) {
+        console.error('Error loading payment methods:', error);
+        document.getElementById('payment-methods-container').innerHTML = '<div class="no-data">Feil ved lasting av betalingsmetoder</div>';
+    }
+}
+
+async function loadCharges(typeFilter = '') {
+    try {
+        let url = '/api/charges';
+        if (typeFilter) {
+            url += '?type=' + encodeURIComponent(typeFilter);
+        }
+        
+        const response = await fetch(url);
+        if (response.ok) {
+            const html = await response.text();
+            document.getElementById('charges-container').innerHTML = html;
+        } else {
+            document.getElementById('charges-container').innerHTML = '<div class="no-data">Kunne ikke laste belastninger</div>';
+        }
+    } catch (error) {
+        console.error('Error loading charges:', error);
+        document.getElementById('charges-container').innerHTML = '<div class="no-data">Feil ved lasting av belastninger</div>';
+    }
+}
+
+function filterCharges(type) {
+    loadCharges(type);
+}
+
+function addPaymentMethod() {
+    // TODO: Implement Stripe payment method addition
+    alert('Legg til betalingsmetode-funksjonalitet kommer snart!');
+}
+
+async function setDefaultPaymentMethod(paymentMethodId) {
+    if (!confirm('Er du sikker på at du vil sette denne som standard betalingsmetode?')) {
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('payment_method_id', paymentMethodId);
+        
+        const response = await fetch('/api/payment-methods/set-default', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            loadPaymentMethods(); // Reload the list
+        } else {
+            alert('Feil ved setting av standard betalingsmetode');
+        }
+    } catch (error) {
+        console.error('Error setting default payment method:', error);
+        alert('Feil ved setting av standard betalingsmetode');
+    }
+}
+
+async function removePaymentMethod(paymentMethodId) {
+    if (!confirm('Er du sikker på at du vil fjerne denne betalingsmetoden?')) {
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('payment_method_id', paymentMethodId);
+        
+        const response = await fetch('/api/payment-methods/remove', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            loadPaymentMethods(); // Reload the list
+        } else {
+            alert('Feil ved fjerning av betalingsmetode');
+        }
+    } catch (error) {
+        console.error('Error removing payment method:', error);
+        alert('Feil ved fjerning av betalingsmetode');
+    }
+}
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadPaymentMethods();
+    loadCharges();
+});
+</script>
+{{end}}

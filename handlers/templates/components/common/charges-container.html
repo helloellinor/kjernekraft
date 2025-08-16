@@ -1,0 +1,18 @@
+{{define "charges_container"}}
+<div class="module">
+    <h2 class="module-title">{{t .Lang "charges.title"}}</h2>
+    
+    <div class="charges-filter">
+        <label for="charges-type-filter">{{t .Lang "payments.filter_by_type"}}:</label>
+        <select id="charges-type-filter" onchange="filterCharges(this.value)">
+            <option value="">{{t .Lang "payments.all_types"}}</option>
+            <option value="medlemskap">{{t .Lang "payments.membership"}}</option>
+            <option value="klippekort">{{t .Lang "payments.klippekort"}}</option>
+        </select>
+    </div>
+    
+    <div id="charges-container">
+        <div class="loading-placeholder">{{t .Lang "payments.loading_charges"}}</div>
+    </div>
+</div>
+{{end}}

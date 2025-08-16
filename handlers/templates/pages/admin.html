@@ -1,192 +1,21 @@
-{{define "admin_page"}}
-<!DOCTYPE html>
-<html lang="no">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Brukeradministrasjon</title>
-    {{template "admin_styles"}}
-</head>
-<body>
-    <h1>Admin - Brukeradministrasjon</h1>
+{{define "content"}}
+{{template "navigation" .}}
+
+<main class="main-content">
+    <h1 class="page-title">{{t .Lang "admin.title"}}</h1>
     
     {{template "admin_settings" .}}
     
-    <div class="stats">
-        <strong>Totalt antall brukere:</strong> {{len .Users}} | 
-        <strong>Totalt antall events:</strong> {{len .Events}} |
-        <strong>Ventende frysingsforespørsler:</strong> {{len .FreezeRequests}}
-    </div>
+    {{template "admin_stats_module" .Stats}}
 
-    <div class="section">
-        <h2>Brukere</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Navn</th>
-                    <th>Fødselsdato</th>
-                    <th>E-post</th>
-                    <th>Telefon</th>
-                    <th>Roller</th>
-                    <th>Opprettet</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{range .Users}}
-                <tr>
-                    <td>{{.ID}}</td>
-                    <td>{{.Name}}</td>
-                    <td>{{.Birthdate}}</td>
-                    <td>{{.Email}}</td>
-                    <td>{{.Phone}}</td>
-                    <td class="roles">{{range $i, $role := .Roles}}{{if $i}}, {{end}}{{$role}}{{end}}</td>
-                    <td>-</td>
-                </tr>
-                {{end}}
-            </tbody>
-        </table>
-    </div>
+    {{template "admin_membership_rules" .}}
 
-    <div class="section">
-        <h2>Frysingsforespørsler</h2>
-        {{if .FreezeRequests}}
-        <table>
-            <thead>
-                <tr>
-                    <th>Bruker</th>
-                    <th>E-post</th>
-                    <th>Telefon</th>
-                    <th>Medlemskap</th>
-                    <th>Pris</th>
-                    <th>Binding (mnd)</th>
-                    <th>Opprettet</th>
-                    <th>Handlinger</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{range .FreezeRequests}}
-                <tr>
-                    <td>{{.UserName}}</td>
-                    <td>{{.UserEmail}}</td>
-                    <td>{{.UserPhone}}</td>
-                    <td>{{.MembershipName}}</td>
-                    <td>{{.MembershipPrice}} kr/mnd</td>
-                    <td>{{.CommitmentMonths}}</td>
-                    <td>{{.CreatedAt.Format "02.01.2006 15:04"}}</td>
-                    <td>
-                        <button onclick="approveFreezeRequest({{.UserID}})" style="background: #28a745; margin-right: 5px;">Godkjenn</button>
-                        <button onclick="rejectFreezeRequest({{.UserID}})" style="background: #dc3545;">Avvis</button>
-                    </td>
-                </tr>
-                {{end}}
-            </tbody>
-        </table>
-        {{else}}
-        <p style="font-style: italic; color: #666;">Ingen ventende frysingsforespørsler</p>
-        {{end}}
-    </div>
+    {{template "admin_users_table" .}}
 
-    <div class="section">
-        <h2>Event Tidsadministrasjon</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tittel</th>
-                    <th>Starttid</th>
-                    <th>Sluttid</th>
-                    <th>Lokasjon</th>
-                    <th>Handlinger</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{range .Events}}
-                <tr>
-                    <td>{{.ID}}</td>
-                    <td>{{.Title}}</td>
-                    <td>{{.StartTime.Format "2006-01-02 15:04"}}</td>
-                    <td>{{.EndTime.Format "2006-01-02T15:04"}}</td>
-                    <td>{{.Location}}</td>
-                    <td>
-                        <div class="update-form">
-                            <form onsubmit="updateEventTime(event, {{.ID}})">
-                                <div class="form-group">
-                                    <label>Start:</label>
-                                    <input type="datetime-local" id="start_{{.ID}}" value="{{.StartTime.Format "2006-01-02T15:04"}}" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Slutt:</label>
-                                    <input type="datetime-local" id="end_{{.ID}}" value="{{.EndTime.Format "2006-01-02T15:04"}}" required>
-                                </div>
-                                <button type="submit">Oppdater tid</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {{end}}
-            </tbody>
-        </table>
-    </div>
+    {{template "admin_freeze_requests_table" .}}
 
-    <script>
-        function updateEventTime(event, eventId) {
-            event.preventDefault();
-            
-            const startTime = document.getElementById('start_' + eventId).value;
-            const endTime = document.getElementById('end_' + eventId).value;
-            
-            if (!startTime || !endTime) {
-                alert('Begge tidsfelt må fylles ut');
-                return;
-            }
-            
-            const url = '/api/admin/events/update-time?event_id=' + eventId + 
-                       '&start_time=' + encodeURIComponent(startTime) + 
-                       '&end_time=' + encodeURIComponent(endTime);
-            
-            fetch(url, { method: 'POST' })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Event tid oppdatert!');
-                        location.reload();
-                    } else {
-                        response.text().then(text => alert('Feil: ' + text));
-                    }
-                })
-                .catch(error => alert('Feil: ' + error));
-        }
+    {{template "admin_events_table" .}}
+</main>
 
-        function approveFreezeRequest(userId) {
-            if (confirm('Er du sikker på at du vil godkjenne frysingsforespørselen?')) {
-                fetch('/api/admin/freeze-requests/approve?user_id=' + userId, { method: 'POST' })
-                    .then(response => {
-                        if (response.ok) {
-                            alert('Frysingsforespørsel godkjent!');
-                            location.reload();
-                        } else {
-                            response.text().then(text => alert('Feil: ' + text));
-                        }
-                    })
-                    .catch(error => alert('Feil: ' + error));
-            }
-        }
-
-        function rejectFreezeRequest(userId) {
-            if (confirm('Er du sikker på at du vil avvise frysingsforespørselen?')) {
-                fetch('/api/admin/freeze-requests/reject?user_id=' + userId, { method: 'POST' })
-                    .then(response => {
-                        if (response.ok) {
-                            alert('Frysingsforespørsel avvist!');
-                            location.reload();
-                        } else {
-                            response.text().then(text => alert('Feil: ' + text));
-                        }
-                    })
-                    .catch(error => alert('Feil: ' + error));
-            }
-        }
-    </script>
-</body>
-</html>
+{{template "admin_scripts" .}}
 {{end}}

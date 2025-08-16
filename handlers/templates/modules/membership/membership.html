@@ -1,0 +1,186 @@
+{{define "membership_module"}}
+<style>
+{{template "membership_module_styles" .}}
+</style>
+
+{{if .HasMembership}}
+<div class="membership-card {{.Membership.Status}}">
+    {{if .Membership.IsSpecialOffer}}
+    <div class="special-offer-badge">Spesialtilbud</div>
+    {{end}}
+    
+    <div class="membership-header">
+        <h3 class="membership-name">{{.Membership.Name}}</h3>
+        <div class="membership-status status-{{.Membership.Status}}">
+            {{if eq .Membership.Status "active"}}AKTIV
+            {{else if eq .Membership.Status "paused"}}{{t .Lang "membership.frozen_until"}} 🧊
+            {{else if eq .Membership.Status "freeze_requested"}}FORESPØRSEL SENDT
+            {{else if eq .Membership.Status "cancelled"}}KANSELLERT
+            {{end}}
+        </div>
+    </div>
+    
+    {{if .Membership.BindingEnd}}
+    <div class="binding-end">
+        <strong>{{t .Lang "membership.binding_expires_in"}} {{.Membership.MonthsUntilBindingEnd}} {{if eq .Membership.MonthsUntilBindingEnd 1}}{{t .Lang "membership.month"}}{{else}}{{t .Lang "membership.months"}}{{end}}</strong>
+    </div>
+    {{end}}
+    
+    <div class="membership-details">
+        <div class="price-info">
+            <span class="price">{{printf "%.0f" (divf .Membership.Price 100)}} {{t .Lang "membership.price_per_month"}}</span>
+            {{if gt .Membership.CommitmentMonths 0}}
+            <span class="commitment">{{.Membership.CommitmentMonths}} {{t .Lang "membership.commitment_months"}}</span>
+            {{else}}
+            <span class="commitment">Ingen binding</span>
+            {{end}}
+        </div>
+        
+        <div class="dates-info">
+            {{if gt .Membership.DaysUntilRenewal 0}}
+            <div class="renewal-date">
+                <strong>{{t .Lang "membership.next_renewal"}}:</strong> {{.Membership.RenewalDate.Format "2. January 2006"}}
+                <span class="days-until">({{t .Lang "membership.in"}} {{.Membership.DaysUntilRenewal}} {{t .Lang "membership.days"}})</span>
+            </div>
+            {{else if eq .Membership.DaysUntilRenewal 0}}
+            <div class="renewal-date urgent">
+                <strong>{{t .Lang "membership.renews_today"}}!</strong>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    
+    <div class="membership-actions">
+        {{if eq .Membership.Status "active"}}
+        <button class="action-btn freeze-btn" onclick="freezeMembership()">
+            {{t .Lang "membership.freeze"}}
+        </button>
+        <button class="action-btn change-btn" onclick="changeMembership()">
+            {{t .Lang "membership.change"}}
+        </button>
+        {{else if eq .Membership.Status "freeze_requested"}}
+        <button class="action-btn cancel-request-btn" onclick="cancelFreezeRequest()">
+            {{t .Lang "membership.cancel_request"}}
+        </button>
+        {{else if eq .Membership.Status "paused"}}
+        <button class="action-btn unfreeze-btn" onclick="unfreezeMembership()">
+            {{t .Lang "membership.unfreeze"}}
+        </button>
+        <button class="action-btn change-btn" onclick="changeMembership()">
+            {{t .Lang "membership.change"}}
+        </button>
+        {{end}}
+        
+        {{if .Membership.CanCancel}}
+        <button class="action-btn cancel-btn" onclick="cancelMembership()">
+            {{t .Lang "membership.cancel"}}
+        </button>
+        {{end}}
+    </div>
+</div>
+{{else}}
+<div class="no-membership">
+    <h3>{{t .Lang "membership.no_membership"}}</h3>
+    <p>Du har ikke et aktivt medlemskap for øyeblikket.</p>
+    <a href="/medlemskap" class="get-membership-btn">Finn medlemskap</a>
+</div>
+{{end}}
+
+<script>
+function freezeMembership() {
+    if (confirm('Er du sikker på at du vil fryse medlemskapet?')) {
+        fetch('/api/membership/freeze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Feil ved frysing av medlemskap');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved frysing av medlemskap');
+        });
+    }
+}
+
+function cancelFreezeRequest() {
+    if (confirm('Er du sikker på at du vil trekke tilbake forespørselen om frysing?')) {
+        fetch('/api/membership/cancel-freeze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Feil ved trekking av frysingsforespørsel');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved trekking av frysingsforespørsel');
+        });
+    }
+}
+
+function unfreezeMembership() {
+    if (confirm('Er du sikker på at du vil smelte medlemskapet?')) {
+        fetch('/api/membership/unfreeze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Feil ved smelting av medlemskap');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved smelting av medlemskap');
+        });
+    }
+}
+
+function changeMembership() {
+    window.location.href = '/medlemskap';
+}
+
+function cancelMembership() {
+    if (confirm('Er du sikker på at du vil si opp medlemskapet? Dette kan ikke angres.')) {
+        fetch('/api/membership/cancel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Feil ved oppsigelse av medlemskap');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved oppsigelse av medlemskap');
+        });
+    }
+}
+</script>
+{{end}}
+
+{{define "membership_module_styles"}}
+{{.MembershipCSS}}
+{{end}}

@@ -1,0 +1,222 @@
+/* Membership Module Styles */
+.membership-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: relative;
+    max-width: 500px;
+}
+
+.membership-card.freeze_requested {
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    background: linear-gradient(135deg, #fff9c4, #ffffff);
+}
+
+.membership-card.paused {
+    box-shadow: 0 4px 12px rgba(0, 124, 186, 0.3);
+    background: linear-gradient(135deg, #e8f4fd, #ffffff);
+}
+
+.membership-card.cancelled {
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    background: linear-gradient(135deg, #f8d7da, #ffffff);
+}
+
+.membership-card.active {
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    background: linear-gradient(135deg, #f8fff9, #ffffff);
+}
+
+.special-offer-badge {
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    background: #ff6b35;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.membership-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.membership-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.membership-status {
+    position: absolute;
+    top: -10px;
+    left: 15px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #28a745;
+    color: white;
+}
+
+.status-freeze_requested {
+    background: #ffc107;
+    color: #856404;
+}
+
+.status-paused {
+    background: #007cba;
+    color: white;
+}
+
+.status-cancelled {
+    background: #dc3545;
+    color: white;
+}
+
+.membership-details {
+    margin-bottom: 1.5rem;
+}
+
+.price-info {
+    margin-bottom: 1rem;
+}
+
+.price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #007cba;
+    margin-right: 0.5rem;
+}
+
+.commitment {
+    font-size: 0.9rem;
+    color: #666;
+    background: #f0f0f0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.dates-info {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.billing-info, .renewal-date, .binding-end {
+    margin-bottom: 0.5rem;
+}
+
+.membership-header + .binding-end {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: #007cba;
+}
+
+.renewal-date.urgent {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.days-until {
+    color: #999;
+}
+
+.membership-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    box-shadow: inset 0 1px 0 0 #e0e0e0;
+}
+
+.action-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+}
+
+.freeze-btn, .unfreeze-btn {
+    background: #007cba;
+    color: white;
+}
+
+.freeze-btn:hover, .unfreeze-btn:hover {
+    background: #005a87;
+}
+
+.change-btn {
+    background: #28a745;
+    color: white;
+}
+
+.change-btn:hover {
+    background: #218838;
+}
+
+.cancel-request-btn {
+    background: #ffc107;
+    color: #000;
+}
+
+.cancel-request-btn:hover {
+    background: #e0a800;
+}
+
+.cancel-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #c82333;
+}
+
+.membership-module .no-membership {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-width: 500px;
+}
+
+.membership-module .no-membership h3 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.membership-module .no-membership p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.get-membership-btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #007cba;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.get-membership-btn:hover {
+    background: #005a87;
+}

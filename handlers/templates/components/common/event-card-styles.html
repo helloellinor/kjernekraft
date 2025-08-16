@@ -1,3 +1,5 @@
+{{define "event_card_styles"}}
+<style>
 /* Event Card Styles */
 .event-card {
     background: white;
@@ -53,7 +55,7 @@
     display: block;
 }
 
-.signup-btn {
+.signup-btn, .signup-button {
     width: 100%;
     padding: 0.75rem;
     background-color: #007cba;
@@ -66,15 +68,15 @@
     margin-top: 0.5rem;
 }
 
-.signup-btn:hover {
+.signup-btn:hover, .signup-button:hover {
     background-color: #005a87;
 }
 
-.signup-btn.waitlist {
+.signup-btn.waitlist, .signup-button.waitlist {
     background-color: #ff6b35;
 }
 
-.signup-btn.waitlist:hover {
+.signup-btn.waitlist:hover, .signup-button.waitlist:hover {
     background-color: #e55a2b;
 }
 
@@ -95,3 +97,5 @@
         transform: translateY(0);
     }
 }
+</style>
+{{end}}

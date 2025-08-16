@@ -1,0 +1,71 @@
+{{define "admin_scripts"}}
+<script>
+    // Load localized text
+    const ADMIN_TEXTS = {
+        approveConfirm: {{t .Lang "admin.alerts.approve_freeze_confirm" | toJS}},
+        rejectConfirm: {{t .Lang "admin.alerts.reject_freeze_confirm" | toJS}},
+        freezeApproved: {{t .Lang "admin.alerts.freeze_approved" | toJS}},
+        freezeRejected: {{t .Lang "admin.alerts.freeze_rejected" | toJS}},
+        eventUpdated: {{t .Lang "admin.alerts.event_updated" | toJS}},
+        timeFieldsRequired: {{t .Lang "admin.alerts.time_fields_required" | toJS}},
+        errorPrefix: {{t .Lang "admin.alerts.error_prefix" | toJS}}
+    };
+
+    function updateEventTime(event, eventId) {
+        event.preventDefault();
+        
+        const startTime = document.getElementById('start_' + eventId).value;
+        const endTime = document.getElementById('end_' + eventId).value;
+        
+        if (!startTime || !endTime) {
+            alert(ADMIN_TEXTS.timeFieldsRequired);
+            return;
+        }
+        
+        const url = '/api/admin/events/update-time?event_id=' + eventId + 
+                   '&start_time=' + encodeURIComponent(startTime) + 
+                   '&end_time=' + encodeURIComponent(endTime);
+        
+        fetch(url, { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    alert(ADMIN_TEXTS.eventUpdated);
+                    location.reload();
+                } else {
+                    response.text().then(text => alert(ADMIN_TEXTS.errorPrefix + text));
+                }
+            })
+            .catch(error => alert(ADMIN_TEXTS.errorPrefix + error));
+    }
+
+    function approveFreezeRequest(userId) {
+        if (confirm(ADMIN_TEXTS.approveConfirm)) {
+            fetch('/api/admin/freeze-requests/approve?user_id=' + userId, { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        alert(ADMIN_TEXTS.freezeApproved);
+                        location.reload();
+                    } else {
+                        response.text().then(text => alert(ADMIN_TEXTS.errorPrefix + text));
+                    }
+                })
+                .catch(error => alert(ADMIN_TEXTS.errorPrefix + error));
+        }
+    }
+
+    function rejectFreezeRequest(userId) {
+        if (confirm(ADMIN_TEXTS.rejectConfirm)) {
+            fetch('/api/admin/freeze-requests/reject?user_id=' + userId, { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        alert(ADMIN_TEXTS.freezeRejected);
+                        location.reload();
+                    } else {
+                        response.text().then(text => alert(ADMIN_TEXTS.errorPrefix + text));
+                    }
+                })
+                .catch(error => alert(ADMIN_TEXTS.errorPrefix + error));
+        }
+    }
+</script>
+{{end}}

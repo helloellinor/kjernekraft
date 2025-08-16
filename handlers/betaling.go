@@ -13,11 +13,15 @@ func BetalingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
+
 	data := map[string]interface{}{
 		"Title":       "Betaling",
 		"CurrentPage": "betaling",
 		"UserName":    user.Name,
 		"User":        user,
+		"Lang":        lang,
 	}
 
 	// Use the new template system

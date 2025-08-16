@@ -1,0 +1,30 @@
+{{define "week_controls"}}
+<div class="week-controls">
+    <div class="filters">
+        <div class="filter-group">
+            <label for="teacher-filter">{{t .Lang "timeplan.teacher_filter"}}</label>
+            <select id="teacher-filter" onchange="applyFilters()">
+                <option value="">{{t .Lang "timeplan.all_teachers"}}</option>
+                {{range .Teachers}}
+                <option value="{{.}}" {{if eq . $.SelectedTeacher}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="class-filter">{{t .Lang "timeplan.class_filter"}}</label>
+            <select id="class-filter" onchange="applyFilters()">
+                <option value="">{{t .Lang "timeplan.all_classes"}}</option>
+                {{range .ClassTypes}}
+                <option value="{{.}}" {{if eq . $.SelectedClass}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+    </div>
+    
+    <div class="week-navigation">
+        <button class="week-nav-btn" onclick="navigateWeek(-1)" {{if not .CanGoBack}}disabled{{end}}>&lt;</button>
+        <input type="number" class="week-input" id="week-input" value="{{.WeekNumber}}" onchange="jumpToWeek()" min="{{.WeekNumber}}">
+        <button class="week-nav-btn" onclick="navigateWeek(1)">&gt;</button>
+    </div>
+</div>
+{{end}}
