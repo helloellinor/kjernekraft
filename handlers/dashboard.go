@@ -3,6 +3,7 @@ package handlers
 import (
 	"kjernekraft/handlers/config"
 	"kjernekraft/models"
+	"log"
 	"net/http"
 	"time"
 )

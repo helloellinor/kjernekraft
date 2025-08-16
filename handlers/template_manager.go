@@ -272,6 +272,26 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 		})
 	}
 
+	// Load working styles  
+	stylesPath := filepath.Join(tm.basePath, "core", "styles")
+	if _, err := os.Stat(stylesPath); err == nil {
+		filepath.WalkDir(stylesPath, func(stylePath string, d fs.DirEntry, err error) error {
+			if err == nil && !d.IsDir() && strings.HasSuffix(stylePath, ".html") {
+				// Try to parse the style individually first to check if it works
+				testTemplate := template.New("test").Funcs(getTemplateFuncs())
+				if _, testErr := testTemplate.ParseFiles(stylePath); testErr == nil {
+					// Style parses successfully, add it to main template
+					if _, parseErr := t.ParseFiles(stylePath); parseErr != nil {
+						log.Printf("Error adding working style %s to page template: %v", stylePath, parseErr)
+					}
+				} else {
+					log.Printf("Skipping style %s due to parse error: %v", stylePath, testErr)
+				}
+			}
+			return nil
+		})
+	}
+
 	// Load working modules only - skip modules that fail to parse
 	modulesPath := filepath.Join(tm.basePath, "modules")
 	if _, err := os.Stat(modulesPath); err == nil {
