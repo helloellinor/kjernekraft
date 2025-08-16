@@ -66,6 +66,8 @@ func main() {
 	// Admin routes
 	r.Get("/admin", handlers.AdminPageHandler)
 	r.Get("/api/admin/users", handlers.GetUsersAPIHandler)
+	r.Get("/api/admin/membership-rules", handlers.GetMembershipRulesHandler)
+	r.Post("/api/admin/membership-rules", handlers.SaveMembershipRulesHandler)
 	r.Post("/api/admin/events/update-time", handlers.UpdateEventTimeHandler)
 	r.Post("/api/admin/freeze-requests/approve", handlers.ApproveFreezeRequestHandler)
 	r.Post("/api/admin/freeze-requests/reject", handlers.RejectFreezeRequestHandler)

@@ -20,6 +20,12 @@
         </div>
     </div>
     
+    {{if .Membership.BindingEnd}}
+    <div class="binding-end">
+        <strong>{{t .Lang "membership.binding_expires_in"}} {{.Membership.MonthsUntilBindingEnd}} {{if eq .Membership.MonthsUntilBindingEnd 1}}{{t .Lang "membership.month"}}{{else}}{{t .Lang "membership.months"}}{{end}}</strong>
+    </div>
+    {{end}}
+    
     <div class="membership-details">
         <div class="price-info">
             <span class="price">{{printf "%.0f" (divf .Membership.Price 100)}} {{t .Lang "membership.price_per_month"}}</span>
@@ -39,12 +45,6 @@
             {{else if eq .Membership.DaysUntilRenewal 0}}
             <div class="renewal-date urgent">
                 <strong>{{t .Lang "membership.renews_today"}}!</strong>
-            </div>
-            {{end}}
-            
-            {{if .Membership.BindingEnd}}
-            <div class="binding-end">
-                <strong>{{t .Lang "membership.binding_expires_in"}} {{.Membership.MonthsUntilBindingEnd}} {{if eq .Membership.MonthsUntilBindingEnd 1}}{{t .Lang "membership.month"}}{{else}}{{t .Lang "membership.months"}}{{end}}</strong>
             </div>
             {{end}}
         </div>

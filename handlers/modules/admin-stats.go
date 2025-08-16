@@ -17,7 +17,7 @@ type AdminStatsModuleData struct {
 // NewAdminStatsModule creates a new admin stats module with the given data
 func NewAdminStatsModule(totalUsers, totalEvents, pendingFreezeRequests int, lang string) (*AdminStatsModuleData, error) {
 	// Load CSS content
-	cssPath := filepath.Join("handlers", "templates", "modules", "admin-stats.css")
+	cssPath := filepath.Join("handlers", "templates", "modules", "admin", "admin-stats.css")
 	cssContent, err := ioutil.ReadFile(cssPath)
 	if err != nil {
 		cssContent = []byte("/* CSS loading failed */")
