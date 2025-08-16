@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"html/template"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -10,7 +11,7 @@ type KlippekortModuleData struct {
 	HasKlippekort bool
 	Klippekort    interface{} // This will be []models.KlippekortWithDetails in practice
 	Lang          string
-	KlippekortCSS string
+	KlippekortCSS template.CSS
 }
 
 // NewKlippekortModule creates a new klippekort module with the given data
@@ -37,7 +38,7 @@ func NewKlippekortModule(klippekort interface{}, lang string) (*KlippekortModule
 		HasKlippekort: hasKlippekort,
 		Klippekort:    klippekort,
 		Lang:          lang,
-		KlippekortCSS: string(cssContent),
+		KlippekortCSS: template.CSS(cssContent),
 	}, nil
 }
 
