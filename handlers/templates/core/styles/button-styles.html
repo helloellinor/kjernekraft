@@ -1,41 +1,57 @@
 {{define "button_styles"}}
 <style>
-/* Standard Button Styles */
+/* Standard Button System for Reusable Components */
+
+/* Base button class with consistent styling */
 .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
     text-decoration: none;
-    display: inline-block;
-    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+    min-height: 44px; /* Accessibility - minimum touch target */
+    line-height: 1.4;
+    box-sizing: border-box;
 }
 
-.btn:hover {
-    transform: translateY(-1px);
-}
-
-.btn:active {
-    transform: translateY(0);
+.btn:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
 }
 
 .btn:disabled {
-    cursor: not-allowed;
     opacity: 0.6;
-    transform: none;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(0);
 }
 
 /* Primary Button */
 .btn-primary {
-    background: #007cba;
+    background: linear-gradient(135deg, #007cba, #005a87);
     color: white;
 }
 
-.btn-primary:hover {
-    background: #005a87;
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #005a87, #004066);
+    box-shadow: 0 4px 12px rgba(0, 124, 186, 0.3);
 }
 
 .btn-primary:disabled {
@@ -44,79 +60,396 @@
 
 /* Secondary Button */
 .btn-secondary {
-    background: #6c757d;
-    color: white;
+    background: #f8f9fa;
+    color: #333;
+    border: 2px solid #e0e0e0;
 }
 
-.btn-secondary:hover {
-    background: #5a6268;
+.btn-secondary:hover:not(:disabled) {
+    background: #e9ecef;
+    border-color: #ced4da;
 }
 
 /* Success Button */
 .btn-success {
-    background: #28a745;
+    background: linear-gradient(135deg, #28a745, #218838);
     color: white;
 }
 
-.btn-success:hover {
-    background: #218838;
+.btn-success:hover:not(:disabled) {
+    background: linear-gradient(135deg, #218838, #1e7e34);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Warning Button */
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #212529;
+}
+
+.btn-warning:hover:not(:disabled) {
+    background: linear-gradient(135deg, #e0a800, #d39e00);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
 
 /* Danger Button */
 .btn-danger {
-    background: #dc3545;
+    background: linear-gradient(135deg, #dc3545, #c82333);
     color: white;
 }
 
-.btn-danger:hover {
-    background: #c82333;
+.btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #c82333, #bd2130);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
-/* Full Width Button */
+/* Info Button */
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+}
+
+.btn-info:hover:not(:disabled) {
+    background: linear-gradient(135deg, #138496, #117a8b);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+/* Outline variants */
+.btn-outline-primary {
+    background: transparent;
+    color: #007cba;
+    border: 2px solid #007cba;
+}
+
+.btn-outline-primary:hover:not(:disabled) {
+    background: #007cba;
+    color: white;
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    color: #6c757d;
+    border: 2px solid #6c757d;
+}
+
+.btn-outline-secondary:hover:not(:disabled) {
+    background: #6c757d;
+    color: white;
+}
+
+/* Size variants */
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    min-height: 36px;
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    min-height: 52px;
+}
+
+.btn-xl {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.25rem;
+    min-height: 56px;
+}
+
+/* Width variants */
 .btn-block {
     width: 100%;
     margin-bottom: 1rem;
 }
 
-/* Legacy compatibility */
-.checkout-btn {
+.btn-full-width {
     width: 100%;
-    background: #007cba;
-    color: white;
-    border: none;
+}
+
+/* Icon buttons */
+.btn-icon {
+    padding: 0.75rem;
+    min-width: 44px;
+    justify-content: center;
+}
+
+.btn-icon.btn-sm {
+    padding: 0.5rem;
+    min-width: 36px;
+}
+
+.btn-icon.btn-lg {
+    padding: 1rem;
+    min-width: 52px;
+}
+
+/* Loading state */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: btn-spinner 0.8s linear infinite;
+}
+
+@keyframes btn-spinner {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Button groups */
+.btn-group {
+    display: inline-flex;
+    gap: 0;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+    border-right-width: 1px;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-right-width: 2px;
+}
+
+/* Legacy compatibility - keep existing class names working */
+.checkout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     padding: 1rem 2rem;
+    border: none;
     border-radius: 8px;
     font-size: 1.1rem;
     font-weight: 600;
+    text-decoration: none;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+    min-height: 44px;
+    line-height: 1.4;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #007cba, #005a87);
+    color: white;
+    width: 100%;
     margin-bottom: 1rem;
 }
 
-.checkout-btn:hover {
-    background: #005a87;
+.checkout-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #005a87, #004066);
+    box-shadow: 0 4px 12px rgba(0, 124, 186, 0.3);
+    transform: translateY(-1px);
 }
 
 .checkout-btn:disabled {
     background: #adb5bd;
+    opacity: 0.6;
     cursor: not-allowed;
+    pointer-events: none;
 }
 
 .add-payment-method-btn {
-    width: 100%;
-    background: #007cba;
-    color: white;
-    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     padding: 1rem 2rem;
+    border: none;
     border-radius: 8px;
     font-size: 1.1rem;
     font-weight: 600;
+    text-decoration: none;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+    min-height: 44px;
+    line-height: 1.4;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #007cba, #005a87);
+    color: white;
+    width: 100%;
 }
 
-.add-payment-method-btn:hover {
-    background: #005a87;
+.add-payment-method-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #005a87, #004066);
+    box-shadow: 0 4px 12px rgba(0, 124, 186, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Special purpose buttons for specific modules */
+.event-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+    min-height: 36px;
+    line-height: 1.4;
+    box-sizing: border-box;
+}
+
+.signup-btn {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+}
+
+.signup-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #218838, #1e7e34);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    transform: translateY(-1px);
+}
+
+.cancel-btn {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+}
+
+.cancel-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #c82333, #bd2130);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    transform: translateY(-1px);
+}
+
+.week-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+    min-height: 36px;
+    line-height: 1.4;
+    box-sizing: border-box;
+    background: #f8f9fa;
+    color: #333;
+    border: 2px solid #e0e0e0;
+}
+
+.week-nav-btn:hover:not(:disabled) {
+    background: #e9ecef;
+    border-color: #ced4da;
+    transform: translateY(-1px);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .btn {
+        min-height: 48px; /* Larger touch targets on mobile */
+        padding: 0.875rem 1.25rem;
+    }
+    
+    .btn-sm {
+        min-height: 40px;
+        padding: 0.625rem 1rem;
+    }
+    
+    .btn-lg {
+        min-height: 56px;
+        padding: 1.125rem 1.75rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0;
+        border-bottom-width: 1px;
+        border-right-width: 2px;
+        width: 100%;
+    }
+    
+    .btn-group .btn:first-child {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        border-bottom-left-radius: 0;
+    }
+    
+    .btn-group .btn:last-child {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        border-top-right-radius: 0;
+        border-bottom-width: 2px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .btn {
+        transition: none;
+    }
+    
+    .btn:hover {
+        transform: none;
+    }
+    
+    .btn-loading::after {
+        animation: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .btn {
+        border-width: 2px;
+        border-style: solid;
+    }
+    
+    .btn-primary {
+        border-color: #007cba;
+    }
+    
+    .btn-secondary {
+        border-color: #6c757d;
+    }
+    
+    .btn-success {
+        border-color: #28a745;
+    }
+    
+    .btn-danger {
+        border-color: #dc3545;
+    }
 }
 </style>
 {{end}}
