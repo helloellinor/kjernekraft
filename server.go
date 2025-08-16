@@ -75,6 +75,12 @@ func main() {
 		r.Get("/", handlers.AdminSettingsHandler)
 		r.Post("/", handlers.AdminSettingsHandler)
 	})
+	
+	// Klippekort admin routes
+	r.Get("/api/admin/klippekort-types", handlers.GetKlippekortTypesHandler)
+	r.Post("/api/admin/klippekort-type", handlers.CreateKlippekortTypeHandler)
+	r.Put("/api/admin/klippekort-type", handlers.UpdateKlippekortTypeHandler)
+	r.Delete("/api/admin/klippekort-type", handlers.DeleteKlippekortTypeHandler)
 
 	// Event routes
 	r.Get("/api/events", handlers.GetAllEventsHandler)

@@ -8,19 +8,50 @@
             <h3>{{t .Lang "admin.klippekort_types"}}</h3>
             <div id="admin-klippekort-types">
                 {{range .KlippekortTypes}}
-                {{template "klippekort_card" (dict 
-                    "ID" .ID
-                    "Name" .Name
-                    "Price" .Price
-                    "TotalPunches" .TotalPunches
-                    "ValidityMonths" .ValidityMonths
-                    "Description" .Description
-                    "AdminMode" true
-                )}}
+                <div class="klippekort-admin-card" data-id="{{.ID}}">
+                    <div class="klippekort-info">
+                        <h4>{{.Name}}</h4>
+                        <p class="description">{{.Description}}</p>
+                        <div class="details">
+                            <div class="detail-item">
+                                <span class="label">Klipp:</span>
+                                <span class="value">{{.KlippCount}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Pris:</span>
+                                <span class="value">{{divf .Price 100}}kr</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Per klipp:</span>
+                                <span class="value">{{divf .PricePerSession 100}}kr</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Gyldig:</span>
+                                <span class="value">{{.ValidDays}} dager</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Status:</span>
+                                <span class="value status {{if .Active}}active{{else}}inactive{{end}}">
+                                    {{if .Active}}Aktiv{{else}}Inaktiv{{end}}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="klippekort-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="editKlippekortType({{.ID}}, '{{.Name}}', {{.Price}}, {{.KlippCount}}, {{divf .ValidDays 30}}, '{{.Description}}')">
+                            Rediger
+                        </button>
+                        {{if .Active}}
+                        <button class="btn btn-sm btn-danger" onclick="deleteKlippekortType({{.ID}}, '{{.Name}}')">
+                            Deaktiver
+                        </button>
+                        {{end}}
+                    </div>
+                </div>
                 {{end}}
             </div>
             
-            <button class="base-btn success" onclick="addNewKlippekortType()">
+            <button class="btn btn-primary btn-block" onclick="addNewKlippekortType()">
                 {{t .Lang "admin.add_new_klippekort_type"}}
             </button>
         </div>
@@ -42,6 +73,18 @@
                     <div class="stat-label">{{t .Lang "admin.total_revenue"}}</div>
                 </div>
             </div>
+            
+            <div class="admin-instructions">
+                <h4>Administrer klippekort-typer</h4>
+                <p>Her kan du legge til nye klippekort-typer, redigere eksisterende eller deaktivere dem. 
+                Inaktive klippekort-typer vises ikke lenger til kundene, men eksisterende brukere beholder sine klippekort.</p>
+                
+                <ul>
+                    <li><strong>Legg til:</strong> Klikk "Legg til ny klippekort-type" for å opprette en ny type</li>
+                    <li><strong>Rediger:</strong> Klikk "Rediger" for å endre navn, pris eller beskrivelse</li>
+                    <li><strong>Deaktiver:</strong> Klikk "Deaktiver" for å fjerne typen fra salg (kun hvis ingen aktive brukere har den)</li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
@@ -53,6 +96,74 @@
 
 .klippekort-types-section {
     margin-bottom: 2rem;
+}
+
+.klippekort-admin-card {
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+.klippekort-admin-card:hover {
+    border-color: #f39c12;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.klippekort-info h4 {
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.klippekort-info .description {
+    color: #666;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+.details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0;
+}
+
+.detail-item .label {
+    font-weight: 600;
+    color: #555;
+}
+
+.detail-item .value {
+    color: #333;
+}
+
+.status.active {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.status.inactive {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.klippekort-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 1rem;
 }
 
 .stats-grid {
@@ -88,6 +199,43 @@
     color: #666;
     font-weight: 500;
 }
+
+.admin-instructions {
+    background: #e8f4fd;
+    border: 1px solid #007cba;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.admin-instructions h4 {
+    color: #007cba;
+    margin-bottom: 1rem;
+}
+
+.admin-instructions ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.admin-instructions li {
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+@media (max-width: 768px) {
+    .details {
+        grid-template-columns: 1fr;
+    }
+    
+    .klippekort-actions {
+        flex-direction: column;
+    }
+    
+    .klippekort-actions .btn {
+        width: 100%;
+    }
+}
 </style>
 
 <script>
@@ -115,7 +263,7 @@ function addNewKlippekortType() {
         },
         body: JSON.stringify({
             name: name,
-            price: parseInt(price) * 100, // Convert to cents
+            price: parseInt(price) * 100, // Convert to øre
             total_punches: parseInt(totalPunches),
             validity_months: parseInt(validityMonths),
             description: description
@@ -134,6 +282,77 @@ function addNewKlippekortType() {
     .catch(error => {
         console.error('Error:', error);
         alert('{{t .Lang "admin.error_creating_klippekort_type"}}: ' + error.message);
+    });
+}
+
+function editKlippekortType(id, currentName, currentPrice, currentPunches, currentValidityMonths, currentDescription) {
+    // Edit an existing klippekort type
+    const name = prompt('{{t .Lang "admin.enter_klippekort_name"}}:', currentName);
+    if (!name) return;
+    
+    const price = prompt('{{t .Lang "admin.enter_price_kr"}}:', Math.round(currentPrice / 100));
+    if (!price || isNaN(price)) return;
+    
+    const totalPunches = prompt('{{t .Lang "admin.enter_total_punches"}}:', currentPunches);
+    if (!totalPunches || isNaN(totalPunches)) return;
+    
+    const validityMonths = prompt('{{t .Lang "admin.enter_validity_months"}}:', Math.round(currentValidityMonths));
+    if (!validityMonths || isNaN(validityMonths)) return;
+    
+    const description = prompt('{{t .Lang "admin.enter_description"}}:', currentDescription) || '';
+    
+    // Call API to update klippekort type
+    fetch('/api/admin/klippekort-type?id=' + id, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: name,
+            price: parseInt(price) * 100, // Convert to øre
+            total_punches: parseInt(totalPunches),
+            validity_months: parseInt(validityMonths),
+            description: description
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('{{t .Lang "admin.klippekort_type_updated"}}');
+            window.location.reload();
+        } else {
+            return response.text().then(text => {
+                throw new Error(text);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{t .Lang "admin.error_updating_klippekort_type"}}: ' + error.message);
+    });
+}
+
+function deleteKlippekortType(id, name) {
+    if (!confirm('Er du sikker på at du vil deaktivere klippekort-typen "' + name + '"? Denne handlingen kan ikke angres.')) {
+        return;
+    }
+    
+    // Call API to delete (deactivate) klippekort type
+    fetch('/api/admin/klippekort-type?id=' + id, {
+        method: 'DELETE'
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('{{t .Lang "admin.klippekort_type_deactivated"}}');
+            window.location.reload();
+        } else {
+            return response.text().then(text => {
+                throw new Error(text);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{t .Lang "admin.error_deactivating_klippekort_type"}}: ' + error.message);
     });
 }
 </script>
