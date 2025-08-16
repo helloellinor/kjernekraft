@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func test_events() {
+func TestEvents() {
 	dbConn, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)
