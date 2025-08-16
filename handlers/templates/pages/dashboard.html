@@ -5,7 +5,7 @@
 <main class="main-content">
     <h1 class="page-title">{{t .Lang "site.welcome"}}, {{.UserName}}!</h1>
     
-    <div class="content-grid two-column-grid">
+    <div class="selector-container">
         {{template "signed_up_classes_container" .}}
         {{template "todays_classes_container" .}}
         {{template "dashboard_membership_container" .}}
