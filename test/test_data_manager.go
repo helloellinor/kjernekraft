@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"database/sql"
@@ -290,22 +290,6 @@ func (tdm *TestDataManager) ShuffleTestData() error {
 	return nil
 }
 
-type ClassTypeInfo struct {
-	Type   string
-	Color  string
-	Titles []string
-}
-
-// getStartOfWeek returns the Monday of the current week
-func getStartOfWeek(t time.Time) time.Time {
-	weekday := t.Weekday()
-	if weekday == time.Sunday {
-		weekday = 7
-	}
-	monday := t.AddDate(0, 0, -int(weekday)+1)
-	return time.Date(monday.Year(), monday.Month(), monday.Day(), 0, 0, 0, 0, monday.Location())
-}
-
 func getClassEmoji(classType string) string {
 	switch classType {
 	case "yoga":
@@ -323,7 +307,7 @@ func getClassEmoji(classType string) string {
 	}
 }
 
-func main() {
+func TestDataManagerMain() {
 	tdm, err := NewTestDataManager()
 	if err != nil {
 		log.Fatalf("Failed to create test data manager: %v", err)

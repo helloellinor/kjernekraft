@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func test_users() {
+func TestUsers() {
 	dbConn, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)
