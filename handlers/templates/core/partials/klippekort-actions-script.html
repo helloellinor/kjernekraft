@@ -1,0 +1,49 @@
+{{define "klippekort_actions_script"}}
+<script>
+// Klippekort Actions Script
+async function buyKlippekort() {
+    try {
+        window.location.href = '/elev/klippekort#buy-klippekort';
+    } catch (error) {
+        console.error('Error buying klippekort:', error);
+        alert('Feil ved kjøp av klippekort');
+    }
+}
+
+async function useKlippekort(klippekortId) {
+    if (!confirm('Er du sikker på at du vil bruke et klipp?')) {
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('klippekort_id', klippekortId);
+        
+        const response = await fetch('/api/klippekort/use', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            alert('Klipp brukt!');
+            location.reload();
+        } else {
+            const errorText = await response.text();
+            alert('Feil ved bruk av klipp: ' + errorText);
+        }
+    } catch (error) {
+        console.error('Error using klippekort:', error);
+        alert('Feil ved bruk av klipp');
+    }
+}
+
+async function viewKlippekortHistory(klippekortId) {
+    try {
+        window.location.href = `/elev/klippekort#history-${klippekortId}`;
+    } catch (error) {
+        console.error('Error viewing klippekort history:', error);
+        alert('Feil ved visning av historikk');
+    }
+}
+</script>
+{{end}}

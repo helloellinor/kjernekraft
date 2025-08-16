@@ -44,6 +44,9 @@ func getTemplateFuncs() template.FuncMap {
 		"sub": func(a, b int) int {
 			return a - b
 		},
+		"add": func(a, b int) int {
+			return a + b
+		},
 		"substr": func(s string, start int, length int) string {
 			if start >= len(s) {
 				return ""

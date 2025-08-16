@@ -1,0 +1,107 @@
+{{define "week_controls"}}
+<div class="week-controls">
+    <div class="week-navigation">
+        {{if .CanGoBack}}
+        <a href="/elev/timeplan?week={{sub .WeekOffset 1}}" class="btn btn-secondary week-nav-btn">
+            ← {{t .Lang "timeplan.previous_week"}}
+        </a>
+        {{end}}
+        <span class="current-week">{{.WeekTitle}}</span>
+        <a href="/elev/timeplan?week={{add .WeekOffset 1}}" class="btn btn-secondary week-nav-btn">
+            {{t .Lang "timeplan.next_week"}} →
+        </a>
+    </div>
+    
+    <div class="timeplan-filters">
+        <div class="filter-group">
+            <label for="teacher-filter">{{t .Lang "timeplan.filter_by_teacher"}}</label>
+            <select id="teacher-filter" onchange="applyFilters()">
+                <option value="">{{t .Lang "timeplan.all_teachers"}}</option>
+                {{range .Teachers}}
+                <option value="{{.}}" {{if eq $.SelectedTeacher .}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label for="class-filter">{{t .Lang "timeplan.filter_by_class"}}</label>
+            <select id="class-filter" onchange="applyFilters()">
+                <option value="">{{t .Lang "timeplan.all_classes"}}</option>
+                {{range .ClassTypes}}
+                <option value="{{.}}" {{if eq $.SelectedClass .}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+    </div>
+</div>
+
+<style>
+.week-controls {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.week-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.current-week {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.week-nav-btn {
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+}
+
+.timeplan-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.filter-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.filter-group select:focus {
+    border-color: #007cba;
+    outline: none;
+}
+
+@media (max-width: 768px) {
+    .week-navigation {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .timeplan-filters {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+</style>
+{{end}}

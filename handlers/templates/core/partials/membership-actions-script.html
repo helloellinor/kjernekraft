@@ -1,0 +1,59 @@
+{{define "membership_actions_script"}}
+<script>
+// Membership Actions Script
+async function changeMembership() {
+    try {
+        window.location.href = '/elev/medlemskap#membership-selector';
+    } catch (error) {
+        console.error('Error changing membership:', error);
+        alert('Feil ved endring av medlemskap');
+    }
+}
+
+async function pauseMembership() {
+    if (!confirm('Er du sikker på at du vil sette medlemskapet på pause?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/membership/pause', {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            alert('Medlemskap satt på pause');
+            location.reload();
+        } else {
+            const errorText = await response.text();
+            alert('Feil ved pausing av medlemskap: ' + errorText);
+        }
+    } catch (error) {
+        console.error('Error pausing membership:', error);
+        alert('Feil ved pausing av medlemskap');
+    }
+}
+
+async function cancelMembership() {
+    if (!confirm('Er du sikker på at du vil avbryte medlemskapet? Dette kan ikke angres.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/membership/cancel', {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            alert('Medlemskap avbrutt');
+            location.reload();
+        } else {
+            const errorText = await response.text();
+            alert('Feil ved avbryting av medlemskap: ' + errorText);
+        }
+    } catch (error) {
+        console.error('Error canceling membership:', error);
+        alert('Feil ved avbryting av medlemskap');
+    }
+}
+</script>
+{{end}}

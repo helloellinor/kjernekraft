@@ -4,13 +4,33 @@
 <main class="main-content user-content">
     <h1 class="page-title user-title">Welcome, {{.UserName}}!</h1>
     
-    <div class="user-grid two-column">
+    <div class="dashboard-grid">
         {{template "signed_up_classes_container" .}}
         {{template "todays_classes_container" .}}
         {{template "dashboard_membership_container" .}}
         {{template "dashboard_klippekort_container" .}}
     </div>
 </main>
+
+<style>
+/* Dashboard 2x2 Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+</style>
 
 {{template "shared_styles"}}
 {{template "dashboard_scripts" .}}

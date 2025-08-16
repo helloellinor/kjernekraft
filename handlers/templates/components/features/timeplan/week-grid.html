@@ -1,0 +1,203 @@
+{{define "week_grid"}}
+<div class="week-grid">
+    {{range $dayIndex, $weekday := .WeekDays}}
+    {{$date := index $.WeekDates $dayIndex}}
+    {{$dateKey := $date.Format "2006-01-02"}}
+    {{$events := index $.EventsByDay $dateKey}}
+    <div class="day-column {{if eq $dateKey $.Today}}today{{end}}">
+        <div class="day-header">
+            <h3 class="day-name">{{$weekday}}</h3>
+            <div class="day-date">{{$date.Format "02.01"}}</div>
+        </div>
+        
+        <div class="day-events">
+            {{if $events}}
+                {{range $events}}
+                <div class="event-card {{if .IsUserSignedUp}}signed-up{{end}}">
+                    <div class="event-time">
+                        {{formatTimeShort .StartTime}} - {{formatTimeShort .EndTime}}
+                    </div>
+                    <div class="event-title">{{.Title}}</div>
+                    <div class="event-teacher">{{.Teacher}}</div>
+                    <div class="event-spots">
+                        {{.SignedUpCount}}/{{.MaxCapacity}}
+                    </div>
+                    {{if .IsUserSignedUp}}
+                    <button class="event-action-btn cancel-btn" onclick="cancelSignup({{.ID}})">
+                        {{t $.Lang "timeplan.cancel_signup"}}
+                    </button>
+                    {{else}}
+                    <button class="event-action-btn signup-btn" onclick="signupForEvent({{.ID}})">
+                        {{t $.Lang "timeplan.sign_up"}}
+                    </button>
+                    {{end}}
+                </div>
+                {{end}}
+            {{else}}
+                <div class="no-events">{{t .Lang "timeplan.no_events"}}</div>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+</div>
+
+<style>
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1rem;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.day-column {
+    min-height: 400px;
+    border-right: 1px solid #e0e0e0;
+    padding-right: 1rem;
+}
+
+.day-column:last-child {
+    border-right: none;
+    padding-right: 0;
+}
+
+.day-column.today .day-header {
+    background: #007cba;
+    color: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.day-header {
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.day-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.day-date {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.day-events {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.event-card {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.event-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.event-card.signed-up {
+    background: #e8f4fd;
+    border-color: #007cba;
+}
+
+.event-time {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #007cba;
+    margin-bottom: 0.5rem;
+}
+
+.event-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.event-teacher {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.event-spots {
+    font-size: 0.8rem;
+    color: #999;
+    margin-bottom: 0.75rem;
+}
+
+.event-action-btn {
+    width: 100%;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.signup-btn {
+    background: #28a745;
+    color: white;
+}
+
+.signup-btn:hover {
+    background: #218838;
+}
+
+.cancel-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #c82333;
+}
+
+.no-events {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 2rem 1rem;
+}
+
+@media (max-width: 1200px) {
+    .week-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .week-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .day-column {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 1rem;
+    }
+    
+    .day-column:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+}
+</style>
+{{end}}
