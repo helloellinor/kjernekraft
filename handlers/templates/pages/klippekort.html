@@ -2,75 +2,54 @@
 {{template "navigation" .}}
 
 <main class="main-content user-content">
-    <h1 class="page-title user-title">{{t .Lang "klippekort.manage_punch_cards"}}</h1>
-    <p class="page-description user-description">{{t .Lang "klippekort.page_description"}}</p>
+    <h1 class="page-title user-title">Manage Punch Cards</h1>
+    <p class="page-description user-description">Purchase and manage your klippekort</p>
     
     <!-- Top section with user's existing klippekort and charges -->
     <div class="user-grid two-column" style="margin-bottom: 3rem;">
         <div class="content-section klippekort-section">
-            <h2 class="section-title">{{t .Lang "klippekort.my_punch_cards"}}</h2>
+            <h2 class="section-title">My Punch Cards</h2>
             <div id="user-klippekort-container">
-                <div class="loading-placeholder">{{t .Lang "klippekort.loading_punch_cards"}}</div>
+                <div class="loading-placeholder">Loading punch cards...</div>
             </div>
         </div>
         
         <div class="content-section charges-section">
-            <h2 class="section-title">{{t .Lang "klippekort.charges"}}</h2>
+            <h2 class="section-title">Charges</h2>
             <div id="klippekort-charges-container">
-                <div class="loading-placeholder">{{t .Lang "klippekort.loading_charges"}}</div>
+                <div class="loading-placeholder">Loading charges...</div>
             </div>
         </div>
     </div>
     
     <!-- Purchase Section -->
-    <h1 class="page-title">{{t .Lang "klippekort.purchase_clips"}}</h1>
-    <p class="page-description">{{t .Lang "klippekort.purchase_description"}}</p>
+    <h1 class="page-title">Purchase Clips</h1>
+    <p class="page-description">Select your training type and number of clips</p>
     
     <div class="user-grid single-column">
         <!-- Category Selector -->
         <div class="klippekort-category-selector">
-            <h2 class="section-title">{{t .Lang "klippekort.select_training_type"}}</h2>
+            <h2 class="section-title">Select Training Type</h2>
             <div class="categories-grid">
-                <!-- Will be populated by JavaScript -->
+                <div class="category-card">
+                    <div class="category-icon">🧘‍♀️</div>
+                    <h3 class="category-name">Gruppetimer Sal</h3>
+                    <p class="category-description">Yoga, Pilates Mat, og andre sal-baserte gruppetimer</p>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">💪</div>
+                    <h3 class="category-name">Reformer/Apparatus</h3>
+                    <p class="category-description">Spesialisert Pilates utstyr og apparatus-trening</p>
+                </div>
             </div>
-        </div>
-        
-        <!-- Package Selectors -->
-        <div class="klippekort-packages-section" id="packages-gruppetimer-sal">
-            <h2 class="section-title">Velg antall klipp for Gruppetimer Sal</h2>
-            <div class="packages-grid">
-                <!-- Will be populated by JavaScript -->
-            </div>
-        </div>
-        
-        <div class="klippekort-packages-section" id="packages-reformer-apparatus">
-            <h2 class="section-title">Velg antall klipp for Reformer/Apparatus</h2>
-            <div class="packages-grid">
-                <!-- Will be populated by JavaScript -->
-            </div>
-        </div>
-        
-        <!-- Purchase Summary -->
-        <div class="purchase-section" id="purchase-section">
-            <h2 class="purchase-title">{{t .Lang "klippekort.confirm_selection"}}</h2>
-            <div class="selected-details">
-                <h3 id="selected-package-name"></h3>
-                <p id="selected-package-description"></p>
-                <div class="price" id="selected-package-price"></div>
-                <p id="selected-package-details"></p>
-            </div>
-            <button class="base-btn primary purchase-btn" onclick="purchasePackage()">
-                {{t .Lang "klippekort.purchase_punch_card"}}
-            </button>
         </div>
     </div>
 </main>
 
 {{template "shared_styles"}}
-{{template "klippekort_actions_script"}}
 
 <style>
-/* Category Selector Styles */
+/* Simple Category Selector Styles */
 .categories-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -95,11 +74,6 @@
     border-color: #f39c12;
 }
 
-.category-card.selected {
-    border-color: #f39c12;
-    background-color: #fef9e7;
-}
-
 .category-icon {
     font-size: 3rem;
     margin-bottom: 1rem;
@@ -118,448 +92,30 @@
     font-size: 0.9rem;
 }
 
-/* Package Selector Styles */
-.klippekort-packages-section {
-    display: none;
-    margin-top: 3rem;
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border: 1px solid #e0e0e0;
+.user-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
 }
 
-.klippekort-packages-section.active {
+.user-grid.single-column {
     display: block;
 }
 
-.packages-grid {
+.user-grid.two-column {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.package-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
-    border: 2px solid transparent;
-    cursor: pointer;
-}
-
-.package-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    border-color: #f39c12;
-}
-
-.package-card.selected {
-    border-color: #f39c12;
-    background-color: #fef9e7;
-}
-
-.package-card.popular {
-    border-color: #ff6b35;
-}
-
-.popular-badge {
-    position: absolute;
-    top: -10px;
-    right: 15px;
-    background: #ff6b35;
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.package-name {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #333;
-}
-
-.package-description {
-    color: #666;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-}
-
-.package-details {
-    margin-bottom: 1.5rem;
-}
-
-.package-price {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #f39c12;
-    margin-bottom: 0.5rem;
-}
-
-.package-count {
-    font-size: 1rem;
-    color: #666;
-    margin-bottom: 0.5rem;
-}
-
-.price-per-session {
-    font-size: 0.9rem;
-    color: #333;
-    font-weight: 500;
-}
-
-.savings {
-    color: #27ae60;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-}
-
-/* Purchase Summary Styles */
-.purchase-section {
-    display: none;
-    margin-top: 3rem;
-    padding: 2rem;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.purchase-section.active {
-    display: block;
-}
-
-.purchase-title {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: #333;
-    text-align: center;
-}
-
-.selected-details {
-    background: #fef9e7;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.selected-details h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-    color: #f39c12;
-}
-
-.selected-details .price {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #f39c12;
-    margin: 1rem 0;
-}
-
-.purchase-btn {
-    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
 }
 
 @media (max-width: 768px) {
-    .categories-grid, .packages-grid {
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .user-grid.two-column {
         grid-template-columns: 1fr;
     }
 }
 </style>
-
-<script>
-    let selectedCategory = null;
-    let selectedPackage = null;
-    
-    // Category data for the selector
-    const categoryData = {
-        categories: [
-            {
-                id: 'gruppetimer-sal',
-                icon: '🧘‍♀️',
-                name: 'Gruppetimer Sal',
-                description: 'Yoga, Pilates Mat, og andre sal-baserte gruppetimer'
-            },
-            {
-                id: 'reformer-apparatus',
-                icon: '💪',
-                name: 'Reformer/Apparatus',
-                description: 'Spesialisert Pilates utstyr og apparatus-trening'
-            },
-            {
-                id: 'self-practice',
-                icon: '🏃‍♂️',
-                name: 'Self Practice Pilates Apparatus',
-                description: 'Selvstendig trening på Pilates apparatus'
-            },
-            {
-                id: 'online-gruppetimer',
-                icon: '💻',
-                name: 'Online Gruppetimer',
-                description: 'Live streaming og on-demand klasser'
-            },
-            {
-                id: 'personlig-trening',
-                icon: '👨‍💼',
-                name: 'Personlig Trening',
-                description: 'One-on-one trening med personlig trener'
-            },
-            {
-                id: 'stressmestring',
-                icon: '🧠',
-                name: 'Stressmestring',
-                description: 'Avslapning, meditasjon og stresshåndtering'
-            }
-        ]
-    };
-    
-    function selectCategory(category) {
-        // Clear previous selections
-        document.querySelectorAll('.category-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-        document.querySelectorAll('.klippekort-packages-section').forEach(section => {
-            section.classList.remove('active');
-        });
-        document.getElementById('purchase-section').classList.remove('active');
-        
-        // Select new category
-        document.querySelector('.category-card[data-category="' + category + '"]').classList.add('selected');
-        const packagesSection = document.getElementById('packages-' + category);
-        if (packagesSection) {
-            packagesSection.classList.add('active');
-            packagesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        selectedCategory = category;
-        selectedPackage = null;
-    }
-    
-    function selectPackage(category, clips, price, description) {
-        // Clear previous package selections
-        document.querySelectorAll('.package-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-        
-        // Select new package
-        event.currentTarget.classList.add('selected');
-        
-        selectedPackage = {
-            category: category,
-            clips: clips,
-            price: price,
-            description: description,
-            pricePerSession: price / clips
-        };
-        
-        // Update purchase section
-        const categoryNames = {
-            'gruppetimer-sal': 'Gruppetimer Sal',
-            'reformer-apparatus': 'Reformer/Apparatus',
-            'self-practice': 'Self Practice Pilates Apparatus',
-            'online-gruppetimer': 'Online Gruppetimer',
-            'personlig-trening': 'Personlig Trening',
-            'stressmestring': 'Stressmestring'
-        };
-        
-        document.getElementById('selected-package-name').textContent = clips + ' klipp ' + categoryNames[category];
-        document.getElementById('selected-package-description').textContent = description;
-        document.getElementById('selected-package-price').textContent = (price / 100) + ' kr';
-        document.getElementById('selected-package-details').textContent = clips + ' klipp • ' + Math.round(selectedPackage.pricePerSession / 100) + ' kr per økt';
-        
-        // Show purchase section
-        document.getElementById('purchase-section').classList.add('active');
-        document.getElementById('purchase-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    
-    function purchasePackage() {
-        if (!selectedPackage) {
-            alert('Vennligst velg en pakke først');
-            return;
-        }
-        
-        // Show alert about Stripe integration being incomplete
-        alert('Betalingsintegrasjon er ikke komplett. Stripe-integrasjon er under utvikling. Klippekort: ' + selectedPackage.clips + ' klipp for ' + (selectedPackage.price / 100) + ' kr');
-        
-        // Find the package ID based on selected package details
-        let packageId = null;
-        document.querySelectorAll('.package-card').forEach(card => {
-            if (card.classList.contains('selected')) {
-                packageId = card.getAttribute('data-package-id');
-            }
-        });
-        
-        if (!packageId) {
-            alert('Kunne ikke finne pakke-ID');
-            return;
-        }
-        
-        if (!confirm('Er du sikker på at du vil kjøpe ' + selectedPackage.clips + ' klipp for ' + (selectedPackage.price / 100) + ' kr?')) {
-            return;
-        }
-        
-        // Call purchase API
-        fetch('/api/klippekort/purchase', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'package_id=' + encodeURIComponent(packageId)
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                return response.text().then(text => {
-                    throw new Error(text);
-                });
-            }
-        })
-        .then(data => {
-            alert('Klippekort kjøpt! ' + selectedPackage.clips + ' klipp for ' + (selectedPackage.price / 100) + ' kr');
-            // Reload the user's klippekort display
-            loadUserKlippekort();
-            loadKlippekortCharges();
-            // Clear the selection
-            document.querySelectorAll('.package-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            document.getElementById('purchase-section').classList.remove('active');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Feil ved kjøp av klippekort: ' + error.message);
-        });
-    }
-    
-    async function loadUserKlippekort() {
-        try {
-            const response = await fetch('/api/user/klippekort');
-            if (response.ok) {
-                const html = await response.text();
-                document.getElementById('user-klippekort-container').innerHTML = html;
-            }
-        } catch (error) {
-            console.error('Error loading user klippekort:', error);
-            document.getElementById('user-klippekort-container').innerHTML = '<div class="error">Kunne ikke laste klippekort</div>';
-        }
-    }
-    
-    async function loadKlippekortCharges() {
-        try {
-            const response = await fetch('/api/charges?type=klippekort');
-            if (response.ok) {
-                const html = await response.text();
-                document.getElementById('klippekort-charges-container').innerHTML = html;
-            }
-        } catch (error) {
-            console.error('Error loading charges:', error);
-            document.getElementById('klippekort-charges-container').innerHTML = '<div class="error">Kunne ikke laste belastninger</div>';
-        }
-    }
-    
-    // Load data when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        loadUserKlippekort();
-        loadKlippekortCharges();
-        
-        // Generate category selector HTML
-        generateCategorySelector();
-        generatePackageSelectors();
-        
-        // Check if we have a fill parameter to auto-select a category
-        const urlParams = new URLSearchParams(window.location.search);
-        const fillCategory = urlParams.get('fill');
-        if (fillCategory) {
-            const categoryMap = {
-                'Gruppetimer Sal': 'gruppetimer-sal',
-                'Reformer/Apparatus': 'reformer-apparatus',
-                'Self Practice Pilates Apparatus': 'self-practice',
-                'Online Gruppetimer': 'online-gruppetimer',
-                'Personlig Trening': 'personlig-trening',
-                'Stressmestring': 'stressmestring'
-            };
-            
-            const categoryId = categoryMap[fillCategory];
-            if (categoryId) {
-                selectCategory(categoryId);
-                setTimeout(() => {
-                    const tenKlippCard = document.querySelector(`#packages-${categoryId} .package-card[data-package*="10"]`);
-                    if (tenKlippCard) {
-                        tenKlippCard.click();
-                    }
-                }, 100);
-            }
-        }
-    });
-    
-    function generateCategorySelector() {
-        const container = document.querySelector('.klippekort-category-selector .categories-grid');
-        if (!container) return;
-        
-        container.innerHTML = categoryData.categories.map(category => `
-            <div class="category-card" data-category="${category.id}" onclick="selectCategory('${category.id}')">
-                <div class="category-icon">${category.icon}</div>
-                <h3 class="category-name">${category.name}</h3>
-                <p class="category-description">${category.description}</p>
-            </div>
-        `).join('');
-    }
-    
-    function generatePackageSelectors() {
-        // Package data would normally come from the backend
-        // For now, we'll generate the HTML dynamically
-        const packageData = {
-            'gruppetimer-sal': [
-                { id: 1, clips: 1, price: 25000, description: 'Prøv en gang', popular: false, savings: 0 },
-                { id: 2, clips: 5, price: 110000, description: 'Perfekt for å prøve ut', popular: false, savings: 15000 },
-                { id: 3, clips: 10, price: 200000, description: 'Mest populære pakke', popular: true, savings: 50000 }
-            ],
-            'reformer-apparatus': [
-                { id: 4, clips: 1, price: 30000, description: 'Prøv en gang', popular: false, savings: 0 },
-                { id: 5, clips: 5, price: 140000, description: 'Perfekt for å prøve ut', popular: false, savings: 10000 },
-                { id: 6, clips: 10, price: 250000, description: 'Mest populære pakke', popular: true, savings: 50000 }
-            ]
-            // Add other categories as needed
-        };
-        
-        // Generate package selector HTML for each category
-        Object.keys(packageData).forEach(categoryId => {
-            const packages = packageData[categoryId];
-            const container = document.getElementById(`packages-${categoryId}`);
-            if (container) {
-                const packagesGrid = container.querySelector('.packages-grid');
-                if (packagesGrid) {
-                    packagesGrid.innerHTML = packages.map(pkg => `
-                        <div class="package-card ${pkg.popular ? 'popular' : ''}" 
-                             data-package="${pkg.id}" 
-                             data-package-id="${pkg.id}" 
-                             onclick="selectPackage('${categoryId}', ${pkg.clips}, ${pkg.price}, '${pkg.description}')">
-                            ${pkg.popular ? '<div class="popular-badge">Mest populær</div>' : ''}
-                            <h3 class="package-name">${pkg.clips} klipp</h3>
-                            <p class="package-description">${pkg.description}</p>
-                            <div class="package-details">
-                                <div class="package-price">${Math.round(pkg.price / 100)} kr</div>
-                                <div class="package-count">${pkg.clips} klipp</div>
-                                <div class="price-per-session">${Math.round(pkg.price / pkg.clips / 100)} kr per økt</div>
-                                ${pkg.savings ? `<div class="savings">Spar ${Math.round(pkg.savings / 100)} kr!</div>` : ''}
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            }
-        });
-    }
-    
-    // Function called from dashboard to fill up klippekort
-    function fillUpKlippekort(category) {
-        window.location.href = '/elev/klippekort?fill=' + encodeURIComponent(category) + '#purchase';
-    }
-</script>
 {{end}}
