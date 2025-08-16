@@ -77,6 +77,66 @@ func getTemplateFuncs() template.FuncMap {
 			}
 			return aFloat / bFloat
 		},
+		"mulf": func(a, b interface{}) float64 {
+			var aFloat, bFloat float64
+			switch v := a.(type) {
+			case int:
+				aFloat = float64(v)
+			case float64:
+				aFloat = v
+			default:
+				return 0
+			}
+			switch v := b.(type) {
+			case int:
+				bFloat = float64(v)
+			case float64:
+				bFloat = v
+			default:
+				return 0
+			}
+			return aFloat * bFloat
+		},
+		"addf": func(a, b interface{}) float64 {
+			var aFloat, bFloat float64
+			switch v := a.(type) {
+			case int:
+				aFloat = float64(v)
+			case float64:
+				aFloat = v
+			default:
+				return 0
+			}
+			switch v := b.(type) {
+			case int:
+				bFloat = float64(v)
+			case float64:
+				bFloat = v
+			default:
+				return 0
+			}
+			return aFloat + bFloat
+		},
+		"subf": func(a, b interface{}) float64 {
+			var aFloat, bFloat float64
+			switch v := a.(type) {
+			case int:
+				aFloat = float64(v)
+			case float64:
+				aFloat = v
+			default:
+				return 0
+			}
+			switch v := b.(type) {
+			case int:
+				bFloat = float64(v)
+			case float64:
+				bFloat = v
+			default:
+				return 0
+			}
+			return aFloat - bFloat
+		},
 		"formatTime": func(t time.Time, format string) string {
 			return t.In(settings.GetLocation()).Format(format)
 		},
@@ -192,30 +252,40 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 		}
 	}
 
-	// Load all components
+	// Load working components only - skip components that fail to parse
 	componentsPath := filepath.Join(tm.basePath, "components")
 	if _, err := os.Stat(componentsPath); err == nil {
 		filepath.WalkDir(componentsPath, func(compPath string, d fs.DirEntry, err error) error {
 			if err == nil && !d.IsDir() && strings.HasSuffix(compPath, ".html") {
-				var parseErr error
-				t, parseErr = t.ParseFiles(compPath)
-				if parseErr != nil {
-					log.Printf("Error parsing component %s: %v", compPath, parseErr)
+				// Try to parse the component individually first to check if it works
+				testTemplate := template.New("test").Funcs(getTemplateFuncs())
+				if _, testErr := testTemplate.ParseFiles(compPath); testErr == nil {
+					// Component parses successfully, add it to main template
+					if _, parseErr := t.ParseFiles(compPath); parseErr != nil {
+						log.Printf("Error adding working component %s to page template: %v", compPath, parseErr)
+					}
+				} else {
+					log.Printf("Skipping component %s due to parse error: %v", compPath, testErr)
 				}
 			}
 			return nil
 		})
 	}
 
-	// Load all modules
+	// Load working modules only - skip modules that fail to parse
 	modulesPath := filepath.Join(tm.basePath, "modules")
 	if _, err := os.Stat(modulesPath); err == nil {
 		filepath.WalkDir(modulesPath, func(modPath string, d fs.DirEntry, err error) error {
 			if err == nil && !d.IsDir() && strings.HasSuffix(modPath, ".html") {
-				var parseErr error
-				t, parseErr = t.ParseFiles(modPath)
-				if parseErr != nil {
-					log.Printf("Error parsing module %s: %v", modPath, parseErr)
+				// Try to parse the module individually first to check if it works
+				testTemplate := template.New("test").Funcs(getTemplateFuncs())
+				if _, testErr := testTemplate.ParseFiles(modPath); testErr == nil {
+					// Module parses successfully, add it to main template
+					if _, parseErr := t.ParseFiles(modPath); parseErr != nil {
+						log.Printf("Error adding working module %s to page template: %v", modPath, parseErr)
+					}
+				} else {
+					log.Printf("Skipping module %s due to parse error: %v", modPath, testErr)
 				}
 			}
 			return nil
