@@ -33,7 +33,8 @@ type UserMembership struct {
 type MembershipWithDetails struct {
 	Membership
 	UserMembership
-	DaysUntilRenewal int    `json:"days_until_renewal"`
-	CanCancel        bool   `json:"can_cancel"`
-	CanPause         bool   `json:"can_pause"`
+	DaysUntilRenewal        int  `json:"days_until_renewal"`
+	MonthsUntilBindingEnd   int  `json:"months_until_binding_end"`
+	CanCancel               bool `json:"can_cancel"`
+	CanPause                bool `json:"can_pause"`
 }

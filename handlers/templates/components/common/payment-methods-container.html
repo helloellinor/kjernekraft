@@ -1,0 +1,13 @@
+{{define "payment_methods_container"}}
+<div class="module">
+    <h2 class="module-title">{{t .Lang "payments.payment_methods"}}</h2>
+    
+    <div id="payment-methods-container">
+        <div class="loading-placeholder">{{t .Lang "payments.loading_payment_methods"}}</div>
+    </div>
+    
+    <button class="add-payment-method-btn" onclick="addPaymentMethod()">
+        + {{t .Lang "payments.add_payment_method"}}
+    </button>
+</div>
+{{end}}

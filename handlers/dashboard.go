@@ -36,6 +36,9 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
+
 	data := map[string]interface{}{
 		"Title":        "Elev Dashboard",
 		"TodaysEvents": upcomingEvents,
@@ -44,6 +47,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		"CurrentPage":  "hjem",
 		"UserName":     user.Name,
 		"User":         user,
+		"Lang":         lang,
 	}
 
 	// Use the new template system

@@ -15,12 +15,16 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
 		return
 	}
+
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
 	
 	data := map[string]interface{}{
 		"Title":       "Klippekort",
 		"CurrentPage": "klippekort",
 		"UserName":    user.Name,
 		"User":        user,
+		"Lang":        lang,
 	}
 
 	// Use the new template system
@@ -65,6 +69,9 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
 	if hasHadMembership {
 		showSpecialOffer = false
 	}
+
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
 	
 	data := map[string]interface{}{
 		"Title":                "Medlemskap",
@@ -76,6 +83,7 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
 		"UserMembership":       membership,
 		"UserName":             user.Name,
 		"User":                 user,
+		"Lang":                 lang,
 	}
 
 	// Use the new template system
@@ -437,6 +445,9 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 	// Handle GET request
 	showSuccess := r.URL.Query().Get("updated") == "true"
 
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
+
 	data := map[string]interface{}{
 		"Title":       "Min profil",
 		"CurrentPage": "profil",
@@ -453,6 +464,7 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 		"Country":     user.Country,
 		"Birthdate":   user.Birthdate,
 		"ShowSuccess": showSuccess,
+		"Lang":        lang,
 	}
 
 	// Use the new template system

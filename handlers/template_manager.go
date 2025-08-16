@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/fs"
 	"kjernekraft/handlers/config"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -103,6 +104,45 @@ func getTemplateFuncs() template.FuncMap {
 			}
 			return strings.ToUpper(s[:1]) + s[1:]
 		},
+		"t": func(lang, key string) string {
+			loc := GetLocalization()
+			return loc.T(lang, key)
+		},
+		"translate": func(lang, key string) string {
+			loc := GetLocalization()
+			return loc.T(lang, key)
+		},
+		"toJS": func(s string) template.JS {
+			// Escape string for JavaScript use
+			escaped := strings.ReplaceAll(s, "\\", "\\\\")
+			escaped = strings.ReplaceAll(escaped, "\"", "\\\"")
+			escaped = strings.ReplaceAll(escaped, "'", "\\'")
+			escaped = strings.ReplaceAll(escaped, "\n", "\\n")
+			escaped = strings.ReplaceAll(escaped, "\r", "\\r")
+			escaped = strings.ReplaceAll(escaped, "\t", "\\t")
+			return template.JS("\"" + escaped + "\"")
+		},
+		"seq": func(n int) []int {
+			var result []int
+			for i := 0; i < n; i++ {
+				result = append(result, i)
+			}
+			return result
+		},
+		"dict": func(values ...interface{}) map[string]interface{} {
+			if len(values)%2 != 0 {
+				return nil // Must have even number of arguments (key-value pairs)
+			}
+			dict := make(map[string]interface{})
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					continue // Skip non-string keys
+				}
+				dict[key] = values[i+1]
+			}
+			return dict
+		},
 	}
 }
 
@@ -144,7 +184,12 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 	// Try to load base layout first
 	baseLayoutPath := filepath.Join(tm.basePath, "layouts", "base.html")
 	if _, err := os.Stat(baseLayoutPath); err == nil {
-		t, _ = t.ParseFiles(baseLayoutPath)
+		var parseErr error
+		t, parseErr = t.ParseFiles(baseLayoutPath)
+		if parseErr != nil {
+			log.Printf("Error parsing base layout %s: %v", baseLayoutPath, parseErr)
+			return
+		}
 	}
 
 	// Load all components
@@ -152,17 +197,38 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 	if _, err := os.Stat(componentsPath); err == nil {
 		filepath.WalkDir(componentsPath, func(compPath string, d fs.DirEntry, err error) error {
 			if err == nil && !d.IsDir() && strings.HasSuffix(compPath, ".html") {
-				t, _ = t.ParseFiles(compPath)
+				var parseErr error
+				t, parseErr = t.ParseFiles(compPath)
+				if parseErr != nil {
+					log.Printf("Error parsing component %s: %v", compPath, parseErr)
+				}
+			}
+			return nil
+		})
+	}
+
+	// Load all modules
+	modulesPath := filepath.Join(tm.basePath, "modules")
+	if _, err := os.Stat(modulesPath); err == nil {
+		filepath.WalkDir(modulesPath, func(modPath string, d fs.DirEntry, err error) error {
+			if err == nil && !d.IsDir() && strings.HasSuffix(modPath, ".html") {
+				var parseErr error
+				t, parseErr = t.ParseFiles(modPath)
+				if parseErr != nil {
+					log.Printf("Error parsing module %s: %v", modPath, parseErr)
+				}
 			}
 			return nil
 		})
 	}
 
 	// Finally parse the page template
-	t, err := t.ParseFiles(path)
-	if err == nil {
-		tm.templates[name] = t
+	finalTemplate, err := t.ParseFiles(path)
+	if err != nil {
+		log.Printf("Error parsing page template %s: %v", path, err)
+		return
 	}
+	tm.templates[name] = finalTemplate
 }
 
 // loadComponentTemplate loads a standalone component template
@@ -185,6 +251,18 @@ func (tm *TemplateManager) GetTemplate(name string) (*template.Template, bool) {
 // ReloadTemplates reloads all templates (useful for development)
 func (tm *TemplateManager) ReloadTemplates() {
 	tm.loadTemplates()
+}
+
+// GetAvailableTemplates returns a list of available template names (for debugging)
+func (tm *TemplateManager) GetAvailableTemplates() []string {
+	tm.mu.RLock()
+	defer tm.mu.RUnlock()
+	
+	var names []string
+	for name := range tm.templates {
+		names = append(names, name)
+	}
+	return names
 }
 
 // ParseTemplate creates a template with components loaded

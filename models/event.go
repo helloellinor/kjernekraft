@@ -19,4 +19,6 @@ type Event struct {
 	Capacity         int                 `json:"capacity"`          // Maximum number of attendees
 	CurrentEnrolment int                 `json:"current_enrolment"` // Current number of enrolled
 	Color            string              `json:"color"`             // Color for the class type
+	// User-specific fields (populated for specific users)
+	IsUserSignedUp   bool                `json:"is_user_signed_up"` // Whether the current user is signed up for this event
 }

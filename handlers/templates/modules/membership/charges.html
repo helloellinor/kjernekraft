@@ -1,0 +1,39 @@
+{{define "charges_module"}}
+<style>
+{{template "charges_module_styles"}}
+</style>
+
+{{if .HasCharges}}
+<div class="charges-list">
+    {{range .Charges}}
+    <div class="charge-item">
+        <div class="charge-info">
+            <div class="charge-description">{{.Description}}</div>
+            <div class="charge-date">{{.ChargeDate.Format "2. January 2006"}}</div>
+            {{if and .PaymentMethodBrand .PaymentMethodLast4}}
+            <div class="charge-payment-method">{{.PaymentMethodBrand | title}} •••• {{.PaymentMethodLast4}}</div>
+            {{else}}
+            <div class="charge-payment-method">{{t .Lang "charges.payment_method_removed"}}</div>
+            {{end}}
+        </div>
+        <div class="charge-amount">{{printf "%.0f" (divf .Amount 100)}} kr</div>
+        <div class="charge-status {{.Status}}">
+            {{if eq .Status "succeeded"}}{{t .Lang "charges.status.succeeded"}}
+            {{else if eq .Status "failed"}}{{t .Lang "charges.status.failed"}}
+            {{else if eq .Status "pending"}}{{t .Lang "charges.status.pending"}}
+            {{else}}{{.Status}}
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+</div>
+{{else}}
+<div class="no-data">
+    {{t .Lang "charges.no_charges"}}
+</div>
+{{end}}
+{{end}}
+
+{{define "charges_module_styles"}}
+{{.ChargesCSS}}
+{{end}}

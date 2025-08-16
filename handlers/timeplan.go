@@ -70,9 +70,40 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		weekEvents = filteredEvents
 	}
 
+	// Get user signups for these events
+	if len(weekEvents) > 0 {
+		eventIDs := make([]int64, len(weekEvents))
+		for i, event := range weekEvents {
+			eventIDs[i] = int64(event.ID)
+		}
+		
+		userSignups, err := DB.GetUserSignupsForEvents(int64(user.ID), eventIDs)
+		if err != nil {
+			// Log error but don't fail the request
+			// Just continue without signup information
+		} else {
+			// Update events with signup information
+			for i := range weekEvents {
+				weekEvents[i].IsUserSignedUp = userSignups[int64(weekEvents[i].ID)]
+			}
+		}
+	}
+
+	// Get language from cookies/request (using new system)
+	lang := GetLanguageFromRequest(r)
+	loc := GetLocalization()
+
 	// Group events by day
 	eventsByDay := make(map[string][]models.Event)
-	weekdays := []string{"Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag", "Søndag"}
+	weekdays := []string{
+		loc.T(lang, "timeplan.monday"),
+		loc.T(lang, "timeplan.tuesday"),
+		loc.T(lang, "timeplan.wednesday"),
+		loc.T(lang, "timeplan.thursday"),
+		loc.T(lang, "timeplan.friday"),
+		loc.T(lang, "timeplan.saturday"),
+		loc.T(lang, "timeplan.sunday"),
+	}
 	weekDates := make([]time.Time, 7)
 
 	for i := 0; i < 7; i++ {
@@ -94,11 +125,11 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	_, targetWeek := targetMonday.ISOWeek()
 	
 	if weekOffset == 0 {
-		weekTitle = "Denne uka"
+		weekTitle = loc.T(lang, "timeplan.this_week")
 	} else if weekOffset == 1 {
-		weekTitle = "Uka som kommer"
+		weekTitle = loc.T(lang, "timeplan.next_week")
 	} else {
-		weekTitle = "Uke " + strconv.Itoa(targetWeek)
+		weekTitle = loc.T(lang, "timeplan.week") + " " + strconv.Itoa(targetWeek)
 	}
 
 	// Get distinct teachers and class types for filters
@@ -131,6 +162,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		"CurrentPage":  "timeplan",
 		"UserName":     user.Name,
 		"User":         user,
+		"Lang":         lang,
 	}
 
 	// Use the new template system

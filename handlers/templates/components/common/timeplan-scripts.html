@@ -1,0 +1,172 @@
+{{define "timeplan_scripts"}}
+<script>
+    function toggleEventCard(element) {
+        const isExpanded = element.classList.contains('expanded');
+        
+        // Close all other expanded cards first
+        document.querySelectorAll('.event-card.expanded').forEach(card => {
+            if (card !== element) {
+                card.classList.remove('expanded');
+            }
+        });
+        
+        // Toggle the clicked card
+        if (isExpanded) {
+            element.classList.remove('expanded');
+        } else {
+            element.classList.add('expanded');
+        }
+    }
+    
+    function signupForClass(classId) {
+        const eventCard = document.querySelector(`[data-event-id="${classId}"]`);
+        if (!eventCard) {
+            alert('Kunne ikke finne klassen. Prøv å laste siden på nytt.');
+            return;
+        }
+        
+        const signupBtn = eventCard.querySelector('.signup-button');
+        if (!signupBtn) {
+            alert('Kunne ikke finne påmeldingsknapp.');
+            return;
+        }
+        
+        // Check if already signed up (button shows "Avmeld")
+        if (signupBtn.textContent.includes('Avmeld')) {
+            // Handle cancellation
+            if (!confirm('Er du sikker på at du vil avmelde deg fra denne klassen?')) {
+                return;
+            }
+            
+            // Call API to cancel signup
+            fetch('/api/events/cancel-signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'event_id=' + encodeURIComponent(classId)
+            })
+            .then(response => {
+                if (response.ok) {
+                    signupBtn.textContent = 'Meld på';
+                    signupBtn.classList.remove('signed-up');
+                    alert('Du er nå avmeldt fra klassen.');
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Feil ved avmelding: ' + error.message);
+            });
+            
+            return;
+        }
+        
+        // Handle signup
+        if (!confirm('Vil du melde deg på denne klassen?')) {
+            return;
+        }
+        
+        // Call API to signup for class
+        fetch('/api/events/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'event_id=' + encodeURIComponent(classId)
+        })
+        .then(response => {
+            if (response.ok) {
+                signupBtn.textContent = 'Avmeld';
+                signupBtn.classList.add('signed-up');
+                alert('Du er nå påmeldt klassen!');
+            } else {
+                return response.text().then(text => {
+                    throw new Error(text);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feil ved påmelding: ' + error.message);
+        });
+    }
+    
+    function navigateWeek(direction) {
+        const currentWeekOffset = {{.WeekOffset}};
+        const newWeekOffset = currentWeekOffset + direction;
+        
+        // Prevent going to past weeks
+        if (newWeekOffset < 0) {
+            return;
+        }
+        
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('week', newWeekOffset);
+        window.location.href = currentUrl.toString();
+    }
+    
+    function jumpToWeek() {
+        const weekInput = document.getElementById('week-input');
+        const targetWeek = parseInt(weekInput.value);
+        const currentWeekNumber = {{.WeekNumber}};
+        
+        // Prevent jumping to past weeks
+        if (targetWeek < currentWeekNumber && {{.WeekOffset}} === 0) {
+            weekInput.value = currentWeekNumber;
+            return;
+        }
+        
+        // Calculate week offset based on target week
+        const weekOffset = targetWeek - currentWeekNumber + {{.WeekOffset}};
+        
+        if (weekOffset < 0) {
+            weekInput.value = currentWeekNumber;
+            return;
+        }
+        
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('week', weekOffset);
+        window.location.href = currentUrl.toString();
+    }
+    
+    function applyFilters() {
+        const teacherFilter = document.getElementById('teacher-filter').value;
+        const classFilter = document.getElementById('class-filter').value;
+        
+        const currentUrl = new URL(window.location);
+        
+        if (teacherFilter) {
+            currentUrl.searchParams.set('teacher', teacherFilter);
+        } else {
+            currentUrl.searchParams.delete('teacher');
+        }
+        
+        if (classFilter) {
+            currentUrl.searchParams.set('class', classFilter);
+        } else {
+            currentUrl.searchParams.delete('class');
+        }
+        
+        window.location.href = currentUrl.toString();
+    }
+    
+    // Update week input minimum based on current week
+    document.addEventListener('DOMContentLoaded', function() {
+        const weekInput = document.getElementById('week-input');
+        if (weekInput) {
+            const currentWeekNumber = {{.WeekNumber}};
+            const weekOffset = {{.WeekOffset}};
+            
+            if (weekOffset === 0) {
+                weekInput.min = currentWeekNumber;
+            } else {
+                weekInput.min = currentWeekNumber;
+            }
+        }
+    });
+</script>
+{{end}}

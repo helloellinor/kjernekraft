@@ -1,0 +1,404 @@
+{{define "content"}}
+<style>
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+    
+    /* Payment Methods Module */
+    .payment-methods-list {
+        margin-bottom: 2rem;
+    }
+    
+    .payment-method-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        transition: border-color 0.2s;
+    }
+    
+    .payment-method-card.default {
+        border-color: #007cba;
+        background: #f8f9fa;
+    }
+    
+    .payment-method-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .payment-method-icon {
+        width: 40px;
+        height: 25px;
+        background: #007cba;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .payment-method-details {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .payment-method-brand {
+        font-weight: 600;
+        color: #333;
+        text-transform: capitalize;
+    }
+    
+    .payment-method-last4 {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .payment-method-expiry {
+        font-size: 0.8rem;
+        color: #999;
+    }
+    
+    .payment-method-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .payment-method-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .set-default-btn {
+        background: #28a745;
+        color: white;
+    }
+    
+    .set-default-btn:hover {
+        background: #218838;
+    }
+    
+    .set-default-btn:disabled {
+        background: #adb5bd;
+        cursor: not-allowed;
+    }
+    
+    .remove-btn {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .remove-btn:hover {
+        background: #c82333;
+    }
+    
+    .default-badge {
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    /* Charges Module */
+    .charges-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .charge-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .charge-item:last-child {
+        border-bottom: none;
+    }
+    
+    .charge-info {
+        flex: 1;
+    }
+    
+    .charge-description {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+    
+    .charge-date {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+    }
+    
+    .charge-payment-method {
+        font-size: 0.8rem;
+        color: #999;
+    }
+    
+    .charge-amount {
+        font-weight: 600;
+        color: #333;
+        text-align: right;
+    }
+    
+    .charge-status {
+        margin-left: 1rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .charge-status.succeeded {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .charge-status.failed {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .charge-status.pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .no-data {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .payment-method-card {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+        
+        .payment-method-actions {
+            justify-content: center;
+        }
+        
+        .charge-item {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: left;
+        }
+        
+        .charge-amount {
+            text-align: left;
+            margin-top: 0.5rem;
+        }
+        
+        .charge-status {
+            margin-left: 0;
+            margin-top: 0.5rem;
+            align-self: flex-start;
+        }
+    }
+    
+    .charges-filter {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .charges-filter label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .charges-filter select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+    
+    .charges-filter select:focus {
+        outline: none;
+        border-color: #007cba;
+    }
+</style>
+
+{{template "navigation" .}}
+
+<main class="main">
+    <h1 class="page-title">Betalinger</h1>
+    <p class="page-description">
+        Administrer dine betalingsmetoder og se betalingshistorikk.
+    </p>
+    
+    <div class="content-grid two-column-grid">
+        <!-- Payment Methods Module -->
+        <div class="module">
+            <h2 class="module-title">Betalingsmetoder</h2>
+            
+            <div id="payment-methods-container">
+                <div class="loading-placeholder">Laster betalingsmetoder...</div>
+            </div>
+            
+            <button class="add-payment-method-btn" onclick="addPaymentMethod()">
+                + Legg til betalingsmetode
+            </button>
+        </div>
+        
+        <!-- Charges Module -->
+        <div class="module">
+            <h2 class="module-title">Belastninger</h2>
+            
+            <!-- Filter controls -->
+            <div class="charges-filter">
+                <label for="charge-type-filter">Filtrer etter type:</label>
+                <select id="charge-type-filter" onchange="filterCharges()">
+                    <option value="">Alle</option>
+                    <option value="medlemskap">Medlemskap</option>
+                    <option value="klippekort">Klippekort</option>
+                    <option value="utdanninger">Utdanninger</option>
+                </select>
+            </div>
+            
+            <div id="charges-container">
+                <div class="loading-placeholder">Laster belastninger...</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    async function loadPaymentMethods() {
+        try {
+            const response = await fetch('/api/payment-methods');
+            if (response.ok) {
+                const html = await response.text();
+                document.getElementById('payment-methods-container').innerHTML = html;
+            } else {
+                document.getElementById('payment-methods-container').innerHTML = '<div class="no-data">Kunne ikke laste betalingsmetoder</div>';
+            }
+        } catch (error) {
+            console.error('Error loading payment methods:', error);
+            document.getElementById('payment-methods-container').innerHTML = '<div class="no-data">Feil ved lasting av betalingsmetoder</div>';
+        }
+    }
+    
+    async function loadCharges(typeFilter = '') {
+        try {
+            let url = '/api/charges';
+            if (typeFilter) {
+                url += '?type=' + encodeURIComponent(typeFilter);
+            }
+            
+            const response = await fetch(url);
+            if (response.ok) {
+                const html = await response.text();
+                document.getElementById('charges-container').innerHTML = html;
+            } else {
+                document.getElementById('charges-container').innerHTML = '<div class="no-data">Kunne ikke laste belastninger</div>';
+            }
+        } catch (error) {
+            console.error('Error loading charges:', error);
+            document.getElementById('charges-container').innerHTML = '<div class="no-data">Feil ved lasting av belastninger</div>';
+        }
+    }
+    
+    function filterCharges() {
+        const filter = document.getElementById('charge-type-filter').value;
+        loadCharges(filter);
+    }
+    
+    function addPaymentMethod() {
+        // TODO: Implement Stripe payment method addition
+        alert('Legg til betalingsmetode-funksjonalitet kommer snart!');
+    }
+    
+    async function setDefaultPaymentMethod(paymentMethodId) {
+        if (!confirm('Er du sikker på at du vil sette denne som standard betalingsmetode?')) {
+            return;
+        }
+        
+        try {
+            const formData = new FormData();
+            formData.append('payment_method_id', paymentMethodId);
+            
+            const response = await fetch('/api/payment-methods/set-default', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                loadPaymentMethods(); // Reload the list
+            } else {
+                alert('Feil ved setting av standard betalingsmetode');
+            }
+        } catch (error) {
+            console.error('Error setting default payment method:', error);
+            alert('Feil ved setting av standard betalingsmetode');
+        }
+    }
+    
+    async function removePaymentMethod(paymentMethodId) {
+        if (!confirm('Er du sikker på at du vil fjerne denne betalingsmetoden?')) {
+            return;
+        }
+        
+        try {
+            const formData = new FormData();
+            formData.append('payment_method_id', paymentMethodId);
+            
+            const response = await fetch('/api/payment-methods/remove', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                loadPaymentMethods(); // Reload the list
+            } else {
+                alert('Feil ved fjerning av betalingsmetode');
+            }
+        } catch (error) {
+            console.error('Error removing payment method:', error);
+            alert('Feil ved fjerning av betalingsmetode');
+        }
+    }
+    
+    // Load data when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadPaymentMethods();
+        loadCharges();
+    });
+</script>
+{{end}}

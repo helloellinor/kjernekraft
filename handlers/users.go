@@ -22,10 +22,14 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/elev/hjem", http.StatusTemporaryRedirect)
 			return
 		}
+
+		// Get language from cookies/request (using new system)
+		lang := GetLanguageFromRequest(r)
 		
 		data := map[string]interface{}{
 			"Title":       "Innlogging",
 			"CurrentPage": "innlogging",
+			"Lang":        lang,
 		}
 
 		// Use the new template system

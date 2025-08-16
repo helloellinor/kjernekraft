@@ -1,0 +1,31 @@
+{{define "admin_users_table"}}
+<div class="section">
+    <h2>{{t .Lang "admin.users"}}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>{{t .Lang "admin.user_table.id"}}</th>
+                <th>{{t .Lang "admin.user_table.name"}}</th>
+                <th>{{t .Lang "admin.user_table.birthdate"}}</th>
+                <th>{{t .Lang "admin.user_table.email"}}</th>
+                <th>{{t .Lang "admin.user_table.phone"}}</th>
+                <th>{{t .Lang "admin.user_table.roles"}}</th>
+                <th>{{t .Lang "admin.user_table.created"}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Users}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.Name}}</td>
+                <td>{{.Birthdate}}</td>
+                <td>{{.Email}}</td>
+                <td>{{.Phone}}</td>
+                <td class="roles">{{range $i, $role := .Roles}}{{if $i}}, {{end}}{{$role}}{{end}}</td>
+                <td>-</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}

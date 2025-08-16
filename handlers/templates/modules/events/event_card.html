@@ -1,5 +1,5 @@
 {{define "event_card"}}
-<div class="event-card {{.ClassType}}" onclick="toggleEventCard(this)">
+<div class="event-card {{.ClassType}}" data-event-id="{{.ID}}" onclick="toggleEventCard(this)">
     <div class="event-time">{{formatTimeShort .StartTime}}-{{formatTimeShort .EndTime}}</div>
     <div class="event-title">{{.Title}}</div>
     <div class="event-teacher">{{.TeacherName}}</div>
@@ -16,12 +16,14 @@
         {{end}}
     </div>
     <div class="event-details">
-        <button class="signup-btn {{if ge .CurrentEnrolment .Capacity}}waitlist{{end}}" 
+        <button class="signup-button {{if .IsUserSignedUp}}signed-up{{else if ge .CurrentEnrolment .Capacity}}waitlist{{end}}" 
                 onclick="signupForClass({{.ID}}); event.stopPropagation();">
-            {{if lt .CurrentEnrolment .Capacity}}
+            {{if .IsUserSignedUp}}
+                Avmeld
+            {{else if lt .CurrentEnrolment .Capacity}}
                 Meld på
             {{else}}
-                Stå på venteliste
+                Venteliste
             {{end}}
         </button>
     </div>

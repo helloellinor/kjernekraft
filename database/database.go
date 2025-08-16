@@ -163,6 +163,18 @@ func Migrate(db *sql.DB) error {
 		UNIQUE(user_id, event_id)
 	);
 	`
+	membershipRulesTableSQL := `
+	CREATE TABLE IF NOT EXISTS membership_rules (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		allow_upgrades BOOLEAN DEFAULT TRUE,
+		combine_binding_periods BOOLEAN DEFAULT TRUE,
+		allow_downgrades BOOLEAN DEFAULT FALSE,
+		allow_change_during_binding BOOLEAN DEFAULT FALSE,
+		default_membership_id INTEGER,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (default_membership_id) REFERENCES memberships(id)
+	);
+	`
 
 	log.Println("Kjører migrering (setter opp databasetabeller)...")
 	if _, err := db.Exec(eventsTableSQL); err != nil {
@@ -196,6 +208,9 @@ func Migrate(db *sql.DB) error {
 		return err
 	}
 	if _, err := db.Exec(eventSignupsTableSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(membershipRulesTableSQL); err != nil {
 		return err
 	}
 
@@ -332,7 +347,51 @@ func (db *Database) CreateUser(u models.User) (int64, error) {
 		}
 	}
 
+	// Create default payment methods for the new user
+	if err := db.CreateDefaultPaymentMethods(userID); err != nil {
+		// Log the error but don't fail user creation
+		log.Printf("Warning: Could not create default payment methods for user %d: %v", userID, err)
+	}
+
 	return userID, nil
+}
+
+// CreateDefaultPaymentMethods creates two default payment cards for a new user
+func (db *Database) CreateDefaultPaymentMethods(userID int64) error {
+	// Create first default card (Visa simulation)
+	card1Query := `INSERT INTO payment_methods (user_id, provider, provider_id) 
+	               VALUES (?, 'stripe', ?)`
+	
+	_, err := db.Conn.Exec(card1Query, userID, fmt.Sprintf("pm_default_visa_%d", userID))
+	if err != nil {
+		return err
+	}
+	
+	// Create second default card (Mastercard simulation)
+	card2Query := `INSERT INTO payment_methods (user_id, provider, provider_id) 
+	               VALUES (?, 'stripe', ?)`
+	
+	_, err = db.Conn.Exec(card2Query, userID, fmt.Sprintf("pm_default_mastercard_%d", userID))
+	return err
+}
+
+// SimulateBilling creates a simulated charge entry for a user's default payment method
+func (db *Database) SimulateBilling(userID int64, amount int, description, chargeType string) error {
+	// Get user's first payment method as default
+	var paymentMethodID int
+	err := db.Conn.QueryRow("SELECT id FROM payment_methods WHERE user_id = ? LIMIT 1", userID).Scan(&paymentMethodID)
+	if err != nil {
+		return fmt.Errorf("ingen betalingsmetode funnet for bruker")
+	}
+
+	// Create a simulated charge (assuming it succeeds)
+	chargeQuery := `INSERT INTO charges (user_id, payment_method_id, amount, currency, status, description, type, charge_date, created_at)
+	                VALUES (?, ?, ?, 'NOK', 'succeeded', ?, ?, ?, ?)`
+	
+	now := time.Now()
+	
+	_, err = db.Conn.Exec(chargeQuery, userID, paymentMethodID, amount, description, chargeType, now, now)
+	return err
 }
 
 func (db *Database) GetOrCreateRole(name string) (int64, error) {
@@ -838,11 +897,28 @@ func (db *Database) AddUserMembership(userID int64, membershipID int64) error {
 	          VALUES (?, ?, 'active', ?, ?, ?, ?, ?, ?)`
 	
 	_, err = db.Conn.Exec(query, userID, membershipID, startDate, renewalDate, endDate, bindingEnd, startDate, now)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Simulate billing for the membership
+	description := fmt.Sprintf("Medlemskap: %s", membership.Name)
+	err = db.SimulateBilling(userID, membership.Price, description, "medlemskap")
+	if err != nil {
+		log.Printf("Warning: Could not simulate billing for membership purchase: %v", err)
+	}
+
+	return nil
 }
 
 // ChangeUserMembership changes a user's membership to a different type
 func (db *Database) ChangeUserMembership(userID int64, newMembershipID int64) error {
+	// Get membership rules
+	rules, err := db.GetMembershipRules()
+	if err != nil {
+		return err
+	}
+
 	// Get current membership
 	currentMembership, err := db.GetUserMembership(userID)
 	if err != nil {
@@ -860,14 +936,37 @@ func (db *Database) ChangeUserMembership(userID int64, newMembershipID int64) er
 
 	now := time.Now()
 	renewalDate := now.AddDate(0, 1, 0).Format("2006-01-02")
-	newEndDate := now.AddDate(0, newMembership.CommitmentMonths, 0).Format("2006-01-02")
-	newBindingEnd := newEndDate
+	
+	// Calculate new binding end date
+	var newBindingEnd string
+	isUpgrade := newMembership.Price > currentMembership.Price
+	
+	if isUpgrade && rules.CombineBindingPeriods && currentMembership.BindingEnd != nil {
+		// For upgrades, combine remaining binding time with new commitment
+		remainingMonths := 0
+		if now.Before(*currentMembership.BindingEnd) {
+			// Calculate remaining months in current binding
+			remainingMonths = int(currentMembership.BindingEnd.Sub(now).Hours() / (24 * 30))
+			if remainingMonths < 0 {
+				remainingMonths = 0
+			}
+		}
+		
+		// Add new commitment months to remaining months
+		totalMonths := remainingMonths + newMembership.CommitmentMonths
+		newBindingEndTime := now.AddDate(0, totalMonths, 0)
+		newBindingEnd = newBindingEndTime.Format("2006-01-02")
+	} else {
+		// For downgrades or if not combining, use standard new commitment
+		newEndDate := now.AddDate(0, newMembership.CommitmentMonths, 0)
+		newBindingEnd = newEndDate.Format("2006-01-02")
+	}
 
 	query := `UPDATE user_memberships 
-	          SET membership_id = ?, renewal_date = ?, end_date = ?, binding_end = ? 
+	          SET membership_id = ?, renewal_date = ?, binding_end = ? 
 	          WHERE user_id = ? AND status IN ('active', 'paused', 'freeze_requested')`
 	
-	_, err = db.Conn.Exec(query, newMembershipID, renewalDate, newEndDate, newBindingEnd, userID)
+	_, err = db.Conn.Exec(query, newMembershipID, renewalDate, newBindingEnd, userID)
 	return err
 }
 
@@ -899,6 +998,12 @@ func (db *Database) GetMembershipByID(membershipID int64) (*models.Membership, e
 
 // CanChangeMembership checks if a user can change to a specific membership
 func (db *Database) CanChangeMembership(userID int64, newMembershipID int64) (bool, string) {
+	// Get membership rules
+	rules, err := db.GetMembershipRules()
+	if err != nil {
+		return false, "Kunne ikke hente medlemskapsregler"
+	}
+
 	// Get current membership
 	currentMembership, err := db.GetUserMembership(userID)
 	if err != nil || currentMembership == nil {
@@ -911,20 +1016,29 @@ func (db *Database) CanChangeMembership(userID int64, newMembershipID int64) (bo
 		return false, "Ugyldig nytt medlemskap"
 	}
 
-	// Check if current membership allows changes (must be active or frozen, not binding)
+	// Check if current membership allows changes (must be active or frozen)
 	if currentMembership.Status != "active" && currentMembership.Status != "paused" {
 		return false, "Medlemskap må være aktivt eller fryst for å bytte"
 	}
 
-	// Check binding period
+	// Check binding period based on rules
 	now := time.Now()
 	if currentMembership.BindingEnd != nil && now.Before(*currentMembership.BindingEnd) {
-		return false, "Kan ikke bytte medlemskap under bindingsperiode"
+		if !rules.AllowChangeDuringBinding {
+			return false, "Kan ikke bytte medlemskap under bindingsperiode"
+		}
 	}
 
-	// Check if new membership is lower price
-	if newMembership.Price > currentMembership.Price {
-		return false, "Kan kun bytte til billigere medlemskap"
+	// Check upgrade vs downgrade based on price
+	isUpgrade := newMembership.Price > currentMembership.Price
+	isDowngrade := newMembership.Price < currentMembership.Price
+
+	if isUpgrade && !rules.AllowUpgrades {
+		return false, "Oppgraderinger er ikke tillatt ifølge gjeldende regler"
+	}
+
+	if isDowngrade && !rules.AllowDowngrades {
+		return false, "Nedgraderinger er ikke tillatt ifølge gjeldende regler"
 	}
 
 	// Check if switching involves adding a discount (would require admin approval)
@@ -978,7 +1092,18 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 		                VALUES (?, ?, ?, ?, ?, ?, TRUE)`
 		
 		_, err = db.Conn.Exec(insertQuery, userID, packageID, pkg.KlippCount, pkg.KlippCount, newExpiryDate, now)
-		return err
+		if err != nil {
+			return err
+		}
+
+		// Simulate billing for the klippekort
+		description := fmt.Sprintf("Klippekort: %s", pkg.Name)
+		err = db.SimulateBilling(userID, pkg.Price, description, "klippekort")
+		if err != nil {
+			log.Printf("Warning: Could not simulate billing for klippekort purchase: %v", err)
+		}
+
+		return nil
 	} else if err != nil {
 		return err
 	}
@@ -1005,7 +1130,18 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 	                WHERE id = ?`
 	
 	_, err = db.Conn.Exec(updateQuery, newTotal, newRemaining, finalExpiryDate, packageID, existingID)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Simulate billing for the additional klippekort
+	description := fmt.Sprintf("Klippekort tillegg: %s", pkg.Name)
+	err = db.SimulateBilling(userID, pkg.Price, description, "klippekort")
+	if err != nil {
+		log.Printf("Warning: Could not simulate billing for klippekort purchase: %v", err)
+	}
+
+	return nil
 }
 
 // Event signup related methods
@@ -1091,5 +1227,138 @@ func (db *Database) CancelUserSignupForEvent(userID, eventID int64) error {
 	// Update event enrolment count
 	updateQuery := `UPDATE events SET current_enrolment = current_enrolment - 1 WHERE id = ?`
 	_, err = db.Conn.Exec(updateQuery, eventID)
+	return err
+}
+
+// GetUserSignupsForEvents returns a map of event IDs that the user is signed up for
+func (db *Database) GetUserSignupsForEvents(userID int64, eventIDs []int64) (map[int64]bool, error) {
+	if len(eventIDs) == 0 {
+		return make(map[int64]bool), nil
+	}
+	
+	// Build query with placeholders for event IDs
+	placeholders := make([]string, len(eventIDs))
+	args := make([]interface{}, len(eventIDs)+1)
+	args[0] = userID
+	
+	for i, eventID := range eventIDs {
+		placeholders[i] = "?"
+		args[i+1] = eventID
+	}
+	
+	query := fmt.Sprintf(
+		`SELECT event_id FROM event_signups WHERE user_id = ? AND event_id IN (%s)`,
+		strings.Join(placeholders, ","),
+	)
+	
+	rows, err := db.Conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	signups := make(map[int64]bool)
+	for rows.Next() {
+		var eventID int64
+		if err := rows.Scan(&eventID); err != nil {
+			return nil, err
+		}
+		signups[eventID] = true
+	}
+	
+	return signups, rows.Err()
+}
+
+// GetUserUpcomingSignups returns all upcoming events that the user is signed up for
+func (db *Database) GetUserUpcomingSignups(userID int64) ([]models.Event, error) {
+	query := `
+		SELECT e.id, e.title, e.description, e.role_requirements, e.start_time, e.end_time, 
+		       e.location, e.organizer, e.attendees, e.class_type, e.teacher_name, 
+		       e.capacity, e.current_enrolment, e.color
+		FROM events e
+		INNER JOIN event_signups es ON e.id = es.event_id
+		WHERE es.user_id = ? AND e.start_time > ?
+		ORDER BY e.start_time ASC
+	`
+	
+	now := time.Now()
+	rows, err := db.Conn.Query(query, userID, now)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	var events []models.Event
+	for rows.Next() {
+		var event models.Event
+		err := rows.Scan(
+			&event.ID, &event.Title, &event.Description, &event.RoleRequirements,
+			&event.StartTime, &event.EndTime, &event.Location, &event.Organizer,
+			&event.Attendees, &event.ClassType, &event.TeacherName,
+			&event.Capacity, &event.CurrentEnrolment, &event.Color,
+		)
+		if err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	
+	return events, rows.Err()
+}
+
+// GetMembershipRules retrieves the current membership rules configuration
+func (db *Database) GetMembershipRules() (*models.MembershipRules, error) {
+	query := `SELECT id, allow_upgrades, combine_binding_periods, allow_downgrades, 
+		allow_change_during_binding, default_membership_id, updated_at 
+		FROM membership_rules ORDER BY id DESC LIMIT 1`
+	
+	var rules models.MembershipRules
+	err := db.Conn.QueryRow(query).Scan(
+		&rules.ID, &rules.AllowUpgrades, &rules.CombineBindingPeriods,
+		&rules.AllowDowngrades, &rules.AllowChangeDuringBinding,
+		&rules.DefaultMembershipID, &rules.UpdatedAt,
+	)
+	
+	if err == sql.ErrNoRows {
+		// Return default rules if none exist
+		return &models.MembershipRules{
+			AllowUpgrades:            true,
+			CombineBindingPeriods:    true,
+			AllowDowngrades:          false,
+			AllowChangeDuringBinding: false,
+			DefaultMembershipID:      nil,
+		}, nil
+	}
+	
+	return &rules, err
+}
+
+// SaveMembershipRules saves or updates the membership rules configuration
+func (db *Database) SaveMembershipRules(rules *models.MembershipRules) error {
+	// First check if any rules exist
+	existingRules, err := db.GetMembershipRules()
+	if err != nil {
+		return err
+	}
+	
+	if existingRules.ID > 0 {
+		// Update existing rules
+		query := `UPDATE membership_rules SET 
+			allow_upgrades = ?, combine_binding_periods = ?, allow_downgrades = ?,
+			allow_change_during_binding = ?, default_membership_id = ?, updated_at = CURRENT_TIMESTAMP
+			WHERE id = ?`
+		_, err = db.Conn.Exec(query, rules.AllowUpgrades, rules.CombineBindingPeriods,
+			rules.AllowDowngrades, rules.AllowChangeDuringBinding, 
+			rules.DefaultMembershipID, existingRules.ID)
+	} else {
+		// Insert new rules
+		query := `INSERT INTO membership_rules 
+			(allow_upgrades, combine_binding_periods, allow_downgrades, 
+			 allow_change_during_binding, default_membership_id) 
+			VALUES (?, ?, ?, ?, ?)`
+		_, err = db.Conn.Exec(query, rules.AllowUpgrades, rules.CombineBindingPeriods,
+			rules.AllowDowngrades, rules.AllowChangeDuringBinding, rules.DefaultMembershipID)
+	}
+	
 	return err
 }

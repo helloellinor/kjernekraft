@@ -1,4 +1,4 @@
-{{define "navigation"}}
+{{define "navigation_styles"}}
 <style>
     .header {
         background-color: #007cba;
@@ -87,41 +87,4 @@
         }
     }
 </style>
-
-<header class="header">
-    <div class="header-content">
-        <h1>Kjernekraft - Elev Dashboard</h1>
-        <div class="auth-controls">
-            {{if .UserName}}
-            <span class="user-name">{{.UserName}}</span>
-            <a href="/logout" class="auth-link">Logg ut</a>
-            {{else}}
-            <a href="/innlogging" class="auth-link">Logg inn</a>
-            {{end}}
-        </div>
-    </div>
-</header>
-
-<nav class="nav">
-    <ul class="nav-list">
-        <li class="nav-item">
-            <a href="/elev/hjem" class="nav-link {{if eq .CurrentPage "hjem"}}active{{end}}">Hjem</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/timeplan" class="nav-link {{if eq .CurrentPage "timeplan"}}active{{end}}">Timeplan</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/klippekort" class="nav-link {{if eq .CurrentPage "klippekort"}}active{{end}}">Klippekort</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/medlemskap" class="nav-link {{if eq .CurrentPage "medlemskap"}}active{{end}}">Medlemskap</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/betaling" class="nav-link {{if eq .CurrentPage "betaling"}}active{{end}}">Betalinger</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/min-profil" class="nav-link {{if eq .CurrentPage "profil"}}active{{end}}">Min profil</a>
-        </li>
-    </ul>
-</nav>
 {{end}}

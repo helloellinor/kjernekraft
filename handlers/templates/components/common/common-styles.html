@@ -19,6 +19,42 @@ body {
     padding: 2rem;
 }
 
+/* Main Content Container */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Content Grid */
+.content-grid {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+}
+
+.content-grid.two-column-grid {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* Content Section Styling */
+.content-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 2px solid #e0e0e0;
+}
+
+.content-section h2.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 0.5rem;
+}
+
 /* Page Description */
 .page-description {
     font-size: 1.1rem;

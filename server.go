@@ -66,6 +66,8 @@ func main() {
 	// Admin routes
 	r.Get("/admin", handlers.AdminPageHandler)
 	r.Get("/api/admin/users", handlers.GetUsersAPIHandler)
+	r.Get("/api/admin/membership-rules", handlers.GetMembershipRulesHandler)
+	r.Post("/api/admin/membership-rules", handlers.SaveMembershipRulesHandler)
 	r.Post("/api/admin/events/update-time", handlers.UpdateEventTimeHandler)
 	r.Post("/api/admin/freeze-requests/approve", handlers.ApproveFreezeRequestHandler)
 	r.Post("/api/admin/freeze-requests/reject", handlers.RejectFreezeRequestHandler)
@@ -100,6 +102,7 @@ func main() {
 	// Dashboard component routes (HTMX endpoints)
 	r.Get("/api/user/klippekort", handlers.UserKlippekortHandler)
 	r.Get("/api/user/membership", handlers.UserMembershipHandler)
+	r.Get("/api/user/signups", handlers.UserSignupsHandler)
 
 	// Payment API routes
 	r.Get("/api/payment-methods", handlers.PaymentMethodsHandler)

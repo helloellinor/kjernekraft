@@ -1,0 +1,70 @@
+{{define "klippekort_module"}}
+<style>
+{{template "klippekort_module_styles" .}}
+</style>
+
+{{if .HasKlippekort}}
+<div class="klippekort-cards">
+    {{range .Klippekort}}
+    <div class="klippekort-card {{if .IsExpiring}}expiring{{end}}">
+        {{if .IsExpiring}}
+        <div class="expiring-badge">{{t $.Lang "klippekort.expires"}}</div>
+        {{end}}
+        
+        <div class="card-header">
+            <h4 class="card-title">{{.Category}}</h4>
+            <span class="card-expiry">
+                {{if gt .DaysUntilExpiry 0}}
+                    {{t $.Lang "klippekort.expires"}} om {{.DaysUntilExpiry}} {{t $.Lang "klippekort.days_until_expiry"}}
+                {{else if eq .DaysUntilExpiry 0}}
+                    {{t $.Lang "klippekort.expires"}} i dag
+                {{else}}
+                    {{t $.Lang "klippekort.expired"}}
+                {{end}}
+            </span>
+        </div>
+        
+        <div class="card-content">
+            <div class="klipp-count">
+                <span class="remaining">{{.RemainingKlipp}}</span>
+                <span class="total">/ {{.TotalKlipp}} {{t $.Lang "klippekort.remaining"}}</span>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-segments">
+                    {{range $i := seq .RemainingKlipp}}
+                    <div class="progress-segment filled"></div>
+                    {{end}}
+                    {{range $i := seq (sub .TotalKlipp .RemainingKlipp)}}
+                    <div class="progress-segment"></div>
+                    {{end}}
+                </div>
+            </div>
+            
+            <div class="card-actions">
+                <button class="fill-up-btn" onclick="fillUpKlippekort('{{.Category}}')">
+                    {{t $.Lang "klippekort.fill_up"}}
+                </button>
+            </div>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{else}}
+<div class="no-klippekort">
+    <p>{{t .Lang "klippekort.no_klippekort"}}</p>
+    <a href="/elev/klippekort#kjop-klipp" class="buy-klippekort-btn">Kjøp klippekort</a>
+</div>
+{{end}}
+
+<script>
+function fillUpKlippekort(category) {
+    // Navigate to klippekort purchase page for the specific category
+    window.location.href = '/elev/klippekort#kjop-klipp?category=' + encodeURIComponent(category);
+}
+</script>
+{{end}}
+
+{{define "klippekort_module_styles"}}
+{{.KlippekortCSS}}
+{{end}}
