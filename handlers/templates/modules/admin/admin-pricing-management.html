@@ -1,0 +1,316 @@
+{{define "admin_pricing_management"}}
+<div class="pricing-management-section">
+    <h3>{{t .Lang "admin.pricing_management"}}</h3>
+    
+    <div class="pricing-container">
+        <div class="membership-pricing">
+            <h4>{{t .Lang "admin.membership_pricing"}}</h4>
+            <table class="pricing-table">
+                <thead>
+                    <tr>
+                        <th>{{t .Lang "admin.membership_name"}}</th>
+                        <th>{{t .Lang "admin.current_price"}}</th>
+                        <th>{{t .Lang "admin.commitment_months"}}</th>
+                        <th>{{t .Lang "admin.student_senior"}}</th>
+                        <th>{{t .Lang "admin.actions"}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Memberships}}
+                    <tr data-membership-id="{{.ID}}">
+                        <td>{{.Name}}</td>
+                        <td class="price-cell">
+                            <span class="price-display">{{.Price}} øre</span>
+                            <input type="number" class="price-input" value="{{.Price}}" style="display: none;">
+                        </td>
+                        <td>{{.CommitmentMonths}}</td>
+                        <td>{{if .IsStudentSenior}}Ja{{else}}Nei{{end}}</td>
+                        <td class="actions">
+                            <button class="edit-price-btn" onclick="editPrice({{.ID}})">{{t $.Lang "admin.edit_price"}}</button>
+                            <button class="save-price-btn" onclick="savePrice({{.ID}})" style="display: none;">{{t $.Lang "admin.save"}}</button>
+                            <button class="cancel-price-btn" onclick="cancelEditPrice({{.ID}})" style="display: none;">{{t $.Lang "admin.cancel"}}</button>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="new-membership">
+            <h4>{{t .Lang "admin.create_new_membership"}}</h4>
+            <form id="new-membership-form" onsubmit="createMembership(event)">
+                <div class="form-group">
+                    <label for="membership-name">{{t .Lang "admin.membership_name"}}:</label>
+                    <input type="text" id="membership-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="membership-price">{{t .Lang "admin.price_ore"}}:</label>
+                    <input type="number" id="membership-price" required>
+                </div>
+                <div class="form-group">
+                    <label for="commitment-months">{{t .Lang "admin.commitment_months"}}:</label>
+                    <input type="number" id="commitment-months" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="is-student-senior">
+                        {{t .Lang "admin.student_senior_discount"}}
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="membership-description">{{t .Lang "admin.description"}}:</label>
+                    <textarea id="membership-description" rows="3"></textarea>
+                </div>
+                <button type="submit" class="create-btn">{{t .Lang "admin.create_membership"}}</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.pricing-management-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.pricing-management-section h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 10px;
+}
+
+.pricing-container {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: 2fr 1fr;
+}
+
+.pricing-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.pricing-table th,
+.pricing-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.pricing-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.price-cell {
+    position: relative;
+}
+
+.price-input {
+    width: 100px;
+    padding: 4px;
+    border: 1px solid #007cba;
+    border-radius: 3px;
+}
+
+.actions button {
+    margin-right: 5px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.edit-price-btn {
+    background: #007cba;
+    color: white;
+}
+
+.edit-price-btn:hover {
+    background: #005d8c;
+}
+
+.save-price-btn {
+    background: #28a745;
+    color: white;
+}
+
+.save-price-btn:hover {
+    background: #218838;
+}
+
+.cancel-price-btn {
+    background: #6c757d;
+    color: white;
+}
+
+.cancel-price-btn:hover {
+    background: #545b62;
+}
+
+.new-membership {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.new-membership h4 {
+    margin-top: 0;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.create-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.create-btn:hover {
+    background: #218838;
+}
+
+@media (max-width: 768px) {
+    .pricing-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .pricing-table {
+        font-size: 12px;
+    }
+    
+    .pricing-table th,
+    .pricing-table td {
+        padding: 8px 4px;
+    }
+}
+</style>
+
+<script>
+function editPrice(membershipId) {
+    const row = document.querySelector(`tr[data-membership-id="${membershipId}"]`);
+    const priceDisplay = row.querySelector('.price-display');
+    const priceInput = row.querySelector('.price-input');
+    const editBtn = row.querySelector('.edit-price-btn');
+    const saveBtn = row.querySelector('.save-price-btn');
+    const cancelBtn = row.querySelector('.cancel-price-btn');
+    
+    priceDisplay.style.display = 'none';
+    priceInput.style.display = 'block';
+    editBtn.style.display = 'none';
+    saveBtn.style.display = 'inline-block';
+    cancelBtn.style.display = 'inline-block';
+    
+    priceInput.focus();
+}
+
+function cancelEditPrice(membershipId) {
+    const row = document.querySelector(`tr[data-membership-id="${membershipId}"]`);
+    const priceDisplay = row.querySelector('.price-display');
+    const priceInput = row.querySelector('.price-input');
+    const editBtn = row.querySelector('.edit-price-btn');
+    const saveBtn = row.querySelector('.save-price-btn');
+    const cancelBtn = row.querySelector('.cancel-price-btn');
+    
+    // Reset to original value
+    priceInput.value = priceDisplay.textContent.replace(' øre', '');
+    
+    priceDisplay.style.display = 'block';
+    priceInput.style.display = 'none';
+    editBtn.style.display = 'inline-block';
+    saveBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+}
+
+function savePrice(membershipId) {
+    const row = document.querySelector(`tr[data-membership-id="${membershipId}"]`);
+    const priceInput = row.querySelector('.price-input');
+    const newPrice = priceInput.value;
+    
+    fetch('/api/admin/membership-price', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            membership_id: membershipId,
+            price: parseInt(newPrice)
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            const priceDisplay = row.querySelector('.price-display');
+            priceDisplay.textContent = newPrice + ' øre';
+            cancelEditPrice(membershipId);
+            alert('{{t .Lang "admin.price_updated_successfully"}}');
+        } else {
+            throw new Error('Failed to update price');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{t .Lang "admin.error_updating_price"}}');
+    });
+}
+
+function createMembership(event) {
+    event.preventDefault();
+    
+    const membershipData = {
+        name: document.getElementById('membership-name').value,
+        price: parseInt(document.getElementById('membership-price').value),
+        commitment_months: parseInt(document.getElementById('commitment-months').value),
+        is_student_senior: document.getElementById('is-student-senior').checked,
+        description: document.getElementById('membership-description').value
+    };
+    
+    fetch('/api/admin/membership', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(membershipData)
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('{{t .Lang "admin.membership_created_successfully"}}');
+            location.reload(); // Reload to show new membership
+        } else {
+            throw new Error('Failed to create membership');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{t .Lang "admin.error_creating_membership"}}');
+    });
+}
+</script>
+{{end}}

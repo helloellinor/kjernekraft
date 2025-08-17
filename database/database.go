@@ -1362,3 +1362,66 @@ func (db *Database) SaveMembershipRules(rules *models.MembershipRules) error {
 	
 	return err
 }
+
+// UpdateMembershipPrice updates the price of a membership
+func (db *Database) UpdateMembershipPrice(membershipID int64, newPrice int) error {
+	query := `UPDATE memberships SET price = ? WHERE id = ?`
+	_, err := db.Conn.Exec(query, newPrice, membershipID)
+	return err
+}
+
+// CreateMembership creates a new membership
+func (db *Database) CreateMembership(membership models.Membership) (int64, error) {
+	query := `INSERT INTO memberships 
+		(name, price, commitment_months, is_student_senior, is_special_offer, description, features, active) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+	
+	// Convert features to JSON if it's not already
+	features := membership.Features
+	if features == "" {
+		features = "[]"
+	}
+	
+	result, err := db.Conn.Exec(query, 
+		membership.Name, 
+		membership.Price, 
+		membership.CommitmentMonths,
+		membership.IsStudentSenior,
+		membership.IsSpecialOffer,
+		membership.Description,
+		features,
+		membership.Active)
+	
+	if err != nil {
+		return 0, err
+	}
+	
+	return result.LastInsertId()
+}
+
+// DeactivateMembership deactivates a membership (soft delete)
+func (db *Database) DeactivateMembership(membershipID int64) error {
+	query := `UPDATE memberships SET active = FALSE WHERE id = ?`
+	_, err := db.Conn.Exec(query, membershipID)
+	return err
+}
+
+// UpdateMembershipDetails updates full membership details
+func (db *Database) UpdateMembershipDetails(membership models.Membership) error {
+	query := `UPDATE memberships SET 
+		name = ?, price = ?, commitment_months = ?, is_student_senior = ?, 
+		is_special_offer = ?, description = ?, features = ?
+		WHERE id = ?`
+	
+	_, err := db.Conn.Exec(query,
+		membership.Name,
+		membership.Price,
+		membership.CommitmentMonths,
+		membership.IsStudentSenior,
+		membership.IsSpecialOffer,
+		membership.Description,
+		membership.Features,
+		membership.ID)
+	
+	return err
+}
