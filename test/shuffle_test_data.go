@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"database/sql"
@@ -217,7 +217,7 @@ func getStartOfWeek(t time.Time) time.Time {
 	return time.Date(monday.Year(), monday.Month(), monday.Day(), 0, 0, 0, 0, monday.Location())
 }
 
-func main() {
+func ShuffleTestDataMain() {
 	if err := ShuffleTestData(); err != nil {
 		log.Fatalf("Failed to shuffle test data: %v", err)
 	}
