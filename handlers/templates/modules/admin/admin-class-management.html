@@ -1,0 +1,433 @@
+{{define "admin_class_management"}}
+<div class="class-management-section">
+    <h3>{{t .Lang "admin.class_management"}}</h3>
+    
+    <div class="class-container">
+        <div class="new-class">
+            <h4>{{t .Lang "admin.create_new_class"}}</h4>
+            <form id="new-class-form" onsubmit="createClass(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="class-title">{{t .Lang "admin.class_title"}}:</label>
+                        <input type="text" id="class-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="class-type">{{t .Lang "admin.class_type"}}:</label>
+                        <select id="class-type" required>
+                            <option value="">{{t .Lang "admin.select_class_type"}}</option>
+                            <option value="yoga">Yoga</option>
+                            <option value="pilates">Pilates</option>
+                            <option value="strength">Styrketrening</option>
+                            <option value="cardio">Kardio</option>
+                            <option value="dance">Dans</option>
+                            <option value="flexibility">Fleksibilitet</option>
+                            <option value="recovery">Restitusjon</option>
+                            <option value="boxing">Boksing</option>
+                            <option value="crossfit">CrossFit</option>
+                            <option value="spinning">Spinning</option>
+                            <option value="hiit">HIIT</option>
+                            <option value="aerobics">Aerobics</option>
+                            <option value="zumba">Zumba</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="class-teacher">{{t .Lang "admin.teacher_name"}}:</label>
+                        <input type="text" id="class-teacher" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="class-location">{{t .Lang "admin.location"}}:</label>
+                        <select id="class-location" required>
+                            <option value="">{{t .Lang "admin.select_location"}}</option>
+                            <option value="Hovedstudio">Hovedstudio</option>
+                            <option value="Studio 1">Studio 1</option>
+                            <option value="Studio 2">Studio 2</option>
+                            <option value="Studio 3">Studio 3</option>
+                            <option value="Yogastudio">Yogastudio</option>
+                            <option value="Pilatesstudio">Pilatesstudio</option>
+                            <option value="Reformer Studio">Reformer Studio</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="class-date">{{t .Lang "admin.class_date"}}:</label>
+                        <input type="date" id="class-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="class-start-time">{{t .Lang "admin.start_time"}}:</label>
+                        <input type="time" id="class-start-time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="class-end-time">{{t .Lang "admin.end_time"}}:</label>
+                        <input type="time" id="class-end-time" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="class-capacity">{{t .Lang "admin.capacity"}}:</label>
+                        <input type="number" id="class-capacity" min="1" max="50" value="20" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="class-color">{{t .Lang "admin.class_color"}}:</label>
+                        <select id="class-color" required>
+                            <option value="">{{t .Lang "admin.select_color"}}</option>
+                            <option value="#4CAF50" style="background-color: #4CAF50; color: white;">{{t .Lang "admin.green"}}</option>
+                            <option value="#2196F3" style="background-color: #2196F3; color: white;">{{t .Lang "admin.blue"}}</option>
+                            <option value="#FF9800" style="background-color: #FF9800; color: white;">{{t .Lang "admin.orange"}}</option>
+                            <option value="#9C27B0" style="background-color: #9C27B0; color: white;">{{t .Lang "admin.purple"}}</option>
+                            <option value="#F44336" style="background-color: #F44336; color: white;">{{t .Lang "admin.red"}}</option>
+                            <option value="#607D8B" style="background-color: #607D8B; color: white;">{{t .Lang "admin.grey"}}</option>
+                            <option value="#795548" style="background-color: #795548; color: white;">{{t .Lang "admin.brown"}}</option>
+                            <option value="#FF5722" style="background-color: #FF5722; color: white;">{{t .Lang "admin.deep_orange"}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="class-description">{{t .Lang "admin.class_description"}}:</label>
+                    <textarea id="class-description" rows="3" placeholder="{{t .Lang "admin.class_description_placeholder"}}"></textarea>
+                </div>
+
+                <div class="recurring-options">
+                    <h5>{{t .Lang "admin.recurring_options"}}</h5>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="is-recurring">
+                                {{t .Lang "admin.create_recurring_class"}}
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="recurring-weeks">{{t .Lang "admin.recurring_weeks"}}:</label>
+                            <input type="number" id="recurring-weeks" min="1" max="52" value="4" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="create-class-btn">{{t .Lang "admin.create_class"}}</button>
+            </form>
+        </div>
+
+        <div class="upcoming-classes">
+            <h4>{{t .Lang "admin.upcoming_classes"}}</h4>
+            <div class="classes-table-container">
+                <table class="classes-table">
+                    <thead>
+                        <tr>
+                            <th>{{t .Lang "admin.class_table.title"}}</th>
+                            <th>{{t .Lang "admin.class_table.type"}}</th>
+                            <th>{{t .Lang "admin.class_table.teacher"}}</th>
+                            <th>{{t .Lang "admin.class_table.date_time"}}</th>
+                            <th>{{t .Lang "admin.class_table.location"}}</th>
+                            <th>{{t .Lang "admin.class_table.capacity"}}</th>
+                            <th>{{t .Lang "admin.class_table.enrolled"}}</th>
+                            <th>{{t .Lang "admin.class_table.actions"}}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="upcoming-classes-tbody">
+                        {{range .Events}}
+                        <tr data-event-id="{{.ID}}">
+                            <td>{{.Title}}</td>
+                            <td>{{.ClassType}}</td>
+                            <td>{{.TeacherName}}</td>
+                            <td>{{.StartTime.Format "02.01.2006 15:04"}}</td>
+                            <td>{{.Location}}</td>
+                            <td>{{.Capacity}}</td>
+                            <td>{{.CurrentEnrolment}}/{{.Capacity}}</td>
+                            <td class="actions">
+                                <button class="edit-class-btn" onclick="editClass({{.ID}})">{{t $.Lang "admin.edit"}}</button>
+                                <button class="delete-class-btn" onclick="deleteClass({{.ID}})">{{t $.Lang "admin.delete"}}</button>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.class-management-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.class-management-section h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 10px;
+}
+
+.class-container {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: 1fr;
+}
+
+.new-class {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.new-class h4 {
+    margin-top: 0;
+    color: #333;
+}
+
+.form-row {
+    display: grid;
+    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+
+.recurring-options {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background: white;
+}
+
+.recurring-options h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.create-class-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.create-class-btn:hover {
+    background: #218838;
+}
+
+.upcoming-classes {
+    background: white;
+}
+
+.upcoming-classes h4 {
+    margin-top: 0;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.classes-table-container {
+    overflow-x: auto;
+}
+
+.classes-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.classes-table th,
+.classes-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.classes-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+}
+
+.classes-table tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+.actions {
+    white-space: nowrap;
+}
+
+.actions button {
+    margin-right: 5px;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.edit-class-btn {
+    background: #007cba;
+    color: white;
+}
+
+.edit-class-btn:hover {
+    background: #005d8c;
+}
+
+.delete-class-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.delete-class-btn:hover {
+    background: #c82333;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .class-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .classes-table {
+        font-size: 12px;
+    }
+    
+    .classes-table th,
+    .classes-table td {
+        padding: 6px 4px;
+    }
+}
+</style>
+
+<script>
+// Enable/disable recurring weeks input based on checkbox
+document.getElementById('is-recurring').addEventListener('change', function() {
+    const recurringWeeks = document.getElementById('recurring-weeks');
+    recurringWeeks.disabled = !this.checked;
+    if (!this.checked) {
+        recurringWeeks.value = 4;
+    }
+});
+
+// Auto-fill end time based on start time (add 1 hour)
+document.getElementById('class-start-time').addEventListener('change', function() {
+    const startTime = this.value;
+    if (startTime) {
+        const [hours, minutes] = startTime.split(':');
+        const endHour = (parseInt(hours) + 1) % 24;
+        const endTime = endHour.toString().padStart(2, '0') + ':' + minutes;
+        document.getElementById('class-end-time').value = endTime;
+    }
+});
+
+function createClass(event) {
+    event.preventDefault();
+    
+    const classData = {
+        title: document.getElementById('class-title').value,
+        class_type: document.getElementById('class-type').value,
+        teacher_name: document.getElementById('class-teacher').value,
+        location: document.getElementById('class-location').value,
+        date: document.getElementById('class-date').value,
+        start_time: document.getElementById('class-start-time').value,
+        end_time: document.getElementById('class-end-time').value,
+        capacity: parseInt(document.getElementById('class-capacity').value),
+        color: document.getElementById('class-color').value,
+        description: document.getElementById('class-description').value,
+        is_recurring: document.getElementById('is-recurring').checked,
+        recurring_weeks: document.getElementById('is-recurring').checked ? 
+            parseInt(document.getElementById('recurring-weeks').value) : 1
+    };
+    
+    fetch('/api/admin/class', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(classData)
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('{{t .Lang "admin.class_created_successfully"}}');
+            location.reload(); // Reload to show new class
+        } else {
+            throw new Error('Failed to create class');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{t .Lang "admin.error_creating_class"}}');
+    });
+}
+
+function editClass(classId) {
+    // For now, just redirect to edit page or show modal
+    alert('Edit functionality for class ' + classId + ' coming soon!');
+}
+
+function deleteClass(classId) {
+    if (confirm('{{t .Lang "admin.confirm_delete_class"}}')) {
+        fetch('/api/admin/class/' + classId, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('{{t .Lang "admin.class_deleted_successfully"}}');
+                location.reload();
+            } else {
+                throw new Error('Failed to delete class');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('{{t .Lang "admin.error_deleting_class"}}');
+        });
+    }
+}
+
+// Set default date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('class-date').value = today;
+});
+</script>
+{{end}}

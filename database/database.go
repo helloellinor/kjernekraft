@@ -1425,3 +1425,23 @@ func (db *Database) UpdateMembershipDetails(membership models.Membership) error 
 	
 	return err
 }
+
+// DeleteEvent deletes an event
+func (db *Database) DeleteEvent(eventID int64) error {
+	_, err := db.Conn.Exec("DELETE FROM events WHERE id = ?", eventID)
+	return err
+}
+
+// UpdateEvent updates an event's details
+func (db *Database) UpdateEvent(event models.Event) error {
+	query := `UPDATE events SET 
+		title = ?, description = ?, start_time = ?, end_time = ?, location = ?, 
+		class_type = ?, teacher_name = ?, capacity = ?, color = ?
+		WHERE id = ?`
+	
+	_, err := db.Conn.Exec(query,
+		event.Title, event.Description, event.StartTime, event.EndTime, event.Location,
+		event.ClassType, event.TeacherName, event.Capacity, event.Color, event.ID)
+	
+	return err
+}
