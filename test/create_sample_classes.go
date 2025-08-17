@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func main() {
+func CreateSampleClasses() {
 	// Connect to database
 	dbConn, err := database.Connect()
 	if err != nil {

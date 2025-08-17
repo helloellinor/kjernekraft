@@ -11,4 +11,7 @@ require (
 	golang.org/x/crypto v0.41.0
 )
 
-require github.com/gorilla/securecookie v1.1.2 // indirect
+require (
+	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/leanovate/gopter v0.2.11 // indirect
+)
