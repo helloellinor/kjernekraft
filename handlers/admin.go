@@ -3,22 +3,11 @@ package handlers
 import (
 	"kjernekraft/database"
 	"kjernekraft/handlers/modules"
-	"kjernekraft/models"
 	"log"
 	"net/http"
 )
 
 var AdminDB *database.Database
-
-type AdminData struct {
-	Users          []models.User
-	Events         []models.Event
-	FreezeRequests []models.FreezeRequest
-	Memberships    []models.Membership
-	Stats          *modules.AdminStatsModuleData
-	Lang           string
-	CurrentPage    string
-}
 
 func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// For now, we'll skip authentication check
@@ -62,14 +51,16 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := AdminData{
-		Users:          users,
-		Events:         events,
-		FreezeRequests: freezeRequests,
-		Memberships:    memberships,
-		Stats:          statsModule,
-		Lang:           lang,
-		CurrentPage:    "admin",
+	data := map[string]interface{}{
+		"Title":          "Admin Dashboard",
+		"Users":          users,
+		"Events":         events,
+		"FreezeRequests": freezeRequests,
+		"Memberships":    memberships,
+		"Stats":          statsModule,
+		"Lang":           lang,
+		"CurrentPage":    "admin",
+		"ExternalCSS":    []string{},
 	}
 
 	// Use template manager instead of inline template
