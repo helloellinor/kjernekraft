@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kjernekraft/models"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -17,9 +18,29 @@ type Database struct {
 }
 
 func Connect() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./kjernekraft.db")
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		dbPath = "./kjernekraft.db"
+	}
+	
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return nil, err
+	}
+
+	// Enable foreign key constraints
+	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
+		return nil, fmt.Errorf("failed to enable foreign keys: %v", err)
+	}
+
+	// Configure connection pool for better performance
+	db.SetMaxOpenConns(25)          // Maximum number of open connections
+	db.SetMaxIdleConns(5)           // Maximum number of idle connections
+	db.SetConnMaxLifetime(5 * time.Minute) // Maximum connection lifetime
+
+	// Test the connection
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %v", err)
 	}
 
 	log.Println("Kopla til SQLite-databasen.")
@@ -234,12 +255,83 @@ func Migrate(db *sql.DB) error {
 		log.Println("Added last_billed column to user_memberships table")
 	}
 	
+	// Create performance indexes if they don't exist
+	if err := createPerformanceIndexes(db); err != nil {
+		log.Printf("Warning: Failed to create some performance indexes: %v", err)
+		// Don't fail migration for index creation issues
+	}
+	
+	return nil
+}
+
+// createPerformanceIndexes creates indexes for better query performance
+func createPerformanceIndexes(db *sql.DB) error {
+	indexes := []string{
+		// User lookup indexes
+		"CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
+		"CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone)",
+		
+		// Event lookup indexes
+		"CREATE INDEX IF NOT EXISTS idx_events_start_time ON events(start_time)",
+		"CREATE INDEX IF NOT EXISTS idx_events_location ON events(location)",
+		"CREATE INDEX IF NOT EXISTS idx_events_teacher_name ON events(teacher_name)",
+		
+		// Membership indexes
+		"CREATE INDEX IF NOT EXISTS idx_user_memberships_user_id ON user_memberships(user_id)",
+		"CREATE INDEX IF NOT EXISTS idx_user_memberships_status ON user_memberships(status)",
+		"CREATE INDEX IF NOT EXISTS idx_user_memberships_renewal_date ON user_memberships(renewal_date)",
+		
+		// Event signup indexes
+		"CREATE INDEX IF NOT EXISTS idx_event_signups_user_id ON event_signups(user_id)",
+		"CREATE INDEX IF NOT EXISTS idx_event_signups_event_id ON event_signups(event_id)",
+		"CREATE INDEX IF NOT EXISTS idx_event_signups_signup_date ON event_signups(signup_date)",
+		
+		// Role assignment indexes
+		"CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON user_roles(user_id)",
+		"CREATE INDEX IF NOT EXISTS idx_user_roles_role_id ON user_roles(role_id)",
+		
+		// Payment method indexes
+		"CREATE INDEX IF NOT EXISTS idx_payment_methods_user_id ON payment_methods(user_id)",
+		
+		// Klippekort indexes
+		"CREATE INDEX IF NOT EXISTS idx_user_klippekort_user_id ON user_klippekort(user_id)",
+		"CREATE INDEX IF NOT EXISTS idx_user_klippekort_expiry_date ON user_klippekort(expiry_date)",
+		"CREATE INDEX IF NOT EXISTS idx_user_klippekort_active ON user_klippekort(is_active)",
+	}
+	
+	for _, indexSQL := range indexes {
+		if _, err := db.Exec(indexSQL); err != nil {
+			// Log but don't fail on index creation errors
+			log.Printf("Warning: Failed to create index: %s - %v", indexSQL, err)
+		}
+	}
+	
+	log.Println("Performance indexes created/verified")
 	return nil
 }
 
 // isColumnExistsError checks if the error is due to column already existing
 func isColumnExistsError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "duplicate column name")
+}
+
+// handleQueryError provides standardized error handling for database queries
+func handleQueryError(err error, operation string, params ...interface{}) error {
+	if err == nil {
+		return nil
+	}
+	
+	if err == sql.ErrNoRows {
+		return nil // For single entity lookups, nil means not found
+	}
+	
+	// Create a descriptive error message
+	var paramStr string
+	if len(params) > 0 {
+		paramStr = fmt.Sprintf(" with params %v", params)
+	}
+	
+	return fmt.Errorf("database %s failed%s: %v", operation, paramStr, err)
 }
 
 // AddRole adds a new role to the roles table
