@@ -53,7 +53,7 @@ func (gs *GlobalSettings) SetTimezone(timezone string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 	gs.Timezone = timezone

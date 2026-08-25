@@ -98,9 +98,9 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := map[string]interface{}{
-		"success":    true,
-		"message":    "Class(es) created successfully",
-		"event_ids":  createdEventIDs,
+		"success":        true,
+		"message":        "Class(es) created successfully",
+		"event_ids":      createdEventIDs,
 		"events_created": len(createdEventIDs),
 	}
 
@@ -121,7 +121,7 @@ func DeleteClassHandler(w http.ResponseWriter, r *http.Request) {
 	// Expected format: /api/admin/class/{id}
 	path := r.URL.Path
 	classIDStr := path[len("/api/admin/class/"):]
-	
+
 	classID, err := strconv.ParseInt(classIDStr, 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid class ID", http.StatusBadRequest)
@@ -154,7 +154,7 @@ func UpdateClassHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract class ID from URL path
 	path := r.URL.Path
 	classIDStr := path[len("/api/admin/class/"):]
-	
+
 	classID, err := strconv.ParseInt(classIDStr, 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid class ID", http.StatusBadRequest)
@@ -204,16 +204,16 @@ func UpdateClassHandler(w http.ResponseWriter, r *http.Request) {
 		endTime.Hour(), endTime.Minute(), 0, 0, classDate.Location())
 
 	event := models.Event{
-		ID:               int(classID),
-		Title:            updateData.Title,
-		Description:      updateData.Description,
-		StartTime:        startDateTime,
-		EndTime:          endDateTime,
-		Location:         updateData.Location,
-		ClassType:        updateData.ClassType,
-		TeacherName:      updateData.TeacherName,
-		Capacity:         updateData.Capacity,
-		Color:            updateData.Color,
+		ID:          int(classID),
+		Title:       updateData.Title,
+		Description: updateData.Description,
+		StartTime:   startDateTime,
+		EndTime:     endDateTime,
+		Location:    updateData.Location,
+		ClassType:   updateData.ClassType,
+		TeacherName: updateData.TeacherName,
+		Capacity:    updateData.Capacity,
+		Color:       updateData.Color,
 	}
 
 	if err := AdminDB.UpdateEvent(event); err != nil {

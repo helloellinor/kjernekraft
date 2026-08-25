@@ -39,14 +39,14 @@ func GetLanguageFromRequest(r *http.Request) string {
 			return lang
 		}
 	}
-	
+
 	// Then try to get from cookie
 	if cookie, err := r.Cookie("preferred_language"); err == nil {
 		if IsValidLanguage(cookie.Value) {
 			return cookie.Value
 		}
 	}
-	
+
 	// Default to Norwegian bokmål
 	return "nb"
 }
@@ -84,7 +84,7 @@ func (l *Localization) loadTranslations() {
 	languages := []string{"nb", "nn", "en"}
 	for _, lang := range languages {
 		langMap := make(map[string]interface{})
-		
+
 		// Load common.json for each language
 		commonPath := filepath.Join(l.basePath, lang, "common.json")
 		if data, err := ioutil.ReadFile(commonPath); err == nil {
@@ -93,7 +93,7 @@ func (l *Localization) loadTranslations() {
 				langMap = translations
 			}
 		}
-		
+
 		l.languages[lang] = langMap
 	}
 }
@@ -151,7 +151,7 @@ func (l *Localization) GetSupportedLanguages() []string {
 func (l *Localization) GetLanguageName(code string) string {
 	names := map[string]string{
 		"nb": "Norsk bokmål",
-		"nn": "Norsk nynorsk", 
+		"nn": "Norsk nynorsk",
 		"en": "English",
 	}
 	if name, exists := names[code]; exists {

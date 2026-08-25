@@ -211,49 +211,28 @@ func ChargesHandler(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Charges    []models.ChargeWithDetails
 		HasCharges bool
+		Lang       string
 	}{
 		Charges:    charges,
 		HasCharges: len(charges) > 0,
+		Lang:       GetLanguageFromRequest(r),
 	}
 
-	// Load and parse the component template directly
-	tmplFuncs := template.FuncMap{
-		"divf": func(a, b interface{}) float64 {
-			var aFloat, bFloat float64
-
-			switch v := a.(type) {
-			case int:
-				aFloat = float64(v)
-			case float64:
-				aFloat = v
-			default:
-				return 0
-			}
-
-			switch v := b.(type) {
-			case int:
-				bFloat = float64(v)
-			case float64:
-				bFloat = v
-			default:
-				return 0
-			}
-
-			if bFloat == 0 {
-				return 0
-			}
-			return aFloat / bFloat
-		},
-		"title": func(s string) string {
-			if len(s) == 0 {
-				return s
-			}
-			return strings.ToUpper(s[:1]) + s[1:]
-		},
+	// Malen nyttar `t` til umsetjingi, og ho hadde si eigi funksjons-
+	// samling med berre `divf` og `title` i. Daa feila parsingi paa
+	// «function "t" not defined», og /api/charges svara 500 kvar gong.
+	// Ho fær den same samlingi som alle hine malarne no.
+	tmplFuncs := getTemplateFuncs()
+	tmplFuncs["title"] = func(s string) string {
+		if len(s) == 0 {
+			return s
+		}
+		return strings.ToUpper(s[:1]) + s[1:]
 	}
 
-	templatePath := filepath.Join("handlers", "templates", "components", "charges.html")
-	t, err := template.New("charges_component").Funcs(tmplFuncs).ParseFiles(templatePath)
+	// Malen ligg i modules/membership/, ikkje i components/.
+	templatePath := filepath.Join("handlers", "templates", "modules", "membership", "charges.html")
+	t, err := template.New("charges.html").Funcs(tmplFuncs).ParseFiles(templatePath)
 	if err != nil {
 		http.Error(w, "Template error", http.StatusInternalServerError)
 		log.Printf("Error parsing charges template: %v", err)
@@ -261,7 +240,7 @@ func ChargesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	if err := t.ExecuteTemplate(w, "charges_component", data); err != nil {
+	if err := t.ExecuteTemplate(w, "charges_module", data); err != nil {
 		http.Error(w, "Template execution error", http.StatusInternalServerError)
 		log.Printf("Error executing charges template: %v", err)
 	}

@@ -10,8 +10,9 @@ import (
 var AdminDB *database.Database
 
 func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
-	// For now, we'll skip authentication check
-	// TODO: Add proper authentication to check if user has admin role
+	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
+	// Ligg denne handsamaren nokon gong utanfor den gruppa, er
+	// administrasjonen open att.
 
 	users, err := AdminDB.GetAllUsers()
 	if err != nil {
@@ -59,6 +60,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		"Memberships":    memberships,
 		"Stats":          statsModule,
 		"Lang":           lang,
+		"CSRFToken":      CSRFToken(r),
 		"CurrentPage":    "admin",
 		"ExternalCSS":    []string{},
 	}

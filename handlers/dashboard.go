@@ -17,7 +17,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
 		return
 	}
-	
+
 	settings := config.GetInstance()
 	now := settings.GetCurrentTime()
 
@@ -48,6 +48,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		"UserName":     user.Name,
 		"User":         user,
 		"Lang":         lang,
+		"CSRFToken":    CSRFToken(r),
 	}
 
 	// Use the new template system

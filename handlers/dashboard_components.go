@@ -97,7 +97,7 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 			year := now.Year()
 			bindingEndMonths := membership.BindingEnd.Month()
 			bindingEndYear := membership.BindingEnd.Year()
-			
+
 			totalMonths := (bindingEndYear-year)*12 + int(bindingEndMonths-months)
 			if membership.BindingEnd.Day() < now.Day() {
 				totalMonths--
@@ -175,6 +175,7 @@ func UserSignupsHandler(w http.ResponseWriter, r *http.Request) {
 		"HasSignups": len(userSignups) > 0,
 		"Signups":    userSignups,
 		"Lang":       lang,
+		"CSRFToken":  CSRFToken(r),
 	}
 
 	// Get template manager and render

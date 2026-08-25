@@ -17,7 +17,7 @@ func TermsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Convert markdown to HTML
 	html := blackfriday.Run(content)
-	
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write(html)
 }
