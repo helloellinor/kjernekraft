@@ -16,7 +16,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
 		return
 	}
-	
+
 	settings := config.GetInstance()
 	now := settings.GetCurrentTime()
 
@@ -27,7 +27,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 			weekOffset = parsedWeek
 		}
 	}
-	
+
 	// Prevent navigating to past weeks
 	if weekOffset < 0 {
 		weekOffset = 0
@@ -76,7 +76,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		for i, event := range weekEvents {
 			eventIDs[i] = int64(event.ID)
 		}
-		
+
 		userSignups, err := DB.GetUserSignupsForEvents(int64(user.ID), eventIDs)
 		if err != nil {
 			// Log error but don't fail the request
@@ -123,7 +123,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	// Calculate week title
 	var weekTitle string
 	_, targetWeek := targetMonday.ISOWeek()
-	
+
 	if weekOffset == 0 {
 		weekTitle = loc.T(lang, "timeplan.this_week")
 	} else if weekOffset == 1 {
@@ -137,32 +137,33 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		teachers = []string{} // Continue with empty list if error
 	}
-	
+
 	classTypes, err := DB.GetDistinctClassTypes()
 	if err != nil {
 		classTypes = []string{} // Continue with empty list if error
 	}
 
 	data := map[string]interface{}{
-		"Title":        "Timeplan",
-		"WeekTitle":    weekTitle,
-		"WeekNumber":   targetWeek,
-		"WeekOffset":   weekOffset,
-		"WeekDays":     weekdays,
-		"WeekDates":    weekDates,
-		"EventsByDay":  eventsByDay,
-		"Today":        now.Format("2006-01-02"),
-		"Teachers":     teachers,
-		"ClassTypes":   classTypes,
+		"Title":           "Timeplan",
+		"WeekTitle":       weekTitle,
+		"WeekNumber":      targetWeek,
+		"WeekOffset":      weekOffset,
+		"WeekDays":        weekdays,
+		"WeekDates":       weekDates,
+		"EventsByDay":     eventsByDay,
+		"Today":           now.Format("2006-01-02"),
+		"Teachers":        teachers,
+		"ClassTypes":      classTypes,
 		"SelectedTeacher": teacherFilter,
 		"SelectedClass":   classFilter,
-		"CanGoBack":    weekOffset > 0,
-		"IsAdmin":      false, // TODO: Implement proper role checking
-		"ExternalCSS":  []string{"/static/css/event-card.css"},
-		"CurrentPage":  "timeplan",
-		"UserName":     user.Name,
-		"User":         user,
-		"Lang":         lang,
+		"CanGoBack":       weekOffset > 0,
+		"IsAdmin":         false, // TODO: Implement proper role checking
+		"ExternalCSS":     []string{"/static/css/event-card.css"},
+		"CurrentPage":     "timeplan",
+		"UserName":        user.Name,
+		"User":            user,
+		"Lang":            lang,
+		"CSRFToken":       CSRFToken(r),
 	}
 
 	// Use the new template system

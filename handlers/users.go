@@ -25,11 +25,13 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Get language from cookies/request (using new system)
 		lang := GetLanguageFromRequest(r)
-		
+
 		data := map[string]interface{}{
 			"Title":       "Innlogging",
 			"CurrentPage": "innlogging",
 			"Lang":        lang,
+			"CSRFToken":   CSRFToken(r),
+			"Error":       loginError(r.URL.Query().Get("error")),
 		}
 
 		// Use the new template system
@@ -49,16 +51,30 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 		// Handle login form submission
-		email := r.FormValue("email")
+		email := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
 		password := r.FormValue("password")
+
+		// Bremsa tel per IP og per e-post. Ein motstandar som byter
+		// e-post kvar gong vert stogga av IP-nykelen; ein som kjem fraa
+		// mange adressor mot den same kontoen vert stogga av den hine.
+		ipKey := "ip:" + clientKey(r)
+		userKey := "e-post:" + email
+		if loginAttempts.Blocked(ipKey) || loginAttempts.Blocked(userKey) {
+			http.Redirect(w, r, "/innlogging?error=blocked", http.StatusSeeOther)
+			return
+		}
 
 		// Validate credentials
 		user, err := DB.AuthenticateUser(email, password)
 		if err != nil {
-			// Redirect back to login with error
-			http.Redirect(w, r, "/innlogging?error=invalid", http.StatusTemporaryRedirect)
+			loginAttempts.Fail(ipKey)
+			loginAttempts.Fail(userKey)
+			http.Redirect(w, r, "/innlogging?error=invalid", http.StatusSeeOther)
 			return
 		}
+
+		loginAttempts.Reset(ipKey)
+		loginAttempts.Reset(userKey)
 
 		// Set user in session
 		err = SetUserInSession(w, r, user)
@@ -75,17 +91,42 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
 
-// LogoutHandler handles user logout
+// loginError gjer spurnadsparameteren um til ein umsetjingsnykel. Han
+// gjev tomt for alt han ikkje kjenner, so ingen kann skriva sin eigen
+// bodskap inn i innloggingssida gjenom adressa.
+func loginError(code string) string {
+	switch code {
+	case "invalid":
+		return "login.error_invalid"
+	case "blocked":
+		return "login.error_blocked"
+	default:
+		return ""
+	}
+}
+
+// LogoutHandler handles user logout.
+//
+// Han tek berre imot POST. Ei utlogging paa GET kann ein framand sida
+// utløysa med eit bilete-merke, og daa er du logga ut utan aa ha bede um
+// det.
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	err := ClearUserSession(w, r)
 	if err != nil {
 		http.Error(w, "Logout error", http.StatusInternalServerError)
 		return
 	}
-	
-	http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
+
+	http.Redirect(w, r, "/innlogging", http.StatusSeeOther)
 }
 
+// AssignRoleToUserHandler ligg bak RequireAdmin i rutaren. Han var open
+// fyrr, og daa var «gjer meg til admin» eitt einaste kall.
 func AssignRoleToUserHandler(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.URL.Query().Get("user_id")
 	roleName := r.URL.Query().Get("role")
@@ -107,14 +148,16 @@ func AssignRoleToUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Role assigned"))
 }
 
+// GetUserRolesHandler gjev rollone aat den innlogga brukaren. Han tok
+// eit user_id or spurnadsstrengen fyrr, og daa kunde kven som helst
+// lesa kven som helst.
 func GetUserRolesHandler(w http.ResponseWriter, r *http.Request) {
-	userIDStr := r.URL.Query().Get("user_id")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Ikkje innlogga", http.StatusUnauthorized)
 		return
 	}
-	roles, err := DB.GetUserRoles(userID)
+	roles, err := DB.GetUserRoles(int64(user.ID))
 	if err != nil {
 		http.Error(w, "Could not fetch roles", http.StatusInternalServerError)
 		return
@@ -122,36 +165,20 @@ func GetUserRolesHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(roles)
 }
 
-func AddPaymentMethodHandler(w http.ResponseWriter, r *http.Request) {
-	userIDStr := r.URL.Query().Get("user_id")
-	provider := r.URL.Query().Get("provider")
-	providerID := r.URL.Query().Get("provider_id")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil || provider == "" || providerID == "" {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
-		return
-	}
-	pmID, err := DB.AddPaymentMethod(userID, provider, providerID)
-	if err != nil {
-		http.Error(w, "Could not add payment method", http.StatusInternalServerError)
-		return
-	}
-	if err := DB.AssignPaymentMethodToUser(userID, pmID); err != nil {
-		http.Error(w, "Could not assign payment method", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Payment method assigned"))
-}
+// AddPaymentMethodHandler er teken burt. Han laga ein betalingsmaate
+// paa kva som helst user_id or spurnadsstrengen, utan innlogging. Naar
+// Stripe vert kopla paa, kjem betalingsmaatarne derifraa — ikkje fraa
+// ein GET-parameter.
 
+// GetUserPaymentMethodsHandler gjev betalingsmaatarne aat den innlogga
+// brukaren, og berre deim.
 func GetUserPaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
-	userIDStr := r.URL.Query().Get("user_id")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Ikkje innlogga", http.StatusUnauthorized)
 		return
 	}
-	methods, err := DB.GetUserPaymentMethods(userID)
+	methods, err := DB.GetUserPaymentMethods(int64(user.ID))
 	if err != nil {
 		http.Error(w, "Could not fetch payment methods", http.StatusInternalServerError)
 		return
@@ -159,22 +186,9 @@ func GetUserPaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(methods)
 }
 
-func AddUserHandler(w http.ResponseWriter, r *http.Request) {
-	var u models.User
-	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
-		http.Error(w, "Invalid user data", http.StatusBadRequest)
-		return
-	}
-	// Example: create user in database (implement CreateUser in database.go)
-	userID, err := DB.CreateUser(u)
-	if err != nil {
-		http.Error(w, "Could not create user", http.StatusInternalServerError)
-		return
-	}
-	u.ID = int(userID)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(u)
-}
+// AddUserHandler er teken burt. Han tok imot vilkaarleg JSON, sette
+// rollone brukaren sjølv bad um, og skreiv passordet slik det kom inn —
+// utan bcrypt. SignUpHandler er den einaste vegen inn no.
 
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {

@@ -175,12 +175,47 @@ Translation files are located in `locales/` directory.
 
 ## Getting Started
 
-```bash
-# Start the application
-go run server.go
+The server reads two environment variables and refuses to start without the
+first one:
 
-# Access the application
-http://localhost:8080
+```bash
+export KJERNEKRAFT_SESSION_KEY=$(openssl rand -base64 32)
+export KJERNEKRAFT_ENV=development
+
+go run .
+# http://localhost:8080
 ```
 
-The application will start with default Norwegian Bokmål language. Add `?lang=en` or `?lang=nn` to any URL to switch languages.
+See `.env.example`. Generate a **different** key for production, keep it out of
+the repository, and leave `KJERNEKRAFT_ENV` unset there — anything other than
+`development` is treated as production, which turns on `Secure` cookies and
+makes the test-data routes return 404.
+
+The application starts in Norwegian Bokmål. Add `?lang=en` or `?lang=nn` to any
+URL to switch languages.
+
+## Access control
+
+Authorization lives in the router, not in the handlers. `server.go` declares
+three groups, and a route's placement is what grants it:
+
+| Group | Middleware | Contains |
+|---|---|---|
+| open | — | `/`, `/signup`, `/terms`, `/innlogging`, `/logout`, `/static/*` |
+| signed in | `RequireAuth` | `/elev/*` and the `/api/*` endpoints a student uses |
+| admin | `RequireAdmin` | `/admin`, `/api/admin/*`, `/users/assign-role` |
+| development | `RequireDevelopment` | the test-data routes, 404 outside `KJERNEKRAFT_ENV=development` |
+
+Two rules hold this together:
+
+- **Roles come from the database, once per request.** The session cookie holds
+  a user ID and nothing else. `WithUser` loads the user, and `RequireAdmin`
+  reads the role off that. A role in the cookie is a role the browser can
+  rewrite.
+- **Every mutating request carries a CSRF token.** `CSRF` issues it into the
+  session and mirrors it into a readable cookie; `static/js/csrf.js` attaches
+  it to htmx and `fetch` calls, and HTML forms carry it in a hidden
+  `csrf_token` field. A `POST` without it gets 403.
+
+Adding a route outside a group makes it public. That is the one thing to get
+right in this file.

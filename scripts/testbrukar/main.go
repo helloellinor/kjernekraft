@@ -21,7 +21,7 @@ func main() {
 	klippekortSQL := []string{
 		`INSERT OR IGNORE INTO user_klippekort (id, user_id, package_id, total_klipp, remaining_klipp, expiry_date) 
 		VALUES (1, 1, 2, 10, 7, datetime('now', '+6 months'))`,
-		
+
 		`INSERT OR IGNORE INTO user_klippekort (id, user_id, package_id, total_klipp, remaining_klipp, expiry_date) 
 		VALUES (2, 1, 5, 10, 2, datetime('now', '+3 months'))`,
 	}

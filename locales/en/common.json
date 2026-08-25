@@ -22,7 +22,9 @@
     "login_button": "Log in",
     "forgot_password": "Forgot password?",
     "no_account": "Don't have an account yet?",
-    "create_account": "Create account"
+    "create_account": "Create account",
+    "error_invalid": "Wrong email or password.",
+    "error_blocked": "Too many attempts. Try again in fifteen minutes."
   },
   "profile": {
     "title": "My profile",
@@ -49,7 +51,7 @@
   },
   "events": {
     "sign_up": "Sign up",
-    "join_waitlist": "Join waitlist", 
+    "join_waitlist": "Join waitlist",
     "spots_remaining": "spots remaining",
     "spots_remaining_singular": "spot remaining",
     "waitlist": "Waitlist"
@@ -66,7 +68,7 @@
     "no_classes": "No classes",
     "finished": "Finished",
     "monday": "Monday",
-    "tuesday": "Tuesday", 
+    "tuesday": "Tuesday",
     "wednesday": "Wednesday",
     "thursday": "Thursday",
     "friday": "Friday",

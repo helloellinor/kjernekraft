@@ -7,11 +7,11 @@ import (
 
 // AdminStatsModuleData represents the data needed for the admin stats module
 type AdminStatsModuleData struct {
-	TotalUsers             int
-	TotalEvents            int
-	PendingFreezeRequests  int
-	Lang                   string
-	AdminStatsCSS          string
+	TotalUsers            int
+	TotalEvents           int
+	PendingFreezeRequests int
+	Lang                  string
+	AdminStatsCSS         string
 }
 
 // NewAdminStatsModule creates a new admin stats module with the given data

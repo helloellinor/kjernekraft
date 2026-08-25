@@ -7,7 +7,12 @@
         <div class="auth-controls">
             {{if .UserName}}
             <span class="user-name">{{.UserName}}</span>
-            <a href="/logout" class="auth-link">{{t .Lang "navigation.logout"}}</a>
+            <!-- Utlogging er ei endring, og difor eit skjema. Ei lenkja
+                 kann ei framand sida utløysa med eit bilete-merke. -->
+            <form action="/logout" method="POST" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                <button type="submit" class="auth-link">{{t .Lang "navigation.logout"}}</button>
+            </form>
             {{else}}
             <a href="/innlogging" class="auth-link">{{t .Lang "navigation.login"}}</a>
             {{end}}

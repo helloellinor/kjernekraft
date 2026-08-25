@@ -93,8 +93,8 @@ func setupMembershipAndKlippekortData(userID int64) error {
 	if existingMembership == nil {
 		// Create user membership
 		now := time.Now()
-		renewalDate := now.AddDate(0, 1, 0) // Next month
-		bindingEnd := now.AddDate(1, 0, 0)  // One year binding
+		renewalDate := now.AddDate(0, 1, 0)  // Next month
+		bindingEnd := now.AddDate(1, 0, 0)   // One year binding
 		lastBilled := now.AddDate(0, 0, -15) // Billed 15 days ago
 
 		_, err = DB.Conn.Exec(`INSERT INTO user_memberships (user_id, membership_id, status, start_date, renewal_date, binding_end, last_billed) VALUES (?, 1, 'active', ?, ?, ?, ?)`,

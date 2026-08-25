@@ -79,6 +79,7 @@
         </div>
         
         <form class="edit-form" id="profile-edit" method="POST" action="/elev/min-profil">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
             <div class="form-group">
                 <label for="name">{{t .Lang "profile.full_name"}}:</label>
                 <input type="text" id="name" name="name" value="{{.Name}}" required>

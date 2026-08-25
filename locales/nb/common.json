@@ -22,7 +22,9 @@
     "login_button": "Logg inn",
     "forgot_password": "Glemt passord?",
     "no_account": "Har du ikke konto ennå?",
-    "create_account": "Opprett konto"
+    "create_account": "Opprett konto",
+    "error_invalid": "Feil e-post eller passord.",
+    "error_blocked": "For mange forsøk. Prøv igjen om et kvarter."
   },
   "profile": {
     "title": "Min profil",
@@ -49,7 +51,7 @@
   },
   "events": {
     "sign_up": "Meld på",
-    "join_waitlist": "Stå på venteliste", 
+    "join_waitlist": "Stå på venteliste",
     "spots_remaining": "plasser igjen",
     "spots_remaining_singular": "plass igjen",
     "waitlist": "Venteliste"
@@ -66,7 +68,7 @@
     "no_classes": "Ingen klasser",
     "finished": "Avsluttet",
     "monday": "Mandag",
-    "tuesday": "Tirsdag", 
+    "tuesday": "Tirsdag",
     "wednesday": "Onsdag",
     "thursday": "Torsdag",
     "friday": "Fredag",

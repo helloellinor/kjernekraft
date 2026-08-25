@@ -35,3 +35,7 @@ go.work.sum
 server
 kjernekraft
 *.db
+
+# Umgjevnad
+.env
+.envrc

@@ -75,7 +75,7 @@ func shuffleTestData() error {
 	// Generate 5-12 events per day with randomization
 	for dayOffset := 0; dayOffset < 7; dayOffset++ {
 		currentDay := monday.AddDate(0, 0, dayOffset)
-		
+
 		// Randomize number of events per day (more events on weekdays)
 		var numEvents int
 		if currentDay.Weekday() == time.Saturday || currentDay.Weekday() == time.Sunday {
@@ -304,7 +304,7 @@ func ShuffleAllTestDataHandler(w http.ResponseWriter, r *http.Request) {
 // shuffleMembershipData shuffles membership names and prices
 func shuffleMembershipData() error {
 	membershipNames := []string{
-		"Basis", "Standard", "Premium", "VIP", "Student", "Senior", 
+		"Basis", "Standard", "Premium", "VIP", "Student", "Senior",
 		"Familie", "Duo", "Unlimited", "Flex", "Morning", "Evening",
 		"Weekend", "Prøve", "Høst Special", "Vinter Deal", "Sommer Pass",
 	}
@@ -350,7 +350,7 @@ func shuffleUserKlippekortData() error {
 
 	for _, klipp := range userKlippekort {
 		newRemaining := rand.Intn(klipp.TotalKlipp + 1)
-		_, err := DB.Conn.Exec(`UPDATE user_klippekort SET remaining_klipp = ? WHERE id = ?`, 
+		_, err := DB.Conn.Exec(`UPDATE user_klippekort SET remaining_klipp = ? WHERE id = ?`,
 			newRemaining, klipp.UserKlippekort.ID)
 		if err != nil {
 			log.Printf("Error updating user klippekort %d: %v", klipp.UserKlippekort.ID, err)

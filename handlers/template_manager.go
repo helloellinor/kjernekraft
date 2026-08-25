@@ -257,7 +257,7 @@ func (tm *TemplateManager) ReloadTemplates() {
 func (tm *TemplateManager) GetAvailableTemplates() []string {
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
-	
+
 	var names []string
 	for name := range tm.templates {
 		names = append(names, name)

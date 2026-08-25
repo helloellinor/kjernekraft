@@ -1,6 +1,6 @@
 {{define "base"}}
 <!DOCTYPE html>
-<html lang="no">
+<html lang="{{if .Lang}}{{.Lang}}{{else}}nn{{end}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,6 +52,8 @@
     <script src="{{.}}"></script>
     {{end}}
     {{block "scripts" .}}{{end}}
+
+    <script src="/static/js/csrf.js"></script>
 </body>
 </html>
 {{end}}
