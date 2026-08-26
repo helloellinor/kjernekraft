@@ -1,0 +1,84 @@
+{{define "admin_klippekort_prisar"}}
+{{/* Klippekortprisane.
+
+     Same forma som medlemskapa — korrekturen: skrivbart der det står,
+     merke i margen på det som er endra, og éi dokk som utfører det.
+     Sjå docs/KORREKTUREN.md.
+
+     Skilnaden er kva ei setning inneheld. Eit medlemskap er ein pris i
+     månaden med ei binding; eit klippekort er eit tal klipp til ein pris,
+     som varer eit visst tal dagar. Prisen per klipp står attmed og er
+     ikkje skrivbar: han er rekna, og eit felt ein kan skrive noko galt i,
+     er eit felt som kan lyge. */}}
+<form id="klippeprisar" method="post" action="/api/admin/klippeprisar"
+      data-endringar data-dokk="klippedokk">
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+  <div class="prisliste" id="klippeliste">
+    {{range .Pakkar}}
+    <div class="prislapp" data-pakke="{{.ID}}">
+      <input class="lappfelt prisnamn" type="text" name="namn-{{.ID}}"
+             value="{{.Name}}" aria-label="{{t $.Lang "admin.membership_name"}}">
+      <div class="lapprad">
+        <input class="lappfelt kort talfelt" type="number" name="klipp-{{.ID}}"
+               value="{{.KlippCount}}" min="1" step="1"
+               aria-label="{{t $.Lang "admin.klipp_count"}}">
+        <span class="priseining">{{t $.Lang "admin.klipp_count"}}</span>
+        <input class="lappfelt kort talfelt" type="number" name="pris-{{.ID}}"
+               value="{{kronerTal .Price}}" min="0" step="1"
+               aria-label="{{t $.Lang "admin.current_price"}}">
+        <span class="priseining">kr</span>
+        <input class="lappfelt kort talfelt" type="number" name="dagar-{{.ID}}"
+               value="{{.ValidDays}}" min="0" step="1"
+               aria-label="{{t $.Lang "admin.valid_days"}}">
+        <span class="priseining">{{t $.Lang "admin.valid_days"}}</span>
+        {{/* Rekna og ikkje skriven. */}}
+        <span class="rekna">{{kroner .PricePerSession}} {{t $.Lang "admin.per_klipp"}}</span>
+        <button type="button" class="slettmerke" data-slett
+                aria-label="{{t $.Lang "admin.delete_membership"}}"
+                title="{{t $.Lang "admin.delete_membership"}}">×</button>
+        <span class="slettord">{{t $.Lang "admin.marked_deleted"}}</span>
+      </div>
+      <input type="hidden" name="kategori-{{.ID}}" value="{{.Category}}">
+    </div>
+    {{end}}
+  </div>
+
+  <button type="button" class="btn nyrad" id="ny-klippelapp">
+    + {{t .Lang "admin.new_klippekort"}}
+  </button>
+
+  <aside class="dokk endringsdokk" id="klippedokk" hidden>
+    <div class="dokkinnhald">
+      <span class="endringstal" aria-live="polite"
+            data-ein="{{t .Lang "profile.changed_one"}}"
+            data-fleire="{{t .Lang "profile.changed_many"}}"></span>
+      <div class="dokkhandling">
+        <button type="button" class="btn" data-angra>{{t .Lang "profile.discard"}}</button>
+        <button type="submit" class="btn-primary">{{t .Lang "profile.save"}}</button>
+      </div>
+    </div>
+  </aside>
+</form>
+
+<template id="klippelapp-mal">
+  <div class="prislapp ny" data-eitt>
+    <input class="lappfelt prisnamn" type="text" name="namn-NY"
+           placeholder="{{t .Lang "admin.membership_name"}}"
+           aria-label="{{t .Lang "admin.membership_name"}}">
+    <div class="lapprad">
+      <input class="lappfelt kort talfelt" type="number" name="klipp-NY" value="10" min="1" step="1"
+             aria-label="{{t .Lang "admin.klipp_count"}}">
+      <span class="priseining">{{t .Lang "admin.klipp_count"}}</span>
+      <input class="lappfelt kort talfelt" type="number" name="pris-NY" value="0" min="0" step="1"
+             aria-label="{{t .Lang "admin.current_price"}}">
+      <span class="priseining">kr</span>
+      <input class="lappfelt kort talfelt" type="number" name="dagar-NY" value="120" min="0" step="1"
+             aria-label="{{t .Lang "admin.valid_days"}}">
+      <span class="priseining">{{t .Lang "admin.valid_days"}}</span>
+      <button type="button" class="slettmerke" data-slett aria-label="×">×</button>
+    </div>
+    <input type="hidden" name="kategori-NY" value="">
+  </div>
+</template>
+{{end}}

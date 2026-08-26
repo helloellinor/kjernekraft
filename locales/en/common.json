@@ -390,7 +390,13 @@
     "kan_ikkje": "cannot",
     "lagd_til": "added to",
     "ikkje_lagd_til": "not added to",
-    "ingen_standard": "no membership"
+    "ingen_standard": "no membership",
+    "tab_klippekort": "Punch cards",
+    "klipp_count": "clips",
+    "valid_days": "days' validity",
+    "per_klipp": "per clip",
+    "new_klippekort": "New punch card",
+    "category": "Category"
   },
   "terms": {
     "title": "Terms and conditions"

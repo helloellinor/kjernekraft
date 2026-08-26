@@ -10,6 +10,7 @@
 <div class="faneark">
   {{template "faner" (dict "Faner" (list
       (dict "Bolk" "medlemskap" "Namn" (t .Lang "admin.tab_membership"))
+      (dict "Bolk" "klippekort" "Namn" (t .Lang "admin.tab_klippekort"))
       (dict "Bolk" "reglar" "Namn" (t .Lang "admin.tab_rules")))
       "Merkelapp" (t .Lang "admin.tab_prices"))}}
 
@@ -100,6 +101,12 @@
         </div>
       </template>
 
+    </div>
+
+    <div data-bolk="klippekort" id="bolk-klippekort" role="tabpanel" tabindex="0" hidden>
+      <div hx-get="/api/admin/klippeprisar" hx-trigger="load" hx-swap="innerHTML">
+        <div class="loading-placeholder">…</div>
+      </div>
     </div>
 
     <div data-bolk="reglar" id="bolk-reglar" role="tabpanel" tabindex="0" hidden>
