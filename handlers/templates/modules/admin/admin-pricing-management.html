@@ -11,6 +11,22 @@
      per rad, ganga med talet på medlemskap, for å endre eitt tal. */}}
 <h2 class="section-title">{{t .Lang "admin.pricing_management"}}</h2>
 
+{{/* To ting som ser like ut, men ikkje er det: å justere prisen på noko
+     som finst, og å lage noko som ikkje finst. Dei stod under kvarandre
+     på same fana, og skjemaet nedst såg ut som endå ei rad i lista.
+
+     Fanerekkja her ligg inne i fana «Prisar» i administrasjonen. Det er
+     to nivå, og faner.js skil dei: kvart ark eig berre sine eigne faner,
+     og berre det ytste eig adressa. */}}
+<div class="faneark">
+  {{template "faner" (dict "Faner" (list
+      (dict "Bolk" "prisliste" "Namn" (t .Lang "admin.membership_pricing"))
+      (dict "Bolk" "nyttmedlemskap" "Namn" (t .Lang "admin.create_new_membership")))
+      "Merkelapp" (t .Lang "admin.pricing_management"))}}
+
+  <div class="fanerom" data-bolk="prisliste">
+  <div data-bolk="prisliste" id="bolk-prisliste" role="tabpanel" tabindex="0">
+
 <form id="prisar" method="post" action="/api/admin/priser"
       data-endringar data-dokk="prisdokk">
   <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
@@ -55,7 +71,9 @@
   </aside>
 </form>
 
-<h3 class="undertittel">{{t .Lang "admin.create_new_membership"}}</h3>
+  </div>
+
+  <div data-bolk="nyttmedlemskap" id="bolk-nyttmedlemskap" role="tabpanel" tabindex="0" hidden>
 <form id="new-membership-form" class="setningsskjema" onsubmit="createMembership(event)">
   <div class="form-group">
     <label for="membership-name">{{t .Lang "admin.membership_name"}}</label>
@@ -83,4 +101,7 @@
   </div>
   <button type="submit">{{t .Lang "admin.create_membership"}}</button>
 </form>
+  </div>
+  </div>
+</div>
 {{end}}

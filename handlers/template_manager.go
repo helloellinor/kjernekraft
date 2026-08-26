@@ -230,6 +230,9 @@ func getTemplateFuncs() template.FuncMap {
 			}
 			return result
 		},
+		// `list` saman med `dict` er det som skal til for å gje ein
+		// komponent ei liste med ting frå ein mal — fanerekkja tek ei.
+		"list": func(values ...interface{}) []interface{} { return values },
 		"dict": func(values ...interface{}) map[string]interface{} {
 			if len(values)%2 != 0 {
 				return nil // Must have even number of arguments (key-value pairs)
