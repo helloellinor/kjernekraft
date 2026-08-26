@@ -80,7 +80,9 @@
     "signup": "Meld på",
     "cancel_signup": "Meld av",
     "close": "Lukk",
-    "of": "av"
+    "of": "av",
+    "prev_week": "Forrige uke",
+    "next_week_btn": "Neste uke"
   },
   "dashboard": {
     "welcome_user": "Velkommen, {{.UserName}}!",
@@ -362,5 +364,14 @@
     "mail_subject": "Glemt passord",
     "what_to_write": "Skriv hvilken e-postadresse du meldte deg inn med, så svarer de deg der.",
     "back": "Tilbake til innloggingen"
+  },
+  "greeting": {
+    "see_you": "Vi ses %s, %s!",
+    "tomorrow": "i morgen",
+    "morning": "morgen",
+    "forenoon": "formiddag",
+    "afternoon": "ettermiddag",
+    "evening": "kveld",
+    "tomorrow_early": "i morgen tidlig"
   }
 }

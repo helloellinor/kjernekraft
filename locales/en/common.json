@@ -80,7 +80,9 @@
     "signup": "Book",
     "cancel_signup": "Cancel",
     "close": "Close",
-    "of": "of"
+    "of": "of",
+    "prev_week": "Previous week",
+    "next_week_btn": "Next week"
   },
   "dashboard": {
     "welcome_user": "Welcome, {{.UserName}}!",
@@ -300,5 +302,14 @@
     "mail_subject": "Forgotten password",
     "what_to_write": "Tell them which email address you joined with and they will reply there.",
     "back": "Back to the login"
+  },
+  "greeting": {
+    "see_you": "See you %s, %s!",
+    "tomorrow": "tomorrow",
+    "morning": "morning",
+    "forenoon": "late morning",
+    "afternoon": "afternoon",
+    "evening": "evening",
+    "tomorrow_early": "tomorrow morning"
   }
 }
