@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"strings"
@@ -90,6 +91,14 @@ func CSRF(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := ensureCSRFToken(w, r)
 
+		// Kjennemerket fylgjer soknaden i staden for aa slaast upp paa
+		// nytt i malen. Slær ein det upp paa nytt, lyt ein lesa økti ein
+		// gong til — og er kaka uleseleg (til dømes av di nykelen er
+		// skift), gjev det andre uppslaget tomt medan kaka hev eit
+		// ferskt kjennemerke. Daa fekk skjemaet value="" og brukaren
+		// kom aldri gjenom innloggingi att.
+		r = withCSRFToken(r, token)
+
 		switch r.Method {
 		case http.MethodGet, http.MethodHead, http.MethodOptions, http.MethodTrace:
 			next.ServeHTTP(w, r)
@@ -143,14 +152,24 @@ func ensureCSRFToken(w http.ResponseWriter, r *http.Request) string {
 	return token
 }
 
-// CSRFToken gjev malane kjennemerket, so skjema kann bera det i eit løynt felt.
+// CSRFToken gjev malane kjennemerket, so skjema kann bera det i eit løynt
+// felt. Det kjem or kall-samanhengen, der CSRF-mellomvara la det.
 func CSRFToken(r *http.Request) string {
+	if token, ok := r.Context().Value(csrfCtxKey).(string); ok {
+		return token
+	}
+	// Utan mellomvara — i ein prøve, til dømes — les me økti beinveges.
 	session, err := sessionStore.Get(r, sessionName)
 	if err != nil {
 		return ""
 	}
 	token, _ := session.Values[csrfSessionKey].(string)
 	return token
+}
+
+// withCSRFToken legg kjennemerket i kall-samanhengen.
+func withCSRFToken(r *http.Request, token string) *http.Request {
+	return r.WithContext(context.WithValue(r.Context(), csrfCtxKey, token))
 }
 
 // ---- innloggingsbremsa ----
@@ -225,4 +244,19 @@ func clientKey(r *http.Request) string {
 		return r.RemoteAddr
 	}
 	return host
+}
+
+// sessionUserName gjev namnet aat den innlogga brukaren, eller tomt.
+// Leidingi vert teikna berre naar det er eit namn aa teikna henne for.
+func sessionUserName(r *http.Request) string {
+	if user := GetUserFromSession(r); user != nil {
+		return user.Name
+	}
+	return ""
+}
+
+// sessionIsAdmin segjer um den innlogga brukaren hev admin-rolla, so
+// malen kann syna administrasjonslenkja for dei som faktisk kjem inn.
+func sessionIsAdmin(r *http.Request) bool {
+	return IsAdmin(GetUserFromSession(r))
 }

@@ -1,7 +1,4 @@
 {{define "klippekort_module"}}
-<style>
-{{template "klippekort_module_styles" .}}
-</style>
 
 {{if .HasKlippekort}}
 <div class="klippekort-cards">
@@ -65,6 +62,3 @@ function fillUpKlippekort(category) {
 </script>
 {{end}}
 
-{{define "klippekort_module_styles"}}
-{{.KlippekortCSS}}
-{{end}}

@@ -1,7 +1,4 @@
 {{define "membership_module"}}
-<style>
-{{template "membership_module_styles" .}}
-</style>
 
 {{if .HasMembership}}
 <div class="membership-card {{.Membership.Status}}">
@@ -181,6 +178,3 @@ function cancelMembership() {
 </script>
 {{end}}
 
-{{define "membership_module_styles"}}
-{{.MembershipCSS}}
-{{end}}

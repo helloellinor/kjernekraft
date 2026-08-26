@@ -1,8 +1,6 @@
 {{define "content"}}
-{{template "timeplan_styles"}}
-{{template "navigation" .}}
 
-<main class="main-content">
+<div class="sida">
     <h1 class="page-title">{{t .Lang "timeplan.title"}}</h1>
     
     <div class="module">
@@ -11,7 +9,7 @@
         {{template "week_controls" .}}
         {{template "week_grid" .}}
     </div>
-</main>
+</div>
 
 {{template "timeplan_scripts" .}}
 {{end}}

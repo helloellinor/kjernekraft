@@ -157,13 +157,13 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		"SelectedTeacher": teacherFilter,
 		"SelectedClass":   classFilter,
 		"CanGoBack":       weekOffset > 0,
-		"IsAdmin":         false, // TODO: Implement proper role checking
-		"ExternalCSS":     []string{"/static/css/event-card.css"},
+		"ExternalCSS":     []string{},
 		"CurrentPage":     "timeplan",
 		"UserName":        user.Name,
 		"User":            user,
 		"Lang":            lang,
 		"CSRFToken":       CSRFToken(r),
+		"IsAdmin":         sessionIsAdmin(r),
 	}
 
 	// Use the new template system

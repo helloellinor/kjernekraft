@@ -176,6 +176,8 @@ func UserSignupsHandler(w http.ResponseWriter, r *http.Request) {
 		"Signups":    userSignups,
 		"Lang":       lang,
 		"CSRFToken":  CSRFToken(r),
+		"IsAdmin":    sessionIsAdmin(r),
+		"UserName":   sessionUserName(r),
 	}
 
 	// Get template manager and render

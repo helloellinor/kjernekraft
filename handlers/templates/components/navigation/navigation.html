@@ -1,11 +1,9 @@
 {{define "navigation"}}
-{{template "navigation_styles"}}
-
 <header class="header">
     <div class="header-content">
-        <h1>{{t .Lang "navigation.dashboard_title"}}</h1>
+        <h1>{{t .Lang "site.title"}}</h1>
         <div class="auth-controls">
-            {{if .UserName}}
+            {{template "language_selector" .}}
             <span class="user-name">{{.UserName}}</span>
             <!-- Utlogging er ei endring, og difor eit skjema. Ei lenkja
                  kann ei framand sida utløysa med eit bilete-merke. -->
@@ -13,33 +11,37 @@
                 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                 <button type="submit" class="auth-link">{{t .Lang "navigation.logout"}}</button>
             </form>
-            {{else}}
-            <a href="/innlogging" class="auth-link">{{t .Lang "navigation.login"}}</a>
-            {{end}}
         </div>
     </div>
 </header>
 
-<nav class="nav">
+<nav class="nav" aria-label="{{t .Lang "navigation.dashboard_title"}}">
     <ul class="nav-list">
-        <li class="nav-item">
-            <a href="/elev/hjem" class="nav-link {{if eq .CurrentPage "hjem"}}active{{end}}">{{t .Lang "navigation.home"}}</a>
+        <li class="nav-item {{if eq .CurrentPage "hjem"}}active{{end}}">
+            <a href="/elev/hjem" {{if eq .CurrentPage "hjem"}}aria-current="page"{{end}}>{{t .Lang "navigation.home"}}</a>
         </li>
-        <li class="nav-item">
-            <a href="/elev/timeplan" class="nav-link {{if eq .CurrentPage "timeplan"}}active{{end}}">{{t .Lang "navigation.schedule"}}</a>
+        <li class="nav-item {{if eq .CurrentPage "timeplan"}}active{{end}}">
+            <a href="/elev/timeplan" {{if eq .CurrentPage "timeplan"}}aria-current="page"{{end}}>{{t .Lang "navigation.schedule"}}</a>
         </li>
-        <li class="nav-item">
-            <a href="/elev/klippekort" class="nav-link {{if eq .CurrentPage "klippekort"}}active{{end}}">{{t .Lang "navigation.punch_cards"}}</a>
+        <li class="nav-item {{if eq .CurrentPage "klippekort"}}active{{end}}">
+            <a href="/elev/klippekort" {{if eq .CurrentPage "klippekort"}}aria-current="page"{{end}}>{{t .Lang "navigation.punch_cards"}}</a>
         </li>
-        <li class="nav-item">
-            <a href="/elev/medlemskap" class="nav-link {{if eq .CurrentPage "medlemskap"}}active{{end}}">{{t .Lang "navigation.membership"}}</a>
+        <li class="nav-item {{if eq .CurrentPage "medlemskap"}}active{{end}}">
+            <a href="/elev/medlemskap" {{if eq .CurrentPage "medlemskap"}}aria-current="page"{{end}}>{{t .Lang "navigation.membership"}}</a>
         </li>
-        <li class="nav-item">
-            <a href="/elev/betaling" class="nav-link {{if eq .CurrentPage "betaling"}}active{{end}}">{{t .Lang "navigation.payments"}}</a>
+        <li class="nav-item {{if eq .CurrentPage "betaling"}}active{{end}}">
+            <a href="/elev/betaling" {{if eq .CurrentPage "betaling"}}aria-current="page"{{end}}>{{t .Lang "navigation.payments"}}</a>
         </li>
-        <li class="nav-item">
-            <a href="/elev/min-profil" class="nav-link {{if eq .CurrentPage "profil"}}active{{end}}">{{t .Lang "navigation.my_profile"}}</a>
+        <li class="nav-item {{if eq .CurrentPage "profil"}}active{{end}}">
+            <a href="/elev/min-profil" {{if eq .CurrentPage "profil"}}aria-current="page"{{end}}>{{t .Lang "navigation.my_profile"}}</a>
         </li>
+        <!-- Administrasjonen hadde ingi lenkja i det heile. Ein admin laut
+             skriva /admin i adressefeltet for aa koma dit. -->
+        {{if .IsAdmin}}
+        <li class="nav-item nav-admin {{if eq .CurrentPage "admin"}}active{{end}}">
+            <a href="/admin" {{if eq .CurrentPage "admin"}}aria-current="page"{{end}}>{{t .Lang "navigation.admin"}}</a>
+        </li>
+        {{end}}
     </ul>
 </nav>
 {{end}}

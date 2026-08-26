@@ -61,6 +61,8 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		"Stats":          statsModule,
 		"Lang":           lang,
 		"CSRFToken":      CSRFToken(r),
+		"IsAdmin":        sessionIsAdmin(r),
+		"UserName":       sessionUserName(r),
 		"CurrentPage":    "admin",
 		"ExternalCSS":    []string{},
 	}

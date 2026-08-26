@@ -2,9 +2,9 @@
 <div class="language-selector">
     <label for="language-select" class="language-label">{{t .Lang "language.select_language"}}</label>
     <select id="language-select" class="language-select" onchange="changeLanguage(this.value)">
-        <option value="nb" {{if eq .Lang "nb"}}selected{{end}}>🇩🇰 {{t .Lang "language.bokmal"}}</option>
-        <option value="nn" {{if eq .Lang "nn"}}selected{{end}}>🇳🇴 {{t .Lang "language.nynorsk"}}</option>
-        <option value="en" {{if eq .Lang "en"}}selected{{end}}>🇺🇸 {{t .Lang "language.english"}}</option>
+        <option value="nb" {{if eq .Lang "nb"}}selected{{end}}>{{t .Lang "language.bokmal"}}</option>
+        <option value="nn" {{if eq .Lang "nn"}}selected{{end}}>{{t .Lang "language.nynorsk"}}</option>
+        <option value="en" {{if eq .Lang "en"}}selected{{end}}>{{t .Lang "language.english"}}</option>
     </select>
 </div>
 

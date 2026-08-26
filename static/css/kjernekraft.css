@@ -1,0 +1,689 @@
+/* ===================================================================
+   Kjernekraft — arket
+
+   Prinsippi er dei same som i maalverktoy: hårfine linor i staden for
+   kassar, éin farge paa heile arket, og fargen tyder noko. Tilfanget er
+   eit anna — eit studio er ikkje ei ordbok.
+
+   Arket er kalkstein: kjøld, ljos, litt graagrøn. Blekket er mest svart
+   med same grøne draget i seg, so det høyrer til flata og ikkje ligg
+   uppaa henne. Merkefargen er furu, og han stend berre der noko *er i
+   live*: eit medlemskap som gjeng, eit klippekort som enno hev klipp,
+   ein time du er paameld. Alt anna — frose, utgjenge, ventande — fær
+   vekt og form i staden for farge.
+
+   Skuggar finst ikkje her. Det som skil eit kort fraa arket er ei lina
+   paa éin piksel. Det som flyt — ei nedfallsliste, ein dialog — fær
+   skugge, av di det *faktisk* ligg yver.
+   =================================================================== */
+
+/* ---- skrifterne ----
+   Ubuntu, sjølvvertsett. Ikkje eit einaste kall ut paa netet: sida skal
+   sjaa lik ut same kvar ho vert opna, og ho skal teikna seg ferdig
+   jamvel naar studioet sitt nett ligg nede. Smale utsnitt — latinsk
+   pluss dei nordiske teikni — so alle fem skriftene til saman er under
+   180 kB. Ubuntu Condensed ber yverskriftene; Ubuntu Mono ber tal som
+   skal staa i kolonne. */
+@font-face {
+  font-family: "Ubuntu"; src: url("/static/fonts/Ubuntu-R.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ubuntu"; src: url("/static/fonts/Ubuntu-M.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ubuntu"; src: url("/static/fonts/Ubuntu-B.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ubuntu Condensed"; src: url("/static/fonts/Ubuntu-C.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ubuntu Mono"; src: url("/static/fonts/UbuntuMono-R.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
+/* ---- tokeni ----
+   Alle fargar stend her og ingen annan stad. Finn du eit hex-tal ute i
+   ein komponent, er det ein feil: det verkar i eitt av dei tvo temaom
+   og lyg i det hine. */
+:root {
+  /* flatone */
+  --ark:        #edeeea;
+  --ark-djup:   #e4e6e1;
+  --flate:      #f5f6f3;
+
+  /* blekket, i tri styrkar */
+  --blekk:      #1c1f1b;
+  --blekk-lys:  #565b54;
+  --blekk-svakt:#868b83;
+
+  /* linone. --haarlina teiknar eit kort; --kant skil tvo bolkar. */
+  --haarlina:   #cfd2cb;
+  --kant:       #bec2b9;
+
+  /* merket. Éin farge paa heile arket. */
+  --merke:      #2c5443;
+  --merke-lys:  #3c6f59;
+  --merke-svak: #dde5e0;
+
+  /* Aatvaringi er ikkje merket. Ho stend berre paa noko som gjekk gale
+     eller ikkje kann gjerast um att, og difor lyt ho vera ein annan
+     farge — elles tyder merket tvo ting. */
+  --aatvaring:  #8c3a2b;
+  --aatvaring-svak: #f0e0dc;
+
+  /* skriftene */
+  --skrift-yver: "Ubuntu Condensed", "Ubuntu", ui-sans-serif, system-ui, sans-serif;
+  --skrift:      "Ubuntu", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --skrift-tal:  "Ubuntu Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* romet. Ei einaste trapp, so ingen finn paa 13px. */
+  --rom-1: .25rem; --rom-2: .5rem;  --rom-3: .75rem;
+  --rom-4: 1rem;   --rom-5: 1.5rem; --rom-6: 2rem;   --rom-7: 3rem;
+
+  /* Skuggen finst i éi utgaava, og han er til det som flyt. */
+  --skugge-flytande: 0 6px 20px rgb(28 31 27 / .14);
+
+  --breidd: 68rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ark:        #161815;
+    --ark-djup:   #101210;
+    --flate:      #1d201c;
+    --blekk:      #e2e5dd;
+    --blekk-lys:  #9aa094;
+    --blekk-svakt:#6f756a;
+    --haarlina:   #32362f;
+    --kant:       #3d423a;
+    --merke:      #7fb094;
+    --merke-lys:  #9cc5ac;
+    --merke-svak: #1f2a24;
+    --aatvaring:  #d08574;
+    --aatvaring-svak: #2b1c18;
+    --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
+  }
+}
+:root[data-theme="dark"] {
+  --ark:        #161815;
+  --ark-djup:   #101210;
+  --flate:      #1d201c;
+  --blekk:      #e2e5dd;
+  --blekk-lys:  #9aa094;
+  --blekk-svakt:#6f756a;
+  --haarlina:   #32362f;
+  --kant:       #3d423a;
+  --merke:      #7fb094;
+  --merke-lys:  #9cc5ac;
+  --merke-svak: #1f2a24;
+  --aatvaring:  #d08574;
+  --aatvaring-svak: #2b1c18;
+  --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
+}
+
+/* ---- grunnen ---- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ark);
+  color: var(--blekk);
+  font: 400 16px/1.55 var(--skrift);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--skrift-yver);
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0;
+  text-wrap: balance;
+  letter-spacing: .005em;
+}
+h1 { font-size: 2.4rem; }
+h2 { font-size: 1.7rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.05rem; }
+
+p { margin: 0 0 var(--rom-4); max-width: 62ch; }
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--merke); text-decoration-thickness: 1px; text-underline-offset: .16em; }
+a:hover { color: var(--merke-lys); }
+
+hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
+
+:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
+
+/* Tal som stend under kvarandre skal ha same breidd, elles dansar
+   kolonna. */
+.tal, td.tal, .package-price, .price, .stat-value, .detail-value,
+.charge-amount, .event-time { font-variant-numeric: tabular-nums; }
+
+/* ---- rullestengene ---- */
+* { scrollbar-width: thin; scrollbar-color: var(--kant) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--kant); border-radius: 4px;
+  border: 2px solid transparent; background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--blekk-svakt); background-clip: content-box; }
+
+/* ===================================================================
+   hovudet og leidingi
+   Ei lina under, ikkje ein bjelke i farge. Den valde sida er merkt med
+   ein strek under ordet — det er der auga alt er.
+   =================================================================== */
+.header {
+  border-bottom: 1px solid var(--kant);
+  background: var(--ark);
+}
+.header-content {
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-4) var(--rom-5);
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--rom-4); flex-wrap: wrap;
+}
+.header-content h1 {
+  font-size: 1.35rem; letter-spacing: .02em;
+  text-transform: uppercase;
+}
+.auth-controls { display: flex; align-items: baseline; gap: var(--rom-4); }
+.user-name { color: var(--blekk-lys); font-size: .92rem; }
+
+/* Utloggingi er eit skjema, so knappen lyt sjaa ut som ei lenkja. */
+.auth-form { margin: 0; }
+.auth-link {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; font-size: .92rem;
+  color: var(--merke); text-decoration: underline;
+  text-decoration-thickness: 1px; text-underline-offset: .16em;
+}
+.auth-link:hover { color: var(--merke-lys); }
+
+.nav { border-bottom: 1px solid var(--haarlina); background: var(--ark); }
+.nav-list {
+  max-width: var(--breidd); margin: 0 auto;
+  padding: 0 var(--rom-5);
+  list-style: none; display: flex; flex-wrap: wrap; gap: var(--rom-5);
+}
+.nav-item a {
+  display: block; padding: var(--rom-3) 0;
+  font-family: var(--skrift-yver); font-size: 1.02rem;
+  letter-spacing: .03em; text-transform: uppercase;
+  color: var(--blekk-lys); text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.nav-item a:hover { color: var(--blekk); }
+.nav-item.active a, .nav-item a[aria-current="page"] {
+  color: var(--blekk); border-bottom-color: var(--merke);
+}
+/* Administrasjonen stend for seg sjølv, skild med ei lina, so det er
+   tydeleg at ein gjeng ut or eleven si sida. */
+.nav-item.nav-admin { margin-left: auto; }
+.nav-item.nav-admin a { color: var(--blekk-svakt); }
+.nav-item.nav-admin a:hover { color: var(--blekk-lys); }
+
+/* ===================================================================
+   sida
+   =================================================================== */
+main {
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-6) var(--rom-5) var(--rom-7);
+}
+
+.page-title {
+  font-size: 2.1rem;
+  margin: 0 0 var(--rom-2);
+  padding: 0;
+  border: 0;
+  text-align: left;
+}
+.page-description { color: var(--blekk-lys); margin-bottom: var(--rom-6); max-width: 62ch; }
+
+.content-section, .section, .packages-section { margin-bottom: var(--rom-7); }
+
+.section-title, .module-title, .step-title {
+  font-family: var(--skrift-yver);
+  font-size: 1.15rem; font-weight: 400;
+  letter-spacing: .05em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  margin: 0 0 var(--rom-4);
+  padding-bottom: var(--rom-2);
+  border-bottom: 1px solid var(--haarlina);
+  text-align: left;
+}
+
+.two-column-grid, .content-grid, .selector-container {
+  display: grid; gap: var(--rom-5);
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+}
+
+/* ===================================================================
+   kortet
+   Ei hårfin lina, ingen skugge, ingen rundingar utyver det vesle.
+   =================================================================== */
+.module, .package-card, .category-card, .event-card, .charge-item,
+.payment-method-card, .rule-section, .activity-placeholder, .no-data {
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  padding: var(--rom-5);
+}
+
+.module { display: flex; flex-direction: column; gap: var(--rom-4); }
+
+.no-data, .activity-placeholder, .loading-placeholder {
+  color: var(--blekk-svakt);
+  text-align: center;
+  padding: var(--rom-6) var(--rom-4);
+  font-size: .95rem;
+}
+.loading-placeholder { background: none; border: 0; }
+
+/* ---- livsmerket ----
+   Fargen tyder «dette er i live». Alt anna er form og vekt:
+   ein open ring ventar, ein strek er frosen, graatt er utgjenge. */
+.stod, .status-badge, .popular-badge {
+  display: inline-flex; align-items: center; gap: var(--rom-2);
+  font-family: var(--skrift-yver);
+  font-size: .78rem; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  background: none; border: 0; padding: 0;
+}
+.stod::before {
+  content: ""; width: .5rem; height: .5rem; border-radius: 50%;
+  border: 1px solid currentColor; background: currentColor;
+}
+.stod-aktiv { color: var(--merke); }
+.stod-venteande { color: var(--merke); }
+.stod-venteande::before { background: none; }
+.stod-frosen { color: var(--blekk-lys); }
+.stod-frosen::before { border-radius: 0; height: 1px; width: .7rem; background: currentColor; }
+.stod-utgaatt { color: var(--blekk-svakt); }
+.stod-utgaatt::before { background: none; border-style: dotted; }
+
+/* Det som er utgjenge skal lesast som utgjenge, ikkje berre staa der. */
+.utgaatt, .expired { color: var(--blekk-svakt); }
+
+/* ---- kortet med rada paa vengen ----
+   Eit kort som *er* noko — eit medlemskap som gjeng — fær ei lina i
+   merkefargen langs vinstre kanten. Eitt kort, éi lina. */
+.package-card.popular, .event-card.signed-up, .module.aktiv {
+  border-left: 3px solid var(--merke);
+}
+
+.package-name, .category-name, .event-title {
+  font-family: var(--skrift-yver); font-size: 1.2rem;
+  margin: 0 0 var(--rom-2);
+}
+.package-description, .category-description, .package-details,
+.event-details, .charge-date { color: var(--blekk-lys); font-size: .92rem; }
+
+.package-price, .price, .price-display {
+  font-family: var(--skrift-tal);
+  font-size: 1.5rem;
+  color: var(--blekk);
+  letter-spacing: -.02em;
+}
+.price-per-session, .savings, .commitment, .renewal-date {
+  font-size: .85rem; color: var(--blekk-lys);
+}
+
+.packages-grid, .events-grid {
+  display: grid; gap: var(--rom-4);
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+}
+
+/* ---- detaljrader ---- */
+.detail-row, .detail-item {
+  display: flex; justify-content: space-between; gap: var(--rom-4);
+  padding: var(--rom-2) 0;
+  border-bottom: 1px solid var(--haarlina);
+}
+.detail-row:last-child, .detail-item:last-child, .no-border { border-bottom: 0; }
+.detail-label { color: var(--blekk-lys); font-size: .9rem; }
+.detail-value { font-family: var(--skrift-tal); font-size: .95rem; }
+
+/* ---- framdrifti paa eit klippekort ----
+   Segmenti er klipp, ikkje ein prosent. Eit brukt klipp er tomt. */
+.progress-bar, .klipp-rad {
+  display: flex; gap: 3px; margin: var(--rom-3) 0;
+}
+.progress-segment {
+  flex: 1; height: 6px;
+  background: var(--merke);
+  border-radius: 1px;
+}
+.progress-segment.used, .progress-segment.empty {
+  background: none; border: 1px solid var(--haarlina);
+}
+
+/* ===================================================================
+   knappar
+   Éin fylt knapp per bilete — den handlingi sida er til for. Alt anna
+   er ei lina eller berre tekst.
+   =================================================================== */
+button, .btn, .action-btn, .change-btn, .timeplan-btn, .login-btn,
+.week-nav-btn, .signup-button {
+  font-family: var(--skrift-yver);
+  font-size: .95rem; letter-spacing: .04em; text-transform: uppercase;
+  padding: var(--rom-3) var(--rom-5);
+  border: 1px solid var(--kant);
+  border-radius: 2px;
+  background: var(--ark);
+  color: var(--blekk);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  line-height: 1.2;
+}
+button:hover, .btn:hover, .action-btn:hover, .change-btn:hover,
+.timeplan-btn:hover, .week-nav-btn:hover, .signup-button:hover {
+  border-color: var(--merke); color: var(--merke);
+}
+
+/* Hovudhandlingi. Det er den fylte, og det er berre éi. */
+.btn-primary, .login-btn, .timeplan-btn, .signup-button,
+button[type="submit"]:not(.auth-link) {
+  background: var(--merke); border-color: var(--merke); color: var(--flate);
+}
+.btn-primary:hover, .login-btn:hover, .timeplan-btn:hover,
+.signup-button:hover, button[type="submit"]:not(.auth-link):hover {
+  background: var(--merke-lys); border-color: var(--merke-lys); color: var(--flate);
+}
+
+/* Det som ikkje kann gjerast um att. Aatvaringsfargen stend i lina og
+   i teksti, ikkje i flata — ein raud klump dreg auga fraa alt anna. */
+.btn-danger, .cancel-signup-btn, .cancel-btn, .remove-btn {
+  background: none; border-color: var(--aatvaring); color: var(--aatvaring);
+}
+.btn-danger:hover, .cancel-signup-btn:hover, .cancel-btn:hover, .remove-btn:hover {
+  background: var(--aatvaring-svak); border-color: var(--aatvaring); color: var(--aatvaring);
+}
+
+button:disabled, .btn:disabled, .week-nav-btn:disabled {
+  color: var(--blekk-svakt); border-color: var(--haarlina);
+  background: none; cursor: not-allowed;
+}
+
+/* ===================================================================
+   skjema
+   =================================================================== */
+.form-group { display: flex; flex-direction: column; gap: var(--rom-2); margin-bottom: var(--rom-4); }
+.form-row { display: grid; gap: var(--rom-4); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+
+label, .option-label, .question-label, .detail-label, .filter-group label {
+  font-size: .88rem; color: var(--blekk-lys);
+}
+
+input[type="text"], input[type="email"], input[type="password"],
+input[type="date"], input[type="tel"], input[type="number"],
+select, textarea {
+  font: inherit;
+  padding: var(--rom-3);
+  background: var(--flate);
+  color: var(--blekk);
+  border: 1px solid var(--kant);
+  border-radius: 2px;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--merke);
+  box-shadow: 0 0 0 1px var(--merke);
+}
+select {
+  /* Nedfallslista er den eine tingen som *faktisk* flyt. */
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 1.05rem top 50%, right .8rem top 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: var(--rom-7);
+}
+
+.error, .login-error {
+  color: var(--aatvaring);
+  background: var(--aatvaring-svak);
+  border: 1px solid var(--aatvaring);
+  border-radius: 2px;
+  padding: var(--rom-3) var(--rom-4);
+  font-size: .92rem;
+  margin-bottom: var(--rom-4);
+}
+.success {
+  color: var(--merke);
+  background: var(--merke-svak);
+  border: 1px solid var(--merke);
+  border-radius: 2px;
+  padding: var(--rom-3) var(--rom-4);
+  font-size: .92rem;
+  margin-bottom: var(--rom-4);
+}
+
+/* ===================================================================
+   tabellar
+   Ingen rammor kring cellone. Ei lina under kvar rad, og ei sterkare
+   under yverskrifti. Fyrste kolonna og yverskrifti fylgja med naar ein
+   rullar sidelengs — same grepet som matrisa i slaaupp.
+   =================================================================== */
+.tabell-rom { overflow-x: auto; border: 1px solid var(--haarlina); background: var(--flate); }
+
+table { border-collapse: collapse; width: 100%; }
+thead th {
+  font-family: var(--skrift-yver);
+  font-size: .78rem; font-weight: 400;
+  letter-spacing: .09em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  text-align: left;
+  padding: var(--rom-3) var(--rom-4);
+  border-bottom: 1px solid var(--kant);
+  background: var(--flate);
+  position: sticky; top: 0; z-index: 2;
+  white-space: nowrap;
+}
+tbody td {
+  padding: var(--rom-3) var(--rom-4);
+  border-bottom: 1px solid var(--haarlina);
+  vertical-align: top;
+  font-size: .94rem;
+}
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: var(--ark-djup); }
+
+/* ===================================================================
+   timeplanen
+   =================================================================== */
+.week-controls, .filter-group, .charges-filter {
+  display: flex; gap: var(--rom-3); align-items: end; flex-wrap: wrap;
+  margin-bottom: var(--rom-5);
+}
+.week-nav-btn { padding: var(--rom-2) var(--rom-4); }
+
+.day-header {
+  font-family: var(--skrift-yver);
+  font-size: 1.05rem; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--blekk);
+  margin: var(--rom-6) 0 var(--rom-3);
+  padding-bottom: var(--rom-2);
+  border-bottom: 1px solid var(--kant);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.day-date { font-family: var(--skrift-tal); font-size: .9rem; color: var(--blekk-svakt); letter-spacing: 0; }
+
+/* Ein time som er ferdig er ikkje burte — han er berre ikkje lenger
+   noko du kann gjera noko med. */
+.event-card.finished, .event-card.avsluttet {
+  color: var(--blekk-svakt);
+  background: var(--ark-djup);
+  border-style: dashed;
+}
+
+.event-type {
+  font-family: var(--skrift-yver);
+  font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  background: none; border: 0; padding: 0;
+}
+.event-header { display: flex; justify-content: space-between; gap: var(--rom-3); align-items: baseline; }
+.event-time { font-family: var(--skrift-tal); font-size: 1.05rem; }
+.event-location, .event-teacher { color: var(--blekk-lys); font-size: .9rem; }
+.event-actions { display: flex; gap: var(--rom-2); margin-top: var(--rom-4); }
+
+/* ===================================================================
+   statistikk (administrasjonen)
+   =================================================================== */
+.stats-grid { display: grid; gap: 1px; background: var(--haarlina); border: 1px solid var(--haarlina); margin-bottom: var(--rom-6); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+.stat-item { background: var(--flate); padding: var(--rom-4) var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-1); }
+.stat-value { font-family: var(--skrift-tal); font-size: 2rem; line-height: 1; color: var(--blekk); }
+.stat-label {
+  font-family: var(--skrift-yver); font-size: .78rem;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys);
+}
+
+/* ===================================================================
+   maalveljaren
+   Ingi flagg. Eit flagg er eit land, ikkje ei skriftform — og det
+   danske flagget paa bokmaal segjer det tydelegare enn eg kann.
+   =================================================================== */
+.language-selector, .login-language-selector {
+  display: flex; align-items: center; gap: var(--rom-2);
+  font-size: .88rem;
+}
+.language-selector select { width: auto; padding: var(--rom-1) var(--rom-6) var(--rom-1) var(--rom-2); font-size: .88rem; }
+
+/* ===================================================================
+   innloggingi — den eine sida utan leiding
+   =================================================================== */
+.login-container {
+  max-width: 22rem; margin: var(--rom-7) auto; padding: var(--rom-6);
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+}
+.login-title { font-size: 1.9rem; margin-bottom: var(--rom-1); }
+.login-subtitle { color: var(--blekk-lys); font-size: .95rem; margin-bottom: var(--rom-5); }
+.login-btn { width: 100%; margin-top: var(--rom-2); }
+.forgot-password, .signup-link { font-size: .9rem; margin-top: var(--rom-4); color: var(--blekk-lys); }
+.signup-link { border-top: 1px solid var(--haarlina); padding-top: var(--rom-4); }
+
+/* ===================================================================
+   smale glas
+   Éin brotstad, skriven éin gong. Han stod fyrr i kvart einskilt
+   stilark, med litt ulike verd.
+   =================================================================== */
+@media (max-width: 48rem) {
+  :root { --rom-5: 1rem; --rom-6: 1.5rem; --rom-7: 2rem; }
+
+  .header-content, .nav-list, main { padding-left: var(--rom-4); padding-right: var(--rom-4); }
+  .nav-list { gap: var(--rom-4); overflow-x: auto; flex-wrap: nowrap; }
+  .nav-item.nav-admin { margin-left: 0; }
+  .nav-item a { white-space: nowrap; }
+
+  h1, .page-title { font-size: 1.7rem; }
+
+  .two-column-grid, .content-grid, .selector-container,
+  .packages-grid, .events-grid, .stats-grid, .form-row {
+    grid-template-columns: 1fr;
+  }
+  .stats-grid { gap: 1px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* Skriv ikkje ut leidingi. */
+@media print {
+  .nav, .header, .auth-controls, button, .btn { display: none !important; }
+  body { background: #fff; color: #000; }
+}
+
+/* ===================================================================
+   medlemskapet og klippekortet
+   Dei tvo tingi studioet sel. Livsmerket er det einaste som ber farge:
+   aktiv er fylt furu, ei sendt førespurnad er den same furua men open,
+   frose er ein strek, kansellert er prikka og graatt.
+   =================================================================== */
+.membership-card, .klippekort-card, .no-membership, .no-klippekort {
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  padding: var(--rom-5);
+}
+.membership-card.active, .klippekort-card:not(.expired) { border-left: 3px solid var(--merke); }
+.membership-card.paused, .membership-card.cancelled { border-left: 3px solid var(--blekk-svakt); }
+.membership-card.freeze_requested { border-left: 3px dashed var(--merke); }
+
+.membership-header, .card-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: var(--rom-3); flex-wrap: wrap;
+  margin-bottom: var(--rom-3);
+}
+.membership-name, .card-title {
+  font-family: var(--skrift-yver); font-size: 1.25rem; margin: 0;
+}
+
+/* Merket sjølv. Forma segjer stoda; fargen segjer berre um ho er i live. */
+.membership-status, .expiring-badge {
+  display: inline-flex; align-items: center; gap: var(--rom-2);
+  font-family: var(--skrift-yver);
+  font-size: .78rem; letter-spacing: .09em; text-transform: uppercase;
+  background: none; border: 0; padding: 0;
+  color: var(--blekk-lys);
+}
+.membership-status::before {
+  content: ""; width: .5rem; height: .5rem; border-radius: 50%;
+  border: 1px solid currentColor; background: currentColor; flex: none;
+}
+.status-active { color: var(--merke); }
+.status-freeze_requested { color: var(--merke); }
+.status-freeze_requested::before { background: none; }
+.status-paused { color: var(--blekk-lys); }
+.status-paused::before { border-radius: 0; height: 1px; width: .7rem; background: currentColor; }
+.status-cancelled { color: var(--blekk-svakt); }
+.status-cancelled::before { background: none; border-style: dotted; }
+
+.expiring-badge { color: var(--aatvaring); }
+
+.price-info { display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap; margin: var(--rom-3) 0; }
+.price-info .price { font-family: var(--skrift-tal); font-size: 1.6rem; letter-spacing: -.02em; }
+.membership-details, .dates-info, .card-content { display: flex; flex-direction: column; gap: var(--rom-1); }
+.binding-end, .days-until, .card-expiry, .renewal-date {
+  font-size: .88rem; color: var(--blekk-lys);
+}
+/* Det som hastar fær vekt, ikkje farge — farge her ville tyda «i live». */
+.renewal-date.urgent, .days-until.urgent { color: var(--blekk); font-weight: 500; }
+
+.membership-actions, .card-actions {
+  display: flex; gap: var(--rom-2); flex-wrap: wrap; margin-top: var(--rom-4);
+}
+
+/* ---- klippekortet ----
+   Segmenti er klipp. Eit brukt klipp er ei tom rute, ikkje ein graa
+   klump: du skal kunna telja kor mange du hev att utan aa lesa talet. */
+.klippekort-cards { display: grid; gap: var(--rom-4); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+.progress-bar, .progress-segments { display: flex; gap: 3px; margin: var(--rom-3) 0; }
+.progress-segment {
+  flex: 1; height: 8px; border-radius: 1px;
+  background: none; border: 1px solid var(--haarlina);
+}
+.progress-segment.filled { background: var(--merke); border-color: var(--merke); }
+
+.klipp-count { font-family: var(--skrift-tal); font-size: 1.1rem; }
+.klipp-count .remaining { font-size: 1.5rem; color: var(--merke); }
+.klipp-count .total { color: var(--blekk-lys); }
+
+.no-membership, .no-klippekort {
+  color: var(--blekk-svakt); text-align: center; padding: var(--rom-6) var(--rom-4);
+}

@@ -1,7 +1,6 @@
 {{define "content"}}
-{{template "navigation" .}}
 
-<main class="main-content">
+<div class="sida">
     <h1 class="page-title">{{t .Lang "profile.title"}}</h1>
     
     <div class="profile-card">
@@ -122,8 +121,7 @@
             {{t .Lang "profile.edit_profile"}}
         </button>
     </div>
-</main>
+</div>
 
-{{template "profile_styles"}}
 {{template "profile_scripts"}}
 {{end}}

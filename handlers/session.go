@@ -37,7 +37,10 @@ var sessionStore *sessions.CookieStore
 // or basen ein gong per soknad og ikkje ein gong per handsamar.
 type ctxKey int
 
-const userCtxKey ctxKey = iota
+const (
+	userCtxKey ctxKey = iota
+	csrfCtxKey
+)
 
 // IsDevelopment segjer um me køyrer utanfor drift.
 func IsDevelopment() bool {
