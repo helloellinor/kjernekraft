@@ -59,20 +59,41 @@ func getTemplateFuncs() template.FuncMap {
 		// «104000 øre» — paa den skjermen Ida redigerer prisar paa.
 		// Tusenskiljet er eit hardt mellomrom, so talet ikkje bryt
 		// midt i lina.
-		"kroner": func(oere int) string {
-			kr := oere / 100
-			s := strconv.Itoa(kr)
-			var b strings.Builder
-			for i, c := range s {
-				if i > 0 && (len(s)-i)%3 == 0 {
-					b.WriteRune('\u00a0')
-				}
-				b.WriteRune(c)
+		//
+		// Han tek imot baade heiltal og flyttal, av di prisen er `int`
+		// paa Membership og `float64` paa FreezeRequest. Det er ein
+		// lyte i modellane — pengar bør vera eitt slag heile vegen —
+		// men malen skal ikkje falla paa det.
+		"kroner": func(v interface{}) string {
+			var oere int64
+			switch n := v.(type) {
+			case int:
+				oere = int64(n)
+			case int32:
+				oere = int64(n)
+			case int64:
+				oere = n
+			case float32:
+				oere = int64(n)
+			case float64:
+				oere = int64(n)
+			default:
+				return ""
 			}
-			return b.String() + "\u00a0kr"
+			return skrivKronor(oere / 100)
 		},
 		// Kronor som eit reint tal, til eit talfelt.
-		"kronerTal": func(oere int) int { return oere / 100 },
+		"kronerTal": func(v interface{}) int64 {
+			switch n := v.(type) {
+			case int:
+				return int64(n) / 100
+			case int64:
+				return n / 100
+			case float64:
+				return int64(n) / 100
+			}
+			return 0
+		},
 		"divf": func(a, b interface{}) float64 {
 			var aFloat, bFloat float64
 			switch v := a.(type) {
@@ -317,4 +338,19 @@ func (tm *TemplateManager) ExecuteTemplate(w io.Writer, name string, data interf
 		return errors.New("template not found: " + name)
 	}
 	return tmpl.ExecuteTemplate(w, name, data)
+}
+
+// skrivKronor set hardt mellomrom som tusenskilje, so talet ikkje bryt
+// midt i lina.
+func skrivKronor(kr int64) string {
+	s := strconv.FormatInt(kr, 10)
+	var b strings.Builder
+	for i, c := range s {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			b.WriteRune('\u00a0')
+		}
+		b.WriteRune(c)
+	}
+	b.WriteString("\u00a0kr")
+	return b.String()
 }

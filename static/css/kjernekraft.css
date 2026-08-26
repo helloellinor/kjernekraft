@@ -1060,7 +1060,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    Fire tal styrer alt. Stod dei kvar for seg i seks reglar, laut dei
    vera samde, og var det ikkje.
 
-     --kant      sidekantarne og toppen
+     --fanekant  sidekantarne og toppen
      --fot       kor tjukk lina fana stend paa er
      --fotfarge  kva den lina er naar fana er lukka
      --loft      kor mykje den opne fana stikk upp yver dei lukka
@@ -1074,7 +1074,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    ingen ting seg naar ein byter fana, og det er heile poenget: du ser
    paa den staden du saag paa, og innhaldet skifter under deg.
    =================================================================== */
-.faneark { --kant: 1px; --fot: 1px; --fotfarge: var(--haarlina); --loft: 2px; }
+.faneark { --fanekant: 1px; --fot: 1px; --fotfarge: var(--haarlina); --loft: 2px; }
 
 .faner {
   display: flex; align-items: flex-end;
@@ -1092,7 +1092,7 @@ tbody tr:hover td { background: var(--ark-djup); }
   position: relative; z-index: 0; flex: none;
   padding: var(--rom-2) var(--rom-4);
   margin-bottom: calc(-1 * var(--fot));
-  border: var(--kant) solid var(--haarlina);
+  border: var(--fanekant) solid var(--haarlina);
   border-bottom: var(--fot) solid var(--fotfarge);
   border-radius: 3px 3px 0 0;
   background: var(--faneflate);
@@ -1132,7 +1132,7 @@ tbody tr:hover td { background: var(--ark-djup); }
 .fane:focus-visible { outline: 2px solid var(--merke); outline-offset: -2px; }
 
 .fanerom {
-  border: var(--kant) solid var(--haarlina);
+  border: var(--fanekant) solid var(--haarlina);
   background: var(--flate);
   padding: var(--rom-5);
 }
