@@ -1,0 +1,108 @@
+{{define "content"}}
+<div class="sida smal">
+    <h1 class="page-title">{{t .Lang "signup.title"}}</h1>
+    <p class="page-description">{{t .Lang "signup.intro"}}</p>
+
+    <div id="message" aria-live="polite"></div>
+
+    <form hx-post="/signup" hx-target="#message" class="skjema">
+        <div class="form-group">
+            <label for="name">{{t .Lang "signup.name"}} <span class="paakravd" aria-hidden="true">*</span></label>
+            <input type="text" id="name" name="name" autocomplete="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="birthdate">{{t .Lang "signup.birthdate"}} <span class="paakravd" aria-hidden="true">*</span></label>
+            <input type="date" id="birthdate" name="birthdate" autocomplete="bday" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">{{t .Lang "signup.email"}} <span class="paakravd" aria-hidden="true">*</span></label>
+            <input type="email" id="email" name="email" autocomplete="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">{{t .Lang "signup.phone"}} <span class="paakravd" aria-hidden="true">*</span></label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">{{t .Lang "signup.password"}} <span class="paakravd" aria-hidden="true">*</span></label>
+            <input type="password" id="password" name="password" autocomplete="new-password" required>
+        </div>
+
+        <fieldset class="bolk">
+            <legend>{{t .Lang "signup.address_optional"}}</legend>
+
+            <div class="form-group">
+                <label for="address">{{t .Lang "signup.address"}}</label>
+                <input type="text" id="address" name="address" autocomplete="street-address">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="postal_code">{{t .Lang "signup.postal_code"}}</label>
+                    <input type="text" id="postal_code" name="postal_code" autocomplete="postal-code" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="city">{{t .Lang "signup.city"}}</label>
+                    <input type="text" id="city" name="city" autocomplete="address-level2">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="country">{{t .Lang "signup.country"}}</label>
+                <input type="text" id="country" name="country" autocomplete="country-name">
+            </div>
+        </fieldset>
+
+        <div class="avkryssing">
+            <input type="checkbox" id="newsletter" name="newsletter">
+            <label for="newsletter">{{t .Lang "signup.newsletter"}}</label>
+        </div>
+
+        <div class="avkryssing">
+            <input type="checkbox" id="terms_accepted" name="terms_accepted" required>
+            <label for="terms_accepted">
+                {{t .Lang "signup.terms_prefix"}}
+                <button type="button" class="lenkjeknapp" id="opna-vilkaar">{{t .Lang "signup.terms_link"}}</button>
+                <span class="paakravd" aria-hidden="true">*</span>
+            </label>
+        </div>
+
+        <button type="submit" class="btn-primary">{{t .Lang "signup.submit"}}</button>
+    </form>
+
+    <p class="attende"><a href="/innlogging">{{t .Lang "signup.have_account"}}</a></p>
+</div>
+
+<!-- Vilkaari ligg i eit <dialog>. Nettlesaren tek fokusfella, Escape og
+     bakgrunnen sjølv; den gamle utgaava var ein div med window.onclick,
+     og daa kom du ikkje ut med tastaturet. -->
+<dialog id="vilkaar" class="skuffa">
+    <h2>{{t .Lang "signup.terms_title"}}</h2>
+    <div id="vilkaar-tekst" class="skuffa-tekst">
+        <p>{{t .Lang "signup.terms_loading"}}</p>
+    </div>
+    <form method="dialog">
+        <button class="btn-primary">{{t .Lang "signup.terms_close"}}</button>
+    </form>
+</dialog>
+
+<script>
+(function () {
+    var dialog = document.getElementById("vilkaar");
+    var tekst = document.getElementById("vilkaar-tekst");
+    var lasta = false;
+
+    document.getElementById("opna-vilkaar").addEventListener("click", function () {
+        dialog.showModal();
+        if (lasta) return;
+        fetch("/terms?fragment=1")
+            .then(function (r) { return r.text(); })
+            .then(function (html) { tekst.innerHTML = html; lasta = true; })
+            .catch(function () { tekst.textContent = {{t .Lang "signup.terms_error" | toJS}}; });
+    });
+})();
+</script>
+{{end}}

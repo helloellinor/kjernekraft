@@ -2,7 +2,7 @@ package models
 
 // MembershipRules represents the configurable rules for membership management
 type MembershipRules struct {
-	ID                        int    `json:"id"`
+	ID                       int    `json:"id"`
 	AllowUpgrades            bool   `json:"allow_upgrades"`
 	CombineBindingPeriods    bool   `json:"combine_binding_periods"`
 	AllowDowngrades          bool   `json:"allow_downgrades"`

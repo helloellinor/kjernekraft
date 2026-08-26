@@ -53,7 +53,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"Title":          "Admin Dashboard",
+		"Title":          t(lang, "admin.title"),
 		"Users":          users,
 		"Events":         events,
 		"FreezeRequests": freezeRequests,

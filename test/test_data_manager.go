@@ -88,7 +88,7 @@ func (tdm *TestDataManager) GenerateRandomizedSchedule() error {
 	// Generate 5-12 events per day with randomization
 	for dayOffset := 0; dayOffset < 7; dayOffset++ {
 		currentDay := monday.AddDate(0, 0, dayOffset)
-		
+
 		// Randomize number of events per day (more events on weekdays)
 		var numEvents int
 		if currentDay.Weekday() == time.Saturday || currentDay.Weekday() == time.Sunday {
@@ -261,7 +261,7 @@ func (tdm *TestDataManager) GetEventStats() error {
 		if err := rows.Scan(&classType, &count); err != nil {
 			return err
 		}
-		
+
 		emoji := getClassEmoji(classType)
 		fmt.Printf("   %s %-12s: %d events\n", emoji, classType, count)
 	}
@@ -273,19 +273,19 @@ func (tdm *TestDataManager) GetEventStats() error {
 // ShuffleTestData combines clearing and regenerating data
 func (tdm *TestDataManager) ShuffleTestData() error {
 	log.Println("🔄 Starting test data shuffle...")
-	
+
 	if err := tdm.ClearAllEvents(); err != nil {
 		return err
 	}
-	
+
 	if err := tdm.GenerateRandomizedSchedule(); err != nil {
 		return err
 	}
-	
+
 	if err := tdm.GetEventStats(); err != nil {
 		return err
 	}
-	
+
 	fmt.Println("🎉 Test data shuffle complete! Refresh your browser to see the new schedule.")
 	return nil
 }

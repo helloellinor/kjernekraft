@@ -58,6 +58,7 @@ func main() {
 	r.Get("/signup", handlers.SignUpPageHandler)
 	r.Post("/signup", handlers.SignUpHandler)
 	r.Get("/terms", handlers.TermsHandler)
+	r.Get("/glemt-passord", handlers.GloymtPassordHandler)
 	r.Get("/innlogging", handlers.InnloggingHandler)
 	r.Post("/innlogging", handlers.InnloggingHandler)
 	r.Post("/logout", handlers.LogoutHandler)

@@ -162,7 +162,7 @@
     "fill_up": "Fyll på"
   },
   "admin": {
-    "title": "Admin - Brukeradministrasjon",
+    "title": "Administrasjon",
     "total_users": "Totalt antall brukere",
     "total_events": "Totalt antall events",
     "pending_freeze_requests": "Ventende frysingsforespørsler",
@@ -300,6 +300,41 @@
       "time_fields_required": "Begge tidsfelt må fylles ut",
       "error_prefix": "Feil: "
     },
-    "actions": "Handlinger"
+    "actions": "Handlinger",
+    "price_in_kroner": "Pris i kroner"
+  },
+  "terms": {
+    "title": "Handelsbetingelser"
+  },
+  "signup": {
+    "title": "Meld deg inn",
+    "intro": "Fyll ut skjemaet, så har du en konto hos Kjernekraft Oslo.",
+    "name": "Navn",
+    "birthdate": "Fødselsdag",
+    "email": "E-post",
+    "phone": "Telefon",
+    "password": "Passord",
+    "address_optional": "Adresse (valgfritt)",
+    "address": "Adresse",
+    "postal_code": "Postnummer",
+    "city": "Sted",
+    "country": "Land",
+    "newsletter": "Jeg vil gjerne motta nyhetsbrev",
+    "terms_prefix": "Jeg har lest og er enig i",
+    "terms_link": "handelsbetingelsene",
+    "submit": "Meld meg inn",
+    "have_account": "Har du konto fra før? Logg inn",
+    "terms_title": "Handelsbetingelser",
+    "terms_loading": "Laster betingelsene …",
+    "terms_close": "Lukk",
+    "terms_error": "Kunne ikke laste betingelsene."
+  },
+  "forgot": {
+    "title": "Glemt passord",
+    "intro": "Det finnes ikke automatisk tilbakestilling av passord ennå. Skriv til studioet, så ordner de det.",
+    "write_to_studio": "Skriv til studioet",
+    "mail_subject": "Glemt passord",
+    "what_to_write": "Skriv hvilken e-postadresse du meldte deg inn med, så svarer de deg der.",
+    "back": "Tilbake til innloggingen"
   }
 }

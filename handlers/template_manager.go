@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -54,6 +55,24 @@ func getTemplateFuncs() template.FuncMap {
 			}
 			return s[start:end]
 		},
+		// Pengar er lagra i øre og skal lesast i kronor. Tabellen synte
+		// «104000 øre» — paa den skjermen Ida redigerer prisar paa.
+		// Tusenskiljet er eit hardt mellomrom, so talet ikkje bryt
+		// midt i lina.
+		"kroner": func(oere int) string {
+			kr := oere / 100
+			s := strconv.Itoa(kr)
+			var b strings.Builder
+			for i, c := range s {
+				if i > 0 && (len(s)-i)%3 == 0 {
+					b.WriteRune('\u00a0')
+				}
+				b.WriteRune(c)
+			}
+			return b.String() + "\u00a0kr"
+		},
+		// Kronor som eit reint tal, til eit talfelt.
+		"kronerTal": func(oere int) int { return oere / 100 },
 		"divf": func(a, b interface{}) float64 {
 			var aFloat, bFloat float64
 			switch v := a.(type) {
@@ -197,11 +216,12 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 	if _, err := os.Stat(componentsPath); err == nil {
 		filepath.WalkDir(componentsPath, func(compPath string, d fs.DirEntry, err error) error {
 			if err == nil && !d.IsDir() && strings.HasSuffix(compPath, ".html") {
-				var parseErr error
-				t, parseErr = t.ParseFiles(compPath)
+				parsed, parseErr := t.ParseFiles(compPath)
 				if parseErr != nil {
 					log.Printf("Error parsing component %s: %v", compPath, parseErr)
+					return nil
 				}
+				t = parsed
 			}
 			return nil
 		})
@@ -212,11 +232,12 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 	if _, err := os.Stat(modulesPath); err == nil {
 		filepath.WalkDir(modulesPath, func(modPath string, d fs.DirEntry, err error) error {
 			if err == nil && !d.IsDir() && strings.HasSuffix(modPath, ".html") {
-				var parseErr error
-				t, parseErr = t.ParseFiles(modPath)
+				parsed, parseErr := t.ParseFiles(modPath)
 				if parseErr != nil {
 					log.Printf("Error parsing module %s: %v", modPath, parseErr)
+					return nil
 				}
+				t = parsed
 			}
 			return nil
 		})
@@ -231,13 +252,18 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 	tm.templates[name] = finalTemplate
 }
 
-// loadComponentTemplate loads a standalone component template
+// loadComponentTemplate loads a standalone component template.
+//
+// Feilen vart slukt her fyrr — malen datt berre ut or samlingi, og den
+// fyrste ein visste um det var at ei sida mangla ein bolk.
 func (tm *TemplateManager) loadComponentTemplate(name, path string) {
 	t := template.New(name).Funcs(getTemplateFuncs())
-	t, err := t.ParseFiles(path)
-	if err == nil {
-		tm.templates[name] = t
+	parsed, err := t.ParseFiles(path)
+	if err != nil {
+		log.Printf("Error parsing component template %s: %v", path, err)
+		return
 	}
+	tm.templates[name] = parsed
 }
 
 // GetTemplate returns a template by name
