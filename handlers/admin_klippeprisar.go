@@ -82,7 +82,7 @@ func AdminKlippeprisarHandler(w http.ResponseWriter, r *http.Request) {
 		if !strings.HasPrefix(nykel, "namn-ny") || len(verdiar) == 0 {
 			continue
 		}
-		namn := strings.TrimSpace(verdiar[0])
+		namn := reintNamn(verdiar[0])
 		if namn == "" {
 			continue
 		}

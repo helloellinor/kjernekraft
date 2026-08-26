@@ -128,6 +128,19 @@
     skjema.addEventListener("change", maal);
 
     angra.addEventListener("click", function () {
+        // Ein ny rad finst ikkje i det lagra. Å angre han er å ta han
+        // bort — ikkje å setje felta hans attende til noko.
+        //
+        // Dette var ein reell feil: det «lagra» verdet for eit nytt felt
+        // er eit merke som tyder «fanst ikkje» (\u0000), og angre skreiv
+        // det merket *inn i feltet*. Trykte du så Lagre, sende skjemaet
+        // eit namn som var eit NUL-teikn, og tenaren laga eit medlemskap
+        // som heitte det.
+        [].slice.call(skjema.querySelectorAll("[data-nyrad]")).forEach(function (rad) {
+            rad.remove();
+        });
+        felt = felt.filter(function (f) { return f.isConnected; });
+
         felt.forEach(function (f) {
             if (f.type === "checkbox") f.checked = f.dataset.lagra === "true";
             else f.value = f.dataset.lagra;
@@ -136,6 +149,15 @@
                 if (synleg) synleg.textContent = f.dataset.lagra;
             }
         });
+
+        // Slettemerke er òg noko som skal takast attende.
+        [].slice.call(skjema.querySelectorAll("input[data-tel]")).forEach(function (m) {
+            var rad = m.closest(".prislapp");
+            if (rad) rad.classList.remove("slettast");
+            m.remove();
+        });
+        felt = felt.filter(function (f) { return f.isConnected; });
+
         maal();
     });
 
