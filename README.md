@@ -219,3 +219,35 @@ Two rules hold this together:
 
 Adding a route outside a group makes it public. That is the one thing to get
 right in this file.
+
+## Utviklingstenaren
+
+```sh
+./køyr              # startar, og byggjer paa nytt naar Go-filer endra seg
+./køyr --ein-gong   # startar utan vaktar
+./køyr --stogg      # stoggar
+```
+
+Han lyder paa <http://localhost:8080> og skriv til `.køyr.logg`.
+
+**Kva som krev kva:**
+
+| Du endrar | Kva som skjer |
+|---|---|
+| `.go` | vaktaren byggjer og startar paa nytt, kring eitt sekund |
+| malar i `handlers/templates/` | ingen ting — dei vert lesne for kvar soknad. Oppdater sida. |
+| `static/css`, `static/js` | ingen ting. Oppdater sida. |
+
+Dei tvo siste gjeld berre naar `KJERNEKRAFT_ENV=development`, som `./køyr`
+set. Statiske filer vert sende med `Cache-Control: no-store` i utvikling —
+elles bufrar lesaren dei, og ein sit og ser paa si eigi gamle CSS medan
+ein lurer paa kvifor endringi ikkje slo inn.
+
+Skriptet set ogso ein fast `KJERNEKRAFT_SESSION_KEY`, so ein ikkje vert
+logga ut kvar gong tenaren startar. Han er **berre** til dette; i drift
+kjem nykelen or umgjevnaden og skal vera tilfeldig.
+
+### Prøvebrukar
+
+`anna@example.com` / `password123` — ho hev admin-rolla, so
+<http://localhost:8080/admin> er open for henne.
