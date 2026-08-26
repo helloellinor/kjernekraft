@@ -34,6 +34,13 @@ type Framsyning struct {
 	Full    bool
 	Prosent int
 	Kolonne int // 1 = maandag … 7 = sundag
+
+	// Klokka som vinklar, so merket kann teikna ei urskiva. Timevisaren
+	// gjeng 30 grader i timen og ein halv grad i minuttet; minuttvisaren
+	// seks grader i minuttet.
+	Klokke       string
+	TimeVinkel   float64
+	MinuttVinkel float64
 }
 
 // Timebolk er ein time med alle dagarne han gjeng i vika.
@@ -42,7 +49,6 @@ type Timebolk struct {
 	Laerar     string
 	Rom        string
 	Klasse     string
-	Start      string // «07:15»
 	Minutt     int
 	Plassar    int
 	Framsyning []Framsyning
@@ -114,7 +120,7 @@ func KlemVika(events []models.Event, iDag time.Time, maandag time.Time) []Timebo
 	bolkar := map[string]*Timebolk{}
 	for _, e := range events {
 		start := e.StartTime.Format("15:04")
-		nykel := fmt.Sprintf("%s|%s|%s|%s", e.Title, e.TeacherName, e.RoomName, start)
+		nykel := fmt.Sprintf("%s|%s|%s", e.Title, e.TeacherName, e.RoomName)
 
 		b, finst := bolkar[nykel]
 		if !finst {
@@ -123,7 +129,6 @@ func KlemVika(events []models.Event, iDag time.Time, maandag time.Time) []Timebo
 				Laerar:    e.TeacherName,
 				Rom:       e.RoomName,
 				Klasse:    e.ClassType,
-				Start:     start,
 				Minutt:    int(e.EndTime.Sub(e.StartTime).Minutes()),
 				Plassar:   e.Capacity,
 				sortering: e.StartTime.Hour()*60 + e.StartTime.Minute(),
@@ -136,15 +141,18 @@ func KlemVika(events []models.Event, iDag time.Time, maandag time.Time) []Timebo
 			prosent = e.CurrentEnrolment * 100 / e.Capacity
 		}
 		b.Framsyning = append(b.Framsyning, Framsyning{
-			Event:   e,
-			Dag:     e.StartTime.Weekday(),
-			Dato:    e.StartTime,
-			DagNamn: dagKort[e.StartTime.Weekday()],
-			ErIDag:  e.StartTime.Format("2006-01-02") == iDagDato,
-			ErUmme:  e.EndTime.Before(naa),
-			Full:    e.Full(),
-			Prosent: prosent,
-			Kolonne: kolonne(e.StartTime.Weekday()),
+			Event:        e,
+			Dag:          e.StartTime.Weekday(),
+			Dato:         e.StartTime,
+			DagNamn:      dagKort[e.StartTime.Weekday()],
+			ErIDag:       e.StartTime.Format("2006-01-02") == iDagDato,
+			ErUmme:       e.EndTime.Before(naa),
+			Full:         e.Full(),
+			Prosent:      prosent,
+			Kolonne:      kolonne(e.StartTime.Weekday()),
+			Klokke:       start,
+			TimeVinkel:   float64(e.StartTime.Hour()%12)*30 + float64(e.StartTime.Minute())*0.5,
+			MinuttVinkel: float64(e.StartTime.Minute()) * 6,
 		})
 	}
 

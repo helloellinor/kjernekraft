@@ -19,7 +19,6 @@
     {{range .Timebolkar}}
     <div class="timerad">
         <div class="timeklokke">
-            <b>{{.Start}}</b>
             <span class="lengd">{{.Minutt}} min</span>
         </div>
 
@@ -34,7 +33,7 @@
             {{range .Rutor}}
             {{if .Har}}
             {{with .Framsyning}}
-            <button type="button" style="--dag: {{.Kolonne}}"
+            <button type="button" style="--dag: {{.Kolonne}}; --fyll: {{.Prosent}}%"
                     class="dagmerke{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}{{if .Full}} full{{end}}"
                     data-event="{{.Event.ID}}"
                     data-tittel="{{.Event.Title}}"
@@ -49,8 +48,14 @@
                     data-paameld="{{.Event.IsUserSignedUp}}"
                     {{if .ErUmme}}disabled{{end}}
                     aria-label="{{.DagNamn}} — {{.Event.CurrentEnrolment}} {{t $.Lang "timeplan.of"}} {{.Event.Capacity}}">
-                <span class="dagnamn berre-lesar">{{.DagNamn}}</span>
-                <span class="dagfyll" style="--fyll: {{.Prosent}}%"></span>
+                <span class="dagnamn berre-lesar">{{.DagNamn}} {{.Klokke}}</span>
+                {{/* Urskiva. Tvo visarar snudde av Go; ho er eit teikn
+                     for eit klokkeslett og ikkje eit ur ein skal lesa av
+                     paa minuttet — difor stend tali attmed. */}}
+                <span class="klokketid">
+                    <span class="urskiva" style="--time: {{.TimeVinkel}}deg; --minutt: {{.MinuttVinkel}}deg"></span>
+                    <span class="klokketal">{{.Klokke}}</span>
+                </span>
                 <span class="dagtal">{{.Event.CurrentEnrolment}}<span class="av">/{{.Event.Capacity}}</span></span>
             </button>
             {{end}}
