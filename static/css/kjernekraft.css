@@ -1161,3 +1161,58 @@ tbody tr:hover td { background: var(--ark-djup); }
   border: 1px solid var(--klas);
   background: color-mix(in srgb, var(--klas) 8%, var(--flate));
 }
+
+/* ===================================================================
+   merket
+   Han stend som ei *maske* og ikkje som eit bilete, so han tek fargen
+   fraa teksti han stend i — same grepet som krossen paa sletteknappen i
+   ordboki. Difor finst det éi fil paa disken og ikkje ei per farge, og
+   han fylgjer temaet utan at nokon skriv honom um.
+   =================================================================== */
+.merke {
+  display: inline-block;
+  flex: none;
+  width: var(--merkestorleik, 1.5em);
+  height: var(--merkestorleik, 1.5em);
+  background: currentColor;
+  -webkit-mask: url("/static/img/kjernekraft.svg") center / contain no-repeat;
+          mask: url("/static/img/kjernekraft.svg") center / contain no-repeat;
+}
+
+/* I hovudet stend han attmed namnet, paa same grunnlina. Boksen hans er
+   fast, so han skuvar ingen ting naar sida vert teikna paa nytt. */
+.merkeord {
+  display: flex; align-items: center; gap: var(--rom-3);
+  text-decoration: none; color: inherit;
+}
+.merkeord .merke { --merkestorleik: 1.7rem; }
+.merkeord h1 { margin: 0; }
+
+/* Paa innloggingi og dei andre dørene stend han for seg sjølv yver
+   tittelen. Det er den einaste staden han fær vera stor. */
+.doermerke {
+  --merkestorleik: 4rem;
+  color: var(--blekk);
+  margin: 0 auto var(--rom-5);
+  display: block;
+}
+
+/* ---- rom til teikningar ----
+   Der det stend emoji i dag. Boksen er fast og kvadratisk, so eit kort
+   ikkje skiftar høgd naar teikningi kjem paa plass — og so lenge ho
+   ikkje er der, stend det eit tomt rom av rett storleik i staden for at
+   alt hoppar den dagen ho kjem.
+
+   Teikningarne skal vera SVG med `stroke="currentColor"` og utan eigne
+   fargar, som merket. Daa verka dei i baae temaom, og dei kann bera
+   produktfargen der dei stend i eit produkt. */
+.teikning, .category-icon {
+  display: block;
+  width: var(--teikningstorleik, 3.5rem);
+  height: var(--teikningstorleik, 3.5rem);
+  margin-bottom: var(--rom-3);
+  color: var(--produkt, var(--blekk-lys));
+  font-size: var(--teikningstorleik, 3.5rem);
+  line-height: 1;
+}
+.teikning svg, .category-icon svg { width: 100%; height: 100%; display: block; }

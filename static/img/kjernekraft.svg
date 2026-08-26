@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750" role="img" aria-labelledby="merketittel">
   <title id="merketittel">Kjernekraft Oslo</title>
+  <style>
+    svg { color: #1c1f1b; }
+    @media (prefers-color-scheme: dark) { svg { color: #e2e5dd; } }
+  </style>
   <defs>
     <!-- Armarne er klipte vassrett der glyfen sluttar, ikkje vinkelrett
          paa seg sjølve. Difor eit klipp og ikkje runde endar. -->
