@@ -25,7 +25,8 @@
     // dømes — lyt takast med. Utan dette kunne ein fylle ut ein ny rad
     // og dokka sa framleis ingenting.
     skjema.addEventListener("endringar:nye", function () {
-        [].slice.call(skjema.querySelectorAll("input:not([type=hidden]), select, textarea"))
+        [].slice.call(skjema.querySelectorAll(
+            "input:not([type=hidden]), input[data-tel], select, textarea"))
             .forEach(function (f) {
                 if (felt.indexOf(f) !== -1) return;
                 // Ein ny rad er ei endring i seg sjølv, so det lagra
@@ -88,6 +89,7 @@
         // er merkt `data-eitt` vert talde som ein ting — elles sa dokka
         // «4 endringar» av eitt nytt medlemskap.
         var eitt = [];
+        felt = felt.filter(function (f) { return f.isConnected; });
         felt.forEach(function (f) {
             var e = endra(f);
             // Eit løynt felt kann ikkje syna at det er endra; merket

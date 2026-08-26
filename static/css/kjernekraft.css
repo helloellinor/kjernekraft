@@ -2511,3 +2511,36 @@ select.lappfelt { padding-right: var(--rom-6); }
 /* Ein rad som ikkje er lagra enno ber det same merket som eit endra
    felt — heile raden, av di det er heile raden som er ny. */
 .prislapp.ny { border-left: 3px solid var(--togu); padding-left: var(--rom-4); }
+
+/* Slettemerket. Det er ikkje ein handling som skjer med det same: raden
+   vert merkt, og dokka utfører det når du lagrar. Difor er han eit lite
+   kryss og ikkje ein raud knapp — det som er ugjenkalleg, er å lagre. */
+.slettmerke {
+  font-family: var(--skrift-tal); font-size: 1rem; line-height: 1;
+  padding: var(--rom-1) var(--rom-2);
+  border: 0; background: none; color: var(--blekk-svakt);
+  cursor: pointer;
+}
+.slettmerke:hover { color: var(--aatvaring); background: none; border: 0; }
+
+/* Ein merkt rad står att så du ser kva du har gjort — gjennomstroken og
+   veik, med åtvaringsfargen i margen. Angre tek han attende. */
+.prislapp.slettast { opacity: .55; border-left: 3px solid var(--aatvaring); padding-left: var(--rom-4); }
+.prislapp.slettast .prisnamn { text-decoration: line-through; }
+.slettord {
+  display: none;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--aatvaring);
+}
+.prislapp.slettast .slettord { display: inline; }
+
+/* Reglane. Kvar regel er ei setning med valet i seg — ikkje ei
+   avkryssing med ei merkelapp attmed og ei skildring under, som var tre
+   tekstar om det same. */
+.reglar { display: flex; flex-direction: column; gap: var(--rom-5); align-items: flex-start; }
+.regel {
+  font-size: 1.05rem; line-height: 2.2; margin: 0;
+  max-width: 62ch; color: var(--blekk);
+}
+.regel select.lappfelt { margin: 0 .15rem; }

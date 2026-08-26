@@ -12,6 +12,10 @@ byggjer, er ein regel som ikkje veit noko um deg.
 
 ---
 
+Korrekturen — forma der du skriv rett på teksten og det endra ber eit
+merke i margen — har sitt eige skriv:
+[KORREKTUREN.md](KORREKTUREN.md). Ho er brukt i profilen og i prisinga.
+
 Fasetten — den eine djupna systemet hev — hev sitt eige skriv:
 [FASETTEN.md](FASETTEN.md). Han er det einaste draget som gjeng att i
 heile systemet utan aa vera ein farge, og den lettaste tingen aa gjera
