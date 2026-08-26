@@ -1592,3 +1592,85 @@ func (db *Database) UpdateEvent(event models.Event) error {
 
 	return err
 }
+
+// Person er ein medlem slik han stend i folkelista.
+//
+// Tri fakta, ikkje sju: kven, kva han held, og naar han sist var her.
+// Fødselsdag og telefon er ikkje noko ein skannar ei liste for — dei
+// høyrer til naar rada er open.
+type Person struct {
+	ID          int
+	Namn        string
+	Epost       string
+	Telefon     string
+	Fodd        string
+	Roller      string
+	Medlemskap  string
+	MedlemStod  string
+	MedlemPris  int
+	KlippAtt    int
+	KlippTotalt int
+	SistHer     *time.Time
+	TimarIAar   int
+	TrengSvar   bool // frysing som ventar
+}
+
+// FolkOversyn hentar alle medlemene med det ein treng for aa kjenna
+// deim att og sjaa kven som treng noko.
+//
+// Sorteringi er ikkje alfabetisk. Ho er *kven som treng deg*: fyrst dei
+// med ei frysing som ventar svar, so dei som ikkje hev vore her paa
+// lenge, so resten. Ei alfabetisk liste er rett naar ein leitar; men
+// den som leitar brukar søkjefeltet, og den som *ser* paa lista vil
+// vita kva som krev noko av henne.
+func (db *Database) FolkOversyn() ([]Person, error) {
+	rows, err := db.Conn.Query(`
+		SELECT u.id, u.name, u.email, COALESCE(u.phone, ''), COALESCE(u.birthdate, ''),
+		       COALESCE((SELECT GROUP_CONCAT(r.name, ', ') FROM user_roles ur
+		                 JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), ''),
+		       COALESCE(m.name, ''), COALESCE(um.status, ''), COALESCE(m.price, 0),
+		       COALESCE((SELECT SUM(uk.remaining_klipp) FROM user_klippekort uk WHERE uk.user_id = u.id), 0),
+		       COALESCE((SELECT SUM(uk.total_klipp) FROM user_klippekort uk WHERE uk.user_id = u.id), 0),
+		       (SELECT MAX(e.start_time) FROM event_signups es
+		        JOIN events e ON e.id = es.event_id
+		        WHERE es.user_id = u.id AND e.start_time < CURRENT_TIMESTAMP),
+		       COALESCE((SELECT COUNT(*) FROM event_signups es
+		                 JOIN events e ON e.id = es.event_id
+		                 WHERE es.user_id = u.id AND e.start_time < CURRENT_TIMESTAMP
+		                 AND e.start_time > datetime('now', '-1 year')), 0)
+		FROM users u
+		LEFT JOIN user_memberships um ON um.user_id = u.id AND um.status != 'cancelled'
+		LEFT JOIN memberships m ON m.id = um.membership_id
+		ORDER BY u.name COLLATE NOCASE`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ut []Person
+	for rows.Next() {
+		var p Person
+		// MAX() gjev ein streng ut or SQLite, ikkje ei tid — aggregatet
+		// misser typen som kolonna hadde. Difor lyt han tolkast her.
+		var sist sql.NullString
+		if err := rows.Scan(&p.ID, &p.Namn, &p.Epost, &p.Telefon, &p.Fodd, &p.Roller,
+			&p.Medlemskap, &p.MedlemStod, &p.MedlemPris,
+			&p.KlippAtt, &p.KlippTotalt, &sist, &p.TimarIAar); err != nil {
+			return nil, err
+		}
+		if sist.Valid && sist.String != "" {
+			for _, mal := range []string{
+				"2006-01-02 15:04:05-07:00", "2006-01-02 15:04:05Z07:00",
+				time.RFC3339, "2006-01-02 15:04:05", "2006-01-02T15:04:05Z",
+			} {
+				if t0, err := time.Parse(mal, sist.String); err == nil {
+					p.SistHer = &t0
+					break
+				}
+			}
+		}
+		p.TrengSvar = p.MedlemStod == "freeze_requested"
+		ut = append(ut, p)
+	}
+	return ut, rows.Err()
+}

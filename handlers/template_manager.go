@@ -134,6 +134,28 @@ func getTemplateFuncs() template.FuncMap {
 			return string(r)
 		},
 		"dagStreng": func(t time.Time) string { return t.Format("2006-01-02") },
+		// «for tri veker sidan» i staden for ein dato. Ein dato lyt ein
+		// rekna paa; «for tri veker sidan» svarar med det same paa det
+		// ein faktisk spør um — er dette nokon som er her, eller nokon
+		// som hev slutta?
+		"sidan": func(lang string, t0 *time.Time) string {
+			if t0 == nil {
+				return ""
+			}
+			d := time.Since(*t0)
+			switch dagar := int(d.Hours() / 24); {
+			case dagar <= 0:
+				return t(lang, "admin.ago_today")
+			case dagar == 1:
+				return t(lang, "admin.ago_yesterday")
+			case dagar < 14:
+				return fmt.Sprintf(t(lang, "admin.ago_days"), dagar)
+			case dagar < 60:
+				return fmt.Sprintf(t(lang, "admin.ago_weeks"), dagar/7)
+			default:
+				return fmt.Sprintf(t(lang, "admin.ago_months"), dagar/30)
+			}
+		},
 		"norskDag": func(t time.Time) string {
 			return norskeDagar[t.Weekday()]
 		},

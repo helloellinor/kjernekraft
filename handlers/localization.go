@@ -31,6 +31,16 @@ func GetLocalization() *Localization {
 	return localization
 }
 
+// LastUmsetjingarPaaNytt les umsetjingsfilone om att.
+//
+// Dei vart lesne ein gong ved oppstart og aldri meir. Malar og stilark
+// vert lesne for kvar soknad i utvikling; umsetjingarne gjorde det
+// ikkje, so ein la til ein nykel, oppdaterte sida, og saag sjølve
+// nykelen staa der — «admin.people» — og trudde han var skriven gale.
+func LastUmsetjingarPaaNytt() {
+	GetLocalization().loadTranslations()
+}
+
 // GetLanguageFromRequest gets the user's preferred language from cookies or URL
 func GetLanguageFromRequest(r *http.Request) string {
 	// First try to get from URL parameter
