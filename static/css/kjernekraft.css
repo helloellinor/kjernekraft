@@ -446,6 +446,19 @@ main {
 
 .content-section, .section, .packages-section { margin-bottom: var(--rom-7); }
 
+/* ---- rangstigen ----
+   Fire steg, og kvart steg er *smalare* enn det yver seg. Breiddi ber
+   rangen, ikkje storleiken: difor kann tvo yverskrifter vera mest like
+   store og endaa segja klaart kva som ligg under kva.
+
+     .page-title    125%  kvar du er
+     .section-title  68%  ein bolk paa sida, med lina under
+     .undertittel    68%  ei gruppa inne i bolken, utan lina
+     dt / .held      68%  eit einskilt felt
+
+   Steg tvo og tri hadde same forma fyrr — ein h4 inne i ein h3 fekk
+   ingi ny tyding, berre ein litt mindre bokstav. Lina er skiljet: ein
+   bolk deler sida, ei gruppa deler berre bolken. */
 .section-title, .module-title, .step-title {
   font-family: var(--skrift-yver);
   font-size: 1.05rem; font-weight: 500;
@@ -457,6 +470,19 @@ main {
   border-bottom: 1px solid var(--haarlina);
   text-align: left;
 }
+
+.undertittel {
+  font-family: var(--skrift-yver);
+  font-size: .78rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+  margin: var(--rom-6) 0 var(--rom-3);
+  padding: 0;
+  border: 0;
+  text-align: left;
+}
+.undertittel:first-child { margin-top: 0; }
 
 .two-column-grid, .content-grid, .selector-container {
   display: grid; gap: var(--rom-5);
@@ -704,7 +730,13 @@ button:disabled, .btn:disabled, .week-nav-btn:disabled {
 /* ===================================================================
    skjema
    =================================================================== */
-.form-group { display: flex; flex-direction: column; gap: var(--rom-2); margin-bottom: var(--rom-4); }
+/* `align-items` stend paa `stretch` som standard, og daa vert kvart barn
+   so breidt som bolken same kva `width` segjer. Ein veljar som var sett
+   til aa vera so brei som innhaldet vart strekt likevel — reglane var
+   rette, men fyresetnaden var det ikkje. Her byrjar dei ved venstre
+   kanten og tek den breiddi dei sjølve bad um; eit skrivefelt hev
+   `width: 100%` og fyller framleis. */
+.form-group { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2); margin-bottom: var(--rom-4); }
 .form-row { display: grid; gap: var(--rom-4); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
 
 label, .option-label, .question-label, .detail-label, .filter-group label {
@@ -761,6 +793,14 @@ input:focus, select:focus, textarea:focus, .soke:focus {
   box-shadow: var(--fasett);
 }
 select {
+  /* Eit skrivefelt strekkjer seg, av di ingen veit kor langt det ein
+     skriv vert. Ein veljar veit det: valdi stend der alt. Difor er han
+     so brei som det breidaste valet og ikkje ein piksel meir — ein
+     tidssoneveljar som tok heile spalta lova ei fridom som ikkje fanst.
+     `max-width: 100%` er taket, so eit langt val ikkje skuvar spalta. */
+  width: auto;
+  max-width: 100%;
+
   /* Nedfallslista er den eine tingen som *faktisk* flyt. */
   appearance: none;
   background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),

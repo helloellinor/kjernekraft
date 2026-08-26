@@ -1,10 +1,10 @@
 {{define "admin_membership_rules"}}
 <div class="admin-section">
-    <h3>{{t .Lang "admin.membership_rules"}}</h3>
+    <h3 class="section-title">{{t .Lang "admin.membership_rules"}}</h3>
     
     <div class="rules-container">
         <div class="rule-section">
-            <h4>{{t .Lang "admin.upgrade_rules"}}</h4>
+            <h4 class="undertittel">{{t .Lang "admin.upgrade_rules"}}</h4>
             <div class="rule-item">
                 <label>
                     <input type="checkbox" id="allow-upgrades" checked> 
@@ -23,7 +23,7 @@
         </div>
         
         <div class="rule-section">
-            <h4>{{t .Lang "admin.downgrade_rules"}}</h4>
+            <h4 class="undertittel">{{t .Lang "admin.downgrade_rules"}}</h4>
             <div class="rule-item">
                 <label>
                     <input type="checkbox" id="allow-downgrades"> 
@@ -34,7 +34,7 @@
         </div>
         
         <div class="rule-section">
-            <h4>{{t .Lang "admin.binding_rules"}}</h4>
+            <h4 class="undertittel">{{t .Lang "admin.binding_rules"}}</h4>
             <div class="rule-item">
                 <label>
                     <input type="checkbox" id="allow-change-during-binding"> 
@@ -45,7 +45,7 @@
         </div>
         
         <div class="rule-section">
-            <h4>{{t .Lang "admin.default_membership"}}</h4>
+            <h4 class="undertittel">{{t .Lang "admin.default_membership"}}</h4>
             <div class="rule-item">
                 <label for="default-membership">{{t .Lang "admin.default_membership_for_new_users"}}:</label>
                 <select id="default-membership">
