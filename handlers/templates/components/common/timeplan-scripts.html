@@ -109,29 +109,6 @@
         window.location.href = currentUrl.toString();
     }
     
-    function jumpToWeek() {
-        const weekInput = document.getElementById('week-input');
-        const targetWeek = parseInt(weekInput.value);
-        const currentWeekNumber = {{.WeekNumber}};
-        
-        // Prevent jumping to past weeks
-        if (targetWeek < currentWeekNumber && {{.WeekOffset}} === 0) {
-            weekInput.value = currentWeekNumber;
-            return;
-        }
-        
-        // Calculate week offset based on target week
-        const weekOffset = targetWeek - currentWeekNumber + {{.WeekOffset}};
-        
-        if (weekOffset < 0) {
-            weekInput.value = currentWeekNumber;
-            return;
-        }
-        
-        const currentUrl = new URL(window.location);
-        currentUrl.searchParams.set('week', weekOffset);
-        window.location.href = currentUrl.toString();
-    }
     
     function applyFilters() {
         const teacherFilter = document.getElementById('teacher-filter').value;
@@ -154,19 +131,5 @@
         window.location.href = currentUrl.toString();
     }
     
-    // Update week input minimum based on current week
-    document.addEventListener('DOMContentLoaded', function() {
-        const weekInput = document.getElementById('week-input');
-        if (weekInput) {
-            const currentWeekNumber = {{.WeekNumber}};
-            const weekOffset = {{.WeekOffset}};
-            
-            if (weekOffset === 0) {
-                weekInput.min = currentWeekNumber;
-            } else {
-                weekInput.min = currentWeekNumber;
-            }
-        }
-    });
 </script>
 {{end}}
