@@ -186,6 +186,11 @@ func main() {
 		r.Post("/api/shuffle-all-test-data", handlers.ShuffleAllTestDataHandler)
 		r.Post("/api/setup-test-data", handlers.SetupTestDataHandler)
 		r.Get("/elev/testdata", handlers.TestDataPageHandler)
+
+		// Verkstaden. Han skriv ingen ting, men han syner heile
+		// stilarket paa ei sida, og det er ikkje noko ein brukar
+		// treng koma til.
+		r.Get("/arket", handlers.ArketHandler)
 	})
 
 	log.Println("Serving on http://localhost:8080")
