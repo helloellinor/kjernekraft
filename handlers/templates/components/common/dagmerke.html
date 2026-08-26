@@ -1,9 +1,16 @@
 {{define "dagmerke"}}
 {{/* Merket. Éin definisjon, tvo bruk: i vikerutenetet og i lista yver
      det du er paameld paa. Det er meiningi — eit merke skal kjennast
-     som *det same tinget* kvar du ser det, som eit klipp du hev i
-     handi. Difor stend det her og ikkje tvo stader. */}}
-<button type="button" style="--dag: {{.Kolonne}}; --fyll: {{.Prosent}}%"
+     som *det same tinget* kvar du ser det.
+
+     Heile figuren er éin SVG med eit fast viewBox. Skal han verta
+     større eller mindre, er det éin skala som endrar seg; strekar,
+     skrift og rom fylgjer med i det same forholdet, so det er den same
+     tingen som kjem nærare og ikkje ei ny teikning.
+
+     Punkti er rekna i merkeform.go. Ein mal skal syna kva som er i
+     figuren; kvar kvart punkt ligg, er ein annan slags kunnskap. */}}
+<button type="button" style="--dag: {{.Kolonne}}"
         class="dagmerke{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}{{if .Full}} full{{end}}"
         data-event="{{.Event.ID}}"
         data-tittel="{{.Event.Title}}"
@@ -18,13 +25,43 @@
         data-paameld="{{.Event.IsUserSignedUp}}"
         {{if .ErUmme}}disabled{{end}}
         aria-label="{{.Merkelapp}}">
-    <span class="dagnamn berre-lesar">{{.DagNamn}}</span>
-    {{/* Klokkeslettet ligg *paa* toppkanten, som eit legende paa eit
-         fieldset: det høyrer til ruta og tek ingi høgd fraa henne. */}}
-    <span class="klokketal">{{.Klokke}}</span>
-    <span class="merkeur">
-        <span class="urskiva" style="--time: {{.TimeVinkel}}deg; --minutt: {{.MinuttVinkel}}deg"></span>
-    </span>
-    <span class="merketal">{{.Event.CurrentEnrolment}}<span class="av">/{{.Event.Capacity}}</span></span>
+  <svg class="merkeform" viewBox="0 0 {{.Form.Breidd}} {{.Form.Hogd}}"
+       width="{{.Form.Breidd}}" height="{{.Form.Hogd}}" aria-hidden="true" focusable="false">
+    {{/* Tri lag av den same silhuetten: ringen (berre naar merket er
+         valt), lina, og flata med fordjupingi i. */}}
+    <path class="form-ring"  d="{{.Form.Silhuett}}" filter="url(#merkering)"/>
+    <path class="form-kant"  d="{{.Form.Silhuett}}" filter="url(#merkekant)"/>
+    <path class="form-flate" d="{{.Form.Silhuett}}"/>
+    <path class="form-djup"  d="{{.Form.Silhuett}}" filter="url(#merkedjup)"/>
+
+    <text class="merkedag" x="{{.Form.DagX}}" y="{{.Form.DagY}}">{{.DagKort2}}</text>
+
+    <g class="skiva">
+      <g clip-path="url(#merkeskiva)">
+        {{range .Form.Kaker}}<path class="{{.Klasse}}" d="{{.D}}"/>{{end}}
+      </g>
+      {{range .Form.Indeksar}}<line class="indeks" x1="{{.X1}}" y1="{{.Y1}}" x2="{{.X2}}" y2="{{.Y2}}"/>{{end}}
+      {{range .Form.Tal}}<text class="skivetal" x="{{.X}}" y="{{.Y}}">{{.Tekst}}</text>{{end}}
+      <line class="visar slutt"  x1="{{.Form.SkiveX}}" y1="{{.Form.SkiveY}}" x2="{{.Form.SkiveX}}" y2="{{.Form.VisarMinutt}}"
+            transform="rotate({{.Form.SluttVinkel}} {{.Form.SkiveX}} {{.Form.SkiveY}})"/>
+      <line class="visar time"   x1="{{.Form.SkiveX}}" y1="{{.Form.SkiveY}}" x2="{{.Form.SkiveX}}" y2="{{.Form.VisarTime}}"
+            transform="rotate({{.Form.TimeVinkel}} {{.Form.SkiveX}} {{.Form.SkiveY}})"/>
+      <line class="visar minutt" x1="{{.Form.SkiveX}}" y1="{{.Form.SkiveY}}" x2="{{.Form.SkiveX}}" y2="{{.Form.VisarMinutt}}"
+            transform="rotate({{.Form.MinuttVinkel}} {{.Form.SkiveX}} {{.Form.SkiveY}})"/>
+      <circle class="pinne" cx="{{.Form.SkiveX}}" cy="{{.Form.SkiveY}}" r="1.25"/>
+    </g>
+
+    {{/* Vindauga: klokkeslettet i klartekst, med den same fordjupingi i det smaa. */}}
+    <path class="ruteflate" d="{{.Form.Rute}}"/>
+    <path class="rutedjup"  d="{{.Form.Rute}}" filter="url(#merkedjup-lite)"/>
+    <text class="rutetal" x="{{.Form.SkiveX}}" y="{{.Form.RuteTekstY}}">{{.Klokke}}</text>
+
+    {{/* Maalaren tømest medan timen fyllest. Er han full, stend ordet i staden. */}}
+    {{if .Form.Full}}
+    <text class="fulltekst" x="{{.Form.LappX}}" y="{{.Form.LappY}}" dominant-baseline="central">FULL</text>
+    {{else}}
+    <path class="plettfyll" d="{{.Form.Maalar}}"/>
+    {{end}}
+  </svg>
 </button>
 {{end}}

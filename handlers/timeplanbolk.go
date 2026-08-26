@@ -43,6 +43,13 @@ type Framsyning struct {
 	TimeVinkel   float64
 	MinuttVinkel float64
 
+	// Dagen som tvo bokstavar. Han stend øvst i merket, av di det er
+	// det ein spør um fyrst.
+	DagKort2 string
+
+	// Sjølve figuren, ferdig rekna. Sjaa merkeform.go.
+	Form Merke
+
 	// Merkelappen for skjermlesaren, ferdig umsett. Merket vert nytta
 	// tvo stader, og korkje av deim skal trenga aa naa rota for aa
 	// finna maalet.
@@ -86,6 +93,14 @@ var dagKort = map[time.Weekday]string{
 	time.Monday: "man", time.Tuesday: "tys", time.Wednesday: "ons",
 	time.Thursday: "tor", time.Friday: "fre", time.Saturday: "lau",
 	time.Sunday: "sun",
+}
+
+// Tvo bokstavar til skiltet paa merket. Tri fekk ikkje plass utan aa
+// gjera skiltet breidare enn kroppen.
+var dagKort2 = map[time.Weekday]string{
+	time.Monday: "MÅ", time.Tuesday: "TY", time.Wednesday: "ON",
+	time.Thursday: "TO", time.Friday: "FR", time.Saturday: "LA",
+	time.Sunday: "SU",
 }
 
 // rutor legg framsyningarne ut paa dei sju dagarne, og fyller resten
@@ -139,8 +154,12 @@ func NyFramsyning(lang string, e models.Event, iDagDato string, naa time.Time) F
 		Prosent:      prosent,
 		Kolonne:      kolonne(e.StartTime.Weekday()),
 		Klokke:       e.StartTime.Format("15:04"),
+		DagKort2:     dagKort2[e.StartTime.Weekday()],
 		TimeVinkel:   float64(e.StartTime.Hour()%12)*30 + float64(e.StartTime.Minute())*0.5,
 		MinuttVinkel: float64(e.StartTime.Minute()) * 6,
+		Form: NyttMerke(fmt.Sprintf("%d-%s", e.ID, e.StartTime.Format("0102")),
+			e.StartTime, e.EndTime, e.CurrentEnrolment, e.Capacity, naa,
+			e.StartTime.Format("2006-01-02") == iDagDato),
 		Merkelapp: fmt.Sprintf("%s %s — %d %s %d",
 			dag, e.StartTime.Format("15:04"),
 			e.CurrentEnrolment, t(lang, "timeplan.of"), e.Capacity),
