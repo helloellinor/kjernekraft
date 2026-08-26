@@ -633,17 +633,30 @@ label, .option-label, .question-label, .detail-label, .filter-group label {
   border-radius: 2px;
   width: 100%;
 }
+
+/* Fordjupingi segjer «her kann du skriva», og difor stend ho berre paa
+   det ein skriv i. Ein veljar plukkar ein or ei liste — han er ein knapp
+   med ei liste attum, ikkje ei renna. */
+:where(input:not([type="checkbox"]):not([type="radio"]), textarea) {
+  box-shadow: var(--fordjuping);
+}
 /* ---- fasetten ----
-   Kanten aat eit felt i fokus er tvo linor og ikkje ei: sjølve kanten i
-   merkefargen, og ei lina til inni honom. Det er dei tvo som gjev
-   djupna — feltet ser ut til aa liggja *i* arket og ikkje paa det, som
-   ei fasettsliping.
-   
-   Ho er skrivi ein stad og nytta av alle: kvar ny kontroll skal falla i
+   Eit felt ligg *i* arket og ikkje paa det. Skuggen fell inn i det
+   ovanfraa, som i ei fasettsliping, og det er den vesle djupna som
+   segjer «her kann du skriva» — utan eit einaste ord, og utan ei ramma
+   som ropar.
+
+   Difor stend han paa *alle* felt heile tidi, ikkje berre paa det ein
+   held paa med. Var han berre i fokus, laut ein klikka rundt for aa
+   finna ut kva som let seg endra. Ved fokus kjem merkefargen attaat:
+   djupna segjer «skrivbar», fargen segjer «her er du no».
+
+   Han er skriven ein stad og nytta av alle, so kvar ny kontroll fell i
    det same sporet utan at nokon tenkjer paa det. */
 :root {
+  --fordjuping: inset 0 1px 2px color-mix(in srgb, var(--blekk) 12%, transparent);
   --fasett:
-    inset 0 1px 2px color-mix(in srgb, var(--blekk) 14%, transparent),
+    inset 0 1px 2px color-mix(in srgb, var(--blekk) 16%, transparent),
     0 0 0 1px var(--merke);
 }
 
@@ -1870,35 +1883,45 @@ tbody tr:hover td { background: var(--ark-djup); }
    Kvart felt er skrivbart der det stend. Ingen redigeringsmodus: fyrr
    bytte heile sida ham for at du skulle retta eit telefonnummer.
    =================================================================== */
-.profilskjema { display: flex; flex-direction: column; gap: var(--rom-5); }
+/* Bolkarne staa for kvar sitt: kven du er, kvar du bur, korleis ein
+   naar deg. Lufti millom deim er det som segjer at dei er ulike ting —
+   utan ei einaste yverskrift. */
+.profilskjema { display: flex; flex-direction: column; gap: var(--rom-6); }
 
 .lapp { display: flex; flex-direction: column; gap: var(--rom-1); }
+.lapp-kven { gap: var(--rom-2); }
 .lapprad { display: flex; gap: var(--rom-2); }
 
+/* Feltet ligg i arket. Fordjupingi er det einaste som segjer at det er
+   eit felt — ingi ramma, ingen understrek — og ho er der heile tidi, so
+   ein ser kva som let seg endra utan aa klikka seg gjenom sida. */
 .lappfelt {
   font: inherit;
-  padding: var(--rom-1) var(--rom-2);
-  background: none;
+  padding: var(--rom-2) var(--rom-3);
+  background: color-mix(in srgb, var(--blekk) 3%, var(--flate));
   border: 0;
-  border-bottom: 1px solid transparent;
-  border-radius: 0;
+  border-radius: 2px;
+  box-shadow: var(--fordjuping);
   color: var(--blekk);
   width: 100%;
 }
-.lappfelt.stor { font-size: 1.5rem; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-weight: 500; }
-.lappfelt.kort { width: 6rem; flex: none; }
+.lappfelt:hover { background: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
+.lappfelt:focus { outline: none; box-shadow: var(--fasett); }
 .lappfelt::placeholder { color: var(--blekk-svakt); }
 
-/* Linja under kjem fyrst naar ein peikar paa feltet. Ei lapp med ni
-   understrekingar les seg som eit skjema; utan dei les ho seg som ei
-   adressa — men ein lyt framleis sjaa at ho *kann* skrivast i. */
-.lappfelt:hover { border-bottom-color: var(--haarlina); }
-.lappfelt:focus {
-  outline: none;
-  border-bottom-color: var(--merke);
-  box-shadow: var(--fasett);
-  background: var(--flate);
+/* Namnet er yverskrifti. Ho er stor av di ho er namnet ditt, og
+   skrivbar av di ho er eit felt — det er den same tingen. */
+/* Namnet er yverskrifti, men ho lyt faa plass. I 3,4 rem og 125 %
+   breidd rakk «Anna Larsen» ikkje fram — feltet klypte etter «Anna
+   Lars». Eit einlina felt kann ikkje brjota, so storleiken lyt vika. */
+.lappfelt.namnefelt {
+  font-family: var(--skrift-yver);
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-stretch: var(--vidd-yver); font-weight: 700;
+  line-height: 1.1; letter-spacing: -.005em;
+  padding: var(--rom-2) var(--rom-3);
 }
+.lappfelt.kort { width: 10rem; flex: none; }
 
 /* ---- det endra feltet ----
    Ingen tekst segjer at noko er ulagra. Feltet ber merket sjølv: ei
@@ -1906,22 +1929,10 @@ tbody tr:hover td { background: var(--ark-djup); }
    ei lina aaleine kann forvekslast med fokus — prikken stend att naar
    du hev gjenge vidare til neste felt. */
 .lappfelt.endra {
-  border-bottom-color: var(--togu);
-  border-bottom-width: 2px;
+  box-shadow: var(--fordjuping), inset 3px 0 0 var(--togu);
 }
-.lappfelt.endra::placeholder { color: var(--togu); }
-
-.lapp { position: relative; }
-.lappfelt.endra + *, .lappfelt.endra { position: relative; }
-.lappfelt.endra::after { content: ""; }
-
-/* Prikken lyt liggja paa ein innpakkar, av di eit <input> ikkje kann ha
-   pseudo-element. Difor teiknar me han som ein bakgrunn i staden. */
-.lappfelt.endra {
-  background-image: radial-gradient(circle at left .55rem, var(--togu) 0 3px, transparent 3px);
-  background-repeat: no-repeat;
-  background-position: -.85rem center;
-  background-size: 1.4rem 100%;
+.lappfelt.endra:focus {
+  box-shadow: var(--fasett), inset 3px 0 0 var(--togu);
 }
 
 .avkryssing.rabatt { align-items: start; gap: var(--rom-3); }
