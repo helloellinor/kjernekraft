@@ -3,6 +3,7 @@ package handlers
 import (
 	"kjernekraft/handlers/config"
 	"kjernekraft/models"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -47,6 +48,9 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	// Get events for the target week
 	weekEvents, err := DB.GetEventsForWeek(targetMonday)
 	if err != nil {
+		// Feilen vart slukt her. Ein 500 utan grunn i loggen er ein
+		// feil ein lyt finna att med gissing.
+		log.Printf("vika %s: %v", targetMonday.Format("2006-01-02"), err)
 		http.Error(w, "Could not fetch week's events", http.StatusInternalServerError)
 		return
 	}
@@ -151,6 +155,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		"WeekDays":        weekdays,
 		"WeekDates":       weekDates,
 		"EventsByDay":     eventsByDay,
+		"Timebolkar":      KlemVika(weekEvents, now),
 		"Today":           now.Format("2006-01-02"),
 		"Teachers":        teachers,
 		"ClassTypes":      classTypes,
@@ -166,15 +171,8 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		"IsAdmin":         sessionIsAdmin(r),
 	}
 
-	// Use the new template system
-	tm := GetTemplateManager()
-	if tmpl, exists := tm.GetTemplate("pages/timeplan"); exists {
-		w.Header().Set("Content-Type", "text/html")
-		if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
-			http.Error(w, "Template execution error", http.StatusInternalServerError)
-		}
-		return
-	}
+	renderPage(w, r, "pages/timeplan", data)
+	return
 
 	// If template doesn't exist, return error
 	http.Error(w, "Template not found", http.StatusInternalServerError)

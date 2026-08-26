@@ -74,7 +74,12 @@
     "thursday": "Thursday",
     "friday": "Friday",
     "saturday": "Saturday",
-    "sunday": "Sunday"
+    "sunday": "Sunday",
+    "full": "full",
+    "waitlist": "Waiting list",
+    "signup": "Book",
+    "cancel_signup": "Cancel",
+    "close": "Close"
   },
   "dashboard": {
     "welcome_user": "Welcome, {{.UserName}}!",
@@ -242,7 +247,9 @@
     "tab_schedule": "Schedule",
     "tab_prices": "Prices",
     "tab_people": "People",
-    "tab_settings": "Settings"
+    "tab_settings": "Settings",
+    "capacity": "Places",
+    "pick_room_first": "pick a room first"
   },
   "terms": {
     "title": "Terms and conditions"

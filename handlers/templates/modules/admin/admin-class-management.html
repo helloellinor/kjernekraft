@@ -41,13 +41,9 @@
                         <label for="class-location">{{t .Lang "admin.location"}}:</label>
                         <select id="class-location" required>
                             <option value="">{{t .Lang "admin.select_location"}}</option>
-                            <option value="Hovedstudio">Hovedstudio</option>
-                            <option value="Studio 1">Studio 1</option>
-                            <option value="Studio 2">Studio 2</option>
-                            <option value="Studio 3">Studio 3</option>
-                            <option value="Yogastudio">Yogastudio</option>
-                            <option value="Pilatesstudio">Pilatesstudio</option>
-                            <option value="Reformer Studio">Reformer Studio</option>
+                            {{range $.Rooms}}
+                            <option value="{{.Name}}" data-plassar="{{.Capacity}}">{{.Name}} &middot; {{.Capacity}} plassar</option>
+                            {{end}}
                         </select>
                     </div>
                 </div>
@@ -69,23 +65,14 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="class-capacity">{{t .Lang "admin.capacity"}}:</label>
-                        <input type="number" id="class-capacity" min="1" max="50" value="20" required>
+                        <label for="class-capacity">{{t .Lang "admin.capacity"}}</label>
+                        <!-- Kapasiteten er ein eigenskap ved rommet. Feltet stod
+                             paa 20 uansett rom, og reformeren hev fire plassar.
+                             Det er lesbart, ikkje skrivbart — og det syner kvar
+                             talet kjem fraa. -->
+                        <output id="class-capacity" class="avleidd">{{t .Lang "admin.pick_room_first"}}</output>
                     </div>
-                    <div class="form-group">
-                        <label for="class-color">{{t .Lang "admin.class_color"}}:</label>
-                        <select id="class-color" required>
-                            <option value="">{{t .Lang "admin.select_color"}}</option>
-                            <option value="#4CAF50" data-farge="#4CAF50">{{t .Lang "admin.green"}}</option>
-                            <option value="#2196F3" data-farge="#2196F3">{{t .Lang "admin.blue"}}</option>
-                            <option value="#FF9800" data-farge="#FF9800">{{t .Lang "admin.orange"}}</option>
-                            <option value="#9C27B0" data-farge="#9C27B0">{{t .Lang "admin.purple"}}</option>
-                            <option value="#F44336" data-farge="#F44336">{{t .Lang "admin.red"}}</option>
-                            <option value="#607D8B" data-farge="#607D8B">{{t .Lang "admin.grey"}}</option>
-                            <option value="#795548" data-farge="#795548">{{t .Lang "admin.brown"}}</option>
-                            <option value="#FF5722" data-farge="#FF5722">{{t .Lang "admin.deep_orange"}}</option>
-                        </select>
-                    </div>
+                    
                 </div>
 
                 <div class="form-group full-width">
@@ -173,6 +160,18 @@ document.getElementById('class-start-time').addEventListener('change', function(
     }
 });
 
+// Kapasiteten fylgjer rommet. Ho vert synt so snart rommet er valt, so
+// det aldri er eit spursmaal kvar talet kjem fraa.
+(function () {
+    var rom = document.getElementById('class-location');
+    var ut = document.getElementById('class-capacity');
+    if (!rom || !ut) return;
+    rom.addEventListener('change', function () {
+        var v = rom.selectedOptions[0] && rom.selectedOptions[0].dataset.plassar;
+        ut.textContent = v ? v + ' plassar' : ut.dataset.tom || '';
+    });
+})();
+
 function createClass(event) {
     event.preventDefault();
     
@@ -184,8 +183,8 @@ function createClass(event) {
         date: document.getElementById('class-date').value,
         start_time: document.getElementById('class-start-time').value,
         end_time: document.getElementById('class-end-time').value,
-        capacity: parseInt(document.getElementById('class-capacity').value),
-        color: document.getElementById('class-color').value,
+        capacity: 0, // 0 = ta kapasiteten fraa rommet
+        
         description: document.getElementById('class-description').value,
         is_recurring: document.getElementById('is-recurring').checked,
         recurring_weeks: document.getElementById('is-recurring').checked ? 

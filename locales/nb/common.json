@@ -74,7 +74,12 @@
     "thursday": "Torsdag",
     "friday": "Fredag",
     "saturday": "Lørdag",
-    "sunday": "Søndag"
+    "sunday": "Søndag",
+    "full": "fullt",
+    "waitlist": "Venteliste",
+    "signup": "Meld på",
+    "cancel_signup": "Meld av",
+    "close": "Lukk"
   },
   "dashboard": {
     "welcome_user": "Velkommen, {{.UserName}}!",
@@ -256,7 +261,7 @@
     "class_date": "Klassedato",
     "start_time": "Starttid",
     "end_time": "Sluttid",
-    "capacity": "Kapasitet",
+    "capacity": "Plasser",
     "class_color": "Klassefarge",
     "select_color": "Velg farge",
     "green": "Grønn",
@@ -306,7 +311,8 @@
     "tab_schedule": "Timeplan",
     "tab_prices": "Priser",
     "tab_people": "Folk",
-    "tab_settings": "Innstillinger"
+    "tab_settings": "Innstillinger",
+    "pick_room_first": "velg et rom først"
   },
   "terms": {
     "title": "Handelsbetingelser"

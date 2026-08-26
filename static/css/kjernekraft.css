@@ -199,6 +199,9 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
+  /* Luft under sida av same høgd som dokka. Utan denne ligg det siste
+     sida hev aa syna under henne, og ein kann ikkje naa det. */
+  padding-bottom: var(--dokkhogd, 0px);
   background: var(--ark);
   color: var(--blekk);
   font: 400 16px/1.55 var(--skrift);
@@ -702,109 +705,129 @@ tbody tr:hover td { background: var(--ark-djup); }
   font-family: var(--skrift-tal); font-variant-numeric: tabular-nums;
 }
 
-/* ---- vika ----
-   Sju dagar attmed kvarandre, slik ein les ei vika. Paa smale glas
-   rullar rutenetet sidelengs i staden for aa leggja dagarne under
-   kvarandre: ein time høyrer til ein dag, og den samanhengen ryk um
-   dagarne vert ei lang liste. */
-.week-grid {
-  display: grid;
-  /* Sju like spaltor som *deler* breiddi som finst. Ingi minstebreidd,
-     og difor ingi sidelengs rulling: rutenetet er aldri breidare enn
-     glaset. Under brotstaden nedanfor vert dagarne til bolkar under
-     kvarandre i staden — dagen fylgjer med som yverskrift, so ein time
-     høyrer framleis til ein dag. */
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 1px;
-  background: var(--haarlina);
+/* ---- den klemde vika ----
+   Éi rad per time, eitt merke per dag. Radi ber det ein skannar etter —
+   naar, kva, kven, kvar — og ikkje meir. Detaljen bur i dokka.
+
+   Fyrr bar kvart kort heile detaljen sin, og vika vart eit tårn ein
+   laut rulla gjenom. Ei rad er 3,2 rem; eit kort var 11. */
+.timeplan {
   border: 1px solid var(--haarlina);
-}
-.day-column {
   background: var(--flate);
-  display: flex; flex-direction: column;
-  min-width: 0;
 }
-.day-column .day-header {
-  margin: 0; padding: var(--rom-3);
+.timerad {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(9rem, 1fr) auto;
+  gap: var(--rom-4);
+  align-items: center;
+  padding: var(--rom-3) var(--rom-4);
   border-bottom: 1px solid var(--haarlina);
-  display: flex; flex-direction: column; gap: 0; align-items: start;
-  position: sticky; top: 0; z-index: 2;
-  background: var(--flate);
 }
-.day-column .day-name { font-size: .95rem; }
-.day-events { display: flex; flex-direction: column; gap: 1px; background: var(--haarlina); flex: 1; }
-.day-content, .no-events {
-  padding: var(--rom-5) var(--rom-3);
-  color: var(--blekk-svakt); font-size: .88rem; text-align: center;
-  background: var(--flate); flex: 1;
-}
+.timerad:last-child { border-bottom: 0; }
+.timerad:hover { background: var(--ark-djup); }
 
-/* Ein dag som er gjengen er ikkje burte — han er berre ikkje noko du
-   kann gjera noko med lenger. */
-.day-column.past { background: var(--ark-djup); }
-.day-column.past .day-header { background: var(--ark-djup); color: var(--blekk-svakt); }
-.day-column.past .day-content { background: var(--ark-djup); }
+.timeklokke { display: flex; flex-direction: column; }
+.timeklokke b { font-family: var(--skrift-tal); font-size: 1.05rem; font-weight: 400; }
+.timeklokke .lengd { font-family: var(--skrift-tal); font-size: .74rem; color: var(--blekk-svakt); }
 
-/* Timekortet i rutenetet er tettare enn eit kort elles. */
-.week-grid .event-card {
-  border: 0; border-radius: 0;
-  padding: var(--rom-3);
-  display: flex; flex-direction: column; gap: var(--rom-1);
-  cursor: pointer;
+.timetittel {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
+  font-weight: 500; font-size: 1.05rem; margin: 0;
 }
-.week-grid .event-card:hover { background: var(--ark-djup); }
-.week-grid .event-time { font-size: .92rem; color: var(--blekk-lys); }
-.week-grid .event-title {
-  font-size: 1rem; font-stretch: var(--vidd-yver); font-weight: 500;
-  margin: 0; text-wrap: pretty;
-}
-.week-grid .event-teacher { font-size: .85rem; }
-.week-grid .event-spaces {
-  font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-lys);
-}
-.week-grid .event-details { margin-top: var(--rom-2); }
-.week-grid .signup-button { width: 100%; padding: var(--rom-2); font-size: .85rem; }
+.timekven { margin: 0; font-size: .86rem; color: var(--blekk-lys); }
+.timerom { color: var(--blekk); font-weight: 500; }
 
-/* Ein full time er ikkje ein feil. Ventelista er ei anna handling, og
-   difor ein annan knapp — open, ikkje fylt. */
-.signup-button.waitlist {
-  background: none; color: var(--blekk); border-color: var(--kant);
-}
-.signup-button.waitlist:hover { border-color: var(--merke); color: var(--merke); background: none; }
-.signup-button.signed-up {
-  background: none; border-color: var(--merke); color: var(--merke);
-}
+/* ---- dagmerket ----
+   Kvar dag timen gjeng er eit merke, og merket ber si eigi fylling. Ei
+   rad med tvo merke segjer «denne gjeng tvo gonger, og torsdagen er
+   fullare enn tysdagen» utan eit einaste ord. */
+.timedagar { display: flex; gap: var(--rom-2); flex-wrap: wrap; justify-content: flex-end; }
 
-.day-header {
-  font-family: var(--skrift-yver);
-  font-size: 1.1rem; font-weight: 600; font-stretch: var(--vidd-leiding);
-  letter-spacing: .05em; text-transform: uppercase;
-  color: var(--blekk);
-  margin: var(--rom-6) 0 var(--rom-3);
-  padding-bottom: var(--rom-2);
-  border-bottom: 1px solid var(--kant);
-  display: flex; justify-content: space-between; align-items: baseline;
+.dagmerke {
+  display: flex; flex-direction: column; align-items: stretch; gap: 3px;
+  min-width: 3.6rem; padding: var(--rom-2) var(--rom-2) var(--rom-1);
+  border: 1px solid var(--haarlina); border-radius: 2px;
+  background: var(--flate); cursor: pointer;
+  font-family: var(--skrift-tal); text-transform: none; letter-spacing: 0;
 }
-.day-date { font-family: var(--skrift-tal); font-size: .9rem; color: var(--blekk-svakt); letter-spacing: 0; }
+.dagmerke:hover:not(:disabled) { border-color: var(--klas); background: var(--flate); color: inherit; }
+.dagmerke[aria-pressed="true"] { border-color: var(--klas); box-shadow: inset 0 0 0 1px var(--klas); }
 
-/* Ein time som er ferdig er ikkje burte — han er berre ikkje lenger
-   noko du kann gjera noko med. */
-.event-card.finished, .event-card.avsluttet {
-  color: var(--blekk-svakt);
-  background: var(--ark-djup);
-  border-style: dashed;
-}
-
-.event-type {
-  font-family: var(--skrift-yver);
-  font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+.dagnamn {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
   color: var(--blekk-lys);
-  background: none; border: 0; padding: 0;
 }
-.event-header { display: flex; justify-content: space-between; gap: var(--rom-3); align-items: baseline; }
-.event-time { font-family: var(--skrift-tal); font-size: 1.05rem; }
-.event-location, .event-teacher { color: var(--blekk-lys); font-size: .9rem; }
-.event-actions { display: flex; gap: var(--rom-2); margin-top: var(--rom-4); }
+.dagmerke.idag .dagnamn { color: var(--klas); }
+
+/* Fyllingi som ei einaste stripa — her tel ein ikkje plassar, ein ser
+   proporsjonen. Rutone per plass stend i dokka, der det er rom til deim. */
+.dagfyll {
+  height: 4px; border-radius: 1px;
+  background: linear-gradient(to right,
+    var(--klas) 0 var(--fyll, 0%), var(--ark-djup) var(--fyll, 0%) 100%);
+}
+.dagtal { font-size: .72rem; color: var(--blekk); }
+.dagtal .av { color: var(--blekk-svakt); }
+
+.dagmerke.full .dagfyll { background: var(--klas); }
+.dagmerke.umme { opacity: .42; cursor: default; }
+.dagmerke:disabled { cursor: default; }
+
+@media (max-width: 52rem) {
+  .timerad { grid-template-columns: 4.5rem minmax(0, 1fr); }
+  .timedagar { grid-column: 1 / -1; justify-content: flex-start; }
+}
+
+/* ===================================================================
+   dokka
+   Ho held det du ser paa i ro medan resten rullar: du vel ein dag, og
+   timen stend her nede til du vel ein annan. Difor flyttar ingen ting
+   seg naar du samanliknar tvo dagar, og knappen er alltid paa den same
+   staden.
+
+   Botnen er festa og toppen flyt, so ho veks med innhaldet. Sida fær
+   luft under seg av same høgdi, elles ligg det siste ho hev aa syna
+   under dokka.
+   =================================================================== */
+:root { --dokkhogd: 0px; }
+
+.dokk {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  background: var(--flate);
+  border-top: 2px solid var(--klas);
+  box-shadow: var(--skugge-flytande);
+}
+.dokkinnhald {
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-4) var(--rom-5);
+  display: flex; align-items: center; gap: var(--rom-5); flex-wrap: wrap;
+  position: relative;
+}
+.dokkkva { flex: 1 1 12rem; }
+.dokktittel {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
+  font-weight: 500; font-size: 1.25rem; margin: 0;
+}
+.dokkkven { margin: 0; font-size: .88rem; color: var(--blekk-lys); }
+.dokknaar { display: flex; flex-direction: column; }
+.dokkdag { font-size: .82rem; color: var(--blekk-lys); text-transform: capitalize; }
+.dokkklokke { font-family: var(--skrift-tal); font-size: 1.05rem; }
+.dokkplassar { min-width: 9rem; }
+.dokkhandling { margin-left: auto; }
+.dokklukk {
+  position: absolute; top: var(--rom-2); right: var(--rom-3);
+  background: none; border: 0; padding: 0 var(--rom-2);
+  font-size: 1.4rem; line-height: 1; color: var(--blekk-svakt);
+  text-transform: none; letter-spacing: 0;
+}
+.dokklukk:hover { color: var(--blekk); background: none; border: 0; }
+
+@media (max-width: 44rem) {
+  .dokkinnhald { gap: var(--rom-3); padding: var(--rom-3) var(--rom-4); }
+  .dokkhandling { margin-left: 0; flex: 1 1 100%; }
+  .dokkhandling .btn-primary { width: 100%; }
+}
 
 /* ===================================================================
    statistikk (administrasjonen)
@@ -1216,3 +1239,62 @@ tbody tr:hover td { background: var(--ark-djup); }
   line-height: 1;
 }
 .teikning svg, .category-icon svg { width: 100%; height: 100%; display: block; }
+
+/* ---- plassmaalaren ----
+   Same ljoset som klippekortet, men med ei anna tyding: her er ei tend
+   rute ein *teken* plass. Regelen er den same i baae — ei tend rute er
+   noko som finst — og difor er ein full time heilt tend. Det er den
+   tilstanden Ida ser etter, og han treng ingen farge for aa skilja seg:
+   han er den einaste som ikkje hev mørke rutor att. */
+.plassmaalar {
+  --klippfarge: var(--klas);
+  --rib: 2px;
+  display: flex; gap: var(--rib);
+  height: 9px; margin: var(--rom-2) 0 var(--rom-1);
+  position: relative; isolation: isolate;
+}
+.plass {
+  position: relative; flex: 1 1 0; min-width: 2px;
+  border: 1px solid var(--haarlina); border-radius: 1px;
+  background: var(--ark-djup);
+}
+.plass.teken {
+  border-color: color-mix(in srgb, var(--klippfarge) 55%, var(--haarlina));
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 26%, #fff) 0%, transparent 100%),
+    color-mix(in srgb, var(--klippfarge) 84%, var(--flate));
+}
+.plass.teken::after {
+  content: ""; position: absolute; z-index: -1;
+  left: -4px; right: -4px; top: -5px; bottom: -5px; pointer-events: none;
+  background:
+    radial-gradient(ellipse 40% 30% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 80%, transparent) 0%,
+      color-mix(in srgb, var(--klippfarge) 44%, transparent) 38%, transparent 76%),
+    radial-gradient(ellipse 110% 80% at 50% 55%,
+      color-mix(in srgb, var(--klippfarge) 16%, transparent) 0%, transparent 82%);
+}
+.plass::before {
+  content: ""; position: absolute; z-index: 2;
+  top: -6px; bottom: -6px;
+  right: calc(-1px - var(--rib)); width: var(--rib);
+  background: var(--flate); pointer-events: none;
+}
+.plass:last-child::before { display: none; }
+
+.event-plassar { font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-lys); }
+.event-plassar b { color: var(--blekk); font-weight: 400; }
+.event-plassar .av { color: var(--blekk-svakt); }
+.event-rom { font-weight: 500; color: var(--blekk); }
+.fullmerke {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--klas); margin-left: var(--rom-2);
+}
+
+/* Ein full time er ikkje ein feil — han er eit utseld hus. Kortet fær
+   ei lina i merkefargen, ikkje ei aatvaring. */
+.event-card.full { border-left: 2px solid var(--klas); }
+
+@media (prefers-reduced-motion: reduce) { .plass.teken::after { display: none; } }

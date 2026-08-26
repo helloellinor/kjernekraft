@@ -52,7 +52,13 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	rooms, err := AdminDB.GetRooms()
+	if err != nil {
+		log.Printf("kunde ikkje henta rom: %v", err)
+	}
+
 	data := map[string]interface{}{
+		"Rooms":          rooms,
 		"Title":          t(lang, "admin.title"),
 		"Users":          users,
 		"Events":         events,

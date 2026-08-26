@@ -59,6 +59,22 @@ func Migrate(db *sql.DB) error {
 		color TEXT DEFAULT ''
 	);
 	`
+	// Rommet er ein ressurs, ikkje ein tekststreng. Salen tek 18 og
+	// Reformer tek 4, og det er den skilnaden heile studioet dreiar um:
+	// eit medlemskap gjeld salen, reformeren vert seld for seg.
+	//
+	// Fyrr laag rommet som fri tekst i events.location, og kapasiteten
+	// var eit tal nokon skreiv inn for haand per time — med 20 som
+	// utgangspunkt, uansett rom. Det er ei innbjoding til aa selja
+	// fjortan plassar som ikkje finst.
+	roomsTableSQL := `
+	CREATE TABLE IF NOT EXISTS rooms (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL UNIQUE,
+		capacity INTEGER NOT NULL,
+		active BOOLEAN DEFAULT TRUE
+	);
+	`
 	usersTableSQL := `
 	CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -227,6 +243,14 @@ func Migrate(db *sql.DB) error {
 	if _, err := db.Exec(membershipRulesTableSQL); err != nil {
 		return err
 	}
+	if _, err := db.Exec(roomsTableSQL); err != nil {
+		return err
+	}
+
+	// Dei røynlege romi i Storgaten 23.
+	if _, err := db.Exec(`INSERT OR IGNORE INTO rooms (name, capacity) VALUES ('Salen', 18), ('Reformer', 4)`); err != nil {
+		return err
+	}
 
 	log.Println("Migrering fullført: alle tabeller oppretta.")
 
@@ -248,7 +272,39 @@ func Migrate(db *sql.DB) error {
 		log.Println("Added last_billed column to user_memberships table")
 	}
 
+	// Rommet paa ein time. Timane som fanst fyrr peika paa rom gjenom
+	// fri tekst i `location`; dei vert kopla yver der namnet stemmer.
+	var romKolonne bool
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='room_id'").Scan(&romKolonne); err == nil && !romKolonne {
+		if _, err := db.Exec("ALTER TABLE events ADD COLUMN room_id INTEGER REFERENCES rooms(id)"); err != nil {
+			return err
+		}
+		if _, err := db.Exec(`UPDATE events SET room_id = (SELECT id FROM rooms WHERE rooms.name = events.location) WHERE room_id IS NULL`); err != nil {
+			return err
+		}
+		log.Println("La til room_id paa events og kopla dei mot romi.")
+	}
+
 	return nil
+}
+
+// GetRooms gjev romi studioet hev, med kapasiteten deira.
+func (db *Database) GetRooms() ([]models.Room, error) {
+	rows, err := db.Conn.Query(`SELECT id, name, capacity FROM rooms WHERE active ORDER BY capacity DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var romi []models.Room
+	for rows.Next() {
+		var r models.Room
+		if err := rows.Scan(&r.ID, &r.Name, &r.Capacity); err != nil {
+			return nil, err
+		}
+		romi = append(romi, r)
+	}
+	return romi, rows.Err()
 }
 
 // isColumnExistsError checks if the error is due to column already existing
@@ -581,12 +637,21 @@ func (db *Database) GetEventsForWeek(mondayDate time.Time) ([]models.Event, erro
 	// Calculate the Sunday of the same week
 	sundayDate := mondayDate.AddDate(0, 0, 6)
 
+	// Kapasiteten kjem av rommet. Timen kann setja henne lægre — ein
+	// workshop i salen med ti plassar — men han kann ikkje setja henne
+	// høgre enn rommet. Difor NULLIF: 0 tyder «ikkje sett».
 	query := `
-		SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color 
-		FROM events 
-		WHERE DATE(start_time) >= DATE(?) 
-		AND DATE(start_time) <= DATE(?)
-		ORDER BY start_time ASC
+		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time,
+		       COALESCE(e.location, ''), COALESCE(e.organizer, ''),
+		       COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''),
+		       COALESCE(NULLIF(e.capacity, 0), r.capacity, 0) AS plassar,
+		       e.current_enrolment, e.color,
+		       COALESCE(r.id, 0), COALESCE(r.name, e.location), COALESCE(r.capacity, 0)
+		FROM events e
+		LEFT JOIN rooms r ON r.id = e.room_id
+		WHERE DATE(e.start_time) >= DATE(?)
+		AND DATE(e.start_time) <= DATE(?)
+		ORDER BY e.start_time ASC
 	`
 	rows, err := db.Conn.Query(query, mondayDate.Format("2006-01-02"), sundayDate.Format("2006-01-02"))
 	if err != nil {
@@ -597,7 +662,10 @@ func (db *Database) GetEventsForWeek(mondayDate time.Time) ([]models.Event, erro
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime,
+			&event.Location, &event.Organizer, &event.ClassType, &event.TeacherName,
+			&event.Capacity, &event.CurrentEnrolment, &event.Color,
+			&event.RoomID, &event.RoomName, &event.RoomCapacity); err != nil {
 			return nil, err
 		}
 		events = append(events, event)

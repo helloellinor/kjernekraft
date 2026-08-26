@@ -1,28 +1,81 @@
 {{define "week_grid"}}
-<div class="week-grid">
-    {{range $index, $day := .WeekDays}}
-    {{$date := index $.WeekDates $index}}
-    {{$dateKey := $date.Format "2006-01-02"}}
-    {{$events := index $.EventsByDay $dateKey}}
-    <div class="day-column {{if lt $dateKey $.Today}}past{{end}}">
-        <div class="day-header">
-            <div class="day-name">{{$day}}</div>
-            <div class="day-date">{{formatDateShort $date}}</div>
+{{/* Vika klemd saman. Éi rad per time, eitt merke per dag han gjeng.
+     «Vinyasa Flow med Kristina 07:15» er éin time som gjeng tysdag og
+     torsdag — ikkje tvo. Fyrr stod dei som tvo like kort i kvar si
+     spalta, og lesaren laut lesa den same linja tvo gonger for aa sjaa
+     at det var den same. */}}
+<div class="timeplan">
+    {{range .Timebolkar}}
+    <div class="timerad">
+        <div class="timeklokke">
+            <b>{{.Start}}</b>
+            <span class="lengd">{{.Minutt}} min</span>
         </div>
-        {{if lt $dateKey $.Today}}
-            <div class="day-content">{{t $.Lang "timeplan.finished"}}</div>
-        {{else}}
-            <div class="day-events">
-                {{if $events}}
-                    {{range $events}}
-                    {{template "event_card" .}}
-                    {{end}}
-                {{else}}
-                    <div class="no-events">{{t $.Lang "timeplan.no_classes"}}</div>
-                {{end}}
-            </div>
-        {{end}}
+
+        <div class="timekva">
+            <h3 class="timetittel">{{.Tittel}}</h3>
+            <p class="timekven">{{.Laerar}}{{if .Rom}} <span class="timerom">{{.Rom}}</span>{{end}}</p>
+        </div>
+
+        {{/* Eitt merke per dag. Merket ber si eigi fylling, so ein ser
+             med det same at torsdagen er full og tysdagen ikkje. */}}
+        <div class="timedagar">
+            {{range .Framsyning}}
+            <button type="button"
+                    class="dagmerke{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}{{if .Full}} full{{end}}"
+                    data-event="{{.Event.ID}}"
+                    data-tittel="{{.Event.Title}}"
+                    data-laerar="{{.Event.TeacherName}}"
+                    data-rom="{{.Event.RoomName}}"
+                    data-dag="{{norskDato .Dato}}"
+                    data-klokke="{{.Event.StartTime.Format "15:04"}}–{{.Event.EndTime.Format "15:04"}}"
+                    data-teke="{{.Event.CurrentEnrolment}}"
+                    data-plassar="{{.Event.Capacity}}"
+                    data-full="{{.Full}}"
+                    data-umme="{{.ErUmme}}"
+                    {{if .ErUmme}}disabled{{end}}
+                    aria-label="{{.DagNamn}} — {{.Event.CurrentEnrolment}} av {{.Event.Capacity}} plassar">
+                <span class="dagnamn">{{.DagNamn}}</span>
+                <span class="dagfyll" style="--fyll: {{.Prosent}}%"></span>
+                <span class="dagtal">{{.Event.CurrentEnrolment}}<span class="av">/{{.Event.Capacity}}</span></span>
+            </button>
+            {{end}}
+        </div>
     </div>
+    {{else}}
+    <p class="tomt midt">{{t .Lang "timeplan.no_classes"}}</p>
     {{end}}
 </div>
+
+{{/* ---- dokka ----
+     Ho held det du ser paa i ro medan resten rullar. Vel du ein dag i
+     ei rad, stend timen her nede til du vel ein annan — du kann halda
+     fram med aa skanna vika utan at noko flyttar seg, og
+     paameldingsknappen er alltid paa den same staden.
+
+     Det var dette som gjorde timeplanen lang fyrr: kvart kort bar heile
+     detaljen sin, so vika vart eit tårn. No ber radi berre det ein
+     skannar etter, og detaljen bur i dokka. */}}
+<aside class="dokk" id="timedokk" hidden aria-live="polite">
+    <div class="dokkinnhald">
+        <div class="dokkkva">
+            <h3 class="dokktittel" id="dokk-tittel"></h3>
+            <p class="dokkkven"><span id="dokk-laerar"></span> <span class="timerom" id="dokk-rom"></span></p>
+        </div>
+        <div class="dokknaar">
+            <span class="dokkdag" id="dokk-dag"></span>
+            <span class="dokkklokke" id="dokk-klokke"></span>
+        </div>
+        <div class="dokkplassar">
+            <div class="plassmaalar" id="dokk-maalar"></div>
+            <span class="event-plassar"><b id="dokk-teke"></b><span class="av" id="dokk-av"></span></span>
+        </div>
+        <div class="dokkhandling">
+            <button type="button" class="btn-primary" id="dokk-knapp"
+                    data-meld-paa="{{t .Lang "timeplan.signup"}}"
+                    data-venteliste="{{t .Lang "timeplan.waitlist"}}"></button>
+        </div>
+        <button type="button" class="dokklukk" id="dokk-lukk" aria-label="{{t .Lang "timeplan.close"}}">&times;</button>
+    </div>
+</aside>
 {{end}}
