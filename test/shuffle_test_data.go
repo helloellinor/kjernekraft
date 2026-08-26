@@ -48,7 +48,7 @@ func ShuffleTestData() error {
 		{Type: "fascia", Color: "", Titles: []string{"Fascia Movement", "Fascia Flyt"}},
 	}
 
-	// Dei som faktisk held timar i Storgaten 23.
+	// Dei som faktisk held timar i Storgata 23.
 	teachers := []string{
 		"Gry", "Ida", "Kristina", "Carla", "Cyrena",
 		"Torunn", "Amanda", "Mariamah Aurora", "Leon", "Veronica",

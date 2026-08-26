@@ -247,7 +247,7 @@ func Migrate(db *sql.DB) error {
 		return err
 	}
 
-	// Dei røynlege romi i Storgaten 23.
+	// Dei røynlege romi i Storgata 23.
 	if _, err := db.Exec(`INSERT OR IGNORE INTO rooms (name, capacity) VALUES ('Salen', 18), ('Reformer', 4)`); err != nil {
 		return err
 	}
