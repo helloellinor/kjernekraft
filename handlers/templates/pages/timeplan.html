@@ -4,17 +4,25 @@
          eiga eska under — ein pil, eit talfelt, ein pil til — og sa det
          same som tittelen alt sa. No er vika i tittelen det ein klikkar
          paa, og pilene flankerer henne. */}}
+    {{/* Vikenummeret *er* kontrollen. Ein skriv talet ein vil til, som
+         i eit sidetal — og pilene tek deg eitt steg naar ein ikkje veit
+         nummeret. Nedfallslista er burte: ho var eit steg til for noko
+         ein alt kunde skriva. */}}
     <header class="timehovudlinje">
         <h1 class="page-title">
             {{t .Lang "timeplan.title"}}<span class="vekeveljar">
                 <button type="button" class="vekepil" onclick="navigateWeek(-1)"
                         {{if not .CanGoBack}}disabled{{end}}
-                        aria-label="{{t .Lang "timeplan.prev_week"}}">&lsaquo;</button><button
-                        type="button" class="veketittel" id="veke-knapp"
-                        aria-expanded="false" aria-controls="vekekorg">{{.WeekTitle}}</button><button
+                        aria-label="{{t .Lang "timeplan.prev_week"}}">&lsaquo;</button><input
+                        type="text" class="vekefelt" id="veke-felt"
+                        value="{{.WeekNumber}}" inputmode="numeric" maxlength="2"
+                        autocomplete="off" spellcheck="false"
+                        data-veke="{{.WeekNumber}}" data-offset="{{.WeekOffset}}"
+                        aria-label="{{t .Lang "timeplan.week"}}"><button
                         type="button" class="vekepil" onclick="navigateWeek(1)"
                         aria-label="{{t .Lang "timeplan.next_week_btn"}}">&rsaquo;</button>
             </span>
+            <span class="vekeord">{{.WeekTitle}}</span>
         </h1>
 
         <div class="filters">
@@ -32,16 +40,6 @@
             </select>
         </div>
     </header>
-
-    {{/* Korgi med vikone. Ho stend lukka til nokon spør etter henne, og
-         ho hev ingi rulling: sju vikor er nok til aa planleggja med, og
-         pilene tek deg lenger. */}}
-    <div class="vekekorg" id="vekekorg" hidden role="listbox" aria-label="{{t .Lang "timeplan.week"}}">
-        {{range .Vekeval}}
-        <a href="?week={{.Offset}}" class="vekeval{{if .ErNo}} no{{end}}"
-           role="option" aria-selected="{{.ErNo}}">{{.Tittel}}</a>
-        {{end}}
-    </div>
 
     {{template "week_grid" .}}
 </div>

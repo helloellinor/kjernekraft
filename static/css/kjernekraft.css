@@ -617,9 +617,24 @@ select, textarea {
   border-radius: 2px;
   width: 100%;
 }
-input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--merke);
-  box-shadow: 0 0 0 1px var(--merke);
+/* ---- fasetten ----
+   Kanten aat eit felt i fokus er tvo linor og ikkje ei: sjølve kanten i
+   merkefargen, og ei lina til inni honom. Det er dei tvo som gjev
+   djupna — feltet ser ut til aa liggja *i* arket og ikkje paa det, som
+   ei fasettsliping.
+   
+   Ho er skrivi ein stad og nytta av alle: kvar ny kontroll skal falla i
+   det same sporet utan at nokon tenkjer paa det. */
+:root {
+  --fasett:
+    inset 0 1px 2px color-mix(in srgb, var(--blekk) 14%, transparent),
+    0 0 0 1px var(--merke);
+}
+
+input:focus, select:focus, textarea:focus, .soke:focus {
+  outline: none;
+  border-color: var(--merke);
+  box-shadow: var(--fasett);
 }
 select {
   /* Nedfallslista er den eine tingen som *faktisk* flyt. */
@@ -710,6 +725,41 @@ tbody tr:hover td { background: var(--ark-djup); }
 .vekeveljar {
   display: inline-flex; align-items: baseline; gap: .1em;
   margin-left: .45em; vertical-align: baseline;
+}
+
+.page-title .vekefelt {
+  /* Talet er ein del av tittelen, ikkje eit felt paa honom. Ingi ramma,
+     ingi flata — berre tale i den same skrifti, og ein blinkande markør
+     som segjer at ein kann skriva i det.
+
+     mix-blend-mode gjer at tale tek ljosstyrken fraa det som ligg bak i
+     staden for aa liggja *paa* det. Paa eit ljost ark mørknar det, paa
+     eit mørkt lysnar det — same tale, same relasjon til grunnen, utan
+     at nokon skriv tvo fargar. */
+  font-family: inherit; font-size: inherit;
+  font-stretch: var(--vidd-tittel); font-weight: 700;
+  letter-spacing: inherit; line-height: 1;
+  width: 2.2ch; field-sizing: content;
+  padding: 0; margin: 0;
+  border: 0; background: none; border-radius: 0;
+  color: var(--blekk);
+  mix-blend-mode: multiply;
+  caret-color: var(--klas);
+  text-align: center;
+}
+:root:not([data-theme="light"]) .page-title .vekefelt { mix-blend-mode: screen; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .page-title .vekefelt { mix-blend-mode: multiply; } }
+:root[data-theme="dark"] .page-title .vekefelt { mix-blend-mode: screen; }
+
+.page-title .vekefelt:focus { outline: none; box-shadow: none; background: none; border: 0; }
+.page-title .vekefelt::selection { background: color-mix(in srgb, var(--klas) 35%, transparent); }
+
+/* Ordet stend attmed og er berre eit ord — «denne uka» — so ein ser kva
+   talet tyder utan aa rekna. */
+.vekeord {
+  font-stretch: var(--vidd-merkelapp); font-weight: 400;
+  font-size: .4em; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--blekk-svakt); margin-left: .35em; white-space: nowrap;
 }
 
 .veketittel, .vekepil {
@@ -1083,7 +1133,7 @@ tbody tr:hover td { background: var(--ark-djup); }
 /* ===================================================================
    statistikk (administrasjonen)
    =================================================================== */
-.stats-grid, .admin-stats { display: grid; gap: 1px; background: var(--haarlina); border: 1px solid var(--haarlina); margin-bottom: var(--rom-6); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+.gamal-stats-grid { display: grid; gap: 1px; background: var(--haarlina); border: 1px solid var(--haarlina); margin-bottom: var(--rom-6); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
 .stat-item { background: var(--flate); padding: var(--rom-4) var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-1); }
 .stat-value { font-family: var(--skrift-tal); font-size: 2rem; line-height: 1; color: var(--blekk); }
 .stat-label {
@@ -1677,3 +1727,44 @@ tbody tr:hover td { background: var(--ark-djup); }
   .folk-hovud { grid-template-columns: minmax(0, 1fr); gap: var(--rom-1); }
   .folk-sist { text-align: left; }
 }
+
+/* ===================================================================
+   tal som setning
+   Tri flisor med eit tal og ei merkelapp under er ein maate aa unngaa
+   aa skriva ei setning paa. Lesaren lyt setja «6» og «TOTALT ANTALL
+   BRUKERE» saman sjølv; «6 medlemer» er alt sett saman.
+
+   Breiddeaksa ber hierarkiet i staden for kassane: tale vidt og feitt,
+   ordet smalt attmed, setningi imillom i vanleg lesetekst. Same regelen
+   som elles — breidd tyder rang — berre nytta i ei linja.
+   =================================================================== */
+.tal-setning {
+  font-size: clamp(1.15rem, 2.4vw, 1.6rem);
+  line-height: 1.55;
+  max-width: 40ch;
+  color: var(--blekk-lys);
+  margin: 0 0 var(--rom-6);
+}
+
+.tal-setning .tal {
+  font-family: var(--skrift-yver);
+  font-stretch: 150%; font-weight: 700;
+  font-size: 1.25em; line-height: 1;
+  color: var(--blekk);
+  font-variant-numeric: tabular-nums;
+  margin-right: .06em;
+}
+
+.tal-setning .ord {
+  font-family: var(--skrift-yver);
+  font-stretch: var(--vidd-merkelapp); font-weight: 500;
+  letter-spacing: .06em; text-transform: uppercase;
+  font-size: .72em;
+  color: var(--blekk);
+}
+
+/* Det som ventar paa deg er det einaste ein kann gjera noko med, og
+   difor det einaste som er ei lenkja. */
+.tal-lenkje { text-decoration: none; border-bottom: 2px solid var(--togu); }
+.tal-lenkje .tal { color: var(--togu); }
+.tal-lenkje:hover .tal, .tal-lenkje:hover .ord { color: var(--togu); }

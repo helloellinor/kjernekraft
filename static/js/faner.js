@@ -91,29 +91,3 @@
         startAlle();
     }
 })();
-
-// Vikeveljaren. Eit klikk paa vika i tittelen opnar dei sju næraste.
-(function () {
-    "use strict";
-    var knapp = document.getElementById("veke-knapp");
-    var korg = document.getElementById("vekekorg");
-    if (!knapp || !korg) return;
-
-    function set(open) {
-        korg.hidden = !open;
-        knapp.setAttribute("aria-expanded", open ? "true" : "false");
-    }
-
-    knapp.addEventListener("click", function () {
-        set(korg.hidden);
-    });
-
-    // Eit klikk utanfor lukkar. Ein veljar som krev at du finn knappen
-    // att for aa verta kvitt honom er ein veljar som stend i vegen.
-    document.addEventListener("click", function (e) {
-        if (!korg.hidden && !korg.contains(e.target) && e.target !== knapp) set(false);
-    });
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && !korg.hidden) { set(false); knapp.focus(); }
-    });
-})();
