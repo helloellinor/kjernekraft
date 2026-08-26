@@ -595,12 +595,30 @@ main {
 
    Og glødi var stengd inne. Ho laag paa `z-index: -1` inne i eit
    isolert lag, so ho vart maala *under* kortet og stogga daudt ved
-   kanten. Ljos stoggar ikkje ved ei kanta. Ho ligg yver alt no, med
-   `pointer-events: none`, og renn ut yver kortet slik ho skal.
+   kanten. Ljos stoggar ikkje ved ei kanta.
+
+   Tridje gongen: ho laag paa kvart einskilt klipp, og kvar glød var ein
+   `::after` med `ellipse 150%` i seg. Ein gradient som er 150% av kassa
+   si er ikkje gjenomsynleg naar kassa sluttar — han vert kutta midt i,
+   og kanten stend att som ei rett lina. Ti klipp gav difor ti ljose
+   rektangel med synlege skjøytar, og bandet saag ut som ei rekkja med
+   klossar. Kommentaren under sa alt at «lina er stripa og bloomen
+   samanhengande»; koden gjorde det motsette.
+
+   No er glødi *éin* ting som ligg paa heile bandet, og lengdi hennar er
+   rekna av kor mange klipp som er tende. Kvart lag fell til
+   gjenomsynleg innanfor si eigi kassa — ingen gradient naar kanten med
+   farge att — og endane er maska av, so ljoset renn ut i staden for aa
+   slutta. Lina er framleis stripa av ribbone; det er ho som er
+   gjenstanden, og glødi som ikkje er det.
    =================================================================== */
 .klippemaalar, .progress-segments {
   --klippfarge: var(--produkt, var(--togu));
   --rib: 3px;
+  /* Malen set desse tvo. Utan deim er ingen ting tendt, og daa er det
+     rett at det ikkje glør. */
+  --tende: 0;
+  --alle: 1;
   display: flex;
   gap: var(--rib);
   height: 2px;
@@ -632,29 +650,44 @@ main {
 }
 
 /* Glødi. Fire lag som i ordboki: utbrend kjerne, fargen tett kring han,
-   ein vid veik halo, og ein bloom under. Ho ligg yver kortet og renn ut
-   yver kanten — det er nettupp det som gjer henne til ljos. */
-.klipp.tend::after, .progress-segment.filled::after {
+   ein vid veik halo, og ein bloom under. Ho ligg paa heile bandet — ein
+   glød, ikkje ein per klipp — og strekkjer seg so langt som dei tende
+   klippi rekk.
+
+   Kvart lag er `to bottom` og fell til gjenomsynleg fyre det naar topp
+   og botn av kassa. Difor finst det ingi rett lina nokon stad i henne.
+   Endane er maska, so ljoset renn ut der klippi sluttar. */
+.klippemaalar::after, .progress-segments::after {
   content: "";
   position: absolute;
-  left: -10px; right: -10px; top: -13px; bottom: -13px;
   pointer-events: none;
+  left: 0; top: -13px; bottom: -13px;
+
+  /* Breiddi aat eit klipp, og so langt dei tende rekk. Gapi millom
+     klippi høyrer med: sju klipp er sju breidder og seks gap. */
+  --klippbreidd: calc((100% - (var(--alle) - 1) * var(--rib)) / var(--alle));
+  width: calc(var(--tende) * var(--klippbreidd) + (var(--tende) - 1) * var(--rib));
+
   background:
-    radial-gradient(ellipse 26% 9% at 50% 50%,
-      color-mix(in srgb, var(--klippfarge) 34%, #fff) 0%,
-      transparent 100%),
-    radial-gradient(ellipse 42% 22% at 50% 50%,
-      color-mix(in srgb, var(--klippfarge) 85%, transparent) 0%,
-      color-mix(in srgb, var(--klippfarge) 45%, transparent) 38%,
-      transparent 78%),
-    radial-gradient(ellipse 100% 60% at 50% 50%,
-      color-mix(in srgb, var(--klippfarge) 24%, transparent) 0%,
-      color-mix(in srgb, var(--klippfarge) 7%, transparent) 46%,
-      transparent 86%),
-    radial-gradient(ellipse 150% 120% at 50% 58%,
-      color-mix(in srgb, var(--klippfarge) 12%, transparent) 0%,
-      transparent 80%);
+    linear-gradient(to bottom, transparent 46%,
+      color-mix(in srgb, var(--klippfarge) 34%, #fff) 50%, transparent 54%),
+    linear-gradient(to bottom, transparent 36%,
+      color-mix(in srgb, var(--klippfarge) 72%, transparent) 50%, transparent 64%),
+    linear-gradient(to bottom, transparent 16%,
+      color-mix(in srgb, var(--klippfarge) 22%, transparent) 50%, transparent 84%),
+    linear-gradient(to bottom, transparent 0%,
+      color-mix(in srgb, var(--klippfarge) 9%, transparent) 50%, transparent 100%);
+
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 9px,
+                        black calc(100% - 9px), transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0, black 9px,
+                        black calc(100% - 9px), transparent 100%);
 }
+
+/* Er alt tendt, skal ljoset naa heilt ut til hi sida — daa er det ikkje
+   ein ende, det er kanten av kortet. */
+.klippemaalar[style*="--tende: 0"]::after,
+.progress-segments[style*="--tende: 0"]::after { display: none; }
 
 /* Ribbone skjer *lina*, ikkje glødi.
    Dei gjekk tvert gjenom heile halosen fyrr, og daa vart bandet til ei
@@ -679,7 +712,7 @@ main {
 .kursmaalar        { --klippfarge: var(--tuneup); }
 
 @media (prefers-reduced-motion: reduce) {
-  .klipp.tend::after, .progress-segment.filled::after { display: none; }
+  .klippemaalar::after, .progress-segments::after { display: none; }
 }
 
 /* ===================================================================

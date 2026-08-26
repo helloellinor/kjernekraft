@@ -28,7 +28,7 @@
             </div>
             
             <div class="progress-bar">
-                <div class="progress-segments">
+                <div class="progress-segments" style="--tende: {{.RemainingKlipp}}; --alle: {{.TotalKlipp}}">
                     {{range $i := seq .RemainingKlipp}}
                     <div class="progress-segment filled"></div>
                     {{end}}
