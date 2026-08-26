@@ -82,7 +82,8 @@
     "close": "Close",
     "of": "of",
     "prev_week": "Previous week",
-    "next_week_btn": "Next week"
+    "next_week_btn": "Next week",
+    "type_week": "type week number"
   },
   "dashboard": {
     "welcome_user": "Welcome, {{.UserName}}!",

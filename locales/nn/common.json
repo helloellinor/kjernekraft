@@ -82,7 +82,8 @@
     "close": "Lukk",
     "of": "av",
     "prev_week": "Førre vika",
-    "next_week_btn": "Neste vika"
+    "next_week_btn": "Neste vika",
+    "type_week": "skriv vekenummer"
   },
   "dashboard": {
     "welcome_user": "Velkommen, {{.UserName}}!",
