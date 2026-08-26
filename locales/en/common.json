@@ -237,7 +237,12 @@
       "error_prefix": "Error: "
     },
     "actions": "Actions",
-    "price_in_kroner": "Price in kroner"
+    "price_in_kroner": "Price in kroner",
+    "tab_overview": "Overview",
+    "tab_schedule": "Schedule",
+    "tab_prices": "Prices",
+    "tab_people": "People",
+    "tab_settings": "Settings"
   },
   "terms": {
     "title": "Terms and conditions"

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750" role="img" aria-labelledby="merketittel">
+  <title id="merketittel">Kjernekraft Oslo</title>
+  <defs>
+    <!-- Armarne er klipte vassrett der glyfen sluttar, ikkje vinkelrett
+         paa seg sjølve. Difor eit klipp og ikkje runde endar. -->
+    <clipPath id="glyfboks">
+      <rect x="0.0" y="218.0" width="120.0" height="158.0"/>
+    </clipPath>
+    <g id="kjernekraft-k" clip-path="url(#glyfboks)" fill="none" stroke="currentColor" stroke-linecap="butt">
+      <path d="M 10.0 218.0 V 376.0" stroke-width="20.0"/>
+      <path d="M 20.0 297.0 L 101.5 218.0" stroke-width="17.7"/>
+      <path d="M 20.0 297.0 L 106.0 376.0" stroke-width="17.7"/>
+    </g>
+  </defs>
+  <!-- Ein K per kompassstrek. Merket er det same teiknet aatte gonger,
+       snutt kring midten — ingi av deim er teikna for seg. -->
+  <g>
+    <use href="#kjernekraft-k" transform="rotate(0 375.0 375.0)"/>
+    <use href="#kjernekraft-k" transform="rotate(45 375.0 375.0)"/>
+    <use href="#kjernekraft-k" transform="rotate(90 375.0 375.0)"/>
+    <use href="#kjernekraft-k" transform="rotate(135 375.0 375.0)"/>
+    <use href="#kjernekraft-k" transform="rotate(180 375.0 375.0)"/>
+    <use href="#kjernekraft-k" transform="rotate(225 375.0 375.0)"/>
+    <use href="#kjernekraft-k" transform="rotate(270 375.0 375.0)"/>
+    <use href="#kjernekraft-k" transform="rotate(315 375.0 375.0)"/>
+  </g>
+</svg>
