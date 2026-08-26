@@ -2038,33 +2038,28 @@ tbody tr:hover td { background: var(--ark-djup); }
 
 .regel-meir { padding: 0 var(--rom-4) var(--rom-3); }
 
-/* Regelen sjølv. Det som stend her gjeld alle komande timar; datoane
-   under er berre utslagi, og dei hev éin knapp kvar. */
-.regel-endring {
-  display: flex; align-items: baseline; gap: var(--rom-4); flex-wrap: wrap;
-  padding-bottom: var(--rom-3);
-  border-bottom: 1px solid var(--haarlina);
-  margin-bottom: var(--rom-2);
+/* Tvo setningar og ei skildring, i same setningsforma som skjemaet
+   yver — merkelappane sa det same som felti og stod berre i vegen.
+   Fyrste setningi er regelen og gjeld alle komande timar; andre er den
+   einskilde timen, der dagveljaren styrer kva vikaren og avlysingi
+   gjeld. Lina imillom skil dei tvo rekkjeviddone. */
+.regel-setning {
+  padding-bottom: var(--rom-2);
 }
-.regel-endring label { display: flex; align-items: baseline; gap: var(--rom-2); }
-.regel-endring input { width: auto; flex: 0 1 auto; padding: var(--rom-1) var(--rom-2); }
-.regel-laerar { flex-basis: 9rem; }
-.regel-vink { font-size: .78rem; color: var(--blekk-svakt); }
+.regel-vink { font-size: .78rem; color: var(--blekk-svakt); white-space: nowrap; }
 
-.regel-timar { list-style: none; margin: 0; padding: 0; }
-.time-dato { font-family: var(--skrift-tal); font-size: .88rem; min-width: 3.5rem; }
-.regel-time {
-  display: flex; align-items: center; gap: var(--rom-3); flex-wrap: wrap;
-  padding: var(--rom-2) 0;
-  border-bottom: 1px solid var(--haarlina);
+.regel-meir .regel-skildring {
+  width: 100%; max-width: 54ch;
+  font-size: .92rem;
+  margin-bottom: var(--rom-3);
 }
-.regel-time:last-child { border-bottom: 0; }
 
-.time-plassar { font-family: var(--skrift-tal); font-size: .88rem; color: var(--blekk-lys); margin-left: auto; }
-.regel-time .time-avlys { flex: none; }
-
-.regel-time.avlyst { color: var(--blekk-svakt); }
-.regel-time.avlyst .time-dato { text-decoration: line-through; }
+.time-setning {
+  border-top: 1px solid var(--haarlina);
+  padding-top: var(--rom-2);
+}
+.time-plassar { font-family: var(--skrift-tal); font-size: .88rem; color: var(--blekk-lys); }
+.time-setning .time-avlys { margin-left: var(--rom-3); }
 
 @media (max-width: 48rem) {
   .regel-hovud { grid-template-columns: minmax(0, 1fr); gap: var(--rom-1); }
@@ -2462,3 +2457,43 @@ a.byteveg {
   .byterad { grid-template-columns: 1fr auto; gap: var(--rom-2); }
   .bytesetning, .byterad form, .byterad .byteveg { grid-column: 1 / -1; }
 }
+
+/* ===================================================================
+   prisane (administrasjonen)
+   Same form som profilen: kvart felt er skrivbart der det står, det
+   endra feltet ber merket sjølv, og dokka nedst ber handlinga.
+
+   Før hadde kvar rad tre knappar — «Rediger pris», «Lagre», «Avbryt» —
+   der dei to siste stod gøymde til du trykte den første. Tre knappar per
+   rad, ganga med talet på medlemskap, for å endre eitt tal.
+   =================================================================== */
+.prisliste { display: flex; flex-direction: column; gap: var(--rom-6); }
+
+/* Eitt medlemskap er ei setning: kva det heiter, kva det kostar, kor
+   lenge du bind deg. Lufta mellom dei er det som skil dei — same grepet
+   som mellom bolkane i profilen, og utan ei einaste overskrift. */
+.prislapp { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2); }
+.prislapp .lapprad { align-items: baseline; flex-wrap: wrap; }
+
+/* Namnet er det største i lappen, av di det er det ein leitar etter når
+   ein skal finne rett medlemskap. */
+.prisnamn {
+  font-family: var(--skrift-yver); font-size: 1.25rem;
+  font-stretch: var(--vidd-yver); font-weight: 500;
+  min-width: 10rem;
+}
+
+/* Tal skal stå i talskrifta og vere så breie som talet, ikkje som
+   spalta. `field-sizing: content` på .lappfelt gjer resten. */
+.talfelt {
+  font-family: var(--skrift-tal);
+  min-width: 4rem;
+  text-align: right;
+}
+/* Nettlesaren sine opp/ned-pilar tek plass og gjer feltet breiare enn
+   talet. Ein skriv talet; ein klikkar det ikkje opp tjue gonger. */
+.talfelt::-webkit-outer-spin-button,
+.talfelt::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.talfelt { -moz-appearance: textfield; appearance: textfield; }
+
+.priseining { color: var(--blekk-lys); font-size: .92rem; }

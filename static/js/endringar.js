@@ -1,18 +1,25 @@
-// Profilen.
+// Ulagra endringar.
 //
-// Kvart felt merkjer seg sjølv naar det er ulikt det som er lagra, og
-// dokka nedst ber handlingi. Ingen tekst segjer «du hev ulagra
+// Kvart felt merkjer seg sjølv når det er ulikt det som er lagra, og
+// dokka nedst ber handlinga. Ingen tekst seier «du har ulagra
 // endringar» — feltet *ser* endra ut, og det er nok.
+//
+// Dette låg i profil.js og kunne berre profilen: han slo opp #profil og
+// #lagre-dokk med id. No tek han kvart skjema som er merkt
+// `data-endringar` og finn dokka si gjennom `data-dokk`. Prisane i
+// administrasjonen er den andre bruken.
 (function () {
     "use strict";
 
-    var skjema = document.getElementById("profil");
-    var dokk = document.getElementById("lagre-dokk");
-    if (!skjema || !dokk) return;
+    [].slice.call(document.querySelectorAll("form[data-endringar]")).forEach(start);
 
-    var tal = document.getElementById("endringstal");
-    var angra = document.getElementById("angra");
-    var felt = [].slice.call(skjema.querySelectorAll("input:not([type=hidden])"));
+    function start(skjema) {
+    var dokk = document.getElementById(skjema.dataset.dokk);
+    if (!dokk) return;
+
+    var tal = dokk.querySelector(".endringstal");
+    var angra = dokk.querySelector("[data-angra]");
+    var felt = [].slice.call(skjema.querySelectorAll("input:not([type=hidden]), select, textarea"));
 
     // Yverskrifta er ein contenteditable <h1> og ikkje eit <input>, av
     // di ho skal brjota som all annan tekst paa sida. Ho speglar seg inn
@@ -107,4 +114,5 @@
     });
 
     maal();
+    }
 })();

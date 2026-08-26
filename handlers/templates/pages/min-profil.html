@@ -16,7 +16,7 @@
 
          Fødselsdagen høyrer til namnet — det er kven du er — og stend
          difor rett under. Adressa er noko anna, og fær luft fyre seg. */}}
-    <form class="profilskjema" id="profil" method="POST" action="/elev/min-profil">
+    <form class="profilskjema" id="profil" data-endringar data-dokk="lagre-dokk" method="POST" action="/elev/min-profil">
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
         <div class="lapp lapp-kven">
@@ -83,7 +83,7 @@
                   data-ein="{{t .Lang "profile.changed_one"}}"
                   data-fleire="{{t .Lang "profile.changed_many"}}"></span>
             <div class="dokkhandling">
-                <button type="button" class="btn" id="angra">{{t .Lang "profile.discard"}}</button>
+                <button type="button" class="btn" id="angra" data-angra>{{t .Lang "profile.discard"}}</button>
                 <button type="submit" form="profil" class="btn-primary">{{t .Lang "profile.save"}}</button>
             </div>
         </div>
