@@ -1,15 +1,13 @@
 {{define "content"}}
 
-<div class="sida">
-    <h1 class="page-title">{{t .Lang "payments.title"}}</h1>
-    <p class="page-description">
-        {{t .Lang "payments.description"}}
-    </p>
-    
-    <div class="content-grid two-column-grid">
-        {{template "payment_methods_container" .}}
-        {{template "charges_container" .}}
-    </div>
+<h1 class="page-title">{{t .Lang "payments.title"}}</h1>
+<p class="page-description">
+    {{t .Lang "payments.description"}}
+</p>
+
+<div class="two-column-grid">
+    {{template "payment_methods_container" .}}
+    {{template "charges_container" .}}
 </div>
 
 {{template "betaling_scripts" .}}

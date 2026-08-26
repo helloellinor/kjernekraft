@@ -25,7 +25,7 @@
         data-paameld="{{.Event.IsUserSignedUp}}"
         {{if .ErUmme}}disabled{{end}}
         aria-label="{{.Merkelapp}}">
-  <svg class="merkeform" viewBox="0 0 {{.Form.Breidd}} {{.Form.Hogd}}"
+  <svg class="merkeform" viewBox="{{.Form.ViewBox}}"
        width="{{.Form.Breidd}}" height="{{.Form.Hogd}}" aria-hidden="true" focusable="false">
     {{/* Tri lag av den same silhuetten: ringen (berre naar merket er
          valt), lina, og flata med fordjupingi i. */}}

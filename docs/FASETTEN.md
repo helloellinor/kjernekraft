@@ -119,7 +119,37 @@ To ting er verde aa merkja seg:
 
 ---
 
-## 5. Tvo maatar aa gjera henne gal paa
+## 5. Det eine holet som hev tvo kantar
+
+Regelen ovanfor — *ingen hovding i botnen* — gjeld felt. Eit felt er ei
+**grunn** fordjuping i arket: ljoset kjem inn ovanfraa og fell paa ein
+botn du ikkje ser. Difor hev det berre ein myrk yverkant.
+
+Den tome ruta i vika er noko anna. Der gjeng det ingen time den dagen,
+og plassen skal lesast som eit **tomt spor** — eit hol med ein botn du
+faktisk ser ned i. Eit slikt hol hev tvo kantar: skuggen fraa den øvre
+lippa, og ljoset som slær i botnen og kastar att paa den nedre.
+
+```css
+.daudflate { fill: color-mix(in srgb, var(--blekk) 6%, transparent); }
+.dauddjup  { fill: color-mix(in srgb, var(--blekk) 28%, transparent); }
+.daudljos  { fill: color-mix(in srgb, var(--flate) 80%, transparent); }
+```
+
+Ljoset er `--flate` og ikkje kvitt. `--flate` er alltid den ljosaste
+flata i temaet — kalkstein i det ljose, ei tone yver arket i det myrke —
+so den nedre lippa lyser i baae utan at nokon skriv henne om att.
+
+Dette er **den einaste** staden i systemet med eit hovding. Kjem det
+fleire, er regelen brote: ein fasett som stend paa alt, tyder ikkje noko
+paa noko.
+
+Ho stod som ein stipla kasse fyrr. Ein stipla kasse er eit *umriss*, og
+eit umriss les seg som noko som skal koma — det motsette av det sanne.
+
+---
+
+## 6. Tvo maatar aa gjera henne gal paa
 
 Baae vart gjorde medan timemerket vart teikna, og baae er lette aa gjera
 om att.
@@ -131,11 +161,11 @@ uppblaast ut, som ein knapp fraa 2008. Fasetten her hev **ikkje** noko
 hovding. Ho er grunn, hard og einsidig, og det er difor ho les seg som
 trykt og ikkje som stempla.
 
-**Fordjupingi som ein glød i det myrke.** Sjaa neste bolken.
+**Fordjupingi som ein glød i det myrke.** Sjaa bolk 7.
 
 ---
 
-## 6. Eit spursmaal som stend ope
+## 7. Eit spursmaal som stend ope
 
 `--fordjuping` er rekna av `--blekk`. I det ljose temaet er blekket
 myrkt, og skuggen vert ei myrk lina i yverkanten — rett.
@@ -160,7 +190,7 @@ kant. Er svaret «kant», er det val 2 som gjeld.
 
 ---
 
-## 7. Regelen
+## 8. Regelen
 
 > Treng ein ny kontroll djupn, skal han nytta `--fordjuping` eller
 > `--fasett` — ikkje ein ny skugge. Finn du eit `box-shadow` i ein

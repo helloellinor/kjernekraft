@@ -1,14 +1,12 @@
 {{define "content"}}
 
-<div class="sida">
-    <h1 class="page-title">{{.Helsing}}</h1>
-    
-    <div class="selector-container">
-        {{template "signed_up_classes_container" .}}
-        {{template "todays_classes_container" .}}
-        {{template "dashboard_membership_container" .}}
-        {{template "dashboard_klippekort_container" .}}
-    </div>
+<h1 class="page-title">{{.Helsing}}</h1>
+
+<div class="selector-container">
+    {{template "signed_up_classes_container" .}}
+    {{template "todays_classes_container" .}}
+    {{template "dashboard_membership_container" .}}
+    {{template "dashboard_klippekort_container" .}}
 </div>
 
 {{template "dashboard_scripts" .}}

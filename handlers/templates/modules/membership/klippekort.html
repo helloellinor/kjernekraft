@@ -4,12 +4,11 @@
 <div class="klippekort-cards">
     {{range .Klippekort}}
     <div class="klippekort-card {{if .IsExpiring}}expiring{{end}}">
-        {{if .IsExpiring}}
-        <div class="expiring-badge">{{t $.Lang "klippekort.expires"}}</div>
-        {{end}}
-        
+        {{/* Utgangsstoda stod her tri gonger: eit merke, teksti og
+             fargen paa bandet. Teksti og bandet ber henne aaleine no —
+             det er den same regelen som tok isbiten (§14). */}}
         <div class="card-header">
-            <h4 class="card-title">{{.Category}}</h4>
+            <h3 class="card-title">{{.Category}}</h3>
             {{/* «utløper om 121 dager til utløp» — baade «expires» og
                  «days_until_expiry» bar ordet utløp, og malen sette deim
                  attmed kvarandre. No ber strengen sjølv kvar tale skal
@@ -20,13 +19,16 @@
                 {{else}}{{t $.Lang "klippekort.expired"}}{{end}}
             </span>
         </div>
-        
-        <div class="card-content">
-            <div class="klipp-count">
+
+        {{/* Éi lina: talet, bandet og knappen deler rada, so kortet er
+             tvo rader høgt og ikkje fire. Paa smale kort bryt rada seg
+             sjølv. */}}
+        <div class="klipprad">
+            <span class="klipp-count">
                 <span class="remaining">{{.RemainingKlipp}}</span>
                 <span class="total">{{tf $.Lang "klippekort.clips_left_of" .TotalKlipp}}</span>
-            </div>
-            
+            </span>
+
             <div class="progress-bar">
                 <div class="progress-segments" style="--tende: {{.RemainingKlipp}}; --alle: {{.TotalKlipp}}">
                     {{range $i := seq .RemainingKlipp}}
@@ -37,12 +39,10 @@
                     {{end}}
                 </div>
             </div>
-            
-            <div class="card-actions">
-                <button class="fill-up-btn" onclick="fillUpKlippekort('{{.Category}}')">
-                    {{t $.Lang "klippekort.fill_up"}}
-                </button>
-            </div>
+
+            <button class="fill-up-btn" onclick="fillUpKlippekort('{{.Category}}')">
+                {{t $.Lang "klippekort.fill_up"}}
+            </button>
         </div>
     </div>
     {{end}}
