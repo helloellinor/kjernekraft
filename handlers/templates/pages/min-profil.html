@@ -9,14 +9,24 @@
          Kvart felt er skrivbart der det stend. Ingen redigeringsmodus:
          du klikkar paa linja, skriv, og gjeng vidare. Fyrr bytte heile
          sida ham for at du skulle retta eit telefonnummer. */}}
-    <h1 class="page-title">{{.Name}}</h1>
+    {{/* Namnet stod tvo gonger — ein gong som yverskrift og ein gong som
+         fyrste felt. Yverskrifti *er* feltet no. Ho er stor av di ho er
+         namnet ditt, og skrivbar av di ho er eit felt; det er den same
+         tingen.
 
+         Fødselsdagen høyrer til namnet — det er kven du er — og stend
+         difor rett under. Adressa er noko anna, og fær luft fyre seg. */}}
     <form class="profilskjema" id="profil" method="POST" action="/elev/min-profil">
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
-        <div class="lapp">
-            <input class="lappfelt stor" type="text" name="name" value="{{.Name}}"
+        <div class="lapp lapp-kven">
+            <input class="lappfelt namnefelt" type="text" name="name" value="{{.Name}}"
                    aria-label="{{t .Lang "profile.full_name"}}" autocomplete="name" required>
+            <input class="lappfelt kort" type="date" name="birthdate" value="{{.Birthdate}}"
+                   aria-label="{{t .Lang "signup.birthdate"}}" autocomplete="bday">
+        </div>
+
+        <div class="lapp">
             <input class="lappfelt" type="text" name="address" value="{{.Address}}"
                    aria-label="{{t .Lang "signup.address"}}" autocomplete="street-address"
                    placeholder="{{t .Lang "signup.address"}}">
@@ -33,14 +43,12 @@
                    placeholder="{{t .Lang "signup.country"}}">
         </div>
 
-        <div class="lapp lapp-kontakt">
+        <div class="lapp">
             <input class="lappfelt" type="email" name="email" value="{{.Email}}"
                    aria-label="{{t .Lang "signup.email"}}" autocomplete="email" required>
             <input class="lappfelt" type="tel" name="phone" value="{{.Phone}}"
                    aria-label="{{t .Lang "signup.phone"}}" autocomplete="tel"
                    placeholder="{{t .Lang "signup.phone"}}">
-            <input class="lappfelt" type="date" name="birthdate" value="{{.Birthdate}}"
-                   aria-label="{{t .Lang "signup.birthdate"}}" autocomplete="bday">
         </div>
 
         {{/* Det som avgjer kva prisar du fær sjaa. Det stend her og
