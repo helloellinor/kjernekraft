@@ -1,14 +1,16 @@
 {{define "content"}}
-
 <div class="sida">
-    <h1 class="page-title">{{t .Lang "timeplan.title"}}</h1>
-    
-    <div class="module">
-        <h2 class="module-title">{{.WeekTitle}}</h2>
-        
+    {{/* Tittelen namngjev vika, so bolkeyverskrifti «Denne uka» er
+         burte — ho sa det same ein gong til, ein halv skjerm lenger
+         nede. Styringi ligg paa same lina, og so kjem lista. Mellom
+         yverskrifti og fyrste timen er det no ei lina, ikkje eit kort
+         med si eigi ramma og si eigi luft. */}}
+    <header class="timehovudlinje">
+        <h1 class="page-title">{{t .Lang "timeplan.title"}} <span class="veketittel">{{.WeekTitle}}</span></h1>
         {{template "week_controls" .}}
-        {{template "week_grid" .}}
-    </div>
+    </header>
+
+    {{template "week_grid" .}}
 </div>
 
 {{template "timeplan_scripts" .}}

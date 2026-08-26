@@ -689,19 +689,36 @@ tbody tr:hover td { background: var(--ark-djup); }
 /* ===================================================================
    timeplanen
    =================================================================== */
-.week-controls {
-  display: flex; gap: var(--rom-4); align-items: end;
-  justify-content: space-between; flex-wrap: wrap;
-  margin-bottom: var(--rom-5);
+/* Tittelen og styringi paa same lina, so lista byrjar der auga alt er.
+   Fyrr stod det ei bolkeyverskrift, tvo merkelappa felt og ei
+   vikerekkja imillom — kring 150 pikslar fyre fyrste timen. */
+.timehovudlinje {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--rom-4) var(--rom-5); flex-wrap: wrap;
+  margin-bottom: var(--rom-4);
 }
-.filters, .charges-filter { display: flex; gap: var(--rom-4); flex-wrap: wrap; align-items: end; }
+.timehovudlinje .page-title { margin-bottom: 0; }
+
+/* Vika er ein presisering av tittelen, ikkje ein ny tittel. */
+.veketittel {
+  font-stretch: var(--vidd-yver); font-weight: 400;
+  font-size: .52em; color: var(--blekk-lys);
+  letter-spacing: .01em; white-space: nowrap;
+}
+
+.week-controls {
+  display: flex; gap: var(--rom-3); align-items: center; flex-wrap: wrap;
+  margin-bottom: 0;
+}
+.filters, .charges-filter { display: flex; gap: var(--rom-2); flex-wrap: wrap; align-items: center; }
+.filters select { width: auto; min-width: 9rem; font-size: .9rem; padding: var(--rom-2) var(--rom-6) var(--rom-2) var(--rom-3); }
 .filter-group { display: flex; flex-direction: column; gap: var(--rom-2); }
 .filter-group select { width: auto; min-width: 11rem; }
 
-.week-navigation { display: flex; align-items: stretch; gap: var(--rom-2); }
-.week-nav-btn { padding: var(--rom-2) var(--rom-4); font-size: 1rem; }
+.week-navigation { display: flex; align-items: stretch; gap: var(--rom-1); }
+.week-nav-btn { padding: var(--rom-2) var(--rom-3); font-size: 1rem; line-height: 1; }
 .week-input {
-  width: 4.5rem; text-align: center;
+  width: 3.4rem; text-align: center; padding: var(--rom-2);
   font-family: var(--skrift-tal); font-variant-numeric: tabular-nums;
 }
 
@@ -725,7 +742,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    i det heile. Ei rullesteng som stend der utan aa ha noko aa rulla er
    berre eit merke um at nokon ikkje maalte. */
 .timeplan {
-  --timetrapp: 2.6rem minmax(7rem, 1fr) repeat(7, minmax(0, 3.1rem));
+  --timetrapp: minmax(8rem, 1fr) repeat(7, minmax(0, 3.9rem));
   max-height: min(70vh, 48rem);
   overflow-y: auto;
   overscroll-behavior-y: contain;
@@ -748,7 +765,7 @@ tbody tr:hover td { background: var(--ark-djup); }
   background: var(--flate);
 }
 .timehovud .dagnamn { text-align: center; }
-.timehovud-tom { grid-column: 1 / 3; }
+.timehovud-tom { grid-column: 1; }
 
 .timerad {
   border-bottom: 1px solid var(--haarlina);
@@ -756,15 +773,7 @@ tbody tr:hover td { background: var(--ark-djup); }
 .timerad:last-child { border-bottom: 0; }
 .timerad:hover { background: var(--ark-djup); }
 
-/* Rada ber ei urskiva og ikkje eit klokkeslett: ho segjer «morgon»
-   eller «kveld» paa eit blikk, og det nøyaktige slaget per dag stend
-   paa merket. Lengdi høyrer til namnet — ho er den same kva dag han
-   gjeng — og stend difor der. */
-.timeklokke { display: flex; align-items: center; justify-content: center; }
-.urskiva.stor { width: 1.35rem; height: 1.35rem; }
-.urskiva.stor::before { height: 28%; }
-.urskiva.stor::after { height: 42%; }
-
+/* Lengdi høyrer til namnet — ho er den same kva dag timen gjeng. */
 .timetittel .lengd {
   font-family: var(--skrift-tal); font-size: .72rem; font-weight: 400;
   font-stretch: normal; letter-spacing: 0;
@@ -794,7 +803,7 @@ tbody tr:hover td { background: var(--ark-djup); }
 .timedagar { display: contents; }
 
 .dagmerke {
-  grid-column: calc(var(--dag) + 2);
+  grid-column: calc(var(--dag) + 1);
   position: relative;
   display: flex; flex-direction: column; align-items: flex-start;
   /* Ståande, ikkje liggjande: kring tri fjerdedelar so breidt som det
@@ -803,8 +812,14 @@ tbody tr:hover td { background: var(--ark-djup); }
      eit kort. */
   /* Klart høgre enn breidt. Merket ber berre talet no — klokka ligg
      paa kanten og urskiva stend i rada — so det toler aa vera smalt. */
-  min-height: 5rem;
-  padding: var(--rom-3) var(--rom-1) var(--rom-2);
+  /* Tri ting i merket, kvart i sitt rom: klokkeslettet paa kanten,
+     skiva under, tale nedst. Dei svarar paa kvar sitt spursmaal, og
+     naar dei ligg i kvar sin boks kann auga henta det eine utan aa
+     lesa det andre. */
+  justify-content: space-between; align-items: center;
+  gap: var(--rom-1);
+  min-height: 5.6rem;
+  padding: var(--rom-4) var(--rom-1) var(--rom-2);
   border: 1px solid var(--haarlina);
   border-bottom: 0;
   border-radius: 3px 3px 0 0;
@@ -840,15 +855,21 @@ tbody tr:hover td { background: var(--ark-djup); }
   transform: translate(-50%, -50%);
   padding: 0 .22rem;
   background-color: inherit;
-  font-size: .6rem; letter-spacing: -.02em;
+  font-size: .72rem; letter-spacing: -.02em;
   color: var(--blekk-lys);
   white-space: nowrap;
 }
 .dagmerke.idag .klokketal { color: var(--klas); }
 
+/* Skiva er det største i merket no. Ho er ikkje eit ur ein les av paa
+   minuttet — tali stend paa kanten — men forma segjer morgon eller
+   kveld fyre du hev lese eit siffer, og ei vika med skivor les seg som
+   eit mynster. */
+.merkeur { display: flex; align-items: center; justify-content: center; }
+
 .urskiva {
   position: relative; flex: none;
-  width: .92rem; height: .92rem;
+  width: 1.6rem; height: 1.6rem;
   border: 1px solid var(--blekk-svakt);
   border-radius: 50%;
 }
@@ -860,21 +881,27 @@ tbody tr:hover td { background: var(--ark-djup); }
 }
 /* Timevisaren er stutt og tjukk, minuttvisaren lang og tunn — elles
    kann ein ikkje sjaa kva for ein som er kva. */
-.urskiva::before { height: 26%; transform: translateX(-50%) rotate(var(--time, 0deg)); }
-.urskiva::after  { height: 40%; transform: translateX(-50%) rotate(var(--minutt, 0deg)); }
+.urskiva::before {
+  height: 27%; width: 1.5px;
+  transform: translateX(-50%) rotate(var(--time, 0deg));
+}
+.urskiva::after {
+  height: 41%;
+  transform: translateX(-50%) rotate(var(--minutt, 0deg));
+}
 
 
 
 /* ---- merkelappen med talet ----
    Nede til høgre, der auga endar naar det hev lese merket. */
-.dagtal {
-  position: absolute; right: var(--rom-1); bottom: var(--rom-2);
-  font-size: .74rem; color: var(--blekk);
-  padding-left: .2rem;
+.merketal {
+  font-size: .86rem; color: var(--blekk);
+  line-height: 1;
 }
-.dagtal .av { color: var(--blekk-svakt); font-size: .92em; }
+.merketal .av { color: var(--blekk-svakt); font-size: .82em; }
 
-.timeklokke .urskiva { border-color: var(--blekk-svakt); }
+.dagmerke.idag .urskiva { border-color: var(--klas); }
+.dagmerke.idag .urskiva::before, .dagmerke.idag .urskiva::after { background: var(--klas); }
 .dagmerke.full { background-image: linear-gradient(to right, var(--klas) 0 100%); }
 .dagmerke.umme { opacity: .42; cursor: default; }
 .dagmerke:disabled { cursor: default; }
@@ -902,7 +929,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    — ogso dei daude — so bandet gjeng ubrote fraa topp til botn. */
 .dagmerke.idag { background-color: color-mix(in srgb, var(--klas) 7%, transparent); }
 .dagmerke.daud.idag { background-color: color-mix(in srgb, var(--klas) 5%, transparent); }
-.dagmerke.idag .dagtal { background: none; }
+
 .timehovud .dagnamn.idag { color: var(--klas); }
 
 /* Berre for skjermlesaren. Dagen stend i hovudet for auga; merket
@@ -917,17 +944,24 @@ tbody tr:hover td { background: var(--ark-djup); }
    rutenetet saman, merki flyt etter kvarandre, og dagen kjem attende i
    merket sjølv — han kann ikkje lenger lesast av plasseringi. */
 @media (max-width: 60rem) {
-  .timeplan { --timetrapp: 4.5rem minmax(0, 1fr); }
+  .timeplan { --timetrapp: minmax(0, 1fr); }
   .timehovud { display: none; }
   .timedagar {
     display: flex; flex-wrap: wrap; gap: var(--rom-2);
     grid-column: 1 / -1;
   }
   .dagmerke { grid-column: auto; min-width: 3.6rem; padding-left: var(--rom-2); padding-right: var(--rom-2); }
+  /* Paa smale glas kann ikkje dagen lesast av plasseringi lenger, so
+     lappen kjem fram — men berre med dagen. Klokka stend alt paa
+     kanten, og ho skal ikkje seiast tvo gonger. */
   .berre-lesar {
     position: static; width: auto; height: auto; margin: 0;
     overflow: visible; clip-path: none;
+    font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+    font-size: .66rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--blekk-lys);
   }
+  .dagmerke { padding-top: var(--rom-3); }
 }
 
 /* ===================================================================

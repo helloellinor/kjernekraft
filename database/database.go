@@ -1408,12 +1408,21 @@ func (db *Database) GetUserSignupsForEvents(userID int64, eventIDs []int64) (map
 
 // GetUserUpcomingSignups returns all upcoming events that the user is signed up for
 func (db *Database) GetUserUpcomingSignups(userID int64) ([]models.Event, error) {
+	// role_requirements og attendees vart henta og skanna inn i eit
+	// kart og ei liste. SQLite kann ikkje det, so spurningen feila —
+	// kvar gong, sidan alltid. Ingen saag det, av di kallaren berre
+	// sjekka `err == nil` og lét det vera. Ingen av felti vert nytta av
+	// nokon som kallar; dei er ute.
 	query := `
-		SELECT e.id, e.title, e.description, e.role_requirements, e.start_time, e.end_time, 
-		       e.location, e.organizer, e.attendees, e.class_type, e.teacher_name, 
-		       e.capacity, e.current_enrolment, e.color
+		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time,
+		       COALESCE(e.location, ''), COALESCE(e.organizer, ''),
+		       COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''),
+		       COALESCE(NULLIF(e.capacity, 0), r.capacity, 0),
+		       e.current_enrolment, COALESCE(e.color, ''),
+		       COALESCE(r.name, e.location, '')
 		FROM events e
 		INNER JOIN event_signups es ON e.id = es.event_id
+		LEFT JOIN rooms r ON r.id = e.room_id
 		WHERE es.user_id = ? AND e.start_time > ?
 		ORDER BY e.start_time ASC
 	`
@@ -1429,10 +1438,11 @@ func (db *Database) GetUserUpcomingSignups(userID int64) ([]models.Event, error)
 	for rows.Next() {
 		var event models.Event
 		err := rows.Scan(
-			&event.ID, &event.Title, &event.Description, &event.RoleRequirements,
+			&event.ID, &event.Title, &event.Description,
 			&event.StartTime, &event.EndTime, &event.Location, &event.Organizer,
-			&event.Attendees, &event.ClassType, &event.TeacherName,
+			&event.ClassType, &event.TeacherName,
 			&event.Capacity, &event.CurrentEnrolment, &event.Color,
+			&event.RoomName,
 		)
 		if err != nil {
 			return nil, err

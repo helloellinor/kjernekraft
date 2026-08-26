@@ -3,6 +3,7 @@ package handlers
 import (
 	"kjernekraft/handlers/config"
 	"kjernekraft/models"
+	"log"
 	"net/http"
 	"time"
 )
@@ -39,7 +40,16 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// Get language from cookies/request (using new system)
 	lang := GetLanguageFromRequest(r)
 
+	// Den fyrste timen han hev meldt seg paa. Han ber helsingi.
+	var neste *models.Event
+	if komande, err := DB.GetUserUpcomingSignups(int64(user.ID)); err != nil {
+		log.Printf("komande paameldingar for %d: %v", user.ID, err)
+	} else if len(komande) > 0 {
+		neste = &komande[0]
+	}
+
 	data := map[string]interface{}{
+		"Helsing":      Helsing(lang, user.Name, neste, time.Now()),
 		"Title":        "Elev Dashboard",
 		"TodaysEvents": upcomingEvents,
 		"ExternalCSS":  []string{},

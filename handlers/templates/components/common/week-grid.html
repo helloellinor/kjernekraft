@@ -18,10 +18,6 @@
 
     {{range .Timebolkar}}
     <div class="timerad">
-        <div class="timeklokke">
-            <span class="urskiva stor" style="--time: {{.TimeVinkel}}deg; --minutt: {{.MinuttVinkel}}deg"></span>
-        </div>
-
         <div class="timekva">
             <h3 class="timetittel">{{.Tittel}} <span class="lengd">{{.Minutt}} min</span></h3>
             <p class="timekven">{{.Laerar}}{{if .Rom}} <span class="timerom">{{.Rom}}</span>{{end}}</p>
@@ -48,12 +44,19 @@
                     data-paameld="{{.Event.IsUserSignedUp}}"
                     {{if .ErUmme}}disabled{{end}}
                     aria-label="{{.DagNamn}} — {{.Event.CurrentEnrolment}} {{t $.Lang "timeplan.of"}} {{.Event.Capacity}}">
-                <span class="dagnamn berre-lesar">{{.DagNamn}} {{.Klokke}}</span>
+                <span class="dagnamn berre-lesar">{{.DagNamn}}</span>
                 {{/* Klokkeslettet ligg *paa* toppkanten, som eit
                      legende paa eit fieldset: det høyrer til ruta og
                      tek ingi høgd fraa henne. */}}
                 <span class="klokketal">{{.Klokke}}</span>
-                <span class="dagtal">{{.Event.CurrentEnrolment}}<span class="av">/{{.Event.Capacity}}</span></span>
+                {{/* Tvo rom under kvarandre: skiva, og so tale. Dei
+                     svarar paa kvar sitt — «naar» og «kor mange» — og
+                     naar dei ligg i kvar sin boks kann auga henta det
+                     eine utan aa lesa det andre. */}}
+                <span class="merkeur">
+                    <span class="urskiva" style="--time: {{.TimeVinkel}}deg; --minutt: {{.MinuttVinkel}}deg"></span>
+                </span>
+                <span class="merketal">{{.Event.CurrentEnrolment}}<span class="av">/{{.Event.Capacity}}</span></span>
             </button>
             {{end}}
             {{else}}
