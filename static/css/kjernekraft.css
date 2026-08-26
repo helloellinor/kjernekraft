@@ -459,96 +459,96 @@ main {
 /* ---- klippekortmaalaren ----
    Ljosbandet fraa ordboki, kutta i klipp.
 
-   Der bandet i ordboki er *eitt* ljos som glir langs lina, er dette
-   mange: eitt per klipp du hev att. Grunnen er at eit klippekort ikkje
-   er ei mengd — det er eit tal. Ein prosentstripe segjer «tri fjerdedelar
-   att»; du vil vita «sju». Difor tel ein rutor, ikkje lengd.
+   Tvo ting var gale fyrr, og dei er den same feilen: eg gjorde bandet
+   til ein *gjenstand* i staden for eit ljos.
 
-   Ljoset er bygt som i ordboki: fire lag radialt — ein utbrend kjerne,
-   fargen tett kring han, ein vid veik halo, og ein bloom under. Og
-   ribbone: skiljelinone millom klippi ligg *yver* ljoset og skjer det
-   upp. Det er dei som gjer at det ser ut som ljos gjenom ei rist og
-   ikkje som ein farga boks.
+   Rutorne var fjorten pikslar høge — like tjukke som ein knapp. I
+   ordboki er lina éin piksel og glødi tjue kring henne: det er
+   forholdet millom dei tvo som gjer at det ser ut som ljos. Ei feit
+   rute med litt skin kring er berre ei feit rute.
 
-   Eit brukt klipp er ikkje mørkt — det er berre ikkje tent. Ruta stend
-   der framleis, i same storleik, so maalaren aldri skiftar breidd naar
-   du brukar eit klipp: det er ljoset som slokknar, ikkje ruta som
-   forsvinn. */
+   Og glødi var stengd inne. Ho laag paa `z-index: -1` inne i eit
+   isolert lag, so ho vart maala *under* kortet og stogga daudt ved
+   kanten. Ljos stoggar ikkje ved ei kanta. Ho ligg yver alt no, med
+   `pointer-events: none`, og renn ut yver kortet slik ho skal.
+   =================================================================== */
 .klippemaalar, .progress-segments {
   --klippfarge: var(--produkt, var(--togu));
-  --rib: 2px;
+  --rib: 3px;
   display: flex;
   gap: var(--rib);
-  height: 14px;
-  margin: var(--rom-3) 0;
+  height: 2px;
+  margin: var(--rom-5) 0 var(--rom-4);
   position: relative;
-  isolation: isolate;
 }
 
-.progress-bar { margin: var(--rom-3) 0; }
+.progress-bar { margin: 0; }
 
 .klipp, .progress-segment {
   position: relative;
   flex: 1 1 0;
-  min-width: 3px;
-  border: 1px solid var(--haarlina);
-  border-radius: 1px;
-  background: var(--ark-djup);
+  min-width: 2px;
+  height: 2px;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--blekk) 13%, transparent);
 }
 
-/* Det tende klippet. Kjerna ligg i sjølve ruta; glødi legg seg utanfor
-   henne, so ho lyser ut yver ribbone paa båe sidor. */
+/* Det tende klippet er sjølve lina, og ho er utbrend i midten som eit
+   filament: kvit der ho er sterkast, fargen mot endane. Ei linja i rein
+   farge ser ut som maaling; det er den kvite kjerna som gjer ljos. */
 .klipp.tend, .progress-segment.filled {
-  border-color: color-mix(in srgb, var(--klippfarge) 55%, var(--haarlina));
-  background:
-    radial-gradient(ellipse 60% 40% at 50% 50%,
-      color-mix(in srgb, var(--klippfarge) 30%, #fff) 0%,
-      transparent 100%),
-    color-mix(in srgb, var(--klippfarge) 86%, var(--flate));
+  background: linear-gradient(to right,
+    color-mix(in srgb, var(--klippfarge) 70%, transparent) 0%,
+    color-mix(in srgb, var(--klippfarge) 30%, #fff) 35%,
+    color-mix(in srgb, var(--klippfarge) 22%, #fff) 65%,
+    color-mix(in srgb, var(--klippfarge) 70%, transparent) 100%);
 }
 
+/* Glødi. Fire lag som i ordboki: utbrend kjerne, fargen tett kring han,
+   ein vid veik halo, og ein bloom under. Ho ligg yver kortet og renn ut
+   yver kanten — det er nettupp det som gjer henne til ljos. */
 .klipp.tend::after, .progress-segment.filled::after {
   content: "";
-  position: absolute; z-index: -1;
-  left: -6px; right: -6px; top: -7px; bottom: -7px;
+  position: absolute;
+  left: -10px; right: -10px; top: -13px; bottom: -13px;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 34% 26% at 50% 50%,
-      color-mix(in srgb, var(--klippfarge) 92%, transparent) 0%,
-      color-mix(in srgb, var(--klippfarge) 58%, transparent) 34%,
-      transparent 74%),
-    radial-gradient(ellipse 90% 60% at 50% 50%,
-      color-mix(in srgb, var(--klippfarge) 26%, transparent) 0%,
-      color-mix(in srgb, var(--klippfarge) 8%, transparent) 48%,
+    radial-gradient(ellipse 26% 9% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 34%, #fff) 0%,
+      transparent 100%),
+    radial-gradient(ellipse 42% 22% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 85%, transparent) 0%,
+      color-mix(in srgb, var(--klippfarge) 45%, transparent) 38%,
+      transparent 78%),
+    radial-gradient(ellipse 100% 60% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 24%, transparent) 0%,
+      color-mix(in srgb, var(--klippfarge) 7%, transparent) 46%,
       transparent 86%),
-    radial-gradient(ellipse 130% 100% at 50% 62%,
-      color-mix(in srgb, var(--klippfarge) 18%, transparent) 0%,
-      transparent 78%);
+    radial-gradient(ellipse 150% 120% at 50% 58%,
+      color-mix(in srgb, var(--klippfarge) 12%, transparent) 0%,
+      transparent 80%);
 }
 
-/* Ribbone. Dei ligg yver ljoset og skjer det upp — det er dei som gjer
-   glødi til klipp og ikkje til ei stripa.
-
-   Kvar rib er teikna paa ruta si eigi høgre sida i staden for aa reknast
-   i prosent paa hylsteret. Ei prosentrekning maa gissa kvar flexen la
-   rutorne, og bommar so snart tale skifter. */
+/* Ribbone skjer *lina*, ikkje glødi.
+   Dei gjekk tvert gjenom heile halosen fyrr, og daa vart bandet til ei
+   rekkja med perlor — kvart klipp ein eigen klump med ljost imillom. I
+   ordboki er det lina som er stripa og bloomen som er samanhengande;
+   det er nettupp den skilnaden som gjer at det ser ut som ljos gjenom
+   ei rist og ikkje som sju smaa lampor. */
 .klipp::before, .progress-segment::before {
   content: "";
   position: absolute; z-index: 2;
-  top: -8px; bottom: -8px;
-  right: calc(-1px - var(--rib, 2px)); width: var(--rib, 2px);
+  top: 0; bottom: 0;
+  right: calc(-1px - var(--rib)); width: var(--rib);
   background: var(--flate);
   pointer-events: none;
 }
 .klipp:last-child::before, .progress-segment:last-child::before { display: none; }
 
-/* Det som er i ferd med aa gaa ut lyser ikkje mindre — det lyser i ein
-   annan farge. Aatvaringi er ikkje ein av dei tri produktfargane. */
 .klippekort-card.expiring .klippemaalar,
 .klippekort-card.expiring .progress-segments { --klippfarge: var(--aatvaring); }
 
-/* Medlemskapet er turkist, kurs og PT er lilla. Same maalaren, anna
-   produkt — fargen er det einaste som skifter. */
 .medlemskapsmaalar { --klippfarge: var(--klas); }
 .kursmaalar        { --klippfarge: var(--tuneup); }
 
@@ -733,6 +733,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    Pilene endrar ingi breidd naar dei vert avslegne, og korgi ligg
    absolutt — so tittelen stend still same kva ein gjer med han. */
 .vekeveljar {
+  position: relative;
   display: inline-flex; align-items: baseline; gap: .1em;
   margin-left: .45em; vertical-align: baseline;
 }
@@ -783,17 +784,21 @@ tbody tr:hover td { background: var(--ark-djup); }
    Ingi flata. Talet ligg berre der, i tittelskrifta, og tek ljosstyrken
    sin fraa det som ligg bak. Ei rute kring hadde gjort det til eit
    skjema; utan rute er det framleis tittelen, berre skrivbar. */
+/* Menyen heng under ordet han høyrer til, ikkje under heile lina.
+   Ordet og menyen er *eitt* — ein nedfallsveljar — og daa lyt dei møtast
+   paa lina under ordet. */
 .vekemeny {
   position: absolute; z-index: 20;
   top: 100%; left: 0;
   display: flex; align-items: baseline; gap: var(--rom-3);
-  padding: var(--rom-2) 0 0;
+  padding: var(--rom-3) 0 0;
   background: none; border: 0; box-shadow: none;
 }
 .vekehint {
   font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
-  font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+  font-size: .74rem; letter-spacing: .08em; text-transform: uppercase;
   color: var(--blekk-svakt);
+  white-space: nowrap;
 }
 
 .veketittel, .vekepil {
@@ -1342,7 +1347,10 @@ tbody tr:hover td { background: var(--ark-djup); }
 /* ---- klippekortet ----
    Segmenti er klipp. Eit brukt klipp er ei tom rute, ikkje ein graa
    klump: du skal kunna telja kor mange du hev att utan aa lesa talet. */
-.klippekort-cards { display: grid; gap: var(--rom-4); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+/* Same mellomrom som millom ladningarne paa hi sida. Dei stod med ulik
+   luft og saag difor ut som tvo ulike slag lister. */
+.klippekort-cards { display: grid; gap: var(--rom-3); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+.klippekort-card { overflow: visible; }
 
 .klipp-count { font-family: var(--skrift-tal); font-size: 1.1rem; }
 .klipp-count .remaining { font-size: 1.5rem; color: var(--produkt, var(--togu)); }
@@ -1825,3 +1833,24 @@ tbody tr:hover td { background: var(--ark-djup); }
 .tal-lenkje { text-decoration: none; border-bottom: 2px solid var(--togu); }
 .tal-lenkje .tal { color: var(--togu); }
 .tal-lenkje:hover .tal, .tal-lenkje:hover .ord { color: var(--togu); }
+
+/* ---- belastningar ----
+   Same mellomrom som klippekorti paa hi sida. Dei stod med ulik luft og
+   las seg difor som tvo ulike slag lister. */
+.charges-list { display: flex; flex-direction: column; gap: var(--rom-3); }
+.charge-item { padding: var(--rom-3) var(--rom-4); }
+.charge-line { margin: 0; font-size: .95rem; color: var(--blekk-lys); max-width: none; }
+.charge-amount {
+  font-family: var(--skrift-tal); font-size: 1.05rem; font-weight: 400;
+  color: var(--blekk);
+}
+.charge-card { font-family: var(--skrift-tal); font-size: .88rem; }
+.charge-what { color: var(--blekk); }
+.charge-meta {
+  margin: var(--rom-1) 0 0; display: flex; gap: var(--rom-3);
+  font-size: .8rem; color: var(--blekk-svakt);
+}
+/* Ei vellukka betaling treng ikkje segja at ho gjekk bra — det er berre
+   naar noko *ikkje* gjekk at ein vil vita det. */
+.charge-status { color: var(--aatvaring); }
+.charge-status.pending { color: var(--blekk-lys); }

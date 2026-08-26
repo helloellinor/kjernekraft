@@ -10,21 +10,21 @@
         
         <div class="card-header">
             <h4 class="card-title">{{.Category}}</h4>
+            {{/* «utløper om 121 dager til utløp» — baade «expires» og
+                 «days_until_expiry» bar ordet utløp, og malen sette deim
+                 attmed kvarandre. No ber strengen sjølv kvar tale skal
+                 staa. */}}
             <span class="card-expiry">
-                {{if gt .DaysUntilExpiry 0}}
-                    {{t $.Lang "klippekort.expires"}} om {{.DaysUntilExpiry}} {{t $.Lang "klippekort.days_until_expiry"}}
-                {{else if eq .DaysUntilExpiry 0}}
-                    {{t $.Lang "klippekort.expires"}} i dag
-                {{else}}
-                    {{t $.Lang "klippekort.expired"}}
-                {{end}}
+                {{if gt .DaysUntilExpiry 0}}{{tf $.Lang "klippekort.expires_in" .DaysUntilExpiry}}
+                {{else if eq .DaysUntilExpiry 0}}{{t $.Lang "klippekort.expires_today"}}
+                {{else}}{{t $.Lang "klippekort.expired"}}{{end}}
             </span>
         </div>
         
         <div class="card-content">
             <div class="klipp-count">
                 <span class="remaining">{{.RemainingKlipp}}</span>
-                <span class="total">/ {{.TotalKlipp}} {{t $.Lang "klippekort.remaining"}}</span>
+                <span class="total">{{tf $.Lang "klippekort.clips_left_of" .TotalKlipp}}</span>
             </div>
             
             <div class="progress-bar">
