@@ -162,7 +162,7 @@
     "fill_up": "Top up"
   },
   "admin": {
-    "title": "Admin - User Administration",
+    "title": "Administration",
     "total_users": "Total number of users",
     "total_events": "Total number of events",
     "pending_freeze_requests": "Pending freeze requests",
@@ -236,6 +236,41 @@
       "time_fields_required": "Both time fields must be filled",
       "error_prefix": "Error: "
     },
-    "actions": "Actions"
+    "actions": "Actions",
+    "price_in_kroner": "Price in kroner"
+  },
+  "terms": {
+    "title": "Terms and conditions"
+  },
+  "signup": {
+    "title": "Join",
+    "intro": "Fill in the form and you will have an account with Kjernekraft Oslo.",
+    "name": "Name",
+    "birthdate": "Date of birth",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
+    "address_optional": "Address (optional)",
+    "address": "Address",
+    "postal_code": "Postcode",
+    "city": "City",
+    "country": "Country",
+    "newsletter": "I would like the newsletter",
+    "terms_prefix": "I have read and agree to the",
+    "terms_link": "terms and conditions",
+    "submit": "Join",
+    "have_account": "Already have an account? Log in",
+    "terms_title": "Terms and conditions",
+    "terms_loading": "Loading the terms …",
+    "terms_close": "Close",
+    "terms_error": "Could not load the terms."
+  },
+  "forgot": {
+    "title": "Forgotten password",
+    "intro": "There is no self-service password reset yet. Write to the studio and they will sort it out.",
+    "write_to_studio": "Write to the studio",
+    "mail_subject": "Forgotten password",
+    "what_to_write": "Tell them which email address you joined with and they will reply there.",
+    "back": "Back to the login"
   }
 }

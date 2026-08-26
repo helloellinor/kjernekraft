@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -259,4 +260,36 @@ func sessionUserName(r *http.Request) string {
 // malen kann syna administrasjonslenkja for dei som faktisk kjem inn.
 func sessionIsAdmin(r *http.Request) bool {
 	return IsAdmin(GetUserFromSession(r))
+}
+
+// t er umsetjingi, kalla fraa Go og ikkje fraa ein mal.
+func t(lang, key string) string {
+	return GetLocalization().T(lang, key)
+}
+
+// renderPage teiknar ei sida gjenom malstyraren.
+//
+// Dei aatte handsamarane gjorde kvar sin utgaava av det same: hent
+// styraren, slaa upp malen, prøv aa lasta paa nytt um han manglar,
+// skriv Content-Type, køyr «base», og logg feilen. Det stod ni gonger
+// med smaa skilnader — ein av deim gløymde teiknsettet.
+func renderPage(w http.ResponseWriter, r *http.Request, name string, data map[string]interface{}) {
+	tm := GetTemplateManager()
+	tmpl, ok := tm.GetTemplate(name)
+	if !ok {
+		// I utvikling vert malarne endra medan tenaren gjeng.
+		tm.ReloadTemplates()
+		tmpl, ok = tm.GetTemplate(name)
+	}
+	if !ok {
+		log.Printf("malen %q finst ikkje", name)
+		http.Error(w, "Malen finst ikkje", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
+		log.Printf("teikning av %q: %v", name, err)
+		http.Error(w, "Feil ved teikning av sida", http.StatusInternalServerError)
+	}
 }

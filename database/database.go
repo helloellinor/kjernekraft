@@ -5,24 +5,38 @@ import (
 	"fmt"
 	"kjernekraft/models"
 	"log"
+	"os"
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Database struct {
 	Conn *sql.DB
 }
 
+// DBPathEnv segjer kvar basefila ligg. Stigen var fast — «./kjernekraft.db»
+// — og det tydde at prøvorne skreiv i ei fil som laag att millom
+// køyringarne. Fyrste gongen gjekk dei; andre gongen fall dei paa
+// «e-post er allerede i bruk», av di brukaren fraa fyrre køyringi
+// framleis stod der.
+const DBPathEnv = "KJERNEKRAFT_DB"
+
+// Connect opnar basen. Stigen kjem or KJERNEKRAFT_DB naar han er sett.
 func Connect() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./kjernekraft.db")
+	path := os.Getenv(DBPathEnv)
+	if path == "" {
+		path = "./kjernekraft.db"
+	}
+
+	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("Kopla til SQLite-databasen.")
+	log.Printf("Kopla til SQLite-databasen (%s).", path)
 	return db, nil
 }
 
@@ -215,7 +229,7 @@ func Migrate(db *sql.DB) error {
 	}
 
 	log.Println("Migrering fullført: alle tabeller oppretta.")
-	
+
 	// Check if last_billed column exists and add it if missing
 	var columnExists bool
 	err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('user_memberships') WHERE name='last_billed'").Scan(&columnExists)
@@ -224,16 +238,16 @@ func Migrate(db *sql.DB) error {
 		if err != nil {
 			return err
 		}
-		
+
 		// Update existing rows with a default value
 		_, err = db.Exec("UPDATE user_memberships SET last_billed = CURRENT_TIMESTAMP WHERE last_billed IS NULL")
 		if err != nil {
 			return err
 		}
-		
+
 		log.Println("Added last_billed column to user_memberships table")
 	}
-	
+
 	return nil
 }
 
@@ -316,7 +330,7 @@ func (db *Database) CreateUser(u models.User) (int64, error) {
 	if err == nil {
 		return 0, fmt.Errorf("e-post er allerede i bruk")
 	}
-	
+
 	// Check if phone already exists
 	err = db.Conn.QueryRow("SELECT id FROM users WHERE phone = ?", u.Phone).Scan(&existingID)
 	if err == nil {
@@ -361,16 +375,16 @@ func (db *Database) CreateDefaultPaymentMethods(userID int64) error {
 	// Create first default card (Visa simulation)
 	card1Query := `INSERT INTO payment_methods (user_id, provider, provider_id) 
 	               VALUES (?, 'stripe', ?)`
-	
+
 	_, err := db.Conn.Exec(card1Query, userID, fmt.Sprintf("pm_default_visa_%d", userID))
 	if err != nil {
 		return err
 	}
-	
+
 	// Create second default card (Mastercard simulation)
 	card2Query := `INSERT INTO payment_methods (user_id, provider, provider_id) 
 	               VALUES (?, 'stripe', ?)`
-	
+
 	_, err = db.Conn.Exec(card2Query, userID, fmt.Sprintf("pm_default_mastercard_%d", userID))
 	return err
 }
@@ -387,9 +401,9 @@ func (db *Database) SimulateBilling(userID int64, amount int, description, charg
 	// Create a simulated charge (assuming it succeeds)
 	chargeQuery := `INSERT INTO charges (user_id, payment_method_id, amount, currency, status, description, type, charge_date, created_at)
 	                VALUES (?, ?, ?, 'NOK', 'succeeded', ?, ?, ?, ?)`
-	
+
 	now := time.Now()
-	
+
 	_, err = db.Conn.Exec(chargeQuery, userID, paymentMethodID, amount, description, chargeType, now, now)
 	return err
 }
@@ -566,7 +580,7 @@ func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 func (db *Database) GetEventsForWeek(mondayDate time.Time) ([]models.Event, error) {
 	// Calculate the Sunday of the same week
 	sundayDate := mondayDate.AddDate(0, 0, 6)
-	
+
 	query := `
 		SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color 
 		FROM events 
@@ -663,7 +677,7 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 		ORDER BY um.created_at DESC
 		LIMIT 1
 	`
-	
+
 	var membership models.MembershipWithDetails
 	err := db.Conn.QueryRow(query, userID).Scan(
 		&membership.UserMembership.ID, &membership.UserMembership.UserID, &membership.UserMembership.MembershipID,
@@ -673,14 +687,14 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 		&membership.Membership.IsStudentSenior, &membership.Membership.IsSpecialOffer, &membership.Membership.Description,
 		&membership.Membership.Features, &membership.Membership.Active,
 	)
-	
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil // No active membership found
 		}
 		return nil, err
 	}
-	
+
 	return &membership, nil
 }
 
@@ -722,7 +736,7 @@ func (db *Database) GetUserKlippekort(userID int64) ([]models.KlippekortWithDeta
 		WHERE uk.user_id = ? AND uk.is_active = TRUE AND uk.expiry_date > datetime('now')
 		ORDER BY uk.expiry_date ASC
 	`
-	
+
 	rows, err := db.Conn.Query(query, userID)
 	if err != nil {
 		return nil, err
@@ -753,66 +767,66 @@ func (db *Database) GetUserKlippekort(userID int64) ([]models.KlippekortWithDeta
 func (db *Database) AuthenticateUser(email, password string) (*models.User, error) {
 	var user models.User
 	var hashedPassword string
-	
+
 	query := `SELECT id, name, email, phone, address, postal_code, city, country, password, newsletter_subscription, terms_accepted
 	          FROM users WHERE email = ?`
-	
+
 	err := db.Conn.QueryRow(query, email).Scan(
 		&user.ID, &user.Name, &user.Email, &user.Phone, &user.Address,
 		&user.PostalCode, &user.City, &user.Country, &hashedPassword,
 		&user.NewsletterSubscription, &user.TermsAccepted,
 	)
-	
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("ugyldig e-post eller passord")
 		}
 		return nil, err
 	}
-	
+
 	// Verify password
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
 		return nil, fmt.Errorf("ugyldig e-post eller passord")
 	}
-	
+
 	// Get user roles
 	roles, err := db.GetUserRoles(int64(user.ID))
 	if err != nil {
 		return nil, err
 	}
 	user.Roles = roles
-	
+
 	return &user, nil
 }
 
 // GetUserByID fetches a user by their ID
 func (db *Database) GetUserByID(userID int64) (*models.User, error) {
 	var user models.User
-	
+
 	query := `SELECT id, name, email, phone, address, postal_code, city, country, newsletter_subscription, terms_accepted
 	          FROM users WHERE id = ?`
-	
+
 	err := db.Conn.QueryRow(query, userID).Scan(
 		&user.ID, &user.Name, &user.Email, &user.Phone, &user.Address,
 		&user.PostalCode, &user.City, &user.Country,
 		&user.NewsletterSubscription, &user.TermsAccepted,
 	)
-	
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("bruker ikke funnet")
 		}
 		return nil, err
 	}
-	
+
 	// Get user roles
 	roles, err := db.GetUserRoles(userID)
 	if err != nil {
 		return nil, err
 	}
 	user.Roles = roles
-	
+
 	return &user, nil
 }
 
@@ -827,13 +841,13 @@ func (db *Database) GetPendingFreezeRequests() ([]models.FreezeRequest, error) {
 		JOIN memberships m ON um.membership_id = m.id
 		WHERE um.status = 'freeze_requested'
 		ORDER BY um.created_at DESC`
-	
+
 	rows, err := db.Conn.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	
+
 	var requests []models.FreezeRequest
 	for rows.Next() {
 		var req models.FreezeRequest
@@ -847,7 +861,7 @@ func (db *Database) GetPendingFreezeRequests() ([]models.FreezeRequest, error) {
 		}
 		requests = append(requests, req)
 	}
-	
+
 	return requests, nil
 }
 
@@ -895,7 +909,7 @@ func (db *Database) AddUserMembership(userID int64, membershipID int64) error {
 
 	query := `INSERT INTO user_memberships (user_id, membership_id, status, start_date, renewal_date, end_date, binding_end, last_billed, created_at)
 	          VALUES (?, ?, 'active', ?, ?, ?, ?, ?, ?)`
-	
+
 	_, err = db.Conn.Exec(query, userID, membershipID, startDate, renewalDate, endDate, bindingEnd, startDate, now)
 	if err != nil {
 		return err
@@ -936,11 +950,11 @@ func (db *Database) ChangeUserMembership(userID int64, newMembershipID int64) er
 
 	now := time.Now()
 	renewalDate := now.AddDate(0, 1, 0).Format("2006-01-02")
-	
+
 	// Calculate new binding end date
 	var newBindingEnd string
 	isUpgrade := newMembership.Price > currentMembership.Price
-	
+
 	if isUpgrade && rules.CombineBindingPeriods && currentMembership.BindingEnd != nil {
 		// For upgrades, combine remaining binding time with new commitment
 		remainingMonths := 0
@@ -951,7 +965,7 @@ func (db *Database) ChangeUserMembership(userID int64, newMembershipID int64) er
 				remainingMonths = 0
 			}
 		}
-		
+
 		// Add new commitment months to remaining months
 		totalMonths := remainingMonths + newMembership.CommitmentMonths
 		newBindingEndTime := now.AddDate(0, totalMonths, 0)
@@ -965,7 +979,7 @@ func (db *Database) ChangeUserMembership(userID int64, newMembershipID int64) er
 	query := `UPDATE user_memberships 
 	          SET membership_id = ?, renewal_date = ?, binding_end = ? 
 	          WHERE user_id = ? AND status IN ('active', 'paused', 'freeze_requested')`
-	
+
 	_, err = db.Conn.Exec(query, newMembershipID, renewalDate, newBindingEnd, userID)
 	return err
 }
@@ -981,18 +995,18 @@ func (db *Database) RemoveUserMembership(userID int64) error {
 func (db *Database) GetMembershipByID(membershipID int64) (*models.Membership, error) {
 	query := `SELECT id, name, price, commitment_months, is_student_senior, is_special_offer, description, features, active 
 	          FROM memberships WHERE id = ?`
-	
+
 	var membership models.Membership
 	err := db.Conn.QueryRow(query, membershipID).Scan(
 		&membership.ID, &membership.Name, &membership.Price, &membership.CommitmentMonths,
 		&membership.IsStudentSenior, &membership.IsSpecialOffer, &membership.Description,
 		&membership.Features, &membership.Active,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &membership, nil
 }
 
@@ -1056,12 +1070,12 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 	var pkg models.KlippekortPackage
 	query := `SELECT id, name, category, klipp_count, price, price_per_session, description, valid_days, active, is_popular 
 	          FROM klippekort_packages WHERE id = ? AND active = TRUE`
-	
+
 	err := db.Conn.QueryRow(query, packageID).Scan(
 		&pkg.ID, &pkg.Name, &pkg.Category, &pkg.KlippCount, &pkg.Price,
 		&pkg.PricePerSession, &pkg.Description, &pkg.ValidDays, &pkg.Active, &pkg.IsPopular,
 	)
-	
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return fmt.Errorf("klippekort-pakke ikke funnet")
@@ -1076,21 +1090,21 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 	                  WHERE uk.user_id = ? AND kp.category = ? AND uk.is_active = TRUE AND uk.expiry_date > datetime('now')
 	                  ORDER BY uk.expiry_date DESC
 	                  LIMIT 1`
-	
+
 	var existingID int
 	var totalKlipp, remainingKlipp int
 	var expiryDate time.Time
-	
+
 	err = db.Conn.QueryRow(existingQuery, userID, pkg.Category).Scan(&existingID, &totalKlipp, &remainingKlipp, &expiryDate)
-	
+
 	now := time.Now()
 	newExpiryDate := now.AddDate(0, 0, pkg.ValidDays)
-	
+
 	if err == sql.ErrNoRows {
 		// No existing klippekort, create new one
 		insertQuery := `INSERT INTO user_klippekort (user_id, package_id, total_klipp, remaining_klipp, expiry_date, purchase_date, is_active)
 		                VALUES (?, ?, ?, ?, ?, ?, TRUE)`
-		
+
 		_, err = db.Conn.Exec(insertQuery, userID, packageID, pkg.KlippCount, pkg.KlippCount, newExpiryDate, now)
 		if err != nil {
 			return err
@@ -1107,28 +1121,28 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 	} else if err != nil {
 		return err
 	}
-	
+
 	// Existing klippekort found - add to it
 	// Check if adding would exceed maximum allowed (20 by default)
 	maxKlipp := 20 // TODO: Make this configurable in admin settings
 	newTotal := totalKlipp + pkg.KlippCount
 	newRemaining := remainingKlipp + pkg.KlippCount
-	
+
 	if newTotal > maxKlipp {
 		return fmt.Errorf("kan ikke kjøpe flere klipp. Maksimum %d klipp per kort (du har %d)", maxKlipp, totalKlipp)
 	}
-	
+
 	// Use the longer expiry date (existing or new)
 	finalExpiryDate := expiryDate
 	if newExpiryDate.After(expiryDate) {
 		finalExpiryDate = newExpiryDate
 	}
-	
+
 	// Update existing klippekort
 	updateQuery := `UPDATE user_klippekort 
 	                SET total_klipp = ?, remaining_klipp = ?, expiry_date = ?, package_id = ?
 	                WHERE id = ?`
-	
+
 	_, err = db.Conn.Exec(updateQuery, newTotal, newRemaining, finalExpiryDate, packageID, existingID)
 	if err != nil {
 		return err
@@ -1151,16 +1165,16 @@ func (db *Database) GetEventByID(eventID int64) (*models.Event, error) {
 	var event models.Event
 	query := `SELECT id, title, description, start_time, end_time, teacher_name, capacity, current_enrolment, class_type
 	          FROM events WHERE id = ?`
-	
+
 	err := db.Conn.QueryRow(query, eventID).Scan(
 		&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime,
 		&event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.ClassType,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &event, nil
 }
 
@@ -1173,11 +1187,11 @@ func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if exists > 0 {
 		return fmt.Errorf("user already signed up for this event")
 	}
-	
+
 	// Check if event has capacity
 	var currentEnrolment, capacity int
 	capacityQuery := `SELECT current_enrolment, capacity FROM events WHERE id = ?`
@@ -1185,18 +1199,18 @@ func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if currentEnrolment >= capacity {
 		return fmt.Errorf("event is full")
 	}
-	
+
 	// Create signup record
 	insertQuery := `INSERT INTO event_signups (user_id, event_id, signup_date) VALUES (?, ?, ?)`
 	_, err = db.Conn.Exec(insertQuery, userID, eventID, time.Now())
 	if err != nil {
 		return err
 	}
-	
+
 	// Update event enrolment count
 	updateQuery := `UPDATE events SET current_enrolment = current_enrolment + 1 WHERE id = ?`
 	_, err = db.Conn.Exec(updateQuery, eventID)
@@ -1212,18 +1226,18 @@ func (db *Database) CancelUserSignupForEvent(userID, eventID int64) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if exists == 0 {
 		return fmt.Errorf("user is not signed up for this event")
 	}
-	
+
 	// Remove signup record
 	deleteQuery := `DELETE FROM event_signups WHERE user_id = ? AND event_id = ?`
 	_, err = db.Conn.Exec(deleteQuery, userID, eventID)
 	if err != nil {
 		return err
 	}
-	
+
 	// Update event enrolment count
 	updateQuery := `UPDATE events SET current_enrolment = current_enrolment - 1 WHERE id = ?`
 	_, err = db.Conn.Exec(updateQuery, eventID)
@@ -1235,28 +1249,28 @@ func (db *Database) GetUserSignupsForEvents(userID int64, eventIDs []int64) (map
 	if len(eventIDs) == 0 {
 		return make(map[int64]bool), nil
 	}
-	
+
 	// Build query with placeholders for event IDs
 	placeholders := make([]string, len(eventIDs))
 	args := make([]interface{}, len(eventIDs)+1)
 	args[0] = userID
-	
+
 	for i, eventID := range eventIDs {
 		placeholders[i] = "?"
 		args[i+1] = eventID
 	}
-	
+
 	query := fmt.Sprintf(
 		`SELECT event_id FROM event_signups WHERE user_id = ? AND event_id IN (%s)`,
 		strings.Join(placeholders, ","),
 	)
-	
+
 	rows, err := db.Conn.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	
+
 	signups := make(map[int64]bool)
 	for rows.Next() {
 		var eventID int64
@@ -1265,7 +1279,7 @@ func (db *Database) GetUserSignupsForEvents(userID int64, eventIDs []int64) (map
 		}
 		signups[eventID] = true
 	}
-	
+
 	return signups, rows.Err()
 }
 
@@ -1280,14 +1294,14 @@ func (db *Database) GetUserUpcomingSignups(userID int64) ([]models.Event, error)
 		WHERE es.user_id = ? AND e.start_time > ?
 		ORDER BY e.start_time ASC
 	`
-	
+
 	now := time.Now()
 	rows, err := db.Conn.Query(query, userID, now)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	
+
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
@@ -1302,7 +1316,7 @@ func (db *Database) GetUserUpcomingSignups(userID int64) ([]models.Event, error)
 		}
 		events = append(events, event)
 	}
-	
+
 	return events, rows.Err()
 }
 
@@ -1311,14 +1325,14 @@ func (db *Database) GetMembershipRules() (*models.MembershipRules, error) {
 	query := `SELECT id, allow_upgrades, combine_binding_periods, allow_downgrades, 
 		allow_change_during_binding, default_membership_id, updated_at 
 		FROM membership_rules ORDER BY id DESC LIMIT 1`
-	
+
 	var rules models.MembershipRules
 	err := db.Conn.QueryRow(query).Scan(
 		&rules.ID, &rules.AllowUpgrades, &rules.CombineBindingPeriods,
 		&rules.AllowDowngrades, &rules.AllowChangeDuringBinding,
 		&rules.DefaultMembershipID, &rules.UpdatedAt,
 	)
-	
+
 	if err == sql.ErrNoRows {
 		// Return default rules if none exist
 		return &models.MembershipRules{
@@ -1329,7 +1343,7 @@ func (db *Database) GetMembershipRules() (*models.MembershipRules, error) {
 			DefaultMembershipID:      nil,
 		}, nil
 	}
-	
+
 	return &rules, err
 }
 
@@ -1340,7 +1354,7 @@ func (db *Database) SaveMembershipRules(rules *models.MembershipRules) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if existingRules.ID > 0 {
 		// Update existing rules
 		query := `UPDATE membership_rules SET 
@@ -1348,7 +1362,7 @@ func (db *Database) SaveMembershipRules(rules *models.MembershipRules) error {
 			allow_change_during_binding = ?, default_membership_id = ?, updated_at = CURRENT_TIMESTAMP
 			WHERE id = ?`
 		_, err = db.Conn.Exec(query, rules.AllowUpgrades, rules.CombineBindingPeriods,
-			rules.AllowDowngrades, rules.AllowChangeDuringBinding, 
+			rules.AllowDowngrades, rules.AllowChangeDuringBinding,
 			rules.DefaultMembershipID, existingRules.ID)
 	} else {
 		// Insert new rules
@@ -1359,7 +1373,7 @@ func (db *Database) SaveMembershipRules(rules *models.MembershipRules) error {
 		_, err = db.Conn.Exec(query, rules.AllowUpgrades, rules.CombineBindingPeriods,
 			rules.AllowDowngrades, rules.AllowChangeDuringBinding, rules.DefaultMembershipID)
 	}
-	
+
 	return err
 }
 
@@ -1375,27 +1389,27 @@ func (db *Database) CreateMembership(membership models.Membership) (int64, error
 	query := `INSERT INTO memberships 
 		(name, price, commitment_months, is_student_senior, is_special_offer, description, features, active) 
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-	
+
 	// Convert features to JSON if it's not already
 	features := membership.Features
 	if features == "" {
 		features = "[]"
 	}
-	
-	result, err := db.Conn.Exec(query, 
-		membership.Name, 
-		membership.Price, 
+
+	result, err := db.Conn.Exec(query,
+		membership.Name,
+		membership.Price,
 		membership.CommitmentMonths,
 		membership.IsStudentSenior,
 		membership.IsSpecialOffer,
 		membership.Description,
 		features,
 		membership.Active)
-	
+
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return result.LastInsertId()
 }
 
@@ -1412,7 +1426,7 @@ func (db *Database) UpdateMembershipDetails(membership models.Membership) error 
 		name = ?, price = ?, commitment_months = ?, is_student_senior = ?, 
 		is_special_offer = ?, description = ?, features = ?
 		WHERE id = ?`
-	
+
 	_, err := db.Conn.Exec(query,
 		membership.Name,
 		membership.Price,
@@ -1422,7 +1436,7 @@ func (db *Database) UpdateMembershipDetails(membership models.Membership) error 
 		membership.Description,
 		membership.Features,
 		membership.ID)
-	
+
 	return err
 }
 
@@ -1438,10 +1452,10 @@ func (db *Database) UpdateEvent(event models.Event) error {
 		title = ?, description = ?, start_time = ?, end_time = ?, location = ?, 
 		class_type = ?, teacher_name = ?, capacity = ?, color = ?
 		WHERE id = ?`
-	
+
 	_, err := db.Conn.Exec(query,
 		event.Title, event.Description, event.StartTime, event.EndTime, event.Location,
 		event.ClassType, event.TeacherName, event.Capacity, event.Color, event.ID)
-	
+
 	return err
 }

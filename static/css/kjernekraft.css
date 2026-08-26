@@ -40,6 +40,19 @@
   font-family: "Ubuntu Condensed"; src: url("/static/fonts/Ubuntu-C.woff2") format("woff2");
   font-weight: 400; font-style: normal; font-display: swap;
 }
+/* Union Gothic ber yverskriftene. Han hev tvo aksar — breidd 50–200 og
+   vekt 400–1000 — og det er heile poenget med honom: breiddi kann tyda
+   noko, ikkje berre pynta.
+   
+   MELLOMBILS. Fila er CC BY-NC-ND og ligg difor i .gitignore: ho skal
+   ikkje fylgja med ut or maskini. Manglar ho, fell alt attende paa
+   Ubuntu Condensed av seg sjølv, og sida ser framleis rett ut. Naar ei
+   lisensiert skrift kjem, er det denne eine blokki som vert bytt. */
+@font-face {
+  font-family: "Union Gothic"; src: url("/static/fonts/UnionGothic-Variable.woff2") format("woff2-variations"),
+                                    url("/static/fonts/UnionGothic-Variable.woff2") format("woff2");
+  font-weight: 400 1000; font-stretch: 50% 200%; font-style: normal; font-display: swap;
+}
 @font-face {
   font-family: "Ubuntu Mono"; src: url("/static/fonts/UbuntuMono-R.woff2") format("woff2");
   font-weight: 400; font-style: normal; font-display: swap;
@@ -76,7 +89,16 @@
   --aatvaring-svak: #f0e0dc;
 
   /* skriftene */
-  --skrift-yver: "Ubuntu Condensed", "Ubuntu", ui-sans-serif, system-ui, sans-serif;
+  --skrift-yver: "Union Gothic", "Ubuntu Condensed", "Ubuntu", ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- breiddetrappa ----
+     Breiddi tyder rang. Det vidaste stend øvst i hierarkiet og det
+     smalaste nedst, so ein ser kva som er kva fyre ein hev lese eit ord.
+     Ein merkelapp skal ikkje taka meir plass enn han er verd. */
+  --vidd-tittel:  125%;   /* kvar du er */
+  --vidd-yver:    105%;   /* yverskrift i sida */
+  --vidd-leiding:  90%;   /* leidingi */
+  --vidd-merkelapp: 68%;  /* merkelappar og bolkeyverskrifter */
   --skrift:      "Ubuntu", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --skrift-tal:  "Ubuntu Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -141,19 +163,32 @@ body {
 
 h1, h2, h3, h4 {
   font-family: var(--skrift-yver);
-  font-weight: 400;
-  line-height: 1.1;
+  line-height: 1.02;
   margin: 0;
   text-wrap: balance;
-  letter-spacing: .005em;
 }
-h1 { font-size: 2.4rem; }
-h2 { font-size: 1.7rem; }
-h3 { font-size: 1.25rem; }
-h4 { font-size: 1.05rem; }
+h1 {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-stretch: var(--vidd-tittel); font-weight: 700; letter-spacing: -.01em;
+  /* Samansette norske ord er lange. Utan dette renn «Brukeradministrasjon»
+     ut or spalta i 125 % breidd. */
+  overflow-wrap: break-word; hyphens: auto;
+}
+h2 { font-size: 1.8rem; font-stretch: var(--vidd-yver);  font-weight: 600; }
+h3 { font-size: 1.3rem; font-stretch: var(--vidd-yver);  font-weight: 500; }
+h4 { font-size: 1.05rem; font-stretch: var(--vidd-yver); font-weight: 500; }
 
 p { margin: 0 0 var(--rom-4); max-width: 62ch; }
 p:last-child { margin-bottom: 0; }
+
+/* Yverskrifterne hadde margin: 0, og malarne rekna med at nokon annan
+   sette lufti. Ingen gjorde det, so «Systeminnstillinger» og «Tidssone:»
+   klistra seg saman. Ei yverskrift eig romet yver seg og under seg. */
+:where(h2, h3, h4):not(:first-child) { margin-top: var(--rom-6); }
+:where(h2, h3, h4) + * { margin-top: var(--rom-3); }
+:where(h2, h3, h4) { margin-bottom: var(--rom-3); }
+/* Merkelappane ber si eigi lina og treng ikkje dobbel luft. */
+:where(.section-title, .module-title, .step-title) { margin-bottom: var(--rom-4); }
 
 a { color: var(--merke); text-decoration-thickness: 1px; text-underline-offset: .16em; }
 a:hover { color: var(--merke-lys); }
@@ -193,7 +228,8 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
   gap: var(--rom-4); flex-wrap: wrap;
 }
 .header-content h1 {
-  font-size: 1.35rem; letter-spacing: .02em;
+  font-size: 1.4rem; letter-spacing: .03em;
+  font-stretch: var(--vidd-leiding); font-weight: 700;
   text-transform: uppercase;
 }
 .auth-controls { display: flex; align-items: baseline; gap: var(--rom-4); }
@@ -217,8 +253,9 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
 }
 .nav-item a {
   display: block; padding: var(--rom-3) 0;
-  font-family: var(--skrift-yver); font-size: 1.02rem;
-  letter-spacing: .03em; text-transform: uppercase;
+  font-family: var(--skrift-yver); font-size: 1.08rem;
+  font-stretch: var(--vidd-leiding); font-weight: 500;
+  letter-spacing: .04em; text-transform: uppercase;
   color: var(--blekk-lys); text-decoration: none;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -242,8 +279,12 @@ main {
 }
 
 .page-title {
-  font-size: 2.1rem;
-  margin: 0 0 var(--rom-2);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  overflow-wrap: break-word; hyphens: auto;
+  font-stretch: var(--vidd-tittel);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  margin: 0 0 var(--rom-3);
   padding: 0;
   border: 0;
   text-align: left;
@@ -254,8 +295,9 @@ main {
 
 .section-title, .module-title, .step-title {
   font-family: var(--skrift-yver);
-  font-size: 1.15rem; font-weight: 400;
-  letter-spacing: .05em; text-transform: uppercase;
+  font-size: 1.05rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
   color: var(--blekk-lys);
   margin: 0 0 var(--rom-4);
   padding-bottom: var(--rom-2);
@@ -294,6 +336,7 @@ main {
    Fargen tyder «dette er i live». Alt anna er form og vekt:
    ein open ring ventar, ein strek er frosen, graatt er utgjenge. */
 .stod, .status-badge, .popular-badge {
+  font-stretch: var(--vidd-merkelapp);
   display: inline-flex; align-items: center; gap: var(--rom-2);
   font-family: var(--skrift-yver);
   font-size: .78rem; letter-spacing: .09em; text-transform: uppercase;
@@ -323,7 +366,8 @@ main {
 }
 
 .package-name, .category-name, .event-title {
-  font-family: var(--skrift-yver); font-size: 1.2rem;
+  font-family: var(--skrift-yver); font-size: 1.25rem;
+  font-stretch: var(--vidd-yver); font-weight: 500;
   margin: 0 0 var(--rom-2);
 }
 .package-description, .category-description, .package-details,
@@ -376,7 +420,8 @@ main {
 button, .btn, .action-btn, .change-btn, .timeplan-btn, .login-btn,
 .week-nav-btn, .signup-button {
   font-family: var(--skrift-yver);
-  font-size: .95rem; letter-spacing: .04em; text-transform: uppercase;
+  font-size: 1rem; font-weight: 500; font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .06em; text-transform: uppercase;
   padding: var(--rom-3) var(--rom-5);
   border: 1px solid var(--kant);
   border-radius: 2px;
@@ -385,6 +430,7 @@ button, .btn, .action-btn, .change-btn, .timeplan-btn, .login-btn,
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
+  text-align: center;
   line-height: 1.2;
 }
 button:hover, .btn:hover, .action-btn:hover, .change-btn:hover,
@@ -482,7 +528,8 @@ select {
 table { border-collapse: collapse; width: 100%; }
 thead th {
   font-family: var(--skrift-yver);
-  font-size: .78rem; font-weight: 400;
+  font-size: .8rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
   letter-spacing: .09em; text-transform: uppercase;
   color: var(--blekk-lys);
   text-align: left;
@@ -504,15 +551,95 @@ tbody tr:hover td { background: var(--ark-djup); }
 /* ===================================================================
    timeplanen
    =================================================================== */
-.week-controls, .filter-group, .charges-filter {
-  display: flex; gap: var(--rom-3); align-items: end; flex-wrap: wrap;
+.week-controls {
+  display: flex; gap: var(--rom-4); align-items: end;
+  justify-content: space-between; flex-wrap: wrap;
   margin-bottom: var(--rom-5);
 }
-.week-nav-btn { padding: var(--rom-2) var(--rom-4); }
+.filters, .charges-filter { display: flex; gap: var(--rom-4); flex-wrap: wrap; align-items: end; }
+.filter-group { display: flex; flex-direction: column; gap: var(--rom-2); }
+.filter-group select { width: auto; min-width: 11rem; }
+
+.week-navigation { display: flex; align-items: stretch; gap: var(--rom-2); }
+.week-nav-btn { padding: var(--rom-2) var(--rom-4); font-size: 1rem; }
+.week-input {
+  width: 4.5rem; text-align: center;
+  font-family: var(--skrift-tal); font-variant-numeric: tabular-nums;
+}
+
+/* ---- vika ----
+   Sju dagar attmed kvarandre, slik ein les ei vika. Paa smale glas
+   rullar rutenetet sidelengs i staden for aa leggja dagarne under
+   kvarandre: ein time høyrer til ein dag, og den samanhengen ryk um
+   dagarne vert ei lang liste. */
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(11rem, 1fr));
+  gap: 1px;
+  background: var(--haarlina);
+  border: 1px solid var(--haarlina);
+  overflow-x: auto;
+}
+.day-column {
+  background: var(--flate);
+  display: flex; flex-direction: column;
+  min-width: 0;
+}
+.day-column .day-header {
+  margin: 0; padding: var(--rom-3);
+  border-bottom: 1px solid var(--haarlina);
+  display: flex; flex-direction: column; gap: 0; align-items: start;
+  position: sticky; top: 0; z-index: 2;
+  background: var(--flate);
+}
+.day-column .day-name { font-size: .95rem; }
+.day-events { display: flex; flex-direction: column; gap: 1px; background: var(--haarlina); flex: 1; }
+.day-content, .no-events {
+  padding: var(--rom-5) var(--rom-3);
+  color: var(--blekk-svakt); font-size: .88rem; text-align: center;
+  background: var(--flate); flex: 1;
+}
+
+/* Ein dag som er gjengen er ikkje burte — han er berre ikkje noko du
+   kann gjera noko med lenger. */
+.day-column.past { background: var(--ark-djup); }
+.day-column.past .day-header { background: var(--ark-djup); color: var(--blekk-svakt); }
+.day-column.past .day-content { background: var(--ark-djup); }
+
+/* Timekortet i rutenetet er tettare enn eit kort elles. */
+.week-grid .event-card {
+  border: 0; border-radius: 0;
+  padding: var(--rom-3);
+  display: flex; flex-direction: column; gap: var(--rom-1);
+  cursor: pointer;
+}
+.week-grid .event-card:hover { background: var(--ark-djup); }
+.week-grid .event-time { font-size: .92rem; color: var(--blekk-lys); }
+.week-grid .event-title {
+  font-size: 1rem; font-stretch: var(--vidd-yver); font-weight: 500;
+  margin: 0; text-wrap: pretty;
+}
+.week-grid .event-teacher { font-size: .85rem; }
+.week-grid .event-spaces {
+  font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-lys);
+}
+.week-grid .event-details { margin-top: var(--rom-2); }
+.week-grid .signup-button { width: 100%; padding: var(--rom-2); font-size: .85rem; }
+
+/* Ein full time er ikkje ein feil. Ventelista er ei anna handling, og
+   difor ein annan knapp — open, ikkje fylt. */
+.signup-button.waitlist {
+  background: none; color: var(--blekk); border-color: var(--kant);
+}
+.signup-button.waitlist:hover { border-color: var(--merke); color: var(--merke); background: none; }
+.signup-button.signed-up {
+  background: none; border-color: var(--merke); color: var(--merke);
+}
 
 .day-header {
   font-family: var(--skrift-yver);
-  font-size: 1.05rem; letter-spacing: .05em; text-transform: uppercase;
+  font-size: 1.1rem; font-weight: 600; font-stretch: var(--vidd-leiding);
+  letter-spacing: .05em; text-transform: uppercase;
   color: var(--blekk);
   margin: var(--rom-6) 0 var(--rom-3);
   padding-bottom: var(--rom-2);
@@ -543,7 +670,7 @@ tbody tr:hover td { background: var(--ark-djup); }
 /* ===================================================================
    statistikk (administrasjonen)
    =================================================================== */
-.stats-grid { display: grid; gap: 1px; background: var(--haarlina); border: 1px solid var(--haarlina); margin-bottom: var(--rom-6); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+.stats-grid, .admin-stats { display: grid; gap: 1px; background: var(--haarlina); border: 1px solid var(--haarlina); margin-bottom: var(--rom-6); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
 .stat-item { background: var(--flate); padding: var(--rom-4) var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-1); }
 .stat-value { font-family: var(--skrift-tal); font-size: 2rem; line-height: 1; color: var(--blekk); }
 .stat-label {
@@ -566,12 +693,12 @@ tbody tr:hover td { background: var(--ark-djup); }
    innloggingi — den eine sida utan leiding
    =================================================================== */
 .login-container {
-  max-width: 22rem; margin: var(--rom-7) auto; padding: var(--rom-6);
+  max-width: 26rem; margin: var(--rom-7) auto; padding: var(--rom-6);
   background: var(--flate);
   border: 1px solid var(--haarlina);
   border-radius: 2px;
 }
-.login-title { font-size: 1.9rem; margin-bottom: var(--rom-1); }
+.login-title { font-size: 2.4rem; font-stretch: var(--vidd-tittel); font-weight: 700; margin-bottom: var(--rom-1); }
 .login-subtitle { color: var(--blekk-lys); font-size: .95rem; margin-bottom: var(--rom-5); }
 .login-btn { width: 100%; margin-top: var(--rom-2); }
 .forgot-password, .signup-link { font-size: .9rem; margin-top: var(--rom-4); color: var(--blekk-lys); }
@@ -593,7 +720,7 @@ tbody tr:hover td { background: var(--ark-djup); }
   h1, .page-title { font-size: 1.7rem; }
 
   .two-column-grid, .content-grid, .selector-container,
-  .packages-grid, .events-grid, .stats-grid, .form-row {
+  .packages-grid, .events-grid, .stats-grid, .admin-stats, .form-row {
     grid-template-columns: 1fr;
   }
   .stats-grid { gap: 1px; }
@@ -631,11 +758,13 @@ tbody tr:hover td { background: var(--ark-djup); }
   margin-bottom: var(--rom-3);
 }
 .membership-name, .card-title {
-  font-family: var(--skrift-yver); font-size: 1.25rem; margin: 0;
+  font-family: var(--skrift-yver); font-size: 1.3rem; margin: 0;
+  font-stretch: var(--vidd-yver); font-weight: 500;
 }
 
 /* Merket sjølv. Forma segjer stoda; fargen segjer berre um ho er i live. */
 .membership-status, .expiring-badge {
+  font-stretch: var(--vidd-merkelapp);
   display: inline-flex; align-items: center; gap: var(--rom-2);
   font-family: var(--skrift-yver);
   font-size: .78rem; letter-spacing: .09em; text-transform: uppercase;
@@ -687,3 +816,80 @@ tbody tr:hover td { background: var(--ark-djup); }
 .no-membership, .no-klippekort {
   color: var(--blekk-svakt); text-align: center; padding: var(--rom-6) var(--rom-4);
 }
+
+/* ===================================================================
+   registrering, vilkaar og gløymt passord
+   Dei tri sidone som stod utanfor systemet: registreringi var ei rein
+   fil med Arial og eigne fargar, vilkaari vart skrivne ut som naken
+   HTML utan so mykje som eit <html>-merke, og gløymt-passord fanst
+   ikkje i det heile — lenkja paa innloggingi gav 404.
+   =================================================================== */
+.smal { max-width: 34rem; }
+
+.skjema { display: flex; flex-direction: column; gap: var(--rom-4); }
+.skjema .form-group { margin-bottom: 0; }
+
+/* Stjerna er ei paaminning, ikkje ei aatvaring. Ho skal ikkje ropa. */
+.paakravd { color: var(--blekk-svakt); }
+
+.bolk {
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  padding: var(--rom-4) var(--rom-5) var(--rom-5);
+  display: flex; flex-direction: column; gap: var(--rom-4);
+  margin: 0;
+}
+.bolk legend {
+  font-family: var(--skrift-yver);
+  font-size: .82rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  padding: 0 var(--rom-2);
+}
+
+.avkryssing { display: flex; align-items: start; gap: var(--rom-3); }
+.avkryssing input[type="checkbox"] {
+  width: 1.05rem; height: 1.05rem; margin: .22rem 0 0; flex: none;
+  accent-color: var(--merke);
+}
+.avkryssing label { color: var(--blekk); font-size: .95rem; }
+
+/* Ein knapp som opnar noko, men som stend inne i ei setning. */
+.lenkjeknapp {
+  background: none; border: 0; padding: 0;
+  font: inherit; text-transform: none; letter-spacing: 0;
+  color: var(--merke); text-decoration: underline;
+  text-underline-offset: .16em; cursor: pointer;
+}
+.lenkjeknapp:hover { color: var(--merke-lys); background: none; border: 0; }
+
+.attende { margin-top: var(--rom-5); font-size: .92rem; }
+
+/* ---- skuffa ----
+   Det einaste paa heile arket som verkeleg flyt, og difor det einaste
+   som fær skugge. */
+.skuffa {
+  border: 1px solid var(--kant);
+  border-radius: 2px;
+  background: var(--flate);
+  color: var(--blekk);
+  box-shadow: var(--skugge-flytande);
+  max-width: min(44rem, 92vw);
+  max-height: 82vh;
+  padding: var(--rom-5);
+}
+.skuffa::backdrop { background: rgb(0 0 0 / .55); }
+.skuffa h2 { margin-bottom: var(--rom-4); }
+.skuffa form { margin-top: var(--rom-5); }
+.skuffa-tekst { overflow-y: auto; max-height: 56vh; }
+.skuffa-tekst h1, .skuffa-tekst h2, .skuffa-tekst h3 { margin: var(--rom-5) 0 var(--rom-2); font-size: 1.15rem; }
+.skuffa-tekst h1:first-child { margin-top: 0; }
+.skuffa-tekst p, .skuffa-tekst li { font-size: .93rem; color: var(--blekk-lys); }
+.skuffa-tekst ul, .skuffa-tekst ol { padding-left: 1.2rem; }
+
+/* ---- vilkaarssida i full breidd ---- */
+.vilkaar { max-width: 46rem; }
+.vilkaar h1, .vilkaar h2, .vilkaar h3 { margin: var(--rom-6) 0 var(--rom-3); }
+.vilkaar h1:first-child { margin-top: 0; }
+.vilkaar li { margin-bottom: var(--rom-2); }

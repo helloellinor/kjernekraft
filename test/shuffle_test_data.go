@@ -70,7 +70,7 @@ func ShuffleTestData() error {
 	// Generate 5-12 events per day with randomization
 	for dayOffset := 0; dayOffset < 7; dayOffset++ {
 		currentDay := monday.AddDate(0, 0, dayOffset)
-		
+
 		// Randomize number of events per day (more events on weekdays)
 		var numEvents int
 		if currentDay.Weekday() == time.Saturday || currentDay.Weekday() == time.Sunday {
@@ -189,7 +189,7 @@ func ShuffleTestData() error {
 			log.Printf("Error creating event %s: %v", event.Title, err)
 		} else {
 			successCount++
-			fmt.Printf("Created event: %s with %s on %s at %s (ID: %d)\n", 
+			fmt.Printf("Created event: %s with %s on %s at %s (ID: %d)\n",
 				event.Title, event.TeacherName, event.StartTime.Format("2006-01-02"), event.StartTime.Format("15:04"), id)
 		}
 	}
@@ -197,7 +197,7 @@ func ShuffleTestData() error {
 	fmt.Printf("\n✅ Successfully shuffled test data: Created %d new events out of %d total\n", successCount, len(events))
 	fmt.Println("📅 Events span current week plus first 3 days of next week")
 	fmt.Println("🔄 Refresh your browser to see the new randomized schedule!")
-	
+
 	return nil
 }
 

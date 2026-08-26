@@ -20,8 +20,8 @@
                     <tr data-membership-id="{{.ID}}">
                         <td>{{.Name}}</td>
                         <td class="price-cell">
-                            <span class="price-display">{{.Price}} øre</span>
-                            <input type="number" class="price-input" value="{{.Price}}" style="display: none;">
+                            <span class="price-display" data-oere="{{.Price}}">{{kroner .Price}}</span>
+                            <input type="number" class="price-input" value="{{kronerTal .Price}}" min="0" step="10" style="display: none;" aria-label="{{t $.Lang "admin.price_in_kroner"}}">
                         </td>
                         <td>{{.CommitmentMonths}}</td>
                         <td>{{if .IsStudentSenior}}Ja{{else}}Nei{{end}}</td>
@@ -93,8 +93,10 @@ function cancelEditPrice(membershipId) {
     const saveBtn = row.querySelector('.save-price-btn');
     const cancelBtn = row.querySelector('.cancel-price-btn');
     
-    // Reset to original value
-    priceInput.value = priceDisplay.textContent.replace(' øre', '');
+    // Attende til det som stod. Verdet vert lese or data-oere og ikkje
+    // or teksti: teksti er formatert for auga, med hardt mellomrom og
+    // «kr» paa slutten, og ho skal ikkje reknast paa.
+    priceInput.value = Math.round(parseInt(priceDisplay.dataset.oere, 10) / 100);
     
     priceDisplay.style.display = 'block';
     priceInput.style.display = 'none';
@@ -106,7 +108,9 @@ function cancelEditPrice(membershipId) {
 function savePrice(membershipId) {
     const row = document.querySelector(`tr[data-membership-id="${membershipId}"]`);
     const priceInput = row.querySelector('.price-input');
-    const newPrice = priceInput.value;
+    // Feltet er i kronor; basen er i øre.
+    const kroner = parseInt(priceInput.value, 10);
+    const newPrice = kroner * 100;
     
     fetch('/api/admin/membership-price', {
         method: 'POST',
@@ -115,13 +119,14 @@ function savePrice(membershipId) {
         },
         body: JSON.stringify({
             membership_id: membershipId,
-            price: parseInt(newPrice)
+            price: newPrice
         })
     })
     .then(response => {
         if (response.ok) {
             const priceDisplay = row.querySelector('.price-display');
-            priceDisplay.textContent = newPrice + ' øre';
+            priceDisplay.dataset.oere = newPrice;
+            priceDisplay.textContent = kroner.toLocaleString('nb-NO') + '\u00a0kr';
             cancelEditPrice(membershipId);
             alert('{{t .Lang "admin.price_updated_successfully"}}');
         } else {
