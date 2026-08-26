@@ -8,6 +8,23 @@ import (
 	"kjernekraft/models"
 )
 
+// reintNamn tek bort styreteikn og luft i endane.
+//
+// Grunnen er konkret: dokka sitt «lagra» verd for eit felt som ikkje
+// fanst, var eit NUL-teikn, og angre-knappen skreiv det inn i feltet.
+// Tre medlemskap som heitte NUL kom inn i basen på den måten. Feilen er
+// retta i endringar.js, men eit namn som ikkje er eit namn, skal ikkje
+// kunne lagast uansett kva som sender skjemaet.
+func reintNamn(s string) string {
+	reint := strings.Map(func(r rune) rune {
+		if r < 32 || r == 127 || r == 0xFFFD {
+			return -1
+		}
+		return r
+	}, s)
+	return strings.TrimSpace(reint)
+}
+
 // AdminPriserHandler lagrar prisane.
 //
 // Skjemaet sender alle medlemskapa, ikkje berre dei endra: kva som er
@@ -88,7 +105,7 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 		if !strings.HasPrefix(nykel, "namn-ny") || len(verdiar) == 0 {
 			continue
 		}
-		namn := strings.TrimSpace(verdiar[0])
+		namn := reintNamn(verdiar[0])
 		if namn == "" {
 			continue // ein tom rad er ein rad nokon ombestemte seg om
 		}
