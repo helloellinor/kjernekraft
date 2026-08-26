@@ -136,21 +136,26 @@ func ensureCSRFToken(w http.ResponseWriter, r *http.Request) string {
 	}
 
 	if cookie, err := r.Cookie(csrfCookieName); err != nil || cookie.Value != token {
-		http.SetCookie(w, &http.Cookie{
-			Name:  csrfCookieName,
-			Value: token,
-			Path:  "/",
-			// Ikkje HttpOnly: skriptet i base.html skal lesa han og
-			// leggja honom i hovudlinja. Kjennemerket er ikkje ein
-			// løyndom for sida sjølv — det er eit prov paa at soknaden
-			// kjem derifraa.
-			HttpOnly: false,
-			Secure:   !IsDevelopment(),
-			SameSite: http.SameSiteLaxMode,
-			MaxAge:   86400 * 7,
-		})
+		settCSRFKaka(w, token)
 	}
 	return token
+}
+
+// settCSRFKaka speglar kjennemerket ut i ei kaka sida sjølv kann lesa.
+//
+// Ikkje HttpOnly: skriptet skal lesa han og leggja honom i hovudlinja.
+// Kjennemerket er ikkje ein løyndom for sida sjølv — det er eit prov paa
+// at soknaden kjem derifraa.
+func settCSRFKaka(w http.ResponseWriter, token string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     csrfCookieName,
+		Value:    token,
+		Path:     "/",
+		HttpOnly: false,
+		Secure:   !IsDevelopment(),
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   86400 * 7,
+	})
 }
 
 // CSRFToken gjev malane kjennemerket, so skjema kann bera det i eit løynt

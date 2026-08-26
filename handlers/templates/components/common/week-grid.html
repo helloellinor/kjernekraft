@@ -33,6 +33,7 @@
                     data-plassar="{{.Event.Capacity}}"
                     data-full="{{.Full}}"
                     data-umme="{{.ErUmme}}"
+                    data-paameld="{{.Event.IsUserSignedUp}}"
                     {{if .ErUmme}}disabled{{end}}
                     aria-label="{{.DagNamn}} — {{.Event.CurrentEnrolment}} av {{.Event.Capacity}} plassar">
                 <span class="dagnamn">{{.DagNamn}}</span>
@@ -73,7 +74,9 @@
         <div class="dokkhandling">
             <button type="button" class="btn-primary" id="dokk-knapp"
                     data-meld-paa="{{t .Lang "timeplan.signup"}}"
-                    data-venteliste="{{t .Lang "timeplan.waitlist"}}"></button>
+                    data-venteliste="{{t .Lang "timeplan.waitlist"}}"
+                    data-meld-av="{{t .Lang "timeplan.cancel_signup"}}"></button>
+            <p class="dokkmelding" id="dokk-melding" role="status"></p>
         </div>
         <button type="button" class="dokklukk" id="dokk-lukk" aria-label="{{t .Lang "timeplan.close"}}">&times;</button>
     </div>
