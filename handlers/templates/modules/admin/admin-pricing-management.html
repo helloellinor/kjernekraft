@@ -1,10 +1,10 @@
 {{define "admin_pricing_management"}}
 <div class="pricing-management-section">
-    <h3>{{t .Lang "admin.pricing_management"}}</h3>
+    <h3 class="section-title">{{t .Lang "admin.pricing_management"}}</h3>
     
     <div class="pricing-container">
         <div class="membership-pricing">
-            <h4>{{t .Lang "admin.membership_pricing"}}</h4>
+            <h4 class="undertittel">{{t .Lang "admin.membership_pricing"}}</h4>
             <table class="pricing-table">
                 <thead>
                     <tr>
@@ -37,7 +37,7 @@
         </div>
 
         <div class="new-membership">
-            <h4>{{t .Lang "admin.create_new_membership"}}</h4>
+            <h4 class="undertittel">{{t .Lang "admin.create_new_membership"}}</h4>
             <form id="new-membership-form" onsubmit="createMembership(event)">
                 <div class="form-group">
                     <label for="membership-name">{{t .Lang "admin.membership_name"}}:</label>

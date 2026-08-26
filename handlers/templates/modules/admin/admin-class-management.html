@@ -1,10 +1,10 @@
 {{define "admin_class_management"}}
 <div class="class-management-section">
-    <h3>{{t .Lang "admin.class_management"}}</h3>
+    <h3 class="section-title">{{t .Lang "admin.class_management"}}</h3>
     
     <div class="class-container">
         <div class="new-class">
-            <h4>{{t .Lang "admin.create_new_class"}}</h4>
+            <h4 class="undertittel">{{t .Lang "admin.create_new_class"}}</h4>
             <form id="new-class-form" class="setningsskjema" onsubmit="createClass(event)">
                 {{/* Timen som ei setning. Rekkjefylgdi er arbeidet — kva,
                      kven, kvar, naar, kor lenge — og ikkje rekkjefylgdi
@@ -58,7 +58,7 @@
         </div>
 
         <div class="upcoming-classes">
-            <h4>{{t .Lang "admin.upcoming_classes"}}</h4>
+            <h4 class="undertittel">{{t .Lang "admin.upcoming_classes"}}</h4>
             <div class="classes-table-container">
                 <table class="classes-table">
                     <thead>
