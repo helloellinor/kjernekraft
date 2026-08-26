@@ -9,9 +9,19 @@
 (function () {
     "use strict";
 
+    // Fanerekkjer kan liggje inni kvarandre: prisane i administrasjonen
+    // har sine eigne faner inne i fana «Prisar». Difor lyt alt vere
+    // scopa til *næraste* ark — utan `:scope >` fann det ytre arket
+    // fanene til det indre og skreiv aria-selected på dei med.
+    function eigne(ark, veljar) {
+        return [].slice.call(ark.querySelectorAll(veljar)).filter(function (el) {
+            return el.closest(".faneark") === ark;
+        });
+    }
+
     function vel(ark, bolk, skrivAdresse) {
-        var rom = ark.querySelector(".fanerom");
-        var faner = ark.querySelectorAll(".fane[data-bolk]");
+        var rom = eigne(ark, ".fanerom")[0];
+        var faner = eigne(ark, ".fane[data-bolk]");
         var finst = false;
 
         for (var i = 0; i < faner.length; i++) {
@@ -56,17 +66,23 @@
     }
 
     function start(ark) {
-        var faner = [].slice.call(ark.querySelectorAll(".fane[data-bolk]"));
+        var faner = eigne(ark, ".fane[data-bolk]");
         if (!faner.length) return;
+
+        // Berre det ytste arket eig adressa. To nivå som skreiv same
+        // hash ville teke henne frå kvarandre for kvar klikk.
+        var ytst = ark.parentElement.closest(".faneark") === null;
 
         ark.addEventListener("click", function (e) {
             var f = e.target.closest(".fane[data-bolk]");
-            if (f) vel(ark, f.getAttribute("data-bolk"), true);
+            if (f && f.closest(".faneark") === ark) {
+                vel(ark, f.getAttribute("data-bolk"), ytst);
+            }
         });
 
         ark.addEventListener("keydown", function (e) {
             var f = e.target.closest(".fane[data-bolk]");
-            if (!f) return;
+            if (!f || f.closest(".faneark") !== ark) return;
             var i = faner.indexOf(f);
             var neste = null;
             if (e.key === "ArrowRight" || e.key === "ArrowDown") neste = faner[(i + 1) % faner.length];
@@ -75,7 +91,7 @@
             else if (e.key === "End") neste = faner[faner.length - 1];
             if (!neste) return;
             e.preventDefault();
-            vel(ark, neste.getAttribute("data-bolk"), true);
+            vel(ark, neste.getAttribute("data-bolk"), ytst);
             neste.focus();
         });
 
@@ -86,11 +102,16 @@
         // Eit hopp som berre skiftar hash lastar ikkje dokumentet paa
         // nytt. Utan denne lyttaren peika ei lenkja til ei fana rett
         // nok i adressa, men synte kva som helst.
-        window.addEventListener("hashchange", function () {
-            vel(ark, fraaAdressa(), false);
-        });
+        if (ytst) {
+            window.addEventListener("hashchange", function () {
+                vel(ark, fraaAdressa(), false);
+            });
+        }
 
-        vel(ark, fraaAdressa() || faner[0].getAttribute("data-bolk"), false);
+        // Eit indre ark skal ikkje lese adressa: ho peikar på ei fane i
+        // det ytre, og då ville det indre ikkje kjenne henne att og late
+        // alt stå som det stod.
+        vel(ark, (ytst && fraaAdressa()) || faner[0].getAttribute("data-bolk"), false);
     }
 
     function startAlle() {
