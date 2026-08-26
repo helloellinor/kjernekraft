@@ -21,6 +21,21 @@
     var angra = dokk.querySelector("[data-angra]");
     var felt = [].slice.call(skjema.querySelectorAll("input:not([type=hidden]), select, textarea"));
 
+    // Felt som kjem til etter at sida er lasta — ein ny prisrad, til
+    // dømes — lyt takast med. Utan dette kunne ein fylle ut ein ny rad
+    // og dokka sa framleis ingenting.
+    skjema.addEventListener("endringar:nye", function () {
+        [].slice.call(skjema.querySelectorAll("input:not([type=hidden]), select, textarea"))
+            .forEach(function (f) {
+                if (felt.indexOf(f) !== -1) return;
+                // Ein ny rad er ei endring i seg sjølv, so det lagra
+                // verdet er «fanst ikkje» og ikkje det som står i feltet.
+                f.dataset.lagra = "\u0000";
+                felt.push(f);
+            });
+        maal();
+    });
+
     // Yverskrifta er ein contenteditable <h1> og ikkje eit <input>, av
     // di ho skal brjota som all annan tekst paa sida. Ho speglar seg inn
     // i eit løynt felt, so skjemaet sender det same som fyrr.
@@ -69,13 +84,23 @@
 
     function maal() {
         var n = 0;
+        // Ein ny rad er *éi* endring, ikkje fire. Felt inne i noko som
+        // er merkt `data-eitt` vert talde som ein ting — elles sa dokka
+        // «4 endringar» av eitt nytt medlemskap.
+        var eitt = [];
         felt.forEach(function (f) {
             var e = endra(f);
             // Eit løynt felt kann ikkje syna at det er endra; merket
             // gjeng paa det som er synleg i staden.
             var synleg = f.dataset.visast ? document.getElementById(f.dataset.visast) : f;
             if (synleg) synleg.classList.toggle("endra", e);
-            if (e) n++;
+            if (!e) return;
+            var samla = f.closest("[data-eitt]");
+            if (samla) {
+                if (eitt.indexOf(samla) === -1) { eitt.push(samla); n++; }
+                return;
+            }
+            n++;
         });
 
         dokk.hidden = n === 0;

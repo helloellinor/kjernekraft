@@ -2167,7 +2167,7 @@ tbody tr:hover td { background: var(--ark-djup); }
 .lappfelt {
   font: inherit;
   padding: var(--rom-2) var(--rom-3);
-  background: color-mix(in srgb, var(--blekk) 3%, var(--flate));
+  background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate));
   border: 0;
   border-radius: 2px;
   box-shadow: var(--fordjuping);
@@ -2177,7 +2177,7 @@ tbody tr:hover td { background: var(--ark-djup); }
   min-width: 7rem;
   max-width: 100%;
 }
-.lappfelt:hover { background: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
+.lappfelt:hover { background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
 .lappfelt:focus { outline: none; box-shadow: var(--fasett); }
 .lappfelt::placeholder { color: var(--blekk-svakt); }
 
@@ -2497,3 +2497,17 @@ a.byteveg {
 .talfelt { -moz-appearance: textfield; appearance: textfield; }
 
 .priseining { color: var(--blekk-lys); font-size: .92rem; }
+
+/* Knappen som legg til ein rad. Han står nedst i lista og ikkje attmed
+   fanene: det er der raden kjem, og det er den plasseringa som verkar
+   like godt på ein telefon som på ein skjerm. */
+.nyrad { margin-top: var(--rom-5); }
+
+/* Veljaren i setninga ber den same fordjupinga som felta rundt seg —
+   `.lappfelt` set flate og skugge, og select-regelen ovanfor held pila
+   og breidda. Utan `padding-right` legg teksten seg under pila. */
+select.lappfelt { padding-right: var(--rom-6); }
+
+/* Ein rad som ikkje er lagra enno ber det same merket som eit endra
+   felt — heile raden, av di det er heile raden som er ny. */
+.prislapp.ny { border-left: 3px solid var(--togu); padding-left: var(--rom-4); }

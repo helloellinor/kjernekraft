@@ -3,6 +3,9 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"strings"
+
+	"kjernekraft/models"
 )
 
 // AdminPriserHandler lagrar prisane.
@@ -47,7 +50,9 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		student := r.FormValue("student-"+id) != ""
+		// Rabatten er ikkje ei avkryssing lenger, men eit val i setninga:
+		// kven medlemskapet gjeld for.
+		student := r.FormValue("gjeld-"+id) == "student"
 
 		if namn == m.Name && pris == m.Price && binding == m.CommitmentMonths &&
 			student == m.IsStudentSenior {
@@ -60,6 +65,40 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 		m.IsStudentSenior = student
 		if err := DB.UpdateMembershipDetails(m); err != nil {
 			http.Error(w, "kunne ikkje lagre", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Nye rader. Dei kjem frå den same lista og den same dokka som
+	// resten — ein legg til der ein endrar, og ikkje på eit eige skjema
+	// ein annan stad.
+	for nykel, verdiar := range r.Form {
+		if !strings.HasPrefix(nykel, "namn-ny") || len(verdiar) == 0 {
+			continue
+		}
+		namn := strings.TrimSpace(verdiar[0])
+		if namn == "" {
+			continue // ein tom rad er ein rad nokon ombestemte seg om
+		}
+		suffiks := strings.TrimPrefix(nykel, "namn-")
+
+		pris := 0
+		if kr, err := strconv.Atoi(r.FormValue("pris-" + suffiks)); err == nil && kr >= 0 {
+			pris = kr * 100
+		}
+		binding := 0
+		if md, err := strconv.Atoi(r.FormValue("binding-" + suffiks)); err == nil && md >= 0 {
+			binding = md
+		}
+
+		if _, err := DB.CreateMembership(models.Membership{
+			Name:             namn,
+			Price:            pris,
+			CommitmentMonths: binding,
+			IsStudentSenior:  r.FormValue("gjeld-"+suffiks) == "student",
+			Active:           true,
+		}); err != nil {
+			http.Error(w, "kunne ikkje opprette", http.StatusInternalServerError)
 			return
 		}
 	}
