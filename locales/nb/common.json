@@ -79,7 +79,8 @@
     "waitlist": "Venteliste",
     "signup": "Meld på",
     "cancel_signup": "Meld av",
-    "close": "Lukk"
+    "close": "Lukk",
+    "of": "av"
   },
   "dashboard": {
     "welcome_user": "Velkommen, {{.UserName}}!",
@@ -277,7 +278,7 @@
     "recurring_options": "Gjentakelsesvalg",
     "create_recurring_class": "Opprett gjentakende klasse",
     "recurring_weeks": "Antall uker",
-    "create_class": "Opprett klasse",
+    "create_class": "Legg til",
     "upcoming_classes": "Kommende klasser",
     "edit": "Rediger",
     "delete": "Slett",
@@ -312,7 +313,21 @@
     "tab_prices": "Priser",
     "tab_people": "Folk",
     "tab_settings": "Innstillinger",
-    "pick_room_first": "velg et rom først"
+    "pick_room_first": "velg et rom først",
+    "with": "med",
+    "in_room": "i",
+    "from_time": "fra",
+    "for_duration": "i",
+    "minutes": "min",
+    "every_week": "hver uke",
+    "for_weeks": "i",
+    "weeks": "uker",
+    "places": "plasser",
+    "ends": "slutter",
+    "eg_class": "Vinyasa Flow",
+    "eg_teacher": "Kristina",
+    "length_minutes": "Lengde i minutter",
+    "room_busy": "Rommet er opptatt"
   },
   "terms": {
     "title": "Handelsbetingelser"

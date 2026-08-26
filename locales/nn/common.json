@@ -79,7 +79,8 @@
     "waitlist": "Venteliste",
     "signup": "Meld på",
     "cancel_signup": "Meld av",
-    "close": "Lukk"
+    "close": "Lukk",
+    "of": "av"
   },
   "dashboard": {
     "welcome_user": "Velkommen, {{.UserName}}!",
@@ -249,7 +250,22 @@
     "tab_people": "Folk",
     "tab_settings": "Innstillingar",
     "capacity": "Plassar",
-    "pick_room_first": "vel eit rom fyrst"
+    "pick_room_first": "vel eit rom fyrst",
+    "with": "med",
+    "in_room": "i",
+    "from_time": "frå",
+    "for_duration": "i",
+    "minutes": "min",
+    "every_week": "kvar veke",
+    "for_weeks": "i",
+    "weeks": "veker",
+    "places": "plassar",
+    "ends": "sluttar",
+    "eg_class": "Vinyasa Flow",
+    "eg_teacher": "Kristina",
+    "length_minutes": "Lengd i minutt",
+    "create_class": "Legg til",
+    "room_busy": "Rommet er uppteke"
   },
   "terms": {
     "title": "Handelsvilkår"

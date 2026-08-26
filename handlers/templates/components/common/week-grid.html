@@ -5,6 +5,17 @@
      spalta, og lesaren laut lesa den same linja tvo gonger for aa sjaa
      at det var den same. */}}
 <div class="timeplan">
+    {{/* Dagarne stend namngjevne ein gong, øvst. Kvart merke ligg i
+         spalta si, so alt som gjeng onsdag stend under kvarandre og ein
+         kann lesa nedyver ein dag. Fyrr flaut merki mot høgre og
+         stod aldri paa lina. */}}
+    <div class="timehovud" aria-hidden="true">
+        <span class="timehovud-tom"></span>
+        {{range $i, $d := .WeekDays}}
+        <span class="dagnamn{{if eq (index $.WeekDates $i | dagStreng) $.Today}} idag{{end}}">{{$d | dagKort3}}</span>
+        {{end}}
+    </div>
+
     {{range .Timebolkar}}
     <div class="timerad">
         <div class="timeklokke">
@@ -20,8 +31,10 @@
         {{/* Eitt merke per dag. Merket ber si eigi fylling, so ein ser
              med det same at torsdagen er full og tysdagen ikkje. */}}
         <div class="timedagar">
-            {{range .Framsyning}}
-            <button type="button"
+            {{range .Rutor}}
+            {{if .Har}}
+            {{with .Framsyning}}
+            <button type="button" style="--dag: {{.Kolonne}}"
                     class="dagmerke{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}{{if .Full}} full{{end}}"
                     data-event="{{.Event.ID}}"
                     data-tittel="{{.Event.Title}}"
@@ -35,11 +48,19 @@
                     data-umme="{{.ErUmme}}"
                     data-paameld="{{.Event.IsUserSignedUp}}"
                     {{if .ErUmme}}disabled{{end}}
-                    aria-label="{{.DagNamn}} — {{.Event.CurrentEnrolment}} av {{.Event.Capacity}} plassar">
-                <span class="dagnamn">{{.DagNamn}}</span>
+                    aria-label="{{.DagNamn}} — {{.Event.CurrentEnrolment}} {{t $.Lang "timeplan.of"}} {{.Event.Capacity}}">
+                <span class="dagnamn berre-lesar">{{.DagNamn}}</span>
                 <span class="dagfyll" style="--fyll: {{.Prosent}}%"></span>
                 <span class="dagtal">{{.Event.CurrentEnrolment}}<span class="av">/{{.Event.Capacity}}</span></span>
             </button>
+            {{end}}
+            {{else}}
+            {{/* Den daude ruta. Ho gjer at rada hev sju plassar og ikkje
+                 tvo — ein ser kva som *ikkje* gjeng, og det er halve
+                 spursmaalet naar ein set upp ei vika. */}}
+            <span class="dagmerke daud{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}"
+                  style="--dag: {{.Kolonne}}" aria-hidden="true"></span>
+            {{end}}
             {{end}}
         </div>
     </div>

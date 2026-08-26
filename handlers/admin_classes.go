@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"kjernekraft/models"
 	"net/http"
 	"strconv"
@@ -15,13 +16,14 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Add admin authentication check here
+	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	var classData struct {
 		Title          string `json:"title"`
 		ClassType      string `json:"class_type"`
 		TeacherName    string `json:"teacher_name"`
 		Location       string `json:"location"`
+		RoomID         int64  `json:"room_id"`
 		Date           string `json:"date"`
 		StartTime      string `json:"start_time"`
 		EndTime        string `json:"end_time"`
@@ -87,6 +89,22 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 			Capacity:         classData.Capacity,
 			CurrentEnrolment: 0,
 			Color:            classData.Color,
+			RoomID:           int(classData.RoomID),
+		}
+
+		// Konflikten er alt synt medan ein skreiv, men han lyt prøvast
+		// her ogso: sida kann ha stade open medan nokon annan la inn
+		// noko, og ei kontroll som berre finst i lesaren er ikkje ei
+		// kontroll.
+		if classData.RoomID > 0 {
+			if kollisjon, err := AdminDB.RoomConflict(classData.RoomID, weekStartTime, weekEndTime); err == nil && kollisjon != nil {
+				http.Error(w, fmt.Sprintf("%s %s–%s: %s",
+					t(GetLanguageFromRequest(r), "admin.room_busy"),
+					kollisjon.StartTime.In(OsloLoc).Format("2.1. 15:04"),
+					kollisjon.EndTime.In(OsloLoc).Format("15:04"),
+					kollisjon.Title), http.StatusConflict)
+				return
+			}
 		}
 
 		eventID, err := AdminDB.CreateEvent(event)
@@ -115,7 +133,7 @@ func DeleteClassHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Add admin authentication check here
+	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	// Extract class ID from URL path
 	// Expected format: /api/admin/class/{id}
@@ -149,7 +167,7 @@ func UpdateClassHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Add admin authentication check here
+	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	// Extract class ID from URL path
 	path := r.URL.Path

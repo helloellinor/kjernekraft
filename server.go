@@ -136,6 +136,7 @@ func main() {
 		r.Post("/api/admin/membership-price", handlers.UpdateMembershipPriceHandler)
 		r.Post("/api/admin/membership", handlers.CreateMembershipHandler)
 		r.Delete("/api/admin/membership", handlers.DeleteMembershipHandler)
+		r.Get("/api/admin/class/conflict", handlers.RoomConflictHandler)
 		r.Post("/api/admin/class", handlers.CreateClassHandler)
 		r.Put("/api/admin/class/*", handlers.UpdateClassHandler)
 		r.Delete("/api/admin/class/*", handlers.DeleteClassHandler)

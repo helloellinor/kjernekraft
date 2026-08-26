@@ -22,6 +22,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	events, err := AdminDB.GetAllEvents()
 	if err != nil {
+		log.Printf("admin: kunde ikkje henta timar: %v", err)
 		http.Error(w, "Kunne ikke hente events", http.StatusInternalServerError)
 		return
 	}

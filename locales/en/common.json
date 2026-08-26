@@ -79,7 +79,8 @@
     "waitlist": "Waiting list",
     "signup": "Book",
     "cancel_signup": "Cancel",
-    "close": "Close"
+    "close": "Close",
+    "of": "of"
   },
   "dashboard": {
     "welcome_user": "Welcome, {{.UserName}}!",
@@ -249,7 +250,22 @@
     "tab_people": "People",
     "tab_settings": "Settings",
     "capacity": "Places",
-    "pick_room_first": "pick a room first"
+    "pick_room_first": "pick a room first",
+    "with": "with",
+    "in_room": "in",
+    "from_time": "from",
+    "for_duration": "for",
+    "minutes": "min",
+    "every_week": "every week",
+    "for_weeks": "for",
+    "weeks": "weeks",
+    "places": "places",
+    "ends": "ends",
+    "eg_class": "Vinyasa Flow",
+    "eg_teacher": "Kristina",
+    "length_minutes": "Length in minutes",
+    "create_class": "Add",
+    "room_busy": "Room is busy"
   },
   "terms": {
     "title": "Terms and conditions"
