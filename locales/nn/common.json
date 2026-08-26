@@ -172,7 +172,10 @@
     "days_until_expiry": "dagar til utløp",
     "expires": "går ut",
     "expired": "utgått",
-    "fill_up": "Fyll på"
+    "fill_up": "Fyll på",
+    "expires_in": "går ut om %d dagar",
+    "expires_today": "går ut i dag",
+    "clips_left_of": "av %d"
   },
   "admin": {
     "title": "Administrasjon",

@@ -172,7 +172,10 @@
     "days_until_expiry": "days until expiry",
     "expires": "expires",
     "expired": "expired",
-    "fill_up": "Top up"
+    "fill_up": "Top up",
+    "expires_in": "expires in %d days",
+    "expires_today": "expires today",
+    "clips_left_of": "of %d"
   },
   "admin": {
     "title": "Administration",

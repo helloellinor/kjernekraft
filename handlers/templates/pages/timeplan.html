@@ -26,6 +26,15 @@
                         aria-expanded="false" aria-controls="veke-meny">{{.WeekTitle}}</button><button
                         type="button" class="vekepil" onclick="navigateWeek(1)"
                         aria-label="{{t .Lang "timeplan.next_week_btn"}}">&rsaquo;</button>
+
+                <div class="vekemeny" id="veke-meny" hidden>
+                    <input type="text" class="vekefelt" id="veke-felt"
+                           value="{{.WeekNumber}}" inputmode="numeric" maxlength="2"
+                           autocomplete="off" spellcheck="false"
+                           data-veke="{{.WeekNumber}}" data-offset="{{.WeekOffset}}"
+                           aria-label="{{t .Lang "timeplan.week"}}">
+                    <span class="vekehint">{{t .Lang "timeplan.type_week"}}</span>
+                </div>
             </span>
         </h1>
 
@@ -44,14 +53,6 @@
             </select>
         </div>
 
-        <div class="vekemeny" id="veke-meny" hidden>
-            <input type="text" class="vekefelt" id="veke-felt"
-                   value="{{.WeekNumber}}" inputmode="numeric" maxlength="2"
-                   autocomplete="off" spellcheck="false"
-                   data-veke="{{.WeekNumber}}" data-offset="{{.WeekOffset}}"
-                   aria-label="{{t .Lang "timeplan.week"}}">
-            <span class="vekehint">{{t .Lang "timeplan.type_week"}}</span>
-        </div>
     </header>
 
     {{template "week_grid" .}}

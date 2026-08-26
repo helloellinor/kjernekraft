@@ -156,6 +156,11 @@ func getTemplateFuncs() template.FuncMap {
 				return fmt.Sprintf(t(lang, "admin.ago_months"), dagar/30)
 			}
 		},
+		// printf-omsetjing: strengen ber sjølv kvar tale skal staa, so
+		// ordstillingi kann vera ulik paa ulike maal.
+		"tf": func(lang, key string, a ...interface{}) string {
+			return fmt.Sprintf(t(lang, key), a...)
+		},
 		"norskDag": func(t time.Time) string {
 			return norskeDagar[t.Weekday()]
 		},
