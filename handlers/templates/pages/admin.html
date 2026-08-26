@@ -1,7 +1,6 @@
 {{define "content"}}
-{{template "navigation" .}}
 
-<main class="main-content">
+<div class="sida">
     <h1 class="page-title">{{t .Lang "admin.title"}}</h1>
     
     {{template "admin_settings" .}}
@@ -19,7 +18,7 @@
     {{template "admin_freeze_requests_table" .}}
 
     {{template "admin_events_table" .}}
-</main>
+</div>
 
 {{template "admin_scripts" .}}
 {{end}}

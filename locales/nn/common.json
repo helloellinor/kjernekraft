@@ -12,7 +12,8 @@
     "punch_cards": "Klippekort",
     "membership": "Medlemskap",
     "payments": "Betalingar",
-    "my_profile": "Min profil"
+    "my_profile": "Min profil",
+    "admin": "Administrasjon"
   },
   "login": {
     "title": "Innlogging",
@@ -234,6 +235,7 @@
       "event_updated": "Hendings tid oppdatert!",
       "time_fields_required": "Begge tidsfelta må fyllast ut",
       "error_prefix": "Feil: "
-    }
+    },
+    "actions": "Handlingar"
   }
 }

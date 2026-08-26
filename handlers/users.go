@@ -31,6 +31,8 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 			"CurrentPage": "innlogging",
 			"Lang":        lang,
 			"CSRFToken":   CSRFToken(r),
+			"IsAdmin":     sessionIsAdmin(r),
+			"UserName":    sessionUserName(r),
 			"Error":       loginError(r.URL.Query().Get("error")),
 		}
 

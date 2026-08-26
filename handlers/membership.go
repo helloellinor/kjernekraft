@@ -26,6 +26,7 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 		"User":        user,
 		"Lang":        lang,
 		"CSRFToken":   CSRFToken(r),
+		"IsAdmin":     sessionIsAdmin(r),
 	}
 
 	// Use the new template system
@@ -86,6 +87,7 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
 		"User":                 user,
 		"Lang":                 lang,
 		"CSRFToken":            CSRFToken(r),
+		"IsAdmin":              sessionIsAdmin(r),
 	}
 
 	// Use the new template system
@@ -468,6 +470,7 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 		"ShowSuccess": showSuccess,
 		"Lang":        lang,
 		"CSRFToken":   CSRFToken(r),
+		"IsAdmin":     sessionIsAdmin(r),
 	}
 
 	// Use the new template system

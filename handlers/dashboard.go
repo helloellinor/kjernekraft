@@ -42,13 +42,13 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Title":        "Elev Dashboard",
 		"TodaysEvents": upcomingEvents,
-		"IsAdmin":      false, // TODO: Implement proper role checking
-		"ExternalCSS":  []string{"/static/css/event-card.css"},
+		"ExternalCSS":  []string{},
 		"CurrentPage":  "hjem",
 		"UserName":     user.Name,
 		"User":         user,
 		"Lang":         lang,
 		"CSRFToken":    CSRFToken(r),
+		"IsAdmin":      sessionIsAdmin(r),
 	}
 
 	// Use the new template system

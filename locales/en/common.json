@@ -12,7 +12,8 @@
     "punch_cards": "Punch cards",
     "membership": "Membership",
     "payments": "Payments",
-    "my_profile": "My profile"
+    "my_profile": "My profile",
+    "admin": "Admin"
   },
   "login": {
     "title": "Login",
@@ -234,6 +235,7 @@
       "event_updated": "Event time updated!",
       "time_fields_required": "Both time fields must be filled",
       "error_prefix": "Error: "
-    }
+    },
+    "actions": "Actions"
   }
 }
