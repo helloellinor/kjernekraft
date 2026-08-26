@@ -41,6 +41,11 @@ type Framsyning struct {
 	Klokke       string
 	TimeVinkel   float64
 	MinuttVinkel float64
+
+	// Merkelappen for skjermlesaren, ferdig umsett. Merket vert nytta
+	// tvo stader, og korkje av deim skal trenga aa naa rota for aa
+	// finna maalet.
+	Merkelapp string
 }
 
 // Timebolk er ein time med alle dagarne han gjeng i vika.
@@ -111,18 +116,56 @@ func kolonne(d time.Weekday) int {
 	return int(d)
 }
 
+// NyFramsyning lagar framsyningi av ein time ein einskild dag.
+//
+// Han stend for seg sjølv av di merket vert nytta tvo stader — i vika og
+// paa heimesida — og daa skal det vera *éin* stad som avgjer kva som
+// stend i det.
+func NyFramsyning(lang string, e models.Event, iDagDato string, naa time.Time) Framsyning {
+	prosent := 0
+	if e.Capacity > 0 {
+		prosent = e.CurrentEnrolment * 100 / e.Capacity
+	}
+	dag := dagKort[e.StartTime.Weekday()]
+	return Framsyning{
+		Event:        e,
+		Dag:          e.StartTime.Weekday(),
+		Dato:         e.StartTime,
+		DagNamn:      dag,
+		ErIDag:       e.StartTime.Format("2006-01-02") == iDagDato,
+		ErUmme:       e.EndTime.Before(naa),
+		Full:         e.Full(),
+		Prosent:      prosent,
+		Kolonne:      kolonne(e.StartTime.Weekday()),
+		Klokke:       e.StartTime.Format("15:04"),
+		TimeVinkel:   float64(e.StartTime.Hour()%12)*30 + float64(e.StartTime.Minute())*0.5,
+		MinuttVinkel: float64(e.StartTime.Minute()) * 6,
+		Merkelapp: fmt.Sprintf("%s %s — %d %s %d",
+			dag, e.StartTime.Format("15:04"),
+			e.CurrentEnrolment, t(lang, "timeplan.of"), e.Capacity),
+	}
+}
+
+// Framsyningar gjer ei liste med timar om til merke.
+func Framsyningar(lang string, events []models.Event, naa time.Time) []Framsyning {
+	iDagDato := naa.Format("2006-01-02")
+	ut := make([]Framsyning, 0, len(events))
+	for _, e := range events {
+		ut = append(ut, NyFramsyning(lang, e, iDagDato, naa))
+	}
+	return ut
+}
+
 // KlemVika slær saman like timar i vika.
 //
 // Nykelen er alt som gjer ein time til *den same* timen: kva han heiter,
 // kven som held honom, kvar han er, og kva klokkeslett han byrjar.
 // Skifter noko av det, er det ein annan time.
-func KlemVika(events []models.Event, iDag time.Time, maandag time.Time) []Timebolk {
+func KlemVika(lang string, events []models.Event, iDag time.Time, maandag time.Time) []Timebolk {
 	iDagDato := iDag.Format("2006-01-02")
-	naa := iDag
 
 	bolkar := map[string]*Timebolk{}
 	for _, e := range events {
-		start := e.StartTime.Format("15:04")
 		nykel := fmt.Sprintf("%s|%s|%s", e.Title, e.TeacherName, e.RoomName)
 
 		b, finst := bolkar[nykel]
@@ -139,24 +182,7 @@ func KlemVika(events []models.Event, iDag time.Time, maandag time.Time) []Timebo
 			bolkar[nykel] = b
 		}
 
-		prosent := 0
-		if e.Capacity > 0 {
-			prosent = e.CurrentEnrolment * 100 / e.Capacity
-		}
-		b.Framsyning = append(b.Framsyning, Framsyning{
-			Event:        e,
-			Dag:          e.StartTime.Weekday(),
-			Dato:         e.StartTime,
-			DagNamn:      dagKort[e.StartTime.Weekday()],
-			ErIDag:       e.StartTime.Format("2006-01-02") == iDagDato,
-			ErUmme:       e.EndTime.Before(naa),
-			Full:         e.Full(),
-			Prosent:      prosent,
-			Kolonne:      kolonne(e.StartTime.Weekday()),
-			Klokke:       start,
-			TimeVinkel:   float64(e.StartTime.Hour()%12)*30 + float64(e.StartTime.Minute())*0.5,
-			MinuttVinkel: float64(e.StartTime.Minute()) * 6,
-		})
+		b.Framsyning = append(b.Framsyning, NyFramsyning(lang, e, iDagDato, iDag))
 	}
 
 	ut := make([]Timebolk, 0, len(bolkar))

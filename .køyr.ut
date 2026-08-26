@@ -13,3 +13,27 @@ Kjernekraft
   ✓ http://localhost:8080
   … endring, byggjer
   ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/timeplanbolk.go:168:4: syntax error: unexpected ) at end of statement
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/timeplanbolk.go:138:3: unknown field Merkelapp in struct literal of type Framsyning
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080

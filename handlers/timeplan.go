@@ -155,7 +155,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		"WeekDays":        weekdays,
 		"WeekDates":       weekDates,
 		"EventsByDay":     eventsByDay,
-		"Timebolkar":      KlemVika(weekEvents, now, targetMonday),
+		"Timebolkar":      KlemVika(lang, weekEvents, now, targetMonday),
 		"Today":           now.Format("2006-01-02"),
 		"Teachers":        teachers,
 		"ClassTypes":      classTypes,

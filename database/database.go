@@ -531,7 +531,7 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 }
 
 func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]models.Event, error) {
-	query := "SELECT id, title, COALESCE(description, ''), start_time, end_time, COALESCE(location, ''), COALESCE(class_type, ''), COALESCE(teacher_name, ''), capacity, current_enrolment, COALESCE(color, '') FROM events WHERE 1=1"
+	query := "SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '') FROM events e LEFT JOIN rooms r ON r.id = e.room_id WHERE 1=1"
 	var args []interface{}
 
 	if startDate != "" {
@@ -556,7 +556,7 @@ func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]mo
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -590,7 +590,7 @@ func (db *Database) UpdateEventTime(eventID int64, startTime, endTime string) er
 
 // GetAllEvents fetches all events from the database
 func (db *Database) GetAllEvents() ([]models.Event, error) {
-	rows, err := db.Conn.Query("SELECT id, title, COALESCE(description, ''), start_time, end_time, COALESCE(location, ''), COALESCE(organizer, ''), COALESCE(class_type, ''), COALESCE(teacher_name, ''), capacity, current_enrolment, COALESCE(color, '') FROM events")
+	rows, err := db.Conn.Query("SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '') FROM events e LEFT JOIN rooms r ON r.id = e.room_id")
 	if err != nil {
 		return nil, err
 	}
@@ -599,7 +599,7 @@ func (db *Database) GetAllEvents() ([]models.Event, error) {
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -610,8 +610,8 @@ func (db *Database) GetAllEvents() ([]models.Event, error) {
 // GetTodaysEvents fetches events for today
 func (db *Database) GetTodaysEvents() ([]models.Event, error) {
 	query := `
-		SELECT id, title, COALESCE(description, ''), start_time, end_time, COALESCE(location, ''), COALESCE(organizer, ''), COALESCE(class_type, ''), COALESCE(teacher_name, ''), capacity, current_enrolment, COALESCE(color, '') 
-		FROM events 
+		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '')
+		FROM events e LEFT JOIN rooms r ON r.id = e.room_id 
 		WHERE DATE(start_time) = DATE('now', 'localtime')
 		ORDER BY start_time ASC
 	`
@@ -624,7 +624,7 @@ func (db *Database) GetTodaysEvents() ([]models.Event, error) {
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -635,8 +635,8 @@ func (db *Database) GetTodaysEvents() ([]models.Event, error) {
 // GetThisWeeksEvents fetches events for the current week
 func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 	query := `
-		SELECT id, title, COALESCE(description, ''), start_time, end_time, COALESCE(location, ''), COALESCE(organizer, ''), COALESCE(class_type, ''), COALESCE(teacher_name, ''), capacity, current_enrolment, COALESCE(color, '') 
-		FROM events 
+		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '')
+		FROM events e LEFT JOIN rooms r ON r.id = e.room_id 
 		WHERE DATE(start_time) >= DATE('now', 'weekday 0', '-6 days', 'localtime') 
 		AND DATE(start_time) <= DATE('now', 'weekday 0', 'localtime')
 		ORDER BY start_time ASC
@@ -650,7 +650,7 @@ func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
 			return nil, err
 		}
 		events = append(events, event)

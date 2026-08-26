@@ -44,6 +44,20 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+
+	// I utvikling skal ingen ting bufrast — korkje sidone eller bitane
+	// htmx hentar. Statiske filer fekk `no-store` fyrr, men sjølve
+	// HTML-en gjorde det ikkje, so ein kunde sitja og sjaa paa ei sida
+	// som var teikna medan ein mal var i stykke, lenge etter at han var
+	// retta. Sida *ser* rett ut; ho er berre gamal.
+	if handlers.IsDevelopment() {
+		r.Use(func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				w.Header().Set("Cache-Control", "no-store, must-revalidate")
+				next.ServeHTTP(w, req)
+			})
+		})
+	}
 	r.Use(handlers.WithUser)
 	r.Use(handlers.CSRF)
 

@@ -366,7 +366,7 @@
     "back": "Tilbake til innloggingen"
   },
   "greeting": {
-    "see_you": "Vi ses %s, %s!",
+    "see_you": "Ses %s, %s!",
     "tomorrow": "i morgen",
     "morning": "morgen",
     "forenoon": "formiddag",

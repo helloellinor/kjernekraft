@@ -932,6 +932,18 @@ tbody tr:hover td { background: var(--ark-djup); }
 
 .timehovud .dagnamn.idag { color: var(--klas); }
 
+/* Merke som stend for seg sjølve — paa heimesida, utan rutenet. Daa
+   kann ikkje dagen lesast av plasseringi, so lappen kjem fram. */
+.merkerad { display: flex; flex-wrap: wrap; gap: var(--rom-2); }
+.merkerad .dagmerke { grid-column: auto; padding-top: var(--rom-3); }
+.merkerad .berre-lesar {
+  position: static; width: auto; height: auto; margin: 0;
+  overflow: visible; clip-path: none;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .66rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--blekk-lys);
+}
+
 /* Berre for skjermlesaren. Dagen stend i hovudet for auga; merket
    treng honom likevel, av di ein som høyrer sida ikkje ser spalta. */
 .berre-lesar {
@@ -951,6 +963,9 @@ tbody tr:hover td { background: var(--ark-djup); }
     grid-column: 1 / -1;
   }
   .dagmerke { grid-column: auto; min-width: 3.6rem; padding-left: var(--rom-2); padding-right: var(--rom-2); }
+  /* Den daude ruta er eit hol i eit rutenet. Er rutenetet burte, er ho
+     berre ei tom eske ein lyt sjaa forbi. */
+  .dagmerke.daud { display: none; }
   /* Paa smale glas kann ikkje dagen lesast av plasseringi lenger, so
      lappen kjem fram — men berre med dagen. Klokka stend alt paa
      kanten, og ho skal ikkje seiast tvo gonger. */
