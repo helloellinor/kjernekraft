@@ -8,15 +8,18 @@
 (function () {
     "use strict";
 
-    var knapp = document.getElementById("ny-prislapp");
-    var lista = document.getElementById("prisliste");
-    var mal = document.getElementById("prislapp-mal");
-    var skjema = document.getElementById("prisar");
-    if (!knapp || !lista || !mal || !skjema) return;
-
     var teljar = 0;
 
-    knapp.addEventListener("click", function () {
+    // Same knappen tener to lister no — medlemskap og klippekort — og
+    // fleire seinare. Han finn lista, malen og skjemaet ut frå seg sjølv
+    // i staden for å slå opp faste id-ar.
+    document.addEventListener("click", function (e) {
+        var knapp = e.target.closest(".nyrad");
+        if (!knapp) return;
+        var skjema = knapp.closest("form");
+        var lista = skjema.querySelector(".prisliste");
+        var mal = skjema.parentElement.querySelector("template");
+        if (!skjema || !lista || !mal) return;
         teljar++;
         var rad = mal.content.cloneNode(true);
         // Feltnamna ber id-en. Ein ny rad har ingen, so han får eit namn
@@ -45,15 +48,14 @@
 (function () {
     "use strict";
 
-    var skjema = document.getElementById("prisar");
-    if (!skjema) return;
-
-    skjema.addEventListener("click", function (e) {
+    document.addEventListener("click", function (e) {
         var knapp = e.target.closest("[data-slett]");
         if (!knapp) return;
 
+        var skjema = knapp.closest("form[data-endringar]");
+        if (!skjema) return;
         var rad = knapp.closest(".prislapp");
-        var id = rad.getAttribute("data-medlemskap");
+        var id = rad.getAttribute("data-medlemskap") || rad.getAttribute("data-pakke");
         if (!id) {                       // ein ny rad er berre borte
             rad.remove();
             skjema.dispatchEvent(new CustomEvent("endringar:nye"));

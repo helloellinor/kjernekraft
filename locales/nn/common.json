@@ -390,7 +390,13 @@
     "kan_ikkje": "kan ikkje",
     "lagd_til": "lagd til",
     "ikkje_lagd_til": "ikkje lagd til",
-    "ingen_standard": "ikkje noko medlemskap"
+    "ingen_standard": "ikkje noko medlemskap",
+    "tab_klippekort": "Klippekort",
+    "klipp_count": "klipp",
+    "valid_days": "dagars gyldigheit",
+    "per_klipp": "per klipp",
+    "new_klippekort": "Nytt klippekort",
+    "category": "Kategori"
   },
   "terms": {
     "title": "Handelsvilkår"

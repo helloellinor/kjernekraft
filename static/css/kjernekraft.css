@@ -2544,3 +2544,8 @@ select.lappfelt { padding-right: var(--rom-6); }
   max-width: 62ch; color: var(--blekk);
 }
 .regel select.lappfelt { margin: 0 .15rem; }
+
+/* Det rekna talet. Prisen per klipp er prisen delt på talet på klipp —
+   han står attmed og er ikkje skrivbar, av di eit felt ein kan skrive
+   noko galt i, er eit felt som kan lyge. */
+.rekna { font-family: var(--skrift-tal); font-size: .88rem; color: var(--blekk-svakt); }

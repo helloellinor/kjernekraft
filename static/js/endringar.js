@@ -13,7 +13,16 @@
 
     [].slice.call(document.querySelectorAll("form[data-endringar]")).forEach(start);
 
+    // Skjema som kjem inn etter at sida er lasta — reglane og
+    // klippekortprisane hentar seg sjølve — lyt startast når dei kjem.
+    document.body.addEventListener("htmx:afterSwap", function (e) {
+        [].slice.call(e.target.querySelectorAll("form[data-endringar]")).forEach(function (f) {
+            if (!f.dataset.starta) start(f);
+        });
+    });
+
     function start(skjema) {
+    skjema.dataset.starta = "1";
     var dokk = document.getElementById(skjema.dataset.dokk);
     if (!dokk) return;
 
