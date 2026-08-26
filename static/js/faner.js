@@ -91,3 +91,24 @@
         startAlle();
     }
 })();
+
+// Namnemenyen. Same grepet som vikeveljaren: ordet er knappen.
+(function () {
+    "use strict";
+    var knapp = document.getElementById("namn-knapp");
+    var meny = document.getElementById("namn-meny");
+    if (!knapp || !meny) return;
+
+    function set(open) {
+        meny.hidden = !open;
+        knapp.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+
+    knapp.addEventListener("click", function () { set(meny.hidden); });
+    document.addEventListener("click", function (e) {
+        if (!meny.hidden && !meny.contains(e.target) && e.target !== knapp) set(false);
+    });
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && !meny.hidden) { set(false); knapp.focus(); }
+    });
+})();
