@@ -24,20 +24,19 @@ func CreateSampleClasses() {
 
 	// Define class types with colors
 	classTypes := map[string]string{
-		"yoga":        "#8e44ad",
-		"pilates":     "#27ae60",
-		"strength":    "#e74c3c",
-		"cardio":      "#f39c12",
-		"flexibility": "#3498db",
+		"Hatha Yoga":        "yoga",
+		"Vinyasa Flow":      "yoga",
+		"Yin Yoga":          "yoga",
+		"Classical Pilates": "pilates",
+		"Pilates Apparatus": "pilates",
+		"Fascia Movement":   "fascia",
 	}
 
 	// Sample teachers
+	// Dei som faktisk held timar i Storgaten 23.
 	teachers := []string{
-		"Anna Larsen",
-		"Erik Nordmann",
-		"Kari Solberg",
-		"Magnus Haugen",
-		"Silje Andersen",
+		"Gry", "Ida", "Kristina", "Carla", "Cyrena",
+		"Torunn", "Amanda", "Mariamah Aurora", "Leon", "Veronica",
 	}
 
 	// Sample class titles

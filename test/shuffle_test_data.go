@@ -39,20 +39,19 @@ func ShuffleTestData() error {
 	// Initialize random seed
 	rand.Seed(time.Now().UnixNano())
 
-	// Define class types with colors and descriptions
+	// Kjernekraft Oslo held yoga, pilates og fascia — i salen eller paa
+	// reformeren. Det stod tretten slag her, med boksing, spinning og
+	// crossfit; eit studio som ikkje finst.
 	classTypes := []ClassTypeInfo{
-		{Type: "yoga", Color: "#8e44ad", Titles: []string{"Basic Yoga", "Forrest Yoga", "Yin Yoga", "Vinyasa Flow", "Hatha Yoga", "Power Yoga", "Restorative Yoga"}},
-		{Type: "pilates", Color: "#27ae60", Titles: []string{"Klassisk Pilates", "Pilates Reformer", "Pilates Mat", "Power Pilates", "Gentle Pilates", "Core Pilates", "Pilates Flow"}},
-		{Type: "strength", Color: "#e74c3c", Titles: []string{"Strength Training", "Circuit Training", "Functional Training", "HIIT Strength", "Body Sculpt", "Weight Training", "CrossFit"}},
-		{Type: "cardio", Color: "#f39c12", Titles: []string{"Spin Class", "Zumba", "Aerobics", "Dance Cardio", "Boxing Cardio", "HIIT Cardio", "Step Aerobics"}},
-		{Type: "flexibility", Color: "#3498db", Titles: []string{"Stretching", "Flexibility Focus", "Mobility Training", "Gentle Stretch", "Recovery Session", "Deep Stretch", "Myofascial Release"}},
+		{Type: "yoga", Color: "", Titles: []string{"Hatha Yoga", "Vinyasa Flow", "Yin Yoga", "Basic Yoga", "Yoga Styrke 45"}},
+		{Type: "pilates", Color: "", Titles: []string{"Classical Pilates", "Klassisk Pilates Matte", "Pilates Apparatus", "Self Practice Pilates Apparatus"}},
+		{Type: "fascia", Color: "", Titles: []string{"Fascia Movement", "Fascia Flyt"}},
 	}
 
-	// Norwegian teacher names
+	// Dei som faktisk held timar i Storgaten 23.
 	teachers := []string{
-		"Anna Larsen", "Erik Nordmann", "Kari Solberg", "Magnus Haugen", "Silje Andersen",
-		"Lars Eriksen", "Ingrid Johansen", "Ole Hansen", "Nina Olsen", "Bjørn Kristiansen",
-		"Hanne Nilsen", "Tor Pedersen", "Astrid Svensson", "Gunnar Andersen", "Lise Berg",
+		"Gry", "Ida", "Kristina", "Carla", "Cyrena",
+		"Torunn", "Amanda", "Mariamah Aurora", "Leon", "Veronica",
 	}
 
 	// Studio locations

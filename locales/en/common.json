@@ -83,7 +83,11 @@
     "of": "of",
     "prev_week": "Previous week",
     "next_week_btn": "Next week",
-    "type_week": "type week number"
+    "type_week": "type week number",
+    "cat_yoga": "Yoga",
+    "cat_pilates": "Pilates",
+    "cat_reformer": "Reformer",
+    "cat_fascia": "Fascia"
   },
   "dashboard": {
     "welcome_user": "Welcome, {{.UserName}}!",

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -62,8 +63,18 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 			if teacherFilter != "" && event.TeacherName != teacherFilter {
 				continue
 			}
-			if classFilter != "" && event.Title != classFilter {
-				continue
+			// Filteret samanlikna med *tittelen*, so «yoga» aldri
+			// treft noko: ingen time heiter «yoga», dei heiter «Hatha
+			// Yoga». Han ser paa slaget no — og «reformer» er ikkje eit
+			// slag, det er rommet, som er slik ein tenkjer um det.
+			if classFilter != "" {
+				if classFilter == "reformer" {
+					if !strings.EqualFold(event.RoomName, "Reformer") {
+						continue
+					}
+				} else if !strings.EqualFold(event.ClassType, classFilter) {
+					continue
+				}
 			}
 			// Only show events that users can sign up for (not full and in the future)
 			if event.CurrentEnrolment >= event.Capacity && event.StartTime.Before(now) {
@@ -142,10 +153,13 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		teachers = []string{} // Continue with empty list if error
 	}
 
-	classTypes, err := DB.GetDistinctClassTypes()
-	if err != nil {
-		classTypes = []string{} // Continue with empty list if error
-	}
+	// Kategoriar, ikkje titlar. Lista kom fraa DISTINCT class_type og
+	// gav tretten val — «boksing», «spinning», «crossfit» — eit studio
+	// som ikkje finst. Ein filtrerer paa kva slag time det er, og
+	// studioet hev tri slag: yoga, pilates og fascia. Reformer er ikkje
+	// eit slag, det er eit rom, men det er slik ein tenkjer um det, so
+	// han stend her og filtrerer paa rommet.
+	classTypes := []string{"yoga", "pilates", "reformer", "fascia"}
 
 	data := map[string]interface{}{
 		"Title":           "Timeplan",

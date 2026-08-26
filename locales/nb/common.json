@@ -83,7 +83,11 @@
     "of": "av",
     "prev_week": "Forrige uke",
     "next_week_btn": "Neste uke",
-    "type_week": "skriv ukenummer"
+    "type_week": "skriv ukenummer",
+    "cat_yoga": "Yoga",
+    "cat_pilates": "Pilates",
+    "cat_reformer": "Reformer",
+    "cat_fascia": "Fascia"
   },
   "dashboard": {
     "welcome_user": "Velkommen, {{.UserName}}!",

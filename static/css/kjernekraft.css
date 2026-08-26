@@ -281,7 +281,7 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
 }
 .header-content {
   max-width: var(--breidd); margin: 0 auto;
-  padding: var(--rom-4) var(--rom-5);
+  padding: var(--rom-3) var(--rom-5);
   display: flex; align-items: baseline; justify-content: space-between;
   gap: var(--rom-4); flex-wrap: wrap;
 }
@@ -290,14 +290,14 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
   font-stretch: var(--vidd-leiding); font-weight: 700;
   text-transform: uppercase;
 }
-.auth-controls { display: flex; align-items: baseline; gap: var(--rom-4); }
-.user-name { color: var(--blekk-lys); font-size: .92rem; }
+.auth-controls { display: flex; align-items: center; gap: var(--rom-3); }
+.user-name { color: var(--blekk-lys); font-size: .82rem; }
 
 /* Utloggingi er eit skjema, so knappen lyt sjaa ut som ei lenkja. */
 .auth-form { margin: 0; }
 .auth-link {
   background: none; border: 0; padding: 0; cursor: pointer;
-  font: inherit; font-size: .92rem;
+  font: inherit; font-size: .82rem;
   color: var(--merke); text-decoration: underline;
   text-decoration-thickness: 1px; text-underline-offset: .16em;
 }
@@ -835,7 +835,18 @@ tbody tr:hover td { background: var(--ark-djup); }
 
 .week-controls { display: flex; gap: var(--rom-3); align-items: center; flex-wrap: wrap; margin-bottom: 0; }
 .filters, .charges-filter { display: flex; gap: var(--rom-2); flex-wrap: wrap; align-items: center; }
-.filters select { width: auto; min-width: 9rem; font-size: .9rem; padding: var(--rom-2) var(--rom-6) var(--rom-2) var(--rom-3); }
+/* Styringi skal vera liti. Ho er ikkje det ein kom for; ho er det ein
+   naar etter naar lista er for lang. Felti var 9 rem breide og i
+   lesestorleik — like tunge som innhaldet dei filtrerte. */
+.filters select {
+  width: auto; min-width: 0; max-width: 11rem;
+  font-size: .82rem;
+  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
+  background-position: right .5rem top 50%;
+  border-color: var(--haarlina);
+  color: var(--blekk-lys);
+}
+.filters select:hover { border-color: var(--kant); color: var(--blekk); }
 .filter-group { display: flex; flex-direction: column; gap: var(--rom-2); }
 .filter-group select { width: auto; min-width: 11rem; }
 
@@ -1186,9 +1197,17 @@ tbody tr:hover td { background: var(--ark-djup); }
    =================================================================== */
 .language-selector, .login-language-selector {
   display: flex; align-items: center; gap: var(--rom-2);
-  font-size: .88rem;
+  font-size: .82rem;
 }
-.language-selector select { width: auto; padding: var(--rom-1) var(--rom-6) var(--rom-1) var(--rom-2); font-size: .88rem; }
+.language-selector select {
+  width: auto; min-width: 0;
+  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
+  font-size: .82rem;
+  border-color: transparent; background-color: transparent;
+  color: var(--blekk-lys);
+  background-position: right .45rem top 50%;
+}
+.language-selector select:hover { border-color: var(--haarlina); color: var(--blekk); }
 
 /* ===================================================================
    innloggingi — den eine sida utan leiding
