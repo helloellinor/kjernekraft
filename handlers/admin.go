@@ -39,11 +39,11 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	// Same veg som alle hine sidone. Denne eine las berre ?lang= og
+	// fall attende paa "nb", so administrasjonen stod på bokmaal same
+	// kva brukaren hadde valt — og fanone og korti på same skjermen
+	// kunde koma på kvar sitt maal.
+	lang := GetLanguageFromRequest(r)
 
 	// Create admin stats module
 	statsModule, err := modules.NewAdminStatsModule(len(users), len(events), len(freezeRequests), lang)
