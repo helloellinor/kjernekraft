@@ -616,9 +616,15 @@ label, .option-label, .question-label, .detail-label, .filter-group label {
   font-size: .88rem; color: var(--blekk-lys);
 }
 
-input[type="text"], input[type="email"], input[type="password"],
-input[type="date"], input[type="tel"], input[type="number"],
-select, textarea {
+/* :where() gjev null i spesifisitet, so kvar klassa slær denne regelen.
+   Utan det er `input[type="text"]` (0,1,1) sterkare enn `.lappfelt`
+   (0,1,0), og eit felt som skulde vera nake fekk ramma og flata
+   attende. Det hende tvo gonger — fyrst med vikefeltet, so med
+   adresselappen — og det er den slags ein ikkje ser i koda, berre paa
+   skjermen. Grunnstilen skal vera lettast aa yverstyra av alle. */
+:where(input[type="text"], input[type="email"], input[type="password"],
+       input[type="date"], input[type="tel"], input[type="number"],
+       select, textarea) {
   font: inherit;
   padding: var(--rom-3);
   background: var(--flate);
@@ -738,7 +744,7 @@ tbody tr:hover td { background: var(--ark-djup); }
   margin-left: .45em; vertical-align: baseline;
 }
 
-.vekemeny .vekefelt {
+.vekefelt {
   /* Talet er ein del av tittelen, ikkje eit felt paa honom. Ingi ramma,
      ingi flata — berre tale i den same skrifti, og ein blinkande markør
      som segjer at ein kann skriva i det.
@@ -759,12 +765,12 @@ tbody tr:hover td { background: var(--ark-djup); }
   caret-color: var(--klas);
   text-align: center;
 }
-:root:not([data-theme="light"]) .vekemeny .vekefelt { mix-blend-mode: screen; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .vekemeny .vekefelt { mix-blend-mode: multiply; } }
-:root[data-theme="dark"] .vekemeny .vekefelt { mix-blend-mode: screen; }
+:root:not([data-theme="light"]) .vekefelt { mix-blend-mode: screen; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .vekefelt { mix-blend-mode: multiply; } }
+:root[data-theme="dark"] .vekefelt { mix-blend-mode: screen; }
 
-.vekemeny .vekefelt:focus { outline: none; box-shadow: none; background: none; border: 0; }
-.vekemeny .vekefelt::selection { background: color-mix(in srgb, var(--klas) 35%, transparent); }
+.vekefelt:focus { outline: none; box-shadow: none; background: none; border: 0; }
+.vekefelt::selection { background: color-mix(in srgb, var(--klas) 35%, transparent); }
 
 /* Ordet er knappen. «Timeplan denne uka» les seg som ei setning; eit
    vikenummer i tittelen gjer det ikkje. Talet ligg i menyen under, for
@@ -1854,3 +1860,81 @@ tbody tr:hover td { background: var(--ark-djup); }
    naar noko *ikkje* gjekk at ein vil vita det. */
 .charge-status { color: var(--aatvaring); }
 .charge-status.pending { color: var(--blekk-lys); }
+
+/* ===================================================================
+   profilen
+   Ei adressa er éin ting med ei form alle kjenner. Set henne slik ho
+   ser ut paa ein konvolutt, og ingen treng merkelappar — det var 891
+   pikslar millom merkelappen og verdet fyrr, ni gonger nedyver.
+
+   Kvart felt er skrivbart der det stend. Ingen redigeringsmodus: fyrr
+   bytte heile sida ham for at du skulle retta eit telefonnummer.
+   =================================================================== */
+.profilskjema { display: flex; flex-direction: column; gap: var(--rom-5); }
+
+.lapp { display: flex; flex-direction: column; gap: var(--rom-1); }
+.lapprad { display: flex; gap: var(--rom-2); }
+
+.lappfelt {
+  font: inherit;
+  padding: var(--rom-1) var(--rom-2);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  color: var(--blekk);
+  width: 100%;
+}
+.lappfelt.stor { font-size: 1.5rem; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-weight: 500; }
+.lappfelt.kort { width: 6rem; flex: none; }
+.lappfelt::placeholder { color: var(--blekk-svakt); }
+
+/* Linja under kjem fyrst naar ein peikar paa feltet. Ei lapp med ni
+   understrekingar les seg som eit skjema; utan dei les ho seg som ei
+   adressa — men ein lyt framleis sjaa at ho *kann* skrivast i. */
+.lappfelt:hover { border-bottom-color: var(--haarlina); }
+.lappfelt:focus {
+  outline: none;
+  border-bottom-color: var(--merke);
+  box-shadow: var(--fasett);
+  background: var(--flate);
+}
+
+/* ---- det endra feltet ----
+   Ingen tekst segjer at noko er ulagra. Feltet ber merket sjølv: ei
+   full lina i merkefargen, og ein prikk i margen. Prikken er der av di
+   ei lina aaleine kann forvekslast med fokus — prikken stend att naar
+   du hev gjenge vidare til neste felt. */
+.lappfelt.endra {
+  border-bottom-color: var(--togu);
+  border-bottom-width: 2px;
+}
+.lappfelt.endra::placeholder { color: var(--togu); }
+
+.lapp { position: relative; }
+.lappfelt.endra + *, .lappfelt.endra { position: relative; }
+.lappfelt.endra::after { content: ""; }
+
+/* Prikken lyt liggja paa ein innpakkar, av di eit <input> ikkje kann ha
+   pseudo-element. Difor teiknar me han som ein bakgrunn i staden. */
+.lappfelt.endra {
+  background-image: radial-gradient(circle at left .55rem, var(--togu) 0 3px, transparent 3px);
+  background-repeat: no-repeat;
+  background-position: -.85rem center;
+  background-size: 1.4rem 100%;
+}
+
+.avkryssing.rabatt { align-items: start; gap: var(--rom-3); }
+.avkryssing.rabatt small { display: block; color: var(--blekk-svakt); font-size: .84rem; margin-top: .1rem; }
+.avkryssing input.endra { outline: 2px solid var(--togu); outline-offset: 2px; }
+
+/* Dokka for ulagra endringar. Same dokk som elles i huset — ho held det
+   du arbeider med i ro medan resten rullar. */
+.endringsdokk { border-top-color: var(--togu); }
+.endringstal {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .82rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--togu);
+}
+.endringsdokk .dokkinnhald { justify-content: space-between; }
+.endringsdokk .dokkhandling { flex-direction: row; gap: var(--rom-2); }

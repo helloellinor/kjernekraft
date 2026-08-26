@@ -42,7 +42,13 @@
     "country": "Land",
     "birthdate": "Fødselsdato",
     "member_since": "Medlem sidan",
-    "user_id": "Brukar-ID"
+    "user_id": "Brukar-ID",
+    "student_senior": "Eg hev student- eller honnørbevis",
+    "student_senior_hint": "Gjev 20 % avslag. Studioet ser beviset i resepsjonen.",
+    "save": "Lagra",
+    "discard": "Angra",
+    "changed_one": "1 endring",
+    "changed_many": "%d endringar"
   },
   "language": {
     "select_language": "Vel språk",
