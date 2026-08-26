@@ -575,6 +575,20 @@ main {
   grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
 }
 
+/* ---- kjøpsflyten: eitt steg um gongen ----
+   JS-en hev alltid flutt `active` og `selected` — klassane fanst berre
+   ikkje i stilarket, so alle seks «Steg 2»-bolkane og kjøpsbolken stod
+   framme samstundes. No syner sida berre det steget du er i: vald
+   kategori → hennar tri pakkor → stadfestingi.
+
+   Det valde kortet held kanten sin og skifter berre farge (§6), og
+   fargen er produktfargen aat klippekortet (§2). */
+.steg { display: none; }
+.steg.active { display: block; }
+
+.category-card, .package-card { cursor: pointer; }
+.category-card.selected, .package-card.selected { border-color: var(--togu); }
+
 /* ---- detaljrader ---- */
 .detail-row, .detail-item {
   display: flex; justify-content: space-between; gap: var(--rom-4);
@@ -1500,7 +1514,7 @@ tbody tr:hover td { background: var(--ark-djup); }
 }
 
 /* Merket sjølv. Forma segjer stoda; fargen segjer berre um ho er i live. */
-.membership-status, .expiring-badge {
+.membership-status {
   font-stretch: var(--vidd-merkelapp);
   display: inline-flex; align-items: center; gap: var(--rom-2);
   font-family: var(--skrift-yver);
@@ -1520,8 +1534,6 @@ tbody tr:hover td { background: var(--ark-djup); }
 .status-cancelled { color: var(--blekk-svakt); }
 .status-cancelled::before { background: none; border-style: dotted; }
 
-.expiring-badge { color: var(--aatvaring); }
-
 .price-info { display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap; margin: var(--rom-3) 0; }
 .price-info .price { font-family: var(--skrift-tal); font-size: 1.6rem; letter-spacing: -.02em; }
 .membership-details, .dates-info, .card-content { display: flex; flex-direction: column; gap: var(--rom-1); }
@@ -1531,7 +1543,7 @@ tbody tr:hover td { background: var(--ark-djup); }
 /* Det som hastar fær vekt, ikkje farge — farge her ville tyda «i live». */
 .renewal-date.urgent, .days-until.urgent { color: var(--blekk); font-weight: 500; }
 
-.membership-actions, .card-actions {
+.membership-actions {
   display: flex; gap: var(--rom-2); flex-wrap: wrap; margin-top: var(--rom-4);
 }
 
@@ -1543,9 +1555,20 @@ tbody tr:hover td { background: var(--ark-djup); }
 .klippekort-cards { display: grid; gap: var(--rom-3); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
 .klippekort-card { overflow: visible; }
 
-.klipp-count { font-family: var(--skrift-tal); font-size: 1.1rem; }
+.klipp-count { font-family: var(--skrift-tal); font-size: 1.1rem; white-space: nowrap; }
 .klipp-count .remaining { font-size: 1.5rem; color: var(--produkt, var(--togu)); }
 .klipp-count .total { color: var(--blekk-lys); }
+
+/* Éi rad: talet, bandet og knappen deler lina, so kortet er tvo rader
+   høgt og ikkje fire. Bandet tek plassen som er att; paa eit smalt kort
+   bryt rada seg sjølv i staden for aa rulla (§7). Maalaren sine eigne
+   loddrette margar er til naar han stend aaleine i ein stabel — her er
+   det rada som set lufti, og glødi treng ingen plass av di ho ligg
+   utanpaa (§3). */
+.klipprad { display: flex; align-items: center; gap: var(--rom-3); flex-wrap: wrap; }
+.klipprad .progress-bar { flex: 1 1 6rem; min-width: 0; }
+.klipprad .progress-segments { margin: 0; }
+.klipprad button { flex: none; margin-left: auto; }
 
 .no-membership, .no-klippekort {
   color: var(--blekk-svakt); text-align: center; padding: var(--rom-6) var(--rom-4);
@@ -1720,12 +1743,11 @@ tbody tr:hover td { background: var(--ark-djup); }
 /* Alle bolkarne stend i dokumentet heile tidi; det er berre synet som
    skifter. Vart dei bytte ut, laut nettlesaren leggja sida ut paa nytt
    for kvart klikk, og daa hoppar det. */
-.fanerom > [data-bolk] { display: none; }
-.fanerom[data-bolk="oversyn"]      > [data-bolk="oversyn"],
-.fanerom[data-bolk="timeplan"]     > [data-bolk="timeplan"],
-.fanerom[data-bolk="prisar"]       > [data-bolk="prisar"],
-.fanerom[data-bolk="folk"]         > [data-bolk="folk"],
-.fanerom[data-bolk="innstillingar"]> [data-bolk="innstillingar"] { display: block; }
+/* Kva bolk som er synleg, avgjer faner.js med `hidden`. Her stod ei
+   liste over namna på bolkane før — «oversyn», «timeplan», «prisar» … —
+   og ei ny fanerekkje kravde ei ny linje i stilarket. Det er den slags
+   regel som vert gløymd, og då er det ikkje fanene som er i stykke:
+   alle bolkane står open på ein gong. */
 
 /* Fyrste yverskrifti i ein bolk stend alt under fanone og treng ikkje
    luft yver seg. */
@@ -1980,6 +2002,73 @@ tbody tr:hover td { background: var(--ark-djup); }
 @media (max-width: 48rem) {
   .folk-hovud { grid-template-columns: minmax(0, 1fr); gap: var(--rom-1); }
   .folk-sist { text-align: left; }
+}
+
+/* ===================================================================
+   timereglane
+   Same grepet som folkelista, av same grunn: administratoren slær upp
+   *éin* regel — «kvifor stend det femti rader her» var svaret paa feil
+   spursmaal. Kvar rad er ein regel (same time, lærar, rom, vekedag,
+   klokkeslett), og rada opnar seg der ho stend med dei einskilde
+   dagane: flytt, set inn vikar, eller avlys nett den eine.
+
+   Ei avlyst rad stend att som avlyst i staden for aa kverva — lista
+   hoppar ikkje (§6), og ein ser kva ein nett gjorde.
+   =================================================================== */
+.regel-liste { list-style: none; margin: 0; padding: 0;
+  border: 1px solid var(--haarlina); background: var(--flate); }
+
+.regel-rad { border-bottom: 1px solid var(--haarlina); }
+.regel-rad:last-child { border-bottom: 0; }
+
+.regel-hovud {
+  width: 100%; text-align: left;
+  display: grid; grid-template-columns: minmax(8rem, 1.2fr) minmax(0, 1.4fr) auto auto;
+  gap: var(--rom-4); align-items: baseline;
+  padding: var(--rom-3) var(--rom-4);
+  background: none; border: 0; border-radius: 0;
+  font-family: var(--skrift); text-transform: none; letter-spacing: 0;
+  cursor: pointer;
+}
+.regel-hovud:hover { background: var(--ark-djup); color: inherit; border: 0; }
+.regel-namn { font-size: 1.05rem; color: var(--blekk); font-weight: 500; }
+.regel-kven { color: var(--blekk-lys); font-size: .92rem; }
+.regel-naar { font-family: var(--skrift-tal); font-size: .92rem; white-space: nowrap; }
+.regel-tal { font-family: var(--skrift-tal); font-size: .8rem; color: var(--blekk-svakt); text-align: right; }
+
+.regel-meir { padding: 0 var(--rom-4) var(--rom-3); }
+
+/* Regelen sjølv. Det som stend her gjeld alle komande timar; datoane
+   under er berre utslagi, og dei hev éin knapp kvar. */
+.regel-endring {
+  display: flex; align-items: baseline; gap: var(--rom-4); flex-wrap: wrap;
+  padding-bottom: var(--rom-3);
+  border-bottom: 1px solid var(--haarlina);
+  margin-bottom: var(--rom-2);
+}
+.regel-endring label { display: flex; align-items: baseline; gap: var(--rom-2); }
+.regel-endring input { width: auto; flex: 0 1 auto; padding: var(--rom-1) var(--rom-2); }
+.regel-laerar { flex-basis: 9rem; }
+.regel-vink { font-size: .78rem; color: var(--blekk-svakt); }
+
+.regel-timar { list-style: none; margin: 0; padding: 0; }
+.time-dato { font-family: var(--skrift-tal); font-size: .88rem; min-width: 3.5rem; }
+.regel-time {
+  display: flex; align-items: center; gap: var(--rom-3); flex-wrap: wrap;
+  padding: var(--rom-2) 0;
+  border-bottom: 1px solid var(--haarlina);
+}
+.regel-time:last-child { border-bottom: 0; }
+
+.time-plassar { font-family: var(--skrift-tal); font-size: .88rem; color: var(--blekk-lys); margin-left: auto; }
+.regel-time .time-avlys { flex: none; }
+
+.regel-time.avlyst { color: var(--blekk-svakt); }
+.regel-time.avlyst .time-dato { text-decoration: line-through; }
+
+@media (max-width: 48rem) {
+  .regel-hovud { grid-template-columns: minmax(0, 1fr); gap: var(--rom-1); }
+  .regel-tal, .regel-naar { text-align: left; }
 }
 
 /* ===================================================================
@@ -2291,3 +2380,85 @@ tbody tr:hover td { background: var(--ark-djup); }
 .verkstad-rom span { display: flex; align-items: center; gap: var(--rom-3); }
 .verkstad-rom i { display: block; height: .5rem; background: var(--merke); width: var(--breidd-rom); }
 .verkstad-rom small { font-family: var(--skrift-tal); font-size: .72rem; color: var(--blekk-lys); }
+
+/* ===================================================================
+   medlemskapet mitt
+   Tre faner som svarar på kvar sitt spørsmål: kva du har, kva du kan
+   byte til, og kva du har betalt.
+
+   Ingen kasse rundt medlemskapet. Ein kasse skil eitt kort frå eit
+   anna, og her finst det berre eitt — du kan ikkje ha to medlemskap på
+   ein gong. Fana er alt ein kasse; eit kort inni han hadde vore ein
+   kasse i ein kasse.
+   =================================================================== */
+.medlemshovud {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--rom-4); flex-wrap: wrap;
+  margin-bottom: var(--rom-3);
+}
+.medlemsnamn {
+  font-family: var(--skrift-yver); font-size: 1.9rem; font-weight: 500;
+  font-stretch: var(--vidd-yver); margin: 0;
+}
+.medlemspris {
+  display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap;
+  margin: 0 0 var(--rom-5); max-width: none;
+}
+.medlemspris .price { font-family: var(--skrift-tal); font-size: 1.7rem; letter-spacing: -.02em; }
+.medlemspris .commitment { color: var(--blekk-lys); }
+.medlemsknappar { display: flex; gap: var(--rom-3); flex-wrap: wrap; margin-top: var(--rom-5); }
+
+/* ---- bytelista ----
+   Eit byte er ikkje eit kjøp. Du har alt eit medlemskap, så det som tel
+   er *skilnaden* frå det du har — ikkje prisen i seg sjølv. Difor er
+   dette ei liste med skilnader og ikkje eit rutenett med prislappar.
+
+   Ingen fylt knapp: Arket seier at hovudhandlinga er den fylte og at det
+   er berre éi. Her finst inga hovudhandling — kva du byter til, er ditt
+   val og ikkje vårt. Ein fylt knapp på éi av radene hadde vore ei
+   tilråding skriven med form i staden for ord. */
+.bytehovud { color: var(--blekk-lys); margin: 0 0 var(--rom-5); max-width: 60ch; }
+.bytehovud strong { color: var(--blekk); font-weight: 500; }
+
+.byterad {
+  display: grid; gap: var(--rom-4); align-items: baseline;
+  grid-template-columns: minmax(9rem, 1.1fr) auto minmax(12rem, 1.4fr) auto;
+  padding: var(--rom-4) 0;
+  border-top: 1px solid var(--haarlina);
+}
+.byterad:last-of-type { border-bottom: 1px solid var(--haarlina); }
+.byterad form { margin: 0; }
+
+.bytenamn {
+  font-family: var(--skrift-yver); font-size: 1.15rem;
+  font-stretch: var(--vidd-yver); font-weight: 500;
+}
+.bytepris { font-family: var(--skrift-tal); font-size: 1.05rem; white-space: nowrap; }
+.bytesetning { color: var(--blekk-lys); font-size: .95rem; }
+
+/* Skilnaden er det einaste talet som er verdt ein farge: mindre er
+   merkefargen, meir er berre blekk. Åtvaringsfargen høyrer ikkje heime
+   her — eit dyrare medlemskap er ikkje noko som gjekk gale. */
+.bytemindre { color: var(--merke); }
+
+/* Ei stengd rad ber ikkje merkefargen. Fargen tyder «dette er i live»,
+   og ein pris du ikkje kan velje enno, er ikkje det. Grunnen står i
+   rada, og vegen ut av henne er ei lenkje — ei rad som berre er borte,
+   lærer deg ingenting. */
+.byterad.stengd .bytenamn,
+.byterad.stengd .bytepris,
+.byterad.stengd .bytesetning,
+.byterad.stengd .bytemindre { color: var(--blekk-svakt); }
+
+a.byteveg {
+  color: var(--merke); text-decoration: none;
+  border-bottom: 1px solid currentColor; white-space: nowrap;
+}
+.bytefot { margin-top: var(--rom-4); color: var(--blekk-lys); font-size: .92rem; max-width: 60ch; }
+
+@media (max-width: 46rem) {
+  /* Fire spalter på ein telefon vert fire ord under kvarandre. Rada
+     vert ei blokk, og knappen fell under. */
+  .byterad { grid-template-columns: 1fr auto; gap: var(--rom-2); }
+  .bytesetning, .byterad form, .byterad .byteveg { grid-column: 1 / -1; }
+}

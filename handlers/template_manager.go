@@ -175,6 +175,12 @@ func getTemplateFuncs() template.FuncMap {
 		"norskDato": func(t time.Time) string {
 			return fmt.Sprintf("%s %d. %s", norskeDagar[t.Weekday()], t.Day(), norskeMaanader[t.Month()])
 		},
+		// Med årstal. «fredag 26. mars» er nok for ein time i denne veka,
+		// men ein fornyingsdato utan år er ikkje ein dato — han kan vere
+		// neste månad eller om to år.
+		"norskDatoAar": func(t time.Time) string {
+			return fmt.Sprintf("%d. %s %d", t.Day(), norskeMaanader[t.Month()], t.Year())
+		},
 		"formatTimeShort": func(t time.Time) string {
 			return t.In(settings.GetLocation()).Format("15:04")
 		},

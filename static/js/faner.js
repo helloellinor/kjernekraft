@@ -19,7 +19,19 @@
         }
         if (!finst) return;
 
-        if (rom) rom.setAttribute("data-bolk", bolk);
+        if (rom) {
+            rom.setAttribute("data-bolk", bolk);
+            // Bolkane vert gøymde her og ikkje i stilarket. Før stod
+            // namna på dei i ein regel i kjernekraft.css — ei ny
+            // fanerekkje kravde ei ny linje der, og ho vart gløymd.
+            var bolkar = rom.children;
+            for (var b = 0; b < bolkar.length; b++) {
+                var namn = bolkar[b].getAttribute("data-bolk");
+                if (!namn) continue;
+                if (namn === bolk) bolkar[b].removeAttribute("hidden");
+                else bolkar[b].setAttribute("hidden", "");
+            }
+        }
         for (var j = 0; j < faner.length; j++) {
             var vald = faner[j].getAttribute("data-bolk") === bolk;
             faner[j].setAttribute("aria-selected", vald ? "true" : "false");

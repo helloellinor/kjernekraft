@@ -138,7 +138,7 @@ func main() {
 		r.Get("/elev/hjem", handlers.ElevDashboardHandler)
 		r.Get("/elev/timeplan", handlers.ElevTimeplanHandler)
 		r.Get("/elev/klippekort", handlers.KlippekortPageHandler)
-		r.Get("/elev/medlemskap", handlers.MembershipSelectorHandler)
+		r.Get("/elev/medlemskap", handlers.MedlemskapetHandler)
 		r.Post("/elev/medlemskap/recommendations", handlers.MembershipRecommendationsHandler)
 		r.Get("/elev/betaling", handlers.BetalingHandler)
 		r.Get("/elev/min-profil", handlers.MinProfilHandler)

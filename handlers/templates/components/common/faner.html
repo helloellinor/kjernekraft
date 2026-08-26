@@ -1,0 +1,21 @@
+{{define "faner"}}
+{{/* Fanerekkja, éin definisjon.
+
+     Ho tek ei liste med bolkar — `.Faner`, kvar med `Bolk` (namnet i
+     adressa) og `Namn` (det som står på fana) — og teiknar sjølve
+     rekkja. Bolkane står i malen som kallar, av di det er innhaldet, og
+     innhaldet er alltid ulikt.
+
+     Fyrste bolken er open; dei andre står `hidden` til faner.js seier
+     noko anna. Utan det ville alle stå opne i det augneblinket sida er
+     teikna og JS-en ikkje har kome til enno. */}}
+<div class="faner" role="tablist" aria-label="{{.Merkelapp}}">
+  {{range $i, $f := .Faner}}
+  <button type="button" class="fane" role="tab"
+          data-bolk="{{$f.Bolk}}"
+          aria-selected="{{if eq $i 0}}true{{else}}false{{end}}"
+          tabindex="{{if eq $i 0}}0{{else}}-1{{end}}"
+          aria-controls="bolk-{{$f.Bolk}}">{{$f.Namn}}</button>
+  {{end}}
+</div>
+{{end}}
