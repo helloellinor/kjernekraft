@@ -12,6 +12,11 @@ byggjer, er ein regel som ikkje veit noko um deg.
 
 ---
 
+Fasetten — den eine djupna systemet hev — hev sitt eige skriv:
+[FASETTEN.md](FASETTEN.md). Han er det einaste draget som gjeng att i
+heile systemet utan aa vera ein farge, og den lettaste tingen aa gjera
+gal.
+
 ## 1. Tokeni
 
 **Alle fargar stend i `:root` i `static/css/kjernekraft.css`, og ingen
@@ -381,4 +386,106 @@ klippekort, lilla i kurs.
 
 > Medan ho manglar, stend emojien i den same faste boksen. Difor hoppar
 > ingen ting naar ho kjem paa plass.
+
+---
+
+## 15. Rangstigen i dokumentet
+
+Breiddi ber rangen for auga (§5). Men dokumentet hev sin eigen
+rangstige — `h1` til `h6` — og han er for deim som ikkje ser sida:
+skjermlesaren byd fram yverskriftene som eit innhaldsoversyn, og daa er
+det *talet* som gjeld, ikkje breiddi. I dag stend dei tvo stigane og
+kranglar: same rolla er `h2` paa ei sida og `h3` paa grannesida, og tvo
+sidor hev tvo `h1` kvar.
+
+Regelen: **steget fylgjer djupni i dokumentet, og ingen ting anna.**
+Utsjaanaden kjem av rolleklassa; steget kjem av kvar i sida yverskrifti
+stend. Dei tvo skal aldri veljast kvar for seg.
+
+| Steg | Rolla | Klasse |
+|---|---|---|
+| `h1` | sidetittelen — kvar du er. Éin per sida, *alltid éin*. | `.page-title` |
+| `h2` | ein bolk paa sida, med lina under | `.section-title` |
+| `h3` | eit kort i bolken, eller ei gruppa utan lina | korttitlane, `.undertittel` |
+| `h4` | ei rad eller eit felt inne i kortet — sjeldan; oftast gjer `dt` arbeidet | — |
+
+Treng du `h5`, er ikkje svaret `h5`: daa ber sida for mykje, og skal
+delast.
+
+Av dette fylgjer:
+
+- **Tvo gjeremaal er tvo bolkar, ikkje tvo sidor paa same sida.**
+  «Behandle klipp» og «Kjøp klipp» er éin `h1` og tvo `h2`.
+- **Éi rolla, eitt namn.** `.module-title` og `.step-title` *er*
+  `.section-title`; stilarket hev alt slege deim saman i éin veljar, og
+  daa skal malarne ogso gjera det. `.login-title` er ein `.page-title`
+  som fekk fast storleik av di han stod for seg sjølv.
+- **Ei yverskrift utan klasse er ein feil.** Ho fell attende paa
+  elementstilen og liknar ingen ting anna paa sida. (Unnataket er
+  vilkaari, der innhaldet kjem ferdigt fraa tenaren og `.vilkaar
+  h1`–`h3` tek imot.)
+
+Prøva:
+
+```sh
+grep -rnE '<h[1-6]( [^>]*)?>' handlers/templates/ | grep -v 'class='
+# skal gjeva ingen ting
+
+for f in handlers/templates/pages/*.html; do echo "$(grep -c '<h1' $f) $f"; done
+# ingi lina skal byrja paa meir enn 1
+```
+
+---
+
+## 16. Eitt lag
+
+Millom arket og innhaldet ligg **høgst éin maala boks**.
+
+Eit kort er ein ting som ligg paa arket: flata, haarlina, fyllet (§4).
+Ligg det ein boks inni boksen, er ingen av deim lenger ein ting — dei er
+emballasje. Inne i eit kort finst berre tekst og linor; inne i eit
+fanerom likeins, for fanerommet *er* boksen sin.
+
+Mønsteret som er rett finst alt, paa dashbordet: `h2.section-title`
+stend beint paa arket med lina si, og korti ligg i eit rutenet under.
+Bolken er ikkje ein boks — han er ei yverskrift, ei lina og romet etter
+§17. **Det som skil tvo bolkar er rom, ikkje vegger.** Det er dette som
+gjer at korti les seg som ting som ligg paa arket, og ikkje som boksar i
+boksar.
+
+Og ein regel um sjølve divane: **ein div skal anten maala eller leggja
+ut.** Hev han korkje bakgrunn, kant, fyll, flex, rute eller breidd — og
+ingi klasse stilarket kjenner — er han att fraa eit gamalt stilark og
+skal burt. Kvart lag som ikkje gjer arbeid er ein stad rom kann verta
+lagt til utan at nokon ser kvar det kom fraa, og det er *det* som gjer
+at ei sida kjennest tilfeldig jamvel naar kvart tal stend paa trappa.
+
+---
+
+## 17. Rommet
+
+Trappa finst — `--rom-1` til `--rom-7` i `:root` — og ho er i bruk mest
+yveralt. Det som ikkje fanst, var kva stegi *tyder*. Eit steg utan
+tyding vert valt etter smak, og daa ser sida tilfeldig ut jamvel naar
+kvart tal stend paa trappa.
+
+| Steg | | Tyder |
+|---|---|---|
+| `--rom-7` | 3 rem | millom bolkar paa sida |
+| `--rom-6` | 2 rem | fraa sidetittel og leiding ned til fyrste bolken; yver ein `.undertittel` |
+| `--rom-5` | 1,5 rem | fyllet i ein boks; gapet millom spaltor |
+| `--rom-4` | 1 rem | millom kort i eit rutenet; fraa yverskrift til innhaldet hennar; millom radene i eit skjema |
+| `--rom-3` | 0,75 rem | inne i ei gruppa: millom merkelapp og felt, millom knappar som høyrer saman |
+| `--rom-2` | 0,5 rem | millom ting som les seg som eitt: ikon og ord, tal og eining |
+| `--rom-1` | 0,25 rem | den minste lufti, der null hadde klistra |
+
+Lovi attum tabellen: **romet utanfor ein ting er alltid større enn romet
+inni honom.** Det er slik auga ser kva som høyrer saman utan vegger. Og
+det er dette som gjer §16 mogleg: naar romi held rangen, treng ikkje
+flokkarne gjerde.
+
+Til sist: **komponenten ber ikkje rom sjølv; foreldra set gapet.** Ein
+komponent med eigen margin veit kvar han stend, og daa kann han ikkje
+flytta paa seg. `.module` gjer dette rett i dag: `gap` paa foreldri,
+ingen margin paa borni.
 
