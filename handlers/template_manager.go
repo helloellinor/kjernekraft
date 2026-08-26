@@ -45,7 +45,10 @@ func getTemplateFuncs() template.FuncMap {
 	return template.FuncMap{
 		// Ruta utan time. Ho er den same figuren for alle, so han vert
 		// rekna ein gong og ikkje per rute.
-		"merkeDaud":   DaudSilhuett,
+		"merkeDaud": DaudSilhuett,
+		"merkeViewBox": func() string {
+			return fmt.Sprintf("%.2f 0 %.2f %.2f", MerkeVenstre, MerkeBreidd, MerkeHogd)
+		},
 		"merkeBreidd": func() float64 { return MerkeBreidd },
 		"merkeHogd":   func() float64 { return MerkeHogd },
 		"sub": func(a, b int) int {

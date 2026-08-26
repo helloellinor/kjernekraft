@@ -3,6 +3,21 @@
 *26. august 2026. Alle malar under `handlers/templates/`, den lause
 `templates/events.html`, og heile `static/css/kjernekraft.css`.*
 
+> **Stoda: arbeidslista er gjord**, same dagen. Alle fire stegi er
+> gjenomførde; prøvone i §15 gjeng reint og `go test ./handlers/` er
+> grøn. Att stend berre resten av F10 (dei hardkoda strengjene paa
+> klippekort- og membership-sida gjenom `{{t}}`) — og eit funn som kom
+> fram under arbeidet, F11 nedanfor.
+>
+> **F11 — kjøpsflyten paa klippekort-sida hev aldri gøymt stegi.**
+> JS-en skiftar `.active` paa `.packages-section`/`#purchase-section`
+> og `.selected` paa korti, men ingen av dei klassane finst i
+> stilarket: alle seks «Steg 2»-bolkane og kjøpsbolken stend framme
+> heile tidi, og eit valt kort ser ikkje valt ut. Det er ein
+> *funksjonell* mangel, ikkje ein strukturell, og er difor ikkje
+> retta her — men det er truleg den største grunnen til at nett den
+> sida kjennest kaotisk.
+
 Dette er granskingi som ligg attum §15–§17 i stilboki. Stilboki segjer
 kva som skal gjelda; dette arket segjer kvar det ikkje gjeld i dag, med
 fil og lina, og i kva rekkjefylgd det løner seg aa retta.

@@ -45,6 +45,18 @@
       <feComposite in="SourceGraphic" in2="band" operator="in"/>
     </filter>
 
+    {{/* Same grepet snutt: bandet inne i *nedkanten*. Det er ljoset som
+         slær i botnen av eit hol og kastar att upp — og det er berre
+         hol som hev det. Eit skrivefelt er ei grunn fordjuping i arket
+         og hev ingen slik botn; ei tom rute i vika er eit hol tvers
+         igjenom, og daa syner den nedre lippa seg. */}}
+    <filter id="merkeljos" x="-25%" y="-25%" width="150%" height="150%">
+      <feOffset in="SourceAlpha" dy="-1" result="upp"/>
+      <feGaussianBlur in="upp" stdDeviation=".8" result="mjuk"/>
+      <feComposite in="SourceAlpha" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+
     {{/* Kakestykki skal ikkje renna ut yver skiva. Geometrien er den
          same for alle merki, so klyppet kann ogso delast. */}}
     <clipPath id="merkeskiva"><circle cx="24" cy="33" r="11.6"/></clipPath>

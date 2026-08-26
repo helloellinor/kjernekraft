@@ -1,11 +1,8 @@
 {{define "admin_class_management"}}
-<div class="class-management-section">
-    <h3 class="section-title">{{t .Lang "admin.class_management"}}</h3>
-    
-    <div class="class-container">
-        <div class="new-class">
-            <h4 class="undertittel">{{t .Lang "admin.create_new_class"}}</h4>
-            <form id="new-class-form" class="setningsskjema" onsubmit="createClass(event)">
+<h2 class="section-title">{{t .Lang "admin.class_management"}}</h2>
+
+<h3 class="undertittel">{{t .Lang "admin.create_new_class"}}</h3>
+<form id="new-class-form" class="setningsskjema" onsubmit="createClass(event)">
                 {{/* Timen som ei setning. Rekkjefylgdi er arbeidet — kva,
                      kven, kvar, naar, kor lenge — og ikkje rekkjefylgdi
                      paa spaltone i tabellen.
@@ -55,12 +52,9 @@
 
                 <button type="submit" class="btn-primary">{{t .Lang "admin.create_class"}}</button>
             </form>
-        </div>
 
-        <div class="upcoming-classes">
-            <h4 class="undertittel">{{t .Lang "admin.upcoming_classes"}}</h4>
-            <div class="classes-table-container">
-                <table class="classes-table">
+<h3 class="undertittel">{{t .Lang "admin.upcoming_classes"}}</h3>
+<table class="classes-table">
                     <thead>
                         <tr>
                             <th>{{t .Lang "admin.class_table.title"}}</th>
@@ -90,11 +84,7 @@
                         </tr>
                         {{end}}
                     </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+</table>
 
 <script>
 // Enable/disable recurring weeks input based on checkbox

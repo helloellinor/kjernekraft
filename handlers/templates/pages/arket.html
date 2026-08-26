@@ -26,6 +26,7 @@
         <li><a href="#kortet">Kortet</a></li>
         <li><a href="#klippekortet">Klippekortet</a></li>
         <li><a href="#dagmerket">Dagmerket</a></li>
+        <li><a href="#vika">Vika</a></li>
         <li><a href="#medlemskapet">Medlemskapet</a></li>
         <li><a href="#skjema">Skjema</a></li>
         <li><a href="#fanone">Fanone</a></li>
@@ -147,6 +148,20 @@
             <div class="verkstad-prova" data-tema="ljos" data-theme="light">{{template "prov_dagmerket" .}}</div>
             <div class="verkstad-prova" data-tema="myrk" data-theme="dark">{{template "prov_dagmerket" .}}</div>
         </div>
+    </section>
+
+
+    <section class="verkstad-bolk" id="vika">
+        <h2 class="section-title">Vika</h2>
+        <p class="verkstad-regel">
+            Merki i det dei er til for. Rutenetet er det same som i
+            timeplanen — det gjeng gjenom <code>KlemVika</code> og
+            <code>week_net</code> som der — so stend spaltone paa lina
+            her, stend dei paa lina der. Hovudet og radene deler den same
+            trappa, og trappa er rekna av <code>--merkestorleik</code>.
+        </p>
+        <div class="verkstad-prova" data-tema="ljos" data-theme="light">{{template "week_net" .}}</div>
+        <div class="verkstad-prova" data-tema="myrk" data-theme="dark">{{template "week_net" .}}</div>
     </section>
 
     <section class="verkstad-bolk" id="medlemskapet">
@@ -286,7 +301,7 @@
 {{end}}
 
 {{define "prov_rangstigen"}}
-<h1 class="page-title">Timeplanen</h1>
+<div class="page-title">Timeplanen</div>
 <h2 class="section-title">Denne veka</h2>
 <h3 class="undertittel">Måndag</h3>
 <div class="detail-row"><span class="detail-label">Lærar</span><span class="detail-value">Gry</span></div>
@@ -317,13 +332,13 @@
 {{define "prov_kortet"}}
 <div class="verkstad-stabel">
     <div class="package-card">
-        <h4 class="package-name">Halvaars</h4>
+        <h3 class="package-name">Halvaars</h3>
         <p class="package-description">Fri tilgang til alle timar i salen.</p>
         <div class="package-price">690 kr/md</div>
         <div class="commitment">6 månaders binding</div>
     </div>
     <div class="package-card popular">
-        <h4 class="package-name">Aars</h4>
+        <h3 class="package-name">Aars</h3>
         <p class="package-description">Det same, eit heilt aar.</p>
         <div class="package-price">590 kr/md</div>
         <div class="price-per-session">Vengen segjer at dette er det som gjeng.</div>
@@ -335,11 +350,11 @@
 <div class="verkstad-stabel">
     <div class="klippekort-card">
         <div class="card-header">
-            <h4 class="card-title">Reformer</h4>
+            <h3 class="card-title">Reformer</h3>
             <span class="card-expiry">gjeng ut um 121 dagar</span>
         </div>
-        <div class="card-content">
-            <div class="klipp-count"><span class="remaining">7</span> <span class="total">av 10 klipp att</span></div>
+        <div class="klipprad">
+            <span class="klipp-count"><span class="remaining">7</span> <span class="total">av 10 klipp att</span></span>
             <div class="progress-bar">
                 <div class="progress-segments" style="--tende: 7; --alle: 10">
                     <div class="progress-segment filled"></div>
@@ -354,18 +369,17 @@
                     <div class="progress-segment"></div>
                 </div>
             </div>
-            <div class="card-actions"><button type="button">Fyll upp</button></div>
+            <button type="button">Fyll upp</button>
         </div>
     </div>
 
     <div class="klippekort-card expiring">
-        <div class="expiring-badge">Gjeng snart ut</div>
         <div class="card-header">
-            <h4 class="card-title">Yoga</h4>
+            <h3 class="card-title">Yoga</h3>
             <span class="card-expiry">gjeng ut i morgon</span>
         </div>
-        <div class="card-content">
-            <div class="klipp-count"><span class="remaining">1</span> <span class="total">av 10 klipp att</span></div>
+        <div class="klipprad">
+            <span class="klipp-count"><span class="remaining">1</span> <span class="total">av 10 klipp att</span></span>
             <div class="progress-bar">
                 <div class="progress-segments" style="--tende: 1; --alle: 10">
                     <div class="progress-segment filled"></div>
@@ -389,7 +403,7 @@
 <div class="verkstad-stabel">
     <div class="membership-card active">
         <div class="membership-header">
-            <h3 class="membership-name">Aarskort</h3>
+            <h3 class="card-title">Aarskort</h3>
             <div class="membership-status status-active">Aktiv</div>
         </div>
         <div class="price-info"><span class="price">590</span> <span class="commitment">kr/md · 12 månader</span></div>
@@ -398,7 +412,7 @@
 
     <div class="membership-card freeze_requested">
         <div class="membership-header">
-            <h3 class="membership-name">Halvaars</h3>
+            <h3 class="card-title">Halvaars</h3>
             <div class="membership-status status-freeze_requested">Førespurnad send</div>
         </div>
         <div class="dates-info"><div class="renewal-date">Ventar paa svar fraa studioet</div></div>
@@ -406,7 +420,7 @@
 
     <div class="membership-card paused">
         <div class="membership-header">
-            <h3 class="membership-name">Halvaars</h3>
+            <h3 class="card-title">Halvaars</h3>
             <div class="membership-status status-paused">Frose</div>
         </div>
         <div class="dates-info"><div class="renewal-date">Frose til 1. november 2026</div></div>
@@ -414,7 +428,7 @@
 
     <div class="membership-card cancelled">
         <div class="membership-header">
-            <h3 class="membership-name">Maanadskort</h3>
+            <h3 class="card-title">Maanadskort</h3>
             <div class="membership-status status-cancelled">Sagt upp</div>
         </div>
         <div class="dates-info"><div class="renewal-date urgent">Gjeng ut 30. september 2026</div></div>
@@ -523,9 +537,11 @@
 <div class="merkerad">
     {{range .Merkeprovor}}{{template "dagmerke" .}}{{end}}
     <span class="dagmerke daud" aria-hidden="true">
-        <svg class="merkeform" viewBox="0 0 {{merkeBreidd}} {{merkeHogd}}"
+        <svg class="merkeform" viewBox="{{merkeViewBox}}"
              width="{{merkeBreidd}}" height="{{merkeHogd}}" aria-hidden="true" focusable="false">
-            <path class="daudkant" d="{{merkeDaud}}"/>
+            <path class="daudflate" d="{{merkeDaud}}"/>
+                    <path class="dauddjup"  d="{{merkeDaud}}" filter="url(#merkedjup)"/>
+                    <path class="daudljos"  d="{{merkeDaud}}" filter="url(#merkeljos)"/>
         </svg>
     </span>
 </div>

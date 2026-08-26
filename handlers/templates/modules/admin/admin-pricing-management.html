@@ -1,11 +1,8 @@
 {{define "admin_pricing_management"}}
-<div class="pricing-management-section">
-    <h3 class="section-title">{{t .Lang "admin.pricing_management"}}</h3>
-    
-    <div class="pricing-container">
-        <div class="membership-pricing">
-            <h4 class="undertittel">{{t .Lang "admin.membership_pricing"}}</h4>
-            <table class="pricing-table">
+<h2 class="section-title">{{t .Lang "admin.pricing_management"}}</h2>
+
+<h3 class="undertittel">{{t .Lang "admin.membership_pricing"}}</h3>
+<table class="pricing-table">
                 <thead>
                     <tr>
                         <th>{{t .Lang "admin.membership_name"}}</th>
@@ -34,11 +31,9 @@
                     {{end}}
                 </tbody>
             </table>
-        </div>
 
-        <div class="new-membership">
-            <h4 class="undertittel">{{t .Lang "admin.create_new_membership"}}</h4>
-            <form id="new-membership-form" onsubmit="createMembership(event)">
+<h3 class="undertittel">{{t .Lang "admin.create_new_membership"}}</h3>
+<form id="new-membership-form" onsubmit="createMembership(event)">
                 <div class="form-group">
                     <label for="membership-name">{{t .Lang "admin.membership_name"}}:</label>
                     <input type="text" id="membership-name" required>
@@ -61,11 +56,8 @@
                     <label for="membership-description">{{t .Lang "admin.description"}}:</label>
                     <textarea id="membership-description" rows="3"></textarea>
                 </div>
-                <button type="submit" class="create-btn">{{t .Lang "admin.create_membership"}}</button>
+                <button type="submit" class="btn-primary">{{t .Lang "admin.create_membership"}}</button>
             </form>
-        </div>
-    </div>
-</div>
 
 <script>
 function editPrice(membershipId) {

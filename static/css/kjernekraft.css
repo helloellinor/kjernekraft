@@ -251,7 +251,7 @@ p:last-child { margin-bottom: 0; }
 :where(h2, h3, h4) + * { margin-top: var(--rom-3); }
 :where(h2, h3, h4) { margin-bottom: var(--rom-3); }
 /* Merkelappane ber si eigi lina og treng ikkje dobbel luft. */
-:where(.section-title, .module-title, .step-title) { margin-bottom: var(--rom-4); }
+:where(.section-title) { margin-bottom: var(--rom-4); }
 
 a { color: var(--merke); text-decoration-thickness: 1px; text-underline-offset: .16em; }
 a:hover { color: var(--merke-lys); }
@@ -437,6 +437,11 @@ main {
 }
 
 .page-title {
+  /* Klassa ber heile utsjaanaden sjølv (§15), so verkstaden kann syna
+     honom paa ein div utan aa laana elementstilen fraa h1. */
+  font-family: var(--skrift-yver);
+  line-height: 1.02;
+  text-wrap: balance;
   font-size: clamp(2rem, 5vw, 3.4rem);
   overflow-wrap: break-word; hyphens: auto;
   font-stretch: var(--vidd-tittel);
@@ -449,7 +454,7 @@ main {
 }
 .page-description { color: var(--blekk-lys); margin-bottom: var(--rom-6); max-width: 62ch; }
 
-.content-section, .section, .packages-section { margin-bottom: var(--rom-7); }
+.content-section, .packages-section { margin-bottom: var(--rom-7); }
 
 /* ---- rangstigen ----
    Fire steg, og kvart steg er *smalare* enn det yver seg. Breiddi ber
@@ -464,7 +469,7 @@ main {
    Steg tvo og tri hadde same forma fyrr — ein h4 inne i ein h3 fekk
    ingi ny tyding, berre ein litt mindre bokstav. Lina er skiljet: ein
    bolk deler sida, ei gruppa deler berre bolken. */
-.section-title, .module-title, .step-title {
+.section-title {
   font-family: var(--skrift-yver);
   font-size: 1.05rem; font-weight: 500;
   font-stretch: var(--vidd-merkelapp);
@@ -489,7 +494,7 @@ main {
 }
 .undertittel:first-child { margin-top: 0; }
 
-.two-column-grid, .content-grid, .selector-container {
+.two-column-grid, .selector-container {
   display: grid; gap: var(--rom-5);
   grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
 }
@@ -498,15 +503,13 @@ main {
    kortet
    Ei hårfin lina, ingen skugge, ingen rundingar utyver det vesle.
    =================================================================== */
-.module, .package-card, .category-card, .event-card, .charge-item,
-.payment-method-card, .rule-section, .activity-placeholder, .no-data {
+.package-card, .category-card, .event-card, .charge-item,
+.payment-method-card, .activity-placeholder, .no-data {
   background: var(--flate);
   border: 1px solid var(--haarlina);
   border-radius: 2px;
   padding: var(--rom-5);
 }
-
-.module { display: flex; flex-direction: column; gap: var(--rom-4); }
 
 .no-data, .activity-placeholder, .loading-placeholder {
   color: var(--blekk-svakt);
@@ -545,7 +548,7 @@ main {
 /* ---- kortet med rada paa vengen ----
    Eit kort som *er* noko — eit medlemskap som gjeng — fær ei lina i
    merkefargen langs vinstre kanten. Eitt kort, éi lina. */
-.package-card.popular, .event-card.signed-up, .module.aktiv {
+.package-card.popular, .event-card.signed-up {
   border-left: 3px solid var(--merke);
 }
 
@@ -567,7 +570,7 @@ main {
   font-size: .85rem; color: var(--blekk-lys);
 }
 
-.packages-grid, .events-grid {
+.packages-grid, .events-grid, .categories-grid {
   display: grid; gap: var(--rom-4);
   grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
 }
@@ -578,7 +581,7 @@ main {
   padding: var(--rom-2) 0;
   border-bottom: 1px solid var(--haarlina);
 }
-.detail-row:last-child, .detail-item:last-child, .no-border { border-bottom: 0; }
+.detail-row:last-child, .detail-item:last-child { border-bottom: 0; }
 .detail-label { color: var(--blekk-lys); font-size: .9rem; }
 .detail-value { font-family: var(--skrift-tal); font-size: .95rem; }
 
@@ -1074,7 +1077,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    i det heile. Ei rullesteng som stend der utan aa ha noko aa rulla er
    berre eit merke um at nokon ikkje maalte. */
 .timeplan {
-  --timetrapp: minmax(8rem, 1fr) repeat(7, minmax(0, 3.9rem));
+  --timetrapp: minmax(8rem, 1fr) repeat(7, minmax(0, var(--merkestorleik)));
   max-height: min(70vh, 48rem);
   overflow-y: auto;
   overscroll-behavior-y: contain;
@@ -1140,17 +1143,25 @@ tbody tr:hover td { background: var(--ark-djup); }
    teikning ved kvar storleik. */
 .timedagar { display: contents; }
 
+/* Storleiken er éin knapp og ingen ting anna. Alt i figuren er rekna i
+   eit viewBox, so skrift, strekar, hyrne og rom fylgjer med i det same
+   forholdet — det er den same tingen som kjem nærare, ikkje ei ny
+   teikning. Spaltone i vika er rekna av det same talet, so hovudet og
+   radene stend paa lina utan at nokon maaler. */
+:root { --merkestorleik: 5.4rem; }
+
 .dagmerke {
   grid-column: calc(var(--dag) + 1);
   display: block;
   padding: 0; border: 0; background: none; border-radius: 0;
   line-height: 0;
   cursor: pointer;
+  justify-self: center;
 }
 .dagmerke:hover:not(:disabled) { background: none; border: 0; color: inherit; }
 .dagmerke:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
 
-.merkeform { display: block; overflow: visible; }
+.merkeform { display: block; overflow: visible; width: var(--merkestorleik); height: auto; }
 .merke-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 /* ---- fasetten i det smaa ----
@@ -1240,18 +1251,32 @@ tbody tr:hover td { background: var(--ark-djup); }
 .timehovud .dagnamn.idag { color: var(--klas); }
 
 /* ---- ruta utan time ----
-   Same maal som ei levande, so rada stend paa lina — men berre eit hint
-   av ei lina. Ho er eit hol og ikkje ein knapp: `pointer-events: none`
-   gjer at ho korkje tek klikk eller stel peikaren. */
-.dagmerke.daud { pointer-events: none; cursor: default; }
-.daudkant {
-  fill: none; stroke-width: 1; stroke-dasharray: 3 3;
-  stroke: color-mix(in srgb, var(--haarlina) 55%, transparent);
-}
-.dagmerke.daud.idag .daudkant { stroke: color-mix(in srgb, var(--merke) 28%, transparent); }
+   Ho var ein stipla kasse fyrr, og ein stipla kasse er eit *umriss* —
+   det ser ut som noko som skal koma. Her er det motsette som er sant:
+   det gjeng ingen time den dagen, og plassen er tom.
 
-/* Merke som stend for seg sjølve — paa heimesida, utan rutenet. */
-.merkerad { display: flex; flex-wrap: wrap; gap: var(--rom-3); }
+   Difor er ho eit spor: ei fordjuping i arket i forma aat kroppen, med
+   den same fasetten som skrivefelti — berre djupare, av di ho er tom
+   heile vegen ned. Uret ligg ikkje i henne. Sjaa docs/FASETTEN.md.
+
+   Ho er eit hol og ikkje ein knapp: `pointer-events: none` gjer at ho
+   korkje tek klikk eller stel peikaren. */
+.dagmerke.daud { pointer-events: none; cursor: default; }
+.daudflate { fill: color-mix(in srgb, var(--blekk) 6%, transparent); }
+.dauddjup  { fill: color-mix(in srgb, var(--blekk) 28%, transparent); }
+/* Den nedre lippa. `--flate` er alltid den ljosaste flata i temaet, so
+   ho lyser i baae — det er difor ho stend her og ikkje kvitt. */
+.daudljos  { fill: color-mix(in srgb, var(--flate) 80%, transparent); }
+.dagmerke.daud.idag .daudflate { fill: color-mix(in srgb, var(--merke) 8%, transparent); }
+
+/* Merke som stend for seg sjølve — paa heimesida, utan rutenet. Dei
+   stend i spaltor av den same breiddi som i vika, so eit merke er like
+   stort kvar du ser det. */
+.merkerad {
+  display: grid; gap: var(--rom-3);
+  grid-template-columns: repeat(auto-fill, var(--merkestorleik));
+  justify-content: start;
+}
 .merkerad .dagmerke { grid-column: auto; }
 
 
@@ -1390,7 +1415,6 @@ tbody tr:hover td { background: var(--ark-djup); }
   border: 1px solid var(--haarlina);
   border-radius: 2px;
 }
-.login-title { font-size: 2.4rem; font-stretch: var(--vidd-tittel); font-weight: 700; margin-bottom: var(--rom-1); }
 .login-subtitle { color: var(--blekk-lys); font-size: .95rem; margin-bottom: var(--rom-5); }
 .login-btn { width: 100%; margin-top: var(--rom-2); }
 .forgot-password, .signup-link { font-size: .9rem; margin-top: var(--rom-4); color: var(--blekk-lys); }
@@ -1423,7 +1447,7 @@ tbody tr:hover td { background: var(--ark-djup); }
 
   h1, .page-title { font-size: 1.7rem; }
 
-  .two-column-grid, .content-grid, .selector-container,
+  .two-column-grid, .selector-container, .categories-grid,
   .packages-grid, .events-grid, .stats-grid, .admin-stats, .form-row {
     grid-template-columns: 1fr;
   }
@@ -1470,7 +1494,7 @@ tbody tr:hover td { background: var(--ark-djup); }
   gap: var(--rom-3); flex-wrap: wrap;
   margin-bottom: var(--rom-3);
 }
-.membership-name, .card-title {
+.card-title {
   font-family: var(--skrift-yver); font-size: 1.3rem; margin: 0;
   font-stretch: var(--vidd-yver); font-weight: 500;
 }

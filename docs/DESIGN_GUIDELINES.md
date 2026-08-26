@@ -435,6 +435,11 @@ for f in handlers/templates/pages/*.html; do echo "$(grep -c '<h1' $f) $f"; done
 # ingi lina skal byrja paa meir enn 1
 ```
 
+Tvo kjende unnatak, baae ufarlege: ein `<h1>` som stend i ein
+*merknad* vert talt med (min-profil), og tvo `h1` i kvar si grein av
+`{{if}}/{{else}}` er framleis éin paa den ferdige sida (membership).
+Prøva tel filer, ikkje sidor — stig talet, sjaa etter kvifor.
+
 ---
 
 ## 16. Eitt lag

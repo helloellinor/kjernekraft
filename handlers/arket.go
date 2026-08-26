@@ -10,7 +10,7 @@ import (
 // merkeProvor lagar timane verkstaden syner. Dei er ikkje teikningar av
 // merket: dei gjeng gjenom NyFramsyning som alt anna, so ser du noko
 // rart her, ser ein brukar det same i timeplanen.
-func merkeProvor(lang string) []Framsyning {
+func merkeVika() (time.Time, time.Time, []models.Event) {
 	// Ei fast vika, so prøvone ikkje skifter medan ein ser paa deim.
 	// Maandagen er «i dag», og klokka er ti paa tolv.
 	maandag := time.Date(2026, 8, 24, 0, 0, 0, 0, OsloLoc)
@@ -31,24 +31,35 @@ func merkeProvor(lang string) []Framsyning {
 		{6, "16:45", "17:45", 16, 18},
 	}
 
-	ut := make([]Framsyning, 0, len(slag))
+	titlar := []struct{ tittel, laerar, rom string }{
+		{"Vinyasa Flow", "Gry", "Salen"},
+		{"Reformer", "Ida", "Reformer"},
+		{"Fascia Flyt", "Torunn", "Salen"},
+		{"Yin", "Kristina", "Salen"},
+		{"Vinyasa Flow", "Gry", "Salen"},
+		{"Reformer", "Ida", "Reformer"},
+		{"Yin", "Kristina", "Salen"},
+	}
+
+	ut := make([]models.Event, 0, len(slag))
 	for i, s := range slag {
 		start, _ := time.ParseInLocation("2006-01-02 15:04",
 			maandag.AddDate(0, 0, s.dag).Format("2006-01-02")+" "+s.fraa, OsloLoc)
 		slutt, _ := time.ParseInLocation("2006-01-02 15:04",
 			maandag.AddDate(0, 0, s.dag).Format("2006-01-02")+" "+s.til, OsloLoc)
-		ut = append(ut, NyFramsyning(lang, models.Event{
+		ut = append(ut, models.Event{
 			ID:               900 + i,
-			Title:            "Prøva",
-			TeacherName:      "Gry",
-			RoomName:         "Salen",
+			Title:            titlar[i].tittel,
+			TeacherName:      titlar[i].laerar,
+			RoomName:         titlar[i].rom,
 			StartTime:        start,
 			EndTime:          slutt,
 			Capacity:         s.plassar,
 			CurrentEnrolment: s.teke,
-		}, iDag, naa))
+		})
 	}
-	return ut
+	_ = iDag
+	return maandag, naa, ut
 }
 
 // ArketHandler syner verkstaden: kvar komponent i stilarket, utanfor
@@ -62,6 +73,14 @@ func merkeProvor(lang string) []Framsyning {
 // studioet syner nokon, og difor er teksti der inne heller ikkje umsett.
 func ArketHandler(w http.ResponseWriter, r *http.Request) {
 	lang := GetLanguageFromRequest(r)
+
+	maandag, naa, hendingar := merkeVika()
+	merkeprovor := Framsyningar(lang, hendingar, naa)
+	vikedagar := make([]time.Time, 7)
+	for i := range vikedagar {
+		vikedagar[i] = maandag.AddDate(0, 0, i)
+	}
+
 	renderPage(w, r, "pages/arket", map[string]interface{}{
 		"Title":       "Arket",
 		"CurrentPage": "arket",
@@ -69,6 +88,17 @@ func ArketHandler(w http.ResponseWriter, r *http.Request) {
 		"CSRFToken":   CSRFToken(r),
 		"IsAdmin":     sessionIsAdmin(r),
 		"UserName":    sessionUserName(r),
-		"Merkeprovor": merkeProvor(lang),
+		"Merkeprovor": merkeprovor,
+		// Vika gjeng gjenom KlemVika som i timeplanen, so verkstaden
+		// syner rutenetet med den same koden — ikkje ei etterlikning.
+		"Timebolkar": KlemVika(lang, hendingar, naa, maandag),
+		"WeekDays": []string{
+			t(lang, "timeplan.monday"), t(lang, "timeplan.tuesday"),
+			t(lang, "timeplan.wednesday"), t(lang, "timeplan.thursday"),
+			t(lang, "timeplan.friday"), t(lang, "timeplan.saturday"),
+			t(lang, "timeplan.sunday"),
+		},
+		"WeekDates": vikedagar,
+		"Today":     maandag.Format("2006-01-02"),
 	})
 }

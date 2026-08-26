@@ -36,8 +36,16 @@ const (
 	plettX = kroppX + kroppB // midten aat pletten ligg i hyrna
 	plettY = kroppY + kroppH
 
-	MerkeBreidd = kroppX + kroppB + plettR + merkeKant
-	MerkeHogd   = kroppY + kroppH + plettR + merkeKant
+	// Maalaren heng 9,6 einingar ut til høgre og ingen ting ut til
+	// vinstre. Er kassen teikna kring det, stend ikkje *uret* midt i
+	// kassen, og sju merke i sju spaltor kjem ikkje under kvarandre same
+	// kva ein gjer i CSS. Difor byrjar viewBox til vinstre for kroppen
+	// med det same overhenget som ligg til høgre: kassen er symmetrisk
+	// kring kroppen, og spaltone stend paa lina av seg sjølve.
+	merkeOverheng = plettR + merkeKant       // 9,6
+	MerkeVenstre  = kroppX - merkeOverheng   // −8,6
+	MerkeBreidd   = kroppB + 2*merkeOverheng // 65,2
+	MerkeHogd     = kroppY + kroppH + plettR + merkeKant
 
 	skiveX = kroppX + kroppB/2
 	skiveY = kroppY + kroppH/2
@@ -73,6 +81,8 @@ type Kake struct {
 
 // Merke er alt ein mal treng for aa teikna eit timemerke.
 type Merke struct {
+	// Heile kassen, ferdig skriven: «−8.6 0 65.2 65.6».
+	ViewBox string
 	// Filtri bur inne i kvar figur og ikkje i eit sams sett paa sida.
 	// Grunnen er tema: `flood-color: var(--kant)` vert løyst der
 	// *filteret* stend, ikkje der det vert nytta. Eit sams sett hadde
@@ -199,8 +209,9 @@ func NyttMerke(ident string, start, slutt time.Time, teke, plassar int, naa time
 	}
 
 	m := Merke{
-		Ident:  ident,
-		Breidd: MerkeBreidd, Hogd: MerkeHogd,
+		Ident:   ident,
+		ViewBox: fmt.Sprintf("%.2f 0 %.2f %.2f", MerkeVenstre, MerkeBreidd, MerkeHogd),
+		Breidd:  MerkeBreidd, Hogd: MerkeHogd,
 		Silhuett:     template.HTMLAttr(silhuett(full)),
 		DagX:         faneX + faneB/2,
 		DagY:         faneY + 8.4,

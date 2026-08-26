@@ -1,32 +1,33 @@
 {{define "content"}}
 
 
-<div class="sida">
-    {{if .HasCurrentMembership}}
+{{if .HasCurrentMembership}}
     <!-- Current Membership Section -->
     <h1 class="page-title">Behandle medlemskap</h1>
     <p class="page-description">
         Gjør endringer i medlemskapet ditt.
     </p>
-    <div class="current-membership-section two-column-grid" id="current-membership">
-        <div class="module no-border membership-module">
-            <h2 class="module-title">Medlemskapet mitt</h2>
+    <div class="two-column-grid" id="current-membership">
+        <section class="content-section">
+            <h2 class="section-title">Medlemskapet mitt</h2>
             <div id="current-membership-container">
                 <!-- This will be loaded via AJAX -->
                 <div class="loading-placeholder">Laster medlemskap...</div>
             </div>
-        </div>
-        
-        <div class="module no-border charges-module">
-            <h2 class="module-title">Belastninger</h2>
+        </section>
+
+        <section class="content-section">
+            <h2 class="section-title">Belastninger</h2>
             <div id="membership-charges-container">
                 <div class="loading-placeholder">Laster belastninger...</div>
             </div>
-        </div>
+        </section>
     </div>
-    {{end}}
-    
+
+    <h2 class="section-title">{{.PageTitle}}</h2>
+    {{else}}
     <h1 class="page-title">{{.PageTitle}}</h1>
+    {{end}}
     {{if not .HasHadMembership}}
     <p class="page-description">
         Svar på noen enkle spørsmål så viser vi deg medlemskapet som passer best for deg.
@@ -42,11 +43,10 @@
               action="/medlemskap/recommendations" 
               method="post">
             
-            <h2 class="module-title">Fortell oss om deg</h2>
-            
-            <div class="question-group">
+            <h2 class="section-title">Fortell oss om deg</h2>
+
+            <div class="form-group">
                 <label class="question-label">Hvor lenge ønsker du å binde deg?</label>
-                <div class="question-options">
                     <label class="option-label">
                         <input type="radio" name="commitment" value="12">
                         <span>12 måneder (best pris)</span>
@@ -69,7 +69,6 @@
                         <input type="radio" name="commitment" value="trial">
                         <span>Jeg vil bare prøve</span>
                     </label>
-                </div>
             </div>
             
             {{/* Spursmaalet um student og honnør stod her. Det er noko um
@@ -77,9 +76,8 @@
                  daa slepp denne sida aa spyrja um det same kvar gong. Er du
                  kvalifisert, ser du prisane; er du det ikkje, finst dei
                  ikkje for deg. */}}
-            <div class="question-group">
+            <div class="form-group">
                 <label class="question-label">Når vil du starte?</label>
-                <div class="question-options">
                     <label class="option-label">
                         <input type="radio" name="start_time" value="now" checked>
                         <span>Så snart som mulig</span>
@@ -88,27 +86,26 @@
                         <input type="radio" name="start_time" value="custom">
                         <span>Annen dato</span>
                     </label>
-                </div>
-                <div id="custom-date-container" style="display: none; margin-top: 1rem;">
-                    <input type="date" name="custom_start_date" class="date-input" id="custom-start-date">
+                <div id="custom-date-container" style="display: none;">
+                    <input type="date" name="custom_start_date" id="custom-start-date">
                 </div>
             </div>
         </form>
         
-        <div class="checkout-container">
+        <section>
             {{if not .HasHadMembership}}
-            <h2 class="module-title">Ditt medlemskap</h2>
+            <h2 class="section-title">Ditt medlemskap</h2>
             {{else}}
-            <h2 class="module-title">Ditt nye medlemskap</h2>
+            <h2 class="section-title">Ditt nye medlemskap</h2>
             {{end}}
-            <div id="special-offer" class="special-offer-notice" style="display: none;">
+            <div id="special-offer" style="display: none;">
                 🍂 Høsttilbud: 12-måneders pris med kun 4 måneders binding!
             </div>
-            
+
             <div class="price-display">
-                <div id="current-price" class="current-price">1490 kr/mnd</div>
-                <div id="original-price" class="original-price" style="display: none;"></div>
-                <div id="discount-badge" class="discount-badge" style="display: none;">20% rabatt</div>
+                <div id="current-price">1490 kr/mnd</div>
+                <div id="original-price" style="display: none;"></div>
+                <div id="discount-badge" style="display: none;">20% rabatt</div>
             </div>
             
             <div class="membership-details">
@@ -130,16 +127,15 @@
                 </div>
             </div>
             
-            <button class="checkout-btn" onclick="proceedToCheckout()">
+            <button class="btn-primary" onclick="proceedToCheckout()">
                 {{if .HasCurrentMembership}}Bytt{{else}}Fortsett til betaling{{end}}
             </button>
-            
+
             <p class="tomt midt">
                 Ingen skjulte kostnader. Avbryt når som helst.
             </p>
-        </div>
+        </section>
     </div>
-</div>
 
 <script>
     // Default pricing data (most expensive, no commitment option)

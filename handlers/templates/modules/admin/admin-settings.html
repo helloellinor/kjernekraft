@@ -1,8 +1,6 @@
 {{define "admin_settings"}}
-<div class="admin-settings-section">
-    <h3 class="section-title">Systeminnstillinger</h3>
-    
-    <div class="settings-form">
+<h2 class="section-title">{{t .Lang "admin.system_settings"}}</h2>
+
         <div class="form-group">
             <label for="timezone-select">Tidssone:</label>
             <select id="timezone-select" onchange="updateTimezone()">
@@ -17,10 +15,8 @@
         <div class="current-time">
             <strong>Gjeldende tid:</strong> <span id="current-time">{{formatDateTime (currentTime)}}</span>
         </div>
-    </div>
-    
+
     <div id="settings-message" class="message" style="display: none;"></div>
-</div>
 
 <script>
 function updateTimezone() {

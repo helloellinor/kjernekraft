@@ -1,67 +1,54 @@
 {{define "admin_membership_rules"}}
-<div class="admin-section">
-    <h3 class="section-title">{{t .Lang "admin.membership_rules"}}</h3>
-    
-    <div class="rules-container">
-        <div class="rule-section">
-            <h4 class="undertittel">{{t .Lang "admin.upgrade_rules"}}</h4>
-            <div class="rule-item">
-                <label>
-                    <input type="checkbox" id="allow-upgrades" checked> 
-                    {{t .Lang "admin.allow_membership_upgrades"}}
-                </label>
-                <p class="rule-description">{{t .Lang "admin.upgrade_rules_description"}}</p>
-            </div>
-            
-            <div class="rule-item">
-                <label>
-                    <input type="checkbox" id="combine-binding-periods" checked> 
-                    {{t .Lang "admin.combine_binding_periods"}}
-                </label>
-                <p class="rule-description">{{t .Lang "admin.combine_binding_description"}}</p>
-            </div>
-        </div>
-        
-        <div class="rule-section">
-            <h4 class="undertittel">{{t .Lang "admin.downgrade_rules"}}</h4>
-            <div class="rule-item">
-                <label>
-                    <input type="checkbox" id="allow-downgrades"> 
-                    {{t .Lang "admin.allow_membership_downgrades"}}
-                </label>
-                <p class="rule-description">{{t .Lang "admin.downgrade_rules_description"}}</p>
-            </div>
-        </div>
-        
-        <div class="rule-section">
-            <h4 class="undertittel">{{t .Lang "admin.binding_rules"}}</h4>
-            <div class="rule-item">
-                <label>
-                    <input type="checkbox" id="allow-change-during-binding"> 
-                    {{t .Lang "admin.allow_changes_during_binding"}}
-                </label>
-                <p class="rule-description">{{t .Lang "admin.binding_change_description"}}</p>
-            </div>
-        </div>
-        
-        <div class="rule-section">
-            <h4 class="undertittel">{{t .Lang "admin.default_membership"}}</h4>
-            <div class="rule-item">
-                <label for="default-membership">{{t .Lang "admin.default_membership_for_new_users"}}:</label>
-                <select id="default-membership">
-                    <option value="">{{t .Lang "admin.no_default"}}</option>
-                    {{range .Memberships}}
-                    <option value="{{.ID}}" {{if .IsSpecialOffer}}selected{{end}}>{{.Name}} - {{printf "%.0f" (divf .Price 100)}} kr</option>
-                    {{end}}
-                </select>
-            </div>
-        </div>
-    </div>
-    
-    <button class="save-rules-btn" onclick="saveMembershipRules()">
-        {{t .Lang "admin.save_rules"}}
-    </button>
+<h2 class="section-title">{{t .Lang "admin.membership_rules"}}</h2>
+
+<h3 class="undertittel">{{t .Lang "admin.upgrade_rules"}}</h3>
+<div class="form-group">
+    <label>
+        <input type="checkbox" id="allow-upgrades" checked>
+        {{t .Lang "admin.allow_membership_upgrades"}}
+    </label>
+    <p class="rule-description">{{t .Lang "admin.upgrade_rules_description"}}</p>
 </div>
+<div class="form-group">
+    <label>
+        <input type="checkbox" id="combine-binding-periods" checked>
+        {{t .Lang "admin.combine_binding_periods"}}
+    </label>
+    <p class="rule-description">{{t .Lang "admin.combine_binding_description"}}</p>
+</div>
+
+<h3 class="undertittel">{{t .Lang "admin.downgrade_rules"}}</h3>
+<div class="form-group">
+    <label>
+        <input type="checkbox" id="allow-downgrades">
+        {{t .Lang "admin.allow_membership_downgrades"}}
+    </label>
+    <p class="rule-description">{{t .Lang "admin.downgrade_rules_description"}}</p>
+</div>
+
+<h3 class="undertittel">{{t .Lang "admin.binding_rules"}}</h3>
+<div class="form-group">
+    <label>
+        <input type="checkbox" id="allow-change-during-binding">
+        {{t .Lang "admin.allow_changes_during_binding"}}
+    </label>
+    <p class="rule-description">{{t .Lang "admin.binding_change_description"}}</p>
+</div>
+
+<h3 class="undertittel">{{t .Lang "admin.default_membership"}}</h3>
+<div class="form-group">
+    <label for="default-membership">{{t .Lang "admin.default_membership_for_new_users"}}:</label>
+    <select id="default-membership">
+        <option value="">{{t .Lang "admin.no_default"}}</option>
+        {{range .Memberships}}
+        <option value="{{.ID}}" {{if .IsSpecialOffer}}selected{{end}}>{{.Name}} - {{printf "%.0f" (divf .Price 100)}} kr</option>
+        {{end}}
+    </select>
+</div>
+
+<button class="btn-primary" onclick="saveMembershipRules()">
+    {{t .Lang "admin.save_rules"}}
+</button>
 
 <script>
 function saveMembershipRules() {

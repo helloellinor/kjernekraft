@@ -1,4 +1,45 @@
 {{define "week_grid"}}
+{{template "week_net" .}}
+
+{{/* ---- dokka ----
+     Ho held det du ser paa i ro medan resten rullar. Vel du ein dag i
+     ei rad, stend timen her nede til du vel ein annan — du kann halda
+     fram med aa skanna vika utan at noko flyttar seg, og
+     paameldingsknappen er alltid paa den same staden.
+
+     Det var dette som gjorde timeplanen lang fyrr: kvart kort bar heile
+     detaljen sin, so vika vart eit tårn. No ber radi berre det ein
+     skannar etter, og detaljen bur i dokka. */}}
+<aside class="dokk" id="timedokk" hidden aria-live="polite">
+    <div class="dokkinnhald">
+        <div class="dokkkva">
+            <h3 class="dokktittel" id="dokk-tittel"></h3>
+            <p class="dokkkven"><span id="dokk-laerar"></span> <span class="timerom" id="dokk-rom"></span></p>
+        </div>
+        <div class="dokknaar">
+            <span class="dokkdag" id="dokk-dag"></span>
+            <span class="dokkklokke" id="dokk-klokke"></span>
+        </div>
+        <div class="dokkplassar">
+            <div class="plassmaalar" id="dokk-maalar"></div>
+            <span class="event-plassar"><b id="dokk-teke"></b><span class="av" id="dokk-av"></span></span>
+        </div>
+        <div class="dokkhandling">
+            <button type="button" class="btn-primary" id="dokk-knapp"
+                    data-meld-paa="{{t .Lang "timeplan.signup"}}"
+                    data-venteliste="{{t .Lang "timeplan.waitlist"}}"
+                    data-meld-av="{{t .Lang "timeplan.cancel_signup"}}"></button>
+            <p class="dokkmelding" id="dokk-melding" role="status"></p>
+        </div>
+        <button type="button" class="dokklukk" id="dokk-lukk" aria-label="{{t .Lang "timeplan.close"}}">&times;</button>
+    </div>
+</aside>
+{{end}}
+
+{{/* Rutenetet aaleine, utan dokka. Verkstaden syner det for seg
+     sjølv — ein treng ikkje ei dokk for aa sjaa um spaltone stend
+     paa lina, og tvo dokker paa den same sida hadde delt id. */}}
+{{define "week_net"}}
 {{/* Vika klemd saman. Éi rad per time, eitt merke per dag han gjeng.
      «Vinyasa Flow med Kristina 07:15» er éin time som gjeng tysdag og
      torsdag — ikkje tvo. Fyrr stod dei som tvo like kort i kvar si
@@ -34,9 +75,11 @@
                  spursmaalet naar ein set upp ei vika. */}}
             <span class="dagmerke daud{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}"
                   style="--dag: {{.Kolonne}}" aria-hidden="true">
-                <svg class="merkeform" viewBox="0 0 {{merkeBreidd}} {{merkeHogd}}"
+                <svg class="merkeform" viewBox="{{merkeViewBox}}"
                      width="{{merkeBreidd}}" height="{{merkeHogd}}" aria-hidden="true" focusable="false">
-                    <path class="daudkant" d="{{merkeDaud}}"/>
+                    <path class="daudflate" d="{{merkeDaud}}"/>
+                    <path class="dauddjup"  d="{{merkeDaud}}" filter="url(#merkedjup)"/>
+                    <path class="daudljos"  d="{{merkeDaud}}" filter="url(#merkeljos)"/>
                 </svg>
             </span>
             {{end}}
@@ -48,37 +91,4 @@
     {{end}}
 </div>
 
-{{/* ---- dokka ----
-     Ho held det du ser paa i ro medan resten rullar. Vel du ein dag i
-     ei rad, stend timen her nede til du vel ein annan — du kann halda
-     fram med aa skanna vika utan at noko flyttar seg, og
-     paameldingsknappen er alltid paa den same staden.
-
-     Det var dette som gjorde timeplanen lang fyrr: kvart kort bar heile
-     detaljen sin, so vika vart eit tårn. No ber radi berre det ein
-     skannar etter, og detaljen bur i dokka. */}}
-<aside class="dokk" id="timedokk" hidden aria-live="polite">
-    <div class="dokkinnhald">
-        <div class="dokkkva">
-            <h3 class="dokktittel" id="dokk-tittel"></h3>
-            <p class="dokkkven"><span id="dokk-laerar"></span> <span class="timerom" id="dokk-rom"></span></p>
-        </div>
-        <div class="dokknaar">
-            <span class="dokkdag" id="dokk-dag"></span>
-            <span class="dokkklokke" id="dokk-klokke"></span>
-        </div>
-        <div class="dokkplassar">
-            <div class="plassmaalar" id="dokk-maalar"></div>
-            <span class="event-plassar"><b id="dokk-teke"></b><span class="av" id="dokk-av"></span></span>
-        </div>
-        <div class="dokkhandling">
-            <button type="button" class="btn-primary" id="dokk-knapp"
-                    data-meld-paa="{{t .Lang "timeplan.signup"}}"
-                    data-venteliste="{{t .Lang "timeplan.waitlist"}}"
-                    data-meld-av="{{t .Lang "timeplan.cancel_signup"}}"></button>
-            <p class="dokkmelding" id="dokk-melding" role="status"></p>
-        </div>
-        <button type="button" class="dokklukk" id="dokk-lukk" aria-label="{{t .Lang "timeplan.close"}}">&times;</button>
-    </div>
-</aside>
 {{end}}
