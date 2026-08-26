@@ -5,98 +5,55 @@
     <div class="class-container">
         <div class="new-class">
             <h4>{{t .Lang "admin.create_new_class"}}</h4>
-            <form id="new-class-form" onsubmit="createClass(event)">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="class-title">{{t .Lang "admin.class_title"}}:</label>
-                        <input type="text" id="class-title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="class-type">{{t .Lang "admin.class_type"}}:</label>
-                        <select id="class-type" required>
-                            <option value="">{{t .Lang "admin.select_class_type"}}</option>
-                            <option value="yoga">Yoga</option>
-                            <option value="pilates">Pilates</option>
-                            <option value="strength">Styrketrening</option>
-                            <option value="cardio">Kardio</option>
-                            <option value="dance">Dans</option>
-                            <option value="flexibility">Fleksibilitet</option>
-                            <option value="recovery">Restitusjon</option>
-                            <option value="boxing">Boksing</option>
-                            <option value="crossfit">CrossFit</option>
-                            <option value="spinning">Spinning</option>
-                            <option value="hiit">HIIT</option>
-                            <option value="aerobics">Aerobics</option>
-                            <option value="zumba">Zumba</option>
-                        </select>
-                    </div>
-                </div>
+            <form id="new-class-form" class="setningsskjema" onsubmit="createClass(event)">
+                {{/* Timen som ei setning. Rekkjefylgdi er arbeidet — kva,
+                     kven, kvar, naar, kor lenge — og ikkje rekkjefylgdi
+                     paa spaltone i tabellen.
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="class-teacher">{{t .Lang "admin.teacher_name"}}:</label>
-                        <input type="text" id="class-teacher" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="class-location">{{t .Lang "admin.location"}}:</label>
-                        <select id="class-location" required>
-                            <option value="">{{t .Lang "admin.select_location"}}</option>
-                            {{range $.Rooms}}
-                            <option value="{{.Name}}" data-plassar="{{.Capacity}}">{{.Name}} &middot; {{.Capacity}} plassar</option>
-                            {{end}}
-                        </select>
-                    </div>
-                </div>
+                     Fem felt er burte fraa det gamle skjemaet, av di
+                     systemet alt veit svaret: kapasiteten kjem av rommet,
+                     fargen av klassetypen, og slutttidi av lengdi. Lengd
+                     er dessutan det ein lærar tenkjer i — ingen planlegg
+                     ein time som «sluttar 18:25». */}}
+                <p class="setning">
+                    <input type="text" id="class-title" class="felt" required
+                           placeholder="{{t .Lang "admin.eg_class"}}"
+                           aria-label="{{t .Lang "admin.class_title"}}">
+                    {{t .Lang "admin.with"}}
+                    <input type="text" id="class-teacher" class="felt" required list="laerarar"
+                           placeholder="{{t .Lang "admin.eg_teacher"}}"
+                           aria-label="{{t .Lang "admin.teacher_name"}}">
+                    <datalist id="laerarar">
+                        {{range $.Teachers}}<option value="{{.}}"></option>{{end}}
+                    </datalist>
+                    {{t .Lang "admin.in_room"}}
+                    <select id="class-location" class="felt" required aria-label="{{t .Lang "admin.location"}}">
+                        <option value="">{{t .Lang "admin.select_location"}}</option>
+                        {{range $.Rooms}}
+                        <option value="{{.Name}}" data-plassar="{{.Capacity}}" data-rom="{{.ID}}">{{.Name}}</option>
+                        {{end}}
+                    </select>,
+                    <input type="date" id="class-date" class="felt" required
+                           aria-label="{{t .Lang "admin.class_date"}}">
+                    {{t .Lang "admin.from_time"}}
+                    <input type="time" id="class-start-time" class="felt" required step="300"
+                           aria-label="{{t .Lang "admin.start_time"}}">
+                    {{t .Lang "admin.for_duration"}}
+                    <input type="number" id="class-length" class="felt felt-tal" value="60"
+                           min="15" max="240" step="5" required
+                           aria-label="{{t .Lang "admin.length_minutes"}}"> {{t .Lang "admin.minutes"}}<span
+                       class="gjentak-bolk">, <label class="innelabel"><input type="checkbox" id="is-recurring">
+                        {{t .Lang "admin.every_week"}}</label> <span id="veker-bolk" hidden>{{t .Lang "admin.for_weeks"}}
+                        <input type="number" id="recurring-weeks" class="felt felt-tal" value="8" min="2" max="52"
+                               aria-label="{{t .Lang "admin.weeks"}}"> {{t .Lang "admin.weeks"}}</span></span>.
+                </p>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="class-date">{{t .Lang "admin.class_date"}}:</label>
-                        <input type="date" id="class-date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="class-start-time">{{t .Lang "admin.start_time"}}:</label>
-                        <input type="time" id="class-start-time" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="class-end-time">{{t .Lang "admin.end_time"}}:</label>
-                        <input type="time" id="class-end-time" required>
-                    </div>
-                </div>
+                {{/* Det systemet reknar ut, synt medan du skriv — so det
+                     aldri er eit spursmaal kvar tali kjem fraa, og so
+                     konflikten stend *fyre* du trykkjer og ikkje etter. */}}
+                <p class="fylgja" id="fylgja" role="status" data-plassar="{{t .Lang "admin.places"}}" data-sluttar="{{t .Lang "admin.ends"}}"></p>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="class-capacity">{{t .Lang "admin.capacity"}}</label>
-                        <!-- Kapasiteten er ein eigenskap ved rommet. Feltet stod
-                             paa 20 uansett rom, og reformeren hev fire plassar.
-                             Det er lesbart, ikkje skrivbart — og det syner kvar
-                             talet kjem fraa. -->
-                        <output id="class-capacity" class="avleidd">{{t .Lang "admin.pick_room_first"}}</output>
-                    </div>
-                    
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="class-description">{{t .Lang "admin.class_description"}}:</label>
-                    <textarea id="class-description" rows="3" placeholder="{{t .Lang "admin.class_description_placeholder"}}"></textarea>
-                </div>
-
-                <div class="recurring-options">
-                    <h5>{{t .Lang "admin.recurring_options"}}</h5>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="is-recurring">
-                                {{t .Lang "admin.create_recurring_class"}}
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label for="recurring-weeks">{{t .Lang "admin.recurring_weeks"}}:</label>
-                            <input type="number" id="recurring-weeks" min="1" max="52" value="4" disabled>
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" class="create-class-btn">{{t .Lang "admin.create_class"}}</button>
+                <button type="submit" class="btn-primary">{{t .Lang "admin.create_class"}}</button>
             </form>
         </div>
 
@@ -160,55 +117,106 @@ document.getElementById('class-start-time').addEventListener('change', function(
     }
 });
 
-// Kapasiteten fylgjer rommet. Ho vert synt so snart rommet er valt, so
-// det aldri er eit spursmaal kvar talet kjem fraa.
+// Det avleidde. Kapasitet av rommet, slutttid av lengdi, og konflikt
+// fraa tenaren — alt medan du skriv.
 (function () {
     var rom = document.getElementById('class-location');
-    var ut = document.getElementById('class-capacity');
+    var dato = document.getElementById('class-date');
+    var start = document.getElementById('class-start-time');
+    var lengd = document.getElementById('class-length');
+    var gjentak = document.getElementById('is-recurring');
+    var vekerBolk = document.getElementById('veker-bolk');
+    var ut = document.getElementById('fylgja');
     if (!rom || !ut) return;
-    rom.addEventListener('change', function () {
-        var v = rom.selectedOptions[0] && rom.selectedOptions[0].dataset.plassar;
-        ut.textContent = v ? v + ' plassar' : ut.dataset.tom || '';
+
+    function slutt() {
+        if (!start.value || !lengd.value) return null;
+        var d = start.value.split(':');
+        var m = parseInt(d[0], 10) * 60 + parseInt(d[1], 10) + parseInt(lengd.value, 10);
+        m = ((m % 1440) + 1440) % 1440;
+        return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+    }
+
+    var tidsavbrot = null;
+    async function teikn() {
+        var bitar = [];
+        var val = rom.selectedOptions[0];
+        if (val && val.dataset.plassar) bitar.push(val.dataset.plassar + ' ' + ut.dataset.plassar);
+        var s = slutt();
+        if (s) bitar.push(ut.dataset.sluttar + ' ' + s);
+        ut.textContent = bitar.join(' \u00b7 ');
+        ut.classList.remove('gale');
+
+        if (!(val && val.dataset.rom && dato.value && start.value && s)) return;
+
+        // Konflikten kjem fraa tenaren, av di det er han som veit kva
+        // som alt stend i rommet. Han vert spurd med ei lita venting, so
+        // det ikkje gjeng eit kall per tastetrykk.
+        clearTimeout(tidsavbrot);
+        tidsavbrot = setTimeout(async function () {
+            var q = new URLSearchParams({ room_id: val.dataset.rom, date: dato.value, start: start.value, end: s });
+            try {
+                var svar = await fetch('/api/admin/class/conflict?' + q);
+                if (!svar.ok) return;
+                var d = await svar.json();
+                if (d.conflict) {
+                    ut.textContent = bitar.join(' \u00b7 ') + ' \u00b7 ' + d.message;
+                    ut.classList.add('gale');
+                }
+            } catch (e) { /* konflikten er ei hjelp, ikkje eit vilkor */ }
+        }, 250);
+    }
+
+    [rom, dato, start, lengd].forEach(function (f) {
+        f.addEventListener('input', teikn);
+        f.addEventListener('change', teikn);
     });
+    gjentak.addEventListener('change', function () { vekerBolk.hidden = !gjentak.checked; });
+
+    // Fyrste gongen: i dag, so ein slepp aa opna kalendaren for det
+    // vanlegaste tilfellet.
+    if (!dato.value) dato.value = new Date().toISOString().slice(0, 10);
+    teikn();
 })();
 
 function createClass(event) {
     event.preventDefault();
-    
-    const classData = {
-        title: document.getElementById('class-title').value,
-        class_type: document.getElementById('class-type').value,
-        teacher_name: document.getElementById('class-teacher').value,
-        location: document.getElementById('class-location').value,
-        date: document.getElementById('class-date').value,
-        start_time: document.getElementById('class-start-time').value,
-        end_time: document.getElementById('class-end-time').value,
-        capacity: 0, // 0 = ta kapasiteten fraa rommet
-        
-        description: document.getElementById('class-description').value,
-        is_recurring: document.getElementById('is-recurring').checked,
-        recurring_weeks: document.getElementById('is-recurring').checked ? 
-            parseInt(document.getElementById('recurring-weeks').value) : 1
-    };
-    
+
+    var start = document.getElementById('class-start-time').value;
+    var lengd = parseInt(document.getElementById('class-length').value, 10);
+    var d = start.split(':');
+    var m = parseInt(d[0], 10) * 60 + parseInt(d[1], 10) + lengd;
+    var slutt = String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+
+    var rom = document.getElementById('class-location');
+    var gjentak = document.getElementById('is-recurring').checked;
+
     fetch('/api/admin/class', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(classData)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            title: document.getElementById('class-title').value,
+            class_type: '',
+            teacher_name: document.getElementById('class-teacher').value,
+            location: rom.value,
+            room_id: parseInt(rom.selectedOptions[0].dataset.rom, 10),
+            date: document.getElementById('class-date').value,
+            start_time: start,
+            end_time: slutt,
+            capacity: 0,
+            description: '',
+            is_recurring: gjentak,
+            recurring_weeks: gjentak ? parseInt(document.getElementById('recurring-weeks').value, 10) : 1
+        })
     })
-    .then(response => {
-        if (response.ok) {
-            alert('{{t .Lang "admin.class_created_successfully"}}');
-            location.reload(); // Reload to show new class
-        } else {
-            throw new Error('Failed to create class');
-        }
+    .then(function (svar) {
+        if (!svar.ok) return svar.text().then(function (t) { throw new Error(t); });
+        location.reload();
     })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('{{t .Lang "admin.error_creating_class"}}');
+    .catch(function (feil) {
+        var ut = document.getElementById('fylgja');
+        ut.textContent = feil.message;
+        ut.classList.add('gale');
     });
 }
 

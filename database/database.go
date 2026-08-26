@@ -288,6 +288,29 @@ func Migrate(db *sql.DB) error {
 	return nil
 }
 
+// RoomConflict gjev den fyrste timen som alt ligg i rommet og krossar
+// tidsrommet, eller nil.
+//
+// Tvo tidsrom krossa kvarandre naar den eine byrjar fyre den andre
+// endar og endar etter at den andre byrja. Det er heile prøva; ho vert
+// ofte skrivi som fire tilfelle, og daa gløymer ein eitt av deim.
+func (db *Database) RoomConflict(romID int64, start, slutt time.Time) (*models.Event, error) {
+	var e models.Event
+	err := db.Conn.QueryRow(`
+		SELECT id, title, COALESCE(teacher_name, ''), start_time, end_time
+		FROM events
+		WHERE room_id = ? AND start_time < ? AND end_time > ?
+		ORDER BY start_time LIMIT 1`,
+		romID, slutt, start).Scan(&e.ID, &e.Title, &e.TeacherName, &e.StartTime, &e.EndTime)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &e, nil
+}
+
 // GetRooms gjev romi studioet hev, med kapasiteten deira.
 func (db *Database) GetRooms() ([]models.Room, error) {
 	rows, err := db.Conn.Query(`SELECT id, name, capacity FROM rooms WHERE active ORDER BY capacity DESC`)
@@ -508,7 +531,7 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 }
 
 func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]models.Event, error) {
-	query := "SELECT id, title, description, start_time, end_time, location, class_type, teacher_name, capacity, current_enrolment, color FROM events WHERE 1=1"
+	query := "SELECT id, title, COALESCE(description, ''), start_time, end_time, COALESCE(location, ''), COALESCE(class_type, ''), COALESCE(teacher_name, ''), capacity, current_enrolment, COALESCE(color, '') FROM events WHERE 1=1"
 	var args []interface{}
 
 	if startDate != "" {
@@ -544,8 +567,11 @@ func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]mo
 // CreateEvent creates a new event in the database
 func (db *Database) CreateEvent(event models.Event) (int64, error) {
 	res, err := db.Conn.Exec(
-		"INSERT INTO events (title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-		event.Title, event.Description, event.StartTime, event.EndTime, event.Location, event.Organizer, event.ClassType, event.TeacherName, event.Capacity, event.CurrentEnrolment, event.Color,
+		`INSERT INTO events (title, description, start_time, end_time, location, room_id,
+			organizer, class_type, teacher_name, capacity, current_enrolment, color)
+		 VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?)`,
+		event.Title, event.Description, event.StartTime, event.EndTime, event.Location, event.RoomID,
+		event.Organizer, event.ClassType, event.TeacherName, event.Capacity, event.CurrentEnrolment, event.Color,
 	)
 	if err != nil {
 		return 0, err
@@ -564,7 +590,7 @@ func (db *Database) UpdateEventTime(eventID int64, startTime, endTime string) er
 
 // GetAllEvents fetches all events from the database
 func (db *Database) GetAllEvents() ([]models.Event, error) {
-	rows, err := db.Conn.Query("SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color FROM events")
+	rows, err := db.Conn.Query("SELECT id, title, COALESCE(description, ''), start_time, end_time, COALESCE(location, ''), COALESCE(organizer, ''), COALESCE(class_type, ''), COALESCE(teacher_name, ''), capacity, current_enrolment, COALESCE(color, '') FROM events")
 	if err != nil {
 		return nil, err
 	}
@@ -584,7 +610,7 @@ func (db *Database) GetAllEvents() ([]models.Event, error) {
 // GetTodaysEvents fetches events for today
 func (db *Database) GetTodaysEvents() ([]models.Event, error) {
 	query := `
-		SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color 
+		SELECT id, title, COALESCE(description, ''), start_time, end_time, COALESCE(location, ''), COALESCE(organizer, ''), COALESCE(class_type, ''), COALESCE(teacher_name, ''), capacity, current_enrolment, COALESCE(color, '') 
 		FROM events 
 		WHERE DATE(start_time) = DATE('now', 'localtime')
 		ORDER BY start_time ASC
@@ -609,7 +635,7 @@ func (db *Database) GetTodaysEvents() ([]models.Event, error) {
 // GetThisWeeksEvents fetches events for the current week
 func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 	query := `
-		SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color 
+		SELECT id, title, COALESCE(description, ''), start_time, end_time, COALESCE(location, ''), COALESCE(organizer, ''), COALESCE(class_type, ''), COALESCE(teacher_name, ''), capacity, current_enrolment, COALESCE(color, '') 
 		FROM events 
 		WHERE DATE(start_time) >= DATE('now', 'weekday 0', '-6 days', 'localtime') 
 		AND DATE(start_time) <= DATE('now', 'weekday 0', 'localtime')

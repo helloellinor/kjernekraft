@@ -33,6 +33,7 @@ type Framsyning struct {
 	ErUmme  bool
 	Full    bool
 	Prosent int
+	Kolonne int // 1 = maandag … 7 = sundag
 }
 
 // Timebolk er ein time med alle dagarne han gjeng i vika.
@@ -45,7 +46,23 @@ type Timebolk struct {
 	Minutt     int
 	Plassar    int
 	Framsyning []Framsyning
-	sortering  int // minutt etter midnatt, til rekkjefylgdi
+	Rutor      [7]Ruta // alle sju dagarne, tome med
+	sortering  int     // minutt etter midnatt, til rekkjefylgdi
+}
+
+// Ruta er ein dag i rada — anten ein time som gjeng, eller eit tomt hol.
+//
+// Dei tome er med av ein grunn: ei rad med *sju* rutor der tvo er fylte
+// syner kva som ikkje gjeng, ikkje berre kva som gjeng. Det er
+// spursmaalet Ida stiller — kvar er holet — og det svaret finst ikkje
+// naar dei tome dagarne er tome piksel.
+type Ruta struct {
+	Har        bool
+	Framsyning Framsyning
+	Dato       time.Time
+	Kolonne    int
+	ErIDag     bool
+	ErUmme     bool
 }
 
 // dagKort er dei norske stuttformene. time.Weekday.String() gjev
@@ -56,12 +73,41 @@ var dagKort = map[time.Weekday]string{
 	time.Sunday: "sun",
 }
 
+// rutor legg framsyningarne ut paa dei sju dagarne, og fyller resten
+// med tome.
+func rutor(b Timebolk, maandag time.Time) [7]Ruta {
+	var ut [7]Ruta
+	for i := 0; i < 7; i++ {
+		d := maandag.AddDate(0, 0, i)
+		ut[i] = Ruta{Dato: d, Kolonne: i + 1}
+	}
+	for _, f := range b.Framsyning {
+		i := f.Kolonne - 1
+		if i >= 0 && i < 7 {
+			ut[i].Har = true
+			ut[i].Framsyning = f
+			ut[i].ErIDag = f.ErIDag
+			ut[i].ErUmme = f.ErUmme
+		}
+	}
+	return ut
+}
+
+// kolonne gjev vekedagen som 1–7 med maandag fyrst. Go sin Weekday
+// byrjar paa sundag; ei norsk vika gjer ikkje det.
+func kolonne(d time.Weekday) int {
+	if d == time.Sunday {
+		return 7
+	}
+	return int(d)
+}
+
 // KlemVika slær saman like timar i vika.
 //
 // Nykelen er alt som gjer ein time til *den same* timen: kva han heiter,
 // kven som held honom, kvar han er, og kva klokkeslett han byrjar.
 // Skifter noko av det, er det ein annan time.
-func KlemVika(events []models.Event, iDag time.Time) []Timebolk {
+func KlemVika(events []models.Event, iDag time.Time, maandag time.Time) []Timebolk {
 	iDagDato := iDag.Format("2006-01-02")
 	naa := iDag
 
@@ -98,6 +144,7 @@ func KlemVika(events []models.Event, iDag time.Time) []Timebolk {
 			ErUmme:  e.EndTime.Before(naa),
 			Full:    e.Full(),
 			Prosent: prosent,
+			Kolonne: kolonne(e.StartTime.Weekday()),
 		})
 	}
 
@@ -106,6 +153,7 @@ func KlemVika(events []models.Event, iDag time.Time) []Timebolk {
 		sort.Slice(b.Framsyning, func(i, j int) bool {
 			return b.Framsyning[i].Dato.Before(b.Framsyning[j].Dato)
 		})
+		b.Rutor = rutor(*b, maandag)
 		ut = append(ut, *b)
 	}
 

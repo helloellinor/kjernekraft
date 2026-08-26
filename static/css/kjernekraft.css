@@ -715,12 +715,42 @@ tbody tr:hover td { background: var(--ark-djup); }
   border: 1px solid var(--haarlina);
   background: var(--flate);
 }
-.timerad {
+/* Rada og hovudet deler den same trappa, so merki stend i spaltone
+   sine og dagarne kann lesast nedyver. */
+/* Lista rullar i seg sjølv, so dagnamni stend att medan timane gjeng
+   forbi. Utan det er hovudet burte etter tri rader, og daa lyt ein
+   telja spaltor for aa finna ut kva dag ein ser paa.
+   
+   `max-height` og ikkje `height`: er vika stutt, kjem det ingi rulling
+   i det heile. Ei rullesteng som stend der utan aa ha noko aa rulla er
+   berre eit merke um at nokon ikkje maalte. */
+.timeplan {
+  --timetrapp: 5rem minmax(7rem, 1fr) repeat(7, minmax(0, 3.4rem));
+  max-height: min(70vh, 48rem);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  /* Ho tek plass av seg sjølv i staden for aa leggja seg yver siste
+     spalta, og daa skuvar ho ikkje rutenetet naar ho kjem og gjeng. */
+  scrollbar-gutter: stable;
+}
+
+.timehovud, .timerad {
   display: grid;
-  grid-template-columns: 5.5rem minmax(9rem, 1fr) auto;
-  gap: var(--rom-4);
+  grid-template-columns: var(--timetrapp);
+  gap: var(--rom-3);
   align-items: center;
   padding: var(--rom-3) var(--rom-4);
+}
+.timehovud {
+  position: sticky; top: 0; z-index: 3;
+  padding-bottom: var(--rom-2);
+  border-bottom: 1px solid var(--kant);
+  background: var(--flate);
+}
+.timehovud .dagnamn { text-align: center; }
+.timehovud-tom { grid-column: 1 / 3; }
+
+.timerad {
   border-bottom: 1px solid var(--haarlina);
 }
 .timerad:last-child { border-bottom: 0; }
@@ -741,11 +771,17 @@ tbody tr:hover td { background: var(--ark-djup); }
    Kvar dag timen gjeng er eit merke, og merket ber si eigi fylling. Ei
    rad med tvo merke segjer «denne gjeng tvo gonger, og torsdagen er
    fullare enn tysdagen» utan eit einaste ord. */
-.timedagar { display: flex; gap: var(--rom-2); flex-wrap: wrap; justify-content: flex-end; }
+/* Merki ligg i sju spaltor som fylgjer hovudet. Ein dag utan time er
+   ei tom rute — det er den tomme ruta som gjer at ein ser holet. */
+.timedagar { display: contents; }
 
 .dagmerke {
+  /* Malen skriv dagen som 1–7 med maandag fyrst; her ligg vitskapen um
+     at tvo spaltor gjeng fyre — klokka og namnet. Domenetalet skal ikkje
+     vita noko um utlegget. */
+  grid-column: calc(var(--dag) + 2);
   display: flex; flex-direction: column; align-items: stretch; gap: 3px;
-  min-width: 3.6rem; padding: var(--rom-2) var(--rom-2) var(--rom-1);
+  padding: var(--rom-2) var(--rom-1) var(--rom-1);
   border: 1px solid var(--haarlina); border-radius: 2px;
   background: var(--flate); cursor: pointer;
   font-family: var(--skrift-tal); text-transform: none; letter-spacing: 0;
@@ -771,12 +807,53 @@ tbody tr:hover td { background: var(--ark-djup); }
 .dagtal .av { color: var(--blekk-svakt); }
 
 .dagmerke.full .dagfyll { background: var(--klas); }
+
+/* Den daude ruta. Ho hev same høgd og breidd som ei levande, so rada
+   stend paa lina, og ho er berre eit hint av ei lina — nok til aa syna
+   at plassen finst og er tom, ikkje nok til aa dra auga. */
+.dagmerke.daud {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--haarlina) 55%, transparent);
+  background: none;
+  min-height: 2.55rem;
+  cursor: default;
+}
+.dagmerke.daud.idag { border-color: color-mix(in srgb, var(--klas) 30%, transparent); }
+
+/* I dag som eit band nedyver heile lista. Kvar rad hev alle sju rutone
+   — ogso dei daude — so bandet gjeng ubrote fraa topp til botn, og det
+   er den samanhengande stripa som gjer at auga finn spalta att etter aa
+   ha lese ei lang rad. */
+.dagmerke.idag { background: color-mix(in srgb, var(--klas) 7%, transparent); }
+.dagmerke.daud.idag { background: color-mix(in srgb, var(--klas) 5%, transparent); }
+.timehovud .dagnamn.idag { color: var(--klas); }
+.dagmerke.daud.umme { border-color: color-mix(in srgb, var(--haarlina) 28%, transparent); }
 .dagmerke.umme { opacity: .42; cursor: default; }
 .dagmerke:disabled { cursor: default; }
 
-@media (max-width: 52rem) {
-  .timerad { grid-template-columns: 4.5rem minmax(0, 1fr); }
-  .timedagar { grid-column: 1 / -1; justify-content: flex-start; }
+/* Berre for skjermlesaren. Dagen stend i hovudet for auga; merket
+   treng honom likevel, av di ein som høyrer sida ikkje ser spalta. */
+.berre-lesar {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* Under dette er sju spaltor for smalt til aa bera eit tal. Daa fell
+   rutenetet saman, merki flyt etter kvarandre, og dagen kjem attende i
+   merket sjølv — han kann ikkje lenger lesast av plasseringi. */
+@media (max-width: 60rem) {
+  .timeplan { --timetrapp: 4.5rem minmax(0, 1fr); }
+  .timehovud { display: none; }
+  .timedagar {
+    display: flex; flex-wrap: wrap; gap: var(--rom-2);
+    grid-column: 1 / -1;
+  }
+  .dagmerke { grid-column: auto; min-width: 3.6rem; padding-left: var(--rom-2); padding-right: var(--rom-2); }
+  .berre-lesar {
+    position: static; width: auto; height: auto; margin: 0;
+    overflow: visible; clip-path: none;
+  }
 }
 
 /* ===================================================================
@@ -1309,3 +1386,49 @@ tbody tr:hover td { background: var(--ark-djup); }
 .event-card.full { border-left: 2px solid var(--klas); }
 
 @media (prefers-reduced-motion: reduce) { .plass.teken::after { display: none; } }
+
+/* ===================================================================
+   setningsskjemaet
+   Timen skriven som ei setning i staden for tolv felt under kvarandre.
+   Rekkjefylgdi er arbeidet — kva, kven, kvar, naar, kor lenge — og
+   ikkje rekkjefylgdi paa spaltone i tabellen.
+
+   Felti veks etter innhaldet (`field-sizing`), so linja les seg som ei
+   linja og ikkje som eit skjema med hol i. Der nettlesaren ikkje kann
+   det, stend dei paa ei rimeleg fast breidd; setningi held.
+   =================================================================== */
+.setningsskjema { display: flex; flex-direction: column; gap: var(--rom-4); align-items: start; }
+
+.setning {
+  font-size: 1.15rem; line-height: 2.4; max-width: 54ch;
+  margin: 0; color: var(--blekk-lys);
+}
+
+.setning .felt {
+  width: auto; min-width: 4.5rem; max-width: 16rem;
+  field-sizing: content;
+  padding: .1rem .4rem;
+  background: none;
+  border: 0; border-bottom: 2px solid var(--klas);
+  border-radius: 0;
+  color: var(--blekk); font-weight: 500; font-size: 1rem;
+}
+.setning .felt:focus {
+  outline: none; box-shadow: none;
+  border-bottom-color: var(--merke-lys);
+  background: var(--merke-svak);
+}
+.setning .felt::placeholder { color: var(--blekk-svakt); font-weight: 400; }
+.setning .felt-tal { min-width: 3.2rem; text-align: center; font-family: var(--skrift-tal); }
+.setning select.felt { padding-right: var(--rom-5); background-position: right .4rem top 50%; }
+
+.setning .innelabel { color: var(--blekk-lys); font-size: 1rem; }
+.setning input[type="checkbox"] { accent-color: var(--klas); width: 1rem; height: 1rem; }
+
+/* Det systemet reknar ut. Det stend under setningi og ikkje inni
+   henne: du skreiv det ikkje, og du kann ikkje endra det. */
+.fylgja {
+  font-family: var(--skrift-tal); font-size: .88rem;
+  color: var(--blekk-svakt); margin: 0; min-height: 1.4em;
+}
+.fylgja.gale { color: var(--aatvaring); }

@@ -124,6 +124,16 @@ func getTemplateFuncs() template.FuncMap {
 		// Go sitt Format gjev engelske dag- og maanadsnamn, og det finst
 		// ingen maate aa be honom um noko anna. Difor stend namni her.
 		// «Thursday 27. August» stod i dokka paa ei norsk sida.
+		// Dagen som tri bokstavar til rutenetshovudet, og datoen som
+		// streng so malen kann samanlikna med «i dag».
+		"dagKort3": func(namn string) string {
+			r := []rune(namn)
+			if len(r) > 3 {
+				r = r[:3]
+			}
+			return string(r)
+		},
+		"dagStreng": func(t time.Time) string { return t.Format("2006-01-02") },
 		"norskDag": func(t time.Time) string {
 			return norskeDagar[t.Weekday()]
 		},
