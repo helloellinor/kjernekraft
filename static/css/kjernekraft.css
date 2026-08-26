@@ -725,7 +725,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    i det heile. Ei rullesteng som stend der utan aa ha noko aa rulla er
    berre eit merke um at nokon ikkje maalte. */
 .timeplan {
-  --timetrapp: 5rem minmax(7rem, 1fr) repeat(7, minmax(0, 3.4rem));
+  --timetrapp: 3.6rem minmax(7rem, 1fr) repeat(7, minmax(0, 3.5rem));
   max-height: min(70vh, 48rem);
   overflow-y: auto;
   overscroll-behavior-y: contain;
@@ -756,9 +756,10 @@ tbody tr:hover td { background: var(--ark-djup); }
 .timerad:last-child { border-bottom: 0; }
 .timerad:hover { background: var(--ark-djup); }
 
+/* Rada ber ikkje eitt klokkeslett lenger — merki ber kvar sitt. Att
+   stend lengdi, som er den same kva dag han gjeng. */
 .timeklokke { display: flex; flex-direction: column; }
-.timeklokke b { font-family: var(--skrift-tal); font-size: 1.05rem; font-weight: 400; }
-.timeklokke .lengd { font-family: var(--skrift-tal); font-size: .74rem; color: var(--blekk-svakt); }
+.timeklokke .lengd { font-family: var(--skrift-tal); font-size: .78rem; color: var(--blekk-svakt); }
 
 .timetittel {
   font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
@@ -768,68 +769,113 @@ tbody tr:hover td { background: var(--ark-djup); }
 .timerom { color: var(--blekk); font-weight: 500; }
 
 /* ---- dagmerket ----
-   Kvar dag timen gjeng er eit merke, og merket ber si eigi fylling. Ei
-   rad med tvo merke segjer «denne gjeng tvo gonger, og torsdagen er
-   fullare enn tysdagen» utan eit einaste ord. */
-/* Merki ligg i sju spaltor som fylgjer hovudet. Ein dag utan time er
-   ei tom rute — det er den tomme ruta som gjer at ein ser holet. */
+   Merket er ståande og ikkje liggjande, med same lodrette drag som
+   skrifti det stend attmed: høgre enn det er breidt. Eit kvadratisk
+   merke les seg som ein knapp; eit ståande les seg som eit kort.
+
+   Tri ting bur i det, kvar paa sin plass:
+     upp til vinstre   urskiva og klokkeslettet
+     nede til høgre    kor mange plassar som er tekne
+     nedste kanten     fyllingi, som *er* kanten
+
+   Fyllingi er ikkje ein strek inni merket lenger. Ho er botnlina, so
+   ho ligg der auga alt fylgjer naar det gjeng fraa merke til merke, og
+   ho tek ikkje plass fraa innhaldet. */
 .timedagar { display: contents; }
 
 .dagmerke {
-  /* Malen skriv dagen som 1–7 med maandag fyrst; her ligg vitskapen um
-     at tvo spaltor gjeng fyre — klokka og namnet. Domenetalet skal ikkje
-     vita noko um utlegget. */
   grid-column: calc(var(--dag) + 2);
-  display: flex; flex-direction: column; align-items: stretch; gap: 3px;
-  padding: var(--rom-2) var(--rom-1) var(--rom-1);
-  border: 1px solid var(--haarlina); border-radius: 2px;
-  background: var(--flate); cursor: pointer;
-  font-family: var(--skrift-tal); text-transform: none; letter-spacing: 0;
+  position: relative;
+  display: flex; flex-direction: column; align-items: flex-start;
+  /* Ståande, ikkje liggjande: kring tri fjerdedelar so breidt som det
+     er høgt, same draget som den kondenserte skrifti det stend attmed.
+     Eit kvadratisk merke les seg som ein knapp; eit ståande les seg som
+     eit kort. */
+  min-height: 4.7rem;
+  padding: var(--rom-2) var(--rom-1) var(--rom-3) var(--rom-2);
+  border: 1px solid var(--haarlina);
+  border-bottom: 0;
+  border-radius: 2px 2px 0 0;
+  background-color: var(--flate);
+  /* Botnlina er tvo band: det fylte og det tome. Ein ekte border kann
+     ikkje vera halvt farga, so ho er teikna som eit bilete i botnen. */
+  background-image: linear-gradient(to right,
+    var(--klas) 0 var(--fyll, 0%),
+    var(--haarlina) var(--fyll, 0%) 100%);
+  background-size: 100% 3px;
+  background-position: bottom left;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  text-transform: none; letter-spacing: 0;
+  font-family: var(--skrift-tal);
 }
-.dagmerke:hover:not(:disabled) { border-color: var(--klas); background: var(--flate); color: inherit; }
+.dagmerke:hover:not(:disabled) { border-color: var(--klas); color: inherit; background-color: var(--flate); }
 .dagmerke[aria-pressed="true"] { border-color: var(--klas); box-shadow: inset 0 0 0 1px var(--klas); }
 
-.dagnamn {
-  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
-  font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--blekk-lys);
+/* ---- urskiva ----
+   Ho er eit teikn for eit klokkeslett, ikkje eit ur ein skal lesa av
+   paa minuttet — difor stend tali attmed. Men forma segjer «morgon»
+   eller «ettermiddag» fyre du hev lese eit einaste siffer, og det er
+   det ein skannar etter. */
+/* Urskiva yver tali, ikkje attmed. Attmed vart merket breidt og
+   liggjande; yver held det seg smalt og ståande. */
+.klokketid { display: flex; flex-direction: column; align-items: flex-start; gap: .15rem; }
+
+.urskiva {
+  position: relative; flex: none;
+  width: .92rem; height: .92rem;
+  border: 1px solid var(--blekk-svakt);
+  border-radius: 50%;
 }
-.dagmerke.idag .dagnamn { color: var(--klas); }
-
-/* Fyllingi som ei einaste stripa — her tel ein ikkje plassar, ein ser
-   proporsjonen. Rutone per plass stend i dokka, der det er rom til deim. */
-.dagfyll {
-  height: 4px; border-radius: 1px;
-  background: linear-gradient(to right,
-    var(--klas) 0 var(--fyll, 0%), var(--ark-djup) var(--fyll, 0%) 100%);
+.urskiva::before, .urskiva::after {
+  content: ""; position: absolute;
+  left: 50%; bottom: 50%;
+  width: 1px; background: var(--blekk-lys);
+  transform-origin: 50% 100%;
 }
-.dagtal { font-size: .72rem; color: var(--blekk); }
-.dagtal .av { color: var(--blekk-svakt); }
+/* Timevisaren er stutt og tjukk, minuttvisaren lang og tunn — elles
+   kann ein ikkje sjaa kva for ein som er kva. */
+.urskiva::before { height: 26%; transform: translateX(-50%) rotate(var(--time, 0deg)); }
+.urskiva::after  { height: 40%; transform: translateX(-50%) rotate(var(--minutt, 0deg)); }
 
-.dagmerke.full .dagfyll { background: var(--klas); }
+.klokketal { font-size: .66rem; color: var(--blekk-lys); letter-spacing: -.02em; }
 
-/* Den daude ruta. Ho hev same høgd og breidd som ei levande, so rada
-   stend paa lina, og ho er berre eit hint av ei lina — nok til aa syna
-   at plassen finst og er tom, ikkje nok til aa dra auga. */
-.dagmerke.daud {
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--haarlina) 55%, transparent);
-  background: none;
-  min-height: 2.55rem;
-  cursor: default;
+/* ---- merkelappen med talet ----
+   Nede til høgre, der auga endar naar det hev lese merket. */
+.dagtal {
+  position: absolute; right: var(--rom-1); bottom: var(--rom-2);
+  font-size: .72rem; color: var(--blekk);
+  background: var(--flate);
+  padding-left: .2rem;
 }
-.dagmerke.daud.idag { border-color: color-mix(in srgb, var(--klas) 30%, transparent); }
+.dagtal .av { color: var(--blekk-svakt); font-size: .92em; }
 
-/* I dag som eit band nedyver heile lista. Kvar rad hev alle sju rutone
-   — ogso dei daude — so bandet gjeng ubrote fraa topp til botn, og det
-   er den samanhengande stripa som gjer at auga finn spalta att etter aa
-   ha lese ei lang rad. */
-.dagmerke.idag { background: color-mix(in srgb, var(--klas) 7%, transparent); }
-.dagmerke.daud.idag { background: color-mix(in srgb, var(--klas) 5%, transparent); }
-.timehovud .dagnamn.idag { color: var(--klas); }
-.dagmerke.daud.umme { border-color: color-mix(in srgb, var(--haarlina) 28%, transparent); }
+.dagmerke.idag .urskiva { border-color: var(--klas); }
+.dagmerke.idag .urskiva::before, .dagmerke.idag .urskiva::after { background: var(--klas); }
+.dagmerke.full { background-image: linear-gradient(to right, var(--klas) 0 100%); }
 .dagmerke.umme { opacity: .42; cursor: default; }
 .dagmerke:disabled { cursor: default; }
+
+/* Den daude ruta hev same maal som ei levande, so rada stend paa lina.
+   Ho er berre eit hint av ei lina — nok til aa syna at plassen finst og
+   er tom, ikkje nok til aa dra auga. */
+.dagmerke.daud {
+  border-style: dashed;
+  border-bottom: 1px dashed color-mix(in srgb, var(--haarlina) 45%, transparent);
+  border-color: color-mix(in srgb, var(--haarlina) 45%, transparent);
+  border-radius: 2px;
+  background-image: none;
+  background-color: transparent;
+  cursor: default;
+}
+.dagmerke.daud.idag { border-color: color-mix(in srgb, var(--klas) 28%, transparent); }
+
+/* I dag som eit band nedyver heile lista. Kvar rad hev alle sju rutone
+   — ogso dei daude — so bandet gjeng ubrote fraa topp til botn. */
+.dagmerke.idag { background-color: color-mix(in srgb, var(--klas) 7%, transparent); }
+.dagmerke.daud.idag { background-color: color-mix(in srgb, var(--klas) 5%, transparent); }
+.dagmerke.idag .dagtal { background: none; }
+.timehovud .dagnamn.idag { color: var(--klas); }
 
 /* Berre for skjermlesaren. Dagen stend i hovudet for auga; merket
    treng honom likevel, av di ein som høyrer sida ikkje ser spalta. */
