@@ -693,23 +693,63 @@ tbody tr:hover td { background: var(--ark-djup); }
    Fyrr stod det ei bolkeyverskrift, tvo merkelappa felt og ei
    vikerekkja imillom — kring 150 pikslar fyre fyrste timen. */
 .timehovudlinje {
+  position: relative;
   display: flex; align-items: baseline; justify-content: space-between;
   gap: var(--rom-4) var(--rom-5); flex-wrap: wrap;
   margin-bottom: var(--rom-4);
 }
 .timehovudlinje .page-title { margin-bottom: 0; }
 
-/* Vika er ein presisering av tittelen, ikkje ein ny tittel. */
-.veketittel {
-  font-stretch: var(--vidd-yver); font-weight: 400;
-  font-size: .52em; color: var(--blekk-lys);
-  letter-spacing: .01em; white-space: nowrap;
+/* ---- vikeveljaren ----
+   Vika i tittelen *er* kontrollen. Ho stod som tri element i ei eiga
+   eska under tittelen og sa det same ein gong til. No flankerer pilene
+   henne, og eit klikk paa henne opnar dei sju næraste vikone.
+
+   Pilene endrar ingi breidd naar dei vert avslegne, og korgi ligg
+   absolutt — so tittelen stend still same kva ein gjer med han. */
+.vekeveljar {
+  display: inline-flex; align-items: baseline; gap: .1em;
+  margin-left: .45em; vertical-align: baseline;
 }
 
-.week-controls {
-  display: flex; gap: var(--rom-3); align-items: center; flex-wrap: wrap;
-  margin-bottom: 0;
+.veketittel, .vekepil {
+  font-family: inherit; font-stretch: var(--vidd-yver); font-weight: 400;
+  font-size: .52em; letter-spacing: .01em;
+  color: var(--blekk-lys); background: none; border: 0;
+  padding: 0 .12em; text-transform: none; line-height: 1.1;
+  cursor: pointer; white-space: nowrap;
 }
+.veketittel { border-bottom: 2px solid var(--haarlina); }
+.veketittel:hover, .vekepil:hover:not(:disabled) { color: var(--blekk); background: none; border-color: var(--klas); }
+.veketittel[aria-expanded="true"] { color: var(--blekk); border-color: var(--klas); }
+.vekepil { color: var(--blekk-svakt); }
+.vekepil:disabled { opacity: .3; cursor: default; }
+
+/* Korgi flyt. Laag ho i flyten, skuva ho heile timeplanen ein tomme
+   ned kvar gong nokon opna henne — og det er nettupp det ein ikkje skal
+   gjera med noko ein opnar for aa *sjaa* paa noko anna.
+   Ho flyt verkeleg, og difor er ho ein av dei faa tingi som fær skugge. */
+.vekekorg {
+  position: absolute; z-index: 20;
+  display: flex; flex-wrap: wrap; gap: var(--rom-1);
+  margin-top: var(--rom-1);
+  padding: var(--rom-2);
+  border: 1px solid var(--kant); background: var(--flate);
+  border-radius: 2px;
+  box-shadow: var(--skugge-flytande);
+  max-width: min(30rem, calc(100vw - 2rem));
+}
+.vekeval {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .8rem; letter-spacing: .06em; text-transform: uppercase;
+  padding: var(--rom-2) var(--rom-3);
+  color: var(--blekk-lys); text-decoration: none;
+  border: 1px solid transparent; border-radius: 2px;
+}
+.vekeval:hover { color: var(--blekk); border-color: var(--haarlina); }
+.vekeval.no { color: var(--klas); border-color: var(--klas); }
+
+.week-controls { display: flex; gap: var(--rom-3); align-items: center; flex-wrap: wrap; margin-bottom: 0; }
 .filters, .charges-filter { display: flex; gap: var(--rom-2); flex-wrap: wrap; align-items: center; }
 .filters select { width: auto; min-width: 9rem; font-size: .9rem; padding: var(--rom-2) var(--rom-6) var(--rom-2) var(--rom-3); }
 .filter-group { display: flex; flex-direction: column; gap: var(--rom-2); }

@@ -1,14 +1,47 @@
 {{define "content"}}
 <div class="sida">
-    {{/* Tittelen namngjev vika, so bolkeyverskrifti «Denne uka» er
-         burte — ho sa det same ein gong til, ein halv skjerm lenger
-         nede. Styringi ligg paa same lina, og so kjem lista. Mellom
-         yverskrifti og fyrste timen er det no ei lina, ikkje eit kort
-         med si eigi ramma og si eigi luft. */}}
+    {{/* Vikeveljaren *er* tittelen. Han stod som tri kontrollar i ei
+         eiga eska under — ein pil, eit talfelt, ein pil til — og sa det
+         same som tittelen alt sa. No er vika i tittelen det ein klikkar
+         paa, og pilene flankerer henne. */}}
     <header class="timehovudlinje">
-        <h1 class="page-title">{{t .Lang "timeplan.title"}} <span class="veketittel">{{.WeekTitle}}</span></h1>
-        {{template "week_controls" .}}
+        <h1 class="page-title">
+            {{t .Lang "timeplan.title"}}<span class="vekeveljar">
+                <button type="button" class="vekepil" onclick="navigateWeek(-1)"
+                        {{if not .CanGoBack}}disabled{{end}}
+                        aria-label="{{t .Lang "timeplan.prev_week"}}">&lsaquo;</button><button
+                        type="button" class="veketittel" id="veke-knapp"
+                        aria-expanded="false" aria-controls="vekekorg">{{.WeekTitle}}</button><button
+                        type="button" class="vekepil" onclick="navigateWeek(1)"
+                        aria-label="{{t .Lang "timeplan.next_week_btn"}}">&rsaquo;</button>
+            </span>
+        </h1>
+
+        <div class="filters">
+            <select id="teacher-filter" onchange="applyFilters()" aria-label="{{t .Lang "timeplan.teacher_filter"}}">
+                <option value="">{{t .Lang "timeplan.all_teachers"}}</option>
+                {{range .Teachers}}
+                <option value="{{.}}" {{if eq . $.SelectedTeacher}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+            <select id="class-filter" onchange="applyFilters()" aria-label="{{t .Lang "timeplan.class_filter"}}">
+                <option value="">{{t .Lang "timeplan.all_classes"}}</option>
+                {{range .ClassTypes}}
+                <option value="{{.}}" {{if eq . $.SelectedClass}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
     </header>
+
+    {{/* Korgi med vikone. Ho stend lukka til nokon spør etter henne, og
+         ho hev ingi rulling: sju vikor er nok til aa planleggja med, og
+         pilene tek deg lenger. */}}
+    <div class="vekekorg" id="vekekorg" hidden role="listbox" aria-label="{{t .Lang "timeplan.week"}}">
+        {{range .Vekeval}}
+        <a href="?week={{.Offset}}" class="vekeval{{if .ErNo}} no{{end}}"
+           role="option" aria-selected="{{.ErNo}}">{{.Tittel}}</a>
+        {{end}}
+    </div>
 
     {{template "week_grid" .}}
 </div>

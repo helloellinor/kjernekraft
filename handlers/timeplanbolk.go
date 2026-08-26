@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"time"
 
 	"kjernekraft/models"
@@ -206,5 +207,41 @@ func KlemVika(lang string, events []models.Event, iDag time.Time, maandag time.T
 		}
 		return ut[i].Tittel < ut[j].Tittel
 	})
+	return ut
+}
+
+// Veke er eitt val i vikeveljaren.
+type Veke struct {
+	Nummer int
+	Offset int
+	Tittel string
+	ErNo   bool
+}
+
+// vekeval gjev vikone kring den ein ser paa.
+//
+// Ein veljar med sju vikor og ikkje eit talfelt: ein veit kva veke det
+// er i dag og kva veke ein vil til, men ein reknar ikkje ut vikenummer
+// i hovudet. «Denne» og «neste» er dei tvo ein spør etter i praksis;
+// resten er der for den som planlegg lenger fram.
+func vekeval(lang string, naaVeke, naaOffset int) []Veke {
+	var ut []Veke
+	for d := -1; d <= 5; d++ {
+		off := naaOffset + d
+		if off < 0 {
+			// Studioet syner ikkje vikor som er gjengne.
+			continue
+		}
+		v := Veke{Nummer: naaVeke + d, Offset: off, ErNo: d == 0}
+		switch off {
+		case 0:
+			v.Tittel = t(lang, "timeplan.this_week")
+		case 1:
+			v.Tittel = t(lang, "timeplan.next_week")
+		default:
+			v.Tittel = t(lang, "timeplan.week") + " " + strconv.Itoa(v.Nummer)
+		}
+		ut = append(ut, v)
+	}
 	return ut
 }
