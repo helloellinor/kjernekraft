@@ -237,7 +237,12 @@
       "error_prefix": "Feil: "
     },
     "actions": "Handlingar",
-    "price_in_kroner": "Pris i kronor"
+    "price_in_kroner": "Pris i kronor",
+    "tab_overview": "Oversyn",
+    "tab_schedule": "Timeplan",
+    "tab_prices": "Prisar",
+    "tab_people": "Folk",
+    "tab_settings": "Innstillingar"
   },
   "terms": {
     "title": "Handelsvilkår"

@@ -77,15 +77,38 @@
   --haarlina:   #cfd2cb;
   --kant:       #bec2b9;
 
-  /* merket. Éin farge paa heile arket. */
-  --merke:      #2c5443;
-  --merke-lys:  #3c6f59;
-  --merke-svak: #dde5e0;
+  /* ---- fargane ----
+     Dei er tekne av tingi som ligg i salen: den rosa Togu-ballen, den
+     turkise sprayflaska, den lilla Tune Up-ballen. Det er ikkje pynt —
+     det er dei tri tingi studioet sel, og kvar farge er eitt av deim:
+
+       turkis  medlemskapet   — det som gjeng og gjeng
+       rosa    klippekortet   — det som vert talt
+       lilla   kurs, PT og rettleiding — det som hender ein gong
+
+     Fargen segjer *kva*. Forma segjer *korleis*: fylt, open, streka,
+     prikka. Dei tvo ligg paa kvar sin kanal og kolliderer difor ikkje.
+
+     Merket er turkisen: han er den rolegaste av dei tri og toler aa
+     staa paa knappar og lenkjor heile dagen. */
+  --togu:       #d6006e;
+  --klas:       #00908c;
+  --tuneup:     #6d2e9e;
+
+  --merke:      var(--klas);
+  --merke-lys:  #00a8a2;
+  --merke-svak: color-mix(in srgb, var(--klas) 12%, var(--ark));
+  --togu-svak:   color-mix(in srgb, var(--togu) 12%, var(--ark));
+  --tuneup-svak: color-mix(in srgb, var(--tuneup) 12%, var(--ark));
 
   /* Aatvaringi er ikkje merket. Ho stend berre paa noko som gjekk gale
      eller ikkje kann gjerast um att, og difor lyt ho vera ein annan
      farge — elles tyder merket tvo ting. */
   --aatvaring:  #8c3a2b;
+
+  /* Flata i ei lukka fana. Han er rekna av blekket og arket, so han
+     fylgjer temaet av seg sjølv og skal ikkje skrivast um att. */
+  --faneflate: color-mix(in srgb, var(--blekk) 6%, var(--ark));
   --aatvaring-svak: #f0e0dc;
 
   /* skriftene */
@@ -122,9 +145,14 @@
     --blekk-svakt:#6f756a;
     --haarlina:   #32362f;
     --kant:       #3d423a;
-    --merke:      #7fb094;
-    --merke-lys:  #9cc5ac;
-    --merke-svak: #1f2a24;
+    --togu:       #ff5fa8;
+    --klas:       #2fd6c6;
+    --tuneup:     #b085f5;
+    --merke:      var(--klas);
+    --merke-lys:  #6ae4d8;
+    --merke-svak: color-mix(in srgb, var(--klas) 18%, var(--ark));
+    --togu-svak:   color-mix(in srgb, var(--togu) 18%, var(--ark));
+    --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
     --aatvaring:  #d08574;
     --aatvaring-svak: #2b1c18;
     --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
@@ -139,9 +167,14 @@
   --blekk-svakt:#6f756a;
   --haarlina:   #32362f;
   --kant:       #3d423a;
-  --merke:      #7fb094;
-  --merke-lys:  #9cc5ac;
-  --merke-svak: #1f2a24;
+  --togu:     #ff5fa8;
+  --klas:     #2fd6c6;
+  --tuneup:   #b085f5;
+  --merke:    var(--klas);
+  --merke-lys:  #6ae4d8;
+  --merke-svak: color-mix(in srgb, var(--klas) 18%, var(--ark));
+  --togu-svak:   color-mix(in srgb, var(--togu) 18%, var(--ark));
+  --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
   --aatvaring:  #d08574;
   --aatvaring-svak: #2b1c18;
   --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
@@ -149,6 +182,18 @@
 
 /* ---- grunnen ---- */
 *, *::before, *::after { box-sizing: border-box; }
+
+/* Tekst skal halda seg innanfor det ho stend i. Eit langt ord — og
+   norsk lagar deim heile tidi, «medlemskapsadministrasjon» — skal
+   brjota, ikkje skuva spalta ut or glaset.
+   `min-width: 0` er den andre halvparten: eit rute- eller flexbarn hev
+   `min-width: auto` som standard, og daa nektar det aa verta smalare
+   enn innhaldet sitt same kva ein segjer um breidd. Det er den eine
+   regelen som gjer at rutenet renn ut or sida. */
+:where(body *) { min-width: 0; }
+:where(p, li, td, th, dd, dt, figcaption, label, h1, h2, h3, h4, h5, h6) {
+  overflow-wrap: break-word;
+}
 
 html { -webkit-text-size-adjust: 100%; }
 
@@ -398,18 +443,104 @@ main {
 .detail-label { color: var(--blekk-lys); font-size: .9rem; }
 .detail-value { font-family: var(--skrift-tal); font-size: .95rem; }
 
-/* ---- framdrifti paa eit klippekort ----
-   Segmenti er klipp, ikkje ein prosent. Eit brukt klipp er tomt. */
-.progress-bar, .klipp-rad {
-  display: flex; gap: 3px; margin: var(--rom-3) 0;
+/* ---- klippekortmaalaren ----
+   Ljosbandet fraa ordboki, kutta i klipp.
+
+   Der bandet i ordboki er *eitt* ljos som glir langs lina, er dette
+   mange: eitt per klipp du hev att. Grunnen er at eit klippekort ikkje
+   er ei mengd — det er eit tal. Ein prosentstripe segjer «tri fjerdedelar
+   att»; du vil vita «sju». Difor tel ein rutor, ikkje lengd.
+
+   Ljoset er bygt som i ordboki: fire lag radialt — ein utbrend kjerne,
+   fargen tett kring han, ein vid veik halo, og ein bloom under. Og
+   ribbone: skiljelinone millom klippi ligg *yver* ljoset og skjer det
+   upp. Det er dei som gjer at det ser ut som ljos gjenom ei rist og
+   ikkje som ein farga boks.
+
+   Eit brukt klipp er ikkje mørkt — det er berre ikkje tent. Ruta stend
+   der framleis, i same storleik, so maalaren aldri skiftar breidd naar
+   du brukar eit klipp: det er ljoset som slokknar, ikkje ruta som
+   forsvinn. */
+.klippemaalar, .progress-segments {
+  --klippfarge: var(--produkt, var(--togu));
+  --rib: 2px;
+  display: flex;
+  gap: var(--rib);
+  height: 14px;
+  margin: var(--rom-3) 0;
+  position: relative;
+  isolation: isolate;
 }
-.progress-segment {
-  flex: 1; height: 6px;
-  background: var(--merke);
+
+.progress-bar { margin: var(--rom-3) 0; }
+
+.klipp, .progress-segment {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 3px;
+  border: 1px solid var(--haarlina);
   border-radius: 1px;
+  background: var(--ark-djup);
 }
-.progress-segment.used, .progress-segment.empty {
-  background: none; border: 1px solid var(--haarlina);
+
+/* Det tende klippet. Kjerna ligg i sjølve ruta; glødi legg seg utanfor
+   henne, so ho lyser ut yver ribbone paa båe sidor. */
+.klipp.tend, .progress-segment.filled {
+  border-color: color-mix(in srgb, var(--klippfarge) 55%, var(--haarlina));
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 30%, #fff) 0%,
+      transparent 100%),
+    color-mix(in srgb, var(--klippfarge) 86%, var(--flate));
+}
+
+.klipp.tend::after, .progress-segment.filled::after {
+  content: "";
+  position: absolute; z-index: -1;
+  left: -6px; right: -6px; top: -7px; bottom: -7px;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 34% 26% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 92%, transparent) 0%,
+      color-mix(in srgb, var(--klippfarge) 58%, transparent) 34%,
+      transparent 74%),
+    radial-gradient(ellipse 90% 60% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 26%, transparent) 0%,
+      color-mix(in srgb, var(--klippfarge) 8%, transparent) 48%,
+      transparent 86%),
+    radial-gradient(ellipse 130% 100% at 50% 62%,
+      color-mix(in srgb, var(--klippfarge) 18%, transparent) 0%,
+      transparent 78%);
+}
+
+/* Ribbone. Dei ligg yver ljoset og skjer det upp — det er dei som gjer
+   glødi til klipp og ikkje til ei stripa.
+
+   Kvar rib er teikna paa ruta si eigi høgre sida i staden for aa reknast
+   i prosent paa hylsteret. Ei prosentrekning maa gissa kvar flexen la
+   rutorne, og bommar so snart tale skifter. */
+.klipp::before, .progress-segment::before {
+  content: "";
+  position: absolute; z-index: 2;
+  top: -8px; bottom: -8px;
+  right: calc(-1px - var(--rib, 2px)); width: var(--rib, 2px);
+  background: var(--flate);
+  pointer-events: none;
+}
+.klipp:last-child::before, .progress-segment:last-child::before { display: none; }
+
+/* Det som er i ferd med aa gaa ut lyser ikkje mindre — det lyser i ein
+   annan farge. Aatvaringi er ikkje ein av dei tri produktfargane. */
+.klippekort-card.expiring .klippemaalar,
+.klippekort-card.expiring .progress-segments { --klippfarge: var(--aatvaring); }
+
+/* Medlemskapet er turkist, kurs og PT er lilla. Same maalaren, anna
+   produkt — fargen er det einaste som skifter. */
+.medlemskapsmaalar { --klippfarge: var(--klas); }
+.kursmaalar        { --klippfarge: var(--tuneup); }
+
+@media (prefers-reduced-motion: reduce) {
+  .klipp.tend::after, .progress-segment.filled::after { display: none; }
 }
 
 /* ===================================================================
@@ -523,9 +654,13 @@ select {
    under yverskrifti. Fyrste kolonna og yverskrifti fylgja med naar ein
    rullar sidelengs — same grepet som matrisa i slaaupp.
    =================================================================== */
-.tabell-rom { overflow-x: auto; border: 1px solid var(--haarlina); background: var(--flate); }
+.tabell-rom { border: 1px solid var(--haarlina); background: var(--flate); }
 
-table { border-collapse: collapse; width: 100%; }
+/* Tabellar rulla ikkje. Ei celle som er for smal bryt teksti si; ei
+   spalta som ikkje er verd plassen gjeng ut paa smale glas i staden
+   for aa skuva alt anna ut or glaset. */
+table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+th, td { overflow-wrap: break-word; hyphens: auto; }
 thead th {
   font-family: var(--skrift-yver);
   font-size: .8rem; font-weight: 500;
@@ -574,11 +709,15 @@ tbody tr:hover td { background: var(--ark-djup); }
    dagarne vert ei lang liste. */
 .week-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(11rem, 1fr));
+  /* Sju like spaltor som *deler* breiddi som finst. Ingi minstebreidd,
+     og difor ingi sidelengs rulling: rutenetet er aldri breidare enn
+     glaset. Under brotstaden nedanfor vert dagarne til bolkar under
+     kvarandre i staden — dagen fylgjer med som yverskrift, so ein time
+     høyrer framleis til ein dag. */
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 1px;
   background: var(--haarlina);
   border: 1px solid var(--haarlina);
-  overflow-x: auto;
 }
 .day-column {
   background: var(--flate);
@@ -709,13 +848,25 @@ tbody tr:hover td { background: var(--ark-djup); }
    Éin brotstad, skriven éin gong. Han stod fyrr i kvart einskilt
    stilark, med litt ulike verd.
    =================================================================== */
+/* Under dette hev ein dag ikkje plass til aa vera ei spalta. Sju
+   spaltor paa eit telefonglas vert ni piksel kvar, og daa er det ikkje
+   ei vika lenger — det er ein vegg. */
+@media (max-width: 62rem) {
+  .week-grid { grid-template-columns: minmax(0, 1fr); }
+  .day-column .day-header {
+    flex-direction: row; justify-content: space-between; align-items: baseline;
+    position: static;
+  }
+  .day-column.past .day-content { padding: var(--rom-3); }
+}
+
 @media (max-width: 48rem) {
   :root { --rom-5: 1rem; --rom-6: 1.5rem; --rom-7: 2rem; }
 
   .header-content, .nav-list, main { padding-left: var(--rom-4); padding-right: var(--rom-4); }
-  .nav-list { gap: var(--rom-4); overflow-x: auto; flex-wrap: nowrap; }
+  .nav-list { gap: var(--rom-2) var(--rom-4); flex-wrap: wrap; }
   .nav-item.nav-admin { margin-left: 0; }
-  .nav-item a { white-space: nowrap; }
+  .nav-item a { white-space: nowrap; padding: var(--rom-2) 0; }
 
   h1, .page-title { font-size: 1.7rem; }
 
@@ -748,9 +899,18 @@ tbody tr:hover td { background: var(--ark-djup); }
   border-radius: 2px;
   padding: var(--rom-5);
 }
-.membership-card.active, .klippekort-card:not(.expired) { border-left: 3px solid var(--merke); }
+/* Produktfargen stend paa vengen. Turkis medlemskap, rosa klippekort,
+   lilla kurs — det er den einaste staden fargen segjer kva slag ting
+   kortet er, og han skiftar aldri av seg sjølv. */
+.membership-card { --produkt: var(--klas); }
+.klippekort-card { --produkt: var(--togu); }
+.kurskort, .event-card.kurs { --produkt: var(--tuneup); }
+
+.membership-card.active, .klippekort-card:not(.expired) {
+  border-left: 3px solid var(--produkt);
+}
 .membership-card.paused, .membership-card.cancelled { border-left: 3px solid var(--blekk-svakt); }
-.membership-card.freeze_requested { border-left: 3px dashed var(--merke); }
+.membership-card.freeze_requested { border-left: 3px dashed var(--produkt); }
 
 .membership-header, .card-header {
   display: flex; justify-content: space-between; align-items: baseline;
@@ -775,8 +935,8 @@ tbody tr:hover td { background: var(--ark-djup); }
   content: ""; width: .5rem; height: .5rem; border-radius: 50%;
   border: 1px solid currentColor; background: currentColor; flex: none;
 }
-.status-active { color: var(--merke); }
-.status-freeze_requested { color: var(--merke); }
+.status-active { color: var(--produkt, var(--merke)); }
+.status-freeze_requested { color: var(--produkt, var(--merke)); }
 .status-freeze_requested::before { background: none; }
 .status-paused { color: var(--blekk-lys); }
 .status-paused::before { border-radius: 0; height: 1px; width: .7rem; background: currentColor; }
@@ -802,15 +962,9 @@ tbody tr:hover td { background: var(--ark-djup); }
    Segmenti er klipp. Eit brukt klipp er ei tom rute, ikkje ein graa
    klump: du skal kunna telja kor mange du hev att utan aa lesa talet. */
 .klippekort-cards { display: grid; gap: var(--rom-4); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
-.progress-bar, .progress-segments { display: flex; gap: 3px; margin: var(--rom-3) 0; }
-.progress-segment {
-  flex: 1; height: 8px; border-radius: 1px;
-  background: none; border: 1px solid var(--haarlina);
-}
-.progress-segment.filled { background: var(--merke); border-color: var(--merke); }
 
 .klipp-count { font-family: var(--skrift-tal); font-size: 1.1rem; }
-.klipp-count .remaining { font-size: 1.5rem; color: var(--merke); }
+.klipp-count .remaining { font-size: 1.5rem; color: var(--produkt, var(--togu)); }
 .klipp-count .total { color: var(--blekk-lys); }
 
 .no-membership, .no-klippekort {
@@ -893,3 +1047,117 @@ tbody tr:hover td { background: var(--ark-djup); }
 .vilkaar h1, .vilkaar h2, .vilkaar h3 { margin: var(--rom-6) 0 var(--rom-3); }
 .vilkaar h1:first-child { margin-top: 0; }
 .vilkaar li { margin-bottom: var(--rom-2); }
+
+/* ===================================================================
+   fanone
+   Same systemet som i ordboki, med same grunngjevingi.
+
+   Ei fana er eit blad i ei mappa: lina gjeng attum dei lukka og er
+   *broti* under den opne. Det er brotet som gjer at rekkja les seg som
+   fanor — ikkje fargen, ikkje skuggen. Difor hev den opne fana ingi
+   botnlina: ho er den same flata som bolken under henne.
+
+   Fire tal styrer alt. Stod dei kvar for seg i seks reglar, laut dei
+   vera samde, og var det ikkje.
+
+     --kant      sidekantarne og toppen
+     --fot       kor tjukk lina fana stend paa er
+     --fotfarge  kva den lina er naar fana er lukka
+     --loft      kor mykje den opne fana stikk upp yver dei lukka
+
+   Loftet er i heile pikslar. Ein rem-brøk vert sjeldan eit heilt tal
+   pikslar, og daa hamnar underkanten aat den opne fana ein halv piksel
+   fraa lina ho skal møta — det er den halve pikselen som gjer at
+   fanone ikkje ser ut som fanor.
+
+   Kantarne stend der heile tidi og skifter berre farge. Difor skuvar
+   ingen ting seg naar ein byter fana, og det er heile poenget: du ser
+   paa den staden du saag paa, og innhaldet skifter under deg.
+   =================================================================== */
+.faneark { --kant: 1px; --fot: 1px; --fotfarge: var(--haarlina); --loft: 2px; }
+
+.faner {
+  display: flex; align-items: flex-end;
+  gap: .15rem;
+  /* Fanone rulla ikkje. Er dei fleire enn lina toler, bryt dei ned paa
+     ei rad til — som fanor i tvo lag i ei mappa, som er ein ting ei
+     mappa faktisk gjer. */
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0 0 0 var(--rom-2);
+  list-style: none;
+}
+
+.fane {
+  position: relative; z-index: 0; flex: none;
+  padding: var(--rom-2) var(--rom-4);
+  margin-bottom: calc(-1 * var(--fot));
+  border: var(--kant) solid var(--haarlina);
+  border-bottom: var(--fot) solid var(--fotfarge);
+  border-radius: 3px 3px 0 0;
+  background: var(--faneflate);
+  /* Flata stoggar ved fotkanten og gjeng ikkje inn under honom. Utan
+     dette vert flata maala *under* foten, foten er gjenomsynleg med
+     vilje, og daa stend ingi fana paa noko. */
+  background-clip: padding-box;
+  color: var(--blekk-lys);
+  font-family: var(--skrift-yver);
+  font-size: .92rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer; text-align: center;
+  /* Skuggen fell ut or fana, ikkje inn i henne: ei fana ligg yver
+     arket og kastar skugge upp og ut. */
+  box-shadow: 0 -2px 5px -3px color-mix(in srgb, var(--blekk) 40%, transparent);
+}
+.fane:hover { color: var(--blekk); background: color-mix(in srgb, var(--blekk) 10%, var(--ark)); }
+
+.fane[aria-selected="true"] {
+  z-index: 1;
+  /* Ho stikk upp med loftet. Fyllet aukar, so teksti flyt ikkje — det
+     er kanten som rører seg, ikkje ordet. */
+  padding-top: calc(var(--rom-2) + var(--loft));
+  background: var(--flate);
+  color: var(--blekk);
+  box-shadow: none;
+}
+/* Remsa som lukkar lina upp. Ho gjeng *inni* kantarne, ikkje ut yver
+   deim: ho skal brjota lina, ikkje eta veggjene aat fana. */
+.fane[aria-selected="true"]::after {
+  content: ""; position: absolute; z-index: 1;
+  left: 0; right: 0;
+  bottom: calc(-1 * var(--fot)); height: var(--fot);
+  background: var(--flate);
+}
+.fane:focus-visible { outline: 2px solid var(--merke); outline-offset: -2px; }
+
+.fanerom {
+  border: var(--kant) solid var(--haarlina);
+  background: var(--flate);
+  padding: var(--rom-5);
+}
+
+/* Alle bolkarne stend i dokumentet heile tidi; det er berre synet som
+   skifter. Vart dei bytte ut, laut nettlesaren leggja sida ut paa nytt
+   for kvart klikk, og daa hoppar det. */
+.fanerom > [data-bolk] { display: none; }
+.fanerom[data-bolk="oversyn"]      > [data-bolk="oversyn"],
+.fanerom[data-bolk="timeplan"]     > [data-bolk="timeplan"],
+.fanerom[data-bolk="prisar"]       > [data-bolk="prisar"],
+.fanerom[data-bolk="folk"]         > [data-bolk="folk"],
+.fanerom[data-bolk="innstillingar"]> [data-bolk="innstillingar"] { display: block; }
+
+/* Fyrste yverskrifti i ein bolk stend alt under fanone og treng ikkje
+   luft yver seg. */
+.fanerom > [data-bolk] > :first-child { margin-top: 0; }
+
+/* Smaating som fyrr stod som style-attributt med sine eigne hex-tal. */
+.tomt { color: var(--blekk-svakt); font-style: italic; }
+.midt { text-align: center; }
+
+/* Det framheva valet i medlemskapsveljaren. Han hadde ein oransje kant
+   og ein kvit fargeovergang; no ber han produktfargen som alt anna. */
+.option-label.framheva {
+  border: 1px solid var(--klas);
+  background: color-mix(in srgb, var(--klas) 8%, var(--flate));
+}

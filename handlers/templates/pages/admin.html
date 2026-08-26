@@ -1,23 +1,46 @@
 {{define "content"}}
-
 <div class="sida">
     <h1 class="page-title">{{t .Lang "admin.title"}}</h1>
-    
-    {{template "admin_settings" .}}
-    
-    {{template "admin_stats_module" .Stats}}
 
-    {{template "admin_pricing_management" .}}
+    <!-- Administrasjonen var sju bolkar under kvarandre paa ei einaste
+         rulla: innstillingar, tal, prisar, timar, reglar, folk,
+         frysingar. Fanone samlar deim etter kva ein er komen for aa
+         gjera, og bolkarne stend paa den same staden kvar gong. -->
+    <div class="faneark">
+        <div class="faner" role="tablist" aria-label="{{t .Lang "admin.title"}}">
+            <button type="button" class="fane" role="tab" data-bolk="oversyn"       aria-selected="true"  aria-controls="bolk-oversyn">{{t .Lang "admin.tab_overview"}}</button>
+            <button type="button" class="fane" role="tab" data-bolk="timeplan"      aria-selected="false" aria-controls="bolk-timeplan">{{t .Lang "admin.tab_schedule"}}</button>
+            <button type="button" class="fane" role="tab" data-bolk="prisar"        aria-selected="false" aria-controls="bolk-prisar">{{t .Lang "admin.tab_prices"}}</button>
+            <button type="button" class="fane" role="tab" data-bolk="folk"          aria-selected="false" aria-controls="bolk-folk">{{t .Lang "admin.tab_people"}}</button>
+            <button type="button" class="fane" role="tab" data-bolk="innstillingar" aria-selected="false" aria-controls="bolk-innstillingar">{{t .Lang "admin.tab_settings"}}</button>
+        </div>
 
-    {{template "admin_class_management" .}}
+        <div class="fanerom" data-bolk="oversyn">
+            <!-- Det som ventar paa deg: tali, og frysingarne som treng svar. -->
+            <section data-bolk="oversyn" id="bolk-oversyn" role="tabpanel" tabindex="0">
+                {{template "admin_stats_module" .Stats}}
+                {{template "admin_freeze_requests_table" .}}
+            </section>
 
-    {{template "admin_membership_rules" .}}
+            <section data-bolk="timeplan" id="bolk-timeplan" role="tabpanel" tabindex="0">
+                {{template "admin_class_management" .}}
+                {{template "admin_events_table" .}}
+            </section>
 
-    {{template "admin_users_table" .}}
+            <section data-bolk="prisar" id="bolk-prisar" role="tabpanel" tabindex="0">
+                {{template "admin_pricing_management" .}}
+                {{template "admin_membership_rules" .}}
+            </section>
 
-    {{template "admin_freeze_requests_table" .}}
+            <section data-bolk="folk" id="bolk-folk" role="tabpanel" tabindex="0">
+                {{template "admin_users_table" .}}
+            </section>
 
-    {{template "admin_events_table" .}}
+            <section data-bolk="innstillingar" id="bolk-innstillingar" role="tabpanel" tabindex="0">
+                {{template "admin_settings" .}}
+            </section>
+        </div>
+    </div>
 </div>
 
 {{template "admin_scripts" .}}

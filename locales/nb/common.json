@@ -301,7 +301,12 @@
       "error_prefix": "Feil: "
     },
     "actions": "Handlinger",
-    "price_in_kroner": "Pris i kroner"
+    "price_in_kroner": "Pris i kroner",
+    "tab_overview": "Oversikt",
+    "tab_schedule": "Timeplan",
+    "tab_prices": "Priser",
+    "tab_people": "Folk",
+    "tab_settings": "Innstillinger"
   },
   "terms": {
     "title": "Handelsbetingelser"
