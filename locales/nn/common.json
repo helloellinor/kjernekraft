@@ -326,7 +326,7 @@
     "price_in_kroner": "Pris i kronor",
     "tab_overview": "Oversyn",
     "tab_schedule": "Timeplan",
-    "tab_prices": "Prisar",
+    "tab_prices": "Prising",
     "tab_people": "Folk",
     "tab_settings": "Innstillingar",
     "system_settings": "Systeminnstillingar",
@@ -372,7 +372,13 @@
     "stats_middle": "Det stend",
     "stats_classes": "timar i planen",
     "stats_and": "og",
-    "stats_waiting": "ventar paa svar"
+    "stats_waiting": "ventar paa svar",
+    "tab_membership": "Medlemskap",
+    "tab_rules": "Reglar",
+    "new_membership": "Nytt medlemskap",
+    "applies_to": "gjeld for",
+    "applies_all": "alle",
+    "applies_student": "student og senior"
   },
   "terms": {
     "title": "Handelsvilkår"

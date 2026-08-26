@@ -1,107 +1,106 @@
 {{define "admin_pricing_management"}}
-{{/* Prisane.
+{{/* Prising.
 
-     Same form som profilen: kvart felt er skrivbart der det står, ingen
-     redigeringsmodus, og eit felt som er ulikt det lagra ber merket
-     sjølv — ei linje i margen. Dokka nedst ber handlinga og talet på
-     endringar.
+     Ingen overskrift her. Fana heiter «Prising», og då veit ein at alt
+     under henne handlar om pris — ei overskrift som seier det ein gong
+     til, er eit ord som ikkje arbeider.
 
-     Før hadde kvar rad tre knappar: «Rediger pris», «Lagre», «Avbryt»,
-     der dei to siste stod gøymde til du trykte den første. Tre knappar
-     per rad, ganga med talet på medlemskap, for å endre eitt tal. */}}
-<h2 class="section-title">{{t .Lang "admin.pricing_management"}}</h2>
-
-{{/* To ting som ser like ut, men ikkje er det: å justere prisen på noko
-     som finst, og å lage noko som ikkje finst. Dei stod under kvarandre
-     på same fana, og skjemaet nedst såg ut som endå ei rad i lista.
-
-     Fanerekkja her ligg inne i fana «Prisar» i administrasjonen. Det er
-     to nivå, og faner.js skil dei: kvart ark eig berre sine eigne faner,
-     og berre det ytste eig adressa. */}}
+     To faner: medlemskapa, og reglane for å byte mellom dei. Fanerekkja
+     ligg inne i ei fane frå før; faner.js skil nivåa. */}}
 <div class="faneark">
   {{template "faner" (dict "Faner" (list
-      (dict "Bolk" "prisliste" "Namn" (t .Lang "admin.membership_pricing"))
-      (dict "Bolk" "nyttmedlemskap" "Namn" (t .Lang "admin.create_new_membership")))
-      "Merkelapp" (t .Lang "admin.pricing_management"))}}
+      (dict "Bolk" "medlemskap" "Namn" (t .Lang "admin.tab_membership"))
+      (dict "Bolk" "reglar" "Namn" (t .Lang "admin.tab_rules")))
+      "Merkelapp" (t .Lang "admin.tab_prices"))}}
 
-  <div class="fanerom" data-bolk="prisliste">
-  <div data-bolk="prisliste" id="bolk-prisliste" role="tabpanel" tabindex="0">
+  <div class="fanerom" data-bolk="medlemskap">
+    <div data-bolk="medlemskap" id="bolk-medlemskap" role="tabpanel" tabindex="0">
 
-<form id="prisar" method="post" action="/api/admin/priser"
-      data-endringar data-dokk="prisdokk">
-  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+      {{/* Same forma som profilen: skrivbart der det står, ingen
+           redigeringsmodus, og eit felt som er ulikt det lagra ber merket
+           sjølv. Dokka nedst ber handlinga. */}}
+      <form id="prisar" method="post" action="/api/admin/priser"
+            data-endringar data-dokk="prisdokk">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
-  <div class="prisliste">
-    {{range .Memberships}}
-    {{/* Eitt medlemskap er ei setning: kva det heiter, kva det kostar,
-         kor lenge du bind deg. */}}
-    <div class="prislapp" data-medlemskap="{{.ID}}">
-      <input class="lappfelt prisnamn" type="text" name="namn-{{.ID}}"
-             value="{{.Name}}" aria-label="{{t $.Lang "admin.membership_name"}}">
-      <div class="lapprad">
-        <input class="lappfelt kort talfelt" type="number" name="pris-{{.ID}}"
-               value="{{kronerTal .Price}}" min="0" step="10"
-               aria-label="{{t $.Lang "admin.current_price"}}">
-        <span class="priseining">{{t $.Lang "membership.price_per_month"}}</span>
-        <input class="lappfelt kort talfelt" type="number" name="binding-{{.ID}}"
-               value="{{.CommitmentMonths}}" min="0" step="1"
-               aria-label="{{t $.Lang "admin.commitment_months"}}">
-        <span class="priseining">{{t $.Lang "membership.commitment_months"}}</span>
-      </div>
-      <label class="avkryssing rabatt">
-        <input type="checkbox" name="student-{{.ID}}" {{if .IsStudentSenior}}checked{{end}}>
-        <span>{{t $.Lang "admin.student_senior_discount"}}</span>
-      </label>
+        <div class="prisliste" id="prisliste">
+          {{range .Memberships}}
+          {{/* Eitt medlemskap er ei setning: kva det heiter, kva det
+               kostar, kor lenge du bind deg, og kven det gjeld for. */}}
+          <div class="prislapp" data-medlemskap="{{.ID}}">
+            <input class="lappfelt prisnamn" type="text" name="namn-{{.ID}}"
+                   value="{{.Name}}" aria-label="{{t $.Lang "admin.membership_name"}}">
+            <div class="lapprad">
+              <input class="lappfelt kort talfelt" type="number" name="pris-{{.ID}}"
+                     value="{{kronerTal .Price}}" min="0" step="10"
+                     aria-label="{{t $.Lang "admin.current_price"}}">
+              <span class="priseining">{{t $.Lang "membership.price_per_month"}}</span>
+              <input class="lappfelt kort talfelt" type="number" name="binding-{{.ID}}"
+                     value="{{.CommitmentMonths}}" min="0" step="1"
+                     aria-label="{{t $.Lang "admin.commitment_months"}}">
+              <span class="priseining">{{t $.Lang "membership.commitment_months"}}</span>
+              {{/* Rabatten var ei avkryssing under raden. Ho er ikkje eit
+                   val ein hakar av — ho seier kven medlemskapet er for, og
+                   det høyrer til setninga. */}}
+              <span class="priseining">{{t $.Lang "admin.applies_to"}}</span>
+              <select class="lappfelt" name="gjeld-{{.ID}}" aria-label="{{t $.Lang "admin.applies_to"}}">
+                <option value="alle" {{if not .IsStudentSenior}}selected{{end}}>{{t $.Lang "admin.applies_all"}}</option>
+                <option value="student" {{if .IsStudentSenior}}selected{{end}}>{{t $.Lang "admin.applies_student"}}</option>
+              </select>
+            </div>
+          </div>
+          {{end}}
+        </div>
+
+        {{/* Dette er ei side der ein endrar; då skal ein kunne leggje til
+             her òg. Knappen står nedst og ikkje attmed fanene: der kjem
+             raden, og der verkar han like godt på ein telefon. */}}
+        <button type="button" class="btn nyrad" id="ny-prislapp">
+          + {{t .Lang "admin.new_membership"}}
+        </button>
+
+        <aside class="dokk endringsdokk" id="prisdokk" hidden>
+          <div class="dokkinnhald">
+            <span class="endringstal" aria-live="polite"
+                  data-ein="{{t .Lang "profile.changed_one"}}"
+                  data-fleire="{{t .Lang "profile.changed_many"}}"></span>
+            <div class="dokkhandling">
+              <button type="button" class="btn" data-angra>{{t .Lang "profile.discard"}}</button>
+              <button type="submit" class="btn-primary">{{t .Lang "profile.save"}}</button>
+            </div>
+          </div>
+        </aside>
+      </form>
+
+      {{/* Malen for ein ny rad. Han står i dokumentet so markeringa er
+           den same som for radene som finst — ikkje ein streng i ei
+           JS-fil som kan kome i utakt med henne. */}}
+      <template id="prislapp-mal">
+        <div class="prislapp ny" data-eitt>
+          <input class="lappfelt prisnamn" type="text" name="namn-NY"
+                 placeholder="{{t .Lang "admin.membership_name"}}"
+                 aria-label="{{t .Lang "admin.membership_name"}}">
+          <div class="lapprad">
+            <input class="lappfelt kort talfelt" type="number" name="pris-NY"
+                   value="0" min="0" step="10" aria-label="{{t .Lang "admin.current_price"}}">
+            <span class="priseining">{{t .Lang "membership.price_per_month"}}</span>
+            <input class="lappfelt kort talfelt" type="number" name="binding-NY"
+                   value="0" min="0" step="1" aria-label="{{t .Lang "admin.commitment_months"}}">
+            <span class="priseining">{{t .Lang "membership.commitment_months"}}</span>
+            <span class="priseining">{{t .Lang "admin.applies_to"}}</span>
+            <select class="lappfelt" name="gjeld-NY" aria-label="{{t .Lang "admin.applies_to"}}">
+              <option value="alle" selected>{{t .Lang "admin.applies_all"}}</option>
+              <option value="student">{{t .Lang "admin.applies_student"}}</option>
+            </select>
+          </div>
+        </div>
+      </template>
+
     </div>
-    {{end}}
-  </div>
 
-  {{/* Same dokk som i profilen. Ho kjem fram når noko er endra, og seier
-       kor mange — ikkje kva, av di kva står i felta sjølve. */}}
-  <aside class="dokk endringsdokk" id="prisdokk" hidden>
-    <div class="dokkinnhald">
-      <span class="endringstal" aria-live="polite"
-            data-ein="{{t .Lang "profile.changed_one"}}"
-            data-fleire="{{t .Lang "profile.changed_many"}}"></span>
-      <div class="dokkhandling">
-        <button type="button" class="btn" data-angra>{{t .Lang "profile.discard"}}</button>
-        <button type="submit" class="btn-primary">{{t .Lang "profile.save"}}</button>
-      </div>
+    <div data-bolk="reglar" id="bolk-reglar" role="tabpanel" tabindex="0" hidden>
+      {{template "admin_membership_rules" .}}
     </div>
-  </aside>
-</form>
-
-  </div>
-
-  <div data-bolk="nyttmedlemskap" id="bolk-nyttmedlemskap" role="tabpanel" tabindex="0" hidden>
-<form id="new-membership-form" class="setningsskjema" onsubmit="createMembership(event)">
-  <div class="form-group">
-    <label for="membership-name">{{t .Lang "admin.membership_name"}}</label>
-    <input type="text" id="membership-name" required>
-  </div>
-  <div class="form-row">
-    <div class="form-group">
-      <label for="membership-price">{{t .Lang "admin.price_ore"}}</label>
-      <input type="number" id="membership-price" required>
-    </div>
-    <div class="form-group">
-      <label for="commitment-months">{{t .Lang "admin.commitment_months"}}</label>
-      <input type="number" id="commitment-months" min="0" required>
-    </div>
-  </div>
-  <div class="form-group">
-    <label>
-      <input type="checkbox" id="is-student-senior">
-      {{t .Lang "admin.student_senior_discount"}}
-    </label>
-  </div>
-  <div class="form-group">
-    <label for="membership-description">{{t .Lang "admin.description"}}</label>
-    <textarea id="membership-description" rows="3"></textarea>
-  </div>
-  <button type="submit">{{t .Lang "admin.create_membership"}}</button>
-</form>
-  </div>
   </div>
 </div>
 {{end}}
