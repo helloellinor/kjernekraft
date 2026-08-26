@@ -57,8 +57,9 @@ func GetLanguageFromRequest(r *http.Request) string {
 		}
 	}
 
-	// Default to Norwegian bokmål
-	return "nb"
+	// Standardmaalet er nynorsk. Det er ikkje ei innstilling ein fyrst
+	// vel — det er det ein fær naar ein ikkje hev valt noko.
+	return "nn"
 }
 
 // SetLanguageCookie sets the language preference cookie
@@ -77,7 +78,7 @@ func SetLanguageCookie(w http.ResponseWriter, lang string) {
 
 // IsValidLanguage checks if a language code is supported
 func IsValidLanguage(lang string) bool {
-	validLangs := []string{"nb", "nn", "en"}
+	validLangs := []string{"nn", "nb", "en"}
 	for _, validLang := range validLangs {
 		if lang == validLang {
 			return true
@@ -91,7 +92,7 @@ func (l *Localization) loadTranslations() {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	languages := []string{"nb", "nn", "en"}
+	languages := []string{"nn", "nb", "en"}
 	for _, lang := range languages {
 		langMap := make(map[string]interface{})
 
@@ -113,9 +114,9 @@ func (l *Localization) T(lang, key string) string {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 
-	// Default to Norwegian bokmål if language not found
+	// Fell attende paa standardmaalet naar maalet ikkje finst.
 	if _, exists := l.languages[lang]; !exists {
-		lang = "nb"
+		lang = "nn"
 	}
 
 	langMap := l.languages[lang]
@@ -154,14 +155,14 @@ func (l *Localization) getNestedValue(data map[string]interface{}, key string) s
 
 // GetSupportedLanguages returns list of supported languages
 func (l *Localization) GetSupportedLanguages() []string {
-	return []string{"nb", "nn", "en"}
+	return []string{"nn", "nb", "en"}
 }
 
 // GetLanguageName returns the display name for a language code
 func (l *Localization) GetLanguageName(code string) string {
 	names := map[string]string{
-		"nb": "Norsk bokmål",
 		"nn": "Norsk nynorsk",
+		"nb": "Norsk bokmål",
 		"en": "English",
 	}
 	if name, exists := names[code]; exists {
@@ -173,8 +174,8 @@ func (l *Localization) GetLanguageName(code string) string {
 // GetLanguageFlag returns the flag emoji for a language code
 func (l *Localization) GetLanguageFlag(code string) string {
 	flags := map[string]string{
-		"nb": "🇩🇰", // Danish flag for Bokmål as requested
 		"nn": "🇳🇴", // Norwegian flag for Nynorsk
+		"nb": "🇩🇰", // Danish flag for Bokmål as requested
 		"en": "🇺🇸", // US flag for English
 	}
 	if flag, exists := flags[code]; exists {
