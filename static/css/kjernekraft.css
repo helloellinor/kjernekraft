@@ -725,7 +725,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    i det heile. Ei rullesteng som stend der utan aa ha noko aa rulla er
    berre eit merke um at nokon ikkje maalte. */
 .timeplan {
-  --timetrapp: 3.6rem minmax(7rem, 1fr) repeat(7, minmax(0, 3.5rem));
+  --timetrapp: 2.6rem minmax(7rem, 1fr) repeat(7, minmax(0, 3.1rem));
   max-height: min(70vh, 48rem);
   overflow-y: auto;
   overscroll-behavior-y: contain;
@@ -756,10 +756,20 @@ tbody tr:hover td { background: var(--ark-djup); }
 .timerad:last-child { border-bottom: 0; }
 .timerad:hover { background: var(--ark-djup); }
 
-/* Rada ber ikkje eitt klokkeslett lenger — merki ber kvar sitt. Att
-   stend lengdi, som er den same kva dag han gjeng. */
-.timeklokke { display: flex; flex-direction: column; }
-.timeklokke .lengd { font-family: var(--skrift-tal); font-size: .78rem; color: var(--blekk-svakt); }
+/* Rada ber ei urskiva og ikkje eit klokkeslett: ho segjer «morgon»
+   eller «kveld» paa eit blikk, og det nøyaktige slaget per dag stend
+   paa merket. Lengdi høyrer til namnet — ho er den same kva dag han
+   gjeng — og stend difor der. */
+.timeklokke { display: flex; align-items: center; justify-content: center; }
+.urskiva.stor { width: 1.35rem; height: 1.35rem; }
+.urskiva.stor::before { height: 28%; }
+.urskiva.stor::after { height: 42%; }
+
+.timetittel .lengd {
+  font-family: var(--skrift-tal); font-size: .72rem; font-weight: 400;
+  font-stretch: normal; letter-spacing: 0;
+  color: var(--blekk-svakt); white-space: nowrap;
+}
 
 .timetittel {
   font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
@@ -791,11 +801,13 @@ tbody tr:hover td { background: var(--ark-djup); }
      er høgt, same draget som den kondenserte skrifti det stend attmed.
      Eit kvadratisk merke les seg som ein knapp; eit ståande les seg som
      eit kort. */
-  min-height: 4.7rem;
-  padding: var(--rom-2) var(--rom-1) var(--rom-3) var(--rom-2);
+  /* Klart høgre enn breidt. Merket ber berre talet no — klokka ligg
+     paa kanten og urskiva stend i rada — so det toler aa vera smalt. */
+  min-height: 5rem;
+  padding: var(--rom-3) var(--rom-1) var(--rom-2);
   border: 1px solid var(--haarlina);
   border-bottom: 0;
-  border-radius: 2px 2px 0 0;
+  border-radius: 3px 3px 0 0;
   background-color: var(--flate);
   /* Botnlina er tvo band: det fylte og det tome. Ein ekte border kann
      ikkje vera halvt farga, so ho er teikna som eit bilete i botnen. */
@@ -817,9 +829,22 @@ tbody tr:hover td { background: var(--ark-djup); }
    paa minuttet — difor stend tali attmed. Men forma segjer «morgon»
    eller «ettermiddag» fyre du hev lese eit einaste siffer, og det er
    det ein skannar etter. */
-/* Urskiva yver tali, ikkje attmed. Attmed vart merket breidt og
-   liggjande; yver held det seg smalt og ståande. */
-.klokketid { display: flex; flex-direction: column; align-items: flex-start; gap: .15rem; }
+/* Klokkeslettet ligg paa toppkanten, som eit legende paa eit fieldset.
+   Det høyrer til ruta og tek ingi høgd fraa henne, og daa kann ruta
+   sjølv vera smal.
+
+   Flata bak er `inherit`, so lappen tek den same flata som merket —
+   ogso i dag-spalta, der merket hev ei tone yver seg. */
+.dagmerke .klokketal {
+  position: absolute; top: 0; left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0 .22rem;
+  background-color: inherit;
+  font-size: .6rem; letter-spacing: -.02em;
+  color: var(--blekk-lys);
+  white-space: nowrap;
+}
+.dagmerke.idag .klokketal { color: var(--klas); }
 
 .urskiva {
   position: relative; flex: none;
@@ -838,20 +863,18 @@ tbody tr:hover td { background: var(--ark-djup); }
 .urskiva::before { height: 26%; transform: translateX(-50%) rotate(var(--time, 0deg)); }
 .urskiva::after  { height: 40%; transform: translateX(-50%) rotate(var(--minutt, 0deg)); }
 
-.klokketal { font-size: .66rem; color: var(--blekk-lys); letter-spacing: -.02em; }
+
 
 /* ---- merkelappen med talet ----
    Nede til høgre, der auga endar naar det hev lese merket. */
 .dagtal {
   position: absolute; right: var(--rom-1); bottom: var(--rom-2);
-  font-size: .72rem; color: var(--blekk);
-  background: var(--flate);
+  font-size: .74rem; color: var(--blekk);
   padding-left: .2rem;
 }
 .dagtal .av { color: var(--blekk-svakt); font-size: .92em; }
 
-.dagmerke.idag .urskiva { border-color: var(--klas); }
-.dagmerke.idag .urskiva::before, .dagmerke.idag .urskiva::after { background: var(--klas); }
+.timeklokke .urskiva { border-color: var(--blekk-svakt); }
 .dagmerke.full { background-image: linear-gradient(to right, var(--klas) 0 100%); }
 .dagmerke.umme { opacity: .42; cursor: default; }
 .dagmerke:disabled { cursor: default; }
@@ -860,6 +883,11 @@ tbody tr:hover td { background: var(--ark-djup); }
    Ho er berre eit hint av ei lina — nok til aa syna at plassen finst og
    er tom, ikkje nok til aa dra auga. */
 .dagmerke.daud {
+  /* Ho er eit hol og ikkje ein knapp. `pointer-events: none` gjer at
+     ho korkje tek klikk eller stel peikaren — [disabled] hjelper ikkje,
+     av di ho er ein <span> og attributtet gjeld berre skjemaelement.
+     Det var difor eit klikk paa eit hol opna dokka med tomt innhald. */
+  pointer-events: none;
   border-style: dashed;
   border-bottom: 1px dashed color-mix(in srgb, var(--haarlina) 45%, transparent);
   border-color: color-mix(in srgb, var(--haarlina) 45%, transparent);

@@ -53,7 +53,10 @@ type Timebolk struct {
 	Plassar    int
 	Framsyning []Framsyning
 	Rutor      [7]Ruta // alle sju dagarne, tome med
-	sortering  int     // minutt etter midnatt, til rekkjefylgdi
+	// Urskiva for rada: den fyrste framsyningi i vika.
+	TimeVinkel   float64
+	MinuttVinkel float64
+	sortering    int // minutt etter midnatt, til rekkjefylgdi
 }
 
 // Ruta er ein dag i rada — anten ein time som gjeng, eller eit tomt hol.
@@ -161,6 +164,10 @@ func KlemVika(events []models.Event, iDag time.Time, maandag time.Time) []Timebo
 		sort.Slice(b.Framsyning, func(i, j int) bool {
 			return b.Framsyning[i].Dato.Before(b.Framsyning[j].Dato)
 		})
+		if len(b.Framsyning) > 0 {
+			b.TimeVinkel = b.Framsyning[0].TimeVinkel
+			b.MinuttVinkel = b.Framsyning[0].MinuttVinkel
+		}
 		b.Rutor = rutor(*b, maandag)
 		ut = append(ut, *b)
 	}

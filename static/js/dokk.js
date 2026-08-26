@@ -142,7 +142,9 @@
     }
 
     document.addEventListener("click", async function (e) {
-        var merke = e.target.closest(".dagmerke:not([disabled])");
+        // .daud er hol og ikkje knappar. [disabled] fangar deim ikkje:
+        // dei er <span>, og attributtet gjeld berre skjemaelement.
+        var merke = e.target.closest(".dagmerke:not(.daud):not([disabled])");
         if (merke) { opna(merke); return; }
         if (e.target.closest("#dokk-lukk")) { lukk(); return; }
 

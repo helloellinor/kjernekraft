@@ -19,11 +19,11 @@
     {{range .Timebolkar}}
     <div class="timerad">
         <div class="timeklokke">
-            <span class="lengd">{{.Minutt}} min</span>
+            <span class="urskiva stor" style="--time: {{.TimeVinkel}}deg; --minutt: {{.MinuttVinkel}}deg"></span>
         </div>
 
         <div class="timekva">
-            <h3 class="timetittel">{{.Tittel}}</h3>
+            <h3 class="timetittel">{{.Tittel}} <span class="lengd">{{.Minutt}} min</span></h3>
             <p class="timekven">{{.Laerar}}{{if .Rom}} <span class="timerom">{{.Rom}}</span>{{end}}</p>
         </div>
 
@@ -49,13 +49,10 @@
                     {{if .ErUmme}}disabled{{end}}
                     aria-label="{{.DagNamn}} — {{.Event.CurrentEnrolment}} {{t $.Lang "timeplan.of"}} {{.Event.Capacity}}">
                 <span class="dagnamn berre-lesar">{{.DagNamn}} {{.Klokke}}</span>
-                {{/* Urskiva. Tvo visarar snudde av Go; ho er eit teikn
-                     for eit klokkeslett og ikkje eit ur ein skal lesa av
-                     paa minuttet — difor stend tali attmed. */}}
-                <span class="klokketid">
-                    <span class="urskiva" style="--time: {{.TimeVinkel}}deg; --minutt: {{.MinuttVinkel}}deg"></span>
-                    <span class="klokketal">{{.Klokke}}</span>
-                </span>
+                {{/* Klokkeslettet ligg *paa* toppkanten, som eit
+                     legende paa eit fieldset: det høyrer til ruta og
+                     tek ingi høgd fraa henne. */}}
+                <span class="klokketal">{{.Klokke}}</span>
                 <span class="dagtal">{{.Event.CurrentEnrolment}}<span class="av">/{{.Event.Capacity}}</span></span>
             </button>
             {{end}}
