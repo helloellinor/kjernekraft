@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -136,5 +137,20 @@ func TestMalaneBedBerreUmNyklarSomFinst(t *testing.T) {
 			t.Errorf("malen bed um «%s», som ikkje er umsett: %s",
 				nykel, strings.Join(sakna[nykel], ", "))
 		}
+	}
+}
+
+func TestStandardmaaletErNynorsk(t *testing.T) {
+	r, err := http.NewRequest(http.MethodGet, "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fekk := GetLanguageFromRequest(r); fekk != "nn" {
+		t.Errorf("ein brukar utan val skal faa nynorsk, fekk %q", fekk)
+	}
+
+	r.AddCookie(&http.Cookie{Name: "preferred_language", Value: "en"})
+	if fekk := GetLanguageFromRequest(r); fekk != "en" {
+		t.Errorf("kaka skal gjelda framfor standardmaalet, fekk %q", fekk)
 	}
 }

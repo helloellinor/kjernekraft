@@ -68,8 +68,8 @@ handlers/templates/
 
 The application supports three languages with cookie-based persistence:
 
-- **Norwegian Bokmål** (nb) 🇩🇰 - Default language
-- **Norwegian Nynorsk** (nn) 🇳🇴  
+- **Norwegian Nynorsk** (nn) 🇳🇴 - Default language
+- **Norwegian Bokmål** (nb) 🇩🇰
 - **English** (en) 🇺🇸
 
 Language preferences are:
@@ -141,8 +141,8 @@ handlers/
 ### Localization System
 
 The application supports three languages:
-- **Norwegian Bokmål** (`nb`) - Default
-- **Norwegian Nynorsk** (`nn`)
+- **Norwegian Nynorsk** (`nn`) - Default
+- **Norwegian Bokmål** (`nb`)
 - **English** (`en`)
 
 All user-facing text uses localization keys:
@@ -151,7 +151,11 @@ All user-facing text uses localization keys:
 {{t .Lang "admin.approve"}}
 ```
 
-Translation files are located in `locales/` directory.
+Translation files are located in `locales/` directory. Do not take this
+section's word for the state of them — `go test ./handlers` does. It fails if
+the three files drift apart on keys, if a translation is empty, or if a
+template asks for a key nobody has translated (which renders as the bare key,
+silently).
 
 ## Development Guidelines
 
@@ -191,8 +195,9 @@ the repository, and leave `KJERNEKRAFT_ENV` unset there — anything other than
 `development` is treated as production, which turns on `Secure` cookies and
 makes the test-data routes return 404.
 
-The application starts in Norwegian Bokmål. Add `?lang=en` or `?lang=nn` to any
-URL to switch languages.
+The application starts in Norwegian Nynorsk — that is what you get when you
+have not chosen. Add `?lang=en` or `?lang=nb` to any URL to switch languages;
+the choice is remembered in a cookie.
 
 ## Access control
 
