@@ -1,7 +1,10 @@
 {{define "navigation"}}
 <header class="header">
     <div class="header-content">
-        <h1>{{t .Lang "site.title"}}</h1>
+        <a class="merkeord" href="/elev/hjem">
+            <span class="merke" aria-hidden="true"></span>
+            <h1>{{t .Lang "site.title"}}</h1>
+        </a>
         <div class="auth-controls">
             {{template "language_selector" .}}
             <span class="user-name">{{.UserName}}</span>

@@ -292,3 +292,93 @@ Og i nettlesaren, paa kvar sida:
 ```js
 document.documentElement.scrollWidth > window.innerWidth   // skal vera false
 ```
+
+---
+
+## 13. Merket i bruk
+
+`.merke` er ei **maske**, ikkje eit bilete: flata er `currentColor` og
+fila er `mask`. Difor finst det éi fil paa disken og ikkje ei per farge,
+og han fylgjer temaet utan at nokon skriv honom um. Same grepet som
+krossen paa sletteknappen i ordboki.
+
+| Stad | Klasse | Storleik |
+|---|---|---|
+| hovudet, attmed namnet | `.merkeord .merke` | 1,7 rem |
+| innlogging, registrering, gløymt passord | `.doermerke` | 4 rem |
+| fane-ikon | `<link rel="icon">` | fila si eigi |
+
+Fila ber sin eigen `color` med eit mørkt alternativ inni seg. Som maske
+er den fargen likegyldig; som fane-ikon er han det som gjer at merket
+finst i baae nettlesartema.
+
+**Han skal ikkje veksa nokon annan stad.** Eit merke som stend stort
+paa kvar sida er ikkje eit merke lenger — det er ein bakgrunn.
+
+---
+
+## 14. Teikningar — der emojiane stend i dag
+
+Emoji er ikkje eit teiknesprog. Dei er teikna av Apple, Google og
+Microsoft kvar for seg, dei ser ulike ut paa kvar maskina, dei ber
+hudfarge og kjøn me ikkje hev bede um, og dei kann ikkje ta
+produktfargen. **Alle ni skal ut.**
+
+### Kva som stend der no
+
+**A — kategoriteikningar.** Seks stykke, paa `elev/klippekort`, steg 1.
+Dette er dei einaste som treng ei *teikning*; resten er ikon eller skal
+berre burt.
+
+| No | Kategori | Kva ho skal segja |
+|---|---|---|
+| 🧘‍♀️ | Gruppetimer Sal | ein sal med matter — det opne golvet |
+| 💪 | Reformer/Apparatus | reformeren sjølv: vogna, fjørerne, fotstonga |
+| 🏃‍♂️ | Self Practice | den same reformeren, utan lærar attmed |
+| 💻 | Online Gruppetimer | skjermen, sedd fraa matta |
+| 👨‍💼 | Personlig Trening | tvo, ikkje ein |
+| 🧠 | Stressmestring | pusten, ikkje hjernen |
+
+Merk at 💪 og 🏃‍♂️ i dag skil tvo ting som er den same maskina med og
+utan lærar — teikningarne bør vera same reformeren, so skilnaden er den
+som faktisk finst.
+
+**B — ikon i teksten.** 📍 for rom og 👨‍🏫 for lærar, paa timekorti.
+Desse er ikkje teikningar; dei er tvo strekikon paa ein cirka 16 px
+boks. Dei kann ogso berre gaa ut: rommet stend alt i halvfeit og
+læraren under, og korti les seg fint utan.
+
+**C — pynt som skal burt.** 🧊 paa frose medlemskap og 🍂 paa
+hausttilbodet. Isbiten gjer arbeidet livsmerket alt gjer — ein frosen
+stod er ein **strek** (§2) — so han segjer det same tvo gonger, med tvo
+ulike former. Haustlauvet er pynt paa ein kampanje.
+
+### Krav til fila
+
+Same reglar som merket, av same grunn:
+
+- **SVG**, `stroke="currentColor"`, `fill="none"`. Ingen eigne fargar i
+  fila. Daa verkar ho i baae temaom utan aa skrivast um, og ho kann
+  bera produktfargen der ho stend i eit produkt.
+- **Kvadratisk `viewBox`**, helst `0 0 64 64`.
+- **Ein strekbreidd** gjenom heile settet. Merket hev 20/750 &asymp; 2,7 %
+  av breiddi; ligg teikningarne i nærleiken, høyrer dei saman med honom.
+- **`stroke-linecap="butt"`** som merket, ikkje runde endar.
+- Ingen tekst i fila.
+
+### Kvar ho stend
+
+Boksen finst alt og er fast, so eit kort ikkje skiftar høgd den dagen
+teikningi kjem:
+
+```html
+<div class="teikning">…svg…</div>
+```
+
+`--teikningstorleik` styrer storleiken (3,5 rem som standard), og
+`color` kjem av `--produkt` der det finst — turkis i medlemskap, rosa i
+klippekort, lilla i kurs.
+
+> Medan ho manglar, stend emojien i den same faste boksen. Difor hoppar
+> ingen ting naar ho kjem paa plass.
+
