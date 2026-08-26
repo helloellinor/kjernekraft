@@ -74,7 +74,12 @@
     "thursday": "Torsdag",
     "friday": "Fredag",
     "saturday": "Laurdag",
-    "sunday": "Sundag"
+    "sunday": "Sundag",
+    "full": "fullt",
+    "waitlist": "Venteliste",
+    "signup": "Meld på",
+    "cancel_signup": "Meld av",
+    "close": "Lukk"
   },
   "dashboard": {
     "welcome_user": "Velkommen, {{.UserName}}!",
@@ -242,7 +247,9 @@
     "tab_schedule": "Timeplan",
     "tab_prices": "Prisar",
     "tab_people": "Folk",
-    "tab_settings": "Innstillingar"
+    "tab_settings": "Innstillingar",
+    "capacity": "Plassar",
+    "pick_room_first": "vel eit rom fyrst"
   },
   "terms": {
     "title": "Handelsvilkår"

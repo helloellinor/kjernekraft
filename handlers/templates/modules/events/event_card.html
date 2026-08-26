@@ -1,30 +1,35 @@
 {{define "event_card"}}
-<div class="event-card {{.ClassType}}" data-event-id="{{.ID}}" onclick="toggleEventCard(this)">
-    <div class="event-time">{{formatTimeShort .StartTime}}-{{formatTimeShort .EndTime}}</div>
+{{/* Timekortet. Rekkjefylgdi er den ein les i: naar, kva, kven og kvar,
+     og so kor full han er. Fyllingi er den einaste opplysningi som
+     svarar paa spursmaalet Ida stiller vika si — kva fyller seg og kva
+     gjer det ikkje — og ho fanst ikkje i det heile fyrr. */}}
+<div class="event-card {{.ClassType}}{{if .Full}} full{{end}}" data-event-id="{{.ID}}" onclick="toggleEventCard(this)">
+    <div class="event-time">{{formatTimeShort .StartTime}}–{{formatTimeShort .EndTime}}</div>
     <div class="event-title">{{.Title}}</div>
-    <div class="event-teacher">{{.TeacherName}}</div>
-    {{$remaining := sub .Capacity .CurrentEnrolment}}
-    <div class="event-spaces">
-        {{if lt .CurrentEnrolment .Capacity}}
-            {{if eq $remaining 1}}
-                1 plass igjen
-            {{else}}
-                {{$remaining}} plasser igjen
-            {{end}}
-        {{else}}
-            Venteliste
-        {{end}}
+    <div class="event-teacher">{{.TeacherName}}{{if .RoomName}} <span class="event-rom">{{.RoomName}}</span>{{end}}</div>
+
+    {{if .Capacity}}
+    {{/* Éin rute per plass. Ei prosentstripe segjer «kring halvfull»;
+         ei rekkja rutor segjer «6 av 18», og ho syner med det same at
+         reformeren hev fire plassar og salen atten. Det er den
+         skilnaden heile huset dreiar um. */}}
+    <div class="plassmaalar" role="img"
+         aria-label="{{.CurrentEnrolment}} av {{.Capacity}} plassar tekne">
+        {{range $i := seq .CurrentEnrolment}}<span class="plass teken"></span>{{end}}
+        {{range $i := seq (sub .Capacity .CurrentEnrolment)}}<span class="plass"></span>{{end}}
     </div>
+    <div class="event-plassar">
+        <b>{{.CurrentEnrolment}}</b><span class="av">/{{.Capacity}}</span>
+        {{if .Full}}<span class="fullmerke">{{t $.Lang "timeplan.full"}}</span>{{end}}
+    </div>
+    {{end}}
+
     <div class="event-details">
-        <button class="signup-button {{if .IsUserSignedUp}}signed-up{{else if ge .CurrentEnrolment .Capacity}}waitlist{{end}}" 
+        <button class="signup-button {{if .IsUserSignedUp}}signed-up{{else if .Full}}waitlist{{end}}"
                 onclick="signupForClass({{.ID}}); event.stopPropagation();">
-            {{if .IsUserSignedUp}}
-                Avmeld
-            {{else if lt .CurrentEnrolment .Capacity}}
-                Meld på
-            {{else}}
-                Venteliste
-            {{end}}
+            {{if .IsUserSignedUp}}{{t $.Lang "timeplan.cancel_signup"}}
+            {{else if .Full}}{{t $.Lang "timeplan.waitlist"}}
+            {{else}}{{t $.Lang "timeplan.signup"}}{{end}}
         </button>
     </div>
 </div>

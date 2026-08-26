@@ -61,7 +61,7 @@ func shuffleTestData() error {
 	}
 
 	// Studio locations
-	studios := []string{"Studio 1", "Studio 2", "Studio 3", "Hovedstudio", "Yogastudio", "Pilatesstudio"}
+	studios := []string{"Salen", "Reformer"}
 
 	// Time slots (hour of day)
 	timeSlots := []int{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}

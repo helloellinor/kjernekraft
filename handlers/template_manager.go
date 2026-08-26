@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"io/fs"
@@ -119,6 +120,15 @@ func getTemplateFuncs() template.FuncMap {
 		},
 		"formatTime": func(t time.Time, format string) string {
 			return t.In(settings.GetLocation()).Format(format)
+		},
+		// Go sitt Format gjev engelske dag- og maanadsnamn, og det finst
+		// ingen maate aa be honom um noko anna. Difor stend namni her.
+		// «Thursday 27. August» stod i dokka paa ei norsk sida.
+		"norskDag": func(t time.Time) string {
+			return norskeDagar[t.Weekday()]
+		},
+		"norskDato": func(t time.Time) string {
+			return fmt.Sprintf("%s %d. %s", norskeDagar[t.Weekday()], t.Day(), norskeMaanader[t.Month()])
 		},
 		"formatTimeShort": func(t time.Time) string {
 			return t.In(settings.GetLocation()).Format("15:04")
@@ -353,4 +363,20 @@ func skrivKronor(kr int64) string {
 	}
 	b.WriteString("\u00a0kr")
 	return b.String()
+}
+
+// Dag- og maanadsnamn paa norsk. Go kann berre engelsk, og eit
+// grensesnitt som segjer «Thursday» til ein som les nynorsk er ikkje
+// omsett — det er berre delvis skrive.
+var norskeDagar = map[time.Weekday]string{
+	time.Monday: "måndag", time.Tuesday: "tysdag", time.Wednesday: "onsdag",
+	time.Thursday: "torsdag", time.Friday: "fredag", time.Saturday: "laurdag",
+	time.Sunday: "sundag",
+}
+
+var norskeMaanader = map[time.Month]string{
+	time.January: "januar", time.February: "februar", time.March: "mars",
+	time.April: "april", time.May: "mai", time.June: "juni",
+	time.July: "juli", time.August: "august", time.September: "september",
+	time.October: "oktober", time.November: "november", time.December: "desember",
 }
