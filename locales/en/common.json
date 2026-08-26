@@ -378,7 +378,19 @@
     "new_membership": "New membership",
     "applies_to": "applies to",
     "applies_all": "everyone",
-    "applies_student": "students and seniors"
+    "applies_student": "students and seniors",
+    "delete_membership": "Delete",
+    "marked_deleted": "will be deleted",
+    "rule_upgrade": "Members %s upgrade to a more expensive membership.",
+    "rule_combine": "On upgrade, remaining binding is %s the new one.",
+    "rule_downgrade": "Members %s downgrade to a cheaper membership.",
+    "rule_binding": "Members %s switch while binding runs.",
+    "rule_default": "New members get %s.",
+    "kan": "can",
+    "kan_ikkje": "cannot",
+    "lagd_til": "added to",
+    "ikkje_lagd_til": "not added to",
+    "ingen_standard": "no membership"
   },
   "terms": {
     "title": "Terms and conditions"

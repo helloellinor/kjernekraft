@@ -378,7 +378,19 @@
     "new_membership": "Nytt medlemskap",
     "applies_to": "gjelder for",
     "applies_all": "alle",
-    "applies_student": "student og senior"
+    "applies_student": "student og senior",
+    "delete_membership": "Slett",
+    "marked_deleted": "blir slettet",
+    "rule_upgrade": "Medlemmer %s oppgradere til et dyrere medlemskap.",
+    "rule_combine": "Ved oppgradering blir bindingen som står igjen %s den nye.",
+    "rule_downgrade": "Medlemmer %s nedgradere til et billigere medlemskap.",
+    "rule_binding": "Medlemmer %s bytte mens bindingen løper.",
+    "rule_default": "Nye medlemmer får %s.",
+    "kan": "kan",
+    "kan_ikkje": "kan ikke",
+    "lagd_til": "lagt til",
+    "ikkje_lagd_til": "ikke lagt til",
+    "ingen_standard": "ikke noe medlemskap"
   },
   "terms": {
     "title": "Handelsbetingelser"

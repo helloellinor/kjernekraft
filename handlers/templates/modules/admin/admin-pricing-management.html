@@ -32,7 +32,7 @@
                    value="{{.Name}}" aria-label="{{t $.Lang "admin.membership_name"}}">
             <div class="lapprad">
               <input class="lappfelt kort talfelt" type="number" name="pris-{{.ID}}"
-                     value="{{kronerTal .Price}}" min="0" step="10"
+                     value="{{kronerTal .Price}}" min="0" step="1"
                      aria-label="{{t $.Lang "admin.current_price"}}">
               <span class="priseining">{{t $.Lang "membership.price_per_month"}}</span>
               <input class="lappfelt kort talfelt" type="number" name="binding-{{.ID}}"
@@ -47,6 +47,10 @@
                 <option value="alle" {{if not .IsStudentSenior}}selected{{end}}>{{t $.Lang "admin.applies_all"}}</option>
                 <option value="student" {{if .IsStudentSenior}}selected{{end}}>{{t $.Lang "admin.applies_student"}}</option>
               </select>
+              <button type="button" class="slettmerke" data-slett
+                      aria-label="{{t $.Lang "admin.delete_membership"}}"
+                      title="{{t $.Lang "admin.delete_membership"}}">×</button>
+              <span class="slettord">{{t $.Lang "admin.marked_deleted"}}</span>
             </div>
           </div>
           {{end}}
@@ -82,7 +86,7 @@
                  aria-label="{{t .Lang "admin.membership_name"}}">
           <div class="lapprad">
             <input class="lappfelt kort talfelt" type="number" name="pris-NY"
-                   value="0" min="0" step="10" aria-label="{{t .Lang "admin.current_price"}}">
+                   value="0" min="0" step="1" aria-label="{{t .Lang "admin.current_price"}}">
             <span class="priseining">{{t .Lang "membership.price_per_month"}}</span>
             <input class="lappfelt kort talfelt" type="number" name="binding-NY"
                    value="0" min="0" step="1" aria-label="{{t .Lang "admin.commitment_months"}}">
@@ -99,7 +103,12 @@
     </div>
 
     <div data-bolk="reglar" id="bolk-reglar" role="tabpanel" tabindex="0" hidden>
-      {{template "admin_membership_rules" .}}
+      {{/* Reglane hentar seg sjølve. Dei treng data admin-sida ikkje
+           sender, og eit fragment er billegare enn å sende alt til alle
+           faner uansett kva ein ser på. */}}
+      <div hx-get="/api/admin/reglar" hx-trigger="load" hx-swap="innerHTML">
+        <div class="loading-placeholder">…</div>
+      </div>
     </div>
   </div>
 </div>

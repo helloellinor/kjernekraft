@@ -230,6 +230,17 @@ func getTemplateFuncs() template.FuncMap {
 			}
 			return result
 		},
+		// Ei setning med eit val i seg står som «Medlemer %s oppgradere
+		// …» i umsetjingsfila — heile setninga på éin nykel, so han som
+		// omset ser samanhengen. `deling` deler henne ved %s, so malen
+		// kan setje veljaren midt inne i henne.
+		"deling": func(s string) []string {
+			i := strings.Index(s, "%s")
+			if i < 0 {
+				return []string{s, ""}
+			}
+			return []string{s[:i], s[i+2:]}
+		},
 		// `list` saman med `dict` er det som skal til for å gje ein
 		// komponent ei liste med ting frå ein mal — fanerekkja tek ei.
 		"list": func(values ...interface{}) []interface{} { return values },

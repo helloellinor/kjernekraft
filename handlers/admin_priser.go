@@ -29,6 +29,18 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, m := range alle {
 		id := strconv.Itoa(m.ID)
 
+		// Slett fyrst: er raden merkt, er det ingen vits i å skrive
+		// endringar i han fyrst.
+		if r.FormValue("slett-"+id) != "" {
+			// Mjuk sletting: medlemskapet vert sett uverksamt. Nokon kan
+			// ha det, og då skal historikken deira ikkje forsvinne.
+			if err := DB.DeactivateMembership(int64(m.ID)); err != nil {
+				http.Error(w, "kunne ikkje slette", http.StatusInternalServerError)
+				return
+			}
+			continue
+		}
+
 		namn := r.FormValue("namn-" + id)
 		if namn == "" {
 			namn = m.Name

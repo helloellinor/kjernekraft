@@ -35,3 +35,46 @@
         if (fyrste) fyrste.focus();
     });
 })();
+
+// Slett ein rad.
+//
+// Han vert ikkje borte med det same. Han vert *merkt*, og det er dokka
+// som utfører det når du lagrar — same veg som alle andre endringar på
+// sida. Angre-knappen tek han attende, og du ser kva du har gjort før
+// det er gjort.
+(function () {
+    "use strict";
+
+    var skjema = document.getElementById("prisar");
+    if (!skjema) return;
+
+    skjema.addEventListener("click", function (e) {
+        var knapp = e.target.closest("[data-slett]");
+        if (!knapp) return;
+
+        var rad = knapp.closest(".prislapp");
+        var id = rad.getAttribute("data-medlemskap");
+        if (!id) {                       // ein ny rad er berre borte
+            rad.remove();
+            skjema.dispatchEvent(new CustomEvent("endringar:nye"));
+            return;
+        }
+
+        var merke = rad.querySelector('input[name="slett-' + id + '"]');
+        if (merke) {
+            merke.remove();
+            rad.classList.remove("slettast");
+        } else {
+            merke = document.createElement("input");
+            merke.type = "hidden";
+            merke.name = "slett-" + id;
+            merke.value = "1";
+            // Løynde felt vert ikkje talde. Dette skal teljast, so det er
+            // eit felt som *er* der og som er ulikt det lagra.
+            merke.dataset.tel = "1";
+            rad.appendChild(merke);
+            rad.classList.add("slettast");
+        }
+        skjema.dispatchEvent(new CustomEvent("endringar:nye"));
+    });
+})();

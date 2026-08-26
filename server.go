@@ -160,6 +160,8 @@ func main() {
 		r.Post("/api/admin/membership-rules", handlers.SaveMembershipRulesHandler)
 		r.Post("/api/admin/membership-price", handlers.UpdateMembershipPriceHandler)
 		r.Post("/api/admin/priser", handlers.AdminPriserHandler)
+		r.Get("/api/admin/reglar", handlers.AdminReglarHandler)
+		r.Post("/api/admin/reglar", handlers.AdminReglarHandler)
 		r.Post("/api/admin/membership", handlers.CreateMembershipHandler)
 		r.Delete("/api/admin/membership", handlers.DeleteMembershipHandler)
 		r.Get("/api/admin/class/conflict", handlers.RoomConflictHandler)
