@@ -57,8 +57,18 @@
             neste.focus();
         });
 
-        var fraaAdressa = window.location.hash.replace(/^#/, "");
-        vel(ark, fraaAdressa || faner[0].getAttribute("data-bolk"), false);
+        function fraaAdressa() {
+            return window.location.hash.replace(/^#/, "");
+        }
+
+        // Eit hopp som berre skiftar hash lastar ikkje dokumentet paa
+        // nytt. Utan denne lyttaren peika ei lenkja til ei fana rett
+        // nok i adressa, men synte kva som helst.
+        window.addEventListener("hashchange", function () {
+            vel(ark, fraaAdressa(), false);
+        });
+
+        vel(ark, fraaAdressa() || faner[0].getAttribute("data-bolk"), false);
     }
 
     function startAlle() {
