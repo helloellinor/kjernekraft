@@ -1883,18 +1883,33 @@ tbody tr:hover td { background: var(--ark-djup); }
    Kvart felt er skrivbart der det stend. Ingen redigeringsmodus: fyrr
    bytte heile sida ham for at du skulle retta eit telefonnummer.
    =================================================================== */
+/* Spalta er breidare enn ei lesespalta. Namnet er sett som ei
+   sidetittel, og ei sidetittel i 34 rem gjev fjortan teikn paa lina —
+   daa fær ikkje «Kristiansen-» plass, og ordet renn ut or ruta si. */
+.profilsida { max-width: 44rem; }
+
 /* Bolkarne staa for kvar sitt: kven du er, kvar du bur, korleis ein
    naar deg. Lufti millom deim er det som segjer at dei er ulike ting —
    utan ei einaste yverskrift. */
 .profilskjema { display: flex; flex-direction: column; gap: var(--rom-6); }
 
-.lapp { display: flex; flex-direction: column; gap: var(--rom-1); }
+/* `align-items: flex-start` — utan han strekkjer flexen kvart barn ut
+   til full breidd, og daa hjelper det ikkje kva feltet sjølv meiner um
+   storleiken sin. */
+.lapp { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-1); }
 .lapp-kven { gap: var(--rom-2); }
 .lapprad { display: flex; gap: var(--rom-2); }
 
 /* Feltet ligg i arket. Fordjupingi er det einaste som segjer at det er
    eit felt — ingi ramma, ingen understrek — og ho er der heile tidi, so
    ein ser kva som let seg endra utan aa klikka seg gjenom sida. */
+/* Feltet er so breidt som det som stend i det, og ikkje breidare.
+   Fyrr var kvart felt 100 % — ei rekkja like lange bjelkar, same om det
+   stod «Oslo» eller ei heil gata i deim. Ei adressa er ikkje formatert
+   slik; ho hev ujamne linor, og det er nettupp dei ujamne linone som
+   gjer at ho les seg som ei adressa.
+
+   Taket er det same som breidda var: dei veks aldri forbi spalta. */
 .lappfelt {
   font: inherit;
   padding: var(--rom-2) var(--rom-3);
@@ -1903,7 +1918,10 @@ tbody tr:hover td { background: var(--ark-djup); }
   border-radius: 2px;
   box-shadow: var(--fordjuping);
   color: var(--blekk);
-  width: 100%;
+  width: auto;
+  field-sizing: content;
+  min-width: 7rem;
+  max-width: 100%;
 }
 .lappfelt:hover { background: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
 .lappfelt:focus { outline: none; box-shadow: var(--fasett); }
@@ -1911,17 +1929,41 @@ tbody tr:hover td { background: var(--ark-djup); }
 
 /* Namnet er yverskrifti. Ho er stor av di ho er namnet ditt, og
    skrivbar av di ho er eit felt — det er den same tingen. */
-/* Namnet er yverskrifti, men ho lyt faa plass. I 3,4 rem og 125 %
-   breidd rakk «Anna Larsen» ikkje fram — feltet klypte etter «Anna
-   Lars». Eit einlina felt kann ikkje brjota, so storleiken lyt vika. */
-.lappfelt.namnefelt {
-  font-family: var(--skrift-yver);
-  font-size: clamp(1.7rem, 4vw, 2.4rem);
-  font-stretch: var(--vidd-yver); font-weight: 700;
-  line-height: 1.1; letter-spacing: -.005em;
+/* ---- namnet ----
+   Ei yverskrift, ikkje eit felt som ser ut som ei. Ho hev same skrift,
+   same storleik og same ombrot som kvar annan h1 paa staden — ho bryt
+   der ei yverskrift ville broti — og ho er skrivbar.
+
+   Eit <input> kunde ikkje gjera dette: det er einlina, og lange namn
+   vart klypte midt i ordet. */
+.namnefelt {
+  /* Ruta hugsar teksti i staden for spalta. Ho veks med namnet og
+     stoggar ved spaltekanten — same taket som fyrr. */
+  display: inline-block;
+  max-width: 100%;
+  margin: 0;
   padding: var(--rom-2) var(--rom-3);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--blekk) 3%, var(--flate));
+  box-shadow: var(--fordjuping);
+  /* Yverskrifter elles hev `text-wrap: balance`, som flyttar ordi kvar
+     gong du skriv ein bokstav. Her skal teksti staa still medan du
+     skriv, so ho bryt som vanleg tekst. */
+  text-wrap: wrap;
+  /* Ord skal ikkje klyppast. Den globale regelen gjev yverskrifter
+     `overflow-wrap: break-word`, so «Kristiansen-Bjørnstad» vart broti
+     midt inne i «Kristiansen». Her bryt ho berre der eit ord faktisk
+     endar — mellomrom, eller ein bindestrek som alt stend i namnet. */
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  min-height: 1em;
 }
-.lappfelt.kort { width: 10rem; flex: none; }
+.namnefelt:hover { background: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
+.namnefelt:focus { outline: none; box-shadow: var(--fasett); }
+.namnefelt.endra { box-shadow: var(--fordjuping), inset 3px 0 0 var(--togu); }
+.namnefelt.endra:focus { box-shadow: var(--fasett), inset 3px 0 0 var(--togu); }
+.lappfelt.kort { min-width: 0; flex: 0 0 auto; }
 
 /* ---- det endra feltet ----
    Ingen tekst segjer at noko er ulagra. Feltet ber merket sjølv: ei

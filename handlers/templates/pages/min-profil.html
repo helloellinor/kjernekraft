@@ -1,5 +1,5 @@
 {{define "content"}}
-<div class="sida smal">
+<div class="sida profilsida">
     {{/* Adresselapp, ikkje merkelapp-og-verd.
          Ni radar med merkelappen til vinstre og verdet til høgre hadde
          891 pikslar imillom. Ei adressa er *éin* ting med ei form alle
@@ -20,8 +20,20 @@
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
         <div class="lapp lapp-kven">
-            <input class="lappfelt namnefelt" type="text" name="name" value="{{.Name}}"
-                   aria-label="{{t .Lang "profile.full_name"}}" autocomplete="name" required>
+            {{/* Yverskrifta er ei *yverskrift*, ikkje eit felt som ser ut
+                 som ei. Eit <input> er einlina og kann ikkje brjota, so
+                 lange namn vart klypte. Ein contenteditable <h1> bryt
+                 slik all annan tekst paa sida bryt — same skrift, same
+                 lineavstand, same ombrot — og han er framleis skrivbar.
+
+                 Det som vert sendt ligg i eit løynt felt attmed; h1-en
+                 speglar seg dit for kvart tastetrykk. */}}
+            <h1 class="page-title namnefelt" id="namnefelt"
+                contenteditable="plaintext-only" role="textbox"
+                aria-label="{{t .Lang "profile.full_name"}}"
+                spellcheck="false" data-speil="namn-verdi">{{.Name}}</h1>
+            <input type="hidden" name="name" id="namn-verdi" value="{{.Name}}"
+                   data-visast="namnefelt">
             <input class="lappfelt kort" type="date" name="birthdate" value="{{.Birthdate}}"
                    aria-label="{{t .Lang "signup.birthdate"}}" autocomplete="bday">
         </div>
