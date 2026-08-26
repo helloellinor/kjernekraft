@@ -1247,42 +1247,71 @@ func (db *Database) GetEventByID(eventID int64) (*models.Event, error) {
 }
 
 // SignupUserForEvent signs up a user for an event
+// SignupUserForEvent melder ein brukar paa ein time.
+//
+// Tvo ting var gale her. Han las kapasiteten beinveges or events-rada,
+// og etter at rommet vart ein ressurs stend det 0 der naar timen ikkje
+// set si eigi — so `7 >= 0` var sant og *kvar* paamelding svara «event
+// is full». Han lyt rekna ut den same kapasiteten som resten av huset.
+//
+// Og han las fyrst og skreiv etterpaa, utan transaksjon. Reformeren hev
+// fire plassar; tvo som trykkjer paa den siste samstundes kom baae
+// gjenom kontrollen og båe vart melde paa. Talet er ikkje stort nok til
+// at ein kann sjaa burt fraa det.
 func (db *Database) SignupUserForEvent(userID, eventID int64) error {
-	// Check if user is already signed up
+	tx, err := db.Conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
 	var exists int
-	checkQuery := `SELECT COUNT(*) FROM event_signups WHERE user_id = ? AND event_id = ?`
-	err := db.Conn.QueryRow(checkQuery, userID, eventID).Scan(&exists)
-	if err != nil {
+	if err := tx.QueryRow(
+		`SELECT COUNT(*) FROM event_signups WHERE user_id = ? AND event_id = ?`,
+		userID, eventID).Scan(&exists); err != nil {
 		return err
 	}
-
 	if exists > 0 {
-		return fmt.Errorf("user already signed up for this event")
+		return fmt.Errorf("brukaren er alt paameld denne timen")
 	}
 
-	// Check if event has capacity
-	var currentEnrolment, capacity int
-	capacityQuery := `SELECT current_enrolment, capacity FROM events WHERE id = ?`
-	err = db.Conn.QueryRow(capacityQuery, eventID).Scan(&currentEnrolment, &capacity)
-	if err != nil {
+	// Same utrekningi som i GetEventsForWeek: timen si eigi kapasitet um
+	// ho er sett, elles rommet si.
+	var paameldte, plassar int
+	if err := tx.QueryRow(`
+		SELECT e.current_enrolment, COALESCE(NULLIF(e.capacity, 0), r.capacity, 0)
+		FROM events e LEFT JOIN rooms r ON r.id = e.room_id
+		WHERE e.id = ?`, eventID).Scan(&paameldte, &plassar); err != nil {
+		return err
+	}
+	if plassar <= 0 {
+		return fmt.Errorf("timen hev ingi kapasitet sett")
+	}
+	if paameldte >= plassar {
+		return fmt.Errorf("timen er full")
+	}
+
+	if _, err := tx.Exec(
+		`INSERT INTO event_signups (user_id, event_id, signup_date) VALUES (?, ?, ?)`,
+		userID, eventID, time.Now()); err != nil {
 		return err
 	}
 
-	if currentEnrolment >= capacity {
-		return fmt.Errorf("event is full")
-	}
-
-	// Create signup record
-	insertQuery := `INSERT INTO event_signups (user_id, event_id, signup_date) VALUES (?, ?, ?)`
-	_, err = db.Conn.Exec(insertQuery, userID, eventID, time.Now())
+	// Vilkoret stend i UPDATE-en med, so tvo samstundes paameldingar
+	// ikkje kann koma forbi kvarandre jamvel um kontrollen yver skulde
+	// sleppa baae gjenom.
+	res, err := tx.Exec(`
+		UPDATE events SET current_enrolment = current_enrolment + 1
+		WHERE id = ? AND current_enrolment < COALESCE(NULLIF(capacity, 0),
+			(SELECT capacity FROM rooms WHERE rooms.id = events.room_id), 0)`, eventID)
 	if err != nil {
 		return err
 	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return fmt.Errorf("timen er full")
+	}
 
-	// Update event enrolment count
-	updateQuery := `UPDATE events SET current_enrolment = current_enrolment + 1 WHERE id = ?`
-	_, err = db.Conn.Exec(updateQuery, eventID)
-	return err
+	return tx.Commit()
 }
 
 // CancelUserSignupForEvent cancels a user's signup for an event

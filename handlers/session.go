@@ -130,8 +130,22 @@ func SetUserInSession(w http.ResponseWriter, r *http.Request, user *models.User)
 		delete(session.Values, k)
 	}
 	session.Values["user_id"] = int64(user.ID)
-	session.Values[csrfSessionKey] = newToken()
-	return session.Save(r, w)
+
+	// Nytt CSRF-kjennemerke ved innlogging: eit kjennemerke ein
+	// motstandar hev sett fyre innloggingi skal ikkje fylgja med inn.
+	//
+	// Men daa lyt kaka fylgja med same vegen. Gjorde ho ikkje det, stod
+	// økti med eitt kjennemerke og kaka med eit anna, og den fyrste
+	// endringi etter innlogging fekk 403. I lesaren gjekk det godt av di
+	// umleidingi er ein GET som stiller deim likt att — men det er hell,
+	// ikkje ein maate aa gjera det paa.
+	nytt := newToken()
+	session.Values[csrfSessionKey] = nytt
+	if err := session.Save(r, w); err != nil {
+		return err
+	}
+	settCSRFKaka(w, nytt)
+	return nil
 }
 
 // ClearUserSession sletter økti.

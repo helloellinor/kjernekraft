@@ -811,10 +811,21 @@ tbody tr:hover td { background: var(--ark-djup); }
 }
 .dokkkven { margin: 0; font-size: .88rem; color: var(--blekk-lys); }
 .dokknaar { display: flex; flex-direction: column; }
-.dokkdag { font-size: .82rem; color: var(--blekk-lys); text-transform: capitalize; }
+/* capitalize tek *kvart* ord, og daa vart «torsdag 27. august» til
+   «Torsdag 27. August». Norsk skriv ikkje maanadsnamn med stor
+   bokstav; berre den fyrste bokstaven i linja skal upp. */
+.dokkdag { font-size: .82rem; color: var(--blekk-lys); }
+.dokkdag::first-letter { text-transform: uppercase; }
 .dokkklokke { font-family: var(--skrift-tal); font-size: 1.05rem; }
 .dokkplassar { min-width: 9rem; }
-.dokkhandling { margin-left: auto; }
+.dokkhandling { margin-left: auto; display: flex; flex-direction: column; gap: var(--rom-2); align-items: stretch; }
+
+/* Svaret fraa tenaren stend i dokka, ikkje i ei varselrute. Ei
+   varselrute stel fokus og lyt lukkast; her stend det attmed knappen
+   som utløyste det, og kvarv naar du vel noko anna. */
+.dokkmelding { margin: 0; font-size: .82rem; color: var(--blekk-lys); max-width: 22rem; }
+.dokkmelding.gale { color: var(--aatvaring); }
+.dagmerke[data-paameld="true"] { border-color: var(--klas); background: var(--merke-svak); }
 .dokklukk {
   position: absolute; top: var(--rom-2); right: var(--rom-3);
   background: none; border: 0; padding: 0 var(--rom-2);
