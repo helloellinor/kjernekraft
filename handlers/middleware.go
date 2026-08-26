@@ -22,6 +22,12 @@ const (
 // basesoknader.
 func WithUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// I utvikling skal alt som ligg paa disken lesast paa nytt —
+		// malar, stilark og umsetjingar. Elles ser ein nykelen sjølv og
+		// trur ein hev skrive han gale.
+		if IsDevelopment() {
+			LastUmsetjingarPaaNytt()
+		}
 		if id, ok := sessionUserID(r); ok {
 			if user, err := DB.GetUserByID(id); err == nil {
 				r = withUser(r, user)

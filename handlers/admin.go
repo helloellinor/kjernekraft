@@ -53,6 +53,11 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	folk, err := AdminDB.FolkOversyn()
+	if err != nil {
+		log.Printf("folkeoversyn: %v", err)
+	}
+
 	rooms, err := AdminDB.GetRooms()
 	if err != nil {
 		log.Printf("kunde ikkje henta rom: %v", err)
@@ -60,6 +65,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := map[string]interface{}{
 		"Rooms":          rooms,
+		"Folk":           folk,
 		"Title":          t(lang, "admin.title"),
 		"Users":          users,
 		"Events":         events,

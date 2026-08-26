@@ -28,6 +28,16 @@
             faner[j].tabIndex = vald ? 0 : -1;
         }
 
+        // Eit felt med `autofocus` i ein bolk som var gøymd naar sida
+        // lasta fekk aldri fokus — nettlesaren hev alt gjenge forbi det.
+        // Difor set me det naar bolken vert synleg.
+        if (rom) {
+            var f = rom.querySelector('[data-bolk="' + bolk + '"] [autofocus]');
+            if (f && document.activeElement !== f) {
+                try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); }
+            }
+        }
+
         if (skrivAdresse && window.history && window.history.replaceState) {
             window.history.replaceState(null, "", "#" + bolk);
         }

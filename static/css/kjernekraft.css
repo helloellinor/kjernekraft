@@ -1595,3 +1595,85 @@ tbody tr:hover td { background: var(--ark-djup); }
   color: var(--blekk-svakt); margin: 0; min-height: 1.4em;
 }
 .fylgja.gale { color: var(--aatvaring); }
+
+/* ===================================================================
+   folk
+   Ein tabell er rett naar ein samanliknar rader paa tvers. Her
+   samanliknar ingen nokon ting: ein slær upp *ein* person, av di det
+   stend ein person framfor deg. Difor er søkjefeltet skjermen, og
+   rada opnar seg paa staden — ein slær ikkje upp ein person ved aa
+   forlata lista yver folk.
+   =================================================================== */
+.folk-sok { display: flex; align-items: baseline; gap: var(--rom-3); margin-bottom: var(--rom-4); }
+
+.soke {
+  flex: 1 1 22rem; max-width: 32rem;
+  font-size: 1.05rem;
+  padding: var(--rom-3) var(--rom-4);
+}
+.folk-tal { font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-svakt); }
+
+.folk-liste { list-style: none; margin: 0; padding: 0;
+  border: 1px solid var(--haarlina); background: var(--flate); }
+
+.folk-rad { border-bottom: 1px solid var(--haarlina); }
+.folk-rad:last-child { border-bottom: 0; }
+.folk-rad[hidden] { display: none; }
+
+.folk-hovud {
+  width: 100%; text-align: left;
+  display: grid; grid-template-columns: minmax(8rem, 1.2fr) minmax(0, 1.4fr) auto;
+  gap: var(--rom-4); align-items: baseline;
+  padding: var(--rom-3) var(--rom-4);
+  background: none; border: 0; border-radius: 0;
+  font-family: var(--skrift); text-transform: none; letter-spacing: 0;
+  cursor: pointer;
+}
+.folk-hovud:hover { background: var(--ark-djup); color: inherit; border: 0; }
+.folk-namn { font-size: 1.05rem; color: var(--blekk); font-weight: 500; }
+
+/* Kva han held, i produktfargen. Turkis medlemskap, rosa klipp — same
+   regelen som paa korti, so ein kjenner det att utan aa lesa. */
+.folk-held { display: flex; flex-wrap: wrap; gap: var(--rom-2); }
+.held {
+  display: inline-block; flex: 0 0 auto;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .74rem; letter-spacing: .07em; text-transform: uppercase;
+  padding: .15rem .45rem; border: 1px solid;
+  border-radius: 2px; white-space: nowrap;
+}
+/* Namni er namnsette med vilje. «.klipp» aaleine er alt ei rute i
+   klippekortmaalaren, og eit merke som fekk den regelen strekte seg
+   yver heile spalta. */
+.held-medlem { color: var(--klas); border-color: color-mix(in srgb, var(--klas) 45%, transparent); }
+.held-klipp  { color: var(--togu); border-color: color-mix(in srgb, var(--togu) 45%, transparent); }
+.held-ingen  { color: var(--blekk-svakt); border-color: var(--haarlina); }
+
+/* Eit frose eller kansellert medlemskap er ikkje i live, og skal difor
+   ikkje bera livsfargen. Same regelen som livsmerket. */
+.held-medlem.stod-paused, .held-medlem.stod-cancelled {
+  color: var(--blekk-lys); border-color: var(--haarlina);
+}
+.held-medlem.stod-freeze_requested { border-style: dashed; }
+
+.folk-sist { font-family: var(--skrift-tal); font-size: .8rem; color: var(--blekk-svakt); text-align: right; }
+
+/* Den som treng eit svar stend fyrst i auga, ikkje fyrst i lista. */
+.folk-rad.treng-svar { border-left: 3px solid var(--togu); }
+
+.folk-meir { padding: 0 var(--rom-4) var(--rom-4) var(--rom-4); }
+.folk-detalj {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--rom-1) var(--rom-4); margin: 0; max-width: 34rem;
+}
+.folk-detalj dt {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+}
+.folk-detalj dd { margin: 0; font-size: .92rem; }
+
+@media (max-width: 48rem) {
+  .folk-hovud { grid-template-columns: minmax(0, 1fr); gap: var(--rom-1); }
+  .folk-sist { text-align: left; }
+}

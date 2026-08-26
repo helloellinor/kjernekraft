@@ -267,7 +267,20 @@
     "eg_teacher": "Kristina",
     "length_minutes": "Lengd i minutt",
     "create_class": "Legg til",
-    "room_busy": "Rommet er uppteke"
+    "room_busy": "Rommet er uppteke",
+    "search_people": "Søk etter namn, e-post eller telefon",
+    "clips_left": "klipp att",
+    "holds_nothing": "ingen ting",
+    "never_here": "aldri vore her",
+    "of_clips": "av",
+    "classes_last_year": "Timar siste året",
+    "no_people": "Ingen folk enno",
+    "ago_today": "i dag",
+    "ago_yesterday": "i går",
+    "ago_days": "for %d dagar sidan",
+    "ago_weeks": "for %d veker sidan",
+    "ago_months": "for %d månader sidan",
+    "people": "folk"
   },
   "terms": {
     "title": "Handelsvilkår"
