@@ -47,8 +47,19 @@ func main() {
 	r.Use(handlers.WithUser)
 	r.Use(handlers.CSRF)
 
-	// Serve static files
-	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+	// Serve static files.
+	//
+	// I utvikling med `no-store`: lesaren bufrar elles CSS og JS, og daa
+	// ser ein sine eigne endringar fyrst etter ei hard oppdatering. Det
+	// er ei felle ein gjeng i om att og om att, av di sida *ser* rett ut
+	// — ho er berre gamal.
+	statiske := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
+	r.Handle("/static/*", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if handlers.IsDevelopment() {
+			w.Header().Set("Cache-Control", "no-store, must-revalidate")
+		}
+		statiske.ServeHTTP(w, req)
+	}))
 
 	// ---- opne rutor ----
 	// Alt som lyt naaast fyre innloggingi, og ikkje eit einaste kall meir.

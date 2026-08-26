@@ -307,8 +307,15 @@ func (tm *TemplateManager) loadComponentTemplate(name, path string) {
 	tm.templates[name] = parsed
 }
 
-// GetTemplate returns a template by name
+// GetTemplate returns a template by name.
+//
+// I utvikling vert malarne lesne paa nytt for kvar soknad, so ei endring
+// i ei .html-fil syner seg ved neste oppdatering — utan omstart, og utan
+// aa lura paa um ein ser det nye eller det gamle.
 func (tm *TemplateManager) GetTemplate(name string) (*template.Template, bool) {
+	if IsDevelopment() {
+		tm.loadTemplates()
+	}
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
 	tmpl, exists := tm.templates[name]
