@@ -8,21 +8,25 @@
          i eit sidetal — og pilene tek deg eitt steg naar ein ikkje veit
          nummeret. Nedfallslista er burte: ho var eit steg til for noko
          ein alt kunde skriva. */}}
+    {{/* «Timeplan denne uka» les seg som ei setning; vikenummeret gjer
+         det ikkje. Difor stend ordet i tittelen, og talet ligg i ein
+         meny under — for den som veit kva veke han vil til.
+
+         Menyen hev ingi flata. Talet ligg berre der, i tittelskrifta,
+         og tek ljosstyrken sin fraa det som ligg bak. Ei rute kring
+         hadde gjort det til eit skjema; utan rute er det framleis
+         tittelen, berre skrivbar. */}}
     <header class="timehovudlinje">
         <h1 class="page-title">
             {{t .Lang "timeplan.title"}}<span class="vekeveljar">
                 <button type="button" class="vekepil" onclick="navigateWeek(-1)"
                         {{if not .CanGoBack}}disabled{{end}}
-                        aria-label="{{t .Lang "timeplan.prev_week"}}">&lsaquo;</button><input
-                        type="text" class="vekefelt" id="veke-felt"
-                        value="{{.WeekNumber}}" inputmode="numeric" maxlength="2"
-                        autocomplete="off" spellcheck="false"
-                        data-veke="{{.WeekNumber}}" data-offset="{{.WeekOffset}}"
-                        aria-label="{{t .Lang "timeplan.week"}}"><button
+                        aria-label="{{t .Lang "timeplan.prev_week"}}">&lsaquo;</button><button
+                        type="button" class="vekeord" id="veke-knapp"
+                        aria-expanded="false" aria-controls="veke-meny">{{.WeekTitle}}</button><button
                         type="button" class="vekepil" onclick="navigateWeek(1)"
                         aria-label="{{t .Lang "timeplan.next_week_btn"}}">&rsaquo;</button>
             </span>
-            <span class="vekeord">{{.WeekTitle}}</span>
         </h1>
 
         <div class="filters">
@@ -38,6 +42,15 @@
                 <option value="{{.}}" {{if eq . $.SelectedClass}}selected{{end}}>{{.}}</option>
                 {{end}}
             </select>
+        </div>
+
+        <div class="vekemeny" id="veke-meny" hidden>
+            <input type="text" class="vekefelt" id="veke-felt"
+                   value="{{.WeekNumber}}" inputmode="numeric" maxlength="2"
+                   autocomplete="off" spellcheck="false"
+                   data-veke="{{.WeekNumber}}" data-offset="{{.WeekOffset}}"
+                   aria-label="{{t .Lang "timeplan.week"}}">
+            <span class="vekehint">{{t .Lang "timeplan.type_week"}}</span>
         </div>
     </header>
 

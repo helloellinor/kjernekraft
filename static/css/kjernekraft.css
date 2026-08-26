@@ -181,6 +181,16 @@
 }
 
 /* ---- grunnen ---- */
+/* hidden-merket skal alltid vinna.
+   Nettlesaren gjev [hidden] display:none gjenom si eigi stilbok, og ei
+   kvar klassa med display: flex slær henne. Vikemenyen stod difor open
+   yver rutenetet fraa fyrste augneblinken, utan at nokon hadde bede um
+   det — og fanebolkarne hadde same lyten, dei stod berre alltid opne.
+
+   Dette er den eine staden i stilarket der !important er rett: det er
+   ikkje ein farge eller ei breidd, det er «finst eller finst ikkje». */
+[hidden] { display: none !important; }
+
 *, *::before, *::after { box-sizing: border-box; }
 
 /* Tekst skal halda seg innanfor det ho stend i. Eit langt ord — og
@@ -727,7 +737,7 @@ tbody tr:hover td { background: var(--ark-djup); }
   margin-left: .45em; vertical-align: baseline;
 }
 
-.page-title .vekefelt {
+.vekemeny .vekefelt {
   /* Talet er ein del av tittelen, ikkje eit felt paa honom. Ingi ramma,
      ingi flata — berre tale i den same skrifti, og ein blinkande markør
      som segjer at ein kann skriva i det.
@@ -736,7 +746,8 @@ tbody tr:hover td { background: var(--ark-djup); }
      staden for aa liggja *paa* det. Paa eit ljost ark mørknar det, paa
      eit mørkt lysnar det — same tale, same relasjon til grunnen, utan
      at nokon skriv tvo fargar. */
-  font-family: inherit; font-size: inherit;
+  font-family: var(--skrift-yver);
+  font-size: clamp(2rem, 5vw, 3.4rem);
   font-stretch: var(--vidd-tittel); font-weight: 700;
   letter-spacing: inherit; line-height: 1;
   width: 2.2ch; field-sizing: content;
@@ -747,19 +758,42 @@ tbody tr:hover td { background: var(--ark-djup); }
   caret-color: var(--klas);
   text-align: center;
 }
-:root:not([data-theme="light"]) .page-title .vekefelt { mix-blend-mode: screen; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .page-title .vekefelt { mix-blend-mode: multiply; } }
-:root[data-theme="dark"] .page-title .vekefelt { mix-blend-mode: screen; }
+:root:not([data-theme="light"]) .vekemeny .vekefelt { mix-blend-mode: screen; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .vekemeny .vekefelt { mix-blend-mode: multiply; } }
+:root[data-theme="dark"] .vekemeny .vekefelt { mix-blend-mode: screen; }
 
-.page-title .vekefelt:focus { outline: none; box-shadow: none; background: none; border: 0; }
-.page-title .vekefelt::selection { background: color-mix(in srgb, var(--klas) 35%, transparent); }
+.vekemeny .vekefelt:focus { outline: none; box-shadow: none; background: none; border: 0; }
+.vekemeny .vekefelt::selection { background: color-mix(in srgb, var(--klas) 35%, transparent); }
 
-/* Ordet stend attmed og er berre eit ord — «denne uka» — so ein ser kva
-   talet tyder utan aa rekna. */
+/* Ordet er knappen. «Timeplan denne uka» les seg som ei setning; eit
+   vikenummer i tittelen gjer det ikkje. Talet ligg i menyen under, for
+   den som veit kva veke han vil til. */
 .vekeord {
-  font-stretch: var(--vidd-merkelapp); font-weight: 400;
-  font-size: .4em; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--blekk-svakt); margin-left: .35em; white-space: nowrap;
+  font-family: inherit;
+  font-stretch: var(--vidd-yver); font-weight: 400;
+  font-size: .52em; letter-spacing: .01em; text-transform: none;
+  color: var(--blekk-lys); background: none; border: 0;
+  border-bottom: 2px solid var(--haarlina);
+  padding: 0 .12em; line-height: 1.1; cursor: pointer; white-space: nowrap;
+}
+.vekeord:hover { color: var(--blekk); border-color: var(--klas); background: none; }
+.vekeord[aria-expanded="true"] { color: var(--blekk); border-color: var(--klas); }
+
+/* ---- vikemenyen ----
+   Ingi flata. Talet ligg berre der, i tittelskrifta, og tek ljosstyrken
+   sin fraa det som ligg bak. Ei rute kring hadde gjort det til eit
+   skjema; utan rute er det framleis tittelen, berre skrivbar. */
+.vekemeny {
+  position: absolute; z-index: 20;
+  top: 100%; left: 0;
+  display: flex; align-items: baseline; gap: var(--rom-3);
+  padding: var(--rom-2) 0 0;
+  background: none; border: 0; box-shadow: none;
+}
+.vekehint {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
 }
 
 .veketittel, .vekepil {
@@ -865,16 +899,20 @@ tbody tr:hover td { background: var(--ark-djup); }
 
 /* Lengdi høyrer til namnet — ho er den same kva dag timen gjeng. */
 .timetittel .lengd {
-  font-family: var(--skrift-tal); font-size: .72rem; font-weight: 400;
+  font-family: var(--skrift-tal); font-size: .78rem; font-weight: 400;
   font-stretch: normal; letter-spacing: 0;
   color: var(--blekk-svakt); white-space: nowrap;
 }
 
+/* Namnet paa timen er det ein leitar etter i lista, og difor det einaste
+   som skal lesast paa avstand. Det stod i 1,05 rem — same storleik som
+   læraren under — og daa maatte ein lesa båe for aa finna kva som var
+   kva. */
 .timetittel {
   font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
-  font-weight: 500; font-size: 1.05rem; margin: 0;
+  font-weight: 600; font-size: 1.55rem; line-height: 1.05; margin: 0;
 }
-.timekven { margin: 0; font-size: .86rem; color: var(--blekk-lys); }
+.timekven { margin: .1rem 0 0; font-size: .92rem; color: var(--blekk-lys); }
 .timerom { color: var(--blekk); font-weight: 500; }
 
 /* ---- dagmerket ----

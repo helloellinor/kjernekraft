@@ -11,7 +11,20 @@
     "use strict";
 
     var felt = document.getElementById("veke-felt");
-    if (!felt) return;
+    var knapp = document.getElementById("veke-knapp");
+    var meny = document.getElementById("veke-meny");
+    if (!felt || !knapp || !meny) return;
+
+    function opna(vis) {
+        meny.hidden = !vis;
+        knapp.setAttribute("aria-expanded", vis ? "true" : "false");
+        if (vis) felt.focus();
+    }
+
+    knapp.addEventListener("click", function () { opna(meny.hidden); });
+    document.addEventListener("click", function (e) {
+        if (!meny.hidden && !meny.contains(e.target) && e.target !== knapp) opna(false);
+    });
 
     var naa = parseInt(felt.dataset.veke, 10);
     var naaOffset = parseInt(felt.dataset.offset, 10);
@@ -40,7 +53,7 @@
     felt.addEventListener("blur", gaa);
     felt.addEventListener("keydown", function (e) {
         if (e.key === "Enter") { e.preventDefault(); felt.blur(); }
-        if (e.key === "Escape") { felt.value = naa; felt.blur(); }
+        if (e.key === "Escape") { felt.value = naa; opna(false); knapp.focus(); }
     });
 
     // Tvo siffer *er* ferdig skrive; daa treng ein ikkje trykkja noko.
