@@ -1,34 +1,31 @@
 {{define "content"}}
 
 
-<div class="sida">
-    <h1 class="page-title">Behandle klipp</h1>
-    
-    <!-- Top section with user's existing klippekort and charges -->
-    <div class="top-section two-column-grid">
-        <div class="module no-border klippekort-mine-module">
-            <h2 class="module-title">Klippekorta mine</h2>
+<h1 class="page-title">Behandle klipp</h1>
+
+    <div class="two-column-grid">
+        <section class="content-section">
+            <h2 class="section-title">Klippekorta mine</h2>
             <div id="user-klippekort-container">
                 <!-- This will be loaded via AJAX -->
                 <div class="loading-placeholder">Laster klippekort...</div>
             </div>
-        </div>
-        
-        <div class="module no-border charges-module">
-            <h2 class="module-title">Belastninger</h2>
+        </section>
+
+        <section class="content-section">
+            <h2 class="section-title">Belastninger</h2>
             <div id="klippekort-charges-container">
                 <div class="loading-placeholder">Laster belastninger...</div>
             </div>
-        </div>
+        </section>
     </div>
-    
-    <!-- Step 1: Category Selection -->
-    <h1 class="page-title">Kjøp klipp</h1>
+
+    <h2 class="section-title">Kjøp klipp</h2>
     <p class="page-description">
         Velg type trening og antall klipp. Jo flere klipp du kjøper, desto mindre blir prisen per økt.
     </p>
-    <div class="step" id="step1">
-        <h2 class="step-title">Steg 1: Velg type trening</h2>
+    <section class="content-section">
+        <h2 class="section-title">Steg 1: Velg type trening</h2>
         <div class="categories-grid">
             <div class="category-card" data-category="gruppetimer-sal" onclick="selectCategory('gruppetimer-sal')">
                 <div class="category-icon">🧘‍♀️</div>
@@ -66,11 +63,11 @@
                 <p class="category-description">Avslapning, meditasjon og stresshåndtering</p>
             </div>
         </div>
-    </div>
-    
+    </section>
+
     <!-- Step 2: Package Selection for each category -->
     <div class="packages-section" id="packages-gruppetimer-sal">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Gruppetimer Sal</h2>
+        <h2 class="section-title">Steg 2: Velg antall klipp for Gruppetimer Sal</h2>
         <div class="packages-grid">
             <div class="package-card" data-package="gruppetimer-1" data-package-id="1" onclick="selectPackage('gruppetimer-sal', 1, 250, 'Prøv en gang')">
                 <h3 class="package-name">1 klipp</h3>
@@ -109,7 +106,7 @@
     
     <!-- Reformer/Apparatus packages -->
     <div class="packages-section" id="packages-reformer-apparatus">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Reformer/Apparatus</h2>
+        <h2 class="section-title">Steg 2: Velg antall klipp for Reformer/Apparatus</h2>
         <div class="packages-grid">
             <div class="package-card" data-package="reformer-1" data-package-id="4" onclick="selectPackage('reformer-apparatus', 1, 300, 'Prøv en gang')">
                 <h3 class="package-name">1 klipp</h3>
@@ -148,7 +145,7 @@
     
     <!-- Self Practice packages -->
     <div class="packages-section" id="packages-self-practice">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Self Practice Pilates Apparatus</h2>
+        <h2 class="section-title">Steg 2: Velg antall klipp for Self Practice Pilates Apparatus</h2>
         <div class="packages-grid">
             <div class="package-card" data-package="self-practice-5" onclick="selectPackage('self-practice', 5, 800, 'Perfekt for å prøve ut')">
                 <h3 class="package-name">5 klipp</h3>
@@ -187,7 +184,7 @@
     
     <!-- Online Gruppetimer packages -->
     <div class="packages-section" id="packages-online-gruppetimer">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Online Gruppetimer</h2>
+        <h2 class="section-title">Steg 2: Velg antall klipp for Online Gruppetimer</h2>
         <div class="packages-grid">
             <div class="package-card" data-package="online-5" onclick="selectPackage('online-gruppetimer', 5, 600, 'Perfekt for å prøve ut')">
                 <h3 class="package-name">5 klipp</h3>
@@ -226,7 +223,7 @@
     
     <!-- Personlig Trening packages -->
     <div class="packages-section" id="packages-personlig-trening">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Personlig Trening</h2>
+        <h2 class="section-title">Steg 2: Velg antall klipp for Personlig Trening</h2>
         <div class="packages-grid">
             <div class="package-card" data-package="personlig-5" onclick="selectPackage('personlig-trening', 5, 4500, 'Perfekt for å prøve ut')">
                 <h3 class="package-name">5 klipp</h3>
@@ -265,7 +262,7 @@
     
     <!-- Stressmestring packages -->
     <div class="packages-section" id="packages-stressmestring">
-        <h2 class="step-title">Steg 2: Velg antall klipp for Stressmestring</h2>
+        <h2 class="section-title">Steg 2: Velg antall klipp for Stressmestring</h2>
         <div class="packages-grid">
             <div class="package-card" data-package="stress-5" onclick="selectPackage('stressmestring', 5, 750, 'Perfekt for å prøve ut')">
                 <h3 class="package-name">5 klipp</h3>
@@ -303,17 +300,14 @@
     </div>
     
     <!-- Purchase Section -->
-    <div class="purchase-section" id="purchase-section">
-        <h2 class="purchase-title">Bekreft ditt valg</h2>
-        <div class="selected-details">
-            <h3 id="selected-package-name"></h3>
-            <p id="selected-package-description"></p>
-            <div class="price" id="selected-package-price"></div>
-            <p id="selected-package-details"></p>
-        </div>
-        <button class="purchase-btn" onclick="purchasePackage()">Kjøp klippekort</button>
-    </div>
-</div>
+    <section class="content-section" id="purchase-section">
+        <h2 class="section-title">Bekreft ditt valg</h2>
+        <h3 class="card-title" id="selected-package-name"></h3>
+        <p id="selected-package-description"></p>
+        <div class="price" id="selected-package-price"></div>
+        <p id="selected-package-details"></p>
+        <button class="btn-primary" onclick="purchasePackage()">Kjøp klippekort</button>
+    </section>
 
 <script>
     let selectedCategory = null;

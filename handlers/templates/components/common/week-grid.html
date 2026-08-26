@@ -33,7 +33,12 @@
                  tvo — ein ser kva som *ikkje* gjeng, og det er halve
                  spursmaalet naar ein set upp ei vika. */}}
             <span class="dagmerke daud{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}"
-                  style="--dag: {{.Kolonne}}" aria-hidden="true"></span>
+                  style="--dag: {{.Kolonne}}" aria-hidden="true">
+                <svg class="merkeform" viewBox="0 0 {{merkeBreidd}} {{merkeHogd}}"
+                     width="{{merkeBreidd}}" height="{{merkeHogd}}" aria-hidden="true" focusable="false">
+                    <path class="daudkant" d="{{merkeDaud}}"/>
+                </svg>
+            </span>
             {{end}}
             {{end}}
         </div>

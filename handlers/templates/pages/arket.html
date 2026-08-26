@@ -135,12 +135,13 @@
     <section class="verkstad-bolk" id="dagmerket">
         <h2 class="section-title">Dagmerket</h2>
         <p class="verkstad-regel">
-            Merket er ståande og ikkje liggjande: eit kvadratisk merke
-            les seg som ein knapp, eit ståande som eit kort. Tri ting bur
-            i det — klokkeslettet paa toppkanten, urskiva i midten, tale
-            nedst — og fyllingi <em>er</em> botnlina. Skiva er ikkje eit
-            ur ein les av paa minuttet; forma skal segja morgon eller
-            kveld fyre du hev lese eit siffer.
+            Eit rektangulært ur: skiltet med dagen paa toppkanten, av di
+            dagen er det ein spør um fyrst; firkanta skiva der indeksane
+            ligg paa eit rektangulært spor; kakestykke som syner kor stor
+            bit av dagen timen tek; vindauga med klokkeslettet i
+            klartekst; og ein maalar i hyrna som <em>tømest</em> medan
+            timen fyllest. Er timen full, er det ikkje noko aa maala, og
+            maalaren vert ei lapp med eitt ord i.
         </p>
         <div class="verkstad-par">
             <div class="verkstad-prova" data-tema="ljos" data-theme="light">{{template "prov_dagmerket" .}}</div>
@@ -516,40 +517,16 @@
 {{end}}
 
 {{define "prov_dagmerket"}}
-{{/* Fem klokkeslett gjenom dagen, so ein ser um forma segjer noko fyre
-     tale gjer det. Vinklane er rekna som paa eit ur: timen er
-     (time%12)*30 + minutt*0.5, minutten er minutt*6. */}}
+{{/* Merki her gjeng gjenom NyFramsyning som alt anna. Dei er ikkje ei
+     teikning av komponenten — dei er komponenten, med faste tal so
+     prøvone ikkje skifter medan ein ser paa deim. */}}
 <div class="merkerad">
-    <button type="button" class="dagmerke" style="--fyll: 39%">
-        <span class="klokketal">07:15</span>
-        <span class="merkeur"><span class="urskiva" style="--time: 217.5deg; --minutt: 90deg"></span></span>
-        <span class="merketal">7<span class="av">/18</span></span>
-    </button>
-    <button type="button" class="dagmerke" style="--fyll: 61%">
-        <span class="klokketal">09:00</span>
-        <span class="merkeur"><span class="urskiva" style="--time: 270deg; --minutt: 0deg"></span></span>
-        <span class="merketal">11<span class="av">/18</span></span>
-    </button>
-    <button type="button" class="dagmerke" style="--fyll: 22%">
-        <span class="klokketal">12:30</span>
-        <span class="merkeur"><span class="urskiva" style="--time: 15deg; --minutt: 180deg"></span></span>
-        <span class="merketal">4<span class="av">/18</span></span>
-    </button>
-    <button type="button" class="dagmerke full" style="--fyll: 100%">
-        <span class="klokketal">17:30</span>
-        <span class="merkeur"><span class="urskiva" style="--time: 165deg; --minutt: 180deg"></span></span>
-        <span class="merketal">18<span class="av">/18</span></span>
-    </button>
-    <button type="button" class="dagmerke idag" style="--fyll: 50%">
-        <span class="klokketal">20:00</span>
-        <span class="merkeur"><span class="urskiva" style="--time: 240deg; --minutt: 0deg"></span></span>
-        <span class="merketal">9<span class="av">/18</span></span>
-    </button>
-    <button type="button" class="dagmerke umme" style="--fyll: 83%" disabled>
-        <span class="klokketal">06:30</span>
-        <span class="merkeur"><span class="urskiva" style="--time: 195deg; --minutt: 180deg"></span></span>
-        <span class="merketal">15<span class="av">/18</span></span>
-    </button>
-    <span class="dagmerke daud" aria-hidden="true"></span>
+    {{range .Merkeprovor}}{{template "dagmerke" .}}{{end}}
+    <span class="dagmerke daud" aria-hidden="true">
+        <svg class="merkeform" viewBox="0 0 {{merkeBreidd}} {{merkeHogd}}"
+             width="{{merkeBreidd}}" height="{{merkeHogd}}" aria-hidden="true" focusable="false">
+            <path class="daudkant" d="{{merkeDaud}}"/>
+        </svg>
+    </span>
 </div>
 {{end}}

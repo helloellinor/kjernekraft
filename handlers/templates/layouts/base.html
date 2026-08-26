@@ -20,6 +20,10 @@
     <!-- Leidingi stend her, éin gong. Ho vart teikna av kvar av dei sju
          sidone kvar for seg fyrr — og README-en hev heile tidi paastade
          at ho stod her. -->
+    {{/* Filtri timemerket nyttar. Éin gong paa sida: dei ber ingen farge,
+         so alle merki kann dela deim. */}}
+    {{template "merke_defs" .}}
+
     {{if .UserName}}{{template "navigation" .}}{{end}}
 
     <main>

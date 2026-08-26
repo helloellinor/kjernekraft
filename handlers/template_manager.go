@@ -43,6 +43,11 @@ func GetTemplateManager() *TemplateManager {
 func getTemplateFuncs() template.FuncMap {
 	settings := config.GetInstance()
 	return template.FuncMap{
+		// Ruta utan time. Ho er den same figuren for alle, so han vert
+		// rekna ein gong og ikkje per rute.
+		"merkeDaud":   DaudSilhuett,
+		"merkeBreidd": func() float64 { return MerkeBreidd },
+		"merkeHogd":   func() float64 { return MerkeHogd },
 		"sub": func(a, b int) int {
 			return a - b
 		},
