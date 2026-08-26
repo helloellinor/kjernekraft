@@ -1,166 +1,86 @@
 {{define "admin_pricing_management"}}
+{{/* Prisane.
+
+     Same form som profilen: kvart felt er skrivbart der det står, ingen
+     redigeringsmodus, og eit felt som er ulikt det lagra ber merket
+     sjølv — ei linje i margen. Dokka nedst ber handlinga og talet på
+     endringar.
+
+     Før hadde kvar rad tre knappar: «Rediger pris», «Lagre», «Avbryt»,
+     der dei to siste stod gøymde til du trykte den første. Tre knappar
+     per rad, ganga med talet på medlemskap, for å endre eitt tal. */}}
 <h2 class="section-title">{{t .Lang "admin.pricing_management"}}</h2>
 
-<h3 class="undertittel">{{t .Lang "admin.membership_pricing"}}</h3>
-<table class="pricing-table">
-                <thead>
-                    <tr>
-                        <th>{{t .Lang "admin.membership_name"}}</th>
-                        <th>{{t .Lang "admin.current_price"}}</th>
-                        <th>{{t .Lang "admin.commitment_months"}}</th>
-                        <th>{{t .Lang "admin.student_senior"}}</th>
-                        <th>{{t .Lang "admin.actions"}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{range .Memberships}}
-                    <tr data-membership-id="{{.ID}}">
-                        <td>{{.Name}}</td>
-                        <td class="price-cell">
-                            <span class="price-display" data-oere="{{.Price}}">{{kroner .Price}}</span>
-                            <input type="number" class="price-input" value="{{kronerTal .Price}}" min="0" step="10" style="display: none;" aria-label="{{t $.Lang "admin.price_in_kroner"}}">
-                        </td>
-                        <td>{{.CommitmentMonths}}</td>
-                        <td>{{if .IsStudentSenior}}Ja{{else}}Nei{{end}}</td>
-                        <td class="actions">
-                            <button class="edit-price-btn" onclick="editPrice({{.ID}})">{{t $.Lang "admin.edit_price"}}</button>
-                            <button class="save-price-btn" onclick="savePrice({{.ID}})" style="display: none;">{{t $.Lang "admin.save"}}</button>
-                            <button class="cancel-price-btn" onclick="cancelEditPrice({{.ID}})" style="display: none;">{{t $.Lang "admin.cancel"}}</button>
-                        </td>
-                    </tr>
-                    {{end}}
-                </tbody>
-            </table>
+<form id="prisar" method="post" action="/api/admin/priser"
+      data-endringar data-dokk="prisdokk">
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+  <div class="prisliste">
+    {{range .Memberships}}
+    {{/* Eitt medlemskap er ei setning: kva det heiter, kva det kostar,
+         kor lenge du bind deg. */}}
+    <div class="prislapp" data-medlemskap="{{.ID}}">
+      <input class="lappfelt prisnamn" type="text" name="namn-{{.ID}}"
+             value="{{.Name}}" aria-label="{{t $.Lang "admin.membership_name"}}">
+      <div class="lapprad">
+        <input class="lappfelt kort talfelt" type="number" name="pris-{{.ID}}"
+               value="{{kronerTal .Price}}" min="0" step="10"
+               aria-label="{{t $.Lang "admin.current_price"}}">
+        <span class="priseining">{{t $.Lang "membership.price_per_month"}}</span>
+        <input class="lappfelt kort talfelt" type="number" name="binding-{{.ID}}"
+               value="{{.CommitmentMonths}}" min="0" step="1"
+               aria-label="{{t $.Lang "admin.commitment_months"}}">
+        <span class="priseining">{{t $.Lang "membership.commitment_months"}}</span>
+      </div>
+      <label class="avkryssing rabatt">
+        <input type="checkbox" name="student-{{.ID}}" {{if .IsStudentSenior}}checked{{end}}>
+        <span>{{t $.Lang "admin.student_senior_discount"}}</span>
+      </label>
+    </div>
+    {{end}}
+  </div>
+
+  {{/* Same dokk som i profilen. Ho kjem fram når noko er endra, og seier
+       kor mange — ikkje kva, av di kva står i felta sjølve. */}}
+  <aside class="dokk endringsdokk" id="prisdokk" hidden>
+    <div class="dokkinnhald">
+      <span class="endringstal" aria-live="polite"
+            data-ein="{{t .Lang "profile.changed_one"}}"
+            data-fleire="{{t .Lang "profile.changed_many"}}"></span>
+      <div class="dokkhandling">
+        <button type="button" class="btn" data-angra>{{t .Lang "profile.discard"}}</button>
+        <button type="submit" class="btn-primary">{{t .Lang "profile.save"}}</button>
+      </div>
+    </div>
+  </aside>
+</form>
 
 <h3 class="undertittel">{{t .Lang "admin.create_new_membership"}}</h3>
-<form id="new-membership-form" onsubmit="createMembership(event)">
-                <div class="form-group">
-                    <label for="membership-name">{{t .Lang "admin.membership_name"}}:</label>
-                    <input type="text" id="membership-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="membership-price">{{t .Lang "admin.price_ore"}}:</label>
-                    <input type="number" id="membership-price" required>
-                </div>
-                <div class="form-group">
-                    <label for="commitment-months">{{t .Lang "admin.commitment_months"}}:</label>
-                    <input type="number" id="commitment-months" min="0" required>
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="is-student-senior">
-                        {{t .Lang "admin.student_senior_discount"}}
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="membership-description">{{t .Lang "admin.description"}}:</label>
-                    <textarea id="membership-description" rows="3"></textarea>
-                </div>
-                <button type="submit" class="btn-primary">{{t .Lang "admin.create_membership"}}</button>
-            </form>
-
-<script>
-function editPrice(membershipId) {
-    const row = document.querySelector(`tr[data-membership-id="${membershipId}"]`);
-    const priceDisplay = row.querySelector('.price-display');
-    const priceInput = row.querySelector('.price-input');
-    const editBtn = row.querySelector('.edit-price-btn');
-    const saveBtn = row.querySelector('.save-price-btn');
-    const cancelBtn = row.querySelector('.cancel-price-btn');
-    
-    priceDisplay.style.display = 'none';
-    priceInput.style.display = 'block';
-    editBtn.style.display = 'none';
-    saveBtn.style.display = 'inline-block';
-    cancelBtn.style.display = 'inline-block';
-    
-    priceInput.focus();
-}
-
-function cancelEditPrice(membershipId) {
-    const row = document.querySelector(`tr[data-membership-id="${membershipId}"]`);
-    const priceDisplay = row.querySelector('.price-display');
-    const priceInput = row.querySelector('.price-input');
-    const editBtn = row.querySelector('.edit-price-btn');
-    const saveBtn = row.querySelector('.save-price-btn');
-    const cancelBtn = row.querySelector('.cancel-price-btn');
-    
-    // Attende til det som stod. Verdet vert lese or data-oere og ikkje
-    // or teksti: teksti er formatert for auga, med hardt mellomrom og
-    // «kr» paa slutten, og ho skal ikkje reknast paa.
-    priceInput.value = Math.round(parseInt(priceDisplay.dataset.oere, 10) / 100);
-    
-    priceDisplay.style.display = 'block';
-    priceInput.style.display = 'none';
-    editBtn.style.display = 'inline-block';
-    saveBtn.style.display = 'none';
-    cancelBtn.style.display = 'none';
-}
-
-function savePrice(membershipId) {
-    const row = document.querySelector(`tr[data-membership-id="${membershipId}"]`);
-    const priceInput = row.querySelector('.price-input');
-    // Feltet er i kronor; basen er i øre.
-    const kroner = parseInt(priceInput.value, 10);
-    const newPrice = kroner * 100;
-    
-    fetch('/api/admin/membership-price', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            membership_id: membershipId,
-            price: newPrice
-        })
-    })
-    .then(response => {
-        if (response.ok) {
-            const priceDisplay = row.querySelector('.price-display');
-            priceDisplay.dataset.oere = newPrice;
-            priceDisplay.textContent = kroner.toLocaleString('nb-NO') + '\u00a0kr';
-            cancelEditPrice(membershipId);
-            alert('{{t .Lang "admin.price_updated_successfully"}}');
-        } else {
-            throw new Error('Failed to update price');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('{{t .Lang "admin.error_updating_price"}}');
-    });
-}
-
-function createMembership(event) {
-    event.preventDefault();
-    
-    const membershipData = {
-        name: document.getElementById('membership-name').value,
-        price: parseInt(document.getElementById('membership-price').value),
-        commitment_months: parseInt(document.getElementById('commitment-months').value),
-        is_student_senior: document.getElementById('is-student-senior').checked,
-        description: document.getElementById('membership-description').value
-    };
-    
-    fetch('/api/admin/membership', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(membershipData)
-    })
-    .then(response => {
-        if (response.ok) {
-            alert('{{t .Lang "admin.membership_created_successfully"}}');
-            location.reload(); // Reload to show new membership
-        } else {
-            throw new Error('Failed to create membership');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('{{t .Lang "admin.error_creating_membership"}}');
-    });
-}
-</script>
+<form id="new-membership-form" class="setningsskjema" onsubmit="createMembership(event)">
+  <div class="form-group">
+    <label for="membership-name">{{t .Lang "admin.membership_name"}}</label>
+    <input type="text" id="membership-name" required>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="membership-price">{{t .Lang "admin.price_ore"}}</label>
+      <input type="number" id="membership-price" required>
+    </div>
+    <div class="form-group">
+      <label for="commitment-months">{{t .Lang "admin.commitment_months"}}</label>
+      <input type="number" id="commitment-months" min="0" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>
+      <input type="checkbox" id="is-student-senior">
+      {{t .Lang "admin.student_senior_discount"}}
+    </label>
+  </div>
+  <div class="form-group">
+    <label for="membership-description">{{t .Lang "admin.description"}}</label>
+    <textarea id="membership-description" rows="3"></textarea>
+  </div>
+  <button type="submit">{{t .Lang "admin.create_membership"}}</button>
+</form>
 {{end}}
