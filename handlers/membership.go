@@ -3,6 +3,7 @@ package handlers
 import (
 	"html/template"
 	"kjernekraft/models"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -52,6 +53,12 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	kvalifisert := Kvalifisert(user)
+	valbare, err := DB.MedlemskapFor(kvalifisert)
+	if err != nil {
+		log.Printf("medlemskap for brukar %d: %v", user.ID, err)
+	}
+
 	// Check if user has a membership
 	membership, err := DB.GetUserMembership(int64(user.ID))
 	hasCurrentMembership := membership != nil && err == nil
@@ -80,6 +87,8 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
 		"CurrentPage":          "medlemskap",
 		"PageTitle":            pageTitle,
 		"HasCurrentMembership": hasCurrentMembership,
+		"Kvalifisert":          kvalifisert,
+		"Valbare":              valbare,
 		"HasHadMembership":     hasHadMembership,
 		"ShowSpecialOffer":     showSpecialOffer,
 		"UserMembership":       membership,
@@ -117,7 +126,10 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isStudentSenior := r.FormValue("is_student_senior") == "true"
+	// Student- og honnørstatus kjem or profilen, ikkje or skjemaet.
+	// Skjemaet spurde um det kvar gong — um noko systemet alt visste, og
+	// som ikkje endrar seg fraa gong til gong.
+	isStudentSenior := Kvalifisert(GetUserFromSession(r))
 	commitment := r.FormValue("commitment")
 	startTime := r.FormValue("start_time")
 

@@ -72,16 +72,11 @@
                 </div>
             </div>
             
-            <div class="question-group">
-                <label class="question-label">Er du student eller senior?</label>
-                <div class="question-options">
-                    <label class="option-label">
-                        <input type="checkbox" name="is_student_senior" value="true">
-                        <span>Ja, jeg er student eller 67+ år</span>
-                    </label>
-                </div>
-            </div>
-            
+            {{/* Spursmaalet um student og honnør stod her. Det er noko um
+                 *deg* og ikkje um dette kjøpet, so det bur i profilen — og
+                 daa slepp denne sida aa spyrja um det same kvar gong. Er du
+                 kvalifisert, ser du prisane; er du det ikkje, finst dei
+                 ikkje for deg. */}}
             <div class="question-group">
                 <label class="question-label">Når vil du starte?</label>
                 <div class="question-options">
@@ -156,7 +151,7 @@
     };
 
     let currentSelection = {
-        isStudentSenior: false,
+        isStudentSenior: {{if .Kvalifisert}}true{{else}}false{{end}},
         commitment: '0', // Default to no binding (most expensive)
         startTime: 'now',
         customStartDate: null
@@ -409,9 +404,9 @@
         const form = document.querySelector('.question-form');
         
         form.addEventListener('change', function(e) {
-            if (e.target.name === 'is_student_senior') {
-                currentSelection.isStudentSenior = e.target.checked;
-            } else if (e.target.name === 'commitment') {
+            // Student- og honnørstatus kjem or profilen no; skjemaet
+            // spør ikkje lenger.
+            if (e.target.name === 'commitment') {
                 currentSelection.commitment = e.target.value;
             } else if (e.target.name === 'start_time') {
                 currentSelection.startTime = e.target.value;

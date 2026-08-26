@@ -7,7 +7,10 @@
         </a>
         <div class="auth-controls">
             {{template "language_selector" .}}
-            <span class="user-name">{{.UserName}}</span>
+            {{/* Namnet er vegen til profilen. Det er konvensjonen alle kjenner,
+                 og daa treng ikkje leidingi eit punkt til for det same. */}}
+            <a class="user-name{{if eq .CurrentPage "profil"}} active{{end}}"
+               href="/elev/min-profil">{{.UserName}}</a>
             <!-- Utlogging er ei endring, og difor eit skjema. Ei lenkja
                  kann ei framand sida utløysa med eit bilete-merke. -->
             <form action="/logout" method="POST" class="auth-form">
@@ -34,9 +37,6 @@
         </li>
         <li class="nav-item {{if eq .CurrentPage "betaling"}}active{{end}}">
             <a href="/elev/betaling" {{if eq .CurrentPage "betaling"}}aria-current="page"{{end}}>{{t .Lang "navigation.payments"}}</a>
-        </li>
-        <li class="nav-item {{if eq .CurrentPage "profil"}}active{{end}}">
-            <a href="/elev/min-profil" {{if eq .CurrentPage "profil"}}aria-current="page"{{end}}>{{t .Lang "navigation.my_profile"}}</a>
         </li>
         <!-- Administrasjonen hadde ingi lenkja i det heile. Ein admin laut
              skriva /admin i adressefeltet for aa koma dit. -->

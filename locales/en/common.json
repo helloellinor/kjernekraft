@@ -42,7 +42,13 @@
     "country": "Country",
     "birthdate": "Birth date",
     "member_since": "Member since",
-    "user_id": "User ID"
+    "user_id": "User ID",
+    "student_senior": "I have a student or senior card",
+    "student_senior_hint": "20 % off. The studio checks it at the desk.",
+    "save": "Save",
+    "discard": "Discard",
+    "changed_one": "1 change",
+    "changed_many": "%d changes"
   },
   "language": {
     "select_language": "Select language",

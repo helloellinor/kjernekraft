@@ -272,6 +272,18 @@ func Migrate(db *sql.DB) error {
 		log.Println("Added last_billed column to user_memberships table")
 	}
 
+	// Student- eller honnørbevis. Studioet gjev 20 % rabatt til den som
+	// hev det, og det er brukaren som fortel at han hev det — studioet
+	// ser beviset i resepsjonen. Alderen kjem av fødselsdagen; ho treng
+	// ingen kolonne.
+	var rabattKolonne bool
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('users') WHERE name='student_senior'").Scan(&rabattKolonne); err == nil && !rabattKolonne {
+		if _, err := db.Exec("ALTER TABLE users ADD COLUMN student_senior BOOLEAN DEFAULT FALSE"); err != nil {
+			return err
+		}
+		log.Println("La til student_senior paa users.")
+	}
+
 	// Rommet paa ein time. Timane som fanst fyrr peika paa rom gjenom
 	// fri tekst i `location`; dei vert kopla yver der namnet stemmer.
 	var romKolonne bool
@@ -741,6 +753,27 @@ func (db *Database) GetDistinctClassTypes() ([]string, error) {
 
 // Membership-related database methods
 
+// MedlemskapFor gjev dei medlemskapi ein brukar kann velja.
+//
+// Studioet gjev 20 % til den som hev student- eller honnørbevis, og hev
+// difor eigne planar for det. Fyrr stod alle side um side, og den som
+// ikkje hadde bevis laut lesa seg forbi helvti av lista for aa finna
+// sine eigne. Det er arbeid lagt paa lesaren for noko systemet alt veit.
+func (db *Database) MedlemskapFor(kvalifisert bool) ([]models.Membership, error) {
+	alle, err := db.GetAllMemberships()
+	if err != nil {
+		return nil, err
+	}
+	var ut []models.Membership
+	for _, m := range alle {
+		if m.IsStudentSenior && !kvalifisert {
+			continue
+		}
+		ut = append(ut, m)
+	}
+	return ut, nil
+}
+
 // GetAllMemberships fetches all active memberships
 func (db *Database) GetAllMemberships() ([]models.Membership, error) {
 	rows, err := db.Conn.Query("SELECT id, name, price, commitment_months, is_student_senior, is_special_offer, description, features, active FROM memberships WHERE active = TRUE")
@@ -898,13 +931,16 @@ func (db *Database) AuthenticateUser(email, password string) (*models.User, erro
 func (db *Database) GetUserByID(userID int64) (*models.User, error) {
 	var user models.User
 
-	query := `SELECT id, name, email, phone, address, postal_code, city, country, newsletter_subscription, terms_accepted
+	query := `SELECT id, name, COALESCE(birthdate, ''), email, COALESCE(phone, ''),
+	                 COALESCE(address, ''), COALESCE(postal_code, ''), COALESCE(city, ''),
+	                 COALESCE(country, ''), newsletter_subscription, terms_accepted,
+	                 COALESCE(student_senior, 0)
 	          FROM users WHERE id = ?`
 
 	err := db.Conn.QueryRow(query, userID).Scan(
-		&user.ID, &user.Name, &user.Email, &user.Phone, &user.Address,
+		&user.ID, &user.Name, &user.Birthdate, &user.Email, &user.Phone, &user.Address,
 		&user.PostalCode, &user.City, &user.Country,
-		&user.NewsletterSubscription, &user.TermsAccepted,
+		&user.NewsletterSubscription, &user.TermsAccepted, &user.StudentSenior,
 	)
 
 	if err != nil {

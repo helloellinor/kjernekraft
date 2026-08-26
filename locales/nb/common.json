@@ -42,7 +42,13 @@
     "country": "Land",
     "birthdate": "Fødselsdato",
     "member_since": "Medlem siden",
-    "user_id": "Bruker-ID"
+    "user_id": "Bruker-ID",
+    "student_senior": "Jeg har student- eller honnørbevis",
+    "student_senior_hint": "Gir 20 % rabatt. Studioet ser beviset i resepsjonen.",
+    "save": "Lagre",
+    "discard": "Angre",
+    "changed_one": "1 endring",
+    "changed_many": "%d endringer"
   },
   "language": {
     "select_language": "Velg språk",

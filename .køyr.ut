@@ -55,3 +55,15 @@ Kjernekraft
   ✓ http://localhost:8080
   … endring, byggjer
   ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/membership.go:56:2: declared and not used: valbare
+    handlers/membership.go:58:3: undefined: log
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
