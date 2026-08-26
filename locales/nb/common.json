@@ -342,7 +342,13 @@
     "ago_days": "for %d dager siden",
     "ago_weeks": "for %d uker siden",
     "ago_months": "for %d måneder siden",
-    "people": "folk"
+    "people": "folk",
+    "stats_lead": "Studioet har",
+    "stats_members": "medlemmer",
+    "stats_middle": "Det står",
+    "stats_classes": "timer i planen",
+    "stats_and": "og",
+    "stats_waiting": "venter på svar"
   },
   "terms": {
     "title": "Handelsbetingelser"
