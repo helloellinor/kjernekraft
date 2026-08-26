@@ -1,0 +1,30 @@
+{{define "dagmerke"}}
+{{/* Merket. Éin definisjon, tvo bruk: i vikerutenetet og i lista yver
+     det du er paameld paa. Det er meiningi — eit merke skal kjennast
+     som *det same tinget* kvar du ser det, som eit klipp du hev i
+     handi. Difor stend det her og ikkje tvo stader. */}}
+<button type="button" style="--dag: {{.Kolonne}}; --fyll: {{.Prosent}}%"
+        class="dagmerke{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}{{if .Full}} full{{end}}"
+        data-event="{{.Event.ID}}"
+        data-tittel="{{.Event.Title}}"
+        data-laerar="{{.Event.TeacherName}}"
+        data-rom="{{.Event.RoomName}}"
+        data-dag="{{norskDato .Dato}}"
+        data-klokke="{{.Event.StartTime.Format "15:04"}}–{{.Event.EndTime.Format "15:04"}}"
+        data-teke="{{.Event.CurrentEnrolment}}"
+        data-plassar="{{.Event.Capacity}}"
+        data-full="{{.Full}}"
+        data-umme="{{.ErUmme}}"
+        data-paameld="{{.Event.IsUserSignedUp}}"
+        {{if .ErUmme}}disabled{{end}}
+        aria-label="{{.Merkelapp}}">
+    <span class="dagnamn berre-lesar">{{.DagNamn}}</span>
+    {{/* Klokkeslettet ligg *paa* toppkanten, som eit legende paa eit
+         fieldset: det høyrer til ruta og tek ingi høgd fraa henne. */}}
+    <span class="klokketal">{{.Klokke}}</span>
+    <span class="merkeur">
+        <span class="urskiva" style="--time: {{.TimeVinkel}}deg; --minutt: {{.MinuttVinkel}}deg"></span>
+    </span>
+    <span class="merketal">{{.Event.CurrentEnrolment}}<span class="av">/{{.Event.Capacity}}</span></span>
+</button>
+{{end}}

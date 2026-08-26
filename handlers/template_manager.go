@@ -293,12 +293,35 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 	tm.templates[name] = finalTemplate
 }
 
-// loadComponentTemplate loads a standalone component template.
+// loadComponentTemplate loads a standalone component or module template.
 //
-// Feilen vart slukt her fyrr — malen datt berre ut or samlingi, og den
-// fyrste ein visste um det var at ei sida mangla ein bolk.
+// Han fær dei sams bitane under components/ med seg. Utan deim kunde ein
+// modul som vert teikna for seg — ein htmx-bit, til dømes — ikkje nytta
+// ein felles komponent: sida hans virka, men biten svara «no such
+// template». Det er den same malen, og han skal te seg likt kvar han
+// vert teikna.
+//
+// Feilen vart dessutan slukt her fyrr: malen datt berre ut or samlingi,
+// og det fyrste ein visste um det var at ein bolk mangla.
 func (tm *TemplateManager) loadComponentTemplate(name, path string) {
 	t := template.New(name).Funcs(getTemplateFuncs())
+
+	komponentar := filepath.Join(tm.basePath, "components")
+	if _, err := os.Stat(komponentar); err == nil {
+		filepath.WalkDir(komponentar, func(p string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() || !strings.HasSuffix(p, ".html") || p == path {
+				return nil
+			}
+			parsed, parseErr := t.ParseFiles(p)
+			if parseErr != nil {
+				log.Printf("Error parsing shared component %s: %v", p, parseErr)
+				return nil
+			}
+			t = parsed
+			return nil
+		})
+	}
+
 	parsed, err := t.ParseFiles(path)
 	if err != nil {
 		log.Printf("Error parsing component template %s: %v", path, err)

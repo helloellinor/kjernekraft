@@ -49,16 +49,17 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"Helsing":      Helsing(lang, user.Name, neste, time.Now()),
-		"Title":        "Elev Dashboard",
-		"TodaysEvents": upcomingEvents,
-		"ExternalCSS":  []string{},
-		"CurrentPage":  "hjem",
-		"UserName":     user.Name,
-		"User":         user,
-		"Lang":         lang,
-		"CSRFToken":    CSRFToken(r),
-		"IsAdmin":      sessionIsAdmin(r),
+		"Helsing":            Helsing(lang, user.Name, neste, time.Now()),
+		"Title":              "Elev Dashboard",
+		"TodaysEvents":       upcomingEvents,
+		"TodaysFramsyningar": Framsyningar(lang, upcomingEvents, time.Now()),
+		"ExternalCSS":        []string{},
+		"CurrentPage":        "hjem",
+		"UserName":           user.Name,
+		"User":               user,
+		"Lang":               lang,
+		"CSRFToken":          CSRFToken(r),
+		"IsAdmin":            sessionIsAdmin(r),
 	}
 
 	// Use the new template system

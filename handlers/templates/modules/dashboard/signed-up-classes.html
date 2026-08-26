@@ -9,35 +9,11 @@
 
 {{define "signed_up_classes_module"}}
 {{if .HasSignups}}
-<div class="events-grid">
-    {{range .Signups}}
-    <div class="event-card signed-up">
-        <div class="event-header">
-            <h4 class="event-title">{{.Title}}</h4>
-            <span class="event-type">{{.ClassType}}</span>
-        </div>
-        <div class="event-details">
-            <div class="event-time">
-                <strong>{{.StartTime.Format "15:04"}}</strong>
-                {{if .EndTime}}
-                - {{.EndTime.Format "15:04"}}
-                {{end}}
-            </div>
-            <div class="event-date">{{.StartTime.Format "2. January 2006"}}</div>
-            {{if .Location}}
-            <div class="event-location">📍 {{.Location}}</div>
-            {{end}}
-            {{if .TeacherName}}
-            <div class="event-teacher">👨‍🏫 {{.TeacherName}}</div>
-            {{end}}
-        </div>
-        <div class="event-actions">
-            <button class="cancel-signup-btn" onclick="cancelSignup({{.ID}})">
-                {{t .Lang "dashboard.cancel_signup"}}
-            </button>
-        </div>
-    </div>
-    {{end}}
+{{/* Dei same merki som i timeplanen. Ein paameld time skal kjennast som
+     det same tinget kvar ein ser honom — som eit klipp ein hev i handi
+     og ikkje som ei rad i ei liste. */}}
+<div class="merkerad">
+    {{range .Framsyningar}}{{template "dagmerke" .}}{{end}}
 </div>
 {{else}}
 <div class="activity-placeholder">
@@ -46,31 +22,4 @@
     <a href="/elev/timeplan" class="timeplan-btn">{{t .Lang "dashboard.see_schedule"}}</a>
 </div>
 {{end}}
-
-<script>
-function cancelSignup(eventId) {
-    if (confirm('{{t .Lang "dashboard.confirm_cancel_signup"}}')) {
-        fetch('/api/events/cancel-signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'event_id=' + eventId
-        })
-        .then(response => {
-            if (response.ok) {
-                // Reload the signups section
-                htmx.trigger('#signed-up-classes', 'load');
-            } else {
-                alert('{{t .Lang "dashboard.cancel_signup_error"}}');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('{{t .Lang "dashboard.cancel_signup_error"}}');
-        });
-    }
-}
-</script>
-
 {{end}}

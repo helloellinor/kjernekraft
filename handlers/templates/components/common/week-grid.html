@@ -27,38 +27,7 @@
              med det same at torsdagen er full og tysdagen ikkje. */}}
         <div class="timedagar">
             {{range .Rutor}}
-            {{if .Har}}
-            {{with .Framsyning}}
-            <button type="button" style="--dag: {{.Kolonne}}; --fyll: {{.Prosent}}%"
-                    class="dagmerke{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}{{if .Full}} full{{end}}"
-                    data-event="{{.Event.ID}}"
-                    data-tittel="{{.Event.Title}}"
-                    data-laerar="{{.Event.TeacherName}}"
-                    data-rom="{{.Event.RoomName}}"
-                    data-dag="{{norskDato .Dato}}"
-                    data-klokke="{{.Event.StartTime.Format "15:04"}}–{{.Event.EndTime.Format "15:04"}}"
-                    data-teke="{{.Event.CurrentEnrolment}}"
-                    data-plassar="{{.Event.Capacity}}"
-                    data-full="{{.Full}}"
-                    data-umme="{{.ErUmme}}"
-                    data-paameld="{{.Event.IsUserSignedUp}}"
-                    {{if .ErUmme}}disabled{{end}}
-                    aria-label="{{.DagNamn}} — {{.Event.CurrentEnrolment}} {{t $.Lang "timeplan.of"}} {{.Event.Capacity}}">
-                <span class="dagnamn berre-lesar">{{.DagNamn}}</span>
-                {{/* Klokkeslettet ligg *paa* toppkanten, som eit
-                     legende paa eit fieldset: det høyrer til ruta og
-                     tek ingi høgd fraa henne. */}}
-                <span class="klokketal">{{.Klokke}}</span>
-                {{/* Tvo rom under kvarandre: skiva, og so tale. Dei
-                     svarar paa kvar sitt — «naar» og «kor mange» — og
-                     naar dei ligg i kvar sin boks kann auga henta det
-                     eine utan aa lesa det andre. */}}
-                <span class="merkeur">
-                    <span class="urskiva" style="--time: {{.TimeVinkel}}deg; --minutt: {{.MinuttVinkel}}deg"></span>
-                </span>
-                <span class="merketal">{{.Event.CurrentEnrolment}}<span class="av">/{{.Event.Capacity}}</span></span>
-            </button>
-            {{end}}
+            {{if .Har}}{{template "dagmerke" .Framsyning}}
             {{else}}
             {{/* Den daude ruta. Ho gjer at rada hev sju plassar og ikkje
                  tvo — ein ser kva som *ikkje* gjeng, og det er halve

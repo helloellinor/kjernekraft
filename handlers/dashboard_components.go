@@ -5,6 +5,7 @@ import (
 	"kjernekraft/handlers/modules"
 	"log"
 	"net/http"
+	"time"
 )
 
 // UserKlippekortHandler provides HTMX endpoint for user's klippekort display
@@ -164,20 +165,21 @@ func UserSignupsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	// Maalet skal koma or den same kjelda som alle hine sidone — kaka,
+	// so ei spurnadsstreng, og so nn. Her stod «nb» hardkoda som
+	// reserve, so ein htmx-bit kunde koma attende paa eit anna maal enn
+	// sida han landa i.
+	lang := GetLanguageFromRequest(r)
 
 	// Create template data
 	data := map[string]interface{}{
-		"HasSignups": len(userSignups) > 0,
-		"Signups":    userSignups,
-		"Lang":       lang,
-		"CSRFToken":  CSRFToken(r),
-		"IsAdmin":    sessionIsAdmin(r),
-		"UserName":   sessionUserName(r),
+		"HasSignups":   len(userSignups) > 0,
+		"Signups":      userSignups,
+		"Framsyningar": Framsyningar(lang, userSignups, time.Now()),
+		"Lang":         lang,
+		"CSRFToken":    CSRFToken(r),
+		"IsAdmin":      sessionIsAdmin(r),
+		"UserName":     sessionUserName(r),
 	}
 
 	// Get template manager and render
