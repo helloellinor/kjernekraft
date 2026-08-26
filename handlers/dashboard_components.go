@@ -42,10 +42,7 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	lang := GetLanguageFromRequest(r)
 
 	// Create module data
 	moduleData, err := modules.NewKlippekortModule(klippekort, lang)
@@ -121,10 +118,7 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	lang := GetLanguageFromRequest(r)
 
 	// Create module data
 	moduleData, err := modules.NewMembershipModule(membership, lang)
