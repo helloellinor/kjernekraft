@@ -285,10 +285,14 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
   display: flex; align-items: baseline; justify-content: space-between;
   gap: var(--rom-4); flex-wrap: wrap;
 }
+/* «Kjernekraft», ikkje «KJERNEKRAFT». Namnet er eit namn, og store
+   bokstavar gjer det til eit skilt. Utan versalane fær ordet dessutan
+   ei kjenneleg form — K-en, j-en og t-en gjev honom ein silhuett ein
+   ser paa avstand, som eit ord og ikkje som ei rekkja med rektangel. */
 .header-content h1 {
-  font-size: 1.4rem; letter-spacing: .03em;
-  font-stretch: var(--vidd-leiding); font-weight: 700;
-  text-transform: uppercase;
+  font: inherit;
+  letter-spacing: 0;
+  text-transform: none;
 }
 .auth-controls { display: flex; align-items: center; gap: var(--rom-3); }
 .user-name { color: var(--blekk-lys); font-size: .82rem; }
@@ -1587,21 +1591,55 @@ tbody tr:hover td { background: var(--ark-djup); }
           mask: url("/static/img/kjernekraft.svg") center / contain no-repeat;
 }
 
-/* I hovudet stend han attmed namnet, paa same grunnlina. Boksen hans er
-   fast, so han skuvar ingen ting naar sida vert teikna paa nytt. */
+/* ---- merket attmed namnet ----
+   Merket er nett so høgt som ein stor bokstav, og det stend paa den
+   same grunnlina. `1cap` er kapitélhøgdi i skrifti som gjeld — same kva
+   storleik eller breidd namnet fær, fylgjer ringen med av seg sjølv.
+   Difor stend toppen av ringen i same høgd som toppen av K-en, og
+   botnen paa grunnlina under honom.
+
+   Var han sett i rem, laut ein rekna det ut paa nytt kvar gong nokon
+   endra skriftstorleiken — og gløyma det den gongen ein ikkje gjorde
+   det. */
 .merkeord {
-  display: flex; align-items: center; gap: var(--rom-3);
+  /* Skrifti stend *her* og ikkje paa h1-en, av di `cap` vert løyst mot
+     den skrifti elementet sjølv hev. Laag ho berre paa yverskrifti,
+     rekna ringen kapitélhøgdi si ut fraa brødteksti — 16 px Ubuntu i
+     staden for 24 px Union Gothic — og vart ein tridjedel for liten.
+     Éin stad aa setja storleiken, og baae fylgjer. */
+  font-family: var(--skrift-yver);
+  font-size: 1.5rem;
+  font-stretch: var(--vidd-leiding);
+  font-weight: 700;
+  line-height: 1;
+
+  display: inline-flex; align-items: baseline; gap: .34em;
   text-decoration: none; color: inherit;
 }
-.merkeord .merke { --merkestorleik: 1.7rem; }
+.merkeord .merke {
+  /* Litt yver kapitélhøgdi. Ein ring som er *maald* like høg som ein K
+     ser mindre ut enn han er — kurva naar toppen berre i eitt punkt,
+     medan K-en ligg flatt langs heile. Same grunnen til at ein O i ei
+     skrift alltid er teikna litt høgre enn ein H. */
+  --merkestorleik: 1.16cap;
+  /* Eit element utan tekst hev grunnlina i underkanten sin, so ringen
+     kjem til aa staa paa lina av seg sjølv. */
+  align-self: baseline;
+}
+/* Der `cap` ikkje finst, fell han attende paa noko som er nære nok. */
+@supports not (height: 1cap) {
+  .merkeord .merke { --merkestorleik: .74em; }
+}
 .merkeord h1 { margin: 0; }
 
 /* Paa innloggingi og dei andre dørene stend han for seg sjølv yver
    tittelen. Det er den einaste staden han fær vera stor. */
+/* Paa dørene stend han for seg sjølv, midt i spalta si. */
 .doermerke {
   --merkestorleik: 4rem;
   color: var(--blekk);
-  margin: 0 auto var(--rom-5);
+  margin-inline: auto;
+  margin-bottom: var(--rom-5);
   display: block;
 }
 
