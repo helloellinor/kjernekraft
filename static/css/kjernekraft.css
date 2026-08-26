@@ -271,9 +271,14 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
 ::-webkit-scrollbar-thumb:hover { background: var(--blekk-svakt); background-clip: content-box; }
 
 /* ===================================================================
-   hovudet og leidingi
-   Ei lina under, ikkje ein bjelke i farge. Den valde sida er merkt med
-   ein strek under ordet — det er der auga alt er.
+   hovudet
+   Éi lina. Merket, sidone og namnet høyrer til den same tingen, og tvo
+   bjelkar tok dobbelt so mykje høgd for aa segja det.
+
+   Alt stend midt paa lina: `align-items: center` paa rada, og kvar bit
+   sentrert i seg sjølv. Det var dette som ikkje stemde — merket laag
+   paa grunnlina si eiga, teksti paa si, og bjelken kring deim visste
+   ikkje um nokon av deim.
    =================================================================== */
 .header {
   border-bottom: 1px solid var(--kant);
@@ -282,55 +287,141 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
 .header-content {
   max-width: var(--breidd); margin: 0 auto;
   padding: var(--rom-3) var(--rom-5);
-  display: flex; align-items: baseline; justify-content: space-between;
-  gap: var(--rom-4); flex-wrap: wrap;
+  display: flex; align-items: center;
+  gap: var(--rom-5); flex-wrap: wrap;
 }
-/* «Kjernekraft», ikkje «KJERNEKRAFT». Namnet er eit namn, og store
-   bokstavar gjer det til eit skilt. Utan versalane fær ordet dessutan
-   ei kjenneleg form — K-en, j-en og t-en gjev honom ein silhuett ein
-   ser paa avstand, som eit ord og ikkje som ei rekkja med rektangel. */
-.header-content h1 {
-  font: inherit;
-  letter-spacing: 0;
-  text-transform: none;
-}
-.auth-controls { display: flex; align-items: center; gap: var(--rom-3); }
-.user-name { color: var(--blekk-lys); font-size: .82rem; }
 
-/* Utloggingi er eit skjema, so knappen lyt sjaa ut som ei lenkja. */
-.auth-form { margin: 0; }
-.auth-link {
-  background: none; border: 0; padding: 0; cursor: pointer;
-  font: inherit; font-size: .82rem;
-  color: var(--merke); text-decoration: underline;
-  text-decoration-thickness: 1px; text-underline-offset: .16em;
-}
-.auth-link:hover { color: var(--merke-lys); }
+/* ---- merket og namnet ----
+   Ringen er nett so høg som ein stor bokstav og stend paa den same
+   grunnlina. `1cap` er kapitélhøgdi i skrifti som gjeld.
 
-.nav { border-bottom: 1px solid var(--haarlina); background: var(--ark); }
+   Ingen yverskyting: blekket i merket naar heilt ut i kanten av ruta
+   si — det er aatte K-ar som strekkjer seg ut i hyrnone, ikkje ein
+   glatt sirkel — so ei rute som er høgre enn kapitélhøgdi set toppen
+   aat ringen yver toppen aat K-en. Ein glatt sirkel hadde trengt
+   yverskyting; denne treng henne ikkje. */
+.merkeord {
+  /* Skrifti stend her og ikkje paa namnet, av di `cap` vert løyst mot
+     den skrifti elementet sjølv hev. Laag ho lenger inn, rekna ringen
+     kapitélhøgdi si ut fraa brødteksti og vart ein tridjedel for liten. */
+  font-family: var(--skrift-yver);
+  font-size: 1.45rem;
+  font-stretch: var(--vidd-leiding);
+  font-weight: 700;
+  line-height: 1;
+
+  display: inline-flex; align-items: baseline; gap: .34em;
+  /* Merkeordet er ei lenkja, men det skal ikkje sjaa ut som ei: det er
+     namnet paa staden, ikkje eit utgangspunkt. Utan denne tok det
+     lenkjefargen. */
+  text-decoration: none; color: var(--blekk);
+  flex: none;
+}
+.merkeord:hover { color: var(--blekk); }
+
+/* Er du heime, stend merket i merkefargen. Det er den same meldingi som
+   streken under ei vald sida, sagd med det som alt er der. */
+.merkeord.paa-heim .merke { color: var(--klas); }
+.merkeord .merke {
+  /* 0,72em — kapitélhøgdi i Union Gothic, teki beinveges or fila
+     (sCapHeight 720 av 1000, og K-glyfen maaler nett 720).
+
+     `1cap` skulde gjeve det same, men gav 20,1 px der kapitélhøgdi er
+     17,3: eininga vert løyst mot metrikken nettlesaren finn, og han
+     kjem ikkje ut med det fila segjer. Maalt er maalt — talet stend
+     her, med kvar det kjem fraa. */
+  --merkestorleik: .72em;
+  align-self: baseline;
+}
+.merkenamn { letter-spacing: 0; }
+
+/* ---- sidone ----
+   Dei stend i midten av lina og tek plassen som er att. */
+.nav { flex: 1 1 auto; min-width: 0; border: 0; background: none; }
 .nav-list {
-  max-width: var(--breidd); margin: 0 auto;
-  padding: 0 var(--rom-5);
-  list-style: none; display: flex; flex-wrap: wrap; gap: var(--rom-5);
+  margin: 0; padding: 0; list-style: none;
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--rom-2) var(--rom-4);
 }
 .nav-item a {
-  display: block; padding: var(--rom-3) 0;
-  font-family: var(--skrift-yver); font-size: 1.08rem;
-  font-stretch: var(--vidd-leiding); font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase;
+  display: block; padding: var(--rom-1) 0;
+  font-family: var(--skrift-yver); font-size: .95rem;
+  font-stretch: var(--vidd-merkelapp); font-weight: 500;
+  letter-spacing: .07em; text-transform: uppercase;
   color: var(--blekk-lys); text-decoration: none;
   border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
 }
 .nav-item a:hover { color: var(--blekk); }
 .nav-item.active a, .nav-item a[aria-current="page"] {
-  color: var(--blekk); border-bottom-color: var(--merke);
+  color: var(--blekk); border-bottom-color: var(--klas);
 }
-/* Administrasjonen stend for seg sjølv, skild med ei lina, so det er
-   tydeleg at ein gjeng ut or eleven si sida. */
-.nav-item.nav-admin { margin-left: auto; }
 .nav-item.nav-admin a { color: var(--blekk-svakt); }
 .nav-item.nav-admin a:hover { color: var(--blekk-lys); }
+
+/* ---- namnet og utloggingi ---- */
+/* ---- namnet ----
+   Det er *ditt* namn og det einaste i bjelken som høyrer til deg, so
+   det skal lesast som eit namn og ikkje som ein merkelapp. Difor litt
+   større og tyngre enn sidone attmed.
+
+   Og det er ein veljar: tvo utgangar ligg attum — profilen og
+   utloggingi — som ikkje tek plass fyre ein spør etter deim. Same
+   grepet som vikenummeret. */
+.auth-controls { position: relative; display: flex; align-items: center; flex: none; }
+
+.user-name {
+  background: none; border: 0; padding: var(--rom-1) 0; cursor: pointer;
+  font-family: var(--skrift); font-size: 1rem; font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+  color: var(--blekk-lys);
+  border-bottom: 2px solid transparent;
+}
+.user-name:hover { color: var(--blekk); background: none; border-bottom-color: var(--haarlina); }
+.user-name.active { color: var(--blekk); border-bottom-color: var(--klas); }
+.user-name[aria-expanded="true"] { color: var(--blekk); border-bottom-color: var(--klas); }
+
+.namnemeny {
+  position: absolute; z-index: 30;
+  top: 100%; right: 0; margin-top: var(--rom-2);
+  display: flex; flex-direction: column; align-items: stretch;
+  min-width: 10rem;
+  background: var(--flate);
+  border: 1px solid var(--kant);
+  border-radius: 2px;
+  box-shadow: var(--skugge-flytande);
+  overflow: hidden;
+}
+.auth-form { margin: 0; display: flex; }
+
+.namneval {
+  display: block; width: 100%; text-align: left;
+  padding: var(--rom-3) var(--rom-4);
+  background: none; border: 0; border-radius: 0;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .84rem; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--blekk); text-decoration: none; cursor: pointer;
+}
+.namneval:hover { background: var(--ark-djup); color: var(--blekk); border: 0; }
+
+/* Utloggingi er utgangen. Ho ber aatvaringsfargen, av di ho er den eine
+   handlingi i menyen som tek noko fraa deg. */
+.namneval-ut { color: var(--aatvaring); }
+.namneval-ut:hover { background: var(--aatvaring-svak); color: var(--aatvaring); }
+
+/* ===================================================================
+   botnlina
+   Det ein vel ein gong høyrer heime nedst. Maalveljaren var det
+   breidaste i heile hovudet, og ein vel ikkje maal kvar gong ein opnar
+   ei sida.
+   =================================================================== */
+.botnlina { border-top: 1px solid var(--haarlina); margin-top: var(--rom-7); }
+.botninnhald {
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-4) var(--rom-5);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--rom-4); flex-wrap: wrap;
+}
+.botnmerke { font-size: .78rem; color: var(--blekk-svakt); }
 
 /* ===================================================================
    sida
@@ -588,11 +679,11 @@ button:hover, .btn:hover, .action-btn:hover, .change-btn:hover,
 
 /* Hovudhandlingi. Det er den fylte, og det er berre éi. */
 .btn-primary, .login-btn, .timeplan-btn, .signup-button,
-button[type="submit"]:not(.auth-link) {
+button[type="submit"]:not(.auth-link):not(.namneval) {
   background: var(--merke); border-color: var(--merke); color: var(--flate);
 }
 .btn-primary:hover, .login-btn:hover, .timeplan-btn:hover,
-.signup-button:hover, button[type="submit"]:not(.auth-link):hover {
+.signup-button:hover, button[type="submit"]:not(.auth-link):not(.namneval):hover {
   background: var(--merke-lys); border-color: var(--merke-lys); color: var(--flate);
 }
 
@@ -1272,10 +1363,10 @@ tbody tr:hover td { background: var(--ark-djup); }
 @media (max-width: 48rem) {
   :root { --rom-5: 1rem; --rom-6: 1.5rem; --rom-7: 2rem; }
 
-  .header-content, .nav-list, main { padding-left: var(--rom-4); padding-right: var(--rom-4); }
-  .nav-list { gap: var(--rom-2) var(--rom-4); flex-wrap: wrap; }
-  .nav-item.nav-admin { margin-left: 0; }
-  .nav-item a { white-space: nowrap; padding: var(--rom-2) 0; }
+  .header-content, .botninnhald, main { padding-left: var(--rom-4); padding-right: var(--rom-4); }
+  .header-content { gap: var(--rom-3); }
+  .nav-list { gap: var(--rom-2) var(--rom-3); }
+  .nav-item a { white-space: nowrap; }
 
   h1, .page-title { font-size: 1.7rem; }
 
@@ -1591,46 +1682,10 @@ tbody tr:hover td { background: var(--ark-djup); }
           mask: url("/static/img/kjernekraft.svg") center / contain no-repeat;
 }
 
-/* ---- merket attmed namnet ----
-   Merket er nett so høgt som ein stor bokstav, og det stend paa den
-   same grunnlina. `1cap` er kapitélhøgdi i skrifti som gjeld — same kva
-   storleik eller breidd namnet fær, fylgjer ringen med av seg sjølv.
-   Difor stend toppen av ringen i same høgd som toppen av K-en, og
-   botnen paa grunnlina under honom.
-
-   Var han sett i rem, laut ein rekna det ut paa nytt kvar gong nokon
-   endra skriftstorleiken — og gløyma det den gongen ein ikkje gjorde
-   det. */
-.merkeord {
-  /* Skrifti stend *her* og ikkje paa h1-en, av di `cap` vert løyst mot
-     den skrifti elementet sjølv hev. Laag ho berre paa yverskrifti,
-     rekna ringen kapitélhøgdi si ut fraa brødteksti — 16 px Ubuntu i
-     staden for 24 px Union Gothic — og vart ein tridjedel for liten.
-     Éin stad aa setja storleiken, og baae fylgjer. */
-  font-family: var(--skrift-yver);
-  font-size: 1.5rem;
-  font-stretch: var(--vidd-leiding);
-  font-weight: 700;
-  line-height: 1;
-
-  display: inline-flex; align-items: baseline; gap: .34em;
-  text-decoration: none; color: inherit;
-}
-.merkeord .merke {
-  /* Litt yver kapitélhøgdi. Ein ring som er *maald* like høg som ein K
-     ser mindre ut enn han er — kurva naar toppen berre i eitt punkt,
-     medan K-en ligg flatt langs heile. Same grunnen til at ein O i ei
-     skrift alltid er teikna litt høgre enn ein H. */
-  --merkestorleik: 1.16cap;
-  /* Eit element utan tekst hev grunnlina i underkanten sin, so ringen
-     kjem til aa staa paa lina av seg sjølv. */
-  align-self: baseline;
-}
-/* Der `cap` ikkje finst, fell han attende paa noko som er nære nok. */
-@supports not (height: 1cap) {
-  .merkeord .merke { --merkestorleik: .74em; }
-}
-.merkeord h1 { margin: 0; }
+/* Merket attmed namnet er skrive i hovudbolken lenger uppe. Ein
+   dublett stod her og — med ein annan storleik — og av di han kom
+   seinare i fila, var det han som gjaldt. Difor rørde ringen seg ikkje
+   naar eg endra talet der uppe. */
 
 /* Paa innloggingi og dei andre dørene stend han for seg sjølv yver
    tittelen. Det er den einaste staden han fær vera stor. */

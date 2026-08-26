@@ -26,6 +26,8 @@
         {{block "content" .}}{{end}}
     </main>
 
+    {{if .UserName}}{{template "botnlina" .}}{{end}}
+
     <!-- htmx ligg i repoet og vert lasta her. Han var aldri lasta paa ei
          einaste sida som gjeng gjenom denne malen, so `hx-get` paa
          paameldingslista henta aldri noko — ho stod og lasta i all
