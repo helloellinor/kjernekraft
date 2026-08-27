@@ -144,6 +144,23 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// regelID les regelnamnet or adressa.
+//
+// Null er ikkje eit regelnamn. Ein time som ikkje ber nokon regel — lagd
+// inn gjenom /api/events, eller frå fyre reglane fanst — vert gruppert
+// på det gamle samantreffet av like felt, og rada hans står med
+// rule_id="0". Slapp det talet inn her, gjekk oppdateringa mot
+// `WHERE rule_id = 0`, råka ingi rad, og svara 200: flata sa «lagra»,
+// og endringa var borte ved neste lasting. Betre å seie nei.
+func regelID(w http.ResponseWriter, r *http.Request) (int64, bool) {
+	id, err := strconv.ParseInt(r.URL.Query().Get("rule_id"), 10, 64)
+	if err != nil || id == 0 {
+		http.Error(w, "Invalid rule_id", http.StatusBadRequest)
+		return 0, false
+	}
+	return id, true
+}
+
 // UpdateRuleTeacherHandler byter lærar paa regelen — alle komande
 // timar. Det som alt er halde stend som det var.
 func UpdateRuleTeacherHandler(w http.ResponseWriter, r *http.Request) {
@@ -154,9 +171,8 @@ func UpdateRuleTeacherHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
-	ruleID, err := strconv.ParseInt(r.URL.Query().Get("rule_id"), 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid rule_id", http.StatusBadRequest)
+	ruleID, ok := regelID(w, r)
+	if !ok {
 		return
 	}
 	laerar := r.URL.Query().Get("teacher_name")
@@ -210,9 +226,8 @@ func UpdateRuleLengthHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
-	ruleID, err := strconv.ParseInt(r.URL.Query().Get("rule_id"), 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid rule_id", http.StatusBadRequest)
+	ruleID, ok := regelID(w, r)
+	if !ok {
 		return
 	}
 	minutt, err := strconv.Atoi(r.URL.Query().Get("minutt"))
@@ -277,9 +292,8 @@ func UpdateRuleClockHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
-	ruleID, err := strconv.ParseInt(r.URL.Query().Get("rule_id"), 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid rule_id", http.StatusBadRequest)
+	ruleID, ok := regelID(w, r)
+	if !ok {
 		return
 	}
 	klokke, err := time.Parse("15:04", r.URL.Query().Get("klokke"))
