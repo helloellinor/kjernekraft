@@ -50,10 +50,22 @@
          spalta si, so alt som gjeng onsdag stend under kvarandre og ein
          kann lesa nedyver ein dag. Fyrr flaut merki mot høgre og
          stod aldri paa lina. */}}
-    <div class="timehovud" aria-hidden="true">
+    {{/* Dagnamna var eit hovud og ingenting meir — `aria-hidden`, ei rein
+         teikning i den eine staden auga går når spørsmålet er
+         dagsforma: «kva kan eg gjere på torsdag?»
+
+         Dei er knappar no, men dei *filtrerer ikkje*. Å filtrere ville
+         teke frå rutenettet det einaste han kan som ei liste ikkje kan:
+         syne heile vika på ein gong, so ein ser at Vinyasa går tysdag
+         òg, og at torsdagen er full medan tysdagen ikkje er det. Ein
+         trykk løftar fram ein dag og dempar dei andre. Ingenting går
+         bort, og eit trykk til slepper han. */}}
+    <div class="timehovud">
         <span class="timehovud-tom"></span>
         {{range $i, $d := .WeekDays}}
-        <span class="dagnamn{{if eq (index $.WeekDates $i | dagStreng) $.Today}} idag{{end}}">{{$d | dagKort3}}</span>
+        <button type="button"
+                class="dagnamn{{if eq (index $.WeekDates $i | dagStreng) $.Today}} idag{{end}}"
+                data-dag="{{add $i 1}}" aria-pressed="false">{{$d | dagKort3}}</button>
         {{end}}
     </div>
 

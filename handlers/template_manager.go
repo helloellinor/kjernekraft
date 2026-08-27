@@ -241,6 +241,7 @@ func getTemplateFuncs() template.FuncMap {
 			}
 			return []string{s[:i], s[i+2:]}
 		},
+		"add": func(a, b int) int { return a + b },
 		// `list` saman med `dict` er det som skal til for å gje ein
 		// komponent ei liste med ting frå ein mal — fanerekkja tek ei.
 		"list": func(values ...interface{}) []interface{} { return values },
