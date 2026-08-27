@@ -154,7 +154,13 @@
     "filter_by_type": "Filter by type",
     "all_types": "All types",
     "membership": "Membership",
-    "klippekort": "Punch cards"
+    "klippekort": "Punch cards",
+    "standard": "Default",
+    "set_standard": "Make default",
+    "remove": "Remove",
+    "expires": "Expires",
+    "no_payment_methods": "You have no payment method saved.",
+    "card_ending": "card ending in %s"
   },
   "membership": {
     "title": "Membership",
@@ -330,7 +336,7 @@
     },
     "actions": "Actions",
     "price_in_kroner": "Price in kroner",
-    "tab_overview": "Overview",
+    "tab_messages": "Messages",
     "tab_schedule": "Schedule",
     "tab_prices": "Pricing",
     "tab_people": "People",
