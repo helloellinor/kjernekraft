@@ -39,6 +39,13 @@ func main() {
 	}
 
 	db := &database.Database{Conn: dbConn}
+
+	// Namn på produkt bur i si eiga tabell. Fyrste gongen flyttar ho
+	// namna som alt står i basen inn som bokmålsnamn — dei er skrivne på
+	// bokmål, so det er det dei er.
+	if err := db.MigrerProduktnamn(); err != nil {
+		log.Fatal(err)
+	}
 	handlers.DB = db
 	handlers.AdminDB = db
 
@@ -159,6 +166,7 @@ func main() {
 		r.Get("/api/admin/membership-rules", handlers.GetMembershipRulesHandler)
 		r.Post("/api/admin/membership-rules", handlers.SaveMembershipRulesHandler)
 		r.Post("/api/admin/membership-price", handlers.UpdateMembershipPriceHandler)
+		r.Get("/api/admin/medlemskapsprisar", handlers.AdminPriserHandler)
 		r.Post("/api/admin/priser", handlers.AdminPriserHandler)
 		r.Get("/api/admin/reglar", handlers.AdminReglarHandler)
 		r.Post("/api/admin/reglar", handlers.AdminReglarHandler)

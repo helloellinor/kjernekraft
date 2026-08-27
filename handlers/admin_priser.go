@@ -31,7 +31,45 @@ func reintNamn(s string) string {
 // endra, er noko nettlesaren veit og tenaren ikkje treng vite. Han
 // samanliknar sjølv og skriv berre dei radene som faktisk er ulike, so
 // eit lagre utan endringar ikkje rører databasen.
+// Prisrad er ei rad slik ho vert teikna: namnet er skrive av systemet
+// eller overstyrt, og fakta er fakta.
+type Prisrad struct {
+	ID       int
+	Namn     string
+	Generert bool
+	Pris     int
+	Binding  int
+	Student  bool
+}
+
 func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
+	lang := GetLanguageFromRequest(r)
+
+	if r.Method == http.MethodGet {
+		alle, err := AdminDB.GetAllMemberships()
+		if err != nil {
+			alle = nil
+		}
+		overstyrte, err := AdminDB.Produktnamn("medlemskap")
+		if err != nil {
+			overstyrte = nil
+		}
+		rader := make([]Prisrad, 0, len(alle))
+		for _, m := range alle {
+			generert := MedlemskapNamn(lang, m)
+			namn := Namn(overstyrte[m.ID], lang, generert)
+			rader = append(rader, Prisrad{
+				ID: m.ID, Namn: namn, Generert: namn == generert,
+				Pris: kroneTal(m.Price), Binding: m.CommitmentMonths,
+				Student: m.IsStudentSenior,
+			})
+		}
+		teiknFragment(w, "admin_medlemskapsprisar", map[string]interface{}{
+			"Lang": lang, "CSRFToken": CSRFToken(r), "Rader": rader,
+		})
+		return
+	}
+
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "ugyldig skjema", http.StatusBadRequest)
 		return
@@ -51,6 +89,10 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 		if r.FormValue("slett-"+id) != "" {
 			// Mjuk sletting: medlemskapet vert sett uverksamt. Nokon kan
 			// ha det, og då skal historikken deira ikkje forsvinne.
+			if err := DB.SlettProduktnamn("medlemskap", m.ID); err != nil {
+				http.Error(w, "kunne ikkje slette namnet", http.StatusInternalServerError)
+				return
+			}
 			if err := DB.DeactivateMembership(int64(m.ID)); err != nil {
 				http.Error(w, "kunne ikkje slette", http.StatusInternalServerError)
 				return
@@ -58,9 +100,13 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		namn := r.FormValue("namn-" + id)
-		if namn == "" {
-			namn = m.Name
+		// Namnet bur ikkje i denne tabellen lenger. Er det som står i
+		// feltet det same som systemet ville skrive, er det inga
+		// overstyring — og tømer du feltet, tek du overstyringa bort.
+		namn := reintNamn(r.FormValue("namn-" + id))
+		generert := MedlemskapNamn(lang, m)
+		if namn == generert {
+			namn = ""
 		}
 
 		// Prisen står i kroner i skjemaet og i øre i basen. Feltet er det
@@ -83,12 +129,16 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 		// kven medlemskapet gjeld for.
 		student := r.FormValue("gjeld-"+id) == "student"
 
-		if namn == m.Name && pris == m.Price && binding == m.CommitmentMonths &&
+		if err := DB.SetProduktnamn("medlemskap", m.ID, lang, namn); err != nil {
+			http.Error(w, "kunne ikkje lagre namnet", http.StatusInternalServerError)
+			return
+		}
+
+		if pris == m.Price && binding == m.CommitmentMonths &&
 			student == m.IsStudentSenior {
 			continue
 		}
 
-		m.Name = namn
 		m.Price = pris
 		m.CommitmentMonths = binding
 		m.IsStudentSenior = student
@@ -120,15 +170,27 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 			binding = md
 		}
 
-		if _, err := DB.CreateMembership(models.Membership{
+		student := r.FormValue("gjeld-"+suffiks) == "student"
+		ny := models.Membership{
 			Name:             namn,
 			Price:            pris,
 			CommitmentMonths: binding,
-			IsStudentSenior:  r.FormValue("gjeld-"+suffiks) == "student",
+			IsStudentSenior:  student,
 			Active:           true,
-		}); err != nil {
+		}
+		id, err := DB.CreateMembership(ny)
+		if err != nil {
 			http.Error(w, "kunne ikkje opprette", http.StatusInternalServerError)
 			return
+		}
+		// Skreiv dei noko anna enn det systemet ville skrive, er det
+		// eit namn dei meiner — og det gjeld språket dei står i.
+		ny.ID = int(id)
+		if namn != MedlemskapNamn(lang, ny) {
+			if err := DB.SetProduktnamn("medlemskap", int(id), lang, namn); err != nil {
+				http.Error(w, "kunne ikkje lagre namnet", http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 

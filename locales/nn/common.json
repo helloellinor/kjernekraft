@@ -469,5 +469,14 @@
     "status_cancelled": "Sagt opp",
     "utan_medlemskap": "Du har ikkje eit medlemskap.",
     "sjaa_val": "Sjå kva du kan velje"
+  },
+  "produkt": {
+    "manadskort": "Månadskort",
+    "halvaarskort": "Halvårskort",
+    "aarskort": "Årskort",
+    "binding_md": "%d månaders binding",
+    "student_suffix": "%s, student og senior",
+    "klipp": "%d klipp",
+    "generert": "generert"
   }
 }

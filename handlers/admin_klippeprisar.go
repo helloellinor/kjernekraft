@@ -15,14 +15,30 @@ import (
 // Sjå docs/KORREKTUREN.md.
 func AdminKlippeprisarHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
+		lang := GetLanguageFromRequest(r)
 		pakkar, err := AdminDB.GetAllKlippekortPackages()
 		if err != nil {
 			pakkar = nil
 		}
+		overstyrte, err := AdminDB.Produktnamn("klippekort")
+		if err != nil {
+			overstyrte = nil
+		}
+		type rad struct {
+			models.KlippekortPackage
+			Namn     string
+			Generert bool
+		}
+		rader := make([]rad, 0, len(pakkar))
+		for _, p := range pakkar {
+			generert := KlippekortNamn(lang, p)
+			namn := Namn(overstyrte[p.ID], lang, generert)
+			rader = append(rader, rad{p, namn, namn == generert})
+		}
 		teiknFragment(w, "admin_klippekort_prisar", map[string]interface{}{
-			"Lang":      GetLanguageFromRequest(r),
+			"Lang":      lang,
 			"CSRFToken": CSRFToken(r),
-			"Pakkar":    pakkar,
+			"Pakkar":    rader,
 		})
 		return
 	}
@@ -31,6 +47,8 @@ func AdminKlippeprisarHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ugyldig skjema", http.StatusBadRequest)
 		return
 	}
+
+	lang := GetLanguageFromRequest(r)
 
 	alle, err := DB.GetAllKlippekortPackages()
 	if err != nil {
@@ -51,6 +69,10 @@ func AdminKlippeprisarHandler(w http.ResponseWriter, r *http.Request) {
 		id := strconv.Itoa(p.ID)
 
 		if r.FormValue("slett-"+id) != "" {
+			if err := DB.SlettProduktnamn("klippekort", p.ID); err != nil {
+				http.Error(w, "kunne ikkje slette namnet", http.StatusInternalServerError)
+				return
+			}
 			if err := DB.DeactivateKlippekortPackage(int64(p.ID)); err != nil {
 				http.Error(w, "kunne ikkje slette", http.StatusInternalServerError)
 				return
@@ -58,19 +80,23 @@ func AdminKlippeprisarHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		namn := r.FormValue("namn-" + id)
-		if namn == "" {
-			namn = p.Name
+		namn := reintNamn(r.FormValue("namn-" + id))
+		if namn == KlippekortNamn(lang, p) {
+			namn = ""
+		}
+		if err := DB.SetProduktnamn("klippekort", p.ID, lang, namn); err != nil {
+			http.Error(w, "kunne ikkje lagre namnet", http.StatusInternalServerError)
+			return
 		}
 		klipp := tal("klipp-"+id, p.KlippCount)
 		pris := tal("pris-"+id, p.Price/100) * 100
 		dagar := tal("dagar-"+id, p.ValidDays)
 
-		if namn == p.Name && klipp == p.KlippCount && pris == p.Price && dagar == p.ValidDays {
+		if klipp == p.KlippCount && pris == p.Price && dagar == p.ValidDays {
 			continue
 		}
 
-		p.Name, p.KlippCount, p.Price, p.ValidDays = namn, klipp, pris, dagar
+		p.KlippCount, p.Price, p.ValidDays = klipp, pris, dagar
 		if err := DB.UpdateKlippekortPackage(p); err != nil {
 			http.Error(w, "kunne ikkje lagre", http.StatusInternalServerError)
 			return
@@ -87,16 +113,25 @@ func AdminKlippeprisarHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		suffiks := strings.TrimPrefix(nykel, "namn-")
-		if _, err := DB.CreateKlippekortPackage(models.KlippekortPackage{
+		nyPakke := models.KlippekortPackage{
 			Name:       namn,
 			Category:   r.FormValue("kategori-" + suffiks),
 			KlippCount: tal("klipp-"+suffiks, 10),
 			Price:      tal("pris-"+suffiks, 0) * 100,
 			ValidDays:  tal("dagar-"+suffiks, 120),
 			Active:     true,
-		}); err != nil {
+		}
+		nyID, err := DB.CreateKlippekortPackage(nyPakke)
+		if err != nil {
 			http.Error(w, "kunne ikkje opprette", http.StatusInternalServerError)
 			return
+		}
+		nyPakke.ID = int(nyID)
+		if namn != KlippekortNamn(lang, nyPakke) {
+			if err := DB.SetProduktnamn("klippekort", int(nyID), lang, namn); err != nil {
+				http.Error(w, "kunne ikkje lagre namnet", http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 

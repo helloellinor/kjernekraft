@@ -28,6 +28,14 @@ func lastMaali(t *testing.T) map[string]map[string]interface{} {
 	}
 	l.loadTranslations()
 
+	// Set han som den samlingi resten av koden nyttar. `t()` gjeng
+	// gjennom singletonen, og han leitar etter «locales» relativt til
+	// arbeidskatalogen — som under prøvor er pakkekatalogen og ikkje
+	// rota. Utan dette gjev `t()` att nykelen sin, og ei prøva som
+	// samanliknar ord ville samanlikna nyklar.
+	localization = l
+	locOnce.Do(func() {})
+
 	for _, maal := range l.GetSupportedLanguages() {
 		if len(l.languages[maal]) == 0 {
 			t.Fatalf("%s/common.json gav ingen nyklar — fila manglar, er tom, eller er ugild JSON", maal)

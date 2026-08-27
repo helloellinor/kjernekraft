@@ -2549,3 +2549,12 @@ select.lappfelt { padding-right: var(--rom-6); }
    han står attmed og er ikkje skrivbar, av di eit felt ein kan skrive
    noko galt i, er eit felt som kan lyge. */
 .rekna { font-family: var(--skrift-tal); font-size: .88rem; color: var(--blekk-svakt); }
+
+/* «generert» attmed eit namn: dette ordet er skrive av systemet, og du
+   kan skrive over det. Det står i det veike blekket av di det ikkje er
+   noko du treng gjere noko med. */
+.generert {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .66rem; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--blekk-svakt); margin-left: var(--rom-2);
+}
