@@ -734,9 +734,32 @@ main {
   background: var(--flate);
   border: 1px solid var(--haarlina);
   border-radius: 2px;
-  padding: var(--rom-5);
+  /* Eit steg ned fraa --rom-5. Polstringi er lufta millom kanten og det
+     som stend inni, og ho skal segja «her tek eitt kort slutt og eit
+     anna tek til» — ikkje meir. Fire og tjuge pikslar rundt fire linor
+     tekst er ei ramma kring eit bilete, ikkje eit kort i ei lista. */
+  padding: var(--rom-4);
 }
 .kort { display: flex; flex-direction: column; gap: var(--rom-2); }
+
+/* Lufta inni eit kort kjem fraa `gap` og ingen annan stad.
+
+   Kvart barn bar si eigi botnmargin med seg attaat: eit avsnitt hev
+   --rom-4 av avsnittsregelen, ei yverskrift --rom-2 av si, og ei
+   handlingsrad --rom-3 av si. Dei laag *uppaa* mellomromet og ikkje i
+   staden for det, so tvo linor som skulle staa aatte pikslar fraa
+   kvarandre stod fyri og tjuge. Det var ikkje ei avgjerd nokon hadde
+   teke — det var tvo maatar aa setja luft paa som ikkje visste um
+   kvarandre.
+
+   No er det éin: mellomromet. Eit kort hev éin rytme, og han stend i
+   `gap`, so ein kann endra honom ein stad og sjaa heile lista fylgja
+   etter. `:is()` er der berre for vekti — han lyfter veljaren eitt hakk
+   yver dei klassone som set margin, so dette vinn same kvar i fila dei
+   stend. */
+.kort > :is(p, h1, h2, h3, h4, div, ul, ol, section, figure) {
+  margin-block: 0;
+}
 
 /* Eit kort som *er* noko — valt, i bruk, framheva — fær ei lina i
    produktfargen langs vinstre kanten. Éi lina, ikkje ei ramme, og
