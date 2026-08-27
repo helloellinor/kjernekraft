@@ -56,11 +56,17 @@
     <path class="rutedjup"  d="{{.Form.Rute}}" filter="url(#merkedjup-lite)"/>
     <text class="rutetal" x="{{.Form.SkiveX}}" y="{{.Form.RuteTekstY}}">{{.Klokke}}</text>
 
-    {{/* Maalaren tømest medan timen fyllest. Er han full, stend ordet i staden. */}}
+    {{/* Kor mange plassar som er att, av kor mange.
+
+         Dette var eit kakestykke — ein *del* — og ein del kan ikkje
+         skiljast: to att av ti ser likt ut som fire att av tjue, og éin
+         att av fire ser ut som ein god sjanse når det i røynda er ein
+         plass. Talet seier det talet seier. */}}
     {{if .Form.Full}}
     <text class="fulltekst" x="{{.Form.LappX}}" y="{{.Form.LappY}}" dominant-baseline="central">FULL</text>
     {{else}}
-    <path class="plettfyll" d="{{.Form.Maalar}}"/>
+    <text class="pletttal" x="{{.Form.PlettX}}" y="{{.Form.PlettY}}" dominant-baseline="central"
+          >{{.Form.Att}}<tspan class="av">/{{.Form.Plassar}}</tspan></text>
     {{end}}
   </svg>
 </button>
