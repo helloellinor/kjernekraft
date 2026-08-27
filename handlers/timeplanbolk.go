@@ -43,6 +43,11 @@ type Framsyning struct {
 	TimeVinkel   float64
 	MinuttVinkel float64
 
+	// Lengdi paa timen, i minutt. Ho høyrer til namnet — ho er den same
+	// kva dag timen gjeng — og ho stend attmed honom i lista, som i
+	// timeplanen.
+	Minutt int
+
 	// Dagen som tvo bokstavar. Han stend øvst i merket, av di det er
 	// det ein spør um fyrst.
 	DagKort2 string
@@ -155,6 +160,7 @@ func NyFramsyning(lang string, e models.Event, iDagDato string, naa time.Time) F
 		Kolonne:      kolonne(e.StartTime.Weekday()),
 		Klokke:       e.StartTime.Format("15:04"),
 		DagKort2:     dagKort2[e.StartTime.Weekday()],
+		Minutt:       int(e.EndTime.Sub(e.StartTime).Minutes()),
 		TimeVinkel:   float64(e.StartTime.Hour()%12)*30 + float64(e.StartTime.Minute())*0.5,
 		MinuttVinkel: float64(e.StartTime.Minute()) * 6,
 		Form: NyttMerke(fmt.Sprintf("%d-%s", e.ID, e.StartTime.Format("0102")),

@@ -119,7 +119,9 @@
     "i_dag": "i dag",
     "i_morgon": "i morgen",
     "av_plassar": "%d av %d plasser igjen",
-    "fullt": "fullt"
+    "fullt": "fullt",
+    "ledig_plass": "Ledig plass",
+    "ingen_ledig_plass": "Alt er fullt i dag og i morgen."
   },
   "membership_actions": {
     "freeze_confirm": "Er du sikker på at du vil fryse medlemskapet ditt?",

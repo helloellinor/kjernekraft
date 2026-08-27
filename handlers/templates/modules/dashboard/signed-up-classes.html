@@ -1,20 +1,18 @@
 {{define "signed_up_classes_container"}}
-<div class="content-section">
-    <h2 class="section-title">{{t .Lang "dashboard.signed_up"}}</h2>
-    <div id="signed-up-classes" hx-get="/api/user/signups" hx-trigger="load" hx-indicator="#loading-signups">
-        <div id="loading-signups" class="loading-placeholder">{{t .Lang "dashboard.loading_signups"}}</div>
-    </div>
+{{/* Heile bolken vert bytt ut, ikkje berre innhaldet: er du ikkje
+     påmeld noko, skal det ikkje stå ei overskrift som seier «Påmeldt»
+     med ei tom melding under. Det er «Ledig plass» som skal fange auga
+     då, og ho gjer ikkje det med ei tom rute over seg. */}}
+<div id="signed-up-classes" hx-get="/api/user/signups" hx-trigger="load" hx-swap="outerHTML">
+    <div class="loading-placeholder">{{t .Lang "dashboard.loading_signups"}}</div>
 </div>
 {{end}}
 
 {{define "signed_up_classes_module"}}
 {{if .HasSignups}}
-{{template "timeliste" (dict "Lang" .Lang "Rader" .Framsyningar)}}
-{{else}}
-<div class="activity-placeholder">
-    {{t .Lang "dashboard.no_signed_up_classes"}}
-    <br><br>
-    <a href="/elev/timeplan" class="timeplan-btn">{{t .Lang "dashboard.see_schedule"}}</a>
+<div class="content-section">
+    <h2 class="section-title">{{t .Lang "dashboard.signed_up"}}</h2>
+    {{template "timeliste" (dict "Lang" .Lang "Rader" .Framsyningar)}}
 </div>
 {{end}}
 {{end}}

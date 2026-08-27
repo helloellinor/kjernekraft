@@ -22,16 +22,20 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	settings := config.GetInstance()
 	now := settings.GetCurrentTime()
 
-	// Get today's events
-	allTodaysEvents, err := DB.GetTodaysEvents()
+	// Timar med ledig plass, i dag og i morgon.
+	//
+	// Bolken spurde «kva går i dag» før. Men ein time som er full er
+	// ikkje eit tilbod, og i dag åleine er for kort: er klokka sju om
+	// kvelden, står bolken tom kvar kveld. Han spør «kvar er det plass»
+	// no, og då må i morgon vere med.
+	ledige, err := DB.LedigeTimar()
 	if err != nil {
 		http.Error(w, "Could not fetch today's events", http.StatusInternalServerError)
 		return
 	}
 
-	// Filter out events that have already started
 	var upcomingEvents []models.Event
-	for _, event := range allTodaysEvents {
+	for _, event := range ledige {
 		if event.StartTime.After(now) {
 			upcomingEvents = append(upcomingEvents, event)
 		}
@@ -52,7 +56,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		"Helsing":            Helsing(lang, user.Name, neste, time.Now()),
 		"Title":              "Elev Dashboard",
 		"TodaysEvents":       upcomingEvents,
-		"TodaysFramsyningar": Framsyningar(lang, upcomingEvents, time.Now()),
+		"LedigeFramsyningar": Framsyningar(lang, upcomingEvents, time.Now()),
 		"ExternalCSS":        []string{},
 		"CurrentPage":        "hjem",
 		"UserName":           user.Name,
