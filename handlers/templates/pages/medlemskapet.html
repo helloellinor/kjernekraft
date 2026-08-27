@@ -24,7 +24,7 @@
         <div>
       {{if .Noverande}}
       <div class="medlemshovud">
-        <h2 class="medlemsnamn">{{.Noverande.Name}}</h2>
+        <h2 class="medlemsnamn">{{.NoverandeNamn}}</h2>
         <span class="stod stod-{{if eq .Noverande.Status "active"}}aktiv{{else if eq .Noverande.Status "paused"}}frosen{{else if eq .Noverande.Status "freeze_requested"}}venteande{{else}}utgaatt{{end}}">
           {{if eq .Noverande.Status "active"}}{{t .Lang "medlemskapet.status_active"}}
           {{else if eq .Noverande.Status "paused"}}{{t .Lang "medlemskapet.status_paused"}}
@@ -80,7 +80,7 @@
            eg to gonger, mistar eg dagar. */}}
       {{if .Noverande}}
       <p class="bytehovud">
-        {{tf .Lang "medlemskapet.lead" .Noverande.Name (printf "%.0f kr" (divf .Noverande.Price 100)) (norskDatoAar .Noverande.RenewalDate)}}
+        {{tf .Lang "medlemskapet.lead" .NoverandeNamn (printf "%.0f kr" (divf .Noverande.Price 100)) (norskDatoAar .Noverande.RenewalDate)}}
       </p>
       {{else}}
       <p class="bytehovud">{{t .Lang "medlemskapet.lead_utan"}}</p>

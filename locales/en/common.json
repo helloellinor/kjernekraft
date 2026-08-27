@@ -469,5 +469,14 @@
     "status_cancelled": "Cancelled",
     "utan_medlemskap": "You do not have a membership.",
     "sjaa_val": "See your options"
+  },
+  "produkt": {
+    "manadskort": "Monthly",
+    "halvaarskort": "Six months",
+    "aarskort": "Yearly",
+    "binding_md": "%d months' binding",
+    "student_suffix": "%s, students and seniors",
+    "klipp": "%d clips",
+    "generert": "generated"
   }
 }

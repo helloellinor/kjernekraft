@@ -1,0 +1,94 @@
+{{define "admin_medlemskapsprisar"}}
+{{/* Medlemskapsprisane.
+
+     Namnet er skrive av systemet ut frå fakta — binding og kven det
+     gjeld for — på det språket du les i. Skriv du noko anna i feltet,
+     vert det ei overstyring *for det språket*. Tømer du feltet, fell
+     namnet attende til det genererte.
+
+     Difor er det ingen språkveljar her: du redigerer alltid i det
+     språket du har valt for sida, og han står i botnlina frå før. */}}
+      {{/* Same forma som profilen: skrivbart der det står, ingen
+           redigeringsmodus, og eit felt som er ulikt det lagra ber merket
+           sjølv. Dokka nedst ber handlinga. */}}
+      <form id="prisar" method="post" action="/api/admin/priser"
+            data-endringar data-dokk="prisdokk">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+        <div class="prisliste" id="prisliste">
+          {{range .Rader}}
+          {{/* Eitt medlemskap er ei setning: kva det heiter, kva det
+               kostar, kor lenge du bind deg, og kven det gjeld for. */}}
+          <div class="prislapp" data-medlemskap="{{.ID}}">
+            <input class="lappfelt prisnamn" type="text" name="namn-{{.ID}}"
+                   value="{{.Namn}}" aria-label="{{t $.Lang "admin.membership_name"}}">
+            <div class="lapprad">
+              <input class="lappfelt kort talfelt" type="number" name="pris-{{.ID}}"
+                     value="{{.Pris}}" min="0" step="1"
+                     aria-label="{{t $.Lang "admin.current_price"}}">
+              <span class="priseining">{{t $.Lang "membership.price_per_month"}}</span>
+              <input class="lappfelt kort talfelt" type="number" name="binding-{{.ID}}"
+                     value="{{.Binding}}" min="0" step="1"
+                     aria-label="{{t $.Lang "admin.commitment_months"}}">
+              <span class="priseining">{{t $.Lang "membership.commitment_months"}}</span>
+              {{/* Rabatten var ei avkryssing under raden. Ho er ikkje eit
+                   val ein hakar av — ho seier kven medlemskapet er for, og
+                   det høyrer til setninga. */}}
+              <span class="priseining">{{t $.Lang "admin.applies_to"}}</span>
+              <select class="lappfelt" name="gjeld-{{.ID}}" aria-label="{{t $.Lang "admin.applies_to"}}">
+                <option value="alle" {{if not .Student}}selected{{end}}>{{t $.Lang "admin.applies_all"}}</option>
+                <option value="student" {{if .Student}}selected{{end}}>{{t $.Lang "admin.applies_student"}}</option>
+              </select>
+              <button type="button" class="slettmerke" data-slett
+                      aria-label="{{t $.Lang "admin.delete_membership"}}"
+                      title="{{t $.Lang "admin.delete_membership"}}">×</button>
+              <span class="slettord">{{t $.Lang "admin.marked_deleted"}}</span>
+            </div>
+          </div>
+          {{end}}
+        </div>
+
+        {{/* Dette er ei side der ein endrar; då skal ein kunne leggje til
+             her òg. Knappen står nedst og ikkje attmed fanene: der kjem
+             raden, og der verkar han like godt på ein telefon. */}}
+        <button type="button" class="btn nyrad" id="ny-prislapp">
+          + {{t .Lang "admin.new_membership"}}
+        </button>
+
+        <aside class="dokk endringsdokk" id="prisdokk" hidden>
+          <div class="dokkinnhald">
+            <span class="endringstal" aria-live="polite"
+                  data-ein="{{t .Lang "profile.changed_one"}}"
+                  data-fleire="{{t .Lang "profile.changed_many"}}"></span>
+            <div class="dokkhandling">
+              <button type="button" class="btn" data-angra>{{t .Lang "profile.discard"}}</button>
+              <button type="submit" class="btn-primary">{{t .Lang "profile.save"}}</button>
+            </div>
+          </div>
+        </aside>
+      </form>
+
+      {{/* Malen for ein ny rad. Han står i dokumentet so markeringa er
+           den same som for radene som finst — ikkje ein streng i ei
+           JS-fil som kan kome i utakt med henne. */}}
+      <template id="prislapp-mal">
+        <div class="prislapp ny" data-eitt data-nyrad>
+          <input class="lappfelt prisnamn" type="text" name="namn-NY"
+                 placeholder="{{t .Lang "admin.membership_name"}}"
+                 aria-label="{{t .Lang "admin.membership_name"}}">
+          <div class="lapprad">
+            <input class="lappfelt kort talfelt" type="number" name="pris-NY"
+                   value="0" min="0" step="1" aria-label="{{t .Lang "admin.current_price"}}">
+            <span class="priseining">{{t .Lang "membership.price_per_month"}}</span>
+            <input class="lappfelt kort talfelt" type="number" name="binding-NY"
+                   value="0" min="0" step="1" aria-label="{{t .Lang "admin.commitment_months"}}">
+            <span class="priseining">{{t .Lang "membership.commitment_months"}}</span>
+            <span class="priseining">{{t .Lang "admin.applies_to"}}</span>
+            <select class="lappfelt" name="gjeld-NY" aria-label="{{t .Lang "admin.applies_to"}}">
+              <option value="alle" selected>{{t .Lang "admin.applies_all"}}</option>
+              <option value="student">{{t .Lang "admin.applies_student"}}</option>
+            </select>
+          </div>
+        </div>
+      </template>
+{{end}}

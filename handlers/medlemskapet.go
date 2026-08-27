@@ -64,7 +64,19 @@ func MedlemskapetHandler(w http.ResponseWriter, r *http.Request) {
 		alle = nil
 	}
 
-	byte := byteval(lang, alle, noverande, kvalifisert)
+	overstyrte, err := DB.Produktnamn("medlemskap")
+	if err != nil {
+		overstyrte = nil
+	}
+
+	byte := byteval(lang, alle, noverande, kvalifisert, overstyrte)
+
+	// Namnet på det du har, kjem same vegen som namna i lista.
+	noverandeNamn := ""
+	if noverande != nil {
+		noverandeNamn = Namn(overstyrte[noverande.Membership.ID], lang,
+			MedlemskapNamn(lang, noverande.Membership))
+	}
 
 	faner := []Fane{
 		{Bolk: "medlemskapet", Namn: t(lang, "medlemskapet.tab_medlemskapet")},
@@ -72,16 +84,17 @@ func MedlemskapetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	renderPage(w, r, "pages/medlemskapet", map[string]interface{}{
-		"Title":       t(lang, "medlemskapet.title"),
-		"CurrentPage": "medlemskap",
-		"Lang":        lang,
-		"CSRFToken":   CSRFToken(r),
-		"IsAdmin":     sessionIsAdmin(r),
-		"UserName":    sessionUserName(r),
-		"Faner":       faner,
-		"Merkelapp":   t(lang, "medlemskapet.title"),
-		"Noverande":   noverande,
-		"Byteval":     byte,
+		"Title":         t(lang, "medlemskapet.title"),
+		"CurrentPage":   "medlemskap",
+		"Lang":          lang,
+		"CSRFToken":     CSRFToken(r),
+		"IsAdmin":       sessionIsAdmin(r),
+		"UserName":      sessionUserName(r),
+		"Faner":         faner,
+		"Merkelapp":     t(lang, "medlemskapet.title"),
+		"Noverande":     noverande,
+		"NoverandeNamn": noverandeNamn,
+		"Byteval":       byte,
 	})
 }
 
@@ -89,7 +102,8 @@ func MedlemskapetHandler(w http.ResponseWriter, r *http.Request) {
 //
 // Prisen aleine seier lite når du alt betaler for noko. Det som tel er
 // skilnaden: «100 kr mindre i månaden, mot 12 månaders binding».
-func byteval(lang string, alle []models.Membership, noverande *models.MembershipWithDetails, kvalifisert bool) []Byteval {
+func byteval(lang string, alle []models.Membership, noverande *models.MembershipWithDetails,
+	kvalifisert bool, overstyrte map[int]map[string]string) []Byteval {
 	var ut []Byteval
 	for _, m := range alle {
 		if noverande != nil && m.ID == noverande.Membership.ID {
@@ -98,7 +112,7 @@ func byteval(lang string, alle []models.Membership, noverande *models.Membership
 
 		v := Byteval{
 			ID:   m.ID,
-			Namn: m.Name,
+			Namn: Namn(overstyrte[m.ID], lang, MedlemskapNamn(lang, m)),
 			Pris: fmt.Sprintf(t(lang, "medlemskapet.per_month"), kroneTal(m.Price)),
 		}
 
