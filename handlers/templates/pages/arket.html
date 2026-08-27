@@ -108,9 +108,17 @@
     <section class="verkstad-bolk" id="livsmerket">
         <h2 class="section-title">Livsmerket</h2>
         <p class="verkstad-regel">
-            Fargen tyder «dette er i live». Alt anna er form: ein open
-            ring ventar, ein strek er frosen, prikkar er utgjenge. Difor
-            les rekkja seg like godt i graatt.
+            Merket er ei <em>lampa</em>, og det er den same lampa som
+            stend i leidingi paa framsida. Ho brenn, eller ho stend og
+            brenn ikkje, eller ho er ikkje der — og halloen er heile
+            skiljet: det er nettupp han som segjer at noko gjeng.
+        </p>
+        <p class="verkstad-regel">
+            Difor les rekkja seg i graatt ogso. Ei lampa som brenn er
+            ljos med ein glód kring seg, ei som kviler er eit graatt
+            glas utan, ei som ventar er ein open ring paa laag straum,
+            og ei som er slokt er eit hol i arket. Fargen segjer kva
+            slag; lyset segjer um det gjeng.
         </p>
         <div class="verkstad-par">
             <div class="verkstad-prova" data-tema="ljos" data-theme="light">{{template "prov_livsmerket" .}}</div>
@@ -347,6 +355,15 @@
     <span class="status status-freeze_requested">Ventar</span>
     <span class="status status-paused">Frose</span>
     <span class="status status-cancelled">Utgjenge</span>
+</div>
+<div class="verkstad-rad">
+    <p class="stodalinje"><span class="ljos ljos-paa" aria-hidden="true"></span>Medlemskapet gjeng</p>
+</div>
+<div class="verkstad-rad">
+    <p class="stodalinje"><span class="ljos ljos-kvild" aria-hidden="true"></span>Medlemskapet er frose</p>
+</div>
+<div class="verkstad-rad">
+    <p class="stodalinje"><span class="ljos ljos-av" aria-hidden="true"></span>Ikkje noko medlemskap</p>
 </div>
 {{end}}
 

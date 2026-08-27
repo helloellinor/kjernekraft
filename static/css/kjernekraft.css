@@ -111,11 +111,18 @@
      farge — elles tyder merket tvo ting. */
   --aatvaring:  #8c3a2b;
 
-  /* Kjernen i ljosbandet under hovudet. Ljos paa papir er ikkje kvitt —
-     det er *metting*: streken vert djupare der lampa stend, ikkje ljosare.
-     I myrkret er det andre vegen, og daa er kjernen utbrend mot kvitt.
-     Sjaa .header::before. */
-  --glodkjerne: color-mix(in srgb, var(--merke) 72%, #000);
+  /* Kjernen i ei ljoskjelde. Ljos paa papir er ikkje kvitt — det er
+     *metting*: streken vert djupare der lampa stend, ikkje ljosare. I
+     myrkret er det andre vegen, og daa er kjernen utbrend mot kvitt.
+
+     Tali stend i tvo eigne token og ikkje inni kjernen, av di kjernen
+     ikkje er den einaste som treng deim: ei lampa som brenn i ein annan
+     farge enn merket lyt kunna rekna sin eigen kjerne, og daa lyt ho
+     hava talet og ikkje svaret. --glodkjerne er merket sin, og han er
+     den ljosbandet under hovudet nyttar. */
+  --glodmengd: 72%;
+  --glodbotn:  #000;
+  --glodkjerne: color-mix(in srgb, var(--merke) var(--glodmengd), var(--glodbotn));
 
   /* Flata i ei lukka fana. Han er rekna av blekket og arket, so han
      fylgjer temaet av seg sjølv og skal ikkje skrivast um att. */
@@ -250,7 +257,10 @@
     --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
     --aatvaring:  #d08574;
     --aatvaring-svak: #2b1c18;
-    --glodkjerne: color-mix(in srgb, var(--merke) 22%, #fff);
+    --faneflate: color-mix(in srgb, var(--blekk) 6%, var(--ark));
+    --glodmengd: 22%;
+    --glodbotn:  #fff;
+    --glodkjerne: color-mix(in srgb, var(--merke) var(--glodmengd), var(--glodbotn));
     --glans:       color-mix(in srgb, #fff 20%, transparent);
     --glans-svak:  color-mix(in srgb, #fff 7%, transparent);
     --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
@@ -275,7 +285,10 @@
   --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
   --aatvaring:  #d08574;
   --aatvaring-svak: #2b1c18;
-  --glodkjerne: color-mix(in srgb, var(--merke) 22%, #fff);
+  --faneflate: color-mix(in srgb, var(--blekk) 6%, var(--ark));
+  --glodmengd: 22%;
+  --glodbotn:  #fff;
+  --glodkjerne: color-mix(in srgb, var(--merke) var(--glodmengd), var(--glodbotn));
   --glans:       color-mix(in srgb, #fff 20%, transparent);
     --glans-svak:  color-mix(in srgb, #fff 7%, transparent);
     --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
@@ -741,15 +754,23 @@ main {
 .loading-placeholder { background: none; border: 0; }
 
 /* ---- livsmerket ----
-   Fargen tyder «dette er i live». Alt anna er form og vekt:
-   ein open ring ventar, ein strek er frosen, graatt er utgjenge. */
-/* Tilstanden. Namni er dei *basen* brukar — «active», «paused»,
-   «cancelled», «freeze_requested» — og ikkje omsette namn attmed dei.
-   Det stod tvo sett her fyrr: `.stod-aktiv` og `.status-active` var den
-   same regelen skriven tvo gonger med kvar sine namn, og malane nytta
-   baae. Ei klasse som heiter det same som verdet ho kjem av, treng
-   ingen omsetjingstabell — og ingen kan gløyma aa halda han i takt. */
-.status, .status-badge, .popular-badge {
+   Merket er ei **lampa**, og det er den same lampa som stend i leidingi
+   paa framsida. Ho var det alt der, og ho var det berre der: rundt i
+   huset stod livsmerket som ein flat prikk i skriftfargen, teikna av
+   `border` og `currentColor`. Tvo maatar aa segja «dette gjeng» paa,
+   og den eine var den gode.
+
+   Ei lampa segjer meir enn ein prikk av di ho hev ein *tilstand ho er
+   i* og ikkje berre ein farge: ho brenn, eller ho stend og brenn ikkje,
+   eller ho er ikkje der. Det er dei tri tingi eit medlemskap kann vera,
+   og halloen er heile skiljet — det er nettupp halloen som segjer at
+   noko gjeng.
+
+   Namni er dei *basen* brukar — «active», «paused», «cancelled»,
+   «freeze_requested» — og ikkje omsette namn attmed dei. Ei klasse som
+   heiter det same som verdet ho kjem av, treng ingen omsetjingstabell,
+   og ingen kann gløyma aa halda han i takt. */
+.status, .membership-status, .status-badge, .popular-badge {
   font-stretch: var(--vidd-merkelapp);
   display: inline-flex; align-items: center; gap: var(--rom-2);
   font-family: var(--skrift-yver);
@@ -757,9 +778,27 @@ main {
   color: var(--blekk-lys);
   background: none; border: 0; padding: 0;
 }
-.status::before {
-  content: ""; width: .5rem; height: .5rem; border-radius: 50%;
-  border: 1px solid currentColor; background: currentColor;
+
+/* Glaset. Det er det same glaset kva anten lampa brenn eller ei — ei
+   lampa som ikkje lyser hev framleis eit glas — og difor stend forma
+   her og tilstanden lenger nede.
+
+   `.ljos` er lampa som eit eige element, i leidingi paa framsida;
+   `::before` er den same lampa inni eit merke med eit ord attmed. Same
+   regel, tvo maatar aa henga henne upp paa.
+
+   Ho stend her **sloknad**, og det er standarden med vilje. Merket fær
+   klassa si av basen — `status-{{.Membership.Status}}` — og eit ord me
+   ikkje kjenner att er nettupp eit me ikkje veit um er i live. Daa skal
+   det ikkje lysa. Ei lampa som ikkje brenn er ogso svaret paa «frose»,
+   og difor treng korkje `.ljos-kvild` eller `.status-paused` ei eigi
+   regel: dei *er* kvila. */
+.status::before, .membership-status::before { content: ""; }
+.ljos, .status::before, .membership-status::before {
+  flex: none; width: .55rem; height: .55rem; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%,
+    color-mix(in srgb, var(--blekk-lys) 60%, var(--ark)) 0%,
+    var(--blekk-svakt) 70%);
 }
 
 
@@ -2150,26 +2189,12 @@ tbody tr:hover td { background: var(--ark-djup); }
   font-stretch: var(--vidd-yver); font-weight: 500;
 }
 
-/* Merket sjølv. Forma segjer stoda; fargen segjer berre um ho er i live. */
-.membership-status {
-  font-stretch: var(--vidd-merkelapp);
-  display: inline-flex; align-items: center; gap: var(--rom-2);
-  font-family: var(--skrift-yver);
-  font-size: .78rem; letter-spacing: .09em; text-transform: uppercase;
-  background: none; border: 0; padding: 0;
-  color: var(--blekk-lys);
-}
-.membership-status::before {
-  content: ""; width: .5rem; height: .5rem; border-radius: 50%;
-  border: 1px solid currentColor; background: currentColor; flex: none;
-}
+/* Ordet i merket. Lampa stend i lampebolken nedst i fila, saman med
+   den ho er ei utgaava av. */
 .status-active { color: var(--produkt, var(--merke)); }
 .status-freeze_requested { color: var(--produkt, var(--merke)); }
-.status-freeze_requested::before { background: none; }
 .status-paused { color: var(--blekk-lys); }
-.status-paused::before { border-radius: 0; height: 1px; width: .7rem; background: currentColor; }
 .status-cancelled { color: var(--blekk-svakt); }
-.status-cancelled::before { background: none; border-style: dotted; }
 
 .price-info { display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap; margin: var(--rom-3) 0; }
 .price-info .price { font-family: var(--skrift-tal); font-size: 1.6rem; letter-spacing: -.02em; }
@@ -3529,25 +3554,61 @@ select.lappfelt { padding-right: var(--rom-6); }
   display: flex; align-items: center; gap: var(--rom-2);
   margin: 0; font-size: .95rem; color: var(--blekk-lys);
 }
-.ljos {
-  flex: none; width: .55rem; height: .55rem; border-radius: 50%;
-}
-.ljos-paa {
+/* Glaset stend i livsmerkebolken lenger uppe, saman med `::before`-en
+   som er den same lampa inni eit merke. Her stend berre kva som er inni
+   glaset, og det er fire ting.
+
+   `--lampe` er fargen ho brenn i. Han er merket som standard, og ei
+   vara som hev sin eigen farge kann setja honom: `--produkt` gjeng
+   fyrst, og daa fylgjer baade glaset, kjernen og halloen etter utan at
+   nokon skriv ei ny regel.
+
+   Halloen stend skriven ut her og ikkje i eit token, og det er med
+   vilje: han er rekna av `--lampe`, og eit token paa `:root` fær
+   fargen sin der og ikkje der han vert nytta. Han lyt difor bu i den
+   eine regelen som veit kva lampa brenn i — og det er heldigvis den
+   same regelen for baae lamporne. */
+
+/* 1. Ho brenn. Kjernen er heitare enn glaset og ligg litt upp mot
+      vinstre, som alt ljos i huset, og halloen ligg kring i tri lag.
+      Halloen er ei ljoskjelda og ikkje ein skugge: tri lag glød utyver,
+      ikkje eitt lag myrke nedyver. Ei lampa utan halo lyser ikkje. */
+.ljos-paa, .status-active::before {
+  --lampe: var(--produkt, var(--merke));
   background: radial-gradient(circle at 34% 30%,
-    var(--glodkjerne) 0%, var(--merke) 62%);
+    color-mix(in srgb, var(--lampe) var(--glodmengd), var(--glodbotn)) 0%,
+    var(--lampe) 62%);
   box-shadow:
-    0 0 3px 0 color-mix(in srgb, var(--merke) 70%, transparent),
-    0 0 9px 1px color-mix(in srgb, var(--merke) 38%, transparent),
-    0 0 18px 4px color-mix(in srgb, var(--merke) 14%, transparent);
+    0 0 3px 0 color-mix(in srgb, var(--lampe) 70%, transparent),
+    0 0 9px 1px color-mix(in srgb, var(--lampe) 38%, transparent),
+    0 0 18px 4px color-mix(in srgb, var(--lampe) 14%, transparent);
 }
-/* Frosi: lampa stend, men ho brenn ikkje. Ingen halo — det er nettupp
-   halloen som segjer at noko gjeng. */
-.ljos-kvild {
-  background: radial-gradient(circle at 34% 30%,
-    color-mix(in srgb, var(--blekk-lys) 60%, var(--ark)) 0%,
-    var(--blekk-svakt) 70%);
+
+/* 2. Ho brenn, men noko er bede um og ikkje svara enno. Glaset er ope —
+      ein ring og ikkje ein kropp — og lampa stend paa lægre straum: tvo
+      lag halo i staden for tri, og kortare veg ut. Det er framleis i
+      live, og difor stend fargen; det er straumen som er teken ned.
+
+      Den opne ringen stod her fyrr ogso, den gongen merket var ein flat
+      prikk. Han var det rette svaret daa, og han er det no. */
+.status-freeze_requested::before {
+  --lampe: var(--produkt, var(--merke));
+  background: none;
+  border: 1px solid var(--lampe);
+  box-shadow:
+    0 0 2px 0 color-mix(in srgb, var(--lampe) 45%, transparent),
+    0 0 7px 1px color-mix(in srgb, var(--lampe) 17%, transparent);
 }
-.ljos-av {
+
+/* 3. Ho stend, og ho brenn ikkje: `.ljos-kvild` og `.status-paused`.
+      Dei stend ikkje her — dei er glaset slik det er teikna i
+      livsmerkebolken uppe, utan noko meir. Ingen halo, og det er nettupp
+      halloen som segjer at noko gjeng. */
+
+/* 4. Ho er ikkje der. Eit slokt ljos er ikkje graatt — det er eit
+      *hol*, som ei tom rute i timeplanen: same fordjupingi som eit felt
+      hev, av di det er den same tomheiti. */
+.ljos-av, .status-cancelled::before {
   background: var(--faneflate);
   box-shadow: var(--fordjuping);
 }

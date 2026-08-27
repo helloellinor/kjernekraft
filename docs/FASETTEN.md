@@ -286,16 +286,24 @@ grep -rn 'box-shadow' static/css/kjernekraft.css \
 `box-shadow: none` er ikkje ein ny skugge, det er ein som vert teken
 burt, so han tel ikkje med.
 
-I dag gjev prøva **fire** treff, og alle fire er meinte:
+I dag gjev prøva **fem** treff, og alle fem er meinte:
 
 1. Fana i administrasjonen kastar ein skugge upp og ut, av di ei fana
    faktisk ligg yver arket.
 2.–3. Hovdinga i `.vekefelt`, i kvila og i fokus — §5. Ho let seg ikkje
    skriva som eit token, av di ho er tvo `inset`-ar som lyt liggja i den
    same eigenskapen.
-4. Halo-en kring `.ljos-paa` — lampa som seier at medlemskapet gjeng.
-   Ho er ei *ljoskjelde* og ikkje ein skugge: tri lag glød utyver,
-   ikkje eitt lag mørke nedyver. Ein lampe utan halo lyser ikkje.
+4.–5. Halo-en kring lampa som brenn (`.ljos-paa`, `.status-active`) og
+   den veike halo-en kring lampa som ventar (`.status-freeze_requested`).
+   Dei er *ljoskjelder* og ikkje skuggar: lag med glød utyver, ikkje eitt
+   lag mørke nedyver. Ei lampe utan halo lyser ikkje.
+
+   Dei kan ikkje bli token. Halo-en er rekna av `--lampe`, og eit token
+   på `:root` får fargen sin *der* — ein custom property blir substituert
+   éin gong der han står, og så arva ferdig utrekna. Skulle han fylgje
+   lampa, laut han bu i regelen som veit kva ho brenn i. Same grunnen
+   til at `--faneflate` og dei andre rekna verdiane står skrivne ut att i
+   kvart tema.
 
 Knappen sin djupn stend i `--knappedjup` og `--knappedjup-inn` og er
 difor teken ut av prøva, som seg hør og bør: han er eit token, ikkje ein
