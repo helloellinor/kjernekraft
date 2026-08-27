@@ -153,29 +153,63 @@
   --rund:       2px;
   --rund-knapp: 999px;
 
-  /* ---- glansen ----
+  /* ---- glaset ----
      Knappen er den eine tingen i huset med djupn utyver fasetten, og
      han hev henne av di han er den eine tingen som er ein *ting* og
-     ikkje papir. Ljoset kjem ovanfraa, som overalt elles: han er ljosare
-     i yverkanten, mørkare mot foten, og det fell eit glim paa den øvre
-     halvdelen.
+     ikkje papir. Ljoset kjem ovanfraa, som overalt elles.
 
-     Tali er lave med vilje. Ein glans paa 55 % er ei kvelv; ein paa 90 %
-     er plast. */
+     Fyrr var han ei kvelv: eit glim som stogga paa midten, teikna med
+     harde stopp i ein gradient tvers yver heile flata. Ei kvelv er rett
+     fysikk for eit stykke plast. Men knappen er ikkje plast — han er ei
+     dropa glas som ligg paa arket, og glas gjer tri ting plasten ikkje
+     gjer:
+
+       1. Ljoset legg seg som ei *dropa* uppaa han, inne fraa kanten,
+          med mjuke endar. Ikkje eit band tvers yver alt.
+       2. Endane er tjukkare enn midten. Ein ser gjenom lite glas i
+          midten og mykje i endane, og difor er endane myrkare. Det er
+          glasveggen, og det er han som gjer at kapselen les seg rund.
+       3. Ljoset som gjeng *gjenom* kroppen kjem attende i foten som eit
+          mjukt glim nedanfraa. Attkastet.
+
+     Ingen av dei tri hev ein hard kant nokon stad. Det er heile
+     skilnaden paa malt og teikna: ein malar set ljoset ned vaatt og let
+     det renna ut i flata, ein teiknar dreg ei line og fyller innanfor.
+
+     Tali er lave med vilje. Ein glans paa 55 % er ei kvelv; ein paa
+     90 % er plast. */
   --glans:       color-mix(in srgb, #fff 55%, transparent);
   --glans-svak:  color-mix(in srgb, #fff 14%, transparent);
+
+  /* Blekket som ikkje snur med temaet. Ein farga knapp ber merkefargen
+     i flata, og merkefargen er ljos i baae temaom — daa lyt ordet vera
+     myrkt i baae. `--blekk` snur, og vilde vorte ljost paa ljost naar
+     skjermen er myrk. Det er den einaste fargen i huset som stend fast,
+     og han stend fast av di flata under honom gjer det same. */
+  --blekk-fast: #1c1f1b;
+
+  /* Djupni, i lag nedanfraa og upp: kanten som fangar ljoset, attkastet
+     i foten, foten som mørknar — og so fallet, som er tvo skuggar og
+     ikkje ein. Den tette seier at han ligg paa noko; den vide og veike
+     seier kor høgt. Fyrr var fallet ei einaste line paa tvo pikslar, og
+     daa laag knappen klistra paa arket i staden for aa liggja paa det. */
   --knappedjup:
     inset 0 1px 0 var(--glans),
     inset 0 -1px 1px color-mix(in srgb, #fff 40%, transparent),
-    inset 0 -3px 4px -2px color-mix(in srgb, var(--blekk) 13%, transparent),
-    0 1px 2px color-mix(in srgb, var(--blekk) 15%, transparent);
+    inset 0 -4px 6px -3px color-mix(in srgb, var(--blekk) 14%, transparent),
+    0 1px 1px color-mix(in srgb, var(--blekk) 11%, transparent),
+    0 4px 9px -3px color-mix(in srgb, var(--blekk) 18%, transparent);
   --knappedjup-inn:
-    inset 0 2px 4px -1px color-mix(in srgb, var(--blekk) 26%, transparent),
+    inset 0 2px 5px -1px color-mix(in srgb, var(--blekk) 28%, transparent),
     inset 0 -1px 0 var(--glans-svak);
 
   /* romet. Ei einaste trapp, so ingen finn paa 13px. */
   --rom-1: .25rem; --rom-2: .5rem;  --rom-3: .75rem;
   --rom-4: 1rem;   --rom-5: 1.5rem; --rom-6: 2rem;   --rom-7: 3rem;
+  /* Lufta over og under teksti i ein knapp. Mindre enn --rom-2, som
+     stod her fyrr: han er eit steg i romskalaen, og eit steg i den
+     skalaen er for mykje til dette. */
+  --knapp-loddrett: .34rem;
 
   /* Skuggen finst i éi utgaava, og han er til det som flyt. */
   --skugge-flytande: 0 6px 20px rgb(28 31 27 / .14);
@@ -987,107 +1021,193 @@ main {
 .btn, .btn-primary, .btn-danger, .action-btn, .change-btn, .timeplan-btn,
 .login-btn, .week-nav-btn, .signup-button,
 .cancel-signup-btn, .cancel-btn, .remove-btn {
+  /* Ei rolla set fem verd og ikkje eit einaste lag. Glaset — dropa,
+     glasveggen, attkastet — er det same for heile familien og stend
+     berre éin stad: her. Fyrr stod den same gradienten skriven tri
+     gonger, ein gong for kvar rolla, og tri stader er tri stader aa
+     gløyma naar noko skal rettast. */
+  --knapp-kropp:   var(--flate);   /* flata han er stopt i */
+  --knapp-tone:    var(--blekk);   /* det myrke i glasveggen og i foten */
+  --knapp-ord:     var(--blekk);
+  --knapp-kant:    var(--kant);
+  --knapp-attkast: var(--glans);   /* ljoset som kjem attende nedanfraa */
+
   font-family: var(--skrift);
   font-size: .95rem; font-weight: 500;
   letter-spacing: 0; text-transform: none;
   /* Kapselen treng luft i endane. Er teksti klemd mot kurva, les forma
-     seg som eit avrunda rektangel og ikkje som ein knapp. */
-  padding: var(--rom-2) var(--rom-5);
-  border: 1px solid var(--kant);
+     seg som eit avrunda rektangel og ikkje som ein knapp.
+
+     Lufta i endane, ikkje over og under. Loddrett stod det like mykje
+     som vassrett stod på ein tredel av vegen, og då vart knappen høg
+     som eit felt: han såg ut som noko ein skriv i. Ein knapp er ei
+     linje med tekst og eit grep rundt henne — han skal vera brei og
+     låg, ikkje kvadratisk. */
+  padding: var(--knapp-loddrett) var(--rom-5);
+  border: 1px solid var(--knapp-kant);
   border-radius: var(--rund-knapp);
-  /* Tvo lag: glimet paa den øvre halvdelen, og kroppen som mørknar mot
-     foten. Glimet stoggar brått paa midten — det er slik ljos oppfører
-     seg paa ei kvelv, og det er den kanten som gjer at forma les seg som
-     runda og ikkje som flat. */
-  /* Glimet stoggar ikkje brått. Ein hard kant paa midten er signaturen
-     aat den tidlege telefonknappen — plast med ei bobla i. Aqua let
-     glimet døy ut yver ein lengre veg, og legg til eit svakt attkast
-     langs foten: ljos som hev gjenge gjenom kroppen og kjem attende.
-     Det er skilnaden paa ei kvelv og ei bobla. */
-  background:
-    linear-gradient(to bottom,
-      var(--glans) 0%,
-      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
-      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
-      color-mix(in srgb, var(--glans) 6%, transparent) 58%,
-      transparent 72%),
-    linear-gradient(to bottom,
-      var(--flate) 0%,
-      color-mix(in srgb, var(--blekk) 7%, var(--flate)) 62%,
-      color-mix(in srgb, var(--blekk) 3%, var(--flate)) 100%);
+  color: var(--knapp-ord);
+  /* Kroppen aaleine, og ingen ting meir: han mørknar mot foten av di
+     glaset er tjukkast der. Ljoset ligg ikkje i denne flata — det ligg
+     i dei tvo laagi uppaa henne, og difor kann kroppen vera ein rein
+     farge og ikkje ei blanding av farge og glim. */
+  background: linear-gradient(to bottom,
+    var(--knapp-kropp) 0%,
+    color-mix(in srgb, var(--knapp-tone) 7%, var(--knapp-kropp)) 58%,
+    color-mix(in srgb, var(--knapp-tone) 13%, var(--knapp-kropp)) 100%);
   box-shadow: var(--knappedjup);
-  color: var(--blekk);
-  cursor: pointer;
-  text-decoration: none;
+
+  position: relative;
+  /* Glaset ligg yver flata og under ordet. Det gjeng berre naar knappen
+     sjølv er ein stablingsgrunn: daa fell eit lag paa `z-index: -1`
+     millom bakgrunnen hans og teksti hans, og ordet stend klaart uppaa
+     glaset slik det gjer i røyndi. */
+  isolation: isolate;
   display: inline-block;
   text-align: center;
   line-height: 1.35;
-}
-.btn:hover, .action-btn:hover, .change-btn:hover,
-.week-nav-btn:hover, .signup-button:hover {
-  border-color: var(--merke); color: var(--merke);
+  cursor: pointer;
+  text-decoration: none;
 }
 
-/* Trykt snur ljoset: glimet gjeng ut, skuggen fell inn ovanfraa, og
-   knappen sig ein piksel. Det er heile gleda ved desse knappane, og
-   det er ogso det einaste stader i huset der noko *flyttar* seg — han
+/* Dropa. Ho ligg *inne i* kanten og hev si eigi kapselform, so ho vert
+   ei form som ligg paa knappen og ikkje ei flate som er knappen. Og ho
+   er uskarp: éin piksel er nok til at ho ikkje hev ein kant nokon stad.
+   Det er den eine linja som skil malt fraa teikna. */
+:is(.btn, .btn-primary, .btn-danger, .action-btn, .change-btn,
+    .timeplan-btn, .login-btn, .week-nav-btn, .signup-button,
+    .cancel-signup-btn, .cancel-btn, .remove-btn)::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  top: 1.5px; left: .58em; right: .58em; height: 45%;
+  border-radius: var(--rund-knapp);
+  background: linear-gradient(to bottom,
+    var(--glans) 0%,
+    color-mix(in srgb, var(--glans) 78%, transparent) 34%,
+    color-mix(in srgb, var(--glans) 30%, transparent) 70%,
+    transparent 100%);
+  filter: blur(1.2px);
+}
+
+/* Glasveggen og attkastet, i det same laget av di dei er den same
+   fysikken: det eine er glas ein ser *gjenom*, det andre er ljos som
+   hev vore inne i det.
+
+   Veggen mørknar dei tvo endane yver ein knapp emme, og ikkje yver ein
+   part av breiddi. Emme fylgjer skriftstorleiken, og skriftstorleiken
+   ber høgdi: daa fær ein lang knapp og ein stutt den same kanten, og
+   kanten held seg jamn med kurva i enden same kor breid han er.
+
+   Laget ligg yver dropa, so veggen skjer henne av i endane slik glaset
+   gjer det. Ei dropa som flyt heilt ut i kanten er ei bobla i plast. */
+:is(.btn, .btn-primary, .btn-danger, .action-btn, .change-btn,
+    .timeplan-btn, .login-btn, .week-nav-btn, .signup-button,
+    .cancel-signup-btn, .cancel-btn, .remove-btn)::after {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  inset: 0; border-radius: inherit;
+  background:
+    linear-gradient(to right,
+      color-mix(in srgb, var(--knapp-tone) 15%, transparent) 0,
+      color-mix(in srgb, var(--knapp-tone) 4%, transparent) .5em,
+      transparent 1.05em,
+      transparent calc(100% - 1.05em),
+      color-mix(in srgb, var(--knapp-tone) 4%, transparent) calc(100% - .5em),
+      color-mix(in srgb, var(--knapp-tone) 15%, transparent) 100%),
+    radial-gradient(88% 132% at 50% 120%,
+      var(--knapp-attkast) 0%,
+      color-mix(in srgb, var(--knapp-attkast) 46%, transparent) 40%,
+      transparent 76%);
+}
+
+/* Hover flyttar tvo verd og ikkje eit lag. Det er heile poenget med aa
+   la rollone vera tal: ein tilstand er ein ny farge, ikkje ein ny
+   gradient som lyt skrivast ut att i sin heilskap. */
+.btn:hover, .action-btn:hover, .change-btn:hover,
+.week-nav-btn:hover, .signup-button:hover {
+  --knapp-kant: var(--merke);
+  --knapp-ord:  var(--merke);
+}
+
+/* Trykt snur ljoset. Dropa gjeng ut — glas som er trykt inn hev ikkje
+   noko ljos uppaa seg — attkastet vert veikt, skuggen fell inn ovanfraa,
+   og knappen sig ein piksel. Det er heile gleda ved desse knappane, og
+   det er ogso den einaste staden i huset der noko *flyttar* seg: han
    flyttar seg av di han er ein ting ein trykkjer paa. */
 .btn:active, .btn-primary:active, .btn-danger:active, .action-btn:active,
 .change-btn:active, .timeplan-btn:active, .login-btn:active,
 .week-nav-btn:active, .signup-button:active,
 .cancel-signup-btn:active, .cancel-btn:active, .remove-btn:active {
-  background-image: none;
+  background: color-mix(in srgb, var(--knapp-tone) 13%, var(--knapp-kropp));
   box-shadow: var(--knappedjup-inn);
   transform: translateY(1px);
 }
+:is(.btn, .btn-primary, .btn-danger, .action-btn, .change-btn,
+    .timeplan-btn, .login-btn, .week-nav-btn, .signup-button,
+    .cancel-signup-btn, .cancel-btn, .remove-btn):active::before { opacity: 0; }
+:is(.btn, .btn-primary, .btn-danger, .action-btn, .change-btn,
+    .timeplan-btn, .login-btn, .week-nav-btn, .signup-button,
+    .cancel-signup-btn, .cancel-btn, .remove-btn):active::after { opacity: .45; }
+
 @media (prefers-reduced-motion: no-preference) {
-  .btn, .btn-primary, .btn-danger { transition: box-shadow .08s ease-out, transform .08s ease-out; }
+  .btn, .btn-primary, .btn-danger { transition: box-shadow .09s ease-out, transform .09s ease-out; }
 }
 
-/* Hovudhandlingi. Fargen i lina og i ordet, og ei svak tone i flata —
-   nok til aa skilja henne fraa dei hine utan aa verta ein klump. Det er
-   berre éi per skjerm. */
+/* Hovudhandlingi ber merkefargen i flata. Ho er den eine knappen paa ei
+   sida som gjer det, og ho gjer det av di ho er den eine som skal
+   svarast fyrst.
+
+   Ordet er `--blekk-fast` og ikkje kvitt. Kvitt paa turkis er tvo ljose
+   ting uppaa kvarandre; myrkt paa turkis er eit ord paa ei flate — og
+   det er ogso slik glaset i dei gamle knappane bar skrifti si. */
 .btn-primary, .login-btn, .timeplan-btn, .signup-button {
-  border-color: color-mix(in srgb, var(--merke) 70%, var(--blekk));
-  color: var(--flate);
-  background:
-    linear-gradient(to bottom, var(--glans) 0%,
-      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
-      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
-      color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%),
-    linear-gradient(to bottom,
-      color-mix(in srgb, var(--merke-lys) 84%, #fff) 0%,
-      var(--merke-lys) 46%, var(--merke) 100%);
+  --knapp-kropp:   color-mix(in srgb, var(--merke-lys) 82%, var(--merke));
+  --knapp-tone:    color-mix(in srgb, var(--merke) 62%, var(--blekk-fast));
+  --knapp-ord:     var(--blekk-fast);
+  --knapp-kant:    color-mix(in srgb, var(--merke) 58%, var(--blekk-fast));
+  --knapp-attkast: color-mix(in srgb, var(--merke-lys) 30%, var(--glans));
 }
 .btn-primary:hover, .login-btn:hover, .timeplan-btn:hover, .signup-button:hover {
-  color: var(--flate);
-  background:
-    linear-gradient(to bottom, var(--glans) 0%, var(--glans-svak) 46%, transparent 50%),
-    linear-gradient(to bottom,
-      color-mix(in srgb, var(--merke-lys) 70%, #fff) 0%, var(--merke-lys) 100%);
+  --knapp-kropp:   var(--merke-lys);
+  --knapp-attkast: color-mix(in srgb, var(--merke-lys) 16%, var(--glans));
 }
 
-/* Det som ikkje kann gjerast um att. Same forma, annan farge. */
+/* Det som ikkje kann gjerast um att. Same glaset, men fargen stend i
+   lina og i ordet og ikkje i flata: ein raud klump dreg auga fraa alt
+   anna, og denne knappen skal ein finna naar ein leitar etter honom —
+   ikkje fyrr. */
 .btn-danger, .cancel-signup-btn, .cancel-btn, .remove-btn {
-  border-color: var(--aatvaring); color: var(--aatvaring);
-  background:
-    linear-gradient(to bottom, var(--glans) 0%,
-      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
-      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
-      color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%),
-    linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--aatvaring) 9%, var(--flate)) 100%);
+  --knapp-tone: color-mix(in srgb, var(--aatvaring) 70%, var(--blekk));
+  --knapp-ord:  var(--aatvaring);
+  --knapp-kant: var(--aatvaring);
 }
 .btn-danger:hover, .cancel-signup-btn:hover, .cancel-btn:hover, .remove-btn:hover {
-  background: var(--aatvaring-svak); border-color: var(--aatvaring); color: var(--aatvaring);
+  --knapp-kropp: var(--aatvaring-svak);
 }
 
-/* Avslegen: ingen glans, ingen skugge, ingen djupn. Han er ikkje ein
-   ting ein kann trykkja paa lenger, og daa skal han ikkje sjaa ut som ein. */
+/* ---- trappa ----
+   Den same kapselen i tri storleikar. Glaset er skrive i emme og i
+   prosent og ikkje i pikslar, so dropa, veggen og attkastet fylgjer
+   skrifti av seg sjølv: ein stor knapp fær eit stort ljos og ein liten
+   eit lite, og ingen av dei tri lyt teiknast paa nytt. Det er prøva paa
+   at laget er rett rekna.
+
+   Storleiken tyder kor ofte handlingi hender, ikkje kor viktig ho er —
+   det siste stend i fargen. Den store er kjøpsknappen og ingen ting
+   anna; den vesle er handlingi som bur inne i ei rad. */
+.btn-liten { font-size: .82rem; padding: calc(var(--knapp-loddrett) - .05rem) var(--rom-4); }
+.btn-stor  { font-size: 1.1rem;  padding: calc(var(--knapp-loddrett) + .2rem) var(--rom-6); }
+
+/* Avslegen: ingen dropa, ingen vegg, ingen skugge. Han er ikkje ein
+   ting ein kann trykkja paa lenger, og daa skal han ikkje sjaa ut som
+   ein — glas som ikkje kann trykkjast er berre ei flate. */
 button:disabled, .btn:disabled, .btn-primary:disabled, .week-nav-btn:disabled {
   color: var(--blekk-svakt); border-color: var(--haarlina);
   background: none; background-image: none;
   box-shadow: none; transform: none; cursor: not-allowed;
 }
+button:disabled::before, button:disabled::after,
+.btn:disabled::before, .btn:disabled::after,
+.btn-primary:disabled::before, .btn-primary:disabled::after,
+.week-nav-btn:disabled::before, .week-nav-btn:disabled::after { display: none; }
 
 /* Ein naken `<button>` er ingen ting: han ber skrifta rundt seg og
    ventar paa ei klasse. Det er dei fleste knappane i huset — merke,

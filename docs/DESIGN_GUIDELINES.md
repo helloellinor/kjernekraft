@@ -147,7 +147,7 @@ den einaste ein aldri bryt:
 | Ting | Kva ljoset gjer |
 |---|---|
 | felt | fell ned i ei grøft — mørk overkant (FASETTEN) |
-| knapp | fell på ei kvelv — glim øvst, mørkare mot foten (§18) |
+| knapp | fell på glas — dropa øvst, tjukk vegg i endane, attkast i foten (§18) |
 | tom dag i vika | fell ned i eit hòl — mørk overleppe, ljos underleppe |
 | ljosbandet | er sjølv kjelda |
 | kort | fell på flatt papir — ingen ting hender |
@@ -554,32 +554,83 @@ tydingar:
 
 Finn du eit tredje rundingsverd i stilarket, er det drift.
 
-### Han er glossy, og det er meininga
+### Han er glas, ikkje plast
 
 Pilleforma er henta frå gamle knappar, og **glansen med henne**. Ein
-knapp er ein gjenstand (§4): ljoset fell på han ovanfrå, kvelver seg
-over den øvre halvdelen og døyr mot foten.
+knapp er ein gjenstand (§4): ljoset fell på han ovanfrå.
 
-Tre lag, og alle tre kjem frå tokens så dei fylgjer temaet:
+Han var ei kvelv ei stund — eit glim som stogga brått på midten. Det er
+rett fysikk for eit stykke plast, og det er den harde kanten som gjer at
+gamle nettknappar ser billige ut. Ei dropa glas oppfører seg annleis, og
+skilnaden er tre ting:
+
+| Lag | Kva det er | Kvar det står |
+|---|---|---|
+| **dropa** | ljoset som legg seg oppå, inne frå kanten, uskarpt i alle endar | `::before` |
+| **glasveggen** | endane er mørkare av di ein ser gjennom meir glas der | `::after`, fyrste laget |
+| **attkastet** | ljos som har gått *gjennom* kroppen og kjem att nedanfrå | `::after`, andre laget |
+
+Ingen av dei tre har ein hard kant nokon stad. Det er heile skilnaden på
+malt og teikna: ein målar set ljoset ned vått og lèt det renne ut, ein
+teiknar dreg ei line og fyller innanfor.
+
+Kroppen sjølv ber ikkje ljos i det heile — han er ein rein farge som
+mørknar litt mot foten. Alt ljoset ligg i dei to laga oppå, og difor kan
+ein byte farge på ein knapp utan å teikne glaset på nytt.
 
 ```css
 --glans:      color-mix(in srgb, #fff 55%, transparent);  /* 20 % i mørkt */
 --glans-svak: color-mix(in srgb, #fff 14%, transparent);
---knappedjup: inset 0 1px 0 var(--glans),                 /* overkanten */
-              inset 0 -2px 3px -1px …blekk 14 %…,         /* foten */
-              0 1px 2px …blekk 16 %…;                     /* fallet */
+--knappedjup: inset 0 1px 0 var(--glans),      /* kanten som fangar ljoset */
+              inset 0 -1px 1px …,              /* attkastet i foten */
+              inset 0 -4px 6px -3px …blekk 14 %…,
+              0 1px 1px …blekk 11 %…,          /* kontaktskuggen */
+              0 4px 9px -3px …blekk 18 %…;     /* fallet, mjukt */
 ```
 
-Glimet stoggar brått på midten. Det er slik ljos oppfører seg på ei
-kvelv, og det er den kanten som gjer at forma les seg som runda i staden
-for flat. Tala er låge med vilje: 55 % er ei kvelv, 90 % er plast.
+Tala er låge med vilje: 55 % er ei dropa, 90 % er plast. Fallet er to
+skuggar og ikkje ein — den tette seier at han ligg på noko, den vide og
+veike seier kor høgt.
 
-**Trykt snur ljoset.** Glimet går ut, skuggen fell inn ovanfrå, og
+Glaset ligg mellom flata og ordet, ikkje over ordet. Knappen er difor
+`isolation: isolate`, og dei to laga står på `z-index: -1`.
+
+### Ei rolle er fem fargar, ikkje eit lag
+
+Fyrr stod den same gradienten skriven tre gonger, ein gong for kvar
+rolle, og tre stader er tre stader å gløyme. No set ei rolle fem verd
+og ingen ting meir:
+
+```css
+--knapp-kropp     /* flata han er støypt i */
+--knapp-tone      /* det mørke i glasveggen og i foten */
+--knapp-ord
+--knapp-kant
+--knapp-attkast   /* ljoset som kjem att nedanfrå */
+```
+
+Ein tilstand — hover, trykt — er ein ny farge i eitt av dei fem, aldri
+ein ny gradient.
+
+### Trappa
+
+Same kapselen i tre storleikar: `.btn-liten`, ingen klasse, `.btn-stor`.
+Glaset er rekna i `em` og i prosent og ikkje i pikslar, så dropa, veggen
+og attkastet fylgjer skrifta av seg sjølv. Må ein teikne glaset på nytt
+for ein ny storleik, er laget feil rekna.
+
+Storleiken seier kor ofte handlinga hender, ikkje kor viktig ho er — det
+siste står i fargen. Den store er kjøpsknappen og ingen ting anna; den
+vesle er handlinga som bur inne i ei rad.
+
+**Trykt snur ljoset.** Dropa går ut — glas som er trykt inn har ikkje
+noko ljos oppå seg — attkastet vert veikt, skuggen fell inn ovanfrå, og
 knappen sig éin piksel. Det er den einaste staden i huset der noko
 flyttar seg — og han flyttar seg av di han er ein ting ein trykkjer på.
 
-**Avslegen har ingen djupn i det heile.** Han er ikkje ein ting ein kan
-trykkje på lenger, og skal ikkje sjå ut som ein.
+**Avslegen har ingen djupn i det heile.** Ingen dropa, ingen vegg, ingen
+skugge: dei to laga står på `display: none`. Han er ikkje ein ting ein
+kan trykkje på lenger, og skal ikkje sjå ut som ein.
 
 ### Røysta
 
@@ -601,11 +652,21 @@ raud klump dreg auga fraa alt anna*. Ein turkis klump gjer det same.
 | | Line | Ord | Flate |
 |---|---|---|---|
 | vanleg | `--kant` | `--blekk` | `--flate` |
-| hovudhandling | `--merke` | `--merke` | `--merke-svak` |
-| uatterkalleleg | `--aatvaring` | `--aatvaring` | inga |
+| hovudhandling | `--merke` mørkna | `--blekk-fast` | `--merke-lys` |
+| uatterkalleleg | `--aatvaring` | `--aatvaring` | `--flate` |
 
 Flata er `--flate` og ikkje `--ark`. Ein knapp malt i sidefargen er eit
 hòl med ei line rundt.
+
+Hovudhandlinga er unnataket, og ho er det åleine: ho ber merkefargen i
+flata av di ho er den eine knappen på sida som skal svarast fyrst. Det
+er difor det står **éi** per skjerm — regelen og fyllet er den same
+setninga sagd to gonger.
+
+Ordet hennar er `--blekk-fast` og ikkje kvitt. Kvitt på turkis er to
+ljose ting oppå kvarandre; mørkt på turkis er eit ord på ei flate. Og
+`--blekk-fast` snur ikkje med temaet, av di merkefargen er ljos i begge
+— eit ord som snur ville vorte ljost på ljost når skjermen er mørk.
 
 ### Grunnstilen gjeld `.btn`-familien, ikkje `<button>`
 
