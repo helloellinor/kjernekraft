@@ -2666,3 +2666,50 @@ select.lappfelt { padding-right: var(--rom-6); }
 .timelistnaar { display: flex; flex-direction: column; align-items: flex-end; gap: .1rem; text-align: right; }
 .timelistdag { font-size: .88rem; color: var(--blekk-lys); white-space: nowrap; }
 .timelistklokke { font-family: var(--skrift-tal); font-size: 1rem; color: var(--blekk); white-space: nowrap; }
+
+/* ===================================================================
+   betalingsmåtane
+   Eit kort er truverdig når det ser ut som det ein hugsar: merket ein
+   kjenner att, dei fire siste sifra, og datoen. Ikkje meir.
+
+   Det såg ut som spam før, og grunnane var konkrete. Kortmerket var
+   bokstavane «VISA» i ein boks — eit falskt logo laga av tekst. Merket
+   stod ein gong til under, som «visa» i småbokstavar. Heile det maskerte
+   nummeret stod der, «•••• •••• •••• 4242», sjølv om berre dei fire
+   siste seier noko. Og knappane låg klemde inntil kortet: ingen luft
+   mellom korta, og ingen mellom det siste kortet og «legg til».
+   =================================================================== */
+.kortliste {
+  list-style: none; margin: 0 0 var(--rom-6); padding: 0;
+  display: flex; flex-direction: column; gap: var(--rom-4);
+  /* Eit kort er eit kort. Strekt over heile spalta les det seg som eit
+     banner, og eit banner er det ein er van med å sjå på ei spamside. */
+  max-width: 30rem;
+}
+
+.kortlapp {
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  padding: var(--rom-5);
+  display: flex; flex-direction: column; gap: var(--rom-2);
+}
+/* Det som er i bruk, ber lina i merkefargen — same regelen som på kort
+   elles i huset. */
+.kortlapp.standard { border-left: 3px solid var(--merke); }
+
+.kortkva { display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap; }
+.kortmerke {
+  font-family: var(--skrift-yver); font-size: 1.15rem; font-weight: 500;
+  font-stretch: var(--vidd-yver); color: var(--blekk);
+}
+/* Sifra i taldskrifta, med luft mellom prikkane og tale, so det les seg
+   som eit kortnummer og ikkje som ei streng. */
+.korttal {
+  font-family: var(--skrift-tal); font-size: 1.05rem;
+  letter-spacing: .08em; color: var(--blekk);
+}
+.kortdato { margin: 0; font-size: .88rem; color: var(--blekk-lys); }
+
+/* Luft mellom kortet og det ein kan gjere med det. */
+.korthandling { display: flex; gap: var(--rom-3); flex-wrap: wrap; margin-top: var(--rom-3); }

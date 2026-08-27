@@ -46,63 +46,29 @@ func PaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	data := struct {
-		PaymentMethods    []models.PaymentMethod
-		HasPaymentMethods bool
-	}{
-		PaymentMethods:    paymentMethods,
-		HasPaymentMethods: len(paymentMethods) > 0,
+	// Merket vert skrive som folk kjenner det att — «Visa», ikkje
+	// «visa», og ikkje bokstavane i ein boks. Er merket ukjent, står det
+	// som det står.
+	merke := map[string]string{
+		"visa": "Visa", "mastercard": "Mastercard", "amex": "American Express",
+	}
+	type kort struct {
+		models.PaymentMethod
+		Merke string
+	}
+	rader := make([]kort, 0, len(paymentMethods))
+	for _, p := range paymentMethods {
+		namn, finst := merke[p.Brand]
+		if !finst {
+			namn = p.Brand
+		}
+		rader = append(rader, kort{p, namn})
 	}
 
-	tmpl := `{{if .HasPaymentMethods}}
-<div class="payment-methods-list">
-    {{range .PaymentMethods}}
-    <div class="payment-method-card {{if .IsDefault}}default{{end}}">
-        <div class="payment-method-info">
-            <div class="payment-method-icon">
-                {{if eq .Brand "visa"}}VISA
-                {{else if eq .Brand "mastercard"}}MC
-                {{else if eq .Brand "amex"}}AMEX
-                {{else}}CARD
-                {{end}}
-            </div>
-            <div class="payment-method-details">
-                <div class="payment-method-brand">{{.Brand}}</div>
-                <div class="payment-method-last4">•••• •••• •••• {{.Last4}}</div>
-                <div class="payment-method-expiry">Utløper {{.ExpiryMonth}}/{{.ExpiryYear}}</div>
-            </div>
-        </div>
-        <div class="payment-method-actions">
-            {{if .IsDefault}}
-            <span class="default-badge">Standard</span>
-            {{else}}
-            <button class="payment-method-btn set-default-btn" onclick="setDefaultPaymentMethod({{.ID}})">
-                Sett som standard
-            </button>
-            {{end}}
-            <button class="payment-method-btn remove-btn" onclick="removePaymentMethod({{.ID}})">
-                Fjern
-            </button>
-        </div>
-    </div>
-    {{end}}
-</div>
-{{else}}
-<div class="no-data">
-    Du har ingen betalingsmetoder registrert.
-</div>
-{{end}}`
-
-	t, err := template.New("payment-methods").Parse(tmpl)
-	if err != nil {
-		http.Error(w, "Template error", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "text/html")
-	if err := t.Execute(w, data); err != nil {
-		http.Error(w, "Template execution error", http.StatusInternalServerError)
-	}
+	teiknFragment(w, "betalingsmaatar", map[string]interface{}{
+		"Lang": GetLanguageFromRequest(r),
+		"Kort": rader,
+	})
 }
 
 // ChargesHandler provides HTMX endpoint for user's charges/billing history

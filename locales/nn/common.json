@@ -154,7 +154,13 @@
     "filter_by_type": "Filtrer etter type",
     "all_types": "Alle typar",
     "membership": "Medlemskap",
-    "klippekort": "Klippekort"
+    "klippekort": "Klippekort",
+    "standard": "Standard",
+    "set_standard": "Gjer til standard",
+    "remove": "Fjern",
+    "expires": "Går ut",
+    "no_payment_methods": "Du har ingen betalingsmåte registrert.",
+    "card_ending": "kort som endar på %s"
   },
   "membership": {
     "title": "Medlemskap",
@@ -330,7 +336,7 @@
     },
     "actions": "Handlingar",
     "price_in_kroner": "Pris i kronor",
-    "tab_overview": "Oversyn",
+    "tab_messages": "Meldingar",
     "tab_schedule": "Timeplan",
     "tab_prices": "Prising",
     "tab_people": "Folk",
@@ -378,7 +384,7 @@
     "stats_middle": "Det stend",
     "stats_classes": "timar i planen",
     "stats_and": "og",
-    "stats_waiting": "ventar paa svar",
+    "stats_waiting": "ventar på svar",
     "tab_membership": "Medlemskap",
     "tab_rules": "Reglar",
     "new_membership": "Nytt medlemskap",

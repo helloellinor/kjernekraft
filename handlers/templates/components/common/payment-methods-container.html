@@ -6,7 +6,8 @@
         <div class="loading-placeholder">{{t .Lang "payments.loading_payment_methods"}}</div>
     </div>
 
-    <button class="add-payment-method-btn" onclick="addPaymentMethod()">
+    {{/* Luft mellom det siste kortet og knappen. Han låg klistra inntil. */}}
+    <button type="button" class="btn nyrad" onclick="addPaymentMethod()">
         + {{t .Lang "payments.add_payment_method"}}
     </button>
 </section>

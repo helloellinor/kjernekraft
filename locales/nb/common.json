@@ -154,7 +154,13 @@
     "filter_by_type": "Filter etter type",
     "all_types": "Alle typer",
     "membership": "Medlemskap",
-    "klippekort": "Klippekort"
+    "klippekort": "Klippekort",
+    "standard": "Standard",
+    "set_standard": "Gjør til standard",
+    "remove": "Fjern",
+    "expires": "Utløper",
+    "no_payment_methods": "Du har ingen betalingsmåte registrert.",
+    "card_ending": "kort som ender på %s"
   },
   "membership": {
     "title": "Medlemskap",
@@ -330,7 +336,7 @@
     },
     "actions": "Handlinger",
     "price_in_kroner": "Pris i kroner",
-    "tab_overview": "Oversikt",
+    "tab_messages": "Meldinger",
     "tab_schedule": "Timeplan",
     "tab_prices": "Prising",
     "tab_people": "Folk",
