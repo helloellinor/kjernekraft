@@ -2,11 +2,24 @@
 
 <h1 class="page-title">{{.Helsing}}</h1>
 
-<div class="selector-container">
-    {{template "signed_up_classes_container" .}}
-    {{template "todays_classes_container" .}}
-    {{template "dashboard_membership_container" .}}
-    {{template "dashboard_klippekort_container" .}}
+{{/* To spalter, og dei ber kvar sitt slag.
+
+     Til venstre står det som endrar seg — timane du skal på, og timane
+     som går i dag. Til høgre det som ligg fast: medlemskapet og klippa.
+
+     Fire like store bolkar i eit rutenett gav rader som var like høge
+     som den høgaste av dei, og då stod det eit hol under den korte.
+     Spaltene her er ulike breie av di dei ber ulike ting, og kvar bolk
+     tek si eiga høgd. */}}
+<div class="heimeoppsett">
+    <div class="heimespalte">
+        {{template "signed_up_classes_container" .}}
+        {{template "todays_classes_container" .}}
+    </div>
+    <div class="heimespalte heimespalte-sida">
+        {{template "dashboard_membership_container" .}}
+        {{template "dashboard_klippekort_container" .}}
+    </div>
 </div>
 
 {{template "dashboard_scripts" .}}

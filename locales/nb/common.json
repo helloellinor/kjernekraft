@@ -115,7 +115,11 @@
     "already_signed_up": "Du er allerede påmeldt denne klassen!",
     "cancellation_complete": "Avmelding fullført. Klassen vises igjen i \"Dagens klasser\" hvis den fortsatt er i dag.",
     "could_not_load_membership": "Kunne ikke laste medlemskap",
-    "could_not_load_punch_cards": "Kunne ikke laste klippekort"
+    "could_not_load_punch_cards": "Kunne ikke laste klippekort",
+    "i_dag": "i dag",
+    "i_morgon": "i morgen",
+    "av_plassar": "%d av %d plasser igjen",
+    "fullt": "fullt"
   },
   "membership_actions": {
     "freeze_confirm": "Er du sikker på at du vil fryse medlemskapet ditt?",
@@ -273,6 +277,8 @@
     "class_type": "Klassetype",
     "select_class_type": "Velg klassetype",
     "teacher_name": "Lærernavn",
+    "role_teacher": "Lærer",
+    "role_admin": "Administrator",
     "location": "Lokasjon",
     "select_location": "Velg lokasjon",
     "class_date": "Klassedato",

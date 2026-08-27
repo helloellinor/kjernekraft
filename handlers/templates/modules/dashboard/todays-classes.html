@@ -1,12 +1,9 @@
 {{define "todays_classes_container"}}
 <div class="content-section">
     <h2 class="section-title">{{t .Lang "dashboard.todays_classes"}}</h2>
-    {{/* Dei same merki som i timeplanen og i paameldingslista. Tri
-         stader, éin definisjon — eit merke skal kjennast som det same
-         tinget kvar du ser det. */}}
-    <div class="merkerad" id="todays-classes">
+    <div id="todays-classes">
         {{if .TodaysFramsyningar}}
-            {{range .TodaysFramsyningar}}{{template "dagmerke" .}}{{end}}
+            {{template "timeliste" (dict "Lang" .Lang "Rader" .TodaysFramsyningar)}}
         {{else}}
             <div class="activity-placeholder">{{t .Lang "dashboard.no_classes_today"}}</div>
         {{end}}
