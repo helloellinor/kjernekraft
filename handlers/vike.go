@@ -11,12 +11,18 @@ import "time"
 // VikeMaandag gjev maandagen i vika som ligg `offset` vikor fram fraa
 // den ein stend i. Sundagen høyrer til vika som gjeng ut og ikkje til
 // den som kjem — difor steget attende.
+// Måndagen byrjar ved midnatt. Klokkeslettet vart med vidare fyrr, og
+// då bar «måndagen for 25 veker sidan» framleis klokka du opna sida på
+// — so aktivitetskartet klypte fyrste dagen sin midt på dagen, og kva
+// timar som fall utanfor kom an på når du såg etter.
 func VikeMaandag(no time.Time, offset int) time.Time {
 	maandag := no.AddDate(0, 0, -int(no.Weekday())+1)
 	if no.Weekday() == time.Sunday {
 		maandag = maandag.AddDate(0, 0, -7)
 	}
-	return maandag.AddDate(0, 0, offset*7)
+	maandag = maandag.AddDate(0, 0, offset*7)
+	return time.Date(maandag.Year(), maandag.Month(), maandag.Day(),
+		0, 0, 0, 0, maandag.Location())
 }
 
 // VikorIAaret gjev kor mange ISO-vikor det er i aaret `t` høyrer til:

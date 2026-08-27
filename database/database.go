@@ -304,12 +304,16 @@ func Migrate(db *sql.DB) error {
 	// samantreffet — same time, lærar, rom, vekedag og klokkeslett —
 	// éin gong, her, og regelen fær det minste time-id-et sitt som
 	// namn.
+	// Feilen her vart svelgd fyrr — `err == nil && !regelKolonne`. Svara
+	// ikkje spurningi, hoppa migreringa over kolonna og sa ingen ting,
+	// og so fall kvart uppslag som les e.rule_id med «no such column»
+	// ein heilt annan stad. Ei migrering som ikkje kann prøva om ho
+	// trengst, skal stogga.
 	var regelKolonne bool
-	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='rule_id'").Scan(&regelKolonne); err == nil && !regelKolonne {
-		if _, err := db.Exec("ALTER TABLE events ADD COLUMN rule_id INTEGER"); err != nil {
-			return err
-		}
-		if err := kopleTimarTilReglar(db); err != nil {
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='rule_id'").Scan(&regelKolonne); err != nil {
+		return err
+	} else if !regelKolonne {
+		if err := leggTilRegelKolonne(db); err != nil {
 			return err
 		}
 		log.Println("La til rule_id paa events og kopla timane til reglane sine.")
@@ -318,11 +322,34 @@ func Migrate(db *sql.DB) error {
 	return nil
 }
 
+// leggTilRegelKolonne gjer kolonna og etterfyllinga til éi økt.
+//
+// Dei stod kvar for seg fyrr, og ALTER TABLE var alt lagra då
+// etterfyllinga gjekk. Datt tenaren midt i, fanst kolonna — so vakti
+// yver hoppa migreringa neste gong — medan resten av timane stod att
+// med rule_id NULL for alltid. Dei hamna då i den regellause gruppa,
+// der kvar endring på regelen er eit stille ingen ting.
+func leggTilRegelKolonne(db *sql.DB) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.Exec("ALTER TABLE events ADD COLUMN rule_id INTEGER"); err != nil {
+		return err
+	}
+	if err := kopleTimarTilReglar(tx); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
 // kopleTimarTilReglar gjev kvar gamal time ein regel. Klokka vert lesi
 // som ho stend: den lagra tidi er veggklokka i heile huset, og skal
 // korkje reknast um her eller nokon annan stad.
-func kopleTimarTilReglar(db *sql.DB) error {
-	rows, err := db.Query(`SELECT id, title, COALESCE(teacher_name,''), COALESCE(location,''),
+func kopleTimarTilReglar(tx *sql.Tx) error {
+	rows, err := tx.Query(`SELECT id, title, COALESCE(teacher_name,''), COALESCE(location,''),
 		COALESCE(room_id, 0), start_time, end_time FROM events`)
 	if err != nil {
 		return err
@@ -346,6 +373,11 @@ func kopleTimarTilReglar(db *sql.DB) error {
 	if err := rows.Err(); err != nil {
 		return err
 	}
+	// Lesinga lyt vera ferdig fyre skrivinga tek til: ei økt er éin
+	// samband, og eit ope svar held han.
+	if err := rows.Close(); err != nil {
+		return err
+	}
 
 	for _, idar := range grupper {
 		regel := idar[0]
@@ -355,7 +387,7 @@ func kopleTimarTilReglar(db *sql.DB) error {
 			}
 		}
 		for _, id := range idar {
-			if _, err := db.Exec("UPDATE events SET rule_id = ? WHERE id = ?", regel, id); err != nil {
+			if _, err := tx.Exec("UPDATE events SET rule_id = ? WHERE id = ?", regel, id); err != nil {
 				return err
 			}
 		}
@@ -369,6 +401,21 @@ func kopleTimarTilReglar(db *sql.DB) error {
 // Tvo tidsrom krossa kvarandre naar den eine byrjar fyre den andre
 // endar og endar etter at den andre byrja. Det er heile prøva; ho vert
 // ofte skrivi som fire tilfelle, og daa gløymer ein eitt av deim.
+// veggtekst skriv eit tidspunkt slik tidene står i events-tabellen:
+// klokka på veggen, utan sone.
+//
+// Drivaren skriv ein time.Time som «2026-08-27 17:00:00+00:00», medan
+// radene som alt låg der står som «2026-08-27 17:00:00». To format i
+// same kolonna, og SQLite samanliknar dei som tekst — det gjekk godt
+// berre av di sona står *etter* klokkeslettet. Ein einaste tid skriven
+// med norsk sone hadde velta det: date('2026-08-27 00:30:00+02:00') er
+// 26. august, og timen hadde hamna på feil dag i vekelista.
+//
+// Difor gjeng kvar tid gjennom denne på veg inn og på veg ut att som
+// grense i ei spurning. Éin skrivemåte i kolonna, og samanlikningane
+// tyder det dei ser ut til å tyde.
+func veggtekst(t time.Time) string { return t.Format("2006-01-02 15:04:05") }
+
 func (db *Database) RoomConflict(romID int64, start, slutt time.Time) (*models.Event, error) {
 	var e models.Event
 	err := db.Conn.QueryRow(`
@@ -376,7 +423,32 @@ func (db *Database) RoomConflict(romID int64, start, slutt time.Time) (*models.E
 		FROM events
 		WHERE room_id = ? AND start_time < ? AND end_time > ?
 		ORDER BY start_time LIMIT 1`,
-		romID, slutt, start).Scan(&e.ID, &e.Title, &e.TeacherName, &e.StartTime, &e.EndTime)
+		romID, veggtekst(slutt), veggtekst(start)).Scan(&e.ID, &e.Title, &e.TeacherName, &e.StartTime, &e.EndTime)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &e, nil
+}
+
+// RoomConflictUtanRegel er den same prøva, men blind for regelen sine
+// eigne timar.
+//
+// Flytter ein heile regelen til eit nytt klokkeslett, står dei gamle
+// radene framleis i det gamle sporet medan prøva gjeng. Utan unntaket
+// hadde regelen kollidert med seg sjølv og ingen ting late seg flytta.
+func (db *Database) RoomConflictUtanRegel(romID, ruleID int64, start, slutt time.Time) (*models.Event, error) {
+	var e models.Event
+	err := db.Conn.QueryRow(`
+		SELECT id, title, COALESCE(teacher_name, ''), start_time, end_time
+		FROM events
+		WHERE room_id = ? AND COALESCE(rule_id, 0) <> ?
+		  AND start_time < ? AND end_time > ?
+		ORDER BY start_time LIMIT 1`,
+		romID, ruleID, veggtekst(slutt), veggtekst(start)).
+		Scan(&e.ID, &e.Title, &e.TeacherName, &e.StartTime, &e.EndTime)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -645,7 +717,7 @@ func (db *Database) CreateEvent(event models.Event) (int64, error) {
 		`INSERT INTO events (title, description, start_time, end_time, location, room_id,
 			organizer, class_type, teacher_name, capacity, current_enrolment, color, rule_id)
 		 VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?, NULLIF(?, 0))`,
-		event.Title, event.Description, event.StartTime, event.EndTime, event.Location, event.RoomID,
+		event.Title, event.Description, veggtekst(event.StartTime), veggtekst(event.EndTime), event.Location, event.RoomID,
 		event.Organizer, event.ClassType, event.TeacherName, event.Capacity, event.CurrentEnrolment, event.Color,
 		event.RuleID,
 	)
@@ -655,12 +727,54 @@ func (db *Database) CreateEvent(event models.Event) (int64, error) {
 	return res.LastInsertId()
 }
 
-// NesteRegelID gjev namnet aat neste regel. Regelen finst ikkje som ei
-// eigi rad — han er talet timane hans ber saman.
-func (db *Database) NesteRegelID() (int64, error) {
-	var id int64
-	err := db.Conn.QueryRow("SELECT COALESCE(MAX(rule_id), 0) + 1 FROM events").Scan(&id)
-	return id, err
+// LagRegel skriv alle timane i ein ny regel i éi økt.
+//
+// Regelen finst ikkje som ei eigi rad — han er talet timane hans ber
+// saman — og talet vart fyrr henta med eit eige `MAX(rule_id) + 1` fyre
+// innskrivinga tok til. To administratorar som la inn kvar sin time i
+// same augneblinken fekk då det same talet, og dei to urelaterte
+// reglane vart éin: eit lærarbyte på den eine skreiv seg inn på den
+// andre òg. Talet vert henta inni økta no, og økta held det til alle
+// timane står der.
+//
+// Innskrivinga er dessutan alt eller ingen ting. Feila den femte av åtte
+// vekene fyrr, stod dei fire fyrste att i basen medan svaret var ein
+// feil — og den som prøvde ein gong til fekk dei fire ein gong til.
+func (db *Database) LagRegel(timar []models.Event) (ruleID int64, ider []int64, err error) {
+	if len(timar) == 0 {
+		return 0, nil, nil
+	}
+	tx, err := db.Conn.Begin()
+	if err != nil {
+		return 0, nil, err
+	}
+	defer tx.Rollback()
+
+	if err := tx.QueryRow("SELECT COALESCE(MAX(rule_id), 0) + 1 FROM events").Scan(&ruleID); err != nil {
+		return 0, nil, err
+	}
+
+	for _, e := range timar {
+		res, err := tx.Exec(
+			`INSERT INTO events (title, description, start_time, end_time, location, room_id,
+				organizer, class_type, teacher_name, capacity, current_enrolment, color, rule_id)
+			 VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?, ?)`,
+			e.Title, e.Description, veggtekst(e.StartTime), veggtekst(e.EndTime), e.Location, e.RoomID,
+			e.Organizer, e.ClassType, e.TeacherName, e.Capacity, e.CurrentEnrolment, e.Color, ruleID,
+		)
+		if err != nil {
+			return 0, nil, err
+		}
+		id, err := res.LastInsertId()
+		if err != nil {
+			return 0, nil, err
+		}
+		ider = append(ider, id)
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, nil, err
+	}
+	return ruleID, ider, nil
 }
 
 // UpdateRuleTeacher byter lærar paa alle komande timar i regelen. Det
@@ -668,7 +782,7 @@ func (db *Database) NesteRegelID() (int64, error) {
 func (db *Database) UpdateRuleTeacher(ruleID int64, laerar string, fraa time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET teacher_name = ? WHERE rule_id = ? AND end_time > ?",
-		laerar, ruleID, fraa,
+		laerar, ruleID, veggtekst(fraa),
 	)
 	return err
 }
@@ -688,7 +802,7 @@ func (db *Database) UpdateEventTeacher(eventID int64, laerar string) error {
 func (db *Database) UpdateRuleDescription(ruleID int64, tekst string, fraa time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET description = ? WHERE rule_id = ? AND end_time > ?",
-		tekst, ruleID, fraa,
+		tekst, ruleID, veggtekst(fraa),
 	)
 	return err
 }
@@ -696,8 +810,9 @@ func (db *Database) UpdateRuleDescription(ruleID int64, tekst string, fraa time.
 // GetFutureEventsByRule gjev dei komande timane i ein regel, etter dato.
 func (db *Database) GetFutureEventsByRule(ruleID int64, fraa time.Time) ([]models.Event, error) {
 	rows, err := db.Conn.Query(
-		"SELECT id, start_time, end_time FROM events WHERE rule_id = ? AND end_time > ? ORDER BY start_time",
-		ruleID, fraa,
+		`SELECT id, start_time, end_time, COALESCE(room_id, 0)
+		 FROM events WHERE rule_id = ? AND end_time > ? ORDER BY start_time`,
+		ruleID, veggtekst(fraa),
 	)
 	if err != nil {
 		return nil, err
@@ -707,7 +822,7 @@ func (db *Database) GetFutureEventsByRule(ruleID int64, fraa time.Time) ([]model
 	var timar []models.Event
 	for rows.Next() {
 		var e models.Event
-		if err := rows.Scan(&e.ID, &e.StartTime, &e.EndTime); err != nil {
+		if err := rows.Scan(&e.ID, &e.StartTime, &e.EndTime, &e.RoomID); err != nil {
 			return nil, err
 		}
 		timar = append(timar, e)
@@ -716,14 +831,47 @@ func (db *Database) GetFutureEventsByRule(ruleID int64, fraa time.Time) ([]model
 }
 
 // FlyttEvent set ny start og slutt paa éin time. Tidene gjeng inn som
-// time.Time, same vegen som CreateEvent — ein tekststreng her gav
-// radene tvo ulike datoformat i same kolonna.
+// time.Time og ut att som veggtekst, same vegen som CreateEvent — so
+// kolonna held éin skrivemåte.
 func (db *Database) FlyttEvent(eventID int64, start, slutt time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET start_time = ?, end_time = ? WHERE id = ?",
-		start, slutt, eventID,
+		veggtekst(start), veggtekst(slutt), eventID,
 	)
 	return err
+}
+
+// FlyttFleire flytter alle timane i eit knippe i éi økt.
+//
+// Ein regel er éin ting, og å flytta han er ei handling. Gjekk
+// oppdateringane kvar for seg og den fjerde feila, låg tri timar på det
+// nye klokkeslettet og resten på det gamle — og flata sa berre «kunne
+// ikkje lagra» og sette feltet attende, so ingen visste at rada var
+// delt. Anten flytter heile regelen seg, eller ingen ting gjer det.
+type Flytting struct {
+	EventID      int64
+	Start, Slutt time.Time
+}
+
+func (db *Database) FlyttFleire(flyttingar []Flytting) error {
+	if len(flyttingar) == 0 {
+		return nil
+	}
+	tx, err := db.Conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	for _, f := range flyttingar {
+		if _, err := tx.Exec(
+			"UPDATE events SET start_time = ?, end_time = ? WHERE id = ?",
+			veggtekst(f.Start), veggtekst(f.Slutt), f.EventID,
+		); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }
 
 // GetAllEvents fetches all events from the database

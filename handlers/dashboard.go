@@ -50,8 +50,10 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		neste = &paamelde[0].Event
 	}
 
-	// Aktiviteten: eit halvt aar attende, dag for dag.
-	fraa := VikeMaandag(now, 0).AddDate(0, 0, -7*25)
+	// Aktiviteten: eit halvt aar attende, dag for dag. Grensa kjem fraa
+	// AktivitetFraa, so baae bileti fær tal for heile tidsrommet sitt.
+	const aktivitetVekor = 26
+	fraa := AktivitetFraa(now, aktivitetVekor)
 	perDag, err := DB.AktivitetPerDag(int64(user.ID), fraa, now)
 	if err != nil {
 		log.Printf("aktivitet for %d: %v", user.ID, err)
@@ -68,7 +70,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"Aktivitet":            NyAktivitet(lang, perDag, now, 26),
+		"Aktivitet":            NyAktivitet(lang, perDag, now, aktivitetVekor),
 		"Medlemskap":           medlemskap,
 		"Helsing":              Helsing(lang, user.Name, neste, now),
 		"Title":                "Elev Dashboard",
