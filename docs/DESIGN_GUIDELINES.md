@@ -628,6 +628,16 @@ noko ljos oppå seg — attkastet vert veikt, skuggen fell inn ovanfrå, og
 knappen sig éin piksel. Det er den einaste staden i huset der noko
 flyttar seg — og han flyttar seg av di han er ein ting ein trykkjer på.
 
+**Og ordet sig med han.** Ljoset kjem ovanfrå, så den nedre lippa i ei
+rispe er den einaste kanten som fangar det: `--ordet-inn` er eit glim på
+éin piksel under bokstaven og ingen ting over han. Han gjer to ting på
+ein gong, og det er difor han er rett her og ikkje berre pynt — ordet
+vert trykt ned i flata saman med knappen, og det får ein ljos kant å
+lesast mot i den eine augneblinken flata under det er mørkast.
+
+Skuggen som fell inn ovanfrå er difor òg ei **line** og ikkje eit slør.
+Låg han som ei vaske over den øvre halvdelen, låg han rett over ordet.
+
 **Avslegen har ingen djupn i det heile.** Ingen dropa, ingen vegg, ingen
 skugge: dei to laga står på `display: none`. Han er ikkje ein ting ein
 kan trykkje på lenger, og skal ikkje sjå ut som ein.

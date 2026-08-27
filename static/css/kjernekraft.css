@@ -200,8 +200,19 @@
     0 1px 1px color-mix(in srgb, var(--blekk) 11%, transparent),
     0 4px 9px -3px color-mix(in srgb, var(--blekk) 18%, transparent);
   --knappedjup-inn:
-    inset 0 2px 5px -1px color-mix(in srgb, var(--blekk) 28%, transparent),
+    inset 0 3px 4px -2px color-mix(in srgb, var(--blekk) 30%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--blekk) 16%, transparent),
     inset 0 -1px 0 var(--glans-svak);
+
+  /* Ordet som er trykt ned i flata. Ljoset kjem ovanfraa, og daa er den
+     nedre lippa i ei rispa den einaste kanten som fangar det: eit glim
+     paa éin piksel under bokstaven, og ingen ting yver honom. Det er den
+     same fysikken som fordjupingi i eit felt, berre paa ein bokstav.
+
+     Han gjer tvo ting paa ein gong, og det er difor han er rett her og
+     ikkje berre pynt: ordet *sig* med knappen, og det fær ein ljos kant
+     aa lesast mot i den eine augneblinken flata under det er myrkast. */
+  --ordet-inn: 0 1px 0 var(--glans);
 
   /* romet. Ei einaste trapp, so ingen finn paa 13px. */
   --rom-1: .25rem; --rom-2: .5rem;  --rom-3: .75rem;
@@ -1138,6 +1149,7 @@ main {
 .cancel-signup-btn:active, .cancel-btn:active, .remove-btn:active {
   background: color-mix(in srgb, var(--knapp-tone) 13%, var(--knapp-kropp));
   box-shadow: var(--knappedjup-inn);
+  text-shadow: var(--ordet-inn);
   transform: translateY(1px);
 }
 :is(.btn, .btn-primary, .btn-danger, .action-btn, .change-btn,
