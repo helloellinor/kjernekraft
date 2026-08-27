@@ -1474,6 +1474,20 @@ tbody td {
 tbody tr:last-child td { border-bottom: 0; }
 tbody tr:hover td { background: var(--ark-djup); }
 
+/* Rutenetlinone. Det stod ingi her fyrr, og grunngjevingi var den same
+   som elles i huset: ei lina skal berre teiknast der ho gjer ein skilnad.
+   Rekkja skil seg av seg sjølv, av di ho ligg under den fyrre.
+
+   Men ei spalta gjer ikkje det. Ho er berre eit hopp i lufta, og skal
+   ein fylgja ho nedyver — kva stod i Kapasitet, tri rader ned? — er det
+   auga som lyt halda ho, og auga slepp. Difor stend linone her no.
+
+   Dei er --haarlina og ikkje --kant: dei skil noko *inni* den same
+   tingen, som lina kring eit kort, og ikkje tvo bolkar fraa kvarandre.
+   Og dei stend millom spaltone og ikkje kring tabellen — ei ramma
+   utanpaa hadde vore ei ny kassa, og huset byggjer ikkje kassar. */
+th + th, td + td { border-left: 1px solid var(--haarlina); }
+
 /* ===================================================================
    timeplanen
    =================================================================== */
@@ -1843,10 +1857,27 @@ tbody tr:hover td { background: var(--ark-djup); }
    og døyr ut mot midten — same kurva som paa knappen, og av same grunn:
    det er ei kvelv, ikkje ei bobla. Laget ligg yverst og fangar difor
    visarane med, slik eit glas gjer. */
-.form-glas { pointer-events: none; }
+.form-glas, .form-vegg, .form-attkast { pointer-events: none; }
+
+/* Dropa. Ho døyr ut yver ein lang veg i staden for aa stogga paa
+   midten — det er skilnaden paa ei kvelv og ei dropa, og det er den
+   same profilen kapselen hev. */
 .glas-topp { stop-color: var(--glans); }
-.glas-midt { stop-color: color-mix(in srgb, var(--glans) 34%, transparent); }
+.glas-midt { stop-color: color-mix(in srgb, var(--glans) 50%, transparent); }
+.glas-laag { stop-color: color-mix(in srgb, var(--glans) 15%, transparent); }
 .glas-ut   { stop-color: transparent; }
+
+/* Glasveggen i endane. Same tal som kapselen sin: femten prosent blekk
+   ytst, fire eit stykke inn, og ingen ting i midten. */
+.vegg-ende { stop-color: color-mix(in srgb, var(--blekk) 15%, transparent); }
+.vegg-mjuk { stop-color: color-mix(in srgb, var(--blekk) 4%, transparent); }
+.vegg-ut   { stop-color: transparent; }
+
+/* Attkastet i foten. Ljos som hev gjenge gjenom kroppen og kjem attende
+   nedanfraa — difor er kjelda under merket og ikkje inni det. */
+.attkast-kjerne { stop-color: color-mix(in srgb, var(--glans) 34%, transparent); }
+.attkast-midt   { stop-color: color-mix(in srgb, var(--glans) 12%, transparent); }
+.attkast-ut     { stop-color: transparent; }
 
 .form-ring  { fill: var(--merke); visibility: hidden; }
 .form-kant  { fill: var(--kant); }

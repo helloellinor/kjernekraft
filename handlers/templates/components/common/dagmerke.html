@@ -29,17 +29,41 @@
        width="{{.Form.Breidd}}" height="{{.Form.Hogd}}" aria-hidden="true" focusable="false">
     {{/* Glaset. Ein klokke hev eit glas yver skiva, og glaset fangar
          ljoset ovanfraa — difor ligg dette laget *yverst* og ikkje under
-         visarane. Gradienten stend inne i kvart merke og ikkje i det
+         visarane. Gradientane stend inne i kvart merke og ikkje i det
          sams def-settet: fargen i eit `stop-color` vert løyst der
          gradienten stend, so eit delt sett hadde gjeve alle merki
          fargane til rot-temaet, og eit ljost merke paa ei myrk sida
-         hadde fenge feil glans. Same fella som med filtri. */}}
+         hadde fenge feil glans. Same fella som med filtri.
+
+         Tri gradientar og ikkje ein, av di glas gjer tri ting — dei same
+         tri som kapselen gjer (DESIGN_GUIDELINES §18):
+
+           dropa     ljoset som legg seg uppaa, mjukt heile vegen ned
+           vegg      endane er myrkare, av di ein ser gjenom meir glas der
+           attkast   ljos som hev gjenge gjenom kroppen og kjem att nedanfraa
+
+         Fyrr var det berre dropa, og ho stogga braatt paa 0,54. Ein hard
+         kant midt paa er signaturen aat plast. */}}
     <defs>
       <linearGradient id="glas-{{.Form.Ident}}" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0"    class="glas-topp"/>
-        <stop offset="0.26" class="glas-midt"/>
-        <stop offset="0.54" class="glas-ut"/>
+        <stop offset="0.24" class="glas-midt"/>
+        <stop offset="0.46" class="glas-laag"/>
+        <stop offset="0.66" class="glas-ut"/>
       </linearGradient>
+      <linearGradient id="vegg-{{.Form.Ident}}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    class="vegg-ende"/>
+        <stop offset="0.16" class="vegg-mjuk"/>
+        <stop offset="0.34" class="vegg-ut"/>
+        <stop offset="0.66" class="vegg-ut"/>
+        <stop offset="0.84" class="vegg-mjuk"/>
+        <stop offset="1"    class="vegg-ende"/>
+      </linearGradient>
+      <radialGradient id="attkast-{{.Form.Ident}}" cx="0.5" cy="1.06" r="0.78">
+        <stop offset="0"    class="attkast-kjerne"/>
+        <stop offset="0.44" class="attkast-midt"/>
+        <stop offset="0.86" class="attkast-ut"/>
+      </radialGradient>
     </defs>
 
     {{/* Fana ligg attum kroppen. Ho gjeng ned under yverkanten hans,
@@ -105,8 +129,15 @@
           >{{.Form.Att}}<tspan class="av">/{{.Form.Plassar}}</tspan></text>
     {{end}}
 
-    {{/* Glaset til slutt: yver skiva, yver visarane, yver alt. */}}
-    <path class="form-glas" d="{{.Form.Silhuett}}" fill="url(#glas-{{.Form.Ident}})"/>
+    {{/* Glaset til slutt: yver skiva, yver visarane, yver alt.
+
+         Rekkjefylgja er den same som i kapselen. Attkastet nedst, av di
+         det er ljos som kjem *ut* or kroppen; dropa uppaa han; og veggen
+         yverst, so han skjer dropa av i endane slik glaset gjer det. Ei
+         dropa som flyt heilt ut i kanten er ei bobla i plast. */}}
+    <path class="form-attkast" d="{{.Form.Silhuett}}" fill="url(#attkast-{{.Form.Ident}})"/>
+    <path class="form-glas"    d="{{.Form.Silhuett}}" fill="url(#glas-{{.Form.Ident}})"/>
+    <path class="form-vegg"    d="{{.Form.Silhuett}}" fill="url(#vegg-{{.Form.Ident}})"/>
   </svg>
 </button>
 {{end}}
