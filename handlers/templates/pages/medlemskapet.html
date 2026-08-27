@@ -23,34 +23,39 @@
       <div class="two-column-grid">
         <div>
       {{if .Noverande}}
-      <div class="medlemshovud">
-        <h2 class="medlemsnamn">{{.NoverandeNamn}}</h2>
-        <span class="stod stod-{{if eq .Noverande.Status "active"}}aktiv{{else if eq .Noverande.Status "paused"}}frosen{{else if eq .Noverande.Status "freeze_requested"}}venteande{{else}}utgaatt{{end}}">
-          {{if eq .Noverande.Status "active"}}{{t .Lang "medlemskapet.status_active"}}
-          {{else if eq .Noverande.Status "paused"}}{{t .Lang "medlemskapet.status_paused"}}
-          {{else if eq .Noverande.Status "freeze_requested"}}{{t .Lang "medlemskapet.status_freeze_requested"}}
-          {{else}}{{t .Lang "medlemskapet.status_cancelled"}}{{end}}
-        </span>
-      </div>
+      {{/* Stoda som ei setning, ikkje som ei liste med rader.
 
-      <p class="medlemspris">
-        <span class="price">{{printf "%.0f" (divf .Noverande.Price 100)}}</span>
-        <span class="commitment">
-          {{t .Lang "membership.price_per_month"}}
-          {{if gt .Noverande.CommitmentMonths 0}}· {{tf .Lang "medlemskapet.binding_months" .Noverande.CommitmentMonths}}{{else}}· {{t .Lang "medlemskapet.no_binding"}}{{end}}
-        </span>
+           Det stod «Neste fornying — 1. oktober 2026» og «Bindinga er
+           ute — 1. mars 2027» under kvarandre, og lesaren laut setje dei
+           saman sjølv. Det er den same feilen som tre flisor med eit tal
+           og ei merkelapp under: «13» og «MÅNADER BINDING» må setjast
+           saman, medan «Bindinga har 13 månader att» alt er sett saman.
+
+           Same forma som oversynet i administrasjonen: tale vidt og
+           feitt, ordet smalt attmed, resten som vanleg lesetekst. */}}
+      <p class="tal-setning">
+        {{$kva := deling (t .Lang "medlemskapet.setning_kva")}}
+        {{index $kva 0}}<span class="ord">{{.NoverandeNamn}}</span>{{index $kva 1}}
+
+        {{$pris := deling (t .Lang "medlemskapet.setning_pris")}}
+        {{index $pris 0}}<b class="tal">{{printf "%.0f" (divf .Noverande.Price 100)}}</b>{{index $pris 1}}
+
+        {{if eq .Noverande.Status "paused"}}
+          {{t .Lang "medlemskapet.setning_frose"}}
+        {{else if eq .Noverande.Status "freeze_requested"}}
+          {{t .Lang "medlemskapet.setning_venteande"}}
+        {{else if eq .Noverande.Status "cancelled"}}
+          {{tf .Lang "medlemskapet.setning_sagt_opp" (norskDatoAar .Noverande.RenewalDate)}}
+        {{else}}
+          {{if gt .Noverande.MonthsUntilBindingEnd 0}}
+            {{$b := deling (t .Lang "medlemskapet.setning_binding")}}
+            {{index $b 0}}<b class="tal">{{.Noverande.MonthsUntilBindingEnd}}</b>{{index $b 1}}
+          {{else}}
+            {{t .Lang "medlemskapet.setning_ubunden"}}
+          {{end}}
+          {{tf .Lang "medlemskapet.setning_fornying" (norskDatoAar .Noverande.RenewalDate)}}
+        {{end}}
       </p>
-
-      <div class="detail-row">
-        <span class="detail-label">{{t .Lang "medlemskapet.next_renewal"}}</span>
-        <span class="detail-value">{{norskDatoAar .Noverande.RenewalDate}}</span>
-      </div>
-      {{if .Noverande.BindingEnd}}
-      <div class="detail-row">
-        <span class="detail-label">{{t .Lang "medlemskapet.binding_ends"}}</span>
-        <span class="detail-value">{{norskDatoAar .Noverande.BindingEnd}}</span>
-      </div>
-      {{end}}
 
       <div class="medlemsknappar">
         <button type="button" class="action-btn" onclick="frysMedlemskapet()">{{t .Lang "medlemskapet.freeze"}}</button>
