@@ -4,15 +4,24 @@
      Bolken spurde «kva går i dag» før. Men det er ikkje det ein lurer
      på: ein lurer på kvar det er plass. Ein full time er ikkje eit
      tilbod, og han er difor ikkje her. I morgon er med, av di i dag
-     åleine er tomt frå og med kvelden. */}}
+     åleine er tomt frå og med kvelden.
+
+     Han hentar seg att når det hender ei påmelding, av same grunn som
+     lista over: melder du deg på ein time her, skal han flytte seg til
+     «Påmeldt» utan at du må laste sida. */}}
+<div id="ledig-plass" hx-get="/api/user/ledig-plass"
+     hx-trigger="paamelding from:body" hx-swap="innerHTML">
+    {{template "ledig_plass_module" .}}
+</div>
+{{end}}
+
+{{define "ledig_plass_module"}}
 <div class="content-section">
     <h2 class="section-title">{{t .Lang "dashboard.ledig_plass"}}</h2>
-    <div id="ledig-plass">
-        {{if .LedigeFramsyningar}}
-            {{template "timeliste" (dict "Lang" .Lang "Rader" .LedigeFramsyningar)}}
-        {{else}}
-            <p class="no-data">{{t .Lang "dashboard.ingen_ledig_plass"}}</p>
-        {{end}}
-    </div>
+    {{if .LedigeFramsyningar}}
+        {{template "timeliste" (dict "Lang" .Lang "Rader" .LedigeFramsyningar)}}
+    {{else}}
+        <p class="no-data">{{t .Lang "dashboard.ingen_ledig_plass"}}</p>
+    {{end}}
 </div>
 {{end}}

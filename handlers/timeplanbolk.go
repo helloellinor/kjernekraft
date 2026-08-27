@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"time"
@@ -164,8 +165,7 @@ func NyFramsyning(lang string, e models.Event, iDagDato string, naa time.Time) F
 		TimeVinkel:   float64(e.StartTime.Hour()%12)*30 + float64(e.StartTime.Minute())*0.5,
 		MinuttVinkel: float64(e.StartTime.Minute()) * 6,
 		Form: NyttMerke(fmt.Sprintf("%d-%s", e.ID, e.StartTime.Format("0102")),
-			e.StartTime, e.EndTime, e.CurrentEnrolment, e.Capacity, naa,
-			e.StartTime.Format("2006-01-02") == iDagDato),
+			e.StartTime, e.EndTime, e.CurrentEnrolment, e.Capacity),
 		Merkelapp: fmt.Sprintf("%s %s — %d %s %d",
 			dag, e.StartTime.Format("15:04"),
 			e.CurrentEnrolment, t(lang, "timeplan.of"), e.Capacity),
@@ -269,4 +269,68 @@ func vekeval(lang string, naaVeke, naaOffset int) []Veke {
 		ut = append(ut, v)
 	}
 	return ut
+}
+
+// ---- listone paa heimesida ----
+//
+// Baade sida og brotstykki som hentar seg att teiknar dei same tvo
+// listone. Dei stod i sidehandsamaren fyrr; her stend dei ein gong, so
+// eit brotstykke aldri kann syna noko anna enn sida gjorde.
+
+// PaameldeFramsyningar er timane du hev meldt deg paa og som ikkje er
+// gjengne. Dei er paamelde per definisjon, so merket veit det og dokka
+// kann tilby avmelding med det same.
+func PaameldeFramsyningar(userID int64, lang string, naa time.Time) ([]Framsyning, error) {
+	komande, err := DB.GetUserUpcomingSignups(userID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range komande {
+		komande[i].IsUserSignedUp = true
+	}
+	return Framsyningar(lang, komande, naa), nil
+}
+
+// LedigeFramsyningar er timane med ledig plass i dag og i morgon.
+//
+// Dei ber om du er paameld fraa fyrr. Utan det sa merket «meld deg paa»
+// um ein time du alt stod paa, og dokka hadde bode deg det same ein
+// gong til.
+func LedigeFramsyningar(userID int64, lang string, naa time.Time) ([]Framsyning, error) {
+	ledige, err := DB.LedigeTimar()
+	if err != nil {
+		return nil, err
+	}
+
+	komande := make([]models.Event, 0, len(ledige))
+	for _, e := range ledige {
+		if e.StartTime.After(naa) {
+			komande = append(komande, e)
+		}
+	}
+	if len(komande) == 0 {
+		return nil, nil
+	}
+
+	ider := make([]int64, len(komande))
+	for i, e := range komande {
+		ider[i] = int64(e.ID)
+	}
+	// Timane du alt stend paa høyrer ikkje heime her. Dei stend i
+	// «Paameld» rett yver, og ei lista som er eit *tilbod* skal ikkje
+	// tilby deg det du hev teke. Det gjer paameldingi synleg med: timen
+	// flyt fraa den eine lista til den andre.
+	if paamelde, err := DB.GetUserSignupsForEvents(userID, ider); err != nil {
+		log.Printf("paameldingar for %d: %v", userID, err)
+	} else {
+		att := komande[:0]
+		for _, e := range komande {
+			if !paamelde[int64(e.ID)] {
+				att = append(att, e)
+			}
+		}
+		komande = att
+	}
+
+	return Framsyningar(lang, komande, naa), nil
 }

@@ -66,6 +66,28 @@ kunna sjaa kva som var skrivbart utan aa fyrst taka i det.
 **Ja:** `input[type=text]`, `email`, `password`, `date`, `tel`, `number`,
 `textarea`, søkjefeltet, adresselappen, namnefeltet.
 
+### Dei to fasettane
+
+Dette skrivet har heile tida handla om djupna og aldri om **hårlina rundt
+henne** — og det er dei to *saman* som blir kjende att som ein fasett.
+Difor finst det to utgåver i huset, og berre den eine har vore skriven ned:
+
+| | Kant | Djupn | Kvar |
+|---|---|---|---|
+| **Den kanta** | `1px solid var(--kant)` | `--fordjuping` | grunnstilen: søkjefeltet i Folk, innstillingar, registrering — og setningsfelta i timeplanen |
+| **Den nakne** | inga | `--fordjuping` | korrekturen: `.lappfelt` på Min profil og i Prising |
+
+Den kanta les seg tydelegast som eit *hol* — kanten er lippa. Den nakne
+er lettare og går inn i ei tett liste utan å lage eit rutenett av seg
+sjølv, som er heile grunnen til at korrekturen har henne.
+
+**Fillet er ikkje ein del av fasetten.** Ein kant og ei djupn gjer
+fasetten; kva som ligg i botnen av holet er fritt. `--flate` gjer holet
+tydeleg og litt hardt; ei gjennomsynleg flate
+(`color-mix(in srgb, var(--flate) 70%, transparent)`) lèt arket under
+skine gjennom og er rettare der feltet står inne i noko anna — i ei
+setning, i ei overskrift.
+
 **Nei:**
 
 - **Veljarar.** Ein veljar plukkar eitt av nokre faae — han er ein knapp
@@ -140,9 +162,58 @@ Ljoset er `--flate` og ikkje kvitt. `--flate` er alltid den ljosaste
 flata i temaet — kalkstein i det ljose, ei tone yver arket i det myrke —
 so den nedre lippa lyser i baae utan at nokon skriv henne om att.
 
-Dette er **den einaste** staden i systemet med eit hovding. Kjem det
-fleire, er regelen brote: ein fasett som stend paa alt, tyder ikkje noko
-paa noko.
+Dette var **den einaste** staden i systemet med eit hovding fram til 27.
+august 2026. No er det to, og den andre er vekefeltet i timeplantittelen
+(`.vekefelt`).
+
+Grunngjevinga, so ho stend skriven: vekeveljaren *er* overskrifta til
+det rutenettet. Talet og den tomme dagen er den same forma i to
+storleikar, og då kan dei låne kvarandre si form. Feltet låg heilt nake
+før — `mix-blend-mode` og ingen ting anna — og det var ikkje lesbart nok.
+
+Regelen er framleis den same, berre med eit tal til: **hovdinga høyrer
+til vika og til ingen ting anna.** Kjem det ein tredje stad som ikkje er
+timeplanen, er regelen brote — ein fasett som stend paa alt, tyder ikkje
+noko paa noko.
+
+### Bobla
+
+Vekefeltet er den fyrste av ei form som har fått namn: **bobla**,
+`.bobla` i stilarket.
+
+Ei bobla er eit skrivefelt som ligg *i* noko anna — i ein tittel, i ei
+line — og ikkje på eit ark. Ho har det tveegga sporet over, og ei
+**mjølkete** flate: `--flate` på 62 % med ei uskarpleik bak. Ei tett
+flate gjer sporet til ein boks lagd oppå tittelen; ei gjennomsynleg lèt
+det som ligg under skine gjennom, og då les det seg som eit hol i noko.
+
+**Ei bobla tek aldri ringen i merkefargen.** Ikkje i kvile og ikkje i
+fokus. Ein ring legg ei hard line tvert over den gjennomsynlege kanten,
+og då er det ikkje ei bobla lenger — det er ein boks. At bobla er der er
+heile hintet om at ein kan skrive i henne. Fokus seier frå ved at flata
+blir eit hakk mindre gjennomsynleg, og ved at markøren blinkar i
+`--klas`. På ein telefon kjem talpanelet opp attåt.
+
+Dette er den eine staden i huset der fokus **ikkje** ber merkefargen.
+
+> **Fella.** `box-shadow` lyt stå skriven ut i *begge* tilstandane.
+> Sløyfer ein henne i fokus, tek grunnstilen over: `input:focus` set
+> `box-shadow: var(--fasett)`, og fasetten har ringen i seg. Ringen vart
+> teken bort her ein gong og kom rett tilbake derifrå — ein regel som
+> ikkje seier noko, seier det grunnstilen seier.
+
+### Framlegget, ikkje verdien
+
+Talet i bobla er ein `placeholder` og ikkje ein `value`. Det er vika du
+*er* i — eit framlegg om kva som ville stått der om du ikkje skreiv noko
+— og difor blinkar markøren frå fyrste stund, og fyrste tasten du slår
+skriv talet ditt i staden for å leggje seg attmed eit tal som alt var
+der.
+
+Feltet valde seg sjølv når det fekk fokus før (`felt.select()`), og då
+låg det eit turkist drag over talet i staden for ein markør. Eit merkt
+tal ser ikkje ut som noko som ventar på deg; det ser ut som noko du
+nettopp gjorde.
 
 Ho stod som ein stipla kasse fyrr. Ein stipla kasse er eit *umriss*, og
 eit umriss les seg som noko som skal koma — det motsette av det sanne.
@@ -154,12 +225,18 @@ eit umriss les seg som noko som skal koma — det motsette av det sanne.
 Baae vart gjorde medan timemerket vart teikna, og baae er lette aa gjera
 om att.
 
-**Mjuk skugge og kvitt hovding.** Fyrste utgaava av merket hadde ein
-skugge ovanfraa *og* eit ljost drag nedanfraa, med fire pikslar
-uskarpleik. Det er den klassiske utgaava av ein fasett — og det ser
-uppblaast ut, som ein knapp fraa 2008. Fasetten her hev **ikkje** noko
-hovding. Ho er grunn, hard og einsidig, og det er difor ho les seg som
-trykt og ikkje som stempla.
+**Mjuk skugge og kvitt hovding — paa eit felt.** Fyrste utgaava av
+merket hadde ein skugge ovanfraa *og* eit ljost drag nedanfraa, med
+fire pikslar uskarpleik, og det saag uppblaast ut. Fasetten her hev
+**ikkje** noko hovding: ho er grunn, hard og einsidig, og det er difor
+ho les seg som trykt og ikkje som stempla.
+
+> Dette gjeld **felt og merke** — ting som er laga av arket. Det gjeld
+> *ikkje* knappen. Ein knapp er ein gjenstand som ligg paa arket, og han
+> hev glans med vilje (DESIGN_GUIDELINES §4 og §18). Denne bolken vart
+> ei stund lesen som eit ålment forbod mot glans i heile huset, og det
+> var aldri det han sa — ljosbandet under hovudet hev vore fire lag
+> gradient med utbrend kjerne heile tidi.
 
 **Fordjupingi som ein glød i det myrke.** Sjaa bolk 7.
 
@@ -202,14 +279,28 @@ Prøva er ei linja:
 ```sh
 grep -rn 'box-shadow' static/css/kjernekraft.css \
   | grep -v 'var(--fasett)\|var(--fordjuping)\|var(--skugge-flytande)' \
+  | grep -v 'var(--knappedjup' \
   | grep -v 'box-shadow: none'
 ```
 
 `box-shadow: none` er ikkje ein ny skugge, det er ein som vert teken
 burt, so han tel ikkje med.
 
-I dag gjev prøva **eitt** treff, og det er meint: fana i
-administrasjonen kastar ein skugge upp og ut, av di ei fana faktisk ligg
-yver arket. Grunngjevingi stend i fila attmed regelen. Alt som kjem ut av
+I dag gjev prøva **fire** treff, og alle fire er meinte:
+
+1. Fana i administrasjonen kastar ein skugge upp og ut, av di ei fana
+   faktisk ligg yver arket.
+2.–3. Hovdinga i `.vekefelt`, i kvila og i fokus — §5. Ho let seg ikkje
+   skriva som eit token, av di ho er tvo `inset`-ar som lyt liggja i den
+   same eigenskapen.
+4. Halo-en kring `.ljos-paa` — lampa som seier at medlemskapet gjeng.
+   Ho er ei *ljoskjelde* og ikkje ein skugge: tri lag glød utyver,
+   ikkje eitt lag mørke nedyver. Ein lampe utan halo lyser ikkje.
+
+Knappen sin djupn stend i `--knappedjup` og `--knappedjup-inn` og er
+difor teken ut av prøva, som seg hør og bør: han er eit token, ikkje ein
+laus skugge.
+
+Grunngjevingi stend i fila attmed kvar av deim. Alt som kjem ut av
 prøva, skal ha ei slik grunngjeving skriven attmed seg — elles er det ein
 feil.

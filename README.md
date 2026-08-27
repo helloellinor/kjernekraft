@@ -11,54 +11,34 @@ The template system is organized by scope of influence, making it easy to find a
 
 ```
 handlers/templates/
-├── layouts/            # Site-wide scope (affects all pages)
-│   └── base.html      # Main layout with navigation, styles, and structure
-├── pages/             # Page-specific scope (individual page templates)
-│   ├── dashboard.html # User dashboard
-│   ├── admin.html     # Admin dashboard  
-│   ├── innlogging.html # Login page
-│   ├── min-profil.html # User profile
-│   ├── membership.html # Membership selection
-│   ├── klippekort.html # Punch cards
-│   ├── betaling.html  # Payments
-│   └── timeplan.html  # Schedule
-├── components/        # Cross-page scope (reusable UI elements)
-│   ├── navigation/    # Site navigation
-│   │   ├── navigation.html
-│   │   └── navigation-styles.html
-│   └── common/        # Shared components and styles
-│       ├── common-styles.html      # Base styles for all pages
-│       ├── event-card-styles.html  # Event card styling
-│       ├── language-selector.html  # Language switching component
-│       ├── profile-styles.html     # Profile page styles
-│       ├── betaling-styles.html    # Payment page styles
-│       └── login-styles.html       # Login page styles
-└── modules/           # Feature-specific scope (related functionality)
-    ├── dashboard/     # Dashboard-specific modules
-    │   ├── signed-up-classes.html
-    │   ├── todays-classes.html
-    │   ├── dashboard-membership.html
-    │   ├── dashboard-klippekort.html
-    │   └── dashboard-scripts.html
-    ├── admin/         # Admin panel modules
-    │   ├── admin-users-table.html
-    │   ├── admin-events-table.html
-    │   ├── admin-freeze-requests-table.html
-    │   ├── admin-scripts.html
-    │   └── admin-styles.html
-    ├── membership/    # Membership management
-    │   ├── membership.html
-    │   ├── charges.html
-    │   └── klippekort.html
-    └── events/        # Event-related functionality
-        └── event_card.html
+├── layouts/
+│   └── base.html          # Ein mal for alle sidor: hovud, <main>, botnlina.
+│                          # Alt av stil ligg i static/css/kjernekraft.css.
+├── pages/                 # Ei fil per sida: dashboard, admin, innlogging,
+│                          # gloymt-passord, registrering, vilkaar, min-profil,
+│                          # membership, klippekort, betaling, timeplan, arket
+├── components/            # Attbrukande bitar paa tvers av sidor
+│   ├── navigation/
+│   │   └── navigation.html
+│   └── common/            # dagmerke, week-grid, language-selector,
+│                          # charges-/payment-methods-containerar, *-scripts
+└── modules/               # Funksjonsbolkar etter forretningsomraade
+    ├── dashboard/         # signed-up-classes, todays-classes,
+    │                      # dashboard-membership, dashboard-klippekort, scripts
+    ├── admin/             # admin-class-management (timereglane),
+    │                      # admin-users-table (folk), admin-freeze-requests-table,
+    │                      # admin-pricing-management, admin-membership-rules,
+    │                      # admin-stats, admin-settings, admin-scripts
+    └── membership/        # membership, charges, klippekort
 ```
 
 ### Component vs Module Distinction
 
 - **Components** (`components/`): Reusable UI elements that can be used across multiple pages
-  - Navigation, styles, language selectors, common layouts
+  - Navigation, language selectors, the dagmerke day token
   - Think "building blocks" that many pages might need
+  - All styling lives in `static/css/kjernekraft.css` — there are no
+    per-component style templates (see `docs/DESIGN_GUIDELINES.md`)
 
 - **Modules** (`modules/`): Feature-specific functionality grouped by business domain
   - Dashboard widgets, admin tools, membership features

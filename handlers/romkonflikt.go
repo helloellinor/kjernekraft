@@ -50,8 +50,8 @@ func RoomConflictHandler(w http.ResponseWriter, r *http.Request) {
 		lang := GetLanguageFromRequest(r)
 		svar["message"] = fmt.Sprintf("%s %s–%s: %s (%s)",
 			t(lang, "admin.room_busy"),
-			kollisjon.StartTime.In(OsloLoc).Format("15:04"),
-			kollisjon.EndTime.In(OsloLoc).Format("15:04"),
+			veggklokka(kollisjon.StartTime).Format("15:04"),
+			veggklokka(kollisjon.EndTime).Format("15:04"),
 			kollisjon.Title, kollisjon.TeacherName)
 	}
 

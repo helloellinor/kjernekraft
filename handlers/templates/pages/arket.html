@@ -208,10 +208,9 @@
         <p class="verkstad-regel">
             Ingi rutenetlinor: rekkja er skild med ei hårfin lina, og
             yverskrifti med ei sterkare. Reglane heng paa
-            <code>table</code> sjølv — <code>.classes-table</code> i
-            administrasjonen er ein krok utan regel. Talspaltone hev
-            korkje taldskrift eller høgrestilling enno; sjaa etter i
-            Kapasitet og Påmelde nedanfor.
+            <code>table</code> sjølv. Talspaltone hev korkje taldskrift
+            eller høgrestilling enno; sjaa etter i Kapasitet og Påmelde
+            nedanfor.
         </p>
         <div class="verkstad-par">
             <div class="verkstad-prova" data-tema="ljos" data-theme="light">{{template "prov_tabellen" .}}</div>
@@ -311,9 +310,9 @@
 {{define "prov_knappar"}}
 <div class="verkstad-rad">
     <button type="button" class="btn-primary">Meld på</button>
-    <button type="button">Endra</button>
+    <button type="button" class="btn">Endra</button>
     <button type="button" class="btn-danger">Sei upp</button>
-    <button type="button" disabled>Fullt</button>
+    <button type="button" class="btn" disabled>Fullt</button>
 </div>
 <div class="verkstad-rad">
     <a href="#knappar" class="btn">Ei lenkja som er ein knapp</a>
@@ -322,22 +321,22 @@
 
 {{define "prov_livsmerket"}}
 <div class="verkstad-rad">
-    <span class="stod stod-aktiv">Aktiv</span>
-    <span class="stod stod-venteande">Ventar</span>
-    <span class="stod stod-frosen">Frose</span>
-    <span class="stod stod-utgaatt">Utgjenge</span>
+    <span class="status status-active">Aktiv</span>
+    <span class="status status-freeze_requested">Ventar</span>
+    <span class="status status-paused">Frose</span>
+    <span class="status status-cancelled">Utgjenge</span>
 </div>
 {{end}}
 
 {{define "prov_kortet"}}
 <div class="verkstad-stabel">
-    <div class="package-card">
+    <div class="kort package-card">
         <h3 class="package-name">Halvaars</h3>
         <p class="package-description">Fri tilgang til alle timar i salen.</p>
         <div class="package-price">690 kr/md</div>
         <div class="commitment">6 månaders binding</div>
     </div>
-    <div class="package-card popular">
+    <div class="kort package-card framheva">
         <h3 class="package-name">Aars</h3>
         <p class="package-description">Det same, eit heilt aar.</p>
         <div class="package-price">590 kr/md</div>
@@ -348,7 +347,7 @@
 
 {{define "prov_klippekortet"}}
 <div class="verkstad-stabel">
-    <div class="klippekort-card">
+    <div class="kort klippekort-card">
         <div class="card-header">
             <h3 class="card-title">Reformer</h3>
             <span class="card-expiry">gjeng ut um 121 dagar</span>
@@ -369,11 +368,11 @@
                     <div class="progress-segment"></div>
                 </div>
             </div>
-            <button type="button">Fyll upp</button>
+            <button type="button" class="btn">Fyll upp</button>
         </div>
     </div>
 
-    <div class="klippekort-card expiring">
+    <div class="kort klippekort-card expiring">
         <div class="card-header">
             <h3 class="card-title">Yoga</h3>
             <span class="card-expiry">gjeng ut i morgon</span>
@@ -471,7 +470,7 @@
     <label for="prov-stengd-{{.Lang}}">Eit felt som ikkje kann rørast</label>
     <input type="text" id="prov-stengd-{{.Lang}}" value="Salen" disabled>
 </div>
-<button type="submit">Lagra</button>
+<button type="submit" class="btn-primary">Lagra</button>
 {{end}}
 
 {{define "prov_fanone"}}

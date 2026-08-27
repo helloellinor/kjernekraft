@@ -72,7 +72,8 @@
     "class_filter": "Class:",
     "all_teachers": "All teachers",
     "all_classes": "All classes",
-    "no_classes": "No classes",
+    "no_classes": "Nothing on this week",
+    "no_classes_sub": "The mat gets a rest. Try next week.",
     "finished": "Finished",
     "monday": "Monday",
     "tuesday": "Tuesday",
@@ -89,7 +90,6 @@
     "of": "of",
     "prev_week": "Previous week",
     "next_week_btn": "Next week",
-    "type_week": "type week number",
     "cat_yoga": "Yoga",
     "cat_pilates": "Pilates",
     "cat_reformer": "Reformer",
@@ -121,7 +121,12 @@
     "av_plassar": "%d of %d places left",
     "fullt": "full",
     "ledig_plass": "Places available",
-    "ingen_ledig_plass": "Everything is full today and tomorrow."
+    "ingen_ledig_plass": "Everything is full today and tomorrow.",
+    "no_membership": "no membership",
+    "membership_details": "View membership",
+    "medlemskap_aktivt": "Active membership",
+    "medlemskap_frose": "Membership frozen",
+    "medlemskap_ingen": "No membership"
   },
   "membership_actions": {
     "freeze_confirm": "Are you sure you want to freeze your membership?",
@@ -142,14 +147,16 @@
       "succeeded": "Successful",
       "failed": "Failed",
       "pending": "Pending"
-    }
+    },
+    "loading": "Loading charges…",
+    "could_not_load": "Couldn't load charges."
   },
   "payments": {
     "title": "Payments",
-    "description": "Manage your payment methods and view payment history.",
-    "payment_methods": "Payment methods",
-    "add_payment_method": "Add payment method",
-    "loading_payment_methods": "Loading payment methods...",
+    "description": "Your cards and what has been charged.",
+    "payment_methods": "Cards",
+    "add_payment_method": "Add card",
+    "loading_payment_methods": "Loading cards…",
     "loading_charges": "Loading payment history...",
     "filter_by_status": "Filter by status",
     "all_statuses": "All statuses",
@@ -157,11 +164,11 @@
     "all_types": "All types",
     "membership": "Membership",
     "klippekort": "Punch cards",
-    "standard": "Default",
-    "set_standard": "Make default",
+    "standard": "In use",
+    "set_standard": "Use",
     "remove": "Remove",
     "expires": "Expires",
-    "no_payment_methods": "You have no payment method saved.",
+    "no_payment_methods": "You haven't added a card.",
     "card_ending": "card ending in %s"
   },
   "membership": {
@@ -193,7 +200,26 @@
     "fill_up": "Top up",
     "expires_in": "expires in %d days",
     "expires_today": "expires today",
-    "clips_left_of": "of %d"
+    "clips_left_of": "of %d",
+    "soonest": "%s expires in %d days.",
+    "soonest_left": "%d clips left.",
+    "soonest_none": "Nothing expiring soon.",
+    "buy": "Buy clips",
+    "buy_lead": "Pick the kind of training, then how many clips. More clips means a lower price per session.",
+    "step_kind": "Kind of training",
+    "step_count": "How many clips — %s",
+    "packages": "packages",
+    "popular": "Most chosen",
+    "n_klipp": "%d clips",
+    "per_session": "%s per session",
+    "valid_days": "valid for %d days",
+    "confirm": "Your choice",
+    "buy_button": "Buy punch card",
+    "no_payment_yet": "Payment isn't connected yet. Buying adds the card but charges nothing.",
+    "no_packages": "No packages are on sale.",
+    "bought": "Punch card added.",
+    "buy_failed": "The purchase didn't go through:",
+    "fill_up_prefix": "Top up"
   },
   "admin": {
     "title": "Administration",
@@ -501,5 +527,30 @@
     "student_suffix": "%s, students and seniors",
     "klipp": "%d clips",
     "generert": "generated"
+  },
+  "maanad": {
+    "kort_1": "Jan",
+    "kort_2": "Feb",
+    "kort_3": "Mar",
+    "kort_4": "Apr",
+    "kort_5": "May",
+    "kort_6": "Jun",
+    "kort_7": "Jul",
+    "kort_8": "Aug",
+    "kort_9": "Sep",
+    "kort_10": "Oct",
+    "kort_11": "Nov",
+    "kort_12": "Dec"
+  },
+  "aktivitet": {
+    "grunnlag": "Classes you were booked on. Attendance isn't recorded yet.",
+    "ingen": "no classes",
+    "meir": "more",
+    "mindre": "less",
+    "per_maanad": "By month",
+    "samandrag": "%d %s in the last %d weeks.",
+    "timar": "classes",
+    "time": "class",
+    "tittel": "Activity"
   }
 }

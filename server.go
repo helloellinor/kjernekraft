@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -74,9 +75,32 @@ func main() {
 	// ser ein sine eigne endringar fyrst etter ei hard oppdatering. Det
 	// er ei felle ein gjeng i om att og om att, av di sida *ser* rett ut
 	// — ho er berre gamal.
+	//
+	// Skriftene er unnatekne. Dei er det einaste under /static/ ein
+	// aldri *endrar* medan ein arbeider — dei er binære filer som fylgjer
+	// med repoet — og `no-store` paa deim tyder at Union Gothic (95 kB)
+	// vert lasta ned paa nytt for kvar einaste sida ein opnar. Med
+	// `font-display: swap` syner nettlesaren daa reserveskrifti fyrst og
+	// byter naar fila er komi: eit blaff i typografien ved kvart klikk.
+	//
+	// Difor: alt anna `no-store` i utvikling, skriftene bufra hardt i
+	// baae. Skiftar ei skriftfil namn, skiftar ho ogso adressa.
 	statiske := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	r.Handle("/static/*", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if handlers.IsDevelopment() {
+		if strings.HasPrefix(req.URL.Path, "/static/fonts/") {
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		} else if strings.HasPrefix(req.URL.Path, "/static/img/") {
+			// Bilete er ikkje skrifter — ein *kann* retta ein SVG medan
+			// ein arbeider — men dei skal ikkje hentast paa nytt for
+			// kvar sida heller. Eit minutt: endringar syner seg medan du
+			// framleis hugsar kva du gjorde, og ingen navigasjon kostar
+			// ei ny henting.
+			if handlers.IsDevelopment() {
+				w.Header().Set("Cache-Control", "public, max-age=60")
+			} else {
+				w.Header().Set("Cache-Control", "public, max-age=604800")
+			}
+		} else if handlers.IsDevelopment() {
 			w.Header().Set("Cache-Control", "no-store, must-revalidate")
 		}
 		statiske.ServeHTTP(w, req)
@@ -109,6 +133,7 @@ func main() {
 		r.Get("/api/user/klippekort", handlers.UserKlippekortHandler)
 		r.Get("/api/user/membership", handlers.UserMembershipHandler)
 		r.Get("/api/user/signups", handlers.UserSignupsHandler)
+		r.Get("/api/user/ledig-plass", handlers.LedigPlassHandler)
 
 		// Payment API routes
 		r.Get("/api/payment-methods", handlers.PaymentMethodsHandler)
@@ -159,6 +184,7 @@ func main() {
 
 		r.Get("/admin", handlers.AdminPageHandler)
 		r.Post("/users/assign-role", handlers.AssignRoleToUserHandler)
+		r.Post("/api/admin/rolla", handlers.SettRollaHandler)
 
 		r.Post("/api/events", handlers.CreateEventHandler)
 

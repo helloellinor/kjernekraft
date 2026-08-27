@@ -1,0 +1,50 @@
+{{define "aktivitet_bolk"}}
+{{/* Aktiviteten. To bilete av det same halve aaret.
+
+     Fyrst kvar einskild dag som ei rute i eit rutenet — det er der ein
+     ser rytmen: tvo faste dagar i vika, eller tri vikor utan noko.
+     So kvar maanad som ein bjelke, som er det same tale summert til noko
+     ein kann samanlikna paa tvers.
+
+     Ingen av deim hev ei fargeforklaring med namn i, av di det ikkje er
+     namn her: det er *ei* mengd i eitt trinnvis blekk. Skalaen nedanfor
+     kartet segjer kva vegen mørkare gjeng, og det er alt ho treng. */}}
+<div class="content-section aktivitet">
+    <h2 class="section-title">{{t .Lang "aktivitet.tittel"}}</h2>
+
+    <p class="aktivitet-samandrag">{{.Aktivitet.Samandrag}}</p>
+
+    <svg class="varmekart" viewBox="{{.Aktivitet.ViewBox}}" role="img"
+         aria-label="{{.Aktivitet.Samandrag}}" preserveAspectRatio="xMinYMid meet">
+        {{range .Aktivitet.Maanadar}}<text class="varmemaanad" x="{{.X}}" y="-4">{{.Namn}}</text>{{end}}
+        {{range .Aktivitet.Rutar}}
+        <rect class="varmerute niv-{{.Niva}}" x="{{.X}}" y="{{.Y}}"
+              width="11" height="11" rx="2"><title>{{.Merkelapp}}</title></rect>
+        {{end}}
+    </svg>
+
+    <p class="varmeskala">
+        <span>{{t .Lang "aktivitet.mindre"}}</span>
+        <span class="varmeprikk niv-0"></span><span class="varmeprikk niv-1"></span><span class="varmeprikk niv-2"></span><span class="varmeprikk niv-3"></span><span class="varmeprikk niv-4"></span>
+        <span>{{t .Lang "aktivitet.meir"}}</span>
+    </p>
+
+    <h3 class="undertittel">{{t .Lang "aktivitet.per_maanad"}}</h3>
+    <svg class="bjelkerad" viewBox="{{.Aktivitet.BjelkeViewBox}}" role="img"
+         aria-label="{{t .Lang "aktivitet.per_maanad"}}" preserveAspectRatio="xMinYMax meet">
+        {{range .Aktivitet.Bjelkar}}
+        <g class="bjelkegruppe">
+            <title>{{.Merkelapp}}</title>
+            {{/* Ein bjelke med noko i fær runda dataende og flat fot:
+                 han er forankra i grunnlina, og runda i baae endar
+                 hadde late han flyta. */}}
+            {{if .D}}<path class="bjelke" d="{{.D}}"/>{{end}}
+            {{if .Tal}}<text class="bjelketal" x="{{.TalX}}" y="{{.TalY}}">{{.Tal}}</text>{{end}}
+            <text class="bjelkenamn" x="{{.TalX}}" y="78">{{.Namn}}</text>
+        </g>
+        {{end}}
+    </svg>
+
+    <p class="aktivitet-grunnlag">{{t .Lang "aktivitet.grunnlag"}}</p>
+</div>
+{{end}}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"math"
-	"strings"
 	"time"
 )
 
@@ -19,46 +18,52 @@ import (
 // Reknestykki stend her og ikkje i malen. Ein mal skal syna kva som er
 // i figuren; kvar kvart punkt ligg, er ein annan slags kunnskap.
 const (
-	kroppB, kroppH = 46.0, 46.0
-	kroppR         = 3.5 // rektangel med so vidt broti hyrna
-	faneB, faneH   = 28.0, 10.4
-	faneR          = 2.5
-	faneLoft       = 9.0
-	plettR         = 8.6
+	// Merket er eit ur i ein høg kasse. Framsida er delt i tri: dagnamnet
+	// langs toppen som ei fane, skiva midt i, og ei botnstripe med
+	// klokkeslettet nede til vinstre og plassmerket nede til høgre.
+	kroppB, kroppH = 56.0, 72.0
+	kroppR         = 4.0 // rektangel med so vidt broti hyrna
+	faneB, faneH   = 44.0, 13.0
+	faneR          = 3.0
+	faneLoft       = 11.0
 	merkeKant      = 1.0
-	lappB          = 23.0 // pletten som lapp, naar timen er full
 
 	kroppX = merkeKant
 	kroppY = faneLoft + merkeKant
 	faneX  = kroppX + (kroppB-faneB)/2
 	faneY  = merkeKant
 
-	plettX = kroppX + kroppB // midten aat pletten ligg i hyrna
-	plettY = kroppY + kroppH
+	// Botnstripa. Alt i henne ligg *inne* i kroppen no. Plassmerket laag
+	// med midten sin paa hyrna fyrr og hekk ein heil radius utanfor, og
+	// daa laut kassen vera so mykje breidare enn kroppen paa baae sidor —
+	// dei einingane merket ikkje fekk bruka. Ingen ting heng utanfor
+	// lenger, og kroppen fyller difor 96,6 % av kassen mot 70,6 % fyrr.
+	botnRom = 3.5
 
-	// Maalaren heng 9,6 einingar ut til høgre og ingen ting ut til
-	// vinstre. Er kassen teikna kring det, stend ikkje *uret* midt i
-	// kassen, og sju merke i sju spaltor kjem ikkje under kvarandre same
-	// kva ein gjer i CSS. Difor byrjar viewBox til vinstre for kroppen
-	// med det same overhenget som ligg til høgre: kassen er symmetrisk
-	// kring kroppen, og spaltone stend paa lina av seg sjølve.
-	merkeOverheng = plettR + merkeKant       // 9,6
-	MerkeVenstre  = kroppX - merkeOverheng   // −8,6
-	MerkeBreidd   = kroppB + 2*merkeOverheng // 65,2
-	MerkeHogd     = kroppY + kroppH + plettR + merkeKant
+	ruteB, ruteH = 27.0, 12.5
+	ruteX        = kroppX + botnRom
+	ruteY        = kroppY + kroppH - ruteH - botnRom
+	ruteR        = 1.8
 
+	plettR = 9.0
+	plettX = kroppX + kroppB - botnRom - plettR
+	plettY = kroppY + kroppH - botnRom - plettR
+	lappB  = 24.0 // plassmerket som lapp, naar timen er full
+
+	MerkeVenstre = 0.0
+	MerkeBreidd  = kroppB + 2*merkeKant
+	MerkeHogd    = kroppY + kroppH + merkeKant
+
+	// Skiva stend midt i rommet yver botnstripa, og visarane stend midt
+	// i skiva. Ho laag halvt nedi vindauga fyrr — klokkeslettet var
+	// teikna tvert yver henne — og daa las korkje uret eller talet seg.
 	skiveX = kroppX + kroppB/2
-	skiveY = kroppY + kroppH/2
-	spor   = 15.4 // sporet indeksane ligg paa
-	kakeR  = 11.6
+	skiveY = 38.0
+	spor   = 21.0 // sporet indeksane ligg paa
+	kakeR  = 17.5
 
-	ruteB, ruteH = 23.0, 9.4
-	ruteX        = skiveX - ruteB/2
-	ruteY        = skiveY + 4.2
-	ruteR        = 1.6
-
-	visarTime   = 7.2
-	visarMinutt = 10.4
+	visarTime   = 12.0
+	visarMinutt = 17.5
 )
 
 // Strek er ein indeks paa skiva.
@@ -103,7 +108,10 @@ type Merke struct {
 	TimeVinkel   float64
 	MinuttVinkel float64
 	SluttVinkel  float64
+	Fane         template.HTMLAttr // dagfana, teikna for seg attum kroppen
+	Plett        template.HTMLAttr // plassmerket, teikna for seg uppaa kroppen
 	Rute         template.HTMLAttr
+	RuteTekstX   float64
 	RuteTekstY   float64
 	Full         bool
 	Att          int // plassar att
@@ -135,20 +143,30 @@ func sirkelPath(cx, cy, r float64) string {
 // laga av honom med filter, ikkje ved aa teikna formene ein gong til
 // litt større: utvidar ein kvar form for seg, vandrar dei innhole hyrno
 // innyver i staden for utyver, og daa slepp lina upp nettupp i skøyten.
-func silhuett(full bool) string {
-	delar := []string{
-		rutePath(faneX+merkeKant, faneY+merkeKant, faneB-2*merkeKant,
-			faneH+7-2*merkeKant, faneR-merkeKant),
-		rutePath(kroppX+merkeKant, kroppY+merkeKant, kroppB-2*merkeKant,
-			kroppH-2*merkeKant, kroppR-merkeKant),
-	}
+func silhuett() string {
+	return rutePath(kroppX+merkeKant, kroppY+merkeKant, kroppB-2*merkeKant,
+		kroppH-2*merkeKant, kroppR-merkeKant)
+}
+
+// fanePath er dagfana. Ho vart teikna saman med kroppen som éi form
+// fyrr, og daa fanst det ingi fana — det fanst eitt umriss med ein
+// kul paa. Ei fana er ein *eigen* ting som ligg attum arket sitt: ho
+// gjeng ned under yverkanten aat kroppen, kroppen dekkjer nedkanten
+// hennar, og det som stikk upp er fana. Same grepet som fanone i
+// administrasjonen, berre teikna.
+func fanePath() string {
+	return rutePath(faneX+merkeKant, faneY+merkeKant, faneB-2*merkeKant,
+		faneH+6-2*merkeKant, faneR-merkeKant)
+}
+
+// plettPath er plassmerket. Ein sirkel naar det er plassar att, ei lapp
+// naar timen er full og ordet treng breidd.
+func plettPath(full bool) string {
 	if full {
-		delar = append(delar, rutePath(plettX+plettR-lappB+merkeKant, plettY-plettR+merkeKant,
-			lappB-2*merkeKant, 2*plettR-2*merkeKant, plettR-merkeKant))
-	} else {
-		delar = append(delar, sirkelPath(plettX, plettY, plettR-merkeKant))
+		return rutePath(plettX+plettR-lappB+merkeKant, plettY-plettR+merkeKant,
+			lappB-2*merkeKant, 2*plettR-2*merkeKant, plettR-merkeKant)
 	}
-	return strings.Join(delar, " ")
+	return sirkelPath(plettX, plettY, plettR-merkeKant)
 }
 
 // paaSporet gjev punktet der ein vinkel møter sporet. Sporet er ein
@@ -199,8 +217,24 @@ func urvinkel(t time.Time) float64 {
 	return float64(t.Hour()%12)*30 + float64(t.Minute())*0.5
 }
 
+// minuttvinkel er kvar minuttvisaren stend: ei runda er ein time.
+func minuttvinkel(t time.Time) float64 {
+	return float64(t.Minute()) * 6
+}
+
+// varigheit er kor stort stykke timen tek av skiva, paa timevisaren si
+// skala: ei runda er tolv timar, so ein time er tretti grader.
+//
+// Minuttskalaen hadde vore meir synleg — ein time paa 45 minutt hadde
+// vorte trikvart av skiva — men ein time som varer lenger enn ein time
+// hadde gjenge heile vegen rundt og ikkje kunna segja meir. Difor stend
+// stykket i minuttvisaren, men maaler seg paa timeskalaen.
+func varigheit(start, slutt time.Time) float64 {
+	return slutt.Sub(start).Hours() * 30
+}
+
 // NyttMerke reknar ut heile figuren for éin time.
-func NyttMerke(ident string, start, slutt time.Time, teke, plassar int, naa time.Time, erIDag bool) Merke {
+func NyttMerke(ident string, start, slutt time.Time, teke, plassar int) Merke {
 	full := plassar > 0 && teke >= plassar
 	att := plassar - teke
 	if att < 0 {
@@ -210,18 +244,21 @@ func NyttMerke(ident string, start, slutt time.Time, teke, plassar int, naa time
 		Ident:   ident,
 		ViewBox: fmt.Sprintf("%.2f 0 %.2f %.2f", MerkeVenstre, MerkeBreidd, MerkeHogd),
 		Breidd:  MerkeBreidd, Hogd: MerkeHogd,
-		Silhuett:     template.HTMLAttr(silhuett(full)),
+		Silhuett:     template.HTMLAttr(silhuett()),
+		Fane:         template.HTMLAttr(fanePath()),
+		Plett:        template.HTMLAttr(plettPath(full)),
 		DagX:         faneX + faneB/2,
-		DagY:         faneY + 8.4,
+		DagY:         faneY + 9.4,
 		SkiveX:       skiveX,
 		SkiveY:       skiveY,
 		VisarTime:    skiveY - visarTime,
 		VisarMinutt:  skiveY - visarMinutt,
 		TimeVinkel:   urvinkel(start),
-		MinuttVinkel: float64(start.Minute()) * 6,
-		SluttVinkel:  urvinkel(slutt),
+		MinuttVinkel: minuttvinkel(start),
+		SluttVinkel:  minuttvinkel(start) + varigheit(start, slutt),
 		Rute:         template.HTMLAttr(rutePath(ruteX, ruteY, ruteB, ruteH, ruteR)),
-		RuteTekstY:   ruteY + 6.9,
+		RuteTekstX:   ruteX + ruteB/2,
+		RuteTekstY:   ruteY + 8.6,
 		Full:         full,
 		PlettX:       plettX,
 		PlettY:       plettY,
@@ -238,25 +275,33 @@ func NyttMerke(ident string, start, slutt time.Time, teke, plassar int, naa time
 		ux, uy := paaSporet(g, spor)
 		kvart := h%3 == 0
 		if kvart {
-			tx, ty := paaSporet(g, spor-1.0)
-			m.Tal = append(m.Tal, Skrift{X: tx, Y: ty + 1.8,
+			tx, ty := paaSporet(g, spor-1.4)
+			m.Tal = append(m.Tal, Skrift{X: tx, Y: ty + 2.4,
 				Tekst: map[int]string{0: "12", 3: "3", 9: "9"}[h]})
 			continue
 		}
-		lengd := 1.7
+		lengd := 2.6
 		ix, iy := paaSporet(g, spor-lengd)
 		m.Indeksar = append(m.Indeksar, Strek{X1: ux, Y1: uy, X2: ix, Y2: iy, Kvart: false})
 	}
 
-	// Kakestykki: det bleike er ventetidi, det farga er timen sjølv.
-	// Ventetidi gjeld berre timar i dag som ikkje hev byrja — elles er
-	// «fram til» ikkje ein vinkel, det er dagar.
-	if erIDag && naa.Before(start) {
-		if d := kakePath(urvinkel(naa), urvinkel(start), kakeR, skiveX, skiveY); d != "" {
-			m.Kaker = append(m.Kaker, Kake{Klasse: "kake-fyre", D: d})
-		}
-	}
-	if d := kakePath(urvinkel(start), urvinkel(slutt), kakeR, skiveX, skiveY); d != "" {
+	// Kakestykket: timen sjølv, og ikkje noko meir.
+	//
+	// Det låg eit bleikt stykke her med — tidi fram til timen byrja. Det
+	// var ikkje til aa lesa: det saag ut som ei nott-og-dag-teikning, og
+	// ingen visste kva det gjorde. Skiva svarar paa «naar gjeng han og
+	// kor lenge»; «kor lenge til» er eit anna spursmaal, og det stend i
+	// klartekst i dokka.
+	// Timen sjølv veks ut or *minuttvisaren* og ikkje or timevisaren.
+	//
+	// Han låg på timevisaren fyrr, og då voks stykket ut or den korte,
+	// tjukke visaren — den eine som ikkje rører seg medan timen gjeng.
+	// Det er minuttvisaren som gjeng medan du ligg på matta, og difor er
+	// det han stykket skal henge i. Sluttvisaren stend i den andre kanten
+	// av stykket, so dei tri tingi — visar, stykke, visar — les seg som
+	// éin ting og ikkje som tri.
+	fraa := minuttvinkel(start)
+	if d := kakePath(fraa, fraa+varigheit(start, slutt), kakeR, skiveX, skiveY); d != "" {
 		m.Kaker = append(m.Kaker, Kake{Klasse: "kake-timen", D: d})
 	}
 

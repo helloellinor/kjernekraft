@@ -40,11 +40,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	classFilter := r.URL.Query().Get("class")
 
 	// Calculate the target week's Monday
-	monday := now.AddDate(0, 0, -int(now.Weekday())+1)
-	if now.Weekday() == time.Sunday {
-		monday = monday.AddDate(0, 0, -7)
-	}
-	targetMonday := monday.AddDate(0, 0, weekOffset*7)
+	targetMonday := VikeMaandag(now, weekOffset)
 
 	// Get events for the target week
 	weekEvents, err := DB.GetEventsForWeek(targetMonday)
@@ -166,6 +162,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		"WeekTitle":       weekTitle,
 		"WeekNumber":      targetWeek,
 		"WeekOffset":      weekOffset,
+		"VikorIAaret":     VikorIAaret(targetMonday),
 		"WeekDays":        weekdays,
 		"WeekDates":       weekDates,
 		"EventsByDay":     eventsByDay,

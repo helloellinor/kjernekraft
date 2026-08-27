@@ -119,15 +119,47 @@ Alt ljos er slege av under `prefers-reduced-motion: reduce`.
 
 ---
 
-## 4. Linor, ikkje skuggar
+## 4. Papir er flatt. Ting er det ikkje.
 
-Det som skil eit kort fraa arket er **ei lina paa éin piksel**.
+Denne bolken sa «linor, ikkje skuggar», og opningi av stilarket sa
+«skuggar finst ikkje». Det var aldri sant. Ljosbandet under hovudet —
+det som lyser under den valde lenkja, og som er det finaste i heile
+huset — er **fire lag radialgradient med ein utbrend kjerne**. Det stod
+på kvar einaste side medan doktrinen sa at slikt ikkje fanst.
 
-`--haarlina` teiknar eit kort. `--kant` skil tvo bolkar.
+Ein regel som blir broten av det ein er stoltast av, er ikkje ein regel.
+Han er ei mistyding av kva ein sjølv held på med. Så her er kva som
+faktisk gjeld:
 
-Skugge finst i **éi** utgaava, `--skugge-flytande`, og han er berre til
-det som *faktisk* flyt: ei nedfallsliste, ein dialog. Ligg ein ting paa
-arket, hev han ikkje skugge.
+**Arket er flatt.** Papir har inga djupn. Kort, bolkar, tabellar,
+overskrifter, faner — alt som *er* ark eller er laga av ark — skil seg
+frå kvarandre med ei hårline på éin piksel og ingen ting meir.
+`--haarlina` teiknar eit kort; `--kant` skil to bolkar.
+
+**Ting på arket har djupn.** Ein knapp du trykkjer på. Eit lys som
+lyser. Eit felt du skriv i. Desse er ikkje papir — dei er gjenstandar
+som ligg oppå det, og gjenstandar fangar ljos. Å nekte dei det gjer dei
+ikkje reinare; det gjer dei berre til teikningar av seg sjølve.
+
+**Ljoset kjem ovanfrå.** Det er den eine regelen som bind alt saman, og
+den einaste ein aldri bryt:
+
+| Ting | Kva ljoset gjer |
+|---|---|
+| felt | fell ned i ei grøft — mørk overkant (FASETTEN) |
+| knapp | fell på ei kvelv — glim øvst, mørkare mot foten (§18) |
+| tom dag i vika | fell ned i eit hòl — mørk overleppe, ljos underleppe |
+| ljosbandet | er sjølv kjelda |
+| kort | fell på flatt papir — ingen ting hender |
+
+Bryt ein den, sluttar rommet å henge saman: ein skugge som fell til
+sida seier at ljoset står skeivt, og då må *alt* i systemet bli samde om
+kva veg.
+
+**Fallskugge** finst framleis i éi utgåve, `--skugge-flytande`, og han
+er berre til det som *faktisk* flyt fritt over sida: ei nedfallsliste,
+ein dialog. Djupna på ein knapp er ikkje det — han ligg på arket, han
+svevar ikkje over det.
 
 ---
 
@@ -154,7 +186,7 @@ ikkje pynt — ho er hierarki:
 | `--vidd-tittel` | 125 % | sidetittelen — kvar du er |
 | `--vidd-yver` | 105 % | yverskrifter i sida |
 | `--vidd-leiding` | 90 % | leidingi |
-| `--vidd-merkelapp` | 68 % | merkelappar, knappar, tabellhovud |
+| `--vidd-merkelapp` | 68 % | merkelappar, faner, tabellhovud |
 
 Det vidaste stend øvst og det smalaste nedst, so ein ser kva som er kva
 fyre ein hev lese eit einaste ord. **Ein merkelapp skal ikkje taka meir
@@ -498,3 +530,89 @@ komponent med eigen margin veit kvar han stend, og daa kann han ikkje
 flytta paa seg. `.module` gjer dette rett i dag: `gap` paa foreldri,
 ingen margin paa borni.
 
+---
+
+## 18. Knappen
+
+Knappen er ein **kapsel**. Ikkje eit avrunda rektangel, ikkje ein boks
+med broti hyrne — ein full kapsel, `border-radius: var(--rund-knapp)`.
+
+### Kvifor rundingsregelen ikkje gjeld her
+
+Stilboka seier ingen rundingar utyver det vesle, og det står ved lag.
+Regelen gjeld **arket og alt som er laga av det**: kort, felt, faner,
+merke. Alle desse er papir, og papir har broten kant, ikkje kurve.
+
+Ein knapp er ikkje papir. Han er ein fysisk ting som ligg *på* arket og
+ventar på fingeren, og forma hans skal seie det. Difor to tokens og to
+tydingar:
+
+```css
+--rund:       2px;    /* arket og alt som er laga av det */
+--rund-knapp: 999px;  /* kontrollar, som ikkje er ark */
+```
+
+Finn du eit tredje rundingsverd i stilarket, er det drift.
+
+### Han er glossy, og det er meininga
+
+Pilleforma er henta frå gamle knappar, og **glansen med henne**. Ein
+knapp er ein gjenstand (§4): ljoset fell på han ovanfrå, kvelver seg
+over den øvre halvdelen og døyr mot foten.
+
+Tre lag, og alle tre kjem frå tokens så dei fylgjer temaet:
+
+```css
+--glans:      color-mix(in srgb, #fff 55%, transparent);  /* 20 % i mørkt */
+--glans-svak: color-mix(in srgb, #fff 14%, transparent);
+--knappedjup: inset 0 1px 0 var(--glans),                 /* overkanten */
+              inset 0 -2px 3px -1px …blekk 14 %…,         /* foten */
+              0 1px 2px …blekk 16 %…;                     /* fallet */
+```
+
+Glimet stoggar brått på midten. Det er slik ljos oppfører seg på ei
+kvelv, og det er den kanten som gjer at forma les seg som runda i staden
+for flat. Tala er låge med vilje: 55 % er ei kvelv, 90 % er plast.
+
+**Trykt snur ljoset.** Glimet går ut, skuggen fell inn ovanfrå, og
+knappen sig éin piksel. Det er den einaste staden i huset der noko
+flyttar seg — og han flyttar seg av di han er ein ting ein trykkjer på.
+
+**Avslegen har ingen djupn i det heile.** Han er ikkje ein ting ein kan
+trykkje på lenger, og skal ikkje sjå ut som ein.
+
+### Røysta
+
+Knappen bar merkelappskrifta før — 68 % smal, store bokstavar, sperra.
+Det er språket til bolkoverskrifter, faner, `dt` og merke: ting som
+**namngjev** ein kategori. Ein knapp namngjev ingen ting. Han er eit
+verb, og eit verb skriv seg som eit ord i ei setning: lesetekstskrifta,
+vanleg setningsform, ingen sperring.
+
+«Lag timen», ikkje «LAG TIMEN».
+
+### Fargen ligg i lina og i ordet
+
+Hovudknappen var ei fylt flate i merkefargen — den tyngste tingen på
+sida, tyngre enn overskrifta, i eit hus som elles byggjer alt av
+hårliner. Åtvaringsknappen hadde alt rett svar skrive attmed seg: *ein
+raud klump dreg auga fraa alt anna*. Ein turkis klump gjer det same.
+
+| | Line | Ord | Flate |
+|---|---|---|---|
+| vanleg | `--kant` | `--blekk` | `--flate` |
+| hovudhandling | `--merke` | `--merke` | `--merke-svak` |
+| uatterkalleleg | `--aatvaring` | `--aatvaring` | inga |
+
+Flata er `--flate` og ikkje `--ark`. Ein knapp malt i sidefargen er eit
+hòl med ei line rundt.
+
+### Grunnstilen gjeld `.btn`-familien, ikkje `<button>`
+
+Tjue stader i huset laut skrella grunnstilen av att — eit merke, ei
+fane, ei rad som opnar seg. Ein grunnstil som må opphevast tjue gonger
+er ikkje ein grunnstil; han er eit unnatak som står først.
+
+Ein naken `<button>` ber difor skrifta rundt seg og ingen ting meir.
+Skal han sjå ut som ein knapp, får han `.btn`, `.btn-primary` eller
+`.btn-danger`.

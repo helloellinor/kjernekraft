@@ -156,6 +156,12 @@
             try {
                 await send(handling, knapp.dataset.event);
                 oppdaterMerke(valdMerke, handling === "meld-av" ? -1 : 1);
+                // Listone paa heimesida lyder paa dette: timen flyt yver
+                // fraa «Ledig plass» til «Paameld» utan at sida lastar.
+                // Er du i timeplanen, er det ingen som lyder, og
+                // hendingi kostar ingen ting.
+                document.body.dispatchEvent(
+                    new CustomEvent("paamelding", { bubbles: true }));
             } catch (feil) {
                 // Tenaren segjer kvifor — for tidleg, fullt, alt paameld.
                 // Bodskapen hans er meir nyttig enn ein me finn paa.

@@ -1,8 +1,22 @@
 {{define "dashboard_membership_container"}}
-<div class="content-section">
-    <h2 class="section-title">{{t .Lang "dashboard.my_membership"}}</h2>
-    <div id="membership-container">
-        <div class="activity-placeholder">{{t .Lang "dashboard.loading_membership"}}</div>
-    </div>
-</div>
+{{/* Heile medlemskapet stod her fyrr: pris, fornying, binding, og
+     knappar for aa frysa og seia upp. Det er ei *forvaltning* — noko ein
+     gjer ein gong i halvaaret — og ho høyrer heime paa medlemskapssida.
+
+     So stod det eit merke med namnet paa kortet og ei lenkja attmed. Det
+     var framleis for mykje: ei lenkja bed um aa verta klikka, og det er
+     ikkje det ein kom hit for. Det ein vil vita naar ein opnar
+     heimesida er eitt einaste: gjeld det. Difor eit ljos og fire ord.
+     Medlemskapet stend i leidingi for den som vil sjaa meir. */}}
+<p class="stodalinje">
+    {{if .Medlemskap}}
+    {{if eq .Medlemskap.Status "paused"}}
+    <span class="ljos ljos-kvild" aria-hidden="true"></span>{{t .Lang "dashboard.medlemskap_frose"}}
+    {{else}}
+    <span class="ljos ljos-paa" aria-hidden="true"></span>{{t .Lang "dashboard.medlemskap_aktivt"}}
+    {{end}}
+    {{else}}
+    <span class="ljos ljos-av" aria-hidden="true"></span>{{t .Lang "dashboard.medlemskap_ingen"}}
+    {{end}}
+</p>
 {{end}}

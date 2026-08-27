@@ -27,12 +27,15 @@
                         aria-label="{{t .Lang "timeplan.next_week_btn"}}">&rsaquo;</button>
 
                 <div class="vekemeny" id="veke-meny" hidden>
-                    <input type="text" class="vekefelt" id="veke-felt"
-                           value="{{.WeekNumber}}" inputmode="numeric" maxlength="2"
+                    {{/* Talet er eit framlegg og ikkje ein verdi: markøren
+                         blinkar frå fyrste stund, og det du slår skriv seg
+                         i staden for å leggje seg attmed. */}}
+                    <input type="text" class="vekefelt bobla" id="veke-felt"
+                           placeholder="{{.WeekNumber}}" inputmode="numeric" maxlength="2"
                            autocomplete="off" spellcheck="false"
                            data-veke="{{.WeekNumber}}" data-offset="{{.WeekOffset}}"
+                           data-veker="{{.VikorIAaret}}"
                            aria-label="{{t .Lang "timeplan.week"}}">
-                    <span class="vekehint">{{t .Lang "timeplan.type_week"}}</span>
                 </div>
             </span>
         </h1>

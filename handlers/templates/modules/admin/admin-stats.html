@@ -14,7 +14,7 @@
     {{t .Lang "admin.stats_middle"}}
     <b class="tal">{{.TotalEvents}}</b> <span class="ord">{{t .Lang "admin.stats_classes"}}</span>{{if .PendingFreezeRequests}},
     {{t .Lang "admin.stats_and"}}
-    <a href="#oversyn" class="tal-lenkje"><b class="tal">{{.PendingFreezeRequests}}</b>
-    <span class="ord">{{t .Lang "admin.stats_waiting"}}</span></a>{{end}}.
+    <a href="#meldingar" class="tal-lenkje"><b class="tal">{{.PendingFreezeRequests}}</b>
+    <span class="ord">{{if eq .PendingFreezeRequests 1}}{{t .Lang "admin.stats_waiting_one"}}{{else}}{{t .Lang "admin.stats_waiting_many"}}{{end}}</span></a>{{end}}.
 </p>
 {{end}}

@@ -20,7 +20,14 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Get language from cookies/request (using new system)
 	lang := GetLanguageFromRequest(r)
 
+	// Pakkorne kjem or basen, ikkje or malen. Sjaa klippekjop.go.
+	pakkar, err := DB.GetAllKlippekortPackages()
+	if err != nil {
+		log.Printf("klippekortpakkar: %v", err)
+	}
+
 	data := map[string]interface{}{
+		"Kategoriar":  Kategoriar(pakkar),
 		"Title":       "Klippekort",
 		"CurrentPage": "klippekort",
 		"UserName":    user.Name,

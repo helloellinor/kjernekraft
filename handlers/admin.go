@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"kjernekraft/database"
+	"kjernekraft/handlers/config"
 	"kjernekraft/handlers/modules"
 	"log"
 	"net/http"
@@ -63,12 +64,22 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("kunde ikkje henta rom: %v", err)
 	}
 
+	// Veljarane paa denne sida — ny time, vikarfeltet — les rollone.
+	// Datalista `laerarar` stod tom fyrr: ho las $.Teachers, og den
+	// nykelen vart aldri sett paa administrasjonssida i det heile.
+	laerarar, err := AdminDB.LaerarNamn()
+	if err != nil {
+		log.Printf("kunde ikkje henta lærarane: %v", err)
+	}
+
 	data := map[string]interface{}{
 		"Rooms":          rooms,
 		"Folk":           folk,
+		"Teachers":       laerarar,
 		"Title":          t(lang, "admin.title"),
 		"Users":          users,
 		"Events":         events,
+		"Timereglar":     GrupperTimar(events, config.GetInstance().GetCurrentTime()),
 		"FreezeRequests": freezeRequests,
 		"Memberships":    memberships,
 		"Stats":          statsModule,
