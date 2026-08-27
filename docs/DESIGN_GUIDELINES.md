@@ -612,6 +612,13 @@ og ingen ting meir:
 Ein tilstand — hover, trykt — er ein ny farge i eitt av dei fem, aldri
 ein ny gradient.
 
+**Hover byter lina og ikkje ordet.** Merkefargen flytte seg inn i skrifta
+ei stund òg, og det var to lyte i eitt: turkis på ljos flate er under
+4,5:1, og `:hover` er framleis på i det ein trykkjer — så den uleselege
+fargen låg nett der flata er mørkast. Merkefargen er ei **linefarge**.
+Han er rekna for å halde éin piksel mot arket, ikkje for å bere ei
+setning.
+
 ### Trappa
 
 Same kapselen i tre storleikar: `.btn-liten`, ingen klasse, `.btn-stor`.
@@ -628,15 +635,25 @@ noko ljos oppå seg — attkastet vert veikt, skuggen fell inn ovanfrå, og
 knappen sig éin piksel. Det er den einaste staden i huset der noko
 flyttar seg — og han flyttar seg av di han er ein ting ein trykkjer på.
 
-**Og ordet sig med han.** Ljoset kjem ovanfrå, så den nedre lippa i ei
-rispe er den einaste kanten som fangar det: `--ordet-inn` er eit glim på
-éin piksel under bokstaven og ingen ting over han. Han gjer to ting på
-ein gong, og det er difor han er rett her og ikkje berre pynt — ordet
-vert trykt ned i flata saman med knappen, og det får ein ljos kant å
-lesast mot i den eine augneblinken flata under det er mørkast.
+Skuggen som fell inn ovanfrå er difor ei **line** og ikkje eit slør. Låg
+han som ei vaske over den øvre halvdelen, låg han rett over ordet, og
+teksta vart tung å lese i nett det augneblinket ein braut henne.
 
-Skuggen som fell inn ovanfrå er difor òg ei **line** og ikkje eit slør.
-Låg han som ei vaske over den øvre halvdelen, låg han rett over ordet.
+### Ordet er rispa ned i glaset
+
+`--ordet-inn` er eit glim på éin piksel under bokstaven og ingen ting
+over han. Ljoset kjem ovanfrå, så den nedre lippa i ei rispe er den
+einaste kanten som fangar det — same fysikken som fordjupinga i eit
+felt, berre på ein bokstav.
+
+Han står **i kvila**, ikkje berre i trykket. Ei rispe er noko som er
+*skore* i ei flate, og eit snitt går ikkje att av di ingen held fingeren
+nede: knappen flyttar seg når ein trykkjer, bokstaven gjer ikkje det.
+Attpå får ordet ein ljos kant å lesast mot nett i det augneblinket flata
+under det er mørkast.
+
+Avslegen har han ikkje. Ingen djupn tyder ingen djupn — `text-shadow`
+går ut saman med skuggen og glaset.
 
 **Avslegen har ingen djupn i det heile.** Ingen dropa, ingen vegg, ingen
 skugge: dei to laga står på `display: none`. Han er ikkje ein ting ein

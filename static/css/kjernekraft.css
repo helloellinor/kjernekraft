@@ -204,14 +204,16 @@
     inset 0 1px 0 color-mix(in srgb, var(--blekk) 16%, transparent),
     inset 0 -1px 0 var(--glans-svak);
 
-  /* Ordet som er trykt ned i flata. Ljoset kjem ovanfraa, og daa er den
+  /* Ordet som er rispa ned i glaset. Ljoset kjem ovanfraa, og daa er den
      nedre lippa i ei rispa den einaste kanten som fangar det: eit glim
      paa éin piksel under bokstaven, og ingen ting yver honom. Det er den
      same fysikken som fordjupingi i eit felt, berre paa ein bokstav.
 
-     Han gjer tvo ting paa ein gong, og det er difor han er rett her og
-     ikkje berre pynt: ordet *sig* med knappen, og det fær ein ljos kant
-     aa lesast mot i den eine augneblinken flata under det er myrkast. */
+     Han stend i kvila og ikkje berre i trykket. Ei rispa er noko som er
+     *skore* i ei flate, og eit snitt gjeng ikkje att av di ingen held
+     fingeren nede — knappen flytter seg naar ein trykkjer, bokstaven
+     gjer ikkje det. Attpaa fær ordet ein ljos kant aa lesast mot nett i
+     den augneblinken flata under det er myrkast. */
   --ordet-inn: 0 1px 0 var(--glans);
 
   /* romet. Ei einaste trapp, so ingen finn paa 13px. */
@@ -1058,6 +1060,12 @@ main {
   border: 1px solid var(--knapp-kant);
   border-radius: var(--rund-knapp);
   color: var(--knapp-ord);
+  /* Ordet er skore ned i glaset, ikkje prenta uppaa det. Ljoset kjem
+     ovanfraa, og daa er den nedre lippa i ei rispa den einaste kanten
+     som fangar det: eit glim paa éin piksel under bokstaven, og ingen
+     ting yver honom. Same fysikk som fordjupingi i eit felt, berre paa
+     ein bokstav. */
+  text-shadow: var(--ordet-inn);
   /* Kroppen aaleine, og ingen ting meir: han mørknar mot foten av di
      glaset er tjukkast der. Ljoset ligg ikkje i denne flata — det ligg
      i dei tvo laagi uppaa henne, og difor kann kroppen vera ein rein
@@ -1129,13 +1137,19 @@ main {
       transparent 76%);
 }
 
-/* Hover flyttar tvo verd og ikkje eit lag. Det er heile poenget med aa
+/* Hover flyttar eitt verd og ikkje eit lag. Det er heile poenget med aa
    la rollone vera tal: ein tilstand er ein ny farge, ikkje ein ny
-   gradient som lyt skrivast ut att i sin heilskap. */
+   gradient som lyt skrivast ut att i sin heilskap.
+
+   Ordet stend svart. Merket flytte seg inn i skrifti ei stund ogso, og
+   det var tvo lyter i eitt: turkis paa ljos flate er under fire og ein
+   halv, og :hover er framleis paa i det ein trykkjer — so den uleselege
+   fargen laag nett der flata er myrkast. Merkefargen er ei linefarge.
+   Han er rekna for aa halda éin piksel mot arket, ikkje for aa bera ei
+   setning. */
 .btn:hover, .action-btn:hover, .change-btn:hover,
 .week-nav-btn:hover, .signup-button:hover {
   --knapp-kant: var(--merke);
-  --knapp-ord:  var(--merke);
 }
 
 /* Trykt snur ljoset. Dropa gjeng ut — glas som er trykt inn hev ikkje
@@ -1149,7 +1163,6 @@ main {
 .cancel-signup-btn:active, .cancel-btn:active, .remove-btn:active {
   background: color-mix(in srgb, var(--knapp-tone) 13%, var(--knapp-kropp));
   box-shadow: var(--knappedjup-inn);
-  text-shadow: var(--ordet-inn);
   transform: translateY(1px);
 }
 :is(.btn, .btn-primary, .btn-danger, .action-btn, .change-btn,
@@ -1214,7 +1227,7 @@ main {
 button:disabled, .btn:disabled, .btn-primary:disabled, .week-nav-btn:disabled {
   color: var(--blekk-svakt); border-color: var(--haarlina);
   background: none; background-image: none;
-  box-shadow: none; transform: none; cursor: not-allowed;
+  box-shadow: none; text-shadow: none; transform: none; cursor: not-allowed;
 }
 button:disabled::before, button:disabled::after,
 .btn:disabled::before, .btn:disabled::after,
