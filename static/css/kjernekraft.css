@@ -2296,12 +2296,21 @@ th + th, td + td { border-left: 1px solid var(--haarlina); }
      Naar hovudet braut, la namnet seg imillom: leiding, so namn, so
      stripa. Namnet hev si eigi turkise lina under seg, og tvo turkise
      liner uppaa kvarandre er ikkje tvo merke, det er eitt som er
-     uleseleg. Namnet gjeng difor øvst, aaleine paa si rad.
+     uleseleg.
 
-     Leidingi tek heile breiddi paa raden sin, so ho ligg klemd inntil
-     stripa og lenkjone fær bryta i staden for aa renna ut or hovudet. */
-  .auth-controls { order: -1; width: 100%; justify-content: flex-end; }
-  .nav { flex-basis: 100%; }
+     Namnet stend difor paa den same raden som merkeordet — merket til
+     venstre, namnet til høgre, nett slik dei stend paa ein brei skjerm
+     — og leidingi fell ned paa si eigi rad under. Daa ligg ho klemd
+     inntil stripa, og lenkjone fær bryta i staden for aa renna ut or
+     hovudet. Dei rann ut fyrr, av di dei delte rad med merkeordet og
+     det ikkje var att plass til fire.
+
+     `order` og ikkje ein ny mal: i teksten stend leidingi millom merket
+     og namnet, og det er rett *lesing* — leidingi er det viktigaste paa
+     sida, og ein som høyrer sida lesen upp skal møta henne der. Det er
+     berre synet som byter um. */
+  .nav { order: 1; flex-basis: 100%; }
+  .auth-controls { margin-left: auto; }
 
   h1, .page-title { font-size: 1.7rem; }
 
