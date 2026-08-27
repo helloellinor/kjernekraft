@@ -386,7 +386,8 @@
     "stats_middle": "There are",
     "stats_classes": "classes scheduled",
     "stats_and": "and",
-    "stats_waiting": "waiting on you",
+    "stats_waiting_one": "message waiting on you",
+    "stats_waiting_many": "messages waiting on you",
     "tab_membership": "Memberships",
     "tab_rules": "Rules",
     "new_membership": "New membership",
@@ -482,7 +483,15 @@
     "status_freeze_requested": "Request sent",
     "status_cancelled": "Cancelled",
     "utan_medlemskap": "You do not have a membership.",
-    "sjaa_val": "See your options"
+    "sjaa_val": "See your options",
+    "setning_kva": "You have %s.",
+    "setning_pris": "It costs %s kr per month.",
+    "setning_binding": "Your binding has %s months left.",
+    "setning_ubunden": "You are not bound.",
+    "setning_fornying": "Next payment is %s.",
+    "setning_frose": "Your membership is frozen.",
+    "setning_venteande": "You have asked to freeze it, and the studio has not answered yet.",
+    "setning_sagt_opp": "Your membership is cancelled and ends %s."
   },
   "produkt": {
     "manadskort": "Monthly",

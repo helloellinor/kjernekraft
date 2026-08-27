@@ -386,7 +386,8 @@
     "stats_middle": "Det står",
     "stats_classes": "timer i planen",
     "stats_and": "og",
-    "stats_waiting": "venter på svar",
+    "stats_waiting_one": "melding venter på svar",
+    "stats_waiting_many": "meldinger venter på svar",
     "tab_membership": "Medlemskap",
     "tab_rules": "Regler",
     "new_membership": "Nytt medlemskap",
@@ -482,7 +483,15 @@
     "status_freeze_requested": "Forespørsel sendt",
     "status_cancelled": "Sagt opp",
     "utan_medlemskap": "Du har ikke et medlemskap.",
-    "sjaa_val": "Se hva du kan velge"
+    "sjaa_val": "Se hva du kan velge",
+    "setning_kva": "Du har %s.",
+    "setning_pris": "Det koster %s kr i måneden.",
+    "setning_binding": "Bindingen har %s måneder igjen.",
+    "setning_ubunden": "Du er ikke bundet.",
+    "setning_fornying": "Neste betaling er %s.",
+    "setning_frose": "Medlemskapet er fryst.",
+    "setning_venteande": "Du har bedt om frysing, og studioet har ikke svart ennå.",
+    "setning_sagt_opp": "Medlemskapet er sagt opp og går ut %s."
   },
   "produkt": {
     "manadskort": "Månedskort",
