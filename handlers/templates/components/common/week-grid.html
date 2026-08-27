@@ -61,7 +61,30 @@
          trykk løftar fram ein dag og dempar dei andre. Ingenting går
          bort, og eit trykk til slepper han. */}}
     <div class="timehovud">
-        <span class="timehovud-tom"></span>
+        {{/* Sikti stend i den fyrste ruta i vikehovudet — den som stend
+             yver spalta ho siktar i. Ho låg i tittellina fyrr, klemd
+             millom tittelen og kanten, og på bokmål klipte ho namni av.
+             Her hev ho heile spaltebreiddi, og ho seier med staden sin
+             kva ho gjeld: klassa og læraren stend rett under.
+
+             Rekkjefylgja er den same som i spalta under: klassa fyrst,
+             so læraren. */}}
+        {{if .Teachers}}
+        <div class="timesikt">
+            <select id="class-filter" onchange="applyFilters()" aria-label="{{t .Lang "timeplan.class_filter"}}">
+                <option value="">{{t .Lang "timeplan.all_classes"}}</option>
+                {{range .ClassTypes}}
+                <option value="{{.}}" {{if eq . $.SelectedClass}}selected{{end}}>{{t $.Lang (printf "timeplan.cat_%s" .)}}</option>
+                {{end}}
+            </select>
+            <select id="teacher-filter" onchange="applyFilters()" aria-label="{{t .Lang "timeplan.teacher_filter"}}">
+                <option value="">{{t .Lang "timeplan.all_teachers"}}</option>
+                {{range .Teachers}}
+                <option value="{{.}}" {{if eq . $.SelectedTeacher}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+        {{else}}<span class="timehovud-tom"></span>{{end}}
         {{range $i, $d := .WeekDays}}
         <button type="button"
                 class="dagnamn{{if eq (index $.WeekDates $i | dagStreng) $.Today}} idag{{end}}"

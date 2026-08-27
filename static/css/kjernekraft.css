@@ -111,6 +111,12 @@
      farge — elles tyder merket tvo ting. */
   --aatvaring:  #8c3a2b;
 
+  /* Kjernen i ljosbandet under hovudet. Ljos paa papir er ikkje kvitt —
+     det er *metting*: streken vert djupare der lampa stend, ikkje ljosare.
+     I myrkret er det andre vegen, og daa er kjernen utbrend mot kvitt.
+     Sjaa .header::before. */
+  --glodkjerne: color-mix(in srgb, var(--merke) 72%, #000);
+
   /* Flata i ei lukka fana. Han er rekna av blekket og arket, so han
      fylgjer temaet av seg sjølv og skal ikkje skrivast um att. */
   --faneflate: color-mix(in srgb, var(--blekk) 6%, var(--ark));
@@ -160,6 +166,7 @@
     --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
     --aatvaring:  #d08574;
     --aatvaring-svak: #2b1c18;
+    --glodkjerne: color-mix(in srgb, var(--merke) 22%, #fff);
     --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
   }
 }
@@ -182,6 +189,7 @@
   --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
   --aatvaring:  #d08574;
   --aatvaring-svak: #2b1c18;
+  --glodkjerne: color-mix(in srgb, var(--merke) 22%, #fff);
   --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
 }
 
@@ -298,9 +306,54 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
    paa grunnlina si eiga, teksti paa si, og bjelken kring deim visste
    ikkje um nokon av deim.
    =================================================================== */
+/* ---- hovudet og lina under det ----
+   Lina er den same som under hovudet i ordboka: ikkje ein kant, men tvo
+   strekar med ei renne imellom, måla som flate. Ein kant kan ikkje bera
+   ljos. Renna er ikkje gjennomsynleg — ho ligg i bakgrunnen åt hovudet,
+   under glødi, so ljoset lyser *gjennom* henne medan dei to strekane
+   står som ribbene i lista. Sjå .hovud::after i slaaupp. */
 .header {
-  border-bottom: 1px solid var(--kant);
-  background: var(--ark);
+  position: relative;
+  background:
+    linear-gradient(to top,
+      transparent 0 1px, var(--faneflate) 1px 2px, transparent 2px),
+    var(--ark);
+}
+.header::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 3px; z-index: 2; pointer-events: none;
+  background: linear-gradient(to bottom,
+    var(--haarlina) 0 1px, transparent 1px 2px, var(--haarlina) 2px 3px);
+}
+
+/* ---- ljosbandet: LED-stripa i lina ----
+   Glødi høyrer til den valde sida, men ho ligg i *hovudet* si lina og
+   ikkje i lenkja si eiga kasse — difor er ho eit lag her, og det er
+   ljosband.js som seier kvar ho står (--glodmidt) og kor brei ho er
+   (--glodvidd), måla på den valde lenkja. Står dei ikkje, er vidda null
+   og laget usynleg; ingi glød på feil stad medan sida lastar.
+
+   Fire lag, som i ordboka: utbrend kjerne, fargen tett kring han, ein
+   vid veik halo, og bloomen under. Lina sjølv ligg over (z-index 2) og
+   skjer glødi i to. */
+.header::before {
+  content: ""; position: absolute; left: 0; right: 0;
+  bottom: -9px; height: 21px; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 0.34) 9% at var(--glodmidt, 50%) 50%,
+      var(--glodkjerne) 0%,
+      transparent 100%),
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 0.8) 14% at var(--glodmidt, 50%) 50%,
+      color-mix(in srgb, var(--merke) 96%, transparent) 0%,
+      color-mix(in srgb, var(--merke) 62%, transparent) 30%,
+      transparent 72%),
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 2.6) 30% at var(--glodmidt, 50%) 50%,
+      color-mix(in srgb, var(--merke) 26%, transparent) 0%,
+      color-mix(in srgb, var(--merke) 8%, transparent) 45%,
+      transparent 85%),
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 1.2) 62% at var(--glodmidt, 50%) 46%,
+      color-mix(in srgb, var(--merke) 26%, transparent) 0%,
+      transparent 76%);
 }
 .header-content {
   max-width: var(--breidd); margin: 0 auto;
@@ -372,19 +425,34 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
   margin: 0; padding: 0; list-style: none;
   display: flex; align-items: center; flex-wrap: wrap;
   gap: var(--rom-2) var(--rom-4);
+  position: relative;
+  /* Midtlina gjennom merket skal gå gjennom lenkjene med. Rada sentrerer
+     *kassane*, og kassen åt ei skrift er ikkje symmetrisk kring
+     kapitélbandet: over- og underlengdene deler seg ulikt. Måla på ei
+     bilete i firedobbel storleik stod kapitélmidten åt lenkjene 1,4 px
+     over kapitélmidten åt K-en i merket. Difor dette dyttet — det er ei
+     måling, ikkje ein smak. */
+  transform: translateY(.09em);
 }
+
 .nav-item a {
-  display: block; padding: var(--rom-1) 0;
+  display: block;
+  /* Symmetrisk. Kassen er teksten og like mykje luft over som under, so
+     midtlina hans er midtlina åt teksten. */
+  padding: var(--rom-1) 0;
+  position: relative;
   font-family: var(--skrift-yver); font-size: .95rem;
   font-stretch: var(--vidd-merkelapp); font-weight: 500;
   letter-spacing: .07em; text-transform: uppercase;
   color: var(--blekk-lys); text-decoration: none;
-  border-bottom: 2px solid transparent;
 }
 .nav-item a:hover { color: var(--blekk); }
-.nav-item.active a, .nav-item a[aria-current="page"] {
-  color: var(--blekk); border-bottom-color: var(--klas);
-}
+
+/* ---- den valde sida ----
+   Ho tek berre fargen. Ljoset hennar ligg i lina under hovudet, ikkje på
+   henne: sjå .header::before. */
+.nav-item.active a, .nav-item a[aria-current="page"] { color: var(--blekk); }
+
 .nav-item.nav-admin a { color: var(--blekk-svakt); }
 .nav-item.nav-admin a:hover { color: var(--blekk-lys); }
 
@@ -405,6 +473,9 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
   letter-spacing: 0; text-transform: none;
   color: var(--blekk-lys);
   border-bottom: 2px solid transparent;
+  /* Same midtlina, same grunnen — og her kjem ein piksel til av at
+     kanten under gjer kassen usymmetrisk. Måla: 1,9 px. */
+  transform: translateY(.12em);
 }
 .user-name:hover { color: var(--blekk); background: none; border-bottom-color: var(--haarlina); }
 .user-name.active { color: var(--blekk); border-bottom-color: var(--klas); }
@@ -1119,21 +1190,11 @@ tbody tr:hover td { background: var(--ark-djup); }
 .vekeval.no { color: var(--klas); border-color: var(--klas); }
 
 .week-controls { display: flex; gap: var(--rom-3); align-items: center; flex-wrap: wrap; margin-bottom: 0; }
-.filters, .charges-filter { display: flex; gap: var(--rom-2); flex-wrap: wrap; align-items: center; }
-/* Styringi skal vera liti. Ho er ikkje det ein kom for; ho er det ein
-   naar etter naar lista er for lang. Felti var 9 rem breide og i
-   lesestorleik — like tunge som innhaldet dei filtrerte. */
-.filters select {
-  width: auto; min-width: 0; max-width: 11rem;
-  font-size: .82rem;
-  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
-  background-position: right .5rem top 50%;
-  border-color: var(--haarlina);
-  color: var(--blekk-lys);
-}
-.filters select:hover { border-color: var(--kant); color: var(--blekk); }
-.filter-group { display: flex; flex-direction: column; gap: var(--rom-2); }
-.filter-group select { width: auto; min-width: 11rem; }
+.charges-filter { display: flex; gap: var(--rom-2); flex-wrap: wrap; align-items: center; }
+/* `.filters` og `.filter-group` stod her fyrr, med `max-width: 11rem` paa
+   veljarane. Sikti i timeplanen var den einaste som nytta deim, og ho
+   bur i vikehovudet no — sjaa `.timesikt`. Taket var nettupp det som
+   klipte lange lærarnamn av. */
 
 .week-navigation { display: flex; align-items: stretch; gap: var(--rom-1); }
 .week-nav-btn { padding: var(--rom-2) var(--rom-3); font-size: 1rem; line-height: 1; }
@@ -1186,6 +1247,38 @@ tbody tr:hover td { background: var(--ark-djup); }
 }
 .timehovud .dagnamn { text-align: center; }
 .timehovud-tom { grid-column: 1; }
+
+/* ---- sikti ----
+   Filtri bur i den fyrste ruta i vikehovudet, yver spalta dei siktar i.
+   Dei stod i tittellina fyrr, med `max-width: 11rem` — og eit lærarnamn
+   eller ei klassa på bokmål vart klipt av lenge fyrr ho var lesi. Her er
+   det ei heil spalta å taka av.
+
+   Dei ser ut som dagane attmed og ikkje som skjemafelt: ingi rute, inga
+   flata, berre ordet. Er eit val teke, tek veljaren den same merkefarga
+   flata som ein trykt dag — so ser ein at det er sikta *utan* å lesa
+   kva som stend. Det er den same regelen som gjeld dagane: eit trykk
+   syner seg som ljos, ikkje som ei ramme. */
+.timesikt {
+  grid-column: 1; min-width: 0;
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--rom-1);
+}
+.timesikt select {
+  width: auto; max-width: 100%; min-width: 0;
+  font: inherit; font-size: .82rem;
+  border: 0; background-color: transparent; border-radius: 2px;
+  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
+  background-position: right .55rem top 50%, right .35rem top 50%;
+  color: var(--blekk-lys);
+}
+.timesikt select:hover { color: var(--blekk); background-color: var(--ark-djup); }
+/* `:has` av di det ikkje finst nokon annan veg: kva som er valt i ein
+   veljar veit berre nettlesaren, og me vil ikkje ha eit skript til for
+   å setja ei klassa på noko han alt veit. */
+.timesikt select:has(option:checked:not([value=""])) {
+  color: var(--blekk); background-color: var(--merke-svak);
+}
 
 .timerad {
   border-bottom: 1px solid var(--haarlina);
@@ -1425,6 +1518,11 @@ tbody tr:hover td { background: var(--ark-djup); }
 @media (max-width: 60rem) {
   .timeplan { --timetrapp: minmax(0, 1fr); }
   .timehovud { display: none; }
+  /* Dagarne kann ikkje lesast av spaltone lenger, so hovudet fell burt
+     — men sikti bur i honom no, og ho gjeld like fullt. Difor stend
+     ruta hennar att åleine. */
+  .timehovud:has(.timesikt) { display: block; }
+  .timehovud:has(.timesikt) .dagnamn { display: none; }
   .timedagar {
     display: flex; flex-wrap: wrap; gap: var(--rom-2);
     grid-column: 1 / -1;
