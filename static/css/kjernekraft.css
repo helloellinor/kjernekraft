@@ -2320,12 +2320,7 @@ th + th, td + td { border-left: 1px solid var(--haarlina); }
    pinna til venstre kanten. Kanten stend 1 px heile vegen rundt og
    ingen ting flyttar seg, rundingi klypper lina i hyrni som ho skal, og
    den brotne rytmen er eit tal nokon hev valt og ikkje eit tal ein
-   nettlesar kom fram til.
-
-   Talet er seksten paa og aatte av. Aatte og seks var fyrste freistnad,
-   og det var for tett: paa ei lina som er tri pikslar brei les ein tett
-   rytme seg som eit korn og ikkje som ei broti lina. Ei lina er broti
-   fyrst naar kvart stykke er langt nok til aa vera eit stykke. */
+   nettlesar kom fram til. */
 .membership-card, .klippekort-card {
   background-repeat: no-repeat;
   background-position: left top;
@@ -2339,10 +2334,41 @@ th + th, td + td { border-left: 1px solid var(--haarlina); }
   background-image: linear-gradient(var(--blekk-svakt), var(--blekk-svakt));
 }
 /* Bede um og ikkje svara enno: lina er der, men ho er ikkje heil. Same
-   tanken som den opne ringen i livsmerket. */
+   tanken som den opne ringen i livsmerket.
+
+   Ho er talt og ikkje maalt, og det er heile knipa. Ein fast rytme —
+   «seksten paa, aatte av» — veit ikkje kor høgt kortet er, og eit
+   mønster som gjeng til det tek slutt endar der det tilfeldigvis er
+   naar kanten kjem: i ei glipa, eller midt i ei stripa. Daa er lina
+   heil i den eine enden og av i den andre, og auga ser skeivt fyre det
+   ser rytme.
+
+   Ei broti lina skal byrja og enda i fargen, og dei tvo ytste stykki
+   skal vera like lange. Det tyder N stykke og N-1 glipor, og det er ei
+   likning: N·s + (N-1)·g = H. Held ein N og g faste, gjev ho seg sjølv,
+   og ho let seg skriva i CSS av di feltet «100%» er H:
+
+     rutehøgd  T = (100% + g) / N
+     stykket   s = T - g
+
+   Den fyrste stripa tek til paa null; den siste tek slutt paa
+   N·T - g = (100% + g) - g = 100%. Nøyaktig i baae endar, kva høgd
+   kortet so hev.
+
+   Stykki er difor ikkje ei fast lengd lenger — dei veks med kortet, og
+   talet paa dei stend fast. Det er rett veg rundt: rytmen er noko ein
+   les yver *heile* lina, og fire stykke les seg som fire same kor lang
+   ho er. Ei fast lengd gjev fem stykke paa eit kort og ni paa eit anna,
+   og daa er det ikkje ein rytme, det er ei tilfeldig lengd. */
 .membership-card.freeze_requested {
+  --veng-tal: 4;        /* stykke. Glipone er alltid eitt færre. */
+  --veng-glipe: .5rem;
+  --veng-rute: calc((100% + var(--veng-glipe)) / var(--veng-tal));
   background-image: repeating-linear-gradient(to bottom,
-    var(--produkt) 0 1rem, transparent 1rem 1.5rem);
+    var(--produkt) 0,
+    var(--produkt) calc(var(--veng-rute) - var(--veng-glipe)),
+    transparent   calc(var(--veng-rute) - var(--veng-glipe)),
+    transparent   var(--veng-rute));
 }
 
 .membership-header, .card-header {
