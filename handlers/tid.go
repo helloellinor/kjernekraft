@@ -29,3 +29,15 @@ func veggklokka(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(),
 		t.Hour(), t.Minute(), t.Second(), 0, OsloLoc)
 }
+
+// fyre og etter set ei *lagra* tid opp mot eit verkeleg tidspunkt.
+//
+// Dei to er ikkje same slaget. Ei lagra tid er klokka på veggen med
+// UTC-merkelappen drivaren gav henne; `no` er eit verkeleg augneblink.
+// Sette ein dei opp mot kvarandre rått, låg dei to timar frå kvarandre
+// om sommaren: klokka 18:30 stod ein time som gjekk 17:00–18:00
+// framleis som «ledig plass», av di 18:00 med UTC-merkelapp er 20:00
+// hjå oss. veggklokka rettar merkelappen fyrst, og då tyder
+// samanlikninga det ho ser ut til å tyde.
+func fyre(lagra, no time.Time) bool  { return veggklokka(lagra).Before(no) }
+func etter(lagra, no time.Time) bool { return veggklokka(lagra).After(no) }

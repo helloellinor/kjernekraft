@@ -155,7 +155,7 @@ func NyFramsyning(lang string, e models.Event, iDagDato string, naa time.Time) F
 		Dato:         e.StartTime,
 		DagNamn:      dag,
 		ErIDag:       e.StartTime.Format("2006-01-02") == iDagDato,
-		ErUmme:       e.EndTime.Before(naa),
+		ErUmme:       fyre(e.EndTime, naa),
 		Full:         e.Full(),
 		Prosent:      prosent,
 		Kolonne:      kolonne(e.StartTime.Weekday()),
@@ -304,7 +304,7 @@ func LedigeFramsyningar(userID int64, lang string, naa time.Time) ([]Framsyning,
 
 	komande := make([]models.Event, 0, len(ledige))
 	for _, e := range ledige {
-		if e.StartTime.After(naa) {
+		if etter(e.StartTime, naa) {
 			komande = append(komande, e)
 		}
 	}
