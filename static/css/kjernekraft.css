@@ -214,6 +214,19 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
+  /* Botnlina stend nedst, same kor kort sida er.
+     
+     Ho «skifta storleik» frå side til side før — men det ho skifta, var
+     *plass*. På ei kort side, som Folk i administrasjonen, rann ho opp
+     og la seg like under innhaldet, med eit stort daudt band under seg;
+     på ei lang side stod ho nedst. Det er den same lina, men auga les
+     bandet under henne som ein del av henne.
+
+     Sida er ei spalte som er minst like høg som glaset, og innhaldet tek
+     det som er att. Då er botnlina alltid nedst. */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   /* Luft under sida av same høgd som dokka. Utan denne ligg det siste
      sida hev aa syna under henne, og ein kann ikkje naa det. */
   padding-bottom: var(--dokkhogd, 0px);
@@ -419,7 +432,7 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
    breidaste i heile hovudet, og ein vel ikkje maal kvar gong ein opnar
    ei sida.
    =================================================================== */
-.botnlina { border-top: 1px solid var(--haarlina); margin-top: var(--rom-7); }
+.botnlina { border-top: 1px solid var(--haarlina); margin-top: var(--rom-7); flex: none; }
 .botninnhald {
   max-width: var(--breidd); margin: 0 auto;
   padding: var(--rom-4) var(--rom-5);
@@ -432,6 +445,12 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
    sida
    =================================================================== */
 main {
+  /* Innhaldet tek plassen som er att, so botnlina vert skuva nedst.
+     `width: 100%` lyt stå: auto-margin på sidene i ei flex-spalte slår av
+     strekkinga, og då krympar <main> til innhaldet sitt og legg seg midt
+     i glaset. Sida såg sentrert ut. */
+  flex: 1 0 auto;
+  width: 100%;
   max-width: var(--breidd); margin: 0 auto;
   padding: var(--rom-6) var(--rom-5) var(--rom-7);
 }
