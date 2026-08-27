@@ -29,6 +29,7 @@
         <li><a href="#vika">Vika</a></li>
         <li><a href="#medlemskapet">Medlemskapet</a></li>
         <li><a href="#skjema">Skjema</a></li>
+        <li><a href="#meldingi">Meldingi</a></li>
         <li><a href="#fanone">Fanone</a></li>
         <li><a href="#tabellen">Tabellen</a></li>
         <li><a href="#talet">Tal som setning</a></li>
@@ -222,6 +223,30 @@
         <div class="verkstad-par">
             <div class="verkstad-prova" data-tema="ljos" data-theme="light">{{template "prov_skjema" .}}</div>
             <div class="verkstad-prova" data-tema="myrk" data-theme="dark">{{template "prov_skjema" .}}</div>
+        </div>
+    </section>
+
+    <section class="verkstad-bolk" id="meldingi">
+        <h2 class="section-title">Meldingi</h2>
+        <p class="verkstad-regel">
+            Noko gjekk gale, eller noko gjekk vel. Ho stod som ein fylt
+            klump fyrr — flata, kanten og ordet i den same fargen, tri
+            gonger — og grunngjevingi mot det stod alt skriven um
+            knappen: <em>ein raud klump dreg auga fraa alt anna</em>. Ei
+            melding som ropar so høgt at ein ikkje kann lesa henne hev
+            gjort tvo ting, og det eine var i vegen for det andre.
+        </p>
+        <p class="verkstad-regel">
+            No er ho eit kort med ein <em>veng</em>, av di det er nettupp
+            det ho er: ein liten boks med noko i, og ei lina i kanten som
+            segjer kva slag. Same forma som medlemskortet, same grepet,
+            same tri pikslane — ein som lærer vengen éin stad kjenner
+            honom att den andre. Fargen ligg i vengen og i ordet, aldri
+            i flata.
+        </p>
+        <div class="verkstad-par">
+            <div class="verkstad-prova" data-tema="ljos" data-theme="light">{{template "prov_meldingi" .}}</div>
+            <div class="verkstad-prova" data-tema="myrk" data-theme="dark">{{template "prov_meldingi" .}}</div>
         </div>
     </section>
 
@@ -481,6 +506,12 @@
         <div class="dates-info"><div class="renewal-date urgent">Gjeng ut 30. september 2026</div></div>
     </div>
 </div>
+{{end}}
+
+{{define "prov_meldingi"}}
+<p class="error" role="alert">Feil e-post eller passord.</p>
+<p class="success">Timen er lagra.</p>
+<p class="error" role="alert">Du kann ikkje melda deg av mindre enn tvo timar fyre timen tek til. Ta kontakt med studioet, so hjelper dei deg.</p>
 {{end}}
 
 {{define "prov_skjema"}}

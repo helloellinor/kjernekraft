@@ -1351,7 +1351,7 @@ label, .option-label, .question-label, .detail-label, .filter-group label {
    korleis det ser ut. */
 :where(input[type="text"], input[type="email"], input[type="password"],
        input[type="date"], input[type="tel"], input[type="number"],
-       input[type="search"], input[type="time"], textarea) {
+       input[type="search"], input[type="time"], textarea), .lappfelt {
   font: inherit;
   /* Same regelen som kapselen: lufta i endane er halve høgdi, so kurva
      tek til der ordet slepper. Sjaa DESIGN_GUIDELINES §18. */
@@ -1382,10 +1382,12 @@ label, .option-label, .question-label, .detail-label, .filter-group label {
   color: var(--blekk);
   border: 0;
   border-radius: var(--rund-knapp);
-  width: 100%;
 }
+:where(input[type="text"], input[type="email"], input[type="password"],
+       input[type="date"], input[type="tel"], input[type="number"],
+       input[type="search"], input[type="time"], textarea) { width: 100%; }
 /* Ei renna med fleire linor er den eine som ikkje kann vera ein kapsel. */
-:where(textarea) { border-radius: var(--rund-bobla); }
+:where(textarea), textarea.lappfelt { border-radius: var(--rund-bobla); }
 
 /* Veljaren hev kant og inga djupn. Han plukkar eitt av nokre faae — han
    er ein knapp med ei liste attum, ikkje ei renna ein hell noko nedi
@@ -1404,7 +1406,7 @@ label, .option-label, .question-label, .detail-label, .filter-group label {
 /* Fordjupingi segjer «her kann du skriva», og difor stend ho berre paa
    det ein skriv i. Ein veljar plukkar ein or ei liste — han er ein knapp
    med ei liste attum, ikkje ei renna. */
-:where(input:not([type="checkbox"]):not([type="radio"]), textarea) {
+:where(input:not([type="checkbox"]):not([type="radio"]), textarea), .lappfelt {
   box-shadow: var(--bobla);
 }
 /* ---- fasetten ----
@@ -1483,23 +1485,46 @@ select {
   padding-right: var(--rom-7);
 }
 
-.error, .login-error {
-  color: var(--aatvaring);
-  background: var(--aatvaring-svak);
-  border: 1px solid var(--aatvaring);
-  border-radius: 2px;
+/* ---- meldingi ----
+   Noko gjekk gale, eller noko gjekk vel. Ho stod som ein fylt klump
+   fyrr: flata i aatvaringsfargen, kant i aatvaringsfargen heile vegen
+   rundt, ordet i aatvaringsfargen. Tri gonger den same fargen, og
+   grunngjevingi mot det stod alt skriven tvo stader i huset — det er
+   den same setningi som knappen fekk: *ein raud klump dreg auga fraa
+   alt anna*. Ei melding som ropar so høgt at ein ikkje kann lesa henne
+   hev gjort tvo ting, og det eine var i vegen for det andre.
+
+   No er ho eit kort med ein veng, av di det er nettupp det ho er: ein
+   liten boks med noko i, og ei lina i kanten som segjer kva slag. Same
+   forma som medlemskortet, same grepet, same tri pikslane. Fargen ligg
+   i vengen og i ordet — aldri i flata.
+
+   Meldingi og medlemskortet er ikkje i slekt, og likevel er dei det:
+   baae er ein boks som ber ei stode. Ein som lærer vengen éin stad
+   kjenner honom att den andre, og det er heile poenget med aa ha eit
+   grep i staden for ei liste med unnatak. */
+.error, .login-error, .success {
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: var(--rund);
   padding: var(--rom-3) var(--rom-4);
   font-size: .92rem;
   margin-bottom: var(--rom-4);
+  /* Vengen. Same laget som paa kortet: eit bakgrunnslag pinna til
+     venstre kanten, so kanten stend 1 px heile vegen rundt og ingen ting
+     flyttar seg naar meldingi kjem. */
+  background-image: linear-gradient(var(--meldingsfarge), var(--meldingsfarge));
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: 3px 100%;
+}
+.error, .login-error {
+  --meldingsfarge: var(--aatvaring);
+  color: var(--aatvaring);
 }
 .success {
+  --meldingsfarge: var(--merke);
   color: var(--merke);
-  background: var(--merke-svak);
-  border: 1px solid var(--merke);
-  border-radius: 2px;
-  padding: var(--rom-3) var(--rom-4);
-  font-size: .92rem;
-  margin-bottom: var(--rom-4);
 }
 
 /* ===================================================================
@@ -3124,25 +3149,32 @@ th + th, td + td { border-left: 1px solid var(--haarlina); }
    er han ogso den fyrste som taper mot kva som helst anna. Ei klassa
    som andre reglar kann slaa, er ikkje ei klassa ein kann lita paa.
    
-   Same forma stend difor tvo stader: i grunnstilen, so eit felt utan
-   klassa er rett av seg sjølv, og her, so eit felt *med* klassa er rett
-   same kva anna som stend i arket. Det er ikkje dobbelt arbeid — det er
-   ein grunnstil og ein garanti. */
+   Same forma stod difor tvo stader ei stund: i grunnstilen, so eit felt
+   utan klassa er rett av seg sjølv, og her, so eit felt *med* klassa er
+   rett same kva anna som stend i arket. «Ikkje dobbelt arbeid — ein
+   grunnstil og ein garanti.»
+
+   Garantien var rett; utskrifti var det ikkje. Daa feltet fekk bobla si,
+   fekk grunnstilen henne og denne regelen ikkje, og profilsida stod att
+   med den gamle forma medan resten av huset hadde den nye. Ein garanti
+   som er skriven av lyder nettupp slik: han held til nokon endrar den
+   eine av dei tvo.
+
+   No stend `.lappfelt` i veljarlista aat grunnstilen i staden. Ei
+   veljarliste kann ha ulik vekt per veljar — `:where(...)` er null,
+   `.lappfelt` er (0,1,0) — so klassa slær framleis `input[type="text"]`
+   (0,1,1) og garantien stend. Men forma er skriven éin gong, og daa
+   kann ho ikkje driva fraa seg sjølv.
+
+   Att her stend berre det som er hans eige: maalet. */
 .lappfelt {
-  font: inherit;
-  padding: var(--rom-2) var(--rom-3);
-  background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate));
-  color: var(--blekk);
-  border: 0;
-  border-radius: var(--rund);
-  box-shadow: var(--fordjuping);
   width: auto;
   field-sizing: content;
   min-width: 7rem;
   max-width: 100%;
 }
 .lappfelt:hover { background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
-.lappfelt:focus { outline: none; box-shadow: var(--fasett); }
+.lappfelt:focus { outline: none; box-shadow: var(--bobla-fokus); }
 .lappfelt::placeholder { color: var(--blekk-svakt); }
 
 /* Namnet er yverskrifti. Ho er stor av di ho er namnet ditt, og
