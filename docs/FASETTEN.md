@@ -269,17 +269,18 @@ kant. Er svaret «kant», er det val 2 som gjeld.
 
 ## 8. Regelen
 
-> Treng ein ny kontroll djupn, skal han nytta `--fordjuping` eller
-> `--fasett` — ikkje ein ny skugge. Finn du eit `box-shadow` i ein
-> komponent som ikkje er ein av dei tvo, eller `--skugge-flytande` paa
-> noko som ikkje faktisk flyt, er det ein feil.
+> Treng ein ny kontroll djupn, skal han nytta eit av dei fire som finst
+> — `--fordjuping`, `--fasett`, `--bobla`, `--knappedjup` — og ikkje ein
+> ny skugge. Finn du eit `box-shadow` i ein komponent som ikkje er ein
+> av dei, eller `--skugge-flytande` paa noko som ikkje faktisk flyt, er
+> det ein feil.
 
 Prøva er ei linja:
 
 ```sh
 grep -rn 'box-shadow' static/css/kjernekraft.css \
   | grep -v 'var(--fasett)\|var(--fordjuping)\|var(--skugge-flytande)' \
-  | grep -v 'var(--knappedjup' \
+  | grep -v 'var(--knappedjup\|var(--bobla' \
   | grep -v 'box-shadow: none'
 ```
 
@@ -305,9 +306,16 @@ I dag gjev prøva **fem** treff, og alle fem er meinte:
    til at `--faneflate` og dei andre rekna verdiane står skrivne ut att i
    kvart tema.
 
-Knappen sin djupn stend i `--knappedjup` og `--knappedjup-inn` og er
-difor teken ut av prøva, som seg hør og bør: han er eit token, ikkje ein
-laus skugge.
+Knappen sin djupn stend i `--knappedjup` og `--knappedjup-inn`, og
+bobla i feltet i `--bobla` og `--bobla-fokus`. Baae er difor tekne ut av
+prøva, som seg hør og bør: dei er token, ikkje lause skuggar.
+
+`--bobla` er fire lag, og alle fire er den same fysikken lesen nedanfrå
+og opp. Feltet er ei renne med noko i: fordjupinga er lippa som kastar
+ein skugge ned i vatnet, meniskusen i foten er ljoset som kjem ut att
+under, glastjukna kring er linsa som pressar det ho ser mot kanten, og
+det siste laget er ljoset som slepp ut på arket under henne. Ho er ei
+**form**, ikkje ein skugge nokon fann på — og det er difor ho får stå.
 
 Grunngjevingi stend i fila attmed kvar av deim. Alt som kjem ut av
 prøva, skal ha ei slik grunngjeving skriven attmed seg — elles er det ein

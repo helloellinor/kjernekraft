@@ -159,6 +159,11 @@
      To verd, tvo tydingar. Alt anna er drift. */
   --rund:       2px;
   --rund-knapp: 999px;
+  /* Ei tekstrenna med fleire linor kann ikkje vera ein kapsel: kurva
+     ville ete hyrni av dei linone som ligg øvst og nedst. Ho fær ein
+     runding som er stor nok til aa lesast som ei bobla og liten nok til
+     aa la teksti bu inni. Det er det tridje og siste rundingsverdet. */
+  --rund-bobla: 1.1rem;
 
   /* ---- glaset ----
      Knappen er den eine tingen i huset med djupn utyver fasetten, og
@@ -1348,13 +1353,39 @@ label, .option-label, .question-label, .detail-label, .filter-group label {
        input[type="date"], input[type="tel"], input[type="number"],
        input[type="search"], input[type="time"], textarea) {
   font: inherit;
-  padding: var(--rom-2) var(--rom-3);
+  /* Same regelen som kapselen: lufta i endane er halve høgdi, so kurva
+     tek til der ordet slepper. Sjaa DESIGN_GUIDELINES §18. */
+  padding: var(--rom-2) var(--knapp-vassrett);
   background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate));
+  /* Tvo lag uppaa vatnet. Sheenen fyrst — bobla bular ut, so ljoset
+     ovanfraa treffer henne øvst — og so meniskusen nedst, der ljoset
+     kjem ut att. Millom dei er ho klaar, av di det er der ein skriv.
+
+     Linsa er laget yver: endane er myrkare av di glaset er tjukkast der
+     og pressar saman det ein ser gjenom. Ho stend i emme, so ho fylgjer
+     skrifti og ikkje breiddi — eit stutt felt og eit langt hev den same
+     kanten. */
+  background-image:
+    linear-gradient(to right,
+      color-mix(in srgb, var(--blekk) 9%, transparent) 0,
+      color-mix(in srgb, var(--blekk) 2%, transparent) .55em,
+      transparent 1.15em,
+      transparent calc(100% - 1.15em),
+      color-mix(in srgb, var(--blekk) 2%, transparent) calc(100% - .55em),
+      color-mix(in srgb, var(--blekk) 9%, transparent) 100%),
+    linear-gradient(to bottom,
+      var(--glans) 0%,
+      color-mix(in srgb, var(--glans) 34%, transparent) 24%,
+      transparent 48%,
+      transparent 76%,
+      color-mix(in srgb, var(--glans) 30%, transparent) 100%);
   color: var(--blekk);
   border: 0;
-  border-radius: 2px;
+  border-radius: var(--rund-knapp);
   width: 100%;
 }
+/* Ei renna med fleire linor er den eine som ikkje kann vera ein kapsel. */
+:where(textarea) { border-radius: var(--rund-bobla); }
 
 /* Veljaren hev kant og inga djupn. Han plukkar eitt av nokre faae — han
    er ein knapp med ei liste attum, ikkje ei renna ein hell noko nedi
@@ -1362,11 +1393,11 @@ label, .option-label, .question-label, .detail-label, .filter-group label {
    noko. */
 :where(select) {
   font: inherit;
-  padding: var(--rom-2) var(--rom-3);
+  padding: var(--rom-2) var(--knapp-vassrett);
   background: var(--flate);
   color: var(--blekk);
   border: 1px solid var(--kant);
-  border-radius: 2px;
+  border-radius: var(--rund-knapp);
   width: 100%;
 }
 
@@ -1374,7 +1405,7 @@ label, .option-label, .question-label, .detail-label, .filter-group label {
    det ein skriv i. Ein veljar plukkar ein or ei liste — han er ein knapp
    med ei liste attum, ikkje ei renna. */
 :where(input:not([type="checkbox"]):not([type="radio"]), textarea) {
-  box-shadow: var(--fordjuping);
+  box-shadow: var(--bobla);
 }
 /* ---- fasetten ----
    Eit felt ligg *i* arket og ikkje paa det. Skuggen fell inn i det
@@ -1394,12 +1425,44 @@ label, .option-label, .question-label, .detail-label, .filter-group label {
   --fasett:
     inset 0 1px 2px color-mix(in srgb, var(--blekk) 16%, transparent),
     0 0 0 1px var(--merke);
+
+  /* ---- bobla ----
+     Feltet er ei renna med noko i. Fordjupingi aaleine segjer at det er
+     ei renna; ho segjer ingen ting um kva som ligg nedi henne, og so
+     laag det ingen ting der.
+
+     No ligg det ei bobla: eit lag plast fyllt med vatn og strekt ut.
+     Fire lag, og kvart av dei er eit stykke fysikk:
+
+       1. Lippa kastar ein skugge ned i vatnet — det er fordjupingi, og
+          ho stend fyrst av di det er ho som segjer «her kann du skriva».
+       2. Meniskusen i foten. Ljos som hev gjenge gjenom bobla kjem ut
+          nedst, og det er den lina som gjer at ho bular ut i staden for
+          aa vera eit hol.
+       3. Glastjukna kring. Ein veik skugge inn fraa alle kantar — det er
+          han som gjer forstørringsglaset: ei linsa er tjukkast i midten
+          og pressar det ho ser mot kanten.
+       4. Ljoset som slepp ut under henne, ned paa arket.
+
+     Han stend som eit token og ikkje laust i regelen, so prøva i
+     FASETTEN §8 kjenner honom att: dette er ei *form*, ikkje ein ny
+     skugge nokon fann paa. */
+  --bobla:
+    inset 0 1px 2px color-mix(in srgb, var(--blekk) 13%, transparent),
+    inset 0 -1px 0 var(--glans),
+    inset 0 0 6px -3px color-mix(in srgb, var(--blekk) 24%, transparent),
+    0 1px 0 color-mix(in srgb, var(--glans) 55%, transparent);
+  --bobla-fokus:
+    inset 0 1px 2px color-mix(in srgb, var(--blekk) 13%, transparent),
+    inset 0 -1px 0 var(--glans),
+    inset 0 0 6px -3px color-mix(in srgb, var(--blekk) 24%, transparent),
+    0 0 0 1px var(--merke);
 }
 
 input:hover:not([type="checkbox"]):not([type="radio"]), textarea:hover {
   background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate));
 }
-input:focus, textarea:focus { outline: none; box-shadow: var(--fasett); }
+input:focus, textarea:focus { outline: none; box-shadow: var(--bobla-fokus); }
 select:focus { outline: none; border-color: var(--merke); box-shadow: var(--fasett); }
 select {
   /* Eit skrivefelt strekkjer seg, av di ingen veit kor langt det ein
@@ -2237,11 +2300,50 @@ th + th, td + td { border-left: 1px solid var(--haarlina); }
 .klippekort-card { --produkt: var(--togu); }
 .kurskort, .event-card.kurs { --produkt: var(--tuneup); }
 
-.membership-card.active, .klippekort-card:not(.expired) {
-  border-left: 3px solid var(--produkt);
+/* ---- vengen ----
+   Lina i venstre kanten som segjer kva slag kortet er. Ho var ein
+   `border-left: 3px`, og det gav tvo lyter.
+
+   Den eine: kanten er 1 px paa dei hine tri sidone, so eit kort med
+   veng fekk innhaldet skuve tvo pikslar mot høgre og eit utan fekk det
+   ikkje. Kortet flytte seg naar lina kom, og det er nettupp det ho
+   ikkje skal gjera.
+
+   Den andre er den som synte: `dashed`. Nettlesaren reknar sjølv kor
+   lange stripone vert, og paa ei lina paa tri pikslar vert dei tri
+   pikslar lange med tri imillom. Det les seg ikkje som ei *broti* lina
+   — det les seg som eit korn, eller som ein lyte i teikningi. Og av di
+   nettlesaren fordeler stripone yver heile kanten utan aa spyrja um
+   hyrni, endar ho midt i ei stripa i baae endar.
+
+   No er ho maala og ikkje ramma: eit bakgrunnslag paa tri pikslar,
+   pinna til venstre kanten. Kanten stend 1 px heile vegen rundt og
+   ingen ting flyttar seg, rundingi klypper lina i hyrni som ho skal, og
+   den brotne rytmen er eit tal nokon hev valt og ikkje eit tal ein
+   nettlesar kom fram til.
+
+   Talet er seksten paa og aatte av. Aatte og seks var fyrste freistnad,
+   og det var for tett: paa ei lina som er tri pikslar brei les ein tett
+   rytme seg som eit korn og ikkje som ei broti lina. Ei lina er broti
+   fyrst naar kvart stykke er langt nok til aa vera eit stykke. */
+.membership-card, .klippekort-card {
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: 3px 100%;
 }
-.membership-card.paused, .membership-card.cancelled { border-left: 3px solid var(--blekk-svakt); }
-.membership-card.freeze_requested { border-left: 3px dashed var(--produkt); }
+.membership-card.active, .klippekort-card:not(.expired) {
+  background-image: linear-gradient(var(--produkt), var(--produkt));
+}
+/* Frose eller sagt upp er ikkje i live, og ber difor ikkje livsfargen. */
+.membership-card.paused, .membership-card.cancelled {
+  background-image: linear-gradient(var(--blekk-svakt), var(--blekk-svakt));
+}
+/* Bede um og ikkje svara enno: lina er der, men ho er ikkje heil. Same
+   tanken som den opne ringen i livsmerket. */
+.membership-card.freeze_requested {
+  background-image: repeating-linear-gradient(to bottom,
+    var(--produkt) 0 1rem, transparent 1rem 1.5rem);
+}
 
 .membership-header, .card-header {
   display: flex; justify-content: space-between; align-items: baseline;
