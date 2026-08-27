@@ -101,25 +101,33 @@
             {{/* Regelen, skriven som setningi han er — same forma som
                  skjemaet yver. Merkelappane sa det same som felti og
                  stod berre i vegen. Det som stend her gjeld alle
-                 komande timar. */}}
+                 komande timar.
+
+                 Ein time som ikkje ber nokon regel — lagd inn gjenom
+                 /api/events, eller frå fyre reglane fanst — hev inkje
+                 regelnamn å endra på. Felti står stengde og seier
+                 kvifor. Fyrr stod dei opne, sende `rule_id=0`, fekk 200
+                 attende av di ingi rad vart råka, og synte det nye
+                 verdet til sida vart lasta på nytt. */}}
+            {{$utanregel := eq .RegelID 0}}
             <p class="setning regel-setning">
                 {{t $.Lang "admin.with"}}
                 <input type="text" class="felt regel-laerar" list="laerarar" value="{{.Laerar}}"
-                       aria-label="{{t $.Lang "admin.teacher_name"}}">
+                       aria-label="{{t $.Lang "admin.teacher_name"}}"{{if $utanregel}} disabled{{end}}>
                 {{t $.Lang "admin.from_time"}}
                 <input type="time" class="felt regel-klokke" value="{{.Klokke}}"
-                       aria-label="{{t $.Lang "admin.rule_time"}}">
+                       aria-label="{{t $.Lang "admin.rule_time"}}"{{if $utanregel}} disabled{{end}}>
                 {{t $.Lang "admin.for_duration"}}
                 <input type="number" class="felt felt-tal regel-lengd" value="{{.Lengd}}"
                        min="15" max="240" step="5"
-                       aria-label="{{t $.Lang "admin.length_minutes"}}">
+                       aria-label="{{t $.Lang "admin.length_minutes"}}"{{if $utanregel}} disabled{{end}}>
                 {{t $.Lang "admin.minutes"}}
-                <span class="regel-vink">— {{t $.Lang "admin.rule_edit_hint"}}</span>
+                <span class="regel-vink">— {{if $utanregel}}{{t $.Lang "admin.rule_none_hint"}}{{else}}{{t $.Lang "admin.rule_edit_hint"}}{{end}}</span>
             </p>
 
             <textarea class="regel-skildring" rows="2"
                       placeholder="{{t $.Lang "admin.description"}}"
-                      aria-label="{{t $.Lang "admin.description"}}">{{.Beskriving}}</textarea>
+                      aria-label="{{t $.Lang "admin.description"}}"{{if $utanregel}} disabled{{end}}>{{.Beskriving}}</textarea>
 
             {{/* Den einskilde timen — tannlækjardagen. Vel dagen, set
                  vikar eller avlys. Femtiotvo rader var ikkje eit

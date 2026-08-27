@@ -379,6 +379,7 @@
     "pick_day": "Pick day",
     "rule_time": "Time",
     "rule_edit_hint": "applies to all upcoming classes in this rule",
+    "rule_none_hint": "this class belongs to no rule, and can only be changed one day at a time",
     "pick_room_first": "pick a room first",
     "with": "with",
     "in_room": "in",

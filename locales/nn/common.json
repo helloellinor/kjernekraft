@@ -379,6 +379,7 @@
     "pick_day": "Vel dag",
     "rule_time": "Klokka",
     "rule_edit_hint": "gjeld alle komande timar i regelen",
+    "rule_none_hint": "denne timen høyrer ikkje til nokon regel, og kan berre endrast dag for dag",
     "pick_room_first": "vel eit rom fyrst",
     "with": "med",
     "in_room": "i",
