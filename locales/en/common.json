@@ -115,7 +115,11 @@
     "already_signed_up": "You are already signed up for this class!",
     "cancellation_complete": "Cancellation complete. The class will appear again in \"Today's classes\" if it's still today.",
     "could_not_load_membership": "Could not load membership",
-    "could_not_load_punch_cards": "Could not load punch cards"
+    "could_not_load_punch_cards": "Could not load punch cards",
+    "i_dag": "today",
+    "i_morgon": "tomorrow",
+    "av_plassar": "%d of %d places left",
+    "fullt": "full"
   },
   "membership_actions": {
     "freeze_confirm": "Are you sure you want to freeze your membership?",
@@ -273,6 +277,8 @@
     "class_type": "Class type",
     "select_class_type": "Select class type",
     "teacher_name": "Teacher name",
+    "role_teacher": "Teacher",
+    "role_admin": "Administrator",
     "location": "Location",
     "select_location": "Select location",
     "class_date": "Class date",

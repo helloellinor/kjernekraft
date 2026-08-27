@@ -1,0 +1,29 @@
+{{define "timeliste"}}
+{{/* Timane som ei liste.
+
+     Dei stod som ei rad med merke. Eit merke ber dag, klokkeslett og kor
+     fullt det er — men ikkje kva timen *heiter*, av di namnet bur i
+     radoverskrifta i vikerutenettet. På heimesida finst det inga
+     radoverskrift, og då står ein att med ei rad ur som ikkje seier kva
+     ein skal på.
+
+     Namnet er overskrifta her. Merket står attmed som det same tinget
+     ein kjenner att frå timeplanen, men det er ikkje lenger det som ber
+     opplysninga. */}}
+<ul class="timeliste">
+  {{$lang := .Lang}}
+  {{range .Rader}}
+  <li class="timelistrad{{if .ErUmme}} umme{{end}}">
+    <span class="timelistmerke">{{template "dagmerke" .}}</span>
+    <span class="timelistkva">
+      <span class="timelistnamn">{{.Event.Title}}</span>
+      <span class="timelistkven">{{.Event.TeacherName}}{{if .Event.RoomName}} · {{.Event.RoomName}}{{end}}</span>
+    </span>
+    <span class="timelistnaar">
+      <span class="timelistdag">{{if .ErIDag}}{{t $lang "dashboard.i_dag"}}{{else}}{{norskDato .Dato}}{{end}}</span>
+      <span class="timelistklokke">{{.Klokke}}–{{.Event.EndTime.Format "15:04"}}</span>
+    </span>
+  </li>
+  {{end}}
+</ul>
+{{end}}

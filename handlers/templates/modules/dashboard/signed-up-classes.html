@@ -1,7 +1,7 @@
 {{define "signed_up_classes_container"}}
 <div class="content-section">
     <h2 class="section-title">{{t .Lang "dashboard.signed_up"}}</h2>
-    <div class="events-grid" id="signed-up-classes" hx-get="/api/user/signups" hx-trigger="load" hx-indicator="#loading-signups">
+    <div id="signed-up-classes" hx-get="/api/user/signups" hx-trigger="load" hx-indicator="#loading-signups">
         <div id="loading-signups" class="loading-placeholder">{{t .Lang "dashboard.loading_signups"}}</div>
     </div>
 </div>
@@ -9,12 +9,7 @@
 
 {{define "signed_up_classes_module"}}
 {{if .HasSignups}}
-{{/* Dei same merki som i timeplanen. Ein paameld time skal kjennast som
-     det same tinget kvar ein ser honom — som eit klipp ein hev i handi
-     og ikkje som ei rad i ei liste. */}}
-<div class="merkerad">
-    {{range .Framsyningar}}{{template "dagmerke" .}}{{end}}
-</div>
+{{template "timeliste" (dict "Lang" .Lang "Rader" .Framsyningar)}}
 {{else}}
 <div class="activity-placeholder">
     {{t .Lang "dashboard.no_signed_up_classes"}}
