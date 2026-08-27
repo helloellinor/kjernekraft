@@ -1230,10 +1230,19 @@ tbody tr:hover td { background: var(--ark-djup); }
   fill: var(--blekk); text-anchor: middle; letter-spacing: -.03em;
 }
 
-/* ---- maalaren ----
-   Ingen tal. Det fylte er plassane som er att, so han tømest medan timen
-   fyllest — og ein maalar som er mest tom er ein time det hastar med. */
-.plettfyll { fill: var(--merke); }
+/* ---- talet i pletten ----
+   Kor mange plassar som er att, av kor mange.
+
+   Det var eit kakestykke ei stund — ein *del* av ein sirkel. Ein del kan
+   ikkje skiljast: to att av ti ser likt ut som fire att av tjue, og éin
+   att av fire ser ut som ein god sjanse når det i røynda er ein plass.
+   Ein Reformer-time har fire plassar; ein time i salen har atten. Det er
+   heile skilnaden, og han er borte i ein del. */
+.pletttal {
+  font-family: var(--skrift-tal); font-size: 5.8px;
+  fill: var(--blekk); text-anchor: middle; letter-spacing: -.04em;
+}
+.pletttal .av { fill: var(--blekk-svakt); font-size: .82em; }
 
 /* Er timen full, er det ikkje noko aa maala. Maalaren vert ei lapp med
    eitt ord i, og ordet stend midt i lappa som veks til vinstre og held
@@ -1998,6 +2007,26 @@ tbody tr:hover td { background: var(--ark-djup); }
   color: var(--blekk-svakt);
 }
 .folk-detalj dd { margin: 0; font-size: .92rem; }
+
+/* Rollone. Same merket som «kva han held», men trykkjande — og difor
+   lyt knappestilen skrellast av: han kjem med arkfargen i ryggen og
+   halvanna centimeter fyll, og eit merke hev korkje. */
+.rollor { display: flex; flex-wrap: wrap; gap: var(--rom-2); margin: var(--rom-4) 0 0; }
+.rolla {
+  background: none; padding: .15rem .45rem;
+  color: var(--blekk-svakt); border-color: var(--haarlina);
+}
+/* Paa er merkefargen: rolla er i live. Av er den same veike lina som
+   «held ingen ting» — merket stend der, men det ber ingen ting. */
+.rolla[aria-pressed="true"] {
+  color: var(--merke); background: var(--merke-svak);
+  border-color: color-mix(in srgb, var(--merke) 45%, transparent);
+}
+.rolla:hover { border-color: var(--merke); color: var(--merke); }
+/* Ei rolla som ikkje let seg setja skal ikkje sjaa ut som um ho vart
+   sett. Handsamaren svarar 409 naar ein administrator tek si eigi
+   rolla, og daa spring merket attende og blenkjer i aatvaringsfargen. */
+.rolla.nekta { border-color: var(--aatvaring); color: var(--aatvaring); }
 
 @media (max-width: 48rem) {
   .folk-hovud { grid-template-columns: minmax(0, 1fr); gap: var(--rom-1); }

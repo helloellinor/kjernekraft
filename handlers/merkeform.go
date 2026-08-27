@@ -106,7 +106,10 @@ type Merke struct {
 	Rute         template.HTMLAttr
 	RuteTekstY   float64
 	Full         bool
-	Maalar       template.HTMLAttr // kakestykket i pletten
+	Att          int // plassar att
+	Plassar      int // av so mange
+	PlettX       float64
+	PlettY       float64
 	LappX, LappY float64
 }
 
@@ -203,11 +206,6 @@ func NyttMerke(ident string, start, slutt time.Time, teke, plassar int, naa time
 	if att < 0 {
 		att = 0
 	}
-	delen := 0.0
-	if plassar > 0 {
-		delen = float64(att) / float64(plassar)
-	}
-
 	m := Merke{
 		Ident:   ident,
 		ViewBox: fmt.Sprintf("%.2f 0 %.2f %.2f", MerkeVenstre, MerkeBreidd, MerkeHogd),
@@ -225,6 +223,8 @@ func NyttMerke(ident string, start, slutt time.Time, teke, plassar int, naa time
 		Rute:         template.HTMLAttr(rutePath(ruteX, ruteY, ruteB, ruteH, ruteR)),
 		RuteTekstY:   ruteY + 6.9,
 		Full:         full,
+		PlettX:       plettX,
+		PlettY:       plettY,
 		LappX:        plettX + plettR - lappB/2,
 		LappY:        plettY,
 	}
@@ -260,9 +260,7 @@ func NyttMerke(ident string, start, slutt time.Time, teke, plassar int, naa time
 		m.Kaker = append(m.Kaker, Kake{Klasse: "kake-timen", D: d})
 	}
 
-	if !full {
-		m.Maalar = template.HTMLAttr(kakePath(0, 359.9*delen, plettR-merkeKant-1.1, plettX, plettY))
-	}
+	m.Att, m.Plassar = att, plassar
 	return m
 }
 
