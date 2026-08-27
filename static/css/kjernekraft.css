@@ -981,32 +981,51 @@ tbody tr:hover td { background: var(--ark-djup); }
   margin-left: .45em; vertical-align: baseline;
 }
 
-.vekefelt {
-  /* Talet er ein del av tittelen, ikkje eit felt paa honom. Ingi ramma,
-     ingi flata — berre tale i den same skrifti, og ein blinkande markør
-     som segjer at ein kann skriva i det.
+/* Talet låg heilt nake her før: inga ramme, inga flate, berre tal i
+   tittelskrifta med `mix-blend-mode` så det tok lysstyrken sin frå det
+   som låg bak.
 
-     mix-blend-mode gjer at tale tek ljosstyrken fraa det som ligg bak i
-     staden for aa liggja *paa* det. Paa eit ljost ark mørknar det, paa
-     eit mørkt lysnar det — same tale, same relasjon til grunnen, utan
-     at nokon skriv tvo fargar. */
+   Blend mode løyste eit problem denne grunnen ikkje har. Multiply tener
+   til noko når grunnen varierer — over eit bilete, over ein gradient.
+   Menyen fell ned over timeplanrutenettet, som er --ark med hårliner:
+   mørkt blekk multiplisert med ein lys, flat grunn gjer nesten ingen
+   ting synleg, bortsett frå at kontrasten ikkje lenger er noko vi
+   styrer. Han vart noko som fall ut av kva rute talet landa oppå.
+
+   No ligg talet i eit spor. Dette er den tveegga fasetten frå den tomme
+   dagen i rutenettet under (FASETTEN §5): mørk overleppe der lyset ikkje
+   når, lys underleppe der det slår i botnen og kastar att. Vekeveljaren
+   *er* overskrifta til det rutenettet, så han låner rutenettet si form.
+
+   Flata er gjennomsynleg og ikkje --flate: sporet skal lesast som eit
+   hol i arket, ikkje som eit felt lagt oppå det. */
+.vekefelt {
   font-family: var(--skrift-yver);
   font-size: clamp(2rem, 5vw, 3.4rem);
   font-stretch: var(--vidd-tittel); font-weight: 700;
   letter-spacing: inherit; line-height: 1;
-  width: 2.2ch; field-sizing: content;
-  padding: 0; margin: 0;
-  border: 0; background: none; border-radius: 0;
+  width: 2.6ch; field-sizing: content;
+  padding: 0 .1em; margin: 0;
+  border: 0; border-radius: 2px;
+  background-color: color-mix(in srgb, var(--blekk) 6%, transparent);
+  box-shadow:
+    inset 0 2px 2px -1px color-mix(in srgb, var(--blekk) 28%, transparent),
+    inset 0 -2px 1px -1px color-mix(in srgb, var(--flate) 80%, transparent);
   color: var(--blekk);
-  mix-blend-mode: multiply;
   caret-color: var(--klas);
   text-align: center;
 }
-:root:not([data-theme="light"]) .vekefelt { mix-blend-mode: screen; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .vekefelt { mix-blend-mode: multiply; } }
-:root[data-theme="dark"] .vekefelt { mix-blend-mode: screen; }
 
-.vekefelt:focus { outline: none; box-shadow: none; background: none; border: 0; }
+/* Ringen i merkefargen kjem attåt sporet, slik han gjer på kvart anna
+   felt: djupna seier «skrivbar», fargen seier «her er du no». */
+.vekefelt:focus {
+  outline: none;
+  background-color: color-mix(in srgb, var(--blekk) 8%, transparent);
+  box-shadow:
+    inset 0 2px 2px -1px color-mix(in srgb, var(--blekk) 28%, transparent),
+    inset 0 -2px 1px -1px color-mix(in srgb, var(--flate) 80%, transparent),
+    0 0 0 1px var(--merke);
+}
 .vekefelt::selection { background: color-mix(in srgb, var(--klas) 35%, transparent); }
 
 /* Ordet er knappen. «Timeplan denne uka» les seg som ei setning; eit
@@ -1209,6 +1228,27 @@ tbody tr:hover td { background: var(--ark-djup); }
 .dagmerke:hover:not(:disabled) { background: none; border: 0; color: inherit; }
 .dagmerke:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
 
+/* Merket sa ingen ting naar du var borti det. Regelen over slår av
+   knappestilen som huset gjev alle knappar — og det var alt som stod
+   der, so peikaren skifta form og ingen ting anna hende.
+
+   No svarar merket med si eiga form: kanten tek merkefargen og flata
+   lysnar eit hakk. Ingen kasse rundt, ingen skugge — det er den same
+   silhuetten som ligg der, berre vaken. */
+.dagmerke:hover:not(:disabled) .form-kant { fill: var(--merke-lys); }
+.dagmerke:hover:not(:disabled) .form-flate { fill: color-mix(in srgb, var(--merke) 7%, var(--flate)); }
+@media (prefers-reduced-motion: no-preference) {
+  .form-kant, .form-flate { transition: fill .12s ease-out; }
+}
+
+/* Paameld. Dette stod som `border-color` og `background` på sjølve
+   knappen — ein turkis kasse bak ein SVG som med vilje har `border: 0`
+   og `background: none`, og som difor synte seg som ein skugge rundt
+   merket i staden for som ein del av det. Regelen låg dessutan midt
+   inne i dokk-reglane, langt frå alt anna som gjeld merket.
+   Kanten seier det no, slik han seier «vald» to reglar lenger nede. */
+.dagmerke[data-paameld="true"] .form-kant { fill: var(--merke); }
+
 .merkeform { display: block; overflow: visible; width: var(--merkestorleik); height: auto; }
 .merke-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 
@@ -1228,8 +1268,8 @@ tbody tr:hover td { background: var(--ark-djup); }
    den klassa i bruk, sette 7,2 px paa yverskrifti yver rutenetet — ein
    kollisjon som berre syner seg paa skjermen. */
 .merkedag {
-  font-family: var(--skrift-yver); font-size: 7.2px; font-weight: 500;
-  font-stretch: var(--vidd-merkelapp); letter-spacing: .11em;
+  font-family: var(--skrift-yver); font-size: 10.4px; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp); letter-spacing: .06em;
   fill: var(--blekk-lys); text-anchor: middle;
 }
 
@@ -1237,9 +1277,9 @@ tbody tr:hover td { background: var(--ark-djup); }
    Indeksane ligg paa eit rektangulært spor og ikkje paa ein sirkel. Det
    er sporet som gjer at ho ser firkanta ut. Tolv indeksar, tal paa 12, 3
    og 9; sekstalet ligg under vindauga, som paa eit ur som er bygt slik. */
-.indeks { stroke: var(--blekk-svakt); stroke-width: .8; stroke-linecap: round; }
+.indeks { stroke: var(--blekk-svakt); stroke-width: 1.15; stroke-linecap: round; }
 .skivetal {
-  font-family: var(--skrift-tal); font-size: 4.8px;
+  font-family: var(--skrift-tal); font-size: 6.4px;
   fill: var(--blekk-svakt); text-anchor: middle; letter-spacing: -.04em;
 }
 
@@ -1250,17 +1290,17 @@ tbody tr:hover td { background: var(--ark-djup); }
 .kake-timen { fill: color-mix(in srgb, var(--merke) 20%, transparent); }
 
 .visar { stroke-linecap: round; }
-.visar.time   { stroke: var(--blekk); stroke-width: 1.9; }
-.visar.minutt { stroke: var(--blekk-lys); stroke-width: 1.05; }
+.visar.time   { stroke: var(--blekk); stroke-width: 2.7; }
+.visar.minutt { stroke: var(--blekk-lys); stroke-width: 1.5; }
 /* Sluttvisaren er like lang som minuttvisaren og ber merkefargen: han
    syner kvar timen er ute. */
-.visar.slutt  { stroke: var(--merke); stroke-width: 1.05; }
+.visar.slutt  { stroke: var(--merke); stroke-width: 1.5; }
 .pinne { fill: var(--blekk); }
 
 /* ---- vindauga ---- */
 .ruteflate { fill: color-mix(in srgb, var(--blekk) 9%, var(--flate)); filter: url(#rutedjup); }
 .rutetal {
-  font-family: var(--skrift-tal); font-size: 6.9px;
+  font-family: var(--skrift-tal); font-size: 8.8px;
   fill: var(--blekk); text-anchor: middle; letter-spacing: -.03em;
 }
 
@@ -1273,7 +1313,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    Ein Reformer-time har fire plassar; ein time i salen har atten. Det er
    heile skilnaden, og han er borte i ein del. */
 .pletttal {
-  font-family: var(--skrift-tal); font-size: 5.8px;
+  font-family: var(--skrift-tal); font-size: 6.6px;
   fill: var(--blekk); text-anchor: middle; letter-spacing: -.04em;
 }
 .pletttal .av { fill: var(--blekk-svakt); font-size: .82em; }
@@ -1282,8 +1322,8 @@ tbody tr:hover td { background: var(--ark-djup); }
    eitt ord i, og ordet stend midt i lappa som veks til vinstre og held
    høgrekanten sin. */
 .fulltekst {
-  font-family: var(--skrift-yver); font-size: 6.6px; font-weight: 500;
-  font-stretch: var(--vidd-merkelapp); letter-spacing: .1em;
+  font-family: var(--skrift-yver); font-size: 7.6px; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp); letter-spacing: .08em;
   fill: var(--blekk-lys); text-anchor: middle;
 }
 
@@ -1418,7 +1458,6 @@ tbody tr:hover td { background: var(--ark-djup); }
    som utløyste det, og kvarv naar du vel noko anna. */
 .dokkmelding { margin: 0; font-size: .82rem; color: var(--blekk-lys); max-width: 22rem; }
 .dokkmelding.gale { color: var(--aatvaring); }
-.dagmerke[data-paameld="true"] { border-color: var(--klas); background: var(--merke-svak); }
 .dokklukk {
   position: absolute; top: var(--rom-2); right: var(--rom-3);
   background: none; border: 0; padding: 0 var(--rom-2);
@@ -1951,14 +1990,19 @@ tbody tr:hover td { background: var(--ark-djup); }
   width: auto; min-width: 4.5rem; max-width: 16rem;
   field-sizing: content;
   padding: .1rem .4rem;
-  background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate));
-  border: 0;
+  /* Hårlina *og* djupna. Det er dei to saman som les seg som ein
+     fasett — søkjefeltet i Folk er det same paret, og det er det
+     paret som er kjent att som «det rette» utsjånaden.
+     Flata er gjennomsynleg og ikkje --flate: han skal liggje i
+     setninga og ikkje som ein kvit boks oppå henne. */
+  background-color: color-mix(in srgb, var(--flate) 70%, transparent);
+  border: 1px solid var(--kant);
   border-radius: 2px;
   box-shadow: var(--fordjuping);
   color: var(--blekk); font-weight: 500; font-size: 1rem;
 }
-.setning .felt:hover { background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
-.setning .felt:focus { outline: none; box-shadow: var(--fasett); }
+.setning .felt:hover { border-color: var(--blekk-svakt); }
+.setning .felt:focus { outline: none; border-color: var(--merke); box-shadow: var(--fasett); }
 .setning .felt::placeholder { color: var(--blekk-svakt); font-weight: 400; }
 .setning .felt-tal { min-width: 3.2rem; text-align: center; font-family: var(--skrift-tal); }
 
@@ -2746,3 +2790,24 @@ select.lappfelt { padding-right: var(--rom-6); }
 
 /* Luft mellom kortet og det ein kan gjere med det. */
 .korthandling { display: flex; gap: var(--rom-3); flex-wrap: wrap; margin-top: var(--rom-3); }
+
+/* ---- ein dag løfta fram ----
+   Dagnamna er knappar, men dei filtrerer ikkje: ein trykk dempar dei
+   andre dagane. Skilnaden er ikkje akademisk. Eit filter tek bort, og då
+   misser rutenettet det einaste han kan som ei liste ikkje kan — syne
+   heile vika på ein gong, so ein ser at timen går tysdag òg, og at
+   torsdagen er full medan tysdagen ikkje er det.
+
+   Difor er dette gjennomsikt og ikkje `display: none`. */
+.timehovud .dagnamn {
+  font: inherit; color: var(--blekk-lys);
+  background: none; border: 0; border-radius: 2px;
+  padding: var(--rom-1) var(--rom-2);
+  text-transform: none; letter-spacing: 0;
+  cursor: pointer;
+}
+.timehovud .dagnamn:hover { color: var(--blekk); background: var(--ark-djup); border: 0; }
+.timehovud .dagnamn[aria-pressed="true"] {
+  color: var(--blekk); background: var(--merke-svak);
+}
+.dagmerke.utanfor-fokus { opacity: .28; }
