@@ -24,20 +24,19 @@ func CreateSampleClasses() {
 
 	// Define class types with colors
 	classTypes := map[string]string{
-		"yoga":        "#8e44ad",
-		"pilates":     "#27ae60",
-		"strength":    "#e74c3c",
-		"cardio":      "#f39c12",
-		"flexibility": "#3498db",
+		"Hatha Yoga":        "yoga",
+		"Vinyasa Flow":      "yoga",
+		"Yin Yoga":          "yoga",
+		"Classical Pilates": "pilates",
+		"Pilates Apparatus": "pilates",
+		"Fascia Movement":   "fascia",
 	}
 
 	// Sample teachers
+	// Dei som faktisk held timar i Storgata 23.
 	teachers := []string{
-		"Anna Larsen",
-		"Erik Nordmann",
-		"Kari Solberg",
-		"Magnus Haugen",
-		"Silje Andersen",
+		"Gry", "Ida", "Kristina", "Carla", "Cyrena",
+		"Torunn", "Amanda", "Mariamah Aurora", "Leon", "Veronica",
 	}
 
 	// Sample class titles
@@ -91,7 +90,7 @@ func CreateSampleClasses() {
 	// Create classes for this week (Week 33 according to problem statement)
 	for dayOffset := 0; dayOffset < 7; dayOffset++ {
 		currentDay := monday.AddDate(0, 0, dayOffset)
-		
+
 		// Skip creating events for past days, but create some for today and future
 		if currentDay.Before(now.Truncate(24 * time.Hour)) {
 			continue
@@ -99,7 +98,7 @@ func CreateSampleClasses() {
 
 		// Create 3-5 classes per day
 		numClasses := 3 + dayOffset%3 // 3-5 classes
-		
+
 		for classIndex := 0; classIndex < numClasses; classIndex++ {
 			// Pick a random class type
 			classTypeIndex := (dayOffset + classIndex) % len(classTypes)
@@ -127,12 +126,12 @@ func CreateSampleClasses() {
 			if startHour > 19 {
 				startHour = 19 // Cap at 19:00
 			}
-			
+
 			startTime := time.Date(currentDay.Year(), currentDay.Month(), currentDay.Day(), startHour, 0, 0, 0, currentDay.Location())
 			endTime := startTime.Add(time.Hour) // 1 hour classes
 
 			// Random capacity and enrollment
-			capacity := 15 + (classIndex * 5) // 15, 20, 25, 30, 35
+			capacity := 15 + (classIndex * 5)                            // 15, 20, 25, 30, 35
 			currentEnrollment := capacity - (dayOffset + classIndex + 1) // Some spaces left
 			if currentEnrollment < 0 {
 				currentEnrollment = capacity // Full class
@@ -162,7 +161,7 @@ func CreateSampleClasses() {
 		if err != nil {
 			log.Printf("Error creating event %s: %v", event.Title, err)
 		} else {
-			fmt.Printf("Created event %s with ID %d on %s\n", 
+			fmt.Printf("Created event %s with ID %d on %s\n",
 				event.Title, id, event.StartTime.Format("2006-01-02 15:04"))
 		}
 	}

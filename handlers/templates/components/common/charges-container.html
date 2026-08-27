@@ -1,7 +1,7 @@
 {{define "charges_container"}}
-<div class="module">
-    <h2 class="module-title">{{t .Lang "charges.title"}}</h2>
-    
+<section class="content-section">
+    <h2 class="section-title">{{t .Lang "charges.title"}}</h2>
+
     <div class="charges-filter">
         <label for="charges-type-filter">{{t .Lang "payments.filter_by_type"}}:</label>
         <select id="charges-type-filter" onchange="filterCharges(this.value)">
@@ -14,5 +14,5 @@
     <div id="charges-container">
         <div class="loading-placeholder">{{t .Lang "payments.loading_charges"}}</div>
     </div>
-</div>
+</section>
 {{end}}

@@ -1,0 +1,112 @@
+{{define "dagmerke"}}
+{{/* Merket. Éin definisjon, tvo bruk: i vikerutenetet og i lista yver
+     det du er paameld paa. Det er meiningi — eit merke skal kjennast
+     som *det same tinget* kvar du ser det.
+
+     Heile figuren er éin SVG med eit fast viewBox. Skal han verta
+     større eller mindre, er det éin skala som endrar seg; strekar,
+     skrift og rom fylgjer med i det same forholdet, so det er den same
+     tingen som kjem nærare og ikkje ei ny teikning.
+
+     Punkti er rekna i merkeform.go. Ein mal skal syna kva som er i
+     figuren; kvar kvart punkt ligg, er ein annan slags kunnskap. */}}
+<button type="button" style="--dag: {{.Kolonne}}"
+        class="dagmerke{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}{{if .Full}} full{{end}}"
+        data-event="{{.Event.ID}}"
+        data-tittel="{{.Event.Title}}"
+        data-laerar="{{.Event.TeacherName}}"
+        data-rom="{{.Event.RoomName}}"
+        data-dag="{{norskDato .Dato}}"
+        data-klokke="{{.Event.StartTime.Format "15:04"}}–{{.Event.EndTime.Format "15:04"}}"
+        data-teke="{{.Event.CurrentEnrolment}}"
+        data-plassar="{{.Event.Capacity}}"
+        data-full="{{.Full}}"
+        data-umme="{{.ErUmme}}"
+        data-paameld="{{.Event.IsUserSignedUp}}"
+        {{if .ErUmme}}disabled{{end}}
+        aria-label="{{.Merkelapp}}">
+  <svg class="merkeform" viewBox="{{.Form.ViewBox}}"
+       width="{{.Form.Breidd}}" height="{{.Form.Hogd}}" aria-hidden="true" focusable="false">
+    {{/* Glaset. Ein klokke hev eit glas yver skiva, og glaset fangar
+         ljoset ovanfraa — difor ligg dette laget *yverst* og ikkje under
+         visarane. Gradienten stend inne i kvart merke og ikkje i det
+         sams def-settet: fargen i eit `stop-color` vert løyst der
+         gradienten stend, so eit delt sett hadde gjeve alle merki
+         fargane til rot-temaet, og eit ljost merke paa ei myrk sida
+         hadde fenge feil glans. Same fella som med filtri. */}}
+    <defs>
+      <linearGradient id="glas-{{.Form.Ident}}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0"    class="glas-topp"/>
+        <stop offset="0.26" class="glas-midt"/>
+        <stop offset="0.54" class="glas-ut"/>
+      </linearGradient>
+    </defs>
+
+    {{/* Fana ligg attum kroppen. Ho gjeng ned under yverkanten hans,
+         kroppen dekkjer nedkanten hennar, og det som stikk upp er fana —
+         same grepet som fanone i administrasjonen, berre teikna. Fyrr
+         var ho og kroppen éi form, og daa fanst det ingi fana: det fanst
+         eitt umriss med ein kul paa. */}}
+    <path class="fanekant"  d="{{.Form.Fane}}" filter="url(#merkekant)"/>
+    <path class="faneflate" d="{{.Form.Fane}}"/>
+    <text class="merkedag" x="{{.Form.DagX}}" y="{{.Form.DagY}}">{{.DagKort2}}</text>
+
+    {{/* Kroppen: ringen (berre naar merket er valt), lina, flata og
+         fordjupingi — alle fire av den same silhuetten. */}}
+    <path class="form-ring"  d="{{.Form.Silhuett}}" filter="url(#merkering)"/>
+    <path class="form-kant"  d="{{.Form.Silhuett}}" filter="url(#merkekant)"/>
+    <path class="form-flate" d="{{.Form.Silhuett}}"/>
+    <path class="form-djup"  d="{{.Form.Silhuett}}" filter="url(#merkedjup)"/>
+
+    {{/* Skiva. Kakestykket er timen lagd ut paa døgeret: der visarane
+         ville staa fraa han byrjar til han er ute. Det er det ein ser
+         fyrst, og det er det som gjer at ein slepp aa lesa klokkeslettet
+         for aa vita naar paa dagen timen ligg.
+
+         Stykket er teikna med radius kakeR kring skivemidten og held seg
+         difor innanfor skiva av seg sjølv. Det laag eit klypp her fyrr,
+         med same sirkelen skriven ein gong til med faste tal — og daa
+         skiva flutte seg, vart stykket klypt mot der ho *hadde* vore. */}}
+    <g class="skiva">
+      {{range .Form.Indeksar}}<line class="indeks" x1="{{.X1}}" y1="{{.Y1}}" x2="{{.X2}}" y2="{{.Y2}}"/>{{end}}
+      {{range .Form.Tal}}<text class="skivetal" x="{{.X}}" y="{{.Y}}">{{.Tekst}}</text>{{end}}
+      <line class="visar slutt"  x1="{{.Form.SkiveX}}" y1="{{.Form.SkiveY}}" x2="{{.Form.SkiveX}}" y2="{{.Form.VisarMinutt}}"
+            transform="rotate({{.Form.SluttVinkel}} {{.Form.SkiveX}} {{.Form.SkiveY}})"/>
+      <line class="visar time"   x1="{{.Form.SkiveX}}" y1="{{.Form.SkiveY}}" x2="{{.Form.SkiveX}}" y2="{{.Form.VisarTime}}"
+            transform="rotate({{.Form.TimeVinkel}} {{.Form.SkiveX}} {{.Form.SkiveY}})"/>
+      <line class="visar minutt" x1="{{.Form.SkiveX}}" y1="{{.Form.SkiveY}}" x2="{{.Form.SkiveX}}" y2="{{.Form.VisarMinutt}}"
+            transform="rotate({{.Form.MinuttVinkel}} {{.Form.SkiveX}} {{.Form.SkiveY}})"/>
+      {{/* Kakestykket ligg *yver* visarane og ikkje under deim. Ein les
+           minuttvisaren fyrst — det er han som segjer kva klokka er — og
+           stykket er laget som kjem etterpaa og segjer kor langt timen
+           strekkjer seg. Laag det under, var det bakgrunn; no er det eit
+           gjenomsynleg drag lagt uppaa uret. */}}
+      {{range .Form.Kaker}}<path class="{{.Klasse}}" d="{{.D}}"/>{{end}}
+      <circle class="pinne" cx="{{.Form.SkiveX}}" cy="{{.Form.SkiveY}}" r="1.5"/>
+    </g>
+
+    {{/* Botnstripa. Klokkeslettet i klartekst nede til vinstre, med den
+         same fordjupingi i det smaa; plassmerket nede til høgre. Baae
+         laag annleis fyrr — vindauga midt uppaa skiva, merket hengande
+         utanfor hyrna — og baae stend inne i kroppen no. */}}
+    <path class="ruteflate" d="{{.Form.Rute}}"/>
+    <path class="rutedjup"  d="{{.Form.Rute}}" filter="url(#merkedjup-lite)"/>
+    <text class="rutetal" x="{{.Form.RuteTekstX}}" y="{{.Form.RuteTekstY}}">{{.Klokke}}</text>
+
+    <path class="plettkant"  d="{{.Form.Plett}}" filter="url(#merkekant)"/>
+    <path class="plettflate" d="{{.Form.Plett}}"/>
+    {{/* Kor mange plassar som er att, av kor mange. Dette var eit
+         kakestykke — ein *del* — og ein del kan ikkje skiljast: to att av
+         ti ser likt ut som fire att av tjue. Talet seier det talet seier. */}}
+    {{if .Form.Full}}
+    <text class="fulltekst" x="{{.Form.LappX}}" y="{{.Form.LappY}}" dominant-baseline="central">FULL</text>
+    {{else}}
+    <text class="pletttal" x="{{.Form.PlettX}}" y="{{.Form.PlettY}}" dominant-baseline="central"
+          >{{.Form.Att}}<tspan class="av">/{{.Form.Plassar}}</tspan></text>
+    {{end}}
+
+    {{/* Glaset til slutt: yver skiva, yver visarane, yver alt. */}}
+    <path class="form-glas" d="{{.Form.Silhuett}}" fill="url(#glas-{{.Form.Ident}})"/>
+  </svg>
+</button>
+{{end}}

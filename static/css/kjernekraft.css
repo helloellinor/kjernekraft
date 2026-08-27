@@ -1,0 +1,3433 @@
+/* ===================================================================
+   Kjernekraft — arket
+
+   Prinsippi er dei same som i maalverktoy: hårfine linor i staden for
+   kassar, éin farge paa heile arket, og fargen tyder noko. Tilfanget er
+   eit anna — eit studio er ikkje ei ordbok.
+
+   Arket er kalkstein: kjøld, ljos, litt graagrøn. Blekket er mest svart
+   med same grøne draget i seg, so det høyrer til flata og ikkje ligg
+   uppaa henne. Merkefargen er furu, og han stend berre der noko *er i
+   live*: eit medlemskap som gjeng, eit klippekort som enno hev klipp,
+   ein time du er paameld. Alt anna — frose, utgjenge, ventande — fær
+   vekt og form i staden for farge.
+
+   Skuggar finst ikkje her. Det som skil eit kort fraa arket er ei lina
+   paa éin piksel. Det som flyt — ei nedfallsliste, ein dialog — fær
+   skugge, av di det *faktisk* ligg yver.
+   =================================================================== */
+
+/* ---- skrifterne ----
+   Ubuntu, sjølvvertsett. Ikkje eit einaste kall ut paa netet: sida skal
+   sjaa lik ut same kvar ho vert opna, og ho skal teikna seg ferdig
+   jamvel naar studioet sitt nett ligg nede. Smale utsnitt — latinsk
+   pluss dei nordiske teikni — so alle fem skriftene til saman er under
+   180 kB. Ubuntu Condensed ber yverskriftene; Ubuntu Mono ber tal som
+   skal staa i kolonne. */
+@font-face {
+  font-family: "Ubuntu"; src: url("/static/fonts/Ubuntu-R.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ubuntu"; src: url("/static/fonts/Ubuntu-M.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ubuntu"; src: url("/static/fonts/Ubuntu-B.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ubuntu Condensed"; src: url("/static/fonts/Ubuntu-C.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+/* Union Gothic ber yverskriftene. Han hev tvo aksar — breidd 50–200 og
+   vekt 400–1000 — og det er heile poenget med honom: breiddi kann tyda
+   noko, ikkje berre pynta.
+   
+   MELLOMBILS. Fila er CC BY-NC-ND og ligg difor i .gitignore: ho skal
+   ikkje fylgja med ut or maskini. Manglar ho, fell alt attende paa
+   Ubuntu Condensed av seg sjølv, og sida ser framleis rett ut. Naar ei
+   lisensiert skrift kjem, er det denne eine blokki som vert bytt. */
+@font-face {
+  font-family: "Union Gothic"; src: url("/static/fonts/UnionGothic-Variable.woff2") format("woff2-variations"),
+                                    url("/static/fonts/UnionGothic-Variable.woff2") format("woff2");
+  font-weight: 400 1000; font-stretch: 50% 200%; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ubuntu Mono"; src: url("/static/fonts/UbuntuMono-R.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
+/* ---- tokeni ----
+   Alle fargar stend her og ingen annan stad. Finn du eit hex-tal ute i
+   ein komponent, er det ein feil: det verkar i eitt av dei tvo temaom
+   og lyg i det hine.
+
+   Veljarane tek med [data-theme] paa kva element som helst, ikkje berre
+   paa rot-elementet. Eit tema er daa noko ein kann setja paa ein bolk:
+   verkstaden paa /arket set ljost og myrkt attmed kvarandre paa den
+   same sida, og det gjeng berre naar tokeni kann bu paa ein div. */
+:root, [data-theme="light"] {
+  /* flatone */
+  --ark:        #edeeea;
+  --ark-djup:   #e4e6e1;
+  --flate:      #f5f6f3;
+
+  /* blekket, i tri styrkar */
+  --blekk:      #1c1f1b;
+  --blekk-lys:  #565b54;
+  --blekk-svakt:#868b83;
+
+  /* linone. --haarlina teiknar eit kort; --kant skil tvo bolkar. */
+  --haarlina:   #cfd2cb;
+  --kant:       #bec2b9;
+
+  /* ---- fargane ----
+     Dei er tekne av tingi som ligg i salen: den rosa Togu-ballen, den
+     turkise sprayflaska, den lilla Tune Up-ballen. Det er ikkje pynt —
+     det er dei tri tingi studioet sel, og kvar farge er eitt av deim:
+
+       turkis  medlemskapet   — det som gjeng og gjeng
+       rosa    klippekortet   — det som vert talt
+       lilla   kurs, PT og rettleiding — det som hender ein gong
+
+     Fargen segjer *kva*. Forma segjer *korleis*: fylt, open, streka,
+     prikka. Dei tvo ligg paa kvar sin kanal og kolliderer difor ikkje.
+
+     Merket er turkisen: han er den rolegaste av dei tri og toler aa
+     staa paa knappar og lenkjor heile dagen. */
+  --togu:       #d6006e;
+  --klas:       #00908c;
+  --tuneup:     #6d2e9e;
+
+  --merke:      var(--klas);
+  --merke-lys:  #00a8a2;
+  --merke-svak: color-mix(in srgb, var(--klas) 12%, var(--ark));
+  --togu-svak:   color-mix(in srgb, var(--togu) 12%, var(--ark));
+  --tuneup-svak: color-mix(in srgb, var(--tuneup) 12%, var(--ark));
+
+  /* Aatvaringi er ikkje merket. Ho stend berre paa noko som gjekk gale
+     eller ikkje kann gjerast um att, og difor lyt ho vera ein annan
+     farge — elles tyder merket tvo ting. */
+  --aatvaring:  #8c3a2b;
+
+  /* Kjernen i ljosbandet under hovudet. Ljos paa papir er ikkje kvitt —
+     det er *metting*: streken vert djupare der lampa stend, ikkje ljosare.
+     I myrkret er det andre vegen, og daa er kjernen utbrend mot kvitt.
+     Sjaa .header::before. */
+  --glodkjerne: color-mix(in srgb, var(--merke) 72%, #000);
+
+  /* Flata i ei lukka fana. Han er rekna av blekket og arket, so han
+     fylgjer temaet av seg sjølv og skal ikkje skrivast um att. */
+  --faneflate: color-mix(in srgb, var(--blekk) 6%, var(--ark));
+  --aatvaring-svak: #f0e0dc;
+
+  /* skriftene */
+  --skrift-yver: "Union Gothic", "Ubuntu Condensed", "Ubuntu", ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- breiddetrappa ----
+     Breiddi tyder rang. Det vidaste stend øvst i hierarkiet og det
+     smalaste nedst, so ein ser kva som er kva fyre ein hev lese eit ord.
+     Ein merkelapp skal ikkje taka meir plass enn han er verd. */
+  --vidd-tittel:  125%;   /* kvar du er */
+  --vidd-yver:    105%;   /* yverskrift i sida */
+  --vidd-leiding:  90%;   /* leidingi */
+  --vidd-merkelapp: 68%;  /* merkelappar og undertitlar */
+  --skrift:      "Ubuntu", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --skrift-tal:  "Ubuntu Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ---- rundingi ----
+     Tvo verd, og skiljet er kva tingen *er*.
+
+     `--rund` er arket og alt som er laga av det: kort, felt, faner,
+     merke. To pikslar — ei kant som er broti, ikkje ei runding. Regelen
+     i stilboki gjeld desse: ingen rundingar utyver det vesle.
+
+     `--rund-knapp` er kontrollane. Ein knapp er ikkje eit ark. Han er
+     ein fysisk ting som ligg *paa* arket og ventar paa fingeren, og
+     difor er han forma som noko ein trykkjer paa: ein kapsel. Det er
+     den same tanken som gamle knappar hadde — pilleforma — men utan
+     glansen og hovdingi, som FASETTEN §6 alt hev sagt nei til.
+
+     To verd, tvo tydingar. Alt anna er drift. */
+  --rund:       2px;
+  --rund-knapp: 999px;
+
+  /* ---- glansen ----
+     Knappen er den eine tingen i huset med djupn utyver fasetten, og
+     han hev henne av di han er den eine tingen som er ein *ting* og
+     ikkje papir. Ljoset kjem ovanfraa, som overalt elles: han er ljosare
+     i yverkanten, mørkare mot foten, og det fell eit glim paa den øvre
+     halvdelen.
+
+     Tali er lave med vilje. Ein glans paa 55 % er ei kvelv; ein paa 90 %
+     er plast. */
+  --glans:       color-mix(in srgb, #fff 55%, transparent);
+  --glans-svak:  color-mix(in srgb, #fff 14%, transparent);
+  --knappedjup:
+    inset 0 1px 0 var(--glans),
+    inset 0 -1px 1px color-mix(in srgb, #fff 40%, transparent),
+    inset 0 -3px 4px -2px color-mix(in srgb, var(--blekk) 13%, transparent),
+    0 1px 2px color-mix(in srgb, var(--blekk) 15%, transparent);
+  --knappedjup-inn:
+    inset 0 2px 4px -1px color-mix(in srgb, var(--blekk) 26%, transparent),
+    inset 0 -1px 0 var(--glans-svak);
+
+  /* romet. Ei einaste trapp, so ingen finn paa 13px. */
+  --rom-1: .25rem; --rom-2: .5rem;  --rom-3: .75rem;
+  --rom-4: 1rem;   --rom-5: 1.5rem; --rom-6: 2rem;   --rom-7: 3rem;
+
+  /* Skuggen finst i éi utgaava, og han er til det som flyt. */
+  --skugge-flytande: 0 6px 20px rgb(28 31 27 / .14);
+
+  --breidd: 68rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ark:        #161815;
+    --ark-djup:   #101210;
+    --flate:      #1d201c;
+    --blekk:      #e2e5dd;
+    --blekk-lys:  #9aa094;
+    --blekk-svakt:#6f756a;
+    --haarlina:   #32362f;
+    --kant:       #3d423a;
+    --togu:       #ff5fa8;
+    --klas:       #2fd6c6;
+    --tuneup:     #b085f5;
+    --merke:      var(--klas);
+    --merke-lys:  #6ae4d8;
+    --merke-svak: color-mix(in srgb, var(--klas) 18%, var(--ark));
+    --togu-svak:   color-mix(in srgb, var(--togu) 18%, var(--ark));
+    --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
+    --aatvaring:  #d08574;
+    --aatvaring-svak: #2b1c18;
+    --glodkjerne: color-mix(in srgb, var(--merke) 22%, #fff);
+    --glans:       color-mix(in srgb, #fff 20%, transparent);
+    --glans-svak:  color-mix(in srgb, #fff 7%, transparent);
+    --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
+  }
+}
+[data-theme="dark"] {
+  --ark:        #161815;
+  --ark-djup:   #101210;
+  --flate:      #1d201c;
+  --blekk:      #e2e5dd;
+  --blekk-lys:  #9aa094;
+  --blekk-svakt:#6f756a;
+  --haarlina:   #32362f;
+  --kant:       #3d423a;
+  --togu:     #ff5fa8;
+  --klas:     #2fd6c6;
+  --tuneup:   #b085f5;
+  --merke:    var(--klas);
+  --merke-lys:  #6ae4d8;
+  --merke-svak: color-mix(in srgb, var(--klas) 18%, var(--ark));
+  --togu-svak:   color-mix(in srgb, var(--togu) 18%, var(--ark));
+  --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
+  --aatvaring:  #d08574;
+  --aatvaring-svak: #2b1c18;
+  --glodkjerne: color-mix(in srgb, var(--merke) 22%, #fff);
+  --glans:       color-mix(in srgb, #fff 20%, transparent);
+    --glans-svak:  color-mix(in srgb, #fff 7%, transparent);
+    --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
+}
+
+/* ---- grunnen ---- */
+/* hidden-merket skal alltid vinna.
+   Nettlesaren gjev [hidden] display:none gjenom si eigi stilbok, og ei
+   kvar klassa med display: flex slær henne. Vikemenyen stod difor open
+   yver rutenetet fraa fyrste augneblinken, utan at nokon hadde bede um
+   det — og fanebolkarne hadde same lyten, dei stod berre alltid opne.
+
+   Dette er den eine staden i stilarket der !important er rett: det er
+   ikkje ein farge eller ei breidd, det er «finst eller finst ikkje». */
+[hidden] { display: none !important; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Tekst skal halda seg innanfor det ho stend i. Eit langt ord — og
+   norsk lagar deim heile tidi, «medlemskapsadministrasjon» — skal
+   brjota, ikkje skuva spalta ut or glaset.
+   `min-width: 0` er den andre halvparten: eit rute- eller flexbarn hev
+   `min-width: auto` som standard, og daa nektar det aa verta smalare
+   enn innhaldet sitt same kva ein segjer um breidd. Det er den eine
+   regelen som gjer at rutenet renn ut or sida. */
+:where(body *) { min-width: 0; }
+:where(p, li, td, th, dd, dt, figcaption, label, h1, h2, h3, h4, h5, h6) {
+  overflow-wrap: break-word;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  /* Botnlina stend nedst, same kor kort sida er.
+     
+     Ho «skifta storleik» frå side til side før — men det ho skifta, var
+     *plass*. På ei kort side, som Folk i administrasjonen, rann ho opp
+     og la seg like under innhaldet, med eit stort daudt band under seg;
+     på ei lang side stod ho nedst. Det er den same lina, men auga les
+     bandet under henne som ein del av henne.
+
+     Sida er ei spalte som er minst like høg som glaset, og innhaldet tek
+     det som er att. Då er botnlina alltid nedst. */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* Luft under sida av same høgd som dokka. Utan denne ligg det siste
+     sida hev aa syna under henne, og ein kann ikkje naa det. */
+  padding-bottom: var(--dokkhogd, 0px);
+  background: var(--ark);
+  color: var(--blekk);
+  font: 400 16px/1.55 var(--skrift);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--skrift-yver);
+  line-height: 1.02;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-stretch: var(--vidd-tittel); font-weight: 700; letter-spacing: -.01em;
+  /* Samansette norske ord er lange. Utan dette renn «Brukeradministrasjon»
+     ut or spalta i 125 % breidd. */
+  overflow-wrap: break-word; hyphens: auto;
+}
+h2 { font-size: 1.8rem; font-stretch: var(--vidd-yver);  font-weight: 600; }
+h3 { font-size: 1.3rem; font-stretch: var(--vidd-yver);  font-weight: 500; }
+h4 { font-size: 1.05rem; font-stretch: var(--vidd-yver); font-weight: 500; }
+
+p { margin: 0 0 var(--rom-4); max-width: 62ch; }
+p:last-child { margin-bottom: 0; }
+
+/* Yverskrifterne hadde margin: 0, og malarne rekna med at nokon annan
+   sette lufti. Ingen gjorde det, so «Systeminnstillinger» og «Tidssone:»
+   klistra seg saman. Ei yverskrift eig romet yver seg og under seg. */
+:where(h2, h3, h4):not(:first-child) { margin-top: var(--rom-6); }
+:where(h2, h3, h4) + * { margin-top: var(--rom-3); }
+:where(h2, h3, h4) { margin-bottom: var(--rom-3); }
+/* Merkelappane ber si eigi lina og treng ikkje dobbel luft. */
+:where(.section-title) { margin-bottom: var(--rom-4); }
+
+a { color: var(--merke); text-decoration-thickness: 1px; text-underline-offset: .16em; }
+a:hover { color: var(--merke-lys); }
+
+hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
+
+:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
+
+/* Tal som stend under kvarandre skal ha same breidd, elles dansar
+   kolonna. */
+.tal, td.tal, .package-price, .price, .stat-value, .detail-value,
+.charge-amount, .event-time { font-variant-numeric: tabular-nums; }
+
+/* ---- rullestengene ---- */
+* { scrollbar-width: thin; scrollbar-color: var(--kant) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--kant); border-radius: 4px;
+  border: 2px solid transparent; background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--blekk-svakt); background-clip: content-box; }
+
+/* ===================================================================
+   hovudet
+   Éi lina. Merket, sidone og namnet høyrer til den same tingen, og tvo
+   bjelkar tok dobbelt so mykje høgd for aa segja det.
+
+   Alt stend midt paa lina: `align-items: center` paa rada, og kvar bit
+   sentrert i seg sjølv. Det var dette som ikkje stemde — merket laag
+   paa grunnlina si eiga, teksti paa si, og bjelken kring deim visste
+   ikkje um nokon av deim.
+   =================================================================== */
+/* ---- hovudet og lina under det ----
+   Lina er den same som under hovudet i ordboka: ikkje ein kant, men tvo
+   strekar med ei renne imellom, måla som flate. Ein kant kan ikkje bera
+   ljos. Renna er ikkje gjennomsynleg — ho ligg i bakgrunnen åt hovudet,
+   under glødi, so ljoset lyser *gjennom* henne medan dei to strekane
+   står som ribbene i lista. Sjå .hovud::after i slaaupp. */
+.header {
+  position: relative;
+  background:
+    linear-gradient(to top,
+      transparent 0 1px, var(--faneflate) 1px 2px, transparent 2px),
+    var(--ark);
+}
+.header::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 3px; z-index: 2; pointer-events: none;
+  background: linear-gradient(to bottom,
+    var(--haarlina) 0 1px, transparent 1px 2px, var(--haarlina) 2px 3px);
+}
+
+/* ---- ljosbandet: LED-stripa i lina ----
+   Glødi høyrer til den valde sida, men ho ligg i *hovudet* si lina og
+   ikkje i lenkja si eiga kasse — difor er ho eit lag her, og det er
+   ljosband.js som seier kvar ho står (--glodmidt) og kor brei ho er
+   (--glodvidd), måla på den valde lenkja. Står dei ikkje, er vidda null
+   og laget usynleg; ingi glød på feil stad medan sida lastar.
+
+   Fire lag, som i ordboka: utbrend kjerne, fargen tett kring han, ein
+   vid veik halo, og bloomen under. Lina sjølv ligg over (z-index 2) og
+   skjer glødi i to. */
+.header::before {
+  content: ""; position: absolute; left: 0; right: 0;
+  bottom: -9px; height: 21px; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 0.34) 9% at var(--glodmidt, 50%) 50%,
+      var(--glodkjerne) 0%,
+      transparent 100%),
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 0.8) 14% at var(--glodmidt, 50%) 50%,
+      color-mix(in srgb, var(--merke) 96%, transparent) 0%,
+      color-mix(in srgb, var(--merke) 62%, transparent) 30%,
+      transparent 72%),
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 2.6) 30% at var(--glodmidt, 50%) 50%,
+      color-mix(in srgb, var(--merke) 26%, transparent) 0%,
+      color-mix(in srgb, var(--merke) 8%, transparent) 45%,
+      transparent 85%),
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 1.2) 62% at var(--glodmidt, 50%) 46%,
+      color-mix(in srgb, var(--merke) 26%, transparent) 0%,
+      transparent 76%);
+}
+.header-content {
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-3) var(--rom-5);
+  display: flex; align-items: center;
+  gap: var(--rom-5); flex-wrap: wrap;
+}
+
+/* ---- merket og namnet ----
+   Ringen er nett so høg som ein stor bokstav og stend paa den same
+   grunnlina. `1cap` er kapitélhøgdi i skrifti som gjeld.
+
+   Ingen yverskyting: blekket i merket naar heilt ut i kanten av ruta
+   si — det er aatte K-ar som strekkjer seg ut i hyrnone, ikkje ein
+   glatt sirkel — so ei rute som er høgre enn kapitélhøgdi set toppen
+   aat ringen yver toppen aat K-en. Ein glatt sirkel hadde trengt
+   yverskyting; denne treng henne ikkje. */
+.merkeord {
+  /* Skrifti stend her og ikkje paa namnet, av di `cap` vert løyst mot
+     den skrifti elementet sjølv hev. Laag ho lenger inn, rekna ringen
+     kapitélhøgdi si ut fraa brødteksti og vart ein tridjedel for liten. */
+  font-family: var(--skrift-yver);
+  font-size: 1.45rem;
+  font-stretch: var(--vidd-leiding);
+  font-weight: 700;
+  line-height: 1;
+
+  display: inline-flex; align-items: baseline; gap: .34em;
+  /* Merkeordet er ei lenkja, men det skal ikkje sjaa ut som ei: det er
+     namnet paa staden, ikkje eit utgangspunkt. Utan denne tok det
+     lenkjefargen. */
+  text-decoration: none; color: var(--blekk);
+  flex: none;
+}
+/* Er du heime, stend merket i merkefargen. Det er den same meldingi som
+   streken under ei vald sida, sagd med det som alt er der. */
+.merkeord.paa-heim .merke { color: var(--klas); }
+
+/* Peikar du på det, tek heile merkeordet fargen — ringen og namnet.
+   Det stod `color: var(--blekk)` her, som *låste* fargen: merket var
+   ei lenkje som ikkje fekk lov til å svare. Grunngjevinga var at det
+   ikkje skulle sjå ut som ei lenkje, men det er ikkje lenkjefargen som
+   er problemet — det er understreken, og han er alt av.
+
+   Heime og peika-på seier ikkje det same: heime står berre ringen i
+   fargen, medan eit peik tek heile lockupen. Difor kjem denne regelen
+   etter, so han vinn medan peikaren står der. */
+.merkeord:hover,
+.merkeord:focus-visible { color: var(--merke); }
+.merkeord:hover .merke,
+.merkeord:focus-visible .merke { color: var(--merke); }
+.merkeord .merke {
+  /* 0,72em — kapitélhøgdi i Union Gothic, teki beinveges or fila
+     (sCapHeight 720 av 1000, og K-glyfen maaler nett 720).
+
+     `1cap` skulde gjeve det same, men gav 20,1 px der kapitélhøgdi er
+     17,3: eininga vert løyst mot metrikken nettlesaren finn, og han
+     kjem ikkje ut med det fila segjer. Maalt er maalt — talet stend
+     her, med kvar det kjem fraa. */
+  --merkestorleik: .72em;
+  align-self: baseline;
+}
+.merkenamn { letter-spacing: 0; }
+
+/* ---- sidone ----
+   Dei stend i midten av lina og tek plassen som er att. */
+.nav { flex: 1 1 auto; min-width: 0; border: 0; background: none; }
+.nav-list {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--rom-2) var(--rom-4);
+  position: relative;
+  /* Midtlina gjennom merket skal gå gjennom lenkjene med. Rada sentrerer
+     *kassane*, og kassen åt ei skrift er ikkje symmetrisk kring
+     kapitélbandet: over- og underlengdene deler seg ulikt. Måla på ei
+     bilete i firedobbel storleik stod kapitélmidten åt lenkjene 1,4 px
+     over kapitélmidten åt K-en i merket. Difor dette dyttet — det er ei
+     måling, ikkje ein smak. */
+  transform: translateY(.09em);
+}
+
+.nav-item a {
+  display: block;
+  /* Symmetrisk. Kassen er teksten og like mykje luft over som under, so
+     midtlina hans er midtlina åt teksten. */
+  padding: var(--rom-1) 0;
+  position: relative;
+  font-family: var(--skrift-yver); font-size: .95rem;
+  font-stretch: var(--vidd-merkelapp); font-weight: 500;
+  letter-spacing: .07em; text-transform: uppercase;
+  color: var(--blekk-lys); text-decoration: none;
+}
+.nav-item a:hover { color: var(--blekk); }
+
+/* ---- den valde sida ----
+   Ho tek berre fargen. Ljoset hennar ligg i lina under hovudet, ikkje på
+   henne: sjå .header::before. */
+.nav-item.active a, .nav-item a[aria-current="page"] { color: var(--blekk); }
+
+.nav-item.nav-admin a { color: var(--blekk-svakt); }
+.nav-item.nav-admin a:hover { color: var(--blekk-lys); }
+
+/* ---- namnet og utloggingi ---- */
+/* ---- namnet ----
+   Det er *ditt* namn og det einaste i bjelken som høyrer til deg, so
+   det skal lesast som eit namn og ikkje som ein merkelapp. Difor litt
+   større og tyngre enn sidone attmed.
+
+   Og det er ein veljar: tvo utgangar ligg attum — profilen og
+   utloggingi — som ikkje tek plass fyre ein spør etter deim. Same
+   grepet som vikenummeret. */
+.auth-controls { position: relative; display: flex; align-items: center; flex: none; }
+
+.user-name {
+  background: none; border: 0; padding: var(--rom-1) 0; cursor: pointer;
+  font-family: var(--skrift); font-size: 1rem; font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+  color: var(--blekk-lys);
+  border-bottom: 2px solid transparent;
+  /* Same midtlina, same grunnen — og her kjem ein piksel til av at
+     kanten under gjer kassen usymmetrisk. Måla: 1,9 px. */
+  transform: translateY(.12em);
+}
+.user-name:hover { color: var(--blekk); background: none; border-bottom-color: var(--haarlina); }
+.user-name.active { color: var(--blekk); border-bottom-color: var(--klas); }
+.user-name[aria-expanded="true"] { color: var(--blekk); border-bottom-color: var(--klas); }
+
+.namnemeny {
+  position: absolute; z-index: 30;
+  top: 100%; right: 0; margin-top: var(--rom-2);
+  display: flex; flex-direction: column; align-items: stretch;
+  min-width: 10rem;
+  background: var(--flate);
+  border: 1px solid var(--kant);
+  border-radius: 2px;
+  box-shadow: var(--skugge-flytande);
+  overflow: hidden;
+}
+.auth-form { margin: 0; display: flex; }
+
+.namneval {
+  display: block; width: 100%; text-align: left;
+  padding: var(--rom-3) var(--rom-4);
+  background: none; border: 0; border-radius: 0;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .84rem; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--blekk); text-decoration: none; cursor: pointer;
+}
+.namneval:hover { background: var(--ark-djup); color: var(--blekk); border: 0; }
+
+/* Utloggingi er utgangen. Ho ber aatvaringsfargen, av di ho er den eine
+   handlingi i menyen som tek noko fraa deg. */
+.namneval-ut { color: var(--aatvaring); }
+.namneval-ut:hover { background: var(--aatvaring-svak); color: var(--aatvaring); }
+
+/* ===================================================================
+   botnlina
+   Det ein vel ein gong høyrer heime nedst. Maalveljaren var det
+   breidaste i heile hovudet, og ein vel ikkje maal kvar gong ein opnar
+   ei sida.
+   =================================================================== */
+.botnlina { border-top: 1px solid var(--haarlina); margin-top: var(--rom-7); flex: none; }
+.botninnhald {
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-4) var(--rom-5);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--rom-4); flex-wrap: wrap;
+}
+.botnmerke { font-size: .78rem; color: var(--blekk-svakt); }
+
+/* ===================================================================
+   sida
+   =================================================================== */
+main {
+  /* Innhaldet tek plassen som er att, so botnlina vert skuva nedst.
+     `width: 100%` lyt stå: auto-margin på sidene i ei flex-spalte slår av
+     strekkinga, og då krympar <main> til innhaldet sitt og legg seg midt
+     i glaset. Sida såg sentrert ut. */
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-6) var(--rom-5) var(--rom-7);
+}
+
+.page-title {
+  /* Klassa ber heile utsjaanaden sjølv (§15), so verkstaden kann syna
+     honom paa ein div utan aa laana elementstilen fraa h1. */
+  font-family: var(--skrift-yver);
+  line-height: 1.02;
+  text-wrap: balance;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  overflow-wrap: break-word; hyphens: auto;
+  font-stretch: var(--vidd-tittel);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  /* Bolkeoverskrifta under er ei overskrift no og ikkje ei merkelapp.
+     To overskrifter med rom-3 imellom les seg som éin blokk. */
+  margin: 0 0 var(--rom-6);
+  padding: 0;
+  border: 0;
+  text-align: left;
+}
+.page-description { color: var(--blekk-lys); margin-bottom: var(--rom-6); max-width: 62ch; }
+
+.content-section, .packages-section { margin-bottom: var(--rom-7); }
+
+/* ---- rangstigen ----
+   Fire steg, og kvart steg er *smalare* enn det yver seg. Breiddi ber
+   rangen, ikkje storleiken: difor kann tvo yverskrifter vera mest like
+   store og endaa segja klaart kva som ligg under kva.
+
+     .page-title    125%  kvar du er
+     .section-title  68%  ein bolk paa sida, med lina under
+     .undertittel    68%  ei gruppa inne i bolken, utan lina
+     dt / .held      68%  eit einskilt felt
+
+   Steg tvo og tri hadde same forma fyrr — ein h4 inne i ein h3 fekk
+   ingi ny tyding, berre ein litt mindre bokstav. Lina er skiljet: ein
+   bolk deler sida, ei gruppa deler berre bolken. */
+/* Ei bolkeoverskrift er ei overskrift, ikkje ei merkelapp.
+
+   Ho stod på merkelapp-trinnet: 1,05 rem, 68 % breidd, versalar og
+   sperra. Det er forma til noko som *namngjev* eit felt — og då les ein
+   henne som ein liten lapp og ikkje som ei overskrift ein tek i. Ho var
+   tung å lese attpåtil: versalar tek bort ordbiletet, og sperringa gjer
+   at auga må lese bokstav for bokstav.
+
+   No står ho på trinnet under sidetittelen: 105 % i staden for 125 % i
+   breidd, og godt under han i storleik. Breidda ber rangen, som elles i
+   huset — ein ser kva som er kva før ein har lese eit ord. */
+.section-title {
+  font-family: var(--skrift-yver);
+  font-size: 1.65rem; font-weight: 500;
+  font-stretch: var(--vidd-yver);
+  letter-spacing: -.005em;
+  line-height: 1.15;
+  color: var(--blekk);
+  margin: 0 0 var(--rom-4);
+  padding-bottom: var(--rom-2);
+  border-bottom: 1px solid var(--haarlina);
+  text-align: left;
+  text-wrap: balance;
+}
+
+.undertittel {
+  font-family: var(--skrift-yver);
+  font-size: .78rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+  margin: var(--rom-6) 0 var(--rom-3);
+  padding: 0;
+  border: 0;
+  text-align: left;
+}
+.undertittel:first-child { margin-top: 0; }
+
+.two-column-grid, .selector-container {
+  display: grid; gap: var(--rom-5);
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+}
+
+/* ===================================================================
+   kortet
+   Ei hårfin lina, ingen skugge, ingen rundingar utyver det vesle.
+   =================================================================== */
+/* Éin definisjon. Fem klassar teikna den same boksen kvar for seg fyrr
+   — flate, hårline, to pikslar runding, fem i fyll — og dei hadde alt
+   drive fraa kvarandre i fyll og radavstand. Det som skil eit medlemskort
+   fraa eit klippekort er kva som stend i det og kva farge produktet hev,
+   ikkje kva slag boks det er.
+
+   `--produkt` er den eine kroken: kortet set han, og alt inni som skal
+   bera produktfargen les han. Ingen skriv turkis eller rosa i ein
+   komponent lenger — dei skriv `var(--produkt)`. */
+.kort, .charge-item, .activity-placeholder, .no-data {
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  padding: var(--rom-5);
+}
+.kort { display: flex; flex-direction: column; gap: var(--rom-2); }
+
+/* Eit kort som *er* noko — valt, i bruk, framheva — fær ei lina i
+   produktfargen langs vinstre kanten. Éi lina, ikkje ei ramme, og
+   kortet flyttar seg ikkje naar ho kjem. */
+.kort.valt, .kort.framheva, .kort[aria-pressed="true"] {
+  border-left: 3px solid var(--produkt, var(--merke));
+}
+
+.no-data, .activity-placeholder, .loading-placeholder {
+  color: var(--blekk-svakt);
+  text-align: center;
+  padding: var(--rom-6) var(--rom-4);
+  font-size: .95rem;
+}
+.loading-placeholder { background: none; border: 0; }
+
+/* ---- livsmerket ----
+   Fargen tyder «dette er i live». Alt anna er form og vekt:
+   ein open ring ventar, ein strek er frosen, graatt er utgjenge. */
+/* Tilstanden. Namni er dei *basen* brukar — «active», «paused»,
+   «cancelled», «freeze_requested» — og ikkje omsette namn attmed dei.
+   Det stod tvo sett her fyrr: `.stod-aktiv` og `.status-active` var den
+   same regelen skriven tvo gonger med kvar sine namn, og malane nytta
+   baae. Ei klasse som heiter det same som verdet ho kjem av, treng
+   ingen omsetjingstabell — og ingen kan gløyma aa halda han i takt. */
+.status, .status-badge, .popular-badge {
+  font-stretch: var(--vidd-merkelapp);
+  display: inline-flex; align-items: center; gap: var(--rom-2);
+  font-family: var(--skrift-yver);
+  font-size: .78rem; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  background: none; border: 0; padding: 0;
+}
+.status::before {
+  content: ""; width: .5rem; height: .5rem; border-radius: 50%;
+  border: 1px solid currentColor; background: currentColor;
+}
+
+
+/* Det som er utgjenge skal lesast som utgjenge, ikkje berre staa der. */
+.utgaatt, .expired { color: var(--blekk-svakt); }
+
+/* ---- kortet med rada paa vengen ----
+   Eit kort som *er* noko — eit medlemskap som gjeng — fær ei lina i
+   merkefargen langs vinstre kanten. Eitt kort, éi lina. */
+.event-card.signed-up { border-left: 3px solid var(--merke); }
+
+.package-name, .category-name, .event-title {
+  font-family: var(--skrift-yver); font-size: 1.25rem;
+  font-stretch: var(--vidd-yver); font-weight: 500;
+  margin: 0 0 var(--rom-2);
+}
+.package-description, .category-description, .package-details,
+.event-details, .charge-date { color: var(--blekk-lys); font-size: .92rem; }
+
+.package-price, .price, .price-display {
+  font-family: var(--skrift-tal);
+  font-size: 1.5rem;
+  color: var(--blekk);
+  letter-spacing: -.02em;
+}
+.price-per-session, .savings, .commitment, .renewal-date {
+  font-size: .85rem; color: var(--blekk-lys);
+}
+
+.packages-grid, .events-grid, .categories-grid {
+  display: grid; gap: var(--rom-4);
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+}
+
+/* ---- kjøpsflyten: eitt steg um gongen ----
+   JS-en hev alltid flutt `active` og `selected` — klassane fanst berre
+   ikkje i stilarket, so alle seks «Steg 2»-bolkane og kjøpsbolken stod
+   framme samstundes. No syner sida berre det steget du er i: vald
+   kategori → hennar tri pakkor → stadfestingi.
+
+   Det valde kortet held kanten sin og skifter berre farge (§6), og
+   fargen er produktfargen aat klippekortet (§2). */
+/* Eitt steg um gongen. `hidden` ber det no, ikkje ein klasse. Den gamle
+   `.steg.active` fanst i JS-en men ikkje i stilarket, so alle stegi stod
+   framme samstundes (STRUCTURE_AUDIT F11) — og daa var det ingen flyt,
+   berre ei lang rulla. Attributtet er det nettlesaren alt hev til dette,
+   og det verkar utan at nokon skriv ein regel. */
+[hidden] { display: none !important; }
+
+/* Kategori- og pakkekorti er knappar no og ikkje divar med onclick.
+   Knappestilen huset gjev alle knappar lyt difor skrellast av: han kjem
+   med store bokstavar, breiddesmal skrift og halvanna centimeter fyll,
+   og eit kort hev korkje. */
+.kategorival {
+  display: grid; gap: var(--rom-4);
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+.kategorikort, .package-card {
+  /* Kort som er knappar. Boksen kjem fraa `.kort`; dette er berre det
+     knappestilen lyt gjeva fraa seg. */
+  --produkt: var(--togu);
+  align-items: flex-start;
+  font: inherit; text-transform: none; letter-spacing: 0; text-align: left;
+  cursor: pointer; position: relative;
+}
+.kategorikort:hover, .package-card:hover { border-color: var(--produkt); color: inherit; }
+
+/* Det valde kortet ber produktfargen aat klippekortet — rosa (§2) — og
+   held kanten sin, so ingen ting flyttar seg naar ein vel. */
+.kategorikort[aria-pressed="true"], .package-card[aria-pressed="true"] {
+  background: var(--togu-svak);
+}
+
+.kategorinamn {
+  font-family: var(--skrift-yver); font-size: 1.25rem;
+  font-stretch: var(--vidd-yver); font-weight: 500; color: var(--blekk);
+}
+.kategorital { font-size: .88rem; color: var(--blekk-svakt); }
+.package-gyldig { font-size: .85rem; color: var(--blekk-svakt); }
+
+/* ---- stadfestingi ----
+   Kva du hev valt, og kva som *ikkje* hender enno. Merknaden stend paa
+   sida og ikkje i ei rute som spring upp etter at du hev trykt: ei
+   varselrute som fortel deg noko du skulde visst fyrr, kjem for seint. */
+.kjopsetning {
+  font-size: 1.15rem; color: var(--blekk); margin: 0 0 var(--rom-3);
+}
+.kjopsmerknad {
+  font-size: .9rem; color: var(--blekk-lys);
+  border-left: 3px solid var(--aatvaring); padding-left: var(--rom-4);
+  margin: 0 0 var(--rom-5); max-width: 44ch;
+}
+.kjopsvar { margin: var(--rom-4) 0 0; font-size: .95rem; color: var(--blekk-lys); }
+.kjopsvar.gale { color: var(--aatvaring); }
+
+/* ---- detaljrader ---- */
+.detail-row, .detail-item {
+  display: flex; justify-content: space-between; gap: var(--rom-4);
+  padding: var(--rom-2) 0;
+  border-bottom: 1px solid var(--haarlina);
+}
+.detail-row:last-child, .detail-item:last-child { border-bottom: 0; }
+.detail-label { color: var(--blekk-lys); font-size: .9rem; }
+.detail-value { font-family: var(--skrift-tal); font-size: .95rem; }
+
+/* ---- klippekortmaalaren ----
+   Ljosbandet fraa ordboki, kutta i klipp.
+
+   Tvo ting var gale fyrr, og dei er den same feilen: eg gjorde bandet
+   til ein *gjenstand* i staden for eit ljos.
+
+   Rutorne var fjorten pikslar høge — like tjukke som ein knapp. I
+   ordboki er lina éin piksel og glødi tjue kring henne: det er
+   forholdet millom dei tvo som gjer at det ser ut som ljos. Ei feit
+   rute med litt skin kring er berre ei feit rute.
+
+   Og glødi var stengd inne. Ho laag paa `z-index: -1` inne i eit
+   isolert lag, so ho vart maala *under* kortet og stogga daudt ved
+   kanten. Ljos stoggar ikkje ved ei kanta.
+
+   Tridje gongen: ho laag paa kvart einskilt klipp, og kvar glød var ein
+   `::after` med `ellipse 150%` i seg. Ein gradient som er 150% av kassa
+   si er ikkje gjenomsynleg naar kassa sluttar — han vert kutta midt i,
+   og kanten stend att som ei rett lina. Ti klipp gav difor ti ljose
+   rektangel med synlege skjøytar, og bandet saag ut som ei rekkja med
+   klossar. Kommentaren under sa alt at «lina er stripa og bloomen
+   samanhengande»; koden gjorde det motsette.
+
+   No er glødi *éin* ting som ligg paa heile bandet, og lengdi hennar er
+   rekna av kor mange klipp som er tende. Kvart lag fell til
+   gjenomsynleg innanfor si eigi kassa — ingen gradient naar kanten med
+   farge att — og endane er maska av, so ljoset renn ut i staden for aa
+   slutta. Lina er framleis stripa av ribbone; det er ho som er
+   gjenstanden, og glødi som ikkje er det.
+   =================================================================== */
+.klippemaalar, .progress-segments {
+  --klippfarge: var(--produkt, var(--togu));
+  --rib: 3px;
+  /* Malen set desse tvo. Utan deim er ingen ting tendt, og daa er det
+     rett at det ikkje glør. */
+  --tende: 0;
+  --alle: 1;
+  display: flex;
+  gap: var(--rib);
+  height: 2px;
+  margin: var(--rom-5) 0 var(--rom-4);
+  position: relative;
+}
+
+.progress-bar { margin: 0; }
+
+.klipp, .progress-segment {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 2px;
+  height: 2px;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--blekk) 13%, transparent);
+}
+
+/* Det tende klippet er sjølve lina, og ho er utbrend i midten som eit
+   filament: kvit der ho er sterkast, fargen mot endane. Ei linja i rein
+   farge ser ut som maaling; det er den kvite kjerna som gjer ljos. */
+.klipp.tend, .progress-segment.filled {
+  background: linear-gradient(to right,
+    color-mix(in srgb, var(--klippfarge) 70%, transparent) 0%,
+    color-mix(in srgb, var(--klippfarge) 30%, #fff) 35%,
+    color-mix(in srgb, var(--klippfarge) 22%, #fff) 65%,
+    color-mix(in srgb, var(--klippfarge) 70%, transparent) 100%);
+}
+
+/* Glødi. Fire lag som i ordboki: utbrend kjerne, fargen tett kring han,
+   ein vid veik halo, og ein bloom under. Ho ligg paa heile bandet — ein
+   glød, ikkje ein per klipp — og strekkjer seg so langt som dei tende
+   klippi rekk.
+
+   Kvart lag er `to bottom` og fell til gjenomsynleg fyre det naar topp
+   og botn av kassa. Difor finst det ingi rett lina nokon stad i henne.
+   Endane er maska, so ljoset renn ut der klippi sluttar. */
+.klippemaalar::after, .progress-segments::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  left: 0; top: -13px; bottom: -13px;
+
+  /* Breiddi aat eit klipp, og so langt dei tende rekk. Gapi millom
+     klippi høyrer med: sju klipp er sju breidder og seks gap. */
+  --klippbreidd: calc((100% - (var(--alle) - 1) * var(--rib)) / var(--alle));
+  width: calc(var(--tende) * var(--klippbreidd) + (var(--tende) - 1) * var(--rib));
+
+  background:
+    linear-gradient(to bottom, transparent 46%,
+      color-mix(in srgb, var(--klippfarge) 34%, #fff) 50%, transparent 54%),
+    linear-gradient(to bottom, transparent 36%,
+      color-mix(in srgb, var(--klippfarge) 72%, transparent) 50%, transparent 64%),
+    linear-gradient(to bottom, transparent 16%,
+      color-mix(in srgb, var(--klippfarge) 22%, transparent) 50%, transparent 84%),
+    linear-gradient(to bottom, transparent 0%,
+      color-mix(in srgb, var(--klippfarge) 9%, transparent) 50%, transparent 100%);
+
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 9px,
+                        black calc(100% - 9px), transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0, black 9px,
+                        black calc(100% - 9px), transparent 100%);
+}
+
+/* Er alt tendt, skal ljoset naa heilt ut til hi sida — daa er det ikkje
+   ein ende, det er kanten av kortet. */
+.klippemaalar[style*="--tende: 0"]::after,
+.progress-segments[style*="--tende: 0"]::after { display: none; }
+
+/* Ribbone skjer *lina*, ikkje glødi.
+   Dei gjekk tvert gjenom heile halosen fyrr, og daa vart bandet til ei
+   rekkja med perlor — kvart klipp ein eigen klump med ljost imillom. I
+   ordboki er det lina som er stripa og bloomen som er samanhengande;
+   det er nettupp den skilnaden som gjer at det ser ut som ljos gjenom
+   ei rist og ikkje som sju smaa lampor. */
+.klipp::before, .progress-segment::before {
+  content: "";
+  position: absolute; z-index: 2;
+  top: 0; bottom: 0;
+  right: calc(-1px - var(--rib)); width: var(--rib);
+  background: var(--flate);
+  pointer-events: none;
+}
+.klipp:last-child::before, .progress-segment:last-child::before { display: none; }
+
+.klippekort-card.expiring .klippemaalar,
+.klippekort-card.expiring .progress-segments { --klippfarge: var(--aatvaring); }
+
+.medlemskapsmaalar { --klippfarge: var(--klas); }
+.kursmaalar        { --klippfarge: var(--tuneup); }
+
+@media (prefers-reduced-motion: reduce) {
+  .klippemaalar::after, .progress-segments::after { display: none; }
+}
+
+/* ===================================================================
+   knappar
+   Éin fylt knapp per bilete — den handlingi sida er til for. Alt anna
+   er ei lina eller berre tekst.
+   =================================================================== */
+/* ===================================================================
+   knappen
+   Tri ting var gale, og dei var det same gale: knappen bar ei røyst som
+   ikkje var hans.
+
+   1. Han stod i merkelappskrifta — 68 % smal, store bokstavar,
+      sperra. Det er språket til bolkoverskrifter, faner, dt og merke:
+      ting som *namngjev* ein kategori. Ein knapp namngjev ingen ting.
+      Han er eit verb, og eit verb skriv seg som eit ord i ei setning.
+
+   2. Hovudknappen var ei fylt flate i merkefargen — den tyngste
+      tingen på kvar side, tyngre enn overskrifta, i eit hus som elles
+      byggjer alt av hårliner. Grunngjevinga stod alt skriven, tvo
+      reglar lenger nede, om åtvaringsknappen: «ein raud klump dreg auga
+      fraa alt anna». Det gjeld ein turkis klump like fullt.
+
+   3. Flata var `--ark` — same fargen som sida. Ein knapp ligg *på*
+      arket; er han malt i arkfargen, er han eit hol med ei line rundt.
+
+   No: reading-skrifta, vanleg setningsform, `--flate` som på kort, og
+   fargen i lina og i ordet — aldri i flata. Åtvaringsknappen hadde rett
+   heile tida; dei hine fylgjer honom.
+
+   Grunnstilen gjeld `.btn`-familien og ikkje kvar `<button>`. Tjue
+   stader i huset laut skrella honom av att — eit merke, ei fane, ei rad
+   som opnar seg — og daa er han ikkje ein grunnstil, han er eit unnatak
+   som stend fyrst.
+   =================================================================== */
+.btn, .btn-primary, .btn-danger, .action-btn, .change-btn, .timeplan-btn,
+.login-btn, .week-nav-btn, .signup-button,
+.cancel-signup-btn, .cancel-btn, .remove-btn {
+  font-family: var(--skrift);
+  font-size: .95rem; font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+  /* Kapselen treng luft i endane. Er teksti klemd mot kurva, les forma
+     seg som eit avrunda rektangel og ikkje som ein knapp. */
+  padding: var(--rom-2) var(--rom-5);
+  border: 1px solid var(--kant);
+  border-radius: var(--rund-knapp);
+  /* Tvo lag: glimet paa den øvre halvdelen, og kroppen som mørknar mot
+     foten. Glimet stoggar brått paa midten — det er slik ljos oppfører
+     seg paa ei kvelv, og det er den kanten som gjer at forma les seg som
+     runda og ikkje som flat. */
+  /* Glimet stoggar ikkje brått. Ein hard kant paa midten er signaturen
+     aat den tidlege telefonknappen — plast med ei bobla i. Aqua let
+     glimet døy ut yver ein lengre veg, og legg til eit svakt attkast
+     langs foten: ljos som hev gjenge gjenom kroppen og kjem attende.
+     Det er skilnaden paa ei kvelv og ei bobla. */
+  background:
+    linear-gradient(to bottom,
+      var(--glans) 0%,
+      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
+      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
+      color-mix(in srgb, var(--glans) 6%, transparent) 58%,
+      transparent 72%),
+    linear-gradient(to bottom,
+      var(--flate) 0%,
+      color-mix(in srgb, var(--blekk) 7%, var(--flate)) 62%,
+      color-mix(in srgb, var(--blekk) 3%, var(--flate)) 100%);
+  box-shadow: var(--knappedjup);
+  color: var(--blekk);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  line-height: 1.35;
+}
+.btn:hover, .action-btn:hover, .change-btn:hover,
+.week-nav-btn:hover, .signup-button:hover {
+  border-color: var(--merke); color: var(--merke);
+}
+
+/* Trykt snur ljoset: glimet gjeng ut, skuggen fell inn ovanfraa, og
+   knappen sig ein piksel. Det er heile gleda ved desse knappane, og
+   det er ogso det einaste stader i huset der noko *flyttar* seg — han
+   flyttar seg av di han er ein ting ein trykkjer paa. */
+.btn:active, .btn-primary:active, .btn-danger:active, .action-btn:active,
+.change-btn:active, .timeplan-btn:active, .login-btn:active,
+.week-nav-btn:active, .signup-button:active,
+.cancel-signup-btn:active, .cancel-btn:active, .remove-btn:active {
+  background-image: none;
+  box-shadow: var(--knappedjup-inn);
+  transform: translateY(1px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn, .btn-primary, .btn-danger { transition: box-shadow .08s ease-out, transform .08s ease-out; }
+}
+
+/* Hovudhandlingi. Fargen i lina og i ordet, og ei svak tone i flata —
+   nok til aa skilja henne fraa dei hine utan aa verta ein klump. Det er
+   berre éi per skjerm. */
+.btn-primary, .login-btn, .timeplan-btn, .signup-button {
+  border-color: color-mix(in srgb, var(--merke) 70%, var(--blekk));
+  color: var(--flate);
+  background:
+    linear-gradient(to bottom, var(--glans) 0%,
+      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
+      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
+      color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--merke-lys) 84%, #fff) 0%,
+      var(--merke-lys) 46%, var(--merke) 100%);
+}
+.btn-primary:hover, .login-btn:hover, .timeplan-btn:hover, .signup-button:hover {
+  color: var(--flate);
+  background:
+    linear-gradient(to bottom, var(--glans) 0%, var(--glans-svak) 46%, transparent 50%),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--merke-lys) 70%, #fff) 0%, var(--merke-lys) 100%);
+}
+
+/* Det som ikkje kann gjerast um att. Same forma, annan farge. */
+.btn-danger, .cancel-signup-btn, .cancel-btn, .remove-btn {
+  border-color: var(--aatvaring); color: var(--aatvaring);
+  background:
+    linear-gradient(to bottom, var(--glans) 0%,
+      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
+      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
+      color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%),
+    linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--aatvaring) 9%, var(--flate)) 100%);
+}
+.btn-danger:hover, .cancel-signup-btn:hover, .cancel-btn:hover, .remove-btn:hover {
+  background: var(--aatvaring-svak); border-color: var(--aatvaring); color: var(--aatvaring);
+}
+
+/* Avslegen: ingen glans, ingen skugge, ingen djupn. Han er ikkje ein
+   ting ein kann trykkja paa lenger, og daa skal han ikkje sjaa ut som ein. */
+button:disabled, .btn:disabled, .btn-primary:disabled, .week-nav-btn:disabled {
+  color: var(--blekk-svakt); border-color: var(--haarlina);
+  background: none; background-image: none;
+  box-shadow: none; transform: none; cursor: not-allowed;
+}
+
+/* Ein naken `<button>` er ingen ting: han ber skrifta rundt seg og
+   ventar paa ei klasse. Det er dei fleste knappane i huset — merke,
+   faner, rader som opnar seg — og dei slepp aa taka noko av att. */
+button:not([class]) {
+  font: inherit; color: inherit; background: none; border: 0;
+  padding: 0; cursor: pointer; text-align: inherit;
+}
+
+/* ===================================================================
+   skjema
+   =================================================================== */
+/* `align-items` stend paa `stretch` som standard, og daa vert kvart barn
+   so breidt som bolken same kva `width` segjer. Ein veljar som var sett
+   til aa vera so brei som innhaldet vart strekt likevel — reglane var
+   rette, men fyresetnaden var det ikkje. Her byrjar dei ved venstre
+   kanten og tek den breiddi dei sjølve bad um; eit skrivefelt hev
+   `width: 100%` og fyller framleis. */
+.form-group { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2); margin-bottom: var(--rom-4); }
+.form-row { display: grid; gap: var(--rom-4); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+
+label, .option-label, .question-label, .detail-label, .filter-group label {
+  font-size: .88rem; color: var(--blekk-lys);
+}
+
+/* :where() gjev null i spesifisitet, so kvar klassa slær denne regelen.
+   Utan det er `input[type="text"]` (0,1,1) sterkare enn `.lappfelt`
+   (0,1,0), og eit felt som skulde vera nake fekk ramma og flata
+   attende. Det hende tvo gonger — fyrst med vikefeltet, so med
+   adresselappen — og det er den slags ein ikkje ser i koda, berre paa
+   skjermen. Grunnstilen skal vera lettast aa yverstyra av alle. */
+/* Eitt felt, og det er det som heitte `.lappfelt`: inga ramme, ei grunn
+   fordjuping, og ei flate eit hakk mørkare enn arket.
+   
+   Fyrr gav grunnstilen kant *og* flate, medan `.lappfelt` tok kanten av
+   att — so kvart felt i huset laut velja side, og fem former for éi
+   meining vart resultatet. No er grunnstilen den rette forma, og
+   klassane som stend att er berre *maal*: kor breidt feltet er, ikkje
+   korleis det ser ut. */
+:where(input[type="text"], input[type="email"], input[type="password"],
+       input[type="date"], input[type="tel"], input[type="number"],
+       input[type="search"], input[type="time"], textarea) {
+  font: inherit;
+  padding: var(--rom-2) var(--rom-3);
+  background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate));
+  color: var(--blekk);
+  border: 0;
+  border-radius: 2px;
+  width: 100%;
+}
+
+/* Veljaren hev kant og inga djupn. Han plukkar eitt av nokre faae — han
+   er ein knapp med ei liste attum, ikkje ei renna ein hell noko nedi
+   (FASETTEN §3). Det er den einaste skilnaden som er att, og han tyder
+   noko. */
+:where(select) {
+  font: inherit;
+  padding: var(--rom-2) var(--rom-3);
+  background: var(--flate);
+  color: var(--blekk);
+  border: 1px solid var(--kant);
+  border-radius: 2px;
+  width: 100%;
+}
+
+/* Fordjupingi segjer «her kann du skriva», og difor stend ho berre paa
+   det ein skriv i. Ein veljar plukkar ein or ei liste — han er ein knapp
+   med ei liste attum, ikkje ei renna. */
+:where(input:not([type="checkbox"]):not([type="radio"]), textarea) {
+  box-shadow: var(--fordjuping);
+}
+/* ---- fasetten ----
+   Eit felt ligg *i* arket og ikkje paa det. Skuggen fell inn i det
+   ovanfraa, som i ei fasettsliping, og det er den vesle djupna som
+   segjer «her kann du skriva» — utan eit einaste ord, og utan ei ramma
+   som ropar.
+
+   Difor stend han paa *alle* felt heile tidi, ikkje berre paa det ein
+   held paa med. Var han berre i fokus, laut ein klikka rundt for aa
+   finna ut kva som let seg endra. Ved fokus kjem merkefargen attaat:
+   djupna segjer «skrivbar», fargen segjer «her er du no».
+
+   Han er skriven ein stad og nytta av alle, so kvar ny kontroll fell i
+   det same sporet utan at nokon tenkjer paa det. */
+:root {
+  --fordjuping: inset 0 1px 2px color-mix(in srgb, var(--blekk) 12%, transparent);
+  --fasett:
+    inset 0 1px 2px color-mix(in srgb, var(--blekk) 16%, transparent),
+    0 0 0 1px var(--merke);
+}
+
+input:hover:not([type="checkbox"]):not([type="radio"]), textarea:hover {
+  background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate));
+}
+input:focus, textarea:focus { outline: none; box-shadow: var(--fasett); }
+select:focus { outline: none; border-color: var(--merke); box-shadow: var(--fasett); }
+select {
+  /* Eit skrivefelt strekkjer seg, av di ingen veit kor langt det ein
+     skriv vert. Ein veljar veit det: valdi stend der alt. Difor er han
+     so brei som det breidaste valet og ikkje ein piksel meir — ein
+     tidssoneveljar som tok heile spalta lova ei fridom som ikkje fanst.
+     `max-width: 100%` er taket, so eit langt val ikkje skuvar spalta. */
+  width: auto;
+  max-width: 100%;
+
+  /* Nedfallslista er den eine tingen som *faktisk* flyt. */
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 1.05rem top 50%, right .8rem top 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: var(--rom-7);
+}
+
+.error, .login-error {
+  color: var(--aatvaring);
+  background: var(--aatvaring-svak);
+  border: 1px solid var(--aatvaring);
+  border-radius: 2px;
+  padding: var(--rom-3) var(--rom-4);
+  font-size: .92rem;
+  margin-bottom: var(--rom-4);
+}
+.success {
+  color: var(--merke);
+  background: var(--merke-svak);
+  border: 1px solid var(--merke);
+  border-radius: 2px;
+  padding: var(--rom-3) var(--rom-4);
+  font-size: .92rem;
+  margin-bottom: var(--rom-4);
+}
+
+/* ===================================================================
+   tabellar
+   Ingen rammor kring cellone. Ei lina under kvar rad, og ei sterkare
+   under yverskrifti. Fyrste kolonna og yverskrifti fylgja med naar ein
+   rullar sidelengs — same grepet som matrisa i slaaupp.
+   =================================================================== */
+.tabell-rom { border: 1px solid var(--haarlina); background: var(--flate); }
+
+/* Tabellar rulla ikkje. Ei celle som er for smal bryt teksti si; ei
+   spalta som ikkje er verd plassen gjeng ut paa smale glas i staden
+   for aa skuva alt anna ut or glaset. */
+table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+th, td { overflow-wrap: break-word; hyphens: auto; }
+thead th {
+  font-family: var(--skrift-yver);
+  font-size: .8rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .09em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  text-align: left;
+  padding: var(--rom-3) var(--rom-4);
+  border-bottom: 1px solid var(--kant);
+  background: var(--flate);
+  position: sticky; top: 0; z-index: 2;
+  white-space: nowrap;
+}
+tbody td {
+  padding: var(--rom-3) var(--rom-4);
+  border-bottom: 1px solid var(--haarlina);
+  vertical-align: top;
+  font-size: .94rem;
+}
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: var(--ark-djup); }
+
+/* ===================================================================
+   timeplanen
+   =================================================================== */
+/* Tittelen og styringi paa same lina, so lista byrjar der auga alt er.
+   Fyrr stod det ei bolkeyverskrift, tvo merkelappa felt og ei
+   vikerekkja imillom — kring 150 pikslar fyre fyrste timen. */
+.timehovudlinje {
+  position: relative;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--rom-4) var(--rom-5); flex-wrap: wrap;
+  margin-bottom: var(--rom-4);
+}
+.timehovudlinje .page-title { margin-bottom: 0; }
+
+/* ---- vikeveljaren ----
+   Vika i tittelen *er* kontrollen. Ho stod som tri element i ei eiga
+   eska under tittelen og sa det same ein gong til. No flankerer pilene
+   henne, og eit klikk paa henne opnar dei sju næraste vikone.
+
+   Pilene endrar ingi breidd naar dei vert avslegne, og korgi ligg
+   absolutt — so tittelen stend still same kva ein gjer med han. */
+.vekeveljar {
+  position: relative;
+  display: inline-flex; align-items: baseline; gap: .1em;
+  margin-left: .45em; vertical-align: baseline;
+}
+
+/* ---- bobla ----
+   Ei bobla er eit skrivefelt som ligg *i* noko anna — i ein tittel, i ei
+   line — og ikkje på eit ark. Ho er mjølkete: --flate på 62 % med ei
+   uskarpleik bak, så det som ligg under skin gjennom. Kanten er det
+   tveegga sporet frå den tomme dagen i rutenettet (FASETTEN §5): mørk
+   overleppe, lys underleppe.
+
+   **Ei bobla tek aldri ringen i merkefargen.** Ein ring legg ei hard
+   line tvert over den gjennomsynlege kanten, og då er det ikkje ei bobla
+   lenger — det er ein boks. Han kjempar dessutan med innhaldet om å bli
+   lesen, og innhaldet her er eitt stort tal.
+
+   Difor står `box-shadow` skriven ut i *begge* tilstandane. Sløyfer ein
+   henne i fokus, tek grunnstilen over — `input:focus` set
+   `box-shadow: var(--fasett)`, og fasetten har ringen i seg. Det hende
+   ein gong: ringen vart teken bort her og kom rett tilbake derifrå.
+
+   At bobla er der, er heile hintet om at ein kan skrive i henne. Fokus
+   seier frå ved at flata blir eit hakk mindre gjennomsynleg, og ved at
+   markøren blinkar i --klas. */
+.bobla {
+  border: 0;
+  border-radius: var(--rund);
+  background-color: color-mix(in srgb, var(--flate) 62%, transparent);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  box-shadow:
+    inset 0 2px 2px -1px color-mix(in srgb, var(--blekk) 28%, transparent),
+    inset 0 -2px 1px -1px color-mix(in srgb, var(--flate) 90%, transparent);
+  color: var(--blekk);
+  caret-color: var(--klas);
+}
+.bobla:focus {
+  outline: none;
+  border: 0;
+  background-color: color-mix(in srgb, var(--flate) 82%, transparent);
+  box-shadow:
+    inset 0 2px 2px -1px color-mix(in srgb, var(--blekk) 28%, transparent),
+    inset 0 -2px 1px -1px color-mix(in srgb, var(--flate) 90%, transparent);
+}
+
+/* Framlegget. Talet i bobla er ikkje det som står der — det er det som
+   *ville* stått der om du ikkje skreiv noko. Difor er det ein
+   placeholder og ikkje ein verdi: markøren blinkar frå fyrste stund, og
+   fyrste tasten du slår skriv talet ditt i staden for å leggje seg
+   attmed eit tal som alt var der.
+
+   Feltet valde seg sjølv før — `felt.select()` — og då låg det eit
+   turkist drag over talet i staden for ein markør. Eit merkt tal ser
+   ikkje ut som noko som ventar på deg; det ser ut som noko du nettopp
+   gjorde. */
+.bobla::placeholder { color: var(--blekk-lys); opacity: 1; }
+
+/* Eit avvist tal — ei vike som er gjengi. Bobla fer ein augneblink i
+   åtvaringsfargen. Ikkje ein ring: ein ring er nettopp det ei bobla
+   aldri tek, og eit avvist tal er ikkje ein grunn til å bryte det. */
+.bobla.nekta { background-color: color-mix(in srgb, var(--aatvaring) 22%, transparent); }
+@media (prefers-reduced-motion: no-preference) {
+  .bobla { transition: background-color .18s ease-out; }
+}
+
+/* Vikefeltet er ei bobla med tittelskrifta si. Alt som gjer henne til
+   ei bobla står over; her står berre det som gjer henne til ein tittel. */
+.vekefelt {
+  font-family: var(--skrift-yver);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-stretch: var(--vidd-tittel); font-weight: 700;
+  letter-spacing: inherit; line-height: 1;
+  width: 2.6ch; min-width: 2.6ch; field-sizing: content;
+  padding: 0 .1em; margin: 0;
+  text-align: center;
+}
+.vekefelt::selection { background: color-mix(in srgb, var(--klas) 35%, transparent); }
+
+/* Ordet er knappen. «Timeplan denne uka» les seg som ei setning; eit
+   vikenummer i tittelen gjer det ikkje. Talet ligg i menyen under, for
+   den som veit kva veke han vil til. */
+.vekeord {
+  font-family: inherit;
+  font-stretch: var(--vidd-yver); font-weight: 400;
+  font-size: .52em; letter-spacing: .01em; text-transform: none;
+  color: var(--blekk-lys); background: none; border: 0;
+  border-bottom: 2px solid var(--haarlina);
+  padding: 0 .12em; line-height: 1.1; cursor: pointer; white-space: nowrap;
+}
+.vekeord:hover { color: var(--blekk); border-color: var(--klas); background: none; }
+.vekeord[aria-expanded="true"] { color: var(--blekk); border-color: var(--klas); }
+
+/* ---- vikemenyen ----
+   Ingi flata. Talet ligg berre der, i tittelskrifta, og tek ljosstyrken
+   sin fraa det som ligg bak. Ei rute kring hadde gjort det til eit
+   skjema; utan rute er det framleis tittelen, berre skrivbar. */
+/* Menyen heng under ordet han høyrer til, ikkje under heile lina.
+   Ordet og menyen er *eitt* — ein nedfallsveljar — og daa lyt dei møtast
+   paa lina under ordet. */
+.vekemeny {
+  position: absolute; z-index: 20;
+  top: 100%; left: 0;
+  display: flex; align-items: baseline;
+  padding: var(--rom-3) 0 0;
+  background: none; border: 0; box-shadow: none;
+}
+
+.veketittel, .vekepil {
+  font-family: inherit; font-stretch: var(--vidd-yver); font-weight: 400;
+  font-size: .52em; letter-spacing: .01em;
+  color: var(--blekk-lys); background: none; border: 0;
+  padding: 0 .12em; text-transform: none; line-height: 1.1;
+  cursor: pointer; white-space: nowrap;
+}
+.veketittel { border-bottom: 2px solid var(--haarlina); }
+.veketittel:hover, .vekepil:hover:not(:disabled) { color: var(--blekk); background: none; border-color: var(--klas); }
+.veketittel[aria-expanded="true"] { color: var(--blekk); border-color: var(--klas); }
+.vekepil { color: var(--blekk-svakt); }
+.vekepil:disabled { opacity: .3; cursor: default; }
+
+/* Korgi flyt. Laag ho i flyten, skuva ho heile timeplanen ein tomme
+   ned kvar gong nokon opna henne — og det er nettupp det ein ikkje skal
+   gjera med noko ein opnar for aa *sjaa* paa noko anna.
+   Ho flyt verkeleg, og difor er ho ein av dei faa tingi som fær skugge. */
+.vekekorg {
+  position: absolute; z-index: 20;
+  display: flex; flex-wrap: wrap; gap: var(--rom-1);
+  margin-top: var(--rom-1);
+  padding: var(--rom-2);
+  border: 1px solid var(--kant); background: var(--flate);
+  border-radius: 2px;
+  box-shadow: var(--skugge-flytande);
+  max-width: min(30rem, calc(100vw - 2rem));
+}
+.vekeval {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .8rem; letter-spacing: .06em; text-transform: uppercase;
+  padding: var(--rom-2) var(--rom-3);
+  color: var(--blekk-lys); text-decoration: none;
+  border: 1px solid transparent; border-radius: 2px;
+}
+.vekeval:hover { color: var(--blekk); border-color: var(--haarlina); }
+.vekeval.no { color: var(--klas); border-color: var(--klas); }
+
+.week-controls { display: flex; gap: var(--rom-3); align-items: center; flex-wrap: wrap; margin-bottom: 0; }
+.charges-filter { display: flex; gap: var(--rom-2); flex-wrap: wrap; align-items: center; }
+/* `.filters` og `.filter-group` stod her fyrr, med `max-width: 11rem` paa
+   veljarane. Sikti i timeplanen var den einaste som nytta deim, og ho
+   bur i vikehovudet no — sjaa `.timesikt`. Taket var nettupp det som
+   klipte lange lærarnamn av. */
+
+.week-navigation { display: flex; align-items: stretch; gap: var(--rom-1); }
+.week-nav-btn { padding: var(--rom-2) var(--rom-3); font-size: 1rem; line-height: 1; }
+.week-input {
+  width: 3.4rem; text-align: center; padding: var(--rom-2);
+  font-family: var(--skrift-tal); font-variant-numeric: tabular-nums;
+}
+
+/* ---- den klemde vika ----
+   Éi rad per time, eitt merke per dag. Radi ber det ein skannar etter —
+   naar, kva, kven, kvar — og ikkje meir. Detaljen bur i dokka.
+
+   Fyrr bar kvart kort heile detaljen sin, og vika vart eit tårn ein
+   laut rulla gjenom. Ei rad er 3,2 rem; eit kort var 11. */
+.timeplan {
+  border: 1px solid var(--haarlina);
+  background: var(--flate);
+}
+/* Rada og hovudet deler den same trappa, so merki stend i spaltone
+   sine og dagarne kann lesast nedyver. */
+/* Lista rullar i seg sjølv, so dagnamni stend att medan timane gjeng
+   forbi. Utan det er hovudet burte etter tri rader, og daa lyt ein
+   telja spaltor for aa finna ut kva dag ein ser paa.
+   
+   `max-height` og ikkje `height`: er vika stutt, kjem det ingi rulling
+   i det heile. Ei rullesteng som stend der utan aa ha noko aa rulla er
+   berre eit merke um at nokon ikkje maalte. */
+.timeplan {
+  --timetrapp: minmax(8rem, 1fr) repeat(7, minmax(0, var(--merkestorleik)));
+  max-height: min(70vh, 48rem);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  /* Ho tek plass av seg sjølv i staden for aa leggja seg yver siste
+     spalta, og daa skuvar ho ikkje rutenetet naar ho kjem og gjeng. */
+  scrollbar-gutter: stable;
+}
+
+.timehovud, .timerad {
+  display: grid;
+  grid-template-columns: var(--timetrapp);
+  gap: var(--rom-3);
+  align-items: center;
+  padding: var(--rom-3) var(--rom-4);
+}
+.timehovud {
+  position: sticky; top: 0; z-index: 3;
+  padding-bottom: var(--rom-2);
+  border-bottom: 1px solid var(--kant);
+  background: var(--flate);
+}
+.timehovud .dagnamn { text-align: center; }
+.timehovud-tom { grid-column: 1; }
+
+/* ---- sikti ----
+   Filtri bur i den fyrste ruta i vikehovudet, yver spalta dei siktar i.
+   Dei stod i tittellina fyrr, med `max-width: 11rem` — og eit lærarnamn
+   eller ei klassa på bokmål vart klipt av lenge fyrr ho var lesi. Her er
+   det ei heil spalta å taka av.
+
+   Dei ser ut som dagane attmed og ikkje som skjemafelt: ingi rute, inga
+   flata, berre ordet. Er eit val teke, tek veljaren den same merkefarga
+   flata som ein trykt dag — so ser ein at det er sikta *utan* å lesa
+   kva som stend. Det er den same regelen som gjeld dagane: eit trykk
+   syner seg som ljos, ikkje som ei ramme. */
+.timesikt {
+  grid-column: 1; min-width: 0;
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--rom-1);
+}
+.timesikt select {
+  width: auto; max-width: 100%; min-width: 0;
+  font: inherit; font-size: .82rem;
+  border: 0; background-color: transparent; border-radius: 2px;
+  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
+  background-position: right .55rem top 50%, right .35rem top 50%;
+  color: var(--blekk-lys);
+}
+.timesikt select:hover { color: var(--blekk); background-color: var(--ark-djup); }
+/* `:has` av di det ikkje finst nokon annan veg: kva som er valt i ein
+   veljar veit berre nettlesaren, og me vil ikkje ha eit skript til for
+   å setja ei klassa på noko han alt veit. */
+.timesikt select:has(option:checked:not([value=""])) {
+  color: var(--blekk); background-color: var(--merke-svak);
+}
+
+.timerad {
+  border-bottom: 1px solid var(--haarlina);
+}
+.timerad:last-child { border-bottom: 0; }
+.timerad:hover { background: var(--ark-djup); }
+
+/* Lengdi høyrer til namnet — ho er den same kva dag timen gjeng. */
+.timetittel .lengd {
+  font-family: var(--skrift-tal); font-size: .78rem; font-weight: 400;
+  font-stretch: normal; letter-spacing: 0;
+  color: var(--blekk-svakt); white-space: nowrap;
+}
+
+/* Namnet paa timen er det ein leitar etter i lista, og difor det einaste
+   som skal lesast paa avstand. Det stod i 1,05 rem — same storleik som
+   læraren under — og daa maatte ein lesa båe for aa finna kva som var
+   kva. */
+.timetittel {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
+  font-weight: 600; font-size: 1.55rem; line-height: 1.05; margin: 0;
+}
+.timekven { margin: .1rem 0 0; font-size: .92rem; color: var(--blekk-lys); }
+.timerom { color: var(--blekk); font-weight: 500; }
+
+/* ---- timemerket ----
+   Eit ur, og eit ur er teikna og ikkje sett saman av kassar. Difor er
+   heile merket éin SVG med eit fast viewBox, og punkti er rekna i
+   merkeform.go.
+
+   Figuren er tri former under éi samanhengande lina: skiltet med dagen
+   paa toppkanten, kroppen med skiva og vindauga, og maalaren i nedre
+   hyrna. Umrisset er ikkje rekna som ein union — det er silhuetten
+   utvida éin einheit med feMorphology. Prøvde ein aa teikna dei tri
+   formene ein gong til litt større, vandra dei innhole hyrno innyver i
+   staden for utyver, og lina slapp upp nettupp i skøyten.
+
+   Storleiken er éin skala og ingen ting anna. Det er difor merket
+   kjennest som den same tingen som kjem nærare, og ikkje som ei ny
+   teikning ved kvar storleik. */
+.timedagar { display: contents; }
+
+/* Storleiken er éin knapp og ingen ting anna. Alt i figuren er rekna i
+   eit viewBox, so skrift, strekar, hyrne og rom fylgjer med i det same
+   forholdet — det er den same tingen som kjem nærare, ikkje ei ny
+   teikning. Spaltone i vika er rekna av det same talet, so hovudet og
+   radene stend paa lina utan at nokon maaler. */
+:root { --merkestorleik: 5.4rem; }
+
+.dagmerke {
+  grid-column: calc(var(--dag) + 1);
+  display: block;
+  padding: 0; border: 0; background: none; border-radius: 0;
+  line-height: 0;
+  cursor: pointer;
+  justify-self: center;
+}
+.dagmerke:hover:not(:disabled) { background: none; border: 0; color: inherit; }
+.dagmerke:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
+
+/* Merket sa ingen ting naar du var borti det. Regelen over slår av
+   knappestilen som huset gjev alle knappar — og det var alt som stod
+   der, so peikaren skifta form og ingen ting anna hende.
+
+   No svarar merket med si eiga form: kanten tek merkefargen og flata
+   lysnar eit hakk. Ingen kasse rundt, ingen skugge — det er den same
+   silhuetten som ligg der, berre vaken. */
+.dagmerke:hover:not(:disabled) .form-kant,
+.dagmerke:hover:not(:disabled) .fanekant { fill: var(--merke-lys); }
+.dagmerke:hover:not(:disabled) .form-flate { fill: color-mix(in srgb, var(--merke) 7%, var(--flate)); }
+@media (prefers-reduced-motion: no-preference) {
+  .form-kant, .form-flate, .fanekant, .faneflate { transition: fill .12s ease-out; }
+}
+
+/* Paameld. Dette stod som `border-color` og `background` på sjølve
+   knappen — ein turkis kasse bak ein SVG som med vilje har `border: 0`
+   og `background: none`, og som difor synte seg som ein skugge rundt
+   merket i staden for som ein del av det. Regelen låg dessutan midt
+   inne i dokk-reglane, langt frå alt anna som gjeld merket.
+   Kanten seier det no, slik han seier «vald» to reglar lenger nede. */
+.dagmerke[data-paameld="true"] .form-kant { fill: var(--merke); }
+
+.merkeform { display: block; overflow: visible; width: var(--merkestorleik); height: auto; }
+.merke-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---- fasetten i det smaa ----
+   Den same fordjupingi som i skrivefelti: `inset 0 1px 2px` av blekket
+   ved 12%. Ei tunn, hard lina inne i yverkanten — ikkje ein mjuk glød,
+   og ikkje noko hovding i botnen. Feltet er grunnt; det er nettupp difor
+   det ser trykt ut og ikkje uppblaast. Sjaa docs/FASETTEN.md. */
+/* Filtri ber ingen farge; fargen stend her, paa elementi, og fylgjer
+   difor temaet der merket stend. */
+/* ---- fana ----
+   Ho er ei fane og ikkje ein kul paa umrisset, og difor ber ho fanone
+   sine fargar: den same lukka flata som ei ulesen fana i
+   administrasjonen. Dagen det er i dag er den valde fana — merkefargen,
+   og namnet i merkefargen — og dei hine trekkjer seg attende. */
+.faneflate { fill: var(--faneflate); }
+.fanekant  { fill: var(--kant); }
+.dagmerke.idag .faneflate { fill: var(--merke-svak); }
+.dagmerke.idag .fanekant  { fill: var(--merke); }
+
+/* Plassmerket ligg inne i kroppen no og lyt difor teikna seg sjølv mot
+   flata hans. */
+.plettflate { fill: var(--flate); }
+.plettkant  { fill: var(--kant); }
+
+/* ---- glaset ----
+   Merket er ein klokke, og ein klokke hev eit glas. Ljoset fell ovanfraa
+   og døyr ut mot midten — same kurva som paa knappen, og av same grunn:
+   det er ei kvelv, ikkje ei bobla. Laget ligg yverst og fangar difor
+   visarane med, slik eit glas gjer. */
+.form-glas { pointer-events: none; }
+.glas-topp { stop-color: var(--glans); }
+.glas-midt { stop-color: color-mix(in srgb, var(--glans) 34%, transparent); }
+.glas-ut   { stop-color: transparent; }
+
+.form-ring  { fill: var(--merke); visibility: hidden; }
+.form-kant  { fill: var(--kant); }
+.form-flate { fill: var(--flate); }
+.form-djup, .rutedjup { fill: color-mix(in srgb, var(--blekk) 12%, transparent); }
+
+/* `.dagnamn` var alt namnet paa dagane i vikehovudet. Eit merke som tok
+   den klassa i bruk, sette 7,2 px paa yverskrifti yver rutenetet — ein
+   kollisjon som berre syner seg paa skjermen. */
+.merkedag {
+  font-family: var(--skrift-yver); font-size: 10.0px; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp); letter-spacing: .06em;
+  fill: var(--blekk-svakt); text-anchor: middle;
+}
+
+/* ---- skiva ----
+   Indeksane ligg paa eit rektangulært spor og ikkje paa ein sirkel. Det
+   er sporet som gjer at ho ser firkanta ut. Tolv indeksar, tal paa 12, 3
+   og 9; sekstalet ligg under vindauga, som paa eit ur som er bygt slik. */
+.indeks { stroke: var(--blekk-svakt); stroke-width: 1.0; stroke-linecap: round; }
+.skivetal {
+  font-family: var(--skrift-tal); font-size: 5.7px;
+  fill: var(--blekk-svakt); text-anchor: middle; letter-spacing: -.04em;
+}
+
+/* Kakestykket heng i minuttvisaren — det er han som gjeng medan timen
+   gjeng — og maaler seg paa timevisaren si skala: ei runda er tolv
+   timar, so eit stykke er kor stor bit av dagen timen tek.
+
+   Det låg eit bleikt stykke attmed, tidi fram til timen byrja. Det er
+   burte: ingen kunde lesa kva det var, og skiva svarar paa naar timen
+   gjeng, ikkje kor lenge det er til. */
+.kake-timen { fill: color-mix(in srgb, var(--merke) 32%, transparent); }
+
+.visar { stroke-linecap: round; }
+.visar.time   { stroke: var(--blekk); stroke-width: 2.3; }
+.visar.minutt { stroke: var(--blekk-lys); stroke-width: 1.25; }
+/* Sluttvisaren er like lang som minuttvisaren og ber merkefargen: han
+   syner kvar timen er ute. */
+.visar.slutt  { stroke: var(--merke); stroke-width: 1.25; }
+.pinne { fill: var(--blekk); }
+
+/* ---- vindauga ---- */
+.ruteflate { fill: color-mix(in srgb, var(--blekk) 9%, var(--flate)); filter: url(#rutedjup); }
+.rutetal {
+  font-family: var(--skrift-tal); font-size: 8.0px;
+  fill: var(--blekk); text-anchor: middle; letter-spacing: -.03em;
+}
+
+/* ---- talet i pletten ----
+   Kor mange plassar som er att, av kor mange.
+
+   Det var eit kakestykke ei stund — ein *del* av ein sirkel. Ein del kan
+   ikkje skiljast: to att av ti ser likt ut som fire att av tjue, og éin
+   att av fire ser ut som ein god sjanse når det i røynda er ein plass.
+   Ein Reformer-time har fire plassar; ein time i salen har atten. Det er
+   heile skilnaden, og han er borte i ein del. */
+.pletttal {
+  font-family: var(--skrift-tal); font-size: 6.7px;
+  fill: var(--blekk); text-anchor: middle; letter-spacing: -.04em;
+}
+.pletttal .av { fill: var(--blekk-svakt); font-size: .82em; }
+
+/* Er timen full, er det ikkje noko aa maala. Maalaren vert ei lapp med
+   eitt ord i, og ordet stend midt i lappa som veks til vinstre og held
+   høgrekanten sin. */
+.fulltekst {
+  font-family: var(--skrift-yver); font-size: 5.7px; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp); letter-spacing: .08em;
+  fill: var(--blekk-lys); text-anchor: middle;
+}
+
+/* ---- stodene ---- */
+/* Vald er det same grepet som fokus i eit skrivefelt: lina tek
+   merkefargen, ein ring til legg seg utanpaa henne, og fordjupingi vert
+   djupare. Djupna segjer «dette kann du taka i», fargen «her er du no». */
+.dagmerke[aria-pressed="true"] .form-ring { visibility: visible; }
+.dagmerke[aria-pressed="true"] .form-kant { fill: var(--merke); }
+.dagmerke[aria-pressed="true"] .form-djup { fill: color-mix(in srgb, var(--blekk) 16%, transparent); }
+
+/* Umme: timen er gjenomgjengen. Han stend der av di rada skal ha sju
+   plassar, men han dreg ikkje auga. */
+.dagmerke.umme { opacity: .42; cursor: default; }
+.dagmerke:disabled { cursor: default; }
+
+/* I dag er ikkje merket sitt. Det er *kvar du er*, og det høyrer til
+   spalta — eit band nedyver heile rutenetet. Vald er kva du peikar paa,
+   og det høyrer til merket. Var baae sagde med den same streken, tydde
+   streken tvo ting. */
+.dagmerke.idag .merkedag { fill: var(--merke); }
+.timehovud .dagnamn.idag { color: var(--klas); }
+
+/* ---- ruta utan time ----
+   Ho var ein stipla kasse fyrr, og ein stipla kasse er eit *umriss* —
+   det ser ut som noko som skal koma. Her er det motsette som er sant:
+   det gjeng ingen time den dagen, og plassen er tom.
+
+   Difor er ho eit spor: ei fordjuping i arket i forma aat kroppen, med
+   den same fasetten som skrivefelti — berre djupare, av di ho er tom
+   heile vegen ned. Uret ligg ikkje i henne. Sjaa docs/FASETTEN.md.
+
+   Ho er eit hol og ikkje ein knapp: `pointer-events: none` gjer at ho
+   korkje tek klikk eller stel peikaren. */
+.dagmerke.daud { pointer-events: none; cursor: default; }
+.daudflate { fill: color-mix(in srgb, var(--blekk) 6%, transparent); }
+.dauddjup  { fill: color-mix(in srgb, var(--blekk) 28%, transparent); }
+/* Den nedre lippa. `--flate` er alltid den ljosaste flata i temaet, so
+   ho lyser i baae — det er difor ho stend her og ikkje kvitt. */
+.daudljos  { fill: color-mix(in srgb, var(--flate) 80%, transparent); }
+.dagmerke.daud.idag .daudflate { fill: color-mix(in srgb, var(--merke) 8%, transparent); }
+
+/* Merke som stend for seg sjølve — paa heimesida, utan rutenet. Dei
+   stend i spaltor av den same breiddi som i vika, so eit merke er like
+   stort kvar du ser det. */
+.merkerad {
+  display: grid; gap: var(--rom-3);
+  grid-template-columns: repeat(auto-fill, var(--merkestorleik));
+  justify-content: start;
+}
+.merkerad .dagmerke { grid-column: auto; }
+
+
+/* Berre for skjermlesaren. Dagen stend i hovudet for auga; merket
+   treng honom likevel, av di ein som høyrer sida ikkje ser spalta. */
+.berre-lesar {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* Under dette er sju spaltor for smalt til aa bera eit tal. Daa fell
+   rutenetet saman, merki flyt etter kvarandre, og dagen kjem attende i
+   merket sjølv — han kann ikkje lenger lesast av plasseringi. */
+@media (max-width: 60rem) {
+  .timeplan { --timetrapp: minmax(0, 1fr); }
+  .timehovud { display: none; }
+  /* Dagarne kann ikkje lesast av spaltone lenger, so hovudet fell burt
+     — men sikti bur i honom no, og ho gjeld like fullt. Difor stend
+     ruta hennar att åleine. */
+  .timehovud:has(.timesikt) { display: block; }
+  .timehovud:has(.timesikt) .dagnamn { display: none; }
+  .timedagar {
+    display: flex; flex-wrap: wrap; gap: var(--rom-2);
+    grid-column: 1 / -1;
+  }
+  .dagmerke { grid-column: auto; min-width: 3.6rem; padding-left: var(--rom-2); padding-right: var(--rom-2); }
+  /* Den daude ruta er eit hol i eit rutenet. Er rutenetet burte, er ho
+     berre ei tom eske ein lyt sjaa forbi. */
+  .dagmerke.daud { display: none; }
+  /* Paa smale glas kann ikkje dagen lesast av plasseringi lenger, so
+     lappen kjem fram — men berre med dagen. Klokka stend alt paa
+     kanten, og ho skal ikkje seiast tvo gonger. */
+  .berre-lesar {
+    position: static; width: auto; height: auto; margin: 0;
+    overflow: visible; clip-path: none;
+    font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+    font-size: .66rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--blekk-lys);
+  }
+  .dagmerke { padding-top: var(--rom-3); }
+}
+
+/* ===================================================================
+   dokka
+   Ho held det du ser paa i ro medan resten rullar: du vel ein dag, og
+   timen stend her nede til du vel ein annan. Difor flyttar ingen ting
+   seg naar du samanliknar tvo dagar, og knappen er alltid paa den same
+   staden.
+
+   Botnen er festa og toppen flyt, so ho veks med innhaldet. Sida fær
+   luft under seg av same høgdi, elles ligg det siste ho hev aa syna
+   under dokka.
+   =================================================================== */
+:root { --dokkhogd: 0px; }
+
+/* Yverkanten var ein maala strek: `2px solid var(--klas)`, tvo pikslar
+   rein turkis tvers yver skjermen. Hovudet hev eit *ljos* i den same
+   lina — fire lag glød som fylgjer den valde lenkja — og dei tvo enda
+   opp som tvo ulike slag ting i kvar sin ende av sida: eit lys upp,
+   ei maling ned.
+
+   No er kanten ei hårlina, og ljoset ligg yver henne og stig upp. Same
+   familien, roleg utgaava: dokka er ei heil flata og ikkje eit punkt,
+   so ho lyser jamt i staden for aa ha ein kjerne. */
+.dokk {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  background: var(--flate);
+  border-top: 1px solid color-mix(in srgb, var(--merke) 55%, var(--haarlina));
+  box-shadow: var(--skugge-flytande);
+}
+.dokk::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -14px;
+  height: 15px; pointer-events: none;
+  background:
+    linear-gradient(to bottom,
+      transparent 0%,
+      color-mix(in srgb, var(--merke) 7%, transparent) 52%,
+      color-mix(in srgb, var(--merke) 20%, transparent) 86%,
+      color-mix(in srgb, var(--merke) 34%, transparent) 100%);
+}
+.dokkinnhald {
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-4) var(--rom-5);
+  display: flex; align-items: center; gap: var(--rom-5); flex-wrap: wrap;
+  position: relative;
+}
+.dokkkva { flex: 1 1 12rem; }
+.dokktittel {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
+  font-weight: 500; font-size: 1.25rem; margin: 0;
+}
+.dokkkven { margin: 0; font-size: .88rem; color: var(--blekk-lys); }
+.dokknaar { display: flex; flex-direction: column; }
+/* capitalize tek *kvart* ord, og daa vart «torsdag 27. august» til
+   «Torsdag 27. August». Norsk skriv ikkje maanadsnamn med stor
+   bokstav; berre den fyrste bokstaven i linja skal upp. */
+.dokkdag { font-size: .82rem; color: var(--blekk-lys); }
+.dokkdag::first-letter { text-transform: uppercase; }
+.dokkklokke { font-family: var(--skrift-tal); font-size: 1.05rem; }
+.dokkplassar { min-width: 9rem; }
+.dokkhandling { margin-left: auto; display: flex; flex-direction: column; gap: var(--rom-2); align-items: stretch; }
+
+/* Svaret fraa tenaren stend i dokka, ikkje i ei varselrute. Ei
+   varselrute stel fokus og lyt lukkast; her stend det attmed knappen
+   som utløyste det, og kvarv naar du vel noko anna. */
+.dokkmelding { margin: 0; font-size: .82rem; color: var(--blekk-lys); max-width: 22rem; }
+.dokkmelding.gale { color: var(--aatvaring); }
+/* Krossen laag absolutt i hyrna og hadde ingi eigi lane — og handlingane
+   i dokka ligg med `margin-left: auto`, altso heilt ute til høgre. Dei
+   tvo enda paa den same plassen: krossen laag uppaa knappen, og daa er
+   det tilfeldig kva ein treffer.
+   
+   Han er eit flex-barn no, sist i rada. Han tek plassen sin i staden for
+   aa laana han av nokon andre, og han stend midt i høgdi so han fylgjer
+   dokka naar ho veks. */
+.dokklukk {
+  order: 99; align-self: center; flex: none;
+  margin-left: var(--rom-2);
+  background: none; border: 0;
+  padding: var(--rom-1) var(--rom-2);
+  font-size: 1.4rem; line-height: 1; color: var(--blekk-svakt);
+  text-transform: none; letter-spacing: 0;
+  border-radius: var(--rund-knapp);
+}
+.dokklukk:hover { color: var(--blekk); background: var(--ark-djup); border: 0; }
+
+@media (max-width: 44rem) {
+  .dokkinnhald { gap: var(--rom-3); padding: var(--rom-3) var(--rom-4); }
+  .dokkhandling { margin-left: 0; flex: 1 1 100%; }
+  .dokkhandling .btn-primary { width: 100%; }
+}
+
+/* ===================================================================
+   statistikk (administrasjonen)
+   =================================================================== */
+.gamal-stats-grid { display: grid; gap: 1px; background: var(--haarlina); border: 1px solid var(--haarlina); margin-bottom: var(--rom-6); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+.stat-item { background: var(--flate); padding: var(--rom-4) var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-1); }
+.stat-value { font-family: var(--skrift-tal); font-size: 2rem; line-height: 1; color: var(--blekk); }
+.stat-label {
+  font-family: var(--skrift-yver); font-size: .78rem;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys);
+}
+
+/* ===================================================================
+   maalveljaren
+   Ingi flagg. Eit flagg er eit land, ikkje ei skriftform — og det
+   danske flagget paa bokmaal segjer det tydelegare enn eg kann.
+   =================================================================== */
+.language-selector, .login-language-selector {
+  display: flex; align-items: center; gap: var(--rom-2);
+  font-size: .82rem;
+}
+.language-selector select {
+  width: auto; min-width: 0;
+  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
+  font-size: .82rem;
+  border-color: transparent; background-color: transparent;
+  color: var(--blekk-lys);
+  background-position: right .45rem top 50%;
+}
+.language-selector select:hover { border-color: var(--haarlina); color: var(--blekk); }
+
+/* ===================================================================
+   innloggingi — den eine sida utan leiding
+   =================================================================== */
+.login-container {
+  max-width: 26rem; margin: var(--rom-7) auto; padding: var(--rom-6);
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+}
+.login-subtitle { color: var(--blekk-lys); font-size: .95rem; margin-bottom: var(--rom-5); }
+.login-btn { width: 100%; margin-top: var(--rom-2); }
+.forgot-password, .signup-link { font-size: .9rem; margin-top: var(--rom-4); color: var(--blekk-lys); }
+.signup-link { border-top: 1px solid var(--haarlina); padding-top: var(--rom-4); }
+
+/* ===================================================================
+   smale glas
+   Éin brotstad, skriven éin gong. Han stod fyrr i kvart einskilt
+   stilark, med litt ulike verd.
+   =================================================================== */
+/* Under dette hev ein dag ikkje plass til aa vera ei spalta. Sju
+   spaltor paa eit telefonglas vert ni piksel kvar, og daa er det ikkje
+   ei vika lenger — det er ein vegg. */
+@media (max-width: 62rem) {
+  .week-grid { grid-template-columns: minmax(0, 1fr); }
+  .day-column .day-header {
+    flex-direction: row; justify-content: space-between; align-items: baseline;
+    position: static;
+  }
+  .day-column.past .day-content { padding: var(--rom-3); }
+}
+
+@media (max-width: 48rem) {
+  :root { --rom-5: 1rem; --rom-6: 1.5rem; --rom-7: 2rem; }
+
+  .header-content, .botninnhald, main { padding-left: var(--rom-4); padding-right: var(--rom-4); }
+  .header-content { gap: var(--rom-3); }
+  .nav-list { gap: var(--rom-2) var(--rom-3); }
+  .nav-item a { white-space: nowrap; }
+
+  h1, .page-title { font-size: 1.7rem; }
+
+  .two-column-grid, .selector-container, .categories-grid,
+  .packages-grid, .events-grid, .stats-grid, .admin-stats, .form-row {
+    grid-template-columns: 1fr;
+  }
+  .stats-grid { gap: 1px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* Skriv ikkje ut leidingi. */
+@media print {
+  .nav, .header, .auth-controls, button, .btn { display: none !important; }
+  body { background: #fff; color: #000; }
+}
+
+/* ===================================================================
+   medlemskapet og klippekortet
+   Dei tvo tingi studioet sel. Livsmerket er det einaste som ber farge:
+   aktiv er fylt furu, ei sendt førespurnad er den same furua men open,
+   frose er ein strek, kansellert er prikka og graatt.
+   =================================================================== */
+.no-membership, .no-klippekort {
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  padding: var(--rom-5);
+}
+/* Produktfargen stend paa vengen. Turkis medlemskap, rosa klippekort,
+   lilla kurs — det er den einaste staden fargen segjer kva slag ting
+   kortet er, og han skiftar aldri av seg sjølv. */
+.membership-card { --produkt: var(--klas); }
+.klippekort-card { --produkt: var(--togu); }
+.kurskort, .event-card.kurs { --produkt: var(--tuneup); }
+
+.membership-card.active, .klippekort-card:not(.expired) {
+  border-left: 3px solid var(--produkt);
+}
+.membership-card.paused, .membership-card.cancelled { border-left: 3px solid var(--blekk-svakt); }
+.membership-card.freeze_requested { border-left: 3px dashed var(--produkt); }
+
+.membership-header, .card-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: var(--rom-3); flex-wrap: wrap;
+  margin-bottom: var(--rom-3);
+}
+.card-title {
+  font-family: var(--skrift-yver); font-size: 1.3rem; margin: 0;
+  font-stretch: var(--vidd-yver); font-weight: 500;
+}
+
+/* Merket sjølv. Forma segjer stoda; fargen segjer berre um ho er i live. */
+.membership-status {
+  font-stretch: var(--vidd-merkelapp);
+  display: inline-flex; align-items: center; gap: var(--rom-2);
+  font-family: var(--skrift-yver);
+  font-size: .78rem; letter-spacing: .09em; text-transform: uppercase;
+  background: none; border: 0; padding: 0;
+  color: var(--blekk-lys);
+}
+.membership-status::before {
+  content: ""; width: .5rem; height: .5rem; border-radius: 50%;
+  border: 1px solid currentColor; background: currentColor; flex: none;
+}
+.status-active { color: var(--produkt, var(--merke)); }
+.status-freeze_requested { color: var(--produkt, var(--merke)); }
+.status-freeze_requested::before { background: none; }
+.status-paused { color: var(--blekk-lys); }
+.status-paused::before { border-radius: 0; height: 1px; width: .7rem; background: currentColor; }
+.status-cancelled { color: var(--blekk-svakt); }
+.status-cancelled::before { background: none; border-style: dotted; }
+
+.price-info { display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap; margin: var(--rom-3) 0; }
+.price-info .price { font-family: var(--skrift-tal); font-size: 1.6rem; letter-spacing: -.02em; }
+.membership-details, .dates-info, .card-content { display: flex; flex-direction: column; gap: var(--rom-1); }
+.binding-end, .days-until, .card-expiry, .renewal-date {
+  font-size: .88rem; color: var(--blekk-lys);
+}
+/* Det som hastar fær vekt, ikkje farge — farge her ville tyda «i live». */
+.renewal-date.urgent, .days-until.urgent { color: var(--blekk); font-weight: 500; }
+
+.membership-actions {
+  display: flex; gap: var(--rom-2); flex-wrap: wrap; margin-top: var(--rom-4);
+}
+
+/* ---- klippekortet ----
+   Segmenti er klipp. Eit brukt klipp er ei tom rute, ikkje ein graa
+   klump: du skal kunna telja kor mange du hev att utan aa lesa talet. */
+/* Same mellomrom som millom ladningarne paa hi sida. Dei stod med ulik
+   luft og saag difor ut som tvo ulike slag lister. */
+.klippekort-cards { display: grid; gap: var(--rom-3); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+.klippekort-card { overflow: visible; }
+
+.klipp-count { font-family: var(--skrift-tal); font-size: 1.1rem; white-space: nowrap; }
+.klipp-count .remaining { font-size: 1.5rem; color: var(--produkt, var(--togu)); }
+.klipp-count .total { color: var(--blekk-lys); }
+
+/* Éi rad: talet, bandet og knappen deler lina, so kortet er tvo rader
+   høgt og ikkje fire. Bandet tek plassen som er att; paa eit smalt kort
+   bryt rada seg sjølv i staden for aa rulla (§7). Maalaren sine eigne
+   loddrette margar er til naar han stend aaleine i ein stabel — her er
+   det rada som set lufti, og glødi treng ingen plass av di ho ligg
+   utanpaa (§3). */
+.klipprad { display: flex; align-items: center; gap: var(--rom-3); flex-wrap: wrap; }
+.klipprad .progress-bar { flex: 1 1 6rem; min-width: 0; }
+.klipprad .progress-segments { margin: 0; }
+.klipprad button { flex: none; margin-left: auto; }
+
+.no-membership, .no-klippekort {
+  color: var(--blekk-svakt); text-align: center; padding: var(--rom-6) var(--rom-4);
+}
+
+/* ===================================================================
+   registrering, vilkaar og gløymt passord
+   Dei tri sidone som stod utanfor systemet: registreringi var ei rein
+   fil med Arial og eigne fargar, vilkaari vart skrivne ut som naken
+   HTML utan so mykje som eit <html>-merke, og gløymt-passord fanst
+   ikkje i det heile — lenkja paa innloggingi gav 404.
+   =================================================================== */
+.smal { max-width: 34rem; }
+
+.skjema { display: flex; flex-direction: column; gap: var(--rom-4); }
+.skjema .form-group { margin-bottom: 0; }
+
+/* Stjerna er ei paaminning, ikkje ei aatvaring. Ho skal ikkje ropa. */
+.paakravd { color: var(--blekk-svakt); }
+
+.bolk {
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  padding: var(--rom-4) var(--rom-5) var(--rom-5);
+  display: flex; flex-direction: column; gap: var(--rom-4);
+  margin: 0;
+}
+.bolk legend {
+  font-family: var(--skrift-yver);
+  font-size: .82rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  padding: 0 var(--rom-2);
+}
+
+.avkryssing { display: flex; align-items: start; gap: var(--rom-3); }
+.avkryssing input[type="checkbox"] {
+  width: 1.05rem; height: 1.05rem; margin: .22rem 0 0; flex: none;
+  accent-color: var(--merke);
+}
+.avkryssing label { color: var(--blekk); font-size: .95rem; }
+
+/* Ein knapp som opnar noko, men som stend inne i ei setning. */
+.lenkjeknapp {
+  background: none; border: 0; padding: 0;
+  font: inherit; text-transform: none; letter-spacing: 0;
+  color: var(--merke); text-decoration: underline;
+  text-underline-offset: .16em; cursor: pointer;
+}
+.lenkjeknapp:hover { color: var(--merke-lys); background: none; border: 0; }
+
+.attende { margin-top: var(--rom-5); font-size: .92rem; }
+
+/* ---- skuffa ----
+   Det einaste paa heile arket som verkeleg flyt, og difor det einaste
+   som fær skugge. */
+.skuffa {
+  border: 1px solid var(--kant);
+  border-radius: 2px;
+  background: var(--flate);
+  color: var(--blekk);
+  box-shadow: var(--skugge-flytande);
+  max-width: min(44rem, 92vw);
+  max-height: 82vh;
+  padding: var(--rom-5);
+}
+.skuffa::backdrop { background: rgb(0 0 0 / .55); }
+.skuffa h2 { margin-bottom: var(--rom-4); }
+.skuffa form { margin-top: var(--rom-5); }
+.skuffa-tekst { overflow-y: auto; max-height: 56vh; }
+.skuffa-tekst h1, .skuffa-tekst h2, .skuffa-tekst h3 { margin: var(--rom-5) 0 var(--rom-2); font-size: 1.15rem; }
+.skuffa-tekst h1:first-child { margin-top: 0; }
+.skuffa-tekst p, .skuffa-tekst li { font-size: .93rem; color: var(--blekk-lys); }
+.skuffa-tekst ul, .skuffa-tekst ol { padding-left: 1.2rem; }
+
+/* ---- vilkaarssida i full breidd ---- */
+.vilkaar { max-width: 46rem; }
+.vilkaar h1, .vilkaar h2, .vilkaar h3 { margin: var(--rom-6) 0 var(--rom-3); }
+.vilkaar h1:first-child { margin-top: 0; }
+.vilkaar li { margin-bottom: var(--rom-2); }
+
+/* ===================================================================
+   fanone
+   Same systemet som i ordboki, med same grunngjevingi.
+
+   Ei fana er eit blad i ei mappa: lina gjeng attum dei lukka og er
+   *broti* under den opne. Det er brotet som gjer at rekkja les seg som
+   fanor — ikkje fargen, ikkje skuggen. Difor hev den opne fana ingi
+   botnlina: ho er den same flata som bolken under henne.
+
+   Fire tal styrer alt. Stod dei kvar for seg i seks reglar, laut dei
+   vera samde, og var det ikkje.
+
+     --fanekant  sidekantarne og toppen
+     --fot       kor tjukk lina fana stend paa er
+     --fotfarge  kva den lina er naar fana er lukka
+     --loft      kor mykje den opne fana stikk upp yver dei lukka
+
+   Loftet er i heile pikslar. Ein rem-brøk vert sjeldan eit heilt tal
+   pikslar, og daa hamnar underkanten aat den opne fana ein halv piksel
+   fraa lina ho skal møta — det er den halve pikselen som gjer at
+   fanone ikkje ser ut som fanor.
+
+   Kantarne stend der heile tidi og skifter berre farge. Difor skuvar
+   ingen ting seg naar ein byter fana, og det er heile poenget: du ser
+   paa den staden du saag paa, og innhaldet skifter under deg.
+   =================================================================== */
+.faneark { --fanekant: 1px; --fot: 1px; --fotfarge: var(--haarlina); --loft: 2px; }
+
+.faner {
+  display: flex; align-items: flex-end;
+  gap: .15rem;
+  /* Fanone rulla ikkje. Er dei fleire enn lina toler, bryt dei ned paa
+     ei rad til — som fanor i tvo lag i ei mappa, som er ein ting ei
+     mappa faktisk gjer. */
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0 0 0 var(--rom-2);
+  list-style: none;
+}
+
+.fane {
+  position: relative; z-index: 0; flex: none;
+  padding: var(--rom-2) var(--rom-4);
+  margin-bottom: calc(-1 * var(--fot));
+  border: var(--fanekant) solid var(--haarlina);
+  border-bottom: var(--fot) solid var(--fotfarge);
+  border-radius: 3px 3px 0 0;
+  background: var(--faneflate);
+  /* Flata stoggar ved fotkanten og gjeng ikkje inn under honom. Utan
+     dette vert flata maala *under* foten, foten er gjenomsynleg med
+     vilje, og daa stend ingi fana paa noko. */
+  background-clip: padding-box;
+  color: var(--blekk-lys);
+  font-family: var(--skrift-yver);
+  font-size: .92rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer; text-align: center;
+  /* Skuggen fell ut or fana, ikkje inn i henne: ei fana ligg yver
+     arket og kastar skugge upp og ut. */
+  box-shadow: 0 -2px 5px -3px color-mix(in srgb, var(--blekk) 40%, transparent);
+}
+.fane:hover { color: var(--blekk); background: color-mix(in srgb, var(--blekk) 10%, var(--ark)); }
+
+.fane[aria-selected="true"] {
+  z-index: 1;
+  /* Ho stikk upp med loftet. Fyllet aukar, so teksti flyt ikkje — det
+     er kanten som rører seg, ikkje ordet. */
+  padding-top: calc(var(--rom-2) + var(--loft));
+  background: var(--flate);
+  color: var(--blekk);
+  box-shadow: none;
+}
+/* Remsa som lukkar lina upp. Ho gjeng *inni* kantarne, ikkje ut yver
+   deim: ho skal brjota lina, ikkje eta veggjene aat fana. */
+.fane[aria-selected="true"]::after {
+  content: ""; position: absolute; z-index: 1;
+  left: 0; right: 0;
+  bottom: calc(-1 * var(--fot)); height: var(--fot);
+  background: var(--flate);
+}
+.fane:focus-visible { outline: 2px solid var(--merke); outline-offset: -2px; }
+
+.fanerom {
+  border: var(--fanekant) solid var(--haarlina);
+  background: var(--flate);
+  padding: var(--rom-5);
+}
+
+/* Alle bolkarne stend i dokumentet heile tidi; det er berre synet som
+   skifter. Vart dei bytte ut, laut nettlesaren leggja sida ut paa nytt
+   for kvart klikk, og daa hoppar det. */
+/* Kva bolk som er synleg, avgjer faner.js med `hidden`. Her stod ei
+   liste over namna på bolkane før — «oversyn», «timeplan», «prisar» … —
+   og ei ny fanerekkje kravde ei ny linje i stilarket. Det er den slags
+   regel som vert gløymd, og då er det ikkje fanene som er i stykke:
+   alle bolkane står open på ein gong. */
+
+/* Fyrste yverskrifti i ein bolk stend alt under fanone og treng ikkje
+   luft yver seg. */
+.fanerom > [data-bolk] > :first-child { margin-top: 0; }
+
+/* Smaating som fyrr stod som style-attributt med sine eigne hex-tal. */
+/* Kursiv finst ingen annan stad i huset — korkje i ei yverskrift, eit
+   merke eller ei lina brødtekst — og ei kursiv line er difor ikkje
+   «dempa», ho er *framand*. Fargen dempar henne alt. */
+.tomt { color: var(--blekk-svakt); }
+
+/* ---- den tome vika ----
+   Ei line i hyrna av eit stort tomt felt les seg som noko som er gløymt
+   att, ikkje som eit svar. Ho stend midt i det rommet timarne vilde
+   hatt no, i yverskriftsskrifta, med ei lettare line under. */
+.tomveke {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: var(--rom-2);
+  min-height: 14rem; padding: var(--rom-7) var(--rom-5);
+  text-align: center;
+}
+.tomveke-tittel {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
+  font-weight: 500; font-size: clamp(1.4rem, 3.4vw, 2rem);
+  line-height: 1.15; color: var(--blekk-lys);
+  margin: 0; text-wrap: balance;
+}
+.tomveke-under {
+  font-size: .95rem; color: var(--blekk-svakt);
+  margin: 0; max-width: 34ch;
+}
+.midt { text-align: center; }
+
+/* Det framheva valet i medlemskapsveljaren. Han hadde ein oransje kant
+   og ein kvit fargeovergang; no ber han produktfargen som alt anna. */
+.option-label.framheva {
+  border: 1px solid var(--klas);
+  background: color-mix(in srgb, var(--klas) 8%, var(--flate));
+}
+
+/* ===================================================================
+   merket
+   Han stend som ei *maske* og ikkje som eit bilete, so han tek fargen
+   fraa teksti han stend i — same grepet som krossen paa sletteknappen i
+   ordboki. Difor finst det éi fil paa disken og ikkje ei per farge, og
+   han fylgjer temaet utan at nokon skriv honom um.
+   =================================================================== */
+.merke {
+  display: inline-block;
+  flex: none;
+  width: var(--merkestorleik, 1.5em);
+  height: var(--merkestorleik, 1.5em);
+  background: currentColor;
+  -webkit-mask: url("/static/img/kjernekraft.svg") center / contain no-repeat;
+          mask: url("/static/img/kjernekraft.svg") center / contain no-repeat;
+}
+
+/* Merket attmed namnet er skrive i hovudbolken lenger uppe. Ein
+   dublett stod her og — med ein annan storleik — og av di han kom
+   seinare i fila, var det han som gjaldt. Difor rørde ringen seg ikkje
+   naar eg endra talet der uppe. */
+
+/* Paa innloggingi og dei andre dørene stend han for seg sjølv yver
+   tittelen. Det er den einaste staden han fær vera stor. */
+/* Paa dørene stend han for seg sjølv, midt i spalta si. */
+.doermerke {
+  --merkestorleik: 4rem;
+  color: var(--blekk);
+  margin-inline: auto;
+  margin-bottom: var(--rom-5);
+  display: block;
+}
+
+/* ---- rom til teikningar ----
+   Der det stend emoji i dag. Boksen er fast og kvadratisk, so eit kort
+   ikkje skiftar høgd naar teikningi kjem paa plass — og so lenge ho
+   ikkje er der, stend det eit tomt rom av rett storleik i staden for at
+   alt hoppar den dagen ho kjem.
+
+   Teikningarne skal vera SVG med `stroke="currentColor"` og utan eigne
+   fargar, som merket. Daa verka dei i baae temaom, og dei kann bera
+   produktfargen der dei stend i eit produkt. */
+.teikning, .category-icon {
+  display: block;
+  width: var(--teikningstorleik, 3.5rem);
+  height: var(--teikningstorleik, 3.5rem);
+  margin-bottom: var(--rom-3);
+  color: var(--produkt, var(--blekk-lys));
+  font-size: var(--teikningstorleik, 3.5rem);
+  line-height: 1;
+}
+.teikning svg, .category-icon svg { width: 100%; height: 100%; display: block; }
+
+/* ---- plassmaalaren ----
+   Same ljoset som klippekortet, men med ei anna tyding: her er ei tend
+   rute ein *teken* plass. Regelen er den same i baae — ei tend rute er
+   noko som finst — og difor er ein full time heilt tend. Det er den
+   tilstanden Ida ser etter, og han treng ingen farge for aa skilja seg:
+   han er den einaste som ikkje hev mørke rutor att. */
+.plassmaalar {
+  --klippfarge: var(--klas);
+  --rib: 2px;
+  display: flex; gap: var(--rib);
+  height: 9px; margin: var(--rom-2) 0 var(--rom-1);
+  position: relative; isolation: isolate;
+}
+.plass {
+  position: relative; flex: 1 1 0; min-width: 2px;
+  border: 1px solid var(--haarlina); border-radius: 1px;
+  background: var(--ark-djup);
+}
+.plass.teken {
+  border-color: color-mix(in srgb, var(--klippfarge) 55%, var(--haarlina));
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 26%, #fff) 0%, transparent 100%),
+    color-mix(in srgb, var(--klippfarge) 84%, var(--flate));
+}
+.plass.teken::after {
+  content: ""; position: absolute; z-index: -1;
+  left: -4px; right: -4px; top: -5px; bottom: -5px; pointer-events: none;
+  background:
+    radial-gradient(ellipse 40% 30% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 80%, transparent) 0%,
+      color-mix(in srgb, var(--klippfarge) 44%, transparent) 38%, transparent 76%),
+    radial-gradient(ellipse 110% 80% at 50% 55%,
+      color-mix(in srgb, var(--klippfarge) 16%, transparent) 0%, transparent 82%);
+}
+.plass::before {
+  content: ""; position: absolute; z-index: 2;
+  top: -6px; bottom: -6px;
+  right: calc(-1px - var(--rib)); width: var(--rib);
+  background: var(--flate); pointer-events: none;
+}
+.plass:last-child::before { display: none; }
+
+.event-plassar { font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-lys); }
+.event-plassar b { color: var(--blekk); font-weight: 400; }
+.event-plassar .av { color: var(--blekk-svakt); }
+.event-rom { font-weight: 500; color: var(--blekk); }
+.fullmerke {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--klas); margin-left: var(--rom-2);
+}
+
+/* Ein full time er ikkje ein feil — han er eit utseld hus. Kortet fær
+   ei lina i merkefargen, ikkje ei aatvaring. */
+.event-card.full { border-left: 2px solid var(--klas); }
+
+@media (prefers-reduced-motion: reduce) { .plass.teken::after { display: none; } }
+
+/* ===================================================================
+   setningsskjemaet
+   Timen skriven som ei setning i staden for tolv felt under kvarandre.
+   Rekkjefylgdi er arbeidet — kva, kven, kvar, naar, kor lenge — og
+   ikkje rekkjefylgdi paa spaltone i tabellen.
+
+   Felti veks etter innhaldet (`field-sizing`), so linja les seg som ei
+   linja og ikkje som eit skjema med hol i. Der nettlesaren ikkje kann
+   det, stend dei paa ei rimeleg fast breidd; setningi held.
+   =================================================================== */
+.setningsskjema { display: flex; flex-direction: column; gap: var(--rom-4); align-items: start; }
+
+.setning {
+  font-size: 1.15rem; line-height: 2.4; max-width: 54ch;
+  margin: 0; color: var(--blekk-lys);
+}
+
+/* Feltet i setninga er eit lappfelt som står i ei line — same djupna,
+   same fokus, same innhaldsbreidd. Det hadde ein turkis understrek før
+   og inga djupn i det heile, og det var gale på to måtar.
+
+   Det var den einaste skrivbare tingen i huset utan fasetten, så
+   «her kan du skrive» sa noko anna her enn på Min profil og i Prising
+   (FASETTEN §2). Og streken var --klas, som er fargen på medlemskapet:
+   ein farge som tyder eitt produkt kan ikkje samstundes tyde
+   «skrivefelt», elles tyder han ingen ting.
+
+   Djupna ber det no, slik ho gjer overalt elles. */
+.setning .felt {
+  /* Same forma som kvart anna felt; berre maalet er setningi sitt.
+     Han hadde ein turkis understrek i ei stund, og ei hårline etter det
+     — men ei hårline inne i ei line brødtekst les seg som ein boks lagd
+     oppå setningi. Djupna åleine ligg *i* henne. */
+  width: auto; min-width: 4.5rem; max-width: 16rem;
+  field-sizing: content;
+  padding: .1rem .4rem;
+  font-weight: 500; font-size: 1rem;
+}
+.setning .felt:hover { background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
+.setning .felt:focus { outline: none; box-shadow: var(--fasett); }
+.setning .felt::placeholder { color: var(--blekk-svakt); font-weight: 400; }
+.setning .felt-tal { min-width: 3.2rem; text-align: center; font-family: var(--skrift-tal); }
+
+/* Ein veljar plukkar; han skriv ikkje. Difor inga fordjuping på han,
+   men hårlina han har overalt elles (FASETTEN §3). Det er skilnaden
+   mellom å skrive og å velje, og han skal vere synleg i setninga òg. */
+.setning select.felt {
+  background-color: var(--flate);
+  border: 1px solid var(--kant);
+  box-shadow: none;
+  padding-right: var(--rom-5); background-position: right .4rem top 50%;
+}
+.setning select.felt:hover { background-color: var(--flate); }
+.setning select.felt:focus { border-color: var(--merke); box-shadow: var(--fasett); }
+
+.setning .innelabel { color: var(--blekk-lys); font-size: 1rem; }
+.setning input[type="checkbox"] { accent-color: var(--klas); width: 1rem; height: 1rem; }
+
+/* Det systemet reknar ut. Det stend under setningi og ikkje inni
+   henne: du skreiv det ikkje, og du kann ikkje endra det. */
+.fylgja {
+  font-family: var(--skrift-tal); font-size: .88rem;
+  color: var(--blekk-svakt); margin: 0; min-height: 1.4em;
+}
+.fylgja.gale { color: var(--aatvaring); }
+
+/* ---- foten aat setningi ----
+   Kva timen vert, og knappen som lagar honom. Knappen var eit tridje
+   jamstelt barn i spalta fyrr — same luft kring seg som fylgja, og
+   `align-items: start`, so han laag heilt til vinstre under ei setning
+   paa femti teikn. Det er difor han saag paalimd ut: han stod i eit
+   tomt felt, like langt fraa alt.
+
+   No sluttar han setningi. Breiddi er hennar, haarlina bind dei saman,
+   og fylgja stend i den andre enden av den same rada — grunnlaget til
+   vinstre, handlingi til høgre. */
+.setningsfot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--rom-4); flex-wrap: wrap;
+  width: 100%; max-width: 54ch;
+  border-top: 1px solid var(--haarlina);
+  padding-top: var(--rom-4);
+}
+/* Fylgja held plassen sin i spalta so lina ikkje hoppar naar ho fyllest;
+   i rada er det knappen som set høgdi, og daa treng ho han ikkje. */
+.setningsfot .fylgja { min-height: 0; }
+
+@media (max-width: 32rem) {
+  /* Bryt rada heller enn aa klemma knappen. */
+  .setningsfot { justify-content: flex-start; }
+}
+
+/* ===================================================================
+   folk
+   Ein tabell er rett naar ein samanliknar rader paa tvers. Her
+   samanliknar ingen nokon ting: ein slær upp *ein* person, av di det
+   stend ein person framfor deg. Difor er søkjefeltet skjermen, og
+   rada opnar seg paa staden — ein slær ikkje upp ein person ved aa
+   forlata lista yver folk.
+   =================================================================== */
+.folk-sok { display: flex; align-items: baseline; gap: var(--rom-3); margin-bottom: var(--rom-4); }
+
+.soke {
+  /* Berre maal. Forma er grunnstilen sin. */
+  flex: 1 1 22rem; max-width: 32rem;
+  font-size: 1.05rem;
+  padding: var(--rom-3) var(--rom-4);
+}
+.folk-tal { font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-svakt); }
+
+.folk-liste { list-style: none; margin: 0; padding: 0;
+  border: 1px solid var(--haarlina); background: var(--flate); }
+
+.folk-rad { border-bottom: 1px solid var(--haarlina); }
+.folk-rad:last-child { border-bottom: 0; }
+.folk-rad[hidden] { display: none; }
+
+.folk-hovud {
+  width: 100%; text-align: left;
+  display: grid; grid-template-columns: minmax(8rem, 1.2fr) minmax(0, 1.4fr) auto;
+  gap: var(--rom-4); align-items: baseline;
+  padding: var(--rom-3) var(--rom-4);
+  background: none; border: 0; border-radius: 0;
+  font-family: var(--skrift); text-transform: none; letter-spacing: 0;
+  cursor: pointer;
+}
+.folk-hovud:hover { background: var(--ark-djup); color: inherit; border: 0; }
+.folk-namn { font-size: 1.05rem; color: var(--blekk); font-weight: 500; }
+
+/* Kva han held, i produktfargen. Turkis medlemskap, rosa klipp — same
+   regelen som paa korti, so ein kjenner det att utan aa lesa. */
+.folk-held { display: flex; flex-wrap: wrap; gap: var(--rom-2); }
+.held {
+  display: inline-block; flex: 0 0 auto;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .74rem; letter-spacing: .07em; text-transform: uppercase;
+  padding: .15rem .45rem; border: 1px solid;
+  border-radius: 2px; white-space: nowrap;
+}
+/* Namni er namnsette med vilje. «.klipp» aaleine er alt ei rute i
+   klippekortmaalaren, og eit merke som fekk den regelen strekte seg
+   yver heile spalta. */
+.held-medlem { color: var(--klas); border-color: color-mix(in srgb, var(--klas) 45%, transparent); }
+.held-klipp  { color: var(--togu); border-color: color-mix(in srgb, var(--togu) 45%, transparent); }
+.held-ingen  { color: var(--blekk-svakt); border-color: var(--haarlina); }
+
+/* Eit frose eller kansellert medlemskap er ikkje i live, og skal difor
+   ikkje bera livsfargen. Same regelen som livsmerket. */
+.held-medlem.status-paused, .held-medlem.status-cancelled {
+  color: var(--blekk-lys); border-color: var(--haarlina);
+}
+.held-medlem.status-freeze_requested { border-style: dashed; }
+
+.folk-sist { font-family: var(--skrift-tal); font-size: .8rem; color: var(--blekk-svakt); text-align: right; }
+
+/* Den som treng eit svar stend fyrst i auga, ikkje fyrst i lista. */
+.folk-rad.treng-svar { border-left: 3px solid var(--togu); }
+
+.folk-meir { padding: 0 var(--rom-4) var(--rom-4) var(--rom-4); }
+.folk-detalj {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--rom-1) var(--rom-4); margin: 0; max-width: 34rem;
+}
+.folk-detalj dt {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+}
+.folk-detalj dd { margin: 0; font-size: .92rem; }
+
+/* Rollone. Same merket som «kva han held», men trykkjande — og difor
+   lyt knappestilen skrellast av: han kjem med arkfargen i ryggen og
+   halvanna centimeter fyll, og eit merke hev korkje. */
+.rollor { display: flex; flex-wrap: wrap; gap: var(--rom-2); margin: var(--rom-4) 0 0; }
+.rolla {
+  background: none; padding: .15rem .45rem;
+  color: var(--blekk-svakt); border-color: var(--haarlina);
+}
+/* Paa er merkefargen: rolla er i live. Av er den same veike lina som
+   «held ingen ting» — merket stend der, men det ber ingen ting. */
+.rolla[aria-pressed="true"] {
+  color: var(--merke); background: var(--merke-svak);
+  border-color: color-mix(in srgb, var(--merke) 45%, transparent);
+}
+.rolla:hover { border-color: var(--merke); color: var(--merke); }
+/* Ei rolla som ikkje let seg setja skal ikkje sjaa ut som um ho vart
+   sett. Handsamaren svarar 409 naar ein administrator tek si eigi
+   rolla, og daa spring merket attende og blenkjer i aatvaringsfargen. */
+.rolla.nekta { border-color: var(--aatvaring); color: var(--aatvaring); }
+
+@media (max-width: 48rem) {
+  .folk-hovud { grid-template-columns: minmax(0, 1fr); gap: var(--rom-1); }
+  .folk-sist { text-align: left; }
+}
+
+/* ===================================================================
+   timereglane
+   Same grepet som folkelista, av same grunn: administratoren slær upp
+   *éin* regel — «kvifor stend det femti rader her» var svaret paa feil
+   spursmaal. Kvar rad er ein regel (same time, lærar, rom, vekedag,
+   klokkeslett), og rada opnar seg der ho stend med dei einskilde
+   dagane: flytt, set inn vikar, eller avlys nett den eine.
+
+   Ei avlyst rad stend att som avlyst i staden for aa kverva — lista
+   hoppar ikkje (§6), og ein ser kva ein nett gjorde.
+   =================================================================== */
+.regel-liste { list-style: none; margin: 0; padding: 0;
+  border: 1px solid var(--haarlina); background: var(--flate); }
+
+.regel-rad { border-bottom: 1px solid var(--haarlina); }
+.regel-rad:last-child { border-bottom: 0; }
+
+.regel-hovud {
+  width: 100%; text-align: left;
+  display: grid; grid-template-columns: minmax(8rem, 1.2fr) minmax(0, 1.4fr) auto auto;
+  gap: var(--rom-4); align-items: baseline;
+  padding: var(--rom-3) var(--rom-4);
+  background: none; border: 0; border-radius: 0;
+  font-family: var(--skrift); text-transform: none; letter-spacing: 0;
+  cursor: pointer;
+}
+.regel-hovud:hover { background: var(--ark-djup); color: inherit; border: 0; }
+.regel-namn { font-size: 1.05rem; color: var(--blekk); font-weight: 500; }
+.regel-kven { color: var(--blekk-lys); font-size: .92rem; }
+.regel-naar { font-family: var(--skrift-tal); font-size: .92rem; white-space: nowrap; }
+.regel-tal { font-family: var(--skrift-tal); font-size: .8rem; color: var(--blekk-svakt); text-align: right; }
+
+.regel-meir { padding: 0 var(--rom-4) var(--rom-3); }
+
+/* Tvo setningar og ei skildring, i same setningsforma som skjemaet
+   yver — merkelappane sa det same som felti og stod berre i vegen.
+   Fyrste setningi er regelen og gjeld alle komande timar; andre er den
+   einskilde timen, der dagveljaren styrer kva vikaren og avlysingi
+   gjeld. Lina imillom skil dei tvo rekkjeviddone. */
+.regel-setning {
+  padding-bottom: var(--rom-2);
+}
+.regel-vink { font-size: .78rem; color: var(--blekk-svakt); white-space: nowrap; }
+
+.regel-meir .regel-skildring {
+  width: 100%; max-width: 54ch;
+  font-size: .92rem;
+  margin-bottom: var(--rom-3);
+}
+
+.time-setning {
+  border-top: 1px solid var(--haarlina);
+  padding-top: var(--rom-2);
+}
+.time-plassar { font-family: var(--skrift-tal); font-size: .88rem; color: var(--blekk-lys); }
+.time-setning .time-avlys { margin-left: var(--rom-3); }
+
+@media (max-width: 48rem) {
+  .regel-hovud { grid-template-columns: minmax(0, 1fr); gap: var(--rom-1); }
+  .regel-tal, .regel-naar { text-align: left; }
+}
+
+/* ===================================================================
+   tal som setning
+   Tre flisar med eit tal og ei merkelapp under er ein måte å unngå å
+   skrive ei setning på. Lesaren må setje «6» og «TOTALT ANTALL BRUKERE»
+   saman sjølv; «6 medlemer» er alt sett saman.
+
+   Éi røyst ber setninga, og eitt einaste ord steg ut av henne: talet.
+   Ordet attmed stod smalt og med store bokstavar før — men det er nett
+   den røysta fanene har, og fanene står to centimeter under. To like
+   røyster oppå kvarandre las seg som ei rad faner til, ikkje som ei
+   setning. No er ordet berre mørkare enn resten av lina: det høyrer til
+   talet utan å seie det med ei ny skrift.
+
+   Difor står Union Gothic i to breidder på sida og ikkje i tre: 125 %
+   der noko er ei overskrift eller eit tal, 68 % på faner og
+   bolkoverskrifter. Setninga sjølv er lesetekst. */
+.tal-setning {
+  font-size: clamp(1.15rem, 2.4vw, 1.6rem);
+  line-height: 1.6;
+  max-width: 40ch;
+  color: var(--blekk-lys);
+  /* Helsinga står mellom overskrifta og fanene og treng luft til begge
+     sider — mest ned, så fanene byrjar for seg sjølve. */
+  margin: var(--rom-5) 0 var(--rom-7);
+}
+
+.tal-setning .tal {
+  font-family: var(--skrift-yver);
+  /* Same breidda som sidetittelen. Talet stod på 150 % før, altså
+     breiare enn overskrifta over det — og breidd tyder rang her. */
+  font-stretch: var(--vidd-tittel); font-weight: 700;
+  font-size: 1.15em; line-height: 1;
+  color: var(--blekk);
+  font-variant-numeric: tabular-nums;
+  margin-right: .06em;
+}
+
+.tal-setning .ord {
+  font-weight: 500;
+  color: var(--blekk);
+}
+
+/* Det som ventar paa deg er det einaste ein kann gjera noko med, og
+   difor det einaste som er ei lenkja. */
+.tal-lenkje { text-decoration: none; border-bottom: 2px solid var(--togu); }
+.tal-lenkje .tal { color: var(--togu); }
+.tal-lenkje:hover .tal, .tal-lenkje:hover .ord { color: var(--togu); }
+
+/* ---- belastningar ----
+   Same mellomrom som klippekorti paa hi sida. Dei stod med ulik luft og
+   las seg difor som tvo ulike slag lister. */
+.charges-list { display: flex; flex-direction: column; gap: var(--rom-3); }
+.charge-item { padding: var(--rom-3) var(--rom-4); }
+.charge-line { margin: 0; font-size: .95rem; color: var(--blekk-lys); max-width: none; }
+.charge-amount {
+  font-family: var(--skrift-tal); font-size: 1.05rem; font-weight: 400;
+  color: var(--blekk);
+}
+.charge-card { font-family: var(--skrift-tal); font-size: .88rem; }
+.charge-what { color: var(--blekk); }
+.charge-meta {
+  margin: var(--rom-1) 0 0; display: flex; gap: var(--rom-3);
+  font-size: .8rem; color: var(--blekk-svakt);
+}
+/* Ei vellukka betaling treng ikkje segja at ho gjekk bra — det er berre
+   naar noko *ikkje* gjekk at ein vil vita det. */
+.charge-status { color: var(--aatvaring); }
+.charge-status.pending { color: var(--blekk-lys); }
+
+/* ===================================================================
+   profilen
+   Ei adressa er éin ting med ei form alle kjenner. Set henne slik ho
+   ser ut paa ein konvolutt, og ingen treng merkelappar — det var 891
+   pikslar millom merkelappen og verdet fyrr, ni gonger nedyver.
+
+   Kvart felt er skrivbart der det stend. Ingen redigeringsmodus: fyrr
+   bytte heile sida ham for at du skulle retta eit telefonnummer.
+   =================================================================== */
+/* Spalta er breidare enn ei lesespalta. Namnet er sett som ei
+   sidetittel, og ei sidetittel i 34 rem gjev fjortan teikn paa lina —
+   daa fær ikkje «Kristiansen-» plass, og ordet renn ut or ruta si. */
+.profilsida { max-width: 44rem; }
+
+/* Bolkarne staa for kvar sitt: kven du er, kvar du bur, korleis ein
+   naar deg. Lufti millom deim er det som segjer at dei er ulike ting —
+   utan ei einaste yverskrift. */
+.profilskjema { display: flex; flex-direction: column; gap: var(--rom-6); }
+
+/* `align-items: flex-start` — utan han strekkjer flexen kvart barn ut
+   til full breidd, og daa hjelper det ikkje kva feltet sjølv meiner um
+   storleiken sin. */
+.lapp { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-1); }
+.lapp-kven { gap: var(--rom-2); }
+.lapprad { display: flex; gap: var(--rom-2); }
+
+/* Feltet ligg i arket. Fordjupingi er det einaste som segjer at det er
+   eit felt — ingi ramma, ingen understrek — og ho er der heile tidi, so
+   ein ser kva som let seg endra utan aa klikka seg gjenom sida. */
+/* Feltet er so breidt som det som stend i det, og ikkje breidare.
+   Fyrr var kvart felt 100 % — ei rekkja like lange bjelkar, same om det
+   stod «Oslo» eller ei heil gata i deim. Ei adressa er ikkje formatert
+   slik; ho hev ujamne linor, og det er nettupp dei ujamne linone som
+   gjer at ho les seg som ei adressa.
+
+   Taket er det same som breidda var: dei veks aldri forbi spalta. */
+/* Lappfeltet skriv ut si eiga form att.
+   
+   Ein freistnad paa aa la grunnstilen bera henne aaleine gjekk gale:
+   grunnstilen stend i `:where()` og hev *null* spesifisitet — det er
+   heile poenget med honom, so kvar klassa kann yverstyra honom — og daa
+   er han ogso den fyrste som taper mot kva som helst anna. Ei klassa
+   som andre reglar kann slaa, er ikkje ei klassa ein kann lita paa.
+   
+   Same forma stend difor tvo stader: i grunnstilen, so eit felt utan
+   klassa er rett av seg sjølv, og her, so eit felt *med* klassa er rett
+   same kva anna som stend i arket. Det er ikkje dobbelt arbeid — det er
+   ein grunnstil og ein garanti. */
+.lappfelt {
+  font: inherit;
+  padding: var(--rom-2) var(--rom-3);
+  background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate));
+  color: var(--blekk);
+  border: 0;
+  border-radius: var(--rund);
+  box-shadow: var(--fordjuping);
+  width: auto;
+  field-sizing: content;
+  min-width: 7rem;
+  max-width: 100%;
+}
+.lappfelt:hover { background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
+.lappfelt:focus { outline: none; box-shadow: var(--fasett); }
+.lappfelt::placeholder { color: var(--blekk-svakt); }
+
+/* Namnet er yverskrifti. Ho er stor av di ho er namnet ditt, og
+   skrivbar av di ho er eit felt — det er den same tingen. */
+/* ---- namnet ----
+   Ei yverskrift, ikkje eit felt som ser ut som ei. Ho hev same skrift,
+   same storleik og same ombrot som kvar annan h1 paa staden — ho bryt
+   der ei yverskrift ville broti — og ho er skrivbar.
+
+   Eit <input> kunde ikkje gjera dette: det er einlina, og lange namn
+   vart klypte midt i ordet. */
+.namnefelt {
+  /* Ruta hugsar teksti i staden for spalta. Ho veks med namnet og
+     stoggar ved spaltekanten — same taket som fyrr. */
+  display: inline-block;
+  max-width: 100%;
+  margin: 0;
+  padding: var(--rom-2) var(--rom-3);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--blekk) 3%, var(--flate));
+  box-shadow: var(--fordjuping);
+  /* Yverskrifter elles hev `text-wrap: balance`, som flyttar ordi kvar
+     gong du skriv ein bokstav. Her skal teksti staa still medan du
+     skriv, so ho bryt som vanleg tekst. */
+  text-wrap: wrap;
+  /* Ord skal ikkje klyppast. Den globale regelen gjev yverskrifter
+     `overflow-wrap: break-word`, so «Kristiansen-Bjørnstad» vart broti
+     midt inne i «Kristiansen». Her bryt ho berre der eit ord faktisk
+     endar — mellomrom, eller ein bindestrek som alt stend i namnet. */
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  min-height: 1em;
+}
+.namnefelt:hover { background: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
+.namnefelt:focus { outline: none; box-shadow: var(--fasett); }
+.namnefelt.endra { box-shadow: var(--fordjuping), inset 3px 0 0 var(--togu); }
+.namnefelt.endra:focus { box-shadow: var(--fasett), inset 3px 0 0 var(--togu); }
+.lappfelt.kort { min-width: 0; flex: 0 0 auto; }
+
+/* ---- det endra feltet ----
+   Ingen tekst segjer at noko er ulagra. Feltet ber merket sjølv: ei
+   full lina i merkefargen, og ein prikk i margen. Prikken er der av di
+   ei lina aaleine kann forvekslast med fokus — prikken stend att naar
+   du hev gjenge vidare til neste felt. */
+.lappfelt.endra {
+  box-shadow: var(--fordjuping), inset 3px 0 0 var(--togu);
+}
+.lappfelt.endra:focus {
+  box-shadow: var(--fasett), inset 3px 0 0 var(--togu);
+}
+
+.avkryssing.rabatt { align-items: start; gap: var(--rom-3); }
+.avkryssing.rabatt small { display: block; color: var(--blekk-svakt); font-size: .84rem; margin-top: .1rem; }
+.avkryssing input.endra { outline: 2px solid var(--togu); outline-offset: 2px; }
+
+/* Dokka for ulagra endringar. Same dokk som elles i huset — ho held det
+   du arbeider med i ro medan resten rullar. */
+.endringsdokk { border-top-color: var(--togu); }
+.endringstal {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .82rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--togu);
+}
+.endringsdokk .dokkinnhald { justify-content: space-between; }
+.endringsdokk .dokkhandling { flex-direction: row; gap: var(--rom-2); }
+
+/* ===================================================================
+   verkstaden (/arket)
+   Ei sida som syner komponentane utanfor arbeidet sitt.
+
+   Ho er ikkje ein katalog yver kva som *bør* finnast. Ho teiknar det
+   som faktisk stend i dette stilarket, med den same koden som sidone
+   nyttar — difor kann ho ikkje verta usann utan at sidone vert det med
+   det same.
+
+   Kvar komponent stend tvo gonger, ljos og myrk, attmed kvarandre. Det
+   er heile grunnen til at tokeni ovanfor tek [data-theme] paa kva
+   element som helst: ein lyt sjaa baae samstundes for aa sjaa at ein
+   farge lyg i det eine.
+
+   Verkstaden er berre open naar KJERNEKRAFT_ENV=development. Teksti
+   her er difor ikkje umsett — ho er ikkje ein del av det studioet
+   syner nokon.
+   =================================================================== */
+.verkstad { max-width: 78rem; }
+
+.verkstad-innleiding { color: var(--blekk-lys); max-width: 34em; }
+
+/* Innhaldslista. Ei rad med lenkjor, ikkje ei punktlista: ho skal
+   kunna lesast paa ein augnekast og ikkje taka ei skjermhøgd. */
+.verkstad-innhald {
+  display: flex; flex-wrap: wrap; gap: var(--rom-2) var(--rom-4);
+  list-style: none; padding: 0;
+  margin: var(--rom-5) 0 var(--rom-7);
+  border-top: 1px solid var(--haarlina);
+  border-bottom: 1px solid var(--haarlina);
+  padding-block: var(--rom-3);
+}
+.verkstad-innhald a {
+  font-family: var(--skrift-yver); font-size: .78rem;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-lys); text-decoration: none;
+}
+.verkstad-innhald a:hover { color: var(--merke); }
+
+.verkstad-bolk { margin-bottom: var(--rom-7); scroll-margin-top: var(--rom-5); }
+
+/* Regelen komponenten ber. Han stend her og ikkje berre i stilboki, av
+   di ein ser forma og grunngjevingi samstundes daa. */
+.verkstad-regel {
+  color: var(--blekk-lys); font-size: .92rem;
+  max-width: 46em; margin: 0 0 var(--rom-4);
+}
+.verkstad-regel code {
+  font-family: var(--skrift-tal); font-size: .88em; color: var(--blekk);
+}
+
+/* ---- paret ----
+   Tvo prøvor av det same, i kvar sitt tema. Dei deler breidd, so det er
+   den same komponenten paa den same plassen i baae. */
+.verkstad-par {
+  display: grid; gap: var(--rom-4);
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+}
+
+.verkstad-prova {
+  background: var(--ark);
+  color: var(--blekk);
+  border: 1px solid var(--kant);
+  padding: var(--rom-5);
+  position: relative;
+}
+/* Namnet paa temaet stend i kanten av prøva, i prøva sine eigne
+   fargar — daa segjer merkelappen ogso um tokeni verkar. */
+.verkstad-prova::before {
+  content: attr(data-tema);
+  position: absolute; top: 0; right: 0;
+  padding: var(--rom-1) var(--rom-2);
+  font-family: var(--skrift-yver); font-size: .68rem;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+}
+
+/* Ei rad med prøvor som skal staa attmed kvarandre og bryta naar det
+   vert trongt — knappar, merke, tilstandar. */
+.verkstad-rad {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: var(--rom-3);
+}
+.verkstad-rad + .verkstad-rad { margin-top: var(--rom-4); }
+
+/* Ei stabla rad, for det som er breidt av seg sjølv. */
+.verkstad-stabel { display: flex; flex-direction: column; gap: var(--rom-4); }
+
+/* ---- fargeflekkene ----
+   Flekken er ei rute i fargen med namnet under. Ho hev hårlina kring
+   seg, av di ein farge som er nesten lik arket elles ikkje syner kanten
+   sin — og det er nettupp dei fargane ein lyt sjaa. */
+.verkstad-fargar {
+  display: grid; gap: var(--rom-4);
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+}
+.verkstad-flekk { display: flex; flex-direction: column; gap: var(--rom-2); }
+.verkstad-flekk i {
+  display: block; height: 3rem;
+  border: 1px solid var(--haarlina);
+  background: var(--flekk);
+}
+.verkstad-flekk b {
+  font-family: var(--skrift-tal); font-size: .78rem; font-weight: 400;
+  color: var(--blekk); word-break: break-all;
+}
+.verkstad-flekk span { font-size: .78rem; color: var(--blekk-lys); }
+
+/* ---- skrifttrappa ---- */
+.verkstad-trapp { display: flex; flex-direction: column; gap: var(--rom-3); }
+.verkstad-trapp p { margin: 0; max-width: none; }
+.verkstad-trapp .vidd {
+  font-family: var(--skrift-yver); font-size: 1.4rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.verkstad-trapp small {
+  font-family: var(--skrift-tal); font-size: .72rem; color: var(--blekk-svakt);
+  display: block;
+}
+
+/* ---- romtrappa ----
+   Sju bjelkar i merkefargen. Ein trapp ein ser er lettare aa halda seg
+   til enn sju tal i ei fil. */
+.verkstad-rom { display: flex; flex-direction: column; gap: var(--rom-2); }
+.verkstad-rom span { display: flex; align-items: center; gap: var(--rom-3); }
+.verkstad-rom i { display: block; height: .5rem; background: var(--merke); width: var(--breidd-rom); }
+.verkstad-rom small { font-family: var(--skrift-tal); font-size: .72rem; color: var(--blekk-lys); }
+
+/* ===================================================================
+   medlemskapet mitt
+   Tre faner som svarar på kvar sitt spørsmål: kva du har, kva du kan
+   byte til, og kva du har betalt.
+
+   Ingen kasse rundt medlemskapet. Ein kasse skil eitt kort frå eit
+   anna, og her finst det berre eitt — du kan ikkje ha to medlemskap på
+   ein gong. Fana er alt ein kasse; eit kort inni han hadde vore ein
+   kasse i ein kasse.
+   =================================================================== */
+.medlemshovud {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--rom-4); flex-wrap: wrap;
+  margin-bottom: var(--rom-3);
+}
+.medlemsnamn {
+  font-family: var(--skrift-yver); font-size: 1.9rem; font-weight: 500;
+  font-stretch: var(--vidd-yver); margin: 0;
+}
+.medlemspris {
+  display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap;
+  margin: 0 0 var(--rom-5); max-width: none;
+}
+.medlemspris .price { font-family: var(--skrift-tal); font-size: 1.7rem; letter-spacing: -.02em; }
+.medlemspris .commitment { color: var(--blekk-lys); }
+.medlemsknappar { display: flex; gap: var(--rom-3); flex-wrap: wrap; margin-top: var(--rom-5); }
+
+/* ---- bytelista ----
+   Eit byte er ikkje eit kjøp. Du har alt eit medlemskap, så det som tel
+   er *skilnaden* frå det du har — ikkje prisen i seg sjølv. Difor er
+   dette ei liste med skilnader og ikkje eit rutenett med prislappar.
+
+   Ingen fylt knapp: Arket seier at hovudhandlinga er den fylte og at det
+   er berre éi. Her finst inga hovudhandling — kva du byter til, er ditt
+   val og ikkje vårt. Ein fylt knapp på éi av radene hadde vore ei
+   tilråding skriven med form i staden for ord. */
+.bytehovud { color: var(--blekk-lys); margin: 0 0 var(--rom-5); max-width: 60ch; }
+.bytehovud strong { color: var(--blekk); font-weight: 500; }
+
+.byterad {
+  display: grid; gap: var(--rom-4); align-items: baseline;
+  grid-template-columns: minmax(9rem, 1.1fr) auto minmax(12rem, 1.4fr) auto;
+  padding: var(--rom-4) 0;
+  border-top: 1px solid var(--haarlina);
+}
+.byterad:last-of-type { border-bottom: 1px solid var(--haarlina); }
+.byterad form { margin: 0; }
+
+.bytenamn {
+  font-family: var(--skrift-yver); font-size: 1.15rem;
+  font-stretch: var(--vidd-yver); font-weight: 500;
+}
+.bytepris { font-family: var(--skrift-tal); font-size: 1.05rem; white-space: nowrap; }
+.bytesetning { color: var(--blekk-lys); font-size: .95rem; }
+
+/* Skilnaden er det einaste talet som er verdt ein farge: mindre er
+   merkefargen, meir er berre blekk. Åtvaringsfargen høyrer ikkje heime
+   her — eit dyrare medlemskap er ikkje noko som gjekk gale. */
+.bytemindre { color: var(--merke); }
+
+/* Ei stengd rad ber ikkje merkefargen. Fargen tyder «dette er i live»,
+   og ein pris du ikkje kan velje enno, er ikkje det. Grunnen står i
+   rada, og vegen ut av henne er ei lenkje — ei rad som berre er borte,
+   lærer deg ingenting. */
+.byterad.stengd .bytenamn,
+.byterad.stengd .bytepris,
+.byterad.stengd .bytesetning,
+.byterad.stengd .bytemindre { color: var(--blekk-svakt); }
+
+a.byteveg {
+  color: var(--merke); text-decoration: none;
+  border-bottom: 1px solid currentColor; white-space: nowrap;
+}
+.bytefot { margin-top: var(--rom-4); color: var(--blekk-lys); font-size: .92rem; max-width: 60ch; }
+
+@media (max-width: 46rem) {
+  /* Fire spalter på ein telefon vert fire ord under kvarandre. Rada
+     vert ei blokk, og knappen fell under. */
+  .byterad { grid-template-columns: 1fr auto; gap: var(--rom-2); }
+  .bytesetning, .byterad form, .byterad .byteveg { grid-column: 1 / -1; }
+}
+
+/* ===================================================================
+   prisane (administrasjonen)
+   Same form som profilen: kvart felt er skrivbart der det står, det
+   endra feltet ber merket sjølv, og dokka nedst ber handlinga.
+
+   Før hadde kvar rad tre knappar — «Rediger pris», «Lagre», «Avbryt» —
+   der dei to siste stod gøymde til du trykte den første. Tre knappar per
+   rad, ganga med talet på medlemskap, for å endre eitt tal.
+   =================================================================== */
+.prisliste { display: flex; flex-direction: column; gap: var(--rom-6); }
+
+/* Eitt medlemskap er ei setning: kva det heiter, kva det kostar, kor
+   lenge du bind deg. Lufta mellom dei er det som skil dei — same grepet
+   som mellom bolkane i profilen, og utan ei einaste overskrift. */
+.prislapp { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2); }
+.prislapp .lapprad { align-items: baseline; flex-wrap: wrap; }
+
+/* Namnet er det største i lappen, av di det er det ein leitar etter når
+   ein skal finne rett medlemskap. */
+.prisnamn {
+  font-family: var(--skrift-yver); font-size: 1.25rem;
+  font-stretch: var(--vidd-yver); font-weight: 500;
+  min-width: 10rem;
+}
+
+/* Tal skal stå i talskrifta og vere så breie som talet, ikkje som
+   spalta. `field-sizing: content` på .lappfelt gjer resten. */
+.talfelt {
+  font-family: var(--skrift-tal);
+  min-width: 4rem;
+  text-align: right;
+}
+/* Nettlesaren sine opp/ned-pilar tek plass og gjer feltet breiare enn
+   talet. Ein skriv talet; ein klikkar det ikkje opp tjue gonger. */
+.talfelt::-webkit-outer-spin-button,
+.talfelt::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.talfelt { -moz-appearance: textfield; appearance: textfield; }
+
+.priseining { color: var(--blekk-lys); font-size: .92rem; }
+
+/* Knappen som legg til ein rad. Han står nedst i lista og ikkje attmed
+   fanene: det er der raden kjem, og det er den plasseringa som verkar
+   like godt på ein telefon som på ein skjerm. */
+.nyrad { margin-top: var(--rom-5); }
+
+/* Veljaren i setninga ber den same fordjupinga som felta rundt seg —
+   `.lappfelt` set flate og skugge, og select-regelen ovanfor held pila
+   og breidda. Utan `padding-right` legg teksten seg under pila. */
+select.lappfelt { padding-right: var(--rom-6); }
+
+/* Ein rad som ikkje er lagra enno ber det same merket som eit endra
+   felt — heile raden, av di det er heile raden som er ny. */
+.prislapp.ny { border-left: 3px solid var(--togu); padding-left: var(--rom-4); }
+
+/* Slettemerket. Det er ikkje ein handling som skjer med det same: raden
+   vert merkt, og dokka utfører det når du lagrar. Difor er han eit lite
+   kryss og ikkje ein raud knapp — det som er ugjenkalleg, er å lagre. */
+.slettmerke {
+  font-family: var(--skrift-tal); font-size: 1rem; line-height: 1;
+  padding: var(--rom-1) var(--rom-2);
+  border: 0; background: none; color: var(--blekk-svakt);
+  cursor: pointer;
+}
+.slettmerke:hover { color: var(--aatvaring); background: none; border: 0; }
+
+/* Ein merkt rad står att så du ser kva du har gjort — gjennomstroken og
+   veik, med åtvaringsfargen i margen. Angre tek han attende. */
+.prislapp.slettast { opacity: .55; border-left: 3px solid var(--aatvaring); padding-left: var(--rom-4); }
+.prislapp.slettast .prisnamn { text-decoration: line-through; }
+.slettord {
+  display: none;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--aatvaring);
+}
+.prislapp.slettast .slettord { display: inline; }
+
+/* Reglane. Kvar regel er ei setning med valet i seg — ikkje ei
+   avkryssing med ei merkelapp attmed og ei skildring under, som var tre
+   tekstar om det same. */
+.reglar { display: flex; flex-direction: column; gap: var(--rom-5); align-items: flex-start; }
+.regel {
+  font-size: 1.05rem; line-height: 2.2; margin: 0;
+  max-width: 62ch; color: var(--blekk);
+}
+.regel select.lappfelt { margin: 0 .15rem; }
+
+/* Det rekna talet. Prisen per klipp er prisen delt på talet på klipp —
+   han står attmed og er ikkje skrivbar, av di eit felt ein kan skrive
+   noko galt i, er eit felt som kan lyge. */
+.rekna { font-family: var(--skrift-tal); font-size: .88rem; color: var(--blekk-svakt); }
+
+/* «generert» attmed eit namn: dette ordet er skrive av systemet, og du
+   kan skrive over det. Det står i det veike blekket av di det ikkje er
+   noko du treng gjere noko med. */
+.generert {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .66rem; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--blekk-svakt); margin-left: var(--rom-2);
+}
+
+/* ===================================================================
+   heimesida
+   To spalter som ber kvar sitt slag: til venstre det som endrar seg —
+   timane du skal på, timane som går i dag — og til høgre det som ligg
+   fast: medlemskapet og klippa.
+
+   Før stod alle fire i eit rutenett med like breie spalter. Ei rad i eit
+   rutenett er like høg som den høgaste cella si, so den korte fekk eit
+   hol under seg, og holet stod midt på sida.
+   =================================================================== */
+.heimeoppsett {
+  display: grid; gap: var(--rom-6) var(--rom-7);
+  grid-template-columns: minmax(0, 1.7fr) minmax(15rem, 1fr);
+  align-items: start;
+}
+.heimespalte { display: flex; flex-direction: column; gap: var(--rom-6); min-width: 0; }
+/* Sidespalta er smalare og underordna. Overskrifta der tek eit trinn ned
+   — elles bryt «Mitt medlemskap» i to linjer i ei spalte som er femten
+   rem brei. */
+.heimespalte-sida .section-title { font-size: 1.3rem; }
+/* Bolkane står i ei spalte med luft imellom; marginen under kvar av dei
+   ville lagt seg oppå den lufta. */
+.heimeoppsett .content-section { margin-bottom: 0; }
+
+@media (max-width: 54rem) {
+  /* Éi spalte. Sidespalta legg seg under, og då er ho ikkje ei
+     sidespalte lenger — men rekkjefylgda er framleis rett: det du skal
+     på fyrst, det du eig etterpå. */
+  .heimeoppsett { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- timen i ei liste ----
+   Radene er dei same som i timeplanen — same klassar, same reglar. Ein
+   time skal kjennast som den same tingen kvar ein ser honom, og det gjer
+   han ikkje om kvar side skriv sine eigne reglar for korleis han ser ut.
+
+   Det einaste som skil er oppsettet: her er det éin dag og ikkje sju, so
+   namnet står til venstre og merket til høgre. */
+.timeliste > .timerad:first-child { border-top: 1px solid var(--haarlina); }
+.timerad.heimerad {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--rom-4);
+  padding: var(--rom-4) 0;
+  align-items: center;
+}
+.timerad.heimerad .timetittel { font-size: 1.35rem; }
+.timerad.heimerad.umme { opacity: .5; }
+/* Merket ber dagen, klokkeslettet og plassane. Difor står ingen av dei
+   i teksten — det ville vore det same to gonger. */
+.timerad.heimerad .dagmerke { --merkestorleik: 4.4rem; }
+
+/* ===================================================================
+   betalingsmåtane
+   Eit kort er truverdig når det ser ut som det ein hugsar: merket ein
+   kjenner att, dei fire siste sifra, og datoen. Ikkje meir.
+
+   Det såg ut som spam før, og grunnane var konkrete. Kortmerket var
+   bokstavane «VISA» i ein boks — eit falskt logo laga av tekst. Merket
+   stod ein gong til under, som «visa» i småbokstavar. Heile det maskerte
+   nummeret stod der, «•••• •••• •••• 4242», sjølv om berre dei fire
+   siste seier noko. Og knappane låg klemde inntil kortet: ingen luft
+   mellom korta, og ingen mellom det siste kortet og «legg til».
+   =================================================================== */
+/* Ingen botnmargin. Knappen under ber lufta si sjølv (`.nyrad`), og
+   tvo margar som møtest her gav tri og ein halv rem mellom det siste
+   kortet og «Legg til kort» — nok til at knappen såg ut til å høyre til
+   noko anna. */
+.kortliste {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: var(--rom-4);
+  /* Eit kort er eit kort. Strekt over heile spalta les det seg som eit
+     banner, og eit banner er det ein er van med å sjå på ei spamside. */
+  max-width: 30rem;
+}
+
+.kortlapp { --produkt: var(--merke); }
+/* Det som er i bruk, ber lina i merkefargen — same regelen som på kort
+   elles i huset. */
+
+
+.kortkva { display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap; }
+.kortmerke {
+  font-family: var(--skrift-yver); font-size: 1.15rem; font-weight: 500;
+  font-stretch: var(--vidd-yver); color: var(--blekk);
+}
+/* Sifra i taldskrifta, med luft mellom prikkane og tale, so det les seg
+   som eit kortnummer og ikkje som ei streng. */
+.korttal {
+  font-family: var(--skrift-tal); font-size: 1.05rem;
+  letter-spacing: .08em; color: var(--blekk);
+}
+.kortdato { margin: 0; font-size: .88rem; color: var(--blekk-lys); }
+
+/* Luft mellom kortet og det ein kan gjere med det. */
+.korthandling { display: flex; gap: var(--rom-3); flex-wrap: wrap; margin-top: var(--rom-3); }
+
+/* ---- ein dag løfta fram ----
+   Dagnamna er knappar, men dei filtrerer ikkje: ein trykk dempar dei
+   andre dagane. Skilnaden er ikkje akademisk. Eit filter tek bort, og då
+   misser rutenettet det einaste han kan som ei liste ikkje kan — syne
+   heile vika på ein gong, so ein ser at timen går tysdag òg, og at
+   torsdagen er full medan tysdagen ikkje er det.
+
+   Difor er dette gjennomsikt og ikkje `display: none`. */
+.timehovud .dagnamn {
+  font: inherit; color: var(--blekk-lys);
+  background: none; border: 0; border-radius: 2px;
+  padding: var(--rom-1) var(--rom-2);
+  text-transform: none; letter-spacing: 0;
+  cursor: pointer;
+}
+.timehovud .dagnamn:hover { color: var(--blekk); background: var(--ark-djup); border: 0; }
+.timehovud .dagnamn[aria-pressed="true"] {
+  color: var(--blekk); background: var(--merke-svak);
+}
+.dagmerke.utanfor-fokus { opacity: .28; }
+
+/* Medlemskapet som ein ting inne i fana. Setninga over sida rundar av —
+   «13 månader att» — og kortet her seier kva dag det er. Det eine er
+   stoda, det andre er papiret.
+
+   Han ber flata og lina sjølv og lener seg ikkje på `.module`: den
+   klassa er ikkje eit kort lenger. */
+.medlemskort { --produkt: var(--klas); max-width: 30rem; }
+
+
+/* ===================================================================
+   aktiviteten
+   Ei mengd, ikkje ein identitet. Difor *ein* farge i fire trinn og ikkje
+   fire fargar: ein les mengdi av kor mykje blekk som ligg der, og
+   fargekanalen er brukt ein gong til noko han faktisk ber.
+
+   Trinni er color-mix mot arket, so dei snur med temaet av seg sjølv: i
+   det ljose gjeng dei fraa nesten-arket til full farge, i det myrke fraa
+   nesten-grunnen upp til full farge. Lysstyrken fell jamt i baae —
+   det er den eine prøva ein trinnskala lyt bestaa.
+
+   Ingi fargeforklaring med namn: det finst ingen namn her. Skalaen under
+   kartet segjer kva veg mørkare gjeng, og talet stend i klartekst i
+   samandraget yver — for trinni ligg under 3:1 mot grunnen, og daa lyt
+   tali kunna lesast ein annan stad enn i fargen.
+   =================================================================== */
+.aktivitet-samandrag {
+  font-size: .95rem; color: var(--blekk-lys);
+  margin: 0 0 var(--rom-4);
+}
+
+.varmekart { display: block; width: 100%; height: auto; overflow: visible; }
+.varmerute { transition: none; }
+.varmemaanad {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: 7px; font-weight: 500; letter-spacing: .08em;
+  text-transform: uppercase; fill: var(--blekk-svakt);
+}
+
+/* Trinni. Null er den same tome ruta som ein dag utan time i timeplanen
+   — det er den same tingen, og han skal sjaa lik ut. */
+.niv-0 { fill: color-mix(in srgb, var(--blekk) 6%, transparent); }
+.niv-1 { fill: color-mix(in srgb, var(--klas) 30%, var(--ark)); }
+.niv-2 { fill: color-mix(in srgb, var(--klas) 55%, var(--ark)); }
+.niv-3 { fill: color-mix(in srgb, var(--klas) 78%, var(--ark)); }
+.niv-4 { fill: var(--klas); }
+
+/* Peikaren skal treffa noko. Ruta er elleve pikslar; ringen gjev henne
+   ein kant utan aa flytta henne. */
+.varmerute:hover { stroke: var(--blekk); stroke-width: 1.5; }
+
+.varmeskala {
+  display: flex; align-items: center; gap: var(--rom-2);
+  margin: var(--rom-3) 0 var(--rom-6);
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+}
+.varmeprikk { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+.varmeprikk.niv-0 { background: color-mix(in srgb, var(--blekk) 6%, transparent); }
+.varmeprikk.niv-1 { background: color-mix(in srgb, var(--klas) 30%, var(--ark)); }
+.varmeprikk.niv-2 { background: color-mix(in srgb, var(--klas) 55%, var(--ark)); }
+.varmeprikk.niv-3 { background: color-mix(in srgb, var(--klas) 78%, var(--ark)); }
+.varmeprikk.niv-4 { background: var(--klas); }
+
+/* Bjelkane ber alle same fargen. Lengdi er talet; aa fargeleggja dei
+   etter verdien hadde sagt det same ein gong til, med ein kanal som daa
+   ikkje kann segja noko anna. */
+.bjelkerad { display: block; width: 100%; height: auto; overflow: visible; }
+.bjelke { fill: var(--klas); }
+.bjelkegruppe:hover .bjelke { fill: var(--merke-lys); }
+.bjelketal {
+  font-family: var(--skrift-tal); font-size: 9px;
+  fill: var(--blekk); text-anchor: middle;
+}
+.bjelkenamn {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: 7.5px; font-weight: 500; letter-spacing: .08em;
+  text-transform: uppercase; fill: var(--blekk-svakt); text-anchor: middle;
+}
+
+/* Kva tali *er*. Frammøtet finst ikkje enno, og eit kart som ser ut som
+   frammøte utan aa vera det, er verre enn ikkje noko kart. */
+.aktivitet-grunnlag {
+  font-size: .8rem; color: var(--blekk-svakt);
+  margin: var(--rom-4) 0 0; max-width: 34ch;
+}
+
+/* ---- medlemskapet i det smaa ----
+   Heile medlemskapet stod paa heimesida fyrr: pris, fornying, binding,
+   knappar for aa frysa og seia upp. Det er ei *forvaltning*, og ho
+   høyrer heime paa medlemskapssida. Her skal det berre staa om det er i
+   live — resten er eitt klikk unna.
+
+   Eit merke med namnet og ei lenkja attmed stod her etter det. Lenkja
+   var det som var for mykje: ho bed um aa verta klikka, og medlemskapet
+   stend alt i leidingi. Att stend eit ljos og fire ord — det ein
+   faktisk kom for aa vita.
+
+   Ljoset er det same ljoset som i lina under hovudet: kjernen er
+   --glodkjerne, glødi ligg kring han, og det er merkefargen som lyser.
+   Eit slokt ljos er ikkje graatt — det er ei *fordjuping*, som ei tom
+   rute i timeplanen. Ei lampa som ikkje lyser hev framleis eit glas. */
+.stodalinje {
+  display: flex; align-items: center; gap: var(--rom-2);
+  margin: 0; font-size: .95rem; color: var(--blekk-lys);
+}
+.ljos {
+  flex: none; width: .55rem; height: .55rem; border-radius: 50%;
+}
+.ljos-paa {
+  background: radial-gradient(circle at 34% 30%,
+    var(--glodkjerne) 0%, var(--merke) 62%);
+  box-shadow:
+    0 0 3px 0 color-mix(in srgb, var(--merke) 70%, transparent),
+    0 0 9px 1px color-mix(in srgb, var(--merke) 38%, transparent),
+    0 0 18px 4px color-mix(in srgb, var(--merke) 14%, transparent);
+}
+/* Frosi: lampa stend, men ho brenn ikkje. Ingen halo — det er nettupp
+   halloen som segjer at noko gjeng. */
+.ljos-kvild {
+  background: radial-gradient(circle at 34% 30%,
+    color-mix(in srgb, var(--blekk-lys) 60%, var(--ark)) 0%,
+    var(--blekk-svakt) 70%);
+}
+.ljos-av {
+  background: var(--faneflate);
+  box-shadow: var(--fordjuping);
+}
+
+/* ---- kva som hastar, sagt fyrst ----
+   Ei lista yver klippekort svarar ikkje paa «kva gjeng ut fyrst» av seg
+   sjølv: talet ein ser paa eit kort er klippa, ikkje dagane, og eit kort
+   med tjue klipp att og fire dagar til utløp ser difor rikare ut enn eit
+   med tvo klipp og eit halvt aar.
+
+   Fargen er rosa og ikkje turkis. Rosa er klippekortet (stilboki §2);
+   turkisen tyder medlemskap, og eit hastemerke i turkis paa denne sida
+   hadde sagt feil produkt. */
+.klippfyrst {
+  display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap;
+  margin: 0 0 var(--rom-5);
+  font-size: 1.05rem; color: var(--blekk-lys);
+}
+.klippfyrst-kva { color: var(--blekk); }
+.klippfyrst-att { color: var(--blekk-svakt); font-size: .92rem; }
+.klippfyrst .lenkjeknapp { margin-left: auto; }
+
+/* Under tretti dagar. Same margstreken som ei rad som treng svar i
+   folkelista — «dette krev noko av deg» er den same tingen. */
+.klippfyrst.hastar {
+  border-left: 3px solid var(--togu);
+  padding-left: var(--rom-4);
+}

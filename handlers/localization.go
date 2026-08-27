@@ -31,6 +31,16 @@ func GetLocalization() *Localization {
 	return localization
 }
 
+// LastUmsetjingarPaaNytt les umsetjingsfilone om att.
+//
+// Dei vart lesne ein gong ved oppstart og aldri meir. Malar og stilark
+// vert lesne for kvar soknad i utvikling; umsetjingarne gjorde det
+// ikkje, so ein la til ein nykel, oppdaterte sida, og saag sjølve
+// nykelen staa der — «admin.people» — og trudde han var skriven gale.
+func LastUmsetjingarPaaNytt() {
+	GetLocalization().loadTranslations()
+}
+
 // GetLanguageFromRequest gets the user's preferred language from cookies or URL
 func GetLanguageFromRequest(r *http.Request) string {
 	// First try to get from URL parameter
@@ -39,16 +49,17 @@ func GetLanguageFromRequest(r *http.Request) string {
 			return lang
 		}
 	}
-	
+
 	// Then try to get from cookie
 	if cookie, err := r.Cookie("preferred_language"); err == nil {
 		if IsValidLanguage(cookie.Value) {
 			return cookie.Value
 		}
 	}
-	
-	// Default to Norwegian bokmål
-	return "nb"
+
+	// Standardmaalet er nynorsk. Det er ikkje ei innstilling ein fyrst
+	// vel — det er det ein fær naar ein ikkje hev valt noko.
+	return "nn"
 }
 
 // SetLanguageCookie sets the language preference cookie
@@ -67,7 +78,7 @@ func SetLanguageCookie(w http.ResponseWriter, lang string) {
 
 // IsValidLanguage checks if a language code is supported
 func IsValidLanguage(lang string) bool {
-	validLangs := []string{"nb", "nn", "en"}
+	validLangs := []string{"nn", "nb", "en"}
 	for _, validLang := range validLangs {
 		if lang == validLang {
 			return true
@@ -81,10 +92,10 @@ func (l *Localization) loadTranslations() {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	languages := []string{"nb", "nn", "en"}
+	languages := []string{"nn", "nb", "en"}
 	for _, lang := range languages {
 		langMap := make(map[string]interface{})
-		
+
 		// Load common.json for each language
 		commonPath := filepath.Join(l.basePath, lang, "common.json")
 		if data, err := ioutil.ReadFile(commonPath); err == nil {
@@ -93,7 +104,7 @@ func (l *Localization) loadTranslations() {
 				langMap = translations
 			}
 		}
-		
+
 		l.languages[lang] = langMap
 	}
 }
@@ -103,9 +114,9 @@ func (l *Localization) T(lang, key string) string {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 
-	// Default to Norwegian bokmål if language not found
+	// Fell attende paa standardmaalet naar maalet ikkje finst.
 	if _, exists := l.languages[lang]; !exists {
-		lang = "nb"
+		lang = "nn"
 	}
 
 	langMap := l.languages[lang]
@@ -144,14 +155,14 @@ func (l *Localization) getNestedValue(data map[string]interface{}, key string) s
 
 // GetSupportedLanguages returns list of supported languages
 func (l *Localization) GetSupportedLanguages() []string {
-	return []string{"nb", "nn", "en"}
+	return []string{"nn", "nb", "en"}
 }
 
 // GetLanguageName returns the display name for a language code
 func (l *Localization) GetLanguageName(code string) string {
 	names := map[string]string{
+		"nn": "Norsk nynorsk",
 		"nb": "Norsk bokmål",
-		"nn": "Norsk nynorsk", 
 		"en": "English",
 	}
 	if name, exists := names[code]; exists {
@@ -163,8 +174,8 @@ func (l *Localization) GetLanguageName(code string) string {
 // GetLanguageFlag returns the flag emoji for a language code
 func (l *Localization) GetLanguageFlag(code string) string {
 	flags := map[string]string{
-		"nb": "🇩🇰", // Danish flag for Bokmål as requested
 		"nn": "🇳🇴", // Norwegian flag for Nynorsk
+		"nb": "🇩🇰", // Danish flag for Bokmål as requested
 		"en": "🇺🇸", // US flag for English
 	}
 	if flag, exists := flags[code]; exists {

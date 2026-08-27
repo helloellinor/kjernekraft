@@ -1,128 +1,92 @@
 {{define "content"}}
-{{template "navigation" .}}
+<div class="profilsida">
+    {{/* Adresselapp, ikkje merkelapp-og-verd.
+         Ni radar med merkelappen til vinstre og verdet til høgre hadde
+         891 pikslar imillom. Ei adressa er *éin* ting med ei form alle
+         kjenner; set henne slik ho ser ut paa ein konvolutt, og ingen
+         treng merkelappar.
 
-<main class="main-content">
-    <h1 class="page-title">{{t .Lang "profile.title"}}</h1>
-    
-    <div class="profile-card">
-        {{if .ShowSuccess}}
-        <div class="success-message">
-            {{t .Lang "profile.profile_updated"}}
-        </div>
-        {{end}}
-        
-        <div class="profile-header">
-            <div class="profile-avatar">{{substr .Name 0 1}}</div>
-            <div class="profile-info">
-                <h2>{{.Name}}</h2>
-                <div class="email">{{.Email}}</div>
-            </div>
-        </div>
-        
-        <!-- Language Selector Section -->
-        <div class="profile-section">
-            <h3 class="section-title">{{t .Lang "language.select_language"}}</h3>
-            {{template "language_selector" .}}
-        </div>
-        
-        <div class="profile-details" id="profile-view">
-            <div class="detail-item">
-                <span class="detail-label">{{t .Lang "profile.full_name"}}:</span>
-                <span class="detail-value">{{.Name}}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">{{t .Lang "profile.email"}}:</span>
-                <span class="detail-value">{{.Email}}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">{{t .Lang "profile.phone"}}:</span>
-                <span class="detail-value">{{if .Phone}}{{.Phone}}{{else}}-{{end}}</span>
-            </div>
-            {{if .Address}}
-            <div class="detail-item">
-                <span class="detail-label">{{t .Lang "profile.address"}}:</span>
-                <span class="detail-value">{{.Address}}</span>
-            </div>
-            {{end}}
-            {{if .PostalCode}}
-            <div class="detail-item">
-                <span class="detail-label">{{t .Lang "profile.postal_code"}}:</span>
-                <span class="detail-value">{{.PostalCode}}</span>
-            </div>
-            {{end}}
-            {{if .City}}
-            <div class="detail-item">
-                <span class="detail-label">{{t .Lang "profile.city"}}:</span>
-                <span class="detail-value">{{.City}}</span>
-            </div>
-            {{end}}
-            {{if .Country}}
-            <div class="detail-item">
-                <span class="detail-label">{{t .Lang "profile.country"}}:</span>
-                <span class="detail-value">{{.Country}}</span>
-            </div>
-            {{end}}
-            {{if .Birthdate}}
-            <div class="detail-item">
-                <span class="detail-label">{{t .Lang "profile.birthdate"}}:</span>
-                <span class="detail-value">{{.Birthdate}}</span>
-            </div>
-            {{end}}
-            <div class="detail-item">
-                <span class="detail-label">{{t .Lang "profile.member_since"}}:</span>
-                <span class="detail-value">{{.JoinDate}}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">{{t .Lang "profile.user_id"}}:</span>
-                <span class="detail-value">#{{.ID}}</span>
-            </div>
-        </div>
-        
-        <form class="edit-form" id="profile-edit" method="POST" action="/elev/min-profil">
-            <div class="form-group">
-                <label for="name">{{t .Lang "profile.full_name"}}:</label>
-                <input type="text" id="name" name="name" value="{{.Name}}" required>
-            </div>
-            <div class="form-group">
-                <label for="email">{{t .Lang "profile.email"}}:</label>
-                <input type="email" id="email" name="email" value="{{.Email}}" required>
-            </div>
-            <div class="form-group">
-                <label for="phone">{{t .Lang "profile.phone"}}:</label>
-                <input type="tel" id="phone" name="phone" value="{{.Phone}}">
-            </div>
-            <div class="form-group">
-                <label for="address">{{t .Lang "profile.address"}}:</label>
-                <input type="text" id="address" name="address" value="{{.Address}}">
-            </div>
-            <div class="form-group">
-                <label for="postal_code">{{t .Lang "profile.postal_code"}}:</label>
-                <input type="text" id="postal_code" name="postal_code" value="{{.PostalCode}}">
-            </div>
-            <div class="form-group">
-                <label for="city">{{t .Lang "profile.city"}}:</label>
-                <input type="text" id="city" name="city" value="{{.City}}">
-            </div>
-            <div class="form-group">
-                <label for="country">{{t .Lang "profile.country"}}:</label>
-                <input type="text" id="country" name="country" value="{{.Country}}">
-            </div>
-            <div class="form-group">
-                <label for="birthdate">{{t .Lang "profile.birthdate"}}:</label>
-                <input type="date" id="birthdate" name="birthdate" value="{{.Birthdate}}">
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="save-btn">{{t .Lang "profile.save_changes"}}</button>
-                <button type="button" class="cancel-btn" onclick="cancelEdit()">{{t .Lang "profile.cancel"}}</button>
-            </div>
-        </form>
-        
-        <button class="edit-profile-btn" id="edit-btn" onclick="editProfile()">
-            {{t .Lang "profile.edit_profile"}}
-        </button>
-    </div>
-</main>
+         Kvart felt er skrivbart der det stend. Ingen redigeringsmodus:
+         du klikkar paa linja, skriv, og gjeng vidare. Fyrr bytte heile
+         sida ham for at du skulle retta eit telefonnummer. */}}
+    {{/* Namnet stod tvo gonger — ein gong som yverskrift og ein gong som
+         fyrste felt. Yverskrifti *er* feltet no. Ho er stor av di ho er
+         namnet ditt, og skrivbar av di ho er eit felt; det er den same
+         tingen.
 
-{{template "profile_styles"}}
-{{template "profile_scripts"}}
+         Fødselsdagen høyrer til namnet — det er kven du er — og stend
+         difor rett under. Adressa er noko anna, og fær luft fyre seg. */}}
+    <form class="profilskjema" id="profil" data-endringar data-dokk="lagre-dokk" method="POST" action="/elev/min-profil">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+        <div class="lapp lapp-kven">
+            {{/* Yverskrifta er ei *yverskrift*, ikkje eit felt som ser ut
+                 som ei. Eit <input> er einlina og kann ikkje brjota, so
+                 lange namn vart klypte. Ein contenteditable <h1> bryt
+                 slik all annan tekst paa sida bryt — same skrift, same
+                 lineavstand, same ombrot — og han er framleis skrivbar.
+
+                 Det som vert sendt ligg i eit løynt felt attmed; h1-en
+                 speglar seg dit for kvart tastetrykk. */}}
+            <h1 class="page-title namnefelt" id="namnefelt"
+                contenteditable="plaintext-only" role="textbox"
+                aria-label="{{t .Lang "profile.full_name"}}"
+                spellcheck="false" data-speil="namn-verdi">{{.Name}}</h1>
+            <input type="hidden" name="name" id="namn-verdi" value="{{.Name}}"
+                   data-visast="namnefelt">
+            <input class="lappfelt kort" type="date" name="birthdate" value="{{.Birthdate}}"
+                   aria-label="{{t .Lang "signup.birthdate"}}" autocomplete="bday">
+        </div>
+
+        <div class="lapp">
+            <input class="lappfelt" type="text" name="address" value="{{.Address}}"
+                   aria-label="{{t .Lang "signup.address"}}" autocomplete="street-address"
+                   placeholder="{{t .Lang "signup.address"}}">
+            <div class="lapprad">
+                <input class="lappfelt kort" type="text" name="postal_code" value="{{.PostalCode}}"
+                       aria-label="{{t .Lang "signup.postal_code"}}" autocomplete="postal-code"
+                       placeholder="{{t .Lang "signup.postal_code"}}" inputmode="numeric">
+                <input class="lappfelt" type="text" name="city" value="{{.City}}"
+                       aria-label="{{t .Lang "signup.city"}}" autocomplete="address-level2"
+                       placeholder="{{t .Lang "signup.city"}}">
+            </div>
+            <input class="lappfelt" type="text" name="country" value="{{.Country}}"
+                   aria-label="{{t .Lang "signup.country"}}" autocomplete="country-name"
+                   placeholder="{{t .Lang "signup.country"}}">
+        </div>
+
+        <div class="lapp">
+            <input class="lappfelt" type="email" name="email" value="{{.Email}}"
+                   aria-label="{{t .Lang "signup.email"}}" autocomplete="email" required>
+            <input class="lappfelt" type="tel" name="phone" value="{{.Phone}}"
+                   aria-label="{{t .Lang "signup.phone"}}" autocomplete="tel"
+                   placeholder="{{t .Lang "signup.phone"}}">
+        </div>
+
+        {{/* Det som avgjer kva prisar du fær sjaa. Det stend her og
+             ikkje paa prissida, av di det er noko um *deg* — og daa
+             slepp prissida aa spyrja um det same kvar gong. */}}
+        <label class="avkryssing rabatt">
+            <input type="checkbox" name="student_senior" {{if .StudentSenior}}checked{{end}}>
+            <span>
+                {{t .Lang "profile.student_senior"}}
+                <small>{{t .Lang "profile.student_senior_hint"}}</small>
+            </span>
+        </label>
+    </form>
+
+    {{/* Dokka kjem fram naar noko er endra. Feltet merkjer seg sjølv;
+         dokka ber handlingi. */}}
+    <aside class="dokk endringsdokk" id="lagre-dokk" hidden>
+        <div class="dokkinnhald">
+            <span class="endringstal" id="endringstal" aria-live="polite"
+                  data-ein="{{t .Lang "profile.changed_one"}}"
+                  data-fleire="{{t .Lang "profile.changed_many"}}"></span>
+            <div class="dokkhandling">
+                <button type="button" class="btn" id="angra" data-angra>{{t .Lang "profile.discard"}}</button>
+                <button type="submit" form="profil" class="btn-primary">{{t .Lang "profile.save"}}</button>
+            </div>
+        </div>
+    </aside>
+</div>
 {{end}}

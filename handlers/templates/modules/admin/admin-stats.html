@@ -1,24 +1,20 @@
 {{define "admin_stats_module"}}
-<style>
-{{template "admin_stats_module_styles"}}
-</style>
+{{/* Tali som ei setning.
+     Tri flisor med eit tal og ei merkelapp under er ein maate aa unngaa
+     aa skriva ei setning paa. «6» og «TOTALT ANTALL BRUKERE» lyt setjast
+     saman av lesaren; «6 medlemer» er alt sett saman.
 
-<div class="admin-stats">
-    <div class="stat-item">
-        <span class="stat-value">{{.TotalUsers}}</span>
-        <span class="stat-label">{{t .Lang "admin.total_users"}}</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-value">{{.TotalEvents}}</span>
-        <span class="stat-label">{{t .Lang "admin.total_events"}}</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-value">{{.PendingFreezeRequests}}</span>
-        <span class="stat-label">{{t .Lang "admin.pending_freeze_requests"}}</span>
-    </div>
-</div>
-{{end}}
-
-{{define "admin_stats_module_styles"}}
-{{.AdminStatsCSS}}
+     Breiddeaksa gjer det leseleg utan kassar: tale stend vidt og feitt,
+     ordet smalt attmed. Det er den same regelen som elles i huset —
+     breidd tyder rang — berre nytta i ei linja i staden for i eit
+     hierarki av yverskrifter. */}}
+<p class="tal-setning">
+    {{t .Lang "admin.stats_lead"}}
+    <b class="tal">{{.TotalUsers}}</b> <span class="ord">{{t .Lang "admin.stats_members"}}</span>.
+    {{t .Lang "admin.stats_middle"}}
+    <b class="tal">{{.TotalEvents}}</b> <span class="ord">{{t .Lang "admin.stats_classes"}}</span>{{if .PendingFreezeRequests}},
+    {{t .Lang "admin.stats_and"}}
+    <a href="#meldingar" class="tal-lenkje"><b class="tal">{{.PendingFreezeRequests}}</b>
+    <span class="ord">{{if eq .PendingFreezeRequests 1}}{{t .Lang "admin.stats_waiting_one"}}{{else}}{{t .Lang "admin.stats_waiting_many"}}{{end}}</span></a>{{end}}.
+</p>
 {{end}}

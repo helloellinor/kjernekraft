@@ -67,7 +67,7 @@ func ChangeMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := int64(user.ID)
-	
+
 	// Check if membership change is allowed
 	canChange, reason := DB.CanChangeMembership(userID, membershipID)
 	if !canChange {

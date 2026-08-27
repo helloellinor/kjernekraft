@@ -5,24 +5,38 @@ import (
 	"fmt"
 	"kjernekraft/models"
 	"log"
+	"os"
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Database struct {
 	Conn *sql.DB
 }
 
+// DBPathEnv segjer kvar basefila ligg. Stigen var fast — «./kjernekraft.db»
+// — og det tydde at prøvorne skreiv i ei fil som laag att millom
+// køyringarne. Fyrste gongen gjekk dei; andre gongen fall dei paa
+// «e-post er allerede i bruk», av di brukaren fraa fyrre køyringi
+// framleis stod der.
+const DBPathEnv = "KJERNEKRAFT_DB"
+
+// Connect opnar basen. Stigen kjem or KJERNEKRAFT_DB naar han er sett.
 func Connect() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./kjernekraft.db")
+	path := os.Getenv(DBPathEnv)
+	if path == "" {
+		path = "./kjernekraft.db"
+	}
+
+	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("Kopla til SQLite-databasen.")
+	log.Printf("Kopla til SQLite-databasen (%s).", path)
 	return db, nil
 }
 
@@ -43,6 +57,22 @@ func Migrate(db *sql.DB) error {
 		capacity INTEGER DEFAULT 0,
 		current_enrolment INTEGER DEFAULT 0,
 		color TEXT DEFAULT ''
+	);
+	`
+	// Rommet er ein ressurs, ikkje ein tekststreng. Salen tek 18 og
+	// Reformer tek 4, og det er den skilnaden heile studioet dreiar um:
+	// eit medlemskap gjeld salen, reformeren vert seld for seg.
+	//
+	// Fyrr laag rommet som fri tekst i events.location, og kapasiteten
+	// var eit tal nokon skreiv inn for haand per time — med 20 som
+	// utgangspunkt, uansett rom. Det er ei innbjoding til aa selja
+	// fjortan plassar som ikkje finst.
+	roomsTableSQL := `
+	CREATE TABLE IF NOT EXISTS rooms (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL UNIQUE,
+		capacity INTEGER NOT NULL,
+		active BOOLEAN DEFAULT TRUE
 	);
 	`
 	usersTableSQL := `
@@ -213,9 +243,17 @@ func Migrate(db *sql.DB) error {
 	if _, err := db.Exec(membershipRulesTableSQL); err != nil {
 		return err
 	}
+	if _, err := db.Exec(roomsTableSQL); err != nil {
+		return err
+	}
+
+	// Dei røynlege romi i Storgata 23.
+	if _, err := db.Exec(`INSERT OR IGNORE INTO rooms (name, capacity) VALUES ('Salen', 18), ('Reformer', 4)`); err != nil {
+		return err
+	}
 
 	log.Println("Migrering fullført: alle tabeller oppretta.")
-	
+
 	// Check if last_billed column exists and add it if missing
 	var columnExists bool
 	err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('user_memberships') WHERE name='last_billed'").Scan(&columnExists)
@@ -224,17 +262,147 @@ func Migrate(db *sql.DB) error {
 		if err != nil {
 			return err
 		}
-		
+
 		// Update existing rows with a default value
 		_, err = db.Exec("UPDATE user_memberships SET last_billed = CURRENT_TIMESTAMP WHERE last_billed IS NULL")
 		if err != nil {
 			return err
 		}
-		
+
 		log.Println("Added last_billed column to user_memberships table")
 	}
-	
+
+	// Student- eller honnørbevis. Studioet gjev 20 % rabatt til den som
+	// hev det, og det er brukaren som fortel at han hev det — studioet
+	// ser beviset i resepsjonen. Alderen kjem av fødselsdagen; ho treng
+	// ingen kolonne.
+	var rabattKolonne bool
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('users') WHERE name='student_senior'").Scan(&rabattKolonne); err == nil && !rabattKolonne {
+		if _, err := db.Exec("ALTER TABLE users ADD COLUMN student_senior BOOLEAN DEFAULT FALSE"); err != nil {
+			return err
+		}
+		log.Println("La til student_senior paa users.")
+	}
+
+	// Rommet paa ein time. Timane som fanst fyrr peika paa rom gjenom
+	// fri tekst i `location`; dei vert kopla yver der namnet stemmer.
+	var romKolonne bool
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='room_id'").Scan(&romKolonne); err == nil && !romKolonne {
+		if _, err := db.Exec("ALTER TABLE events ADD COLUMN room_id INTEGER REFERENCES rooms(id)"); err != nil {
+			return err
+		}
+		if _, err := db.Exec(`UPDATE events SET room_id = (SELECT id FROM rooms WHERE rooms.name = events.location) WHERE room_id IS NULL`); err != nil {
+			return err
+		}
+		log.Println("La til room_id paa events og kopla dei mot romi.")
+	}
+
+	// Regelen attum timane. «Kvar veke i aatte veker» vart skrive inn
+	// som aatte sjølvstendige rader, og kva som høyrde saman fanst
+	// berre som eit samantreff av like felt. No ber kvar time regelen
+	// sin; dei gamle radene vert kopla saman etter det same
+	// samantreffet — same time, lærar, rom, vekedag og klokkeslett —
+	// éin gong, her, og regelen fær det minste time-id-et sitt som
+	// namn.
+	var regelKolonne bool
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='rule_id'").Scan(&regelKolonne); err == nil && !regelKolonne {
+		if _, err := db.Exec("ALTER TABLE events ADD COLUMN rule_id INTEGER"); err != nil {
+			return err
+		}
+		if err := kopleTimarTilReglar(db); err != nil {
+			return err
+		}
+		log.Println("La til rule_id paa events og kopla timane til reglane sine.")
+	}
+
 	return nil
+}
+
+// kopleTimarTilReglar gjev kvar gamal time ein regel. Klokka vert lesi
+// som ho stend: den lagra tidi er veggklokka i heile huset, og skal
+// korkje reknast um her eller nokon annan stad.
+func kopleTimarTilReglar(db *sql.DB) error {
+	rows, err := db.Query(`SELECT id, title, COALESCE(teacher_name,''), COALESCE(location,''),
+		COALESCE(room_id, 0), start_time, end_time FROM events`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	grupper := map[string][]int64{}
+	for rows.Next() {
+		var id, romID int64
+		var tittel, laerar, stad string
+		var start, slutt time.Time
+		if err := rows.Scan(&id, &tittel, &laerar, &stad, &romID, &start, &slutt); err != nil {
+			return err
+		}
+		st := start
+		nykel := fmt.Sprintf("%s|%s|%s|%d|%d|%s|%d",
+			tittel, laerar, stad, romID, st.Weekday(), st.Format("15:04"),
+			int(slutt.Sub(start).Minutes()))
+		grupper[nykel] = append(grupper[nykel], id)
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	for _, idar := range grupper {
+		regel := idar[0]
+		for _, id := range idar {
+			if id < regel {
+				regel = id
+			}
+		}
+		for _, id := range idar {
+			if _, err := db.Exec("UPDATE events SET rule_id = ? WHERE id = ?", regel, id); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// RoomConflict gjev den fyrste timen som alt ligg i rommet og krossar
+// tidsrommet, eller nil.
+//
+// Tvo tidsrom krossa kvarandre naar den eine byrjar fyre den andre
+// endar og endar etter at den andre byrja. Det er heile prøva; ho vert
+// ofte skrivi som fire tilfelle, og daa gløymer ein eitt av deim.
+func (db *Database) RoomConflict(romID int64, start, slutt time.Time) (*models.Event, error) {
+	var e models.Event
+	err := db.Conn.QueryRow(`
+		SELECT id, title, COALESCE(teacher_name, ''), start_time, end_time
+		FROM events
+		WHERE room_id = ? AND start_time < ? AND end_time > ?
+		ORDER BY start_time LIMIT 1`,
+		romID, slutt, start).Scan(&e.ID, &e.Title, &e.TeacherName, &e.StartTime, &e.EndTime)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &e, nil
+}
+
+// GetRooms gjev romi studioet hev, med kapasiteten deira.
+func (db *Database) GetRooms() ([]models.Room, error) {
+	rows, err := db.Conn.Query(`SELECT id, name, capacity FROM rooms WHERE active ORDER BY capacity DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var romi []models.Room
+	for rows.Next() {
+		var r models.Room
+		if err := rows.Scan(&r.ID, &r.Name, &r.Capacity); err != nil {
+			return nil, err
+		}
+		romi = append(romi, r)
+	}
+	return romi, rows.Err()
 }
 
 // isColumnExistsError checks if the error is due to column already existing
@@ -316,7 +484,7 @@ func (db *Database) CreateUser(u models.User) (int64, error) {
 	if err == nil {
 		return 0, fmt.Errorf("e-post er allerede i bruk")
 	}
-	
+
 	// Check if phone already exists
 	err = db.Conn.QueryRow("SELECT id FROM users WHERE phone = ?", u.Phone).Scan(&existingID)
 	if err == nil {
@@ -361,16 +529,16 @@ func (db *Database) CreateDefaultPaymentMethods(userID int64) error {
 	// Create first default card (Visa simulation)
 	card1Query := `INSERT INTO payment_methods (user_id, provider, provider_id) 
 	               VALUES (?, 'stripe', ?)`
-	
+
 	_, err := db.Conn.Exec(card1Query, userID, fmt.Sprintf("pm_default_visa_%d", userID))
 	if err != nil {
 		return err
 	}
-	
+
 	// Create second default card (Mastercard simulation)
 	card2Query := `INSERT INTO payment_methods (user_id, provider, provider_id) 
 	               VALUES (?, 'stripe', ?)`
-	
+
 	_, err = db.Conn.Exec(card2Query, userID, fmt.Sprintf("pm_default_mastercard_%d", userID))
 	return err
 }
@@ -387,9 +555,9 @@ func (db *Database) SimulateBilling(userID int64, amount int, description, charg
 	// Create a simulated charge (assuming it succeeds)
 	chargeQuery := `INSERT INTO charges (user_id, payment_method_id, amount, currency, status, description, type, charge_date, created_at)
 	                VALUES (?, ?, ?, 'NOK', 'succeeded', ?, ?, ?, ?)`
-	
+
 	now := time.Now()
-	
+
 	_, err = db.Conn.Exec(chargeQuery, userID, paymentMethodID, amount, description, chargeType, now, now)
 	return err
 }
@@ -438,7 +606,7 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 }
 
 func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]models.Event, error) {
-	query := "SELECT id, title, description, start_time, end_time, location, class_type, teacher_name, capacity, current_enrolment, color FROM events WHERE 1=1"
+	query := "SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '') FROM events e LEFT JOIN rooms r ON r.id = e.room_id WHERE 1=1"
 	var args []interface{}
 
 	if startDate != "" {
@@ -463,7 +631,7 @@ func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]mo
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -474,8 +642,12 @@ func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]mo
 // CreateEvent creates a new event in the database
 func (db *Database) CreateEvent(event models.Event) (int64, error) {
 	res, err := db.Conn.Exec(
-		"INSERT INTO events (title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-		event.Title, event.Description, event.StartTime, event.EndTime, event.Location, event.Organizer, event.ClassType, event.TeacherName, event.Capacity, event.CurrentEnrolment, event.Color,
+		`INSERT INTO events (title, description, start_time, end_time, location, room_id,
+			organizer, class_type, teacher_name, capacity, current_enrolment, color, rule_id)
+		 VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?, NULLIF(?, 0))`,
+		event.Title, event.Description, event.StartTime, event.EndTime, event.Location, event.RoomID,
+		event.Organizer, event.ClassType, event.TeacherName, event.Capacity, event.CurrentEnrolment, event.Color,
+		event.RuleID,
 	)
 	if err != nil {
 		return 0, err
@@ -483,18 +655,80 @@ func (db *Database) CreateEvent(event models.Event) (int64, error) {
 	return res.LastInsertId()
 }
 
-// UpdateEventTime updates the start and end time of an event
-func (db *Database) UpdateEventTime(eventID int64, startTime, endTime string) error {
+// NesteRegelID gjev namnet aat neste regel. Regelen finst ikkje som ei
+// eigi rad — han er talet timane hans ber saman.
+func (db *Database) NesteRegelID() (int64, error) {
+	var id int64
+	err := db.Conn.QueryRow("SELECT COALESCE(MAX(rule_id), 0) + 1 FROM events").Scan(&id)
+	return id, err
+}
+
+// UpdateRuleTeacher byter lærar paa alle komande timar i regelen. Det
+// som alt er halde stend som det var — historia skriv seg ikkje um.
+func (db *Database) UpdateRuleTeacher(ruleID int64, laerar string, fraa time.Time) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET teacher_name = ? WHERE rule_id = ? AND end_time > ?",
+		laerar, ruleID, fraa,
+	)
+	return err
+}
+
+// UpdateEventTeacher set vikar paa éin einskild time — tannlækjardagen.
+// Regelen stend urørd; det er nett denne dagen som fær eit anna namn.
+func (db *Database) UpdateEventTeacher(eventID int64, laerar string) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET teacher_name = ? WHERE id = ?",
+		laerar, eventID,
+	)
+	return err
+}
+
+// UpdateRuleDescription set skildringi paa alle komande timar i
+// regelen — det er regelen som hev ei skildring, timane arvar henne.
+func (db *Database) UpdateRuleDescription(ruleID int64, tekst string, fraa time.Time) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET description = ? WHERE rule_id = ? AND end_time > ?",
+		tekst, ruleID, fraa,
+	)
+	return err
+}
+
+// GetFutureEventsByRule gjev dei komande timane i ein regel, etter dato.
+func (db *Database) GetFutureEventsByRule(ruleID int64, fraa time.Time) ([]models.Event, error) {
+	rows, err := db.Conn.Query(
+		"SELECT id, start_time, end_time FROM events WHERE rule_id = ? AND end_time > ? ORDER BY start_time",
+		ruleID, fraa,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var timar []models.Event
+	for rows.Next() {
+		var e models.Event
+		if err := rows.Scan(&e.ID, &e.StartTime, &e.EndTime); err != nil {
+			return nil, err
+		}
+		timar = append(timar, e)
+	}
+	return timar, rows.Err()
+}
+
+// FlyttEvent set ny start og slutt paa éin time. Tidene gjeng inn som
+// time.Time, same vegen som CreateEvent — ein tekststreng her gav
+// radene tvo ulike datoformat i same kolonna.
+func (db *Database) FlyttEvent(eventID int64, start, slutt time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET start_time = ?, end_time = ? WHERE id = ?",
-		startTime, endTime, eventID,
+		start, slutt, eventID,
 	)
 	return err
 }
 
 // GetAllEvents fetches all events from the database
 func (db *Database) GetAllEvents() ([]models.Event, error) {
-	rows, err := db.Conn.Query("SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color FROM events")
+	rows, err := db.Conn.Query("SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, ''), COALESCE(e.rule_id, 0) FROM events e LEFT JOIN rooms r ON r.id = e.room_id")
 	if err != nil {
 		return nil, err
 	}
@@ -503,7 +737,7 @@ func (db *Database) GetAllEvents() ([]models.Event, error) {
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName, &event.RuleID); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -514,8 +748,8 @@ func (db *Database) GetAllEvents() ([]models.Event, error) {
 // GetTodaysEvents fetches events for today
 func (db *Database) GetTodaysEvents() ([]models.Event, error) {
 	query := `
-		SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color 
-		FROM events 
+		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '')
+		FROM events e LEFT JOIN rooms r ON r.id = e.room_id 
 		WHERE DATE(start_time) = DATE('now', 'localtime')
 		ORDER BY start_time ASC
 	`
@@ -528,7 +762,7 @@ func (db *Database) GetTodaysEvents() ([]models.Event, error) {
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -539,8 +773,8 @@ func (db *Database) GetTodaysEvents() ([]models.Event, error) {
 // GetThisWeeksEvents fetches events for the current week
 func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 	query := `
-		SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color 
-		FROM events 
+		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '')
+		FROM events e LEFT JOIN rooms r ON r.id = e.room_id 
 		WHERE DATE(start_time) >= DATE('now', 'weekday 0', '-6 days', 'localtime') 
 		AND DATE(start_time) <= DATE('now', 'weekday 0', 'localtime')
 		ORDER BY start_time ASC
@@ -554,7 +788,7 @@ func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -566,13 +800,22 @@ func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 func (db *Database) GetEventsForWeek(mondayDate time.Time) ([]models.Event, error) {
 	// Calculate the Sunday of the same week
 	sundayDate := mondayDate.AddDate(0, 0, 6)
-	
+
+	// Kapasiteten kjem av rommet. Timen kann setja henne lægre — ein
+	// workshop i salen med ti plassar — men han kann ikkje setja henne
+	// høgre enn rommet. Difor NULLIF: 0 tyder «ikkje sett».
 	query := `
-		SELECT id, title, description, start_time, end_time, location, organizer, class_type, teacher_name, capacity, current_enrolment, color 
-		FROM events 
-		WHERE DATE(start_time) >= DATE(?) 
-		AND DATE(start_time) <= DATE(?)
-		ORDER BY start_time ASC
+		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time,
+		       COALESCE(e.location, ''), COALESCE(e.organizer, ''),
+		       COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''),
+		       COALESCE(NULLIF(e.capacity, 0), r.capacity, 0) AS plassar,
+		       e.current_enrolment, e.color,
+		       COALESCE(r.id, 0), COALESCE(r.name, e.location), COALESCE(r.capacity, 0)
+		FROM events e
+		LEFT JOIN rooms r ON r.id = e.room_id
+		WHERE DATE(e.start_time) >= DATE(?)
+		AND DATE(e.start_time) <= DATE(?)
+		ORDER BY e.start_time ASC
 	`
 	rows, err := db.Conn.Query(query, mondayDate.Format("2006-01-02"), sundayDate.Format("2006-01-02"))
 	if err != nil {
@@ -583,7 +826,10 @@ func (db *Database) GetEventsForWeek(mondayDate time.Time) ([]models.Event, erro
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime,
+			&event.Location, &event.Organizer, &event.ClassType, &event.TeacherName,
+			&event.Capacity, &event.CurrentEnrolment, &event.Color,
+			&event.RoomID, &event.RoomName, &event.RoomCapacity); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -633,6 +879,27 @@ func (db *Database) GetDistinctClassTypes() ([]string, error) {
 
 // Membership-related database methods
 
+// MedlemskapFor gjev dei medlemskapi ein brukar kann velja.
+//
+// Studioet gjev 20 % til den som hev student- eller honnørbevis, og hev
+// difor eigne planar for det. Fyrr stod alle side um side, og den som
+// ikkje hadde bevis laut lesa seg forbi helvti av lista for aa finna
+// sine eigne. Det er arbeid lagt paa lesaren for noko systemet alt veit.
+func (db *Database) MedlemskapFor(kvalifisert bool) ([]models.Membership, error) {
+	alle, err := db.GetAllMemberships()
+	if err != nil {
+		return nil, err
+	}
+	var ut []models.Membership
+	for _, m := range alle {
+		if m.IsStudentSenior && !kvalifisert {
+			continue
+		}
+		ut = append(ut, m)
+	}
+	return ut, nil
+}
+
 // GetAllMemberships fetches all active memberships
 func (db *Database) GetAllMemberships() ([]models.Membership, error) {
 	rows, err := db.Conn.Query("SELECT id, name, price, commitment_months, is_student_senior, is_special_offer, description, features, active FROM memberships WHERE active = TRUE")
@@ -663,7 +930,7 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 		ORDER BY um.created_at DESC
 		LIMIT 1
 	`
-	
+
 	var membership models.MembershipWithDetails
 	err := db.Conn.QueryRow(query, userID).Scan(
 		&membership.UserMembership.ID, &membership.UserMembership.UserID, &membership.UserMembership.MembershipID,
@@ -673,14 +940,14 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 		&membership.Membership.IsStudentSenior, &membership.Membership.IsSpecialOffer, &membership.Membership.Description,
 		&membership.Membership.Features, &membership.Membership.Active,
 	)
-	
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil // No active membership found
 		}
 		return nil, err
 	}
-	
+
 	return &membership, nil
 }
 
@@ -722,7 +989,7 @@ func (db *Database) GetUserKlippekort(userID int64) ([]models.KlippekortWithDeta
 		WHERE uk.user_id = ? AND uk.is_active = TRUE AND uk.expiry_date > datetime('now')
 		ORDER BY uk.expiry_date ASC
 	`
-	
+
 	rows, err := db.Conn.Query(query, userID)
 	if err != nil {
 		return nil, err
@@ -753,66 +1020,69 @@ func (db *Database) GetUserKlippekort(userID int64) ([]models.KlippekortWithDeta
 func (db *Database) AuthenticateUser(email, password string) (*models.User, error) {
 	var user models.User
 	var hashedPassword string
-	
+
 	query := `SELECT id, name, email, phone, address, postal_code, city, country, password, newsletter_subscription, terms_accepted
 	          FROM users WHERE email = ?`
-	
+
 	err := db.Conn.QueryRow(query, email).Scan(
 		&user.ID, &user.Name, &user.Email, &user.Phone, &user.Address,
 		&user.PostalCode, &user.City, &user.Country, &hashedPassword,
 		&user.NewsletterSubscription, &user.TermsAccepted,
 	)
-	
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("ugyldig e-post eller passord")
 		}
 		return nil, err
 	}
-	
+
 	// Verify password
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
 		return nil, fmt.Errorf("ugyldig e-post eller passord")
 	}
-	
+
 	// Get user roles
 	roles, err := db.GetUserRoles(int64(user.ID))
 	if err != nil {
 		return nil, err
 	}
 	user.Roles = roles
-	
+
 	return &user, nil
 }
 
 // GetUserByID fetches a user by their ID
 func (db *Database) GetUserByID(userID int64) (*models.User, error) {
 	var user models.User
-	
-	query := `SELECT id, name, email, phone, address, postal_code, city, country, newsletter_subscription, terms_accepted
+
+	query := `SELECT id, name, COALESCE(birthdate, ''), email, COALESCE(phone, ''),
+	                 COALESCE(address, ''), COALESCE(postal_code, ''), COALESCE(city, ''),
+	                 COALESCE(country, ''), newsletter_subscription, terms_accepted,
+	                 COALESCE(student_senior, 0)
 	          FROM users WHERE id = ?`
-	
+
 	err := db.Conn.QueryRow(query, userID).Scan(
-		&user.ID, &user.Name, &user.Email, &user.Phone, &user.Address,
+		&user.ID, &user.Name, &user.Birthdate, &user.Email, &user.Phone, &user.Address,
 		&user.PostalCode, &user.City, &user.Country,
-		&user.NewsletterSubscription, &user.TermsAccepted,
+		&user.NewsletterSubscription, &user.TermsAccepted, &user.StudentSenior,
 	)
-	
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("bruker ikke funnet")
 		}
 		return nil, err
 	}
-	
+
 	// Get user roles
 	roles, err := db.GetUserRoles(userID)
 	if err != nil {
 		return nil, err
 	}
 	user.Roles = roles
-	
+
 	return &user, nil
 }
 
@@ -827,13 +1097,13 @@ func (db *Database) GetPendingFreezeRequests() ([]models.FreezeRequest, error) {
 		JOIN memberships m ON um.membership_id = m.id
 		WHERE um.status = 'freeze_requested'
 		ORDER BY um.created_at DESC`
-	
+
 	rows, err := db.Conn.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	
+
 	var requests []models.FreezeRequest
 	for rows.Next() {
 		var req models.FreezeRequest
@@ -847,7 +1117,7 @@ func (db *Database) GetPendingFreezeRequests() ([]models.FreezeRequest, error) {
 		}
 		requests = append(requests, req)
 	}
-	
+
 	return requests, nil
 }
 
@@ -895,7 +1165,7 @@ func (db *Database) AddUserMembership(userID int64, membershipID int64) error {
 
 	query := `INSERT INTO user_memberships (user_id, membership_id, status, start_date, renewal_date, end_date, binding_end, last_billed, created_at)
 	          VALUES (?, ?, 'active', ?, ?, ?, ?, ?, ?)`
-	
+
 	_, err = db.Conn.Exec(query, userID, membershipID, startDate, renewalDate, endDate, bindingEnd, startDate, now)
 	if err != nil {
 		return err
@@ -936,11 +1206,11 @@ func (db *Database) ChangeUserMembership(userID int64, newMembershipID int64) er
 
 	now := time.Now()
 	renewalDate := now.AddDate(0, 1, 0).Format("2006-01-02")
-	
+
 	// Calculate new binding end date
 	var newBindingEnd string
 	isUpgrade := newMembership.Price > currentMembership.Price
-	
+
 	if isUpgrade && rules.CombineBindingPeriods && currentMembership.BindingEnd != nil {
 		// For upgrades, combine remaining binding time with new commitment
 		remainingMonths := 0
@@ -951,7 +1221,7 @@ func (db *Database) ChangeUserMembership(userID int64, newMembershipID int64) er
 				remainingMonths = 0
 			}
 		}
-		
+
 		// Add new commitment months to remaining months
 		totalMonths := remainingMonths + newMembership.CommitmentMonths
 		newBindingEndTime := now.AddDate(0, totalMonths, 0)
@@ -965,7 +1235,7 @@ func (db *Database) ChangeUserMembership(userID int64, newMembershipID int64) er
 	query := `UPDATE user_memberships 
 	          SET membership_id = ?, renewal_date = ?, binding_end = ? 
 	          WHERE user_id = ? AND status IN ('active', 'paused', 'freeze_requested')`
-	
+
 	_, err = db.Conn.Exec(query, newMembershipID, renewalDate, newBindingEnd, userID)
 	return err
 }
@@ -981,18 +1251,18 @@ func (db *Database) RemoveUserMembership(userID int64) error {
 func (db *Database) GetMembershipByID(membershipID int64) (*models.Membership, error) {
 	query := `SELECT id, name, price, commitment_months, is_student_senior, is_special_offer, description, features, active 
 	          FROM memberships WHERE id = ?`
-	
+
 	var membership models.Membership
 	err := db.Conn.QueryRow(query, membershipID).Scan(
 		&membership.ID, &membership.Name, &membership.Price, &membership.CommitmentMonths,
 		&membership.IsStudentSenior, &membership.IsSpecialOffer, &membership.Description,
 		&membership.Features, &membership.Active,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &membership, nil
 }
 
@@ -1056,12 +1326,12 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 	var pkg models.KlippekortPackage
 	query := `SELECT id, name, category, klipp_count, price, price_per_session, description, valid_days, active, is_popular 
 	          FROM klippekort_packages WHERE id = ? AND active = TRUE`
-	
+
 	err := db.Conn.QueryRow(query, packageID).Scan(
 		&pkg.ID, &pkg.Name, &pkg.Category, &pkg.KlippCount, &pkg.Price,
 		&pkg.PricePerSession, &pkg.Description, &pkg.ValidDays, &pkg.Active, &pkg.IsPopular,
 	)
-	
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return fmt.Errorf("klippekort-pakke ikke funnet")
@@ -1076,21 +1346,21 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 	                  WHERE uk.user_id = ? AND kp.category = ? AND uk.is_active = TRUE AND uk.expiry_date > datetime('now')
 	                  ORDER BY uk.expiry_date DESC
 	                  LIMIT 1`
-	
+
 	var existingID int
 	var totalKlipp, remainingKlipp int
 	var expiryDate time.Time
-	
+
 	err = db.Conn.QueryRow(existingQuery, userID, pkg.Category).Scan(&existingID, &totalKlipp, &remainingKlipp, &expiryDate)
-	
+
 	now := time.Now()
 	newExpiryDate := now.AddDate(0, 0, pkg.ValidDays)
-	
+
 	if err == sql.ErrNoRows {
 		// No existing klippekort, create new one
 		insertQuery := `INSERT INTO user_klippekort (user_id, package_id, total_klipp, remaining_klipp, expiry_date, purchase_date, is_active)
 		                VALUES (?, ?, ?, ?, ?, ?, TRUE)`
-		
+
 		_, err = db.Conn.Exec(insertQuery, userID, packageID, pkg.KlippCount, pkg.KlippCount, newExpiryDate, now)
 		if err != nil {
 			return err
@@ -1107,28 +1377,28 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 	} else if err != nil {
 		return err
 	}
-	
+
 	// Existing klippekort found - add to it
 	// Check if adding would exceed maximum allowed (20 by default)
 	maxKlipp := 20 // TODO: Make this configurable in admin settings
 	newTotal := totalKlipp + pkg.KlippCount
 	newRemaining := remainingKlipp + pkg.KlippCount
-	
+
 	if newTotal > maxKlipp {
 		return fmt.Errorf("kan ikke kjøpe flere klipp. Maksimum %d klipp per kort (du har %d)", maxKlipp, totalKlipp)
 	}
-	
+
 	// Use the longer expiry date (existing or new)
 	finalExpiryDate := expiryDate
 	if newExpiryDate.After(expiryDate) {
 		finalExpiryDate = newExpiryDate
 	}
-	
+
 	// Update existing klippekort
 	updateQuery := `UPDATE user_klippekort 
 	                SET total_klipp = ?, remaining_klipp = ?, expiry_date = ?, package_id = ?
 	                WHERE id = ?`
-	
+
 	_, err = db.Conn.Exec(updateQuery, newTotal, newRemaining, finalExpiryDate, packageID, existingID)
 	if err != nil {
 		return err
@@ -1151,56 +1421,85 @@ func (db *Database) GetEventByID(eventID int64) (*models.Event, error) {
 	var event models.Event
 	query := `SELECT id, title, description, start_time, end_time, teacher_name, capacity, current_enrolment, class_type
 	          FROM events WHERE id = ?`
-	
+
 	err := db.Conn.QueryRow(query, eventID).Scan(
 		&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime,
 		&event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.ClassType,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &event, nil
 }
 
 // SignupUserForEvent signs up a user for an event
+// SignupUserForEvent melder ein brukar paa ein time.
+//
+// Tvo ting var gale her. Han las kapasiteten beinveges or events-rada,
+// og etter at rommet vart ein ressurs stend det 0 der naar timen ikkje
+// set si eigi — so `7 >= 0` var sant og *kvar* paamelding svara «event
+// is full». Han lyt rekna ut den same kapasiteten som resten av huset.
+//
+// Og han las fyrst og skreiv etterpaa, utan transaksjon. Reformeren hev
+// fire plassar; tvo som trykkjer paa den siste samstundes kom baae
+// gjenom kontrollen og båe vart melde paa. Talet er ikkje stort nok til
+// at ein kann sjaa burt fraa det.
 func (db *Database) SignupUserForEvent(userID, eventID int64) error {
-	// Check if user is already signed up
+	tx, err := db.Conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
 	var exists int
-	checkQuery := `SELECT COUNT(*) FROM event_signups WHERE user_id = ? AND event_id = ?`
-	err := db.Conn.QueryRow(checkQuery, userID, eventID).Scan(&exists)
-	if err != nil {
+	if err := tx.QueryRow(
+		`SELECT COUNT(*) FROM event_signups WHERE user_id = ? AND event_id = ?`,
+		userID, eventID).Scan(&exists); err != nil {
 		return err
 	}
-	
 	if exists > 0 {
-		return fmt.Errorf("user already signed up for this event")
+		return fmt.Errorf("brukaren er alt paameld denne timen")
 	}
-	
-	// Check if event has capacity
-	var currentEnrolment, capacity int
-	capacityQuery := `SELECT current_enrolment, capacity FROM events WHERE id = ?`
-	err = db.Conn.QueryRow(capacityQuery, eventID).Scan(&currentEnrolment, &capacity)
+
+	// Same utrekningi som i GetEventsForWeek: timen si eigi kapasitet um
+	// ho er sett, elles rommet si.
+	var paameldte, plassar int
+	if err := tx.QueryRow(`
+		SELECT e.current_enrolment, COALESCE(NULLIF(e.capacity, 0), r.capacity, 0)
+		FROM events e LEFT JOIN rooms r ON r.id = e.room_id
+		WHERE e.id = ?`, eventID).Scan(&paameldte, &plassar); err != nil {
+		return err
+	}
+	if plassar <= 0 {
+		return fmt.Errorf("timen hev ingi kapasitet sett")
+	}
+	if paameldte >= plassar {
+		return fmt.Errorf("timen er full")
+	}
+
+	if _, err := tx.Exec(
+		`INSERT INTO event_signups (user_id, event_id, signup_date) VALUES (?, ?, ?)`,
+		userID, eventID, time.Now()); err != nil {
+		return err
+	}
+
+	// Vilkoret stend i UPDATE-en med, so tvo samstundes paameldingar
+	// ikkje kann koma forbi kvarandre jamvel um kontrollen yver skulde
+	// sleppa baae gjenom.
+	res, err := tx.Exec(`
+		UPDATE events SET current_enrolment = current_enrolment + 1
+		WHERE id = ? AND current_enrolment < COALESCE(NULLIF(capacity, 0),
+			(SELECT capacity FROM rooms WHERE rooms.id = events.room_id), 0)`, eventID)
 	if err != nil {
 		return err
 	}
-	
-	if currentEnrolment >= capacity {
-		return fmt.Errorf("event is full")
+	if n, _ := res.RowsAffected(); n == 0 {
+		return fmt.Errorf("timen er full")
 	}
-	
-	// Create signup record
-	insertQuery := `INSERT INTO event_signups (user_id, event_id, signup_date) VALUES (?, ?, ?)`
-	_, err = db.Conn.Exec(insertQuery, userID, eventID, time.Now())
-	if err != nil {
-		return err
-	}
-	
-	// Update event enrolment count
-	updateQuery := `UPDATE events SET current_enrolment = current_enrolment + 1 WHERE id = ?`
-	_, err = db.Conn.Exec(updateQuery, eventID)
-	return err
+
+	return tx.Commit()
 }
 
 // CancelUserSignupForEvent cancels a user's signup for an event
@@ -1212,18 +1511,18 @@ func (db *Database) CancelUserSignupForEvent(userID, eventID int64) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if exists == 0 {
 		return fmt.Errorf("user is not signed up for this event")
 	}
-	
+
 	// Remove signup record
 	deleteQuery := `DELETE FROM event_signups WHERE user_id = ? AND event_id = ?`
 	_, err = db.Conn.Exec(deleteQuery, userID, eventID)
 	if err != nil {
 		return err
 	}
-	
+
 	// Update event enrolment count
 	updateQuery := `UPDATE events SET current_enrolment = current_enrolment - 1 WHERE id = ?`
 	_, err = db.Conn.Exec(updateQuery, eventID)
@@ -1235,28 +1534,28 @@ func (db *Database) GetUserSignupsForEvents(userID int64, eventIDs []int64) (map
 	if len(eventIDs) == 0 {
 		return make(map[int64]bool), nil
 	}
-	
+
 	// Build query with placeholders for event IDs
 	placeholders := make([]string, len(eventIDs))
 	args := make([]interface{}, len(eventIDs)+1)
 	args[0] = userID
-	
+
 	for i, eventID := range eventIDs {
 		placeholders[i] = "?"
 		args[i+1] = eventID
 	}
-	
+
 	query := fmt.Sprintf(
 		`SELECT event_id FROM event_signups WHERE user_id = ? AND event_id IN (%s)`,
 		strings.Join(placeholders, ","),
 	)
-	
+
 	rows, err := db.Conn.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	
+
 	signups := make(map[int64]bool)
 	for rows.Next() {
 		var eventID int64
@@ -1265,44 +1564,54 @@ func (db *Database) GetUserSignupsForEvents(userID int64, eventIDs []int64) (map
 		}
 		signups[eventID] = true
 	}
-	
+
 	return signups, rows.Err()
 }
 
 // GetUserUpcomingSignups returns all upcoming events that the user is signed up for
 func (db *Database) GetUserUpcomingSignups(userID int64) ([]models.Event, error) {
+	// role_requirements og attendees vart henta og skanna inn i eit
+	// kart og ei liste. SQLite kann ikkje det, so spurningen feila —
+	// kvar gong, sidan alltid. Ingen saag det, av di kallaren berre
+	// sjekka `err == nil` og lét det vera. Ingen av felti vert nytta av
+	// nokon som kallar; dei er ute.
 	query := `
-		SELECT e.id, e.title, e.description, e.role_requirements, e.start_time, e.end_time, 
-		       e.location, e.organizer, e.attendees, e.class_type, e.teacher_name, 
-		       e.capacity, e.current_enrolment, e.color
+		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time,
+		       COALESCE(e.location, ''), COALESCE(e.organizer, ''),
+		       COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''),
+		       COALESCE(NULLIF(e.capacity, 0), r.capacity, 0),
+		       e.current_enrolment, COALESCE(e.color, ''),
+		       COALESCE(r.name, e.location, '')
 		FROM events e
 		INNER JOIN event_signups es ON e.id = es.event_id
+		LEFT JOIN rooms r ON r.id = e.room_id
 		WHERE es.user_id = ? AND e.start_time > ?
 		ORDER BY e.start_time ASC
 	`
-	
+
 	now := time.Now()
 	rows, err := db.Conn.Query(query, userID, now)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	
+
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
 		err := rows.Scan(
-			&event.ID, &event.Title, &event.Description, &event.RoleRequirements,
+			&event.ID, &event.Title, &event.Description,
 			&event.StartTime, &event.EndTime, &event.Location, &event.Organizer,
-			&event.Attendees, &event.ClassType, &event.TeacherName,
+			&event.ClassType, &event.TeacherName,
 			&event.Capacity, &event.CurrentEnrolment, &event.Color,
+			&event.RoomName,
 		)
 		if err != nil {
 			return nil, err
 		}
 		events = append(events, event)
 	}
-	
+
 	return events, rows.Err()
 }
 
@@ -1311,14 +1620,14 @@ func (db *Database) GetMembershipRules() (*models.MembershipRules, error) {
 	query := `SELECT id, allow_upgrades, combine_binding_periods, allow_downgrades, 
 		allow_change_during_binding, default_membership_id, updated_at 
 		FROM membership_rules ORDER BY id DESC LIMIT 1`
-	
+
 	var rules models.MembershipRules
 	err := db.Conn.QueryRow(query).Scan(
 		&rules.ID, &rules.AllowUpgrades, &rules.CombineBindingPeriods,
 		&rules.AllowDowngrades, &rules.AllowChangeDuringBinding,
 		&rules.DefaultMembershipID, &rules.UpdatedAt,
 	)
-	
+
 	if err == sql.ErrNoRows {
 		// Return default rules if none exist
 		return &models.MembershipRules{
@@ -1329,7 +1638,7 @@ func (db *Database) GetMembershipRules() (*models.MembershipRules, error) {
 			DefaultMembershipID:      nil,
 		}, nil
 	}
-	
+
 	return &rules, err
 }
 
@@ -1340,7 +1649,7 @@ func (db *Database) SaveMembershipRules(rules *models.MembershipRules) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if existingRules.ID > 0 {
 		// Update existing rules
 		query := `UPDATE membership_rules SET 
@@ -1348,7 +1657,7 @@ func (db *Database) SaveMembershipRules(rules *models.MembershipRules) error {
 			allow_change_during_binding = ?, default_membership_id = ?, updated_at = CURRENT_TIMESTAMP
 			WHERE id = ?`
 		_, err = db.Conn.Exec(query, rules.AllowUpgrades, rules.CombineBindingPeriods,
-			rules.AllowDowngrades, rules.AllowChangeDuringBinding, 
+			rules.AllowDowngrades, rules.AllowChangeDuringBinding,
 			rules.DefaultMembershipID, existingRules.ID)
 	} else {
 		// Insert new rules
@@ -1359,7 +1668,7 @@ func (db *Database) SaveMembershipRules(rules *models.MembershipRules) error {
 		_, err = db.Conn.Exec(query, rules.AllowUpgrades, rules.CombineBindingPeriods,
 			rules.AllowDowngrades, rules.AllowChangeDuringBinding, rules.DefaultMembershipID)
 	}
-	
+
 	return err
 }
 
@@ -1375,27 +1684,27 @@ func (db *Database) CreateMembership(membership models.Membership) (int64, error
 	query := `INSERT INTO memberships 
 		(name, price, commitment_months, is_student_senior, is_special_offer, description, features, active) 
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-	
+
 	// Convert features to JSON if it's not already
 	features := membership.Features
 	if features == "" {
 		features = "[]"
 	}
-	
-	result, err := db.Conn.Exec(query, 
-		membership.Name, 
-		membership.Price, 
+
+	result, err := db.Conn.Exec(query,
+		membership.Name,
+		membership.Price,
 		membership.CommitmentMonths,
 		membership.IsStudentSenior,
 		membership.IsSpecialOffer,
 		membership.Description,
 		features,
 		membership.Active)
-	
+
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return result.LastInsertId()
 }
 
@@ -1412,7 +1721,7 @@ func (db *Database) UpdateMembershipDetails(membership models.Membership) error 
 		name = ?, price = ?, commitment_months = ?, is_student_senior = ?, 
 		is_special_offer = ?, description = ?, features = ?
 		WHERE id = ?`
-	
+
 	_, err := db.Conn.Exec(query,
 		membership.Name,
 		membership.Price,
@@ -1422,7 +1731,7 @@ func (db *Database) UpdateMembershipDetails(membership models.Membership) error 
 		membership.Description,
 		membership.Features,
 		membership.ID)
-	
+
 	return err
 }
 
@@ -1438,10 +1747,96 @@ func (db *Database) UpdateEvent(event models.Event) error {
 		title = ?, description = ?, start_time = ?, end_time = ?, location = ?, 
 		class_type = ?, teacher_name = ?, capacity = ?, color = ?
 		WHERE id = ?`
-	
+
 	_, err := db.Conn.Exec(query,
 		event.Title, event.Description, event.StartTime, event.EndTime, event.Location,
 		event.ClassType, event.TeacherName, event.Capacity, event.Color, event.ID)
-	
+
 	return err
+}
+
+// Person er ein medlem slik han stend i folkelista.
+//
+// Tri fakta, ikkje sju: kven, kva han held, og naar han sist var her.
+// Fødselsdag og telefon er ikkje noko ein skannar ei liste for — dei
+// høyrer til naar rada er open.
+type Person struct {
+	ID          int
+	Namn        string
+	Epost       string
+	Telefon     string
+	Fodd        string
+	Roller      string
+	Medlemskap  string
+	MedlemStod  string
+	MedlemPris  int
+	KlippAtt    int
+	KlippTotalt int
+	SistHer     *time.Time
+	TimarIAar   int
+	TrengSvar   bool // frysing som ventar
+	ErLaerar    bool
+	ErAdmin     bool
+}
+
+// FolkOversyn hentar alle medlemene med det ein treng for aa kjenna
+// deim att og sjaa kven som treng noko.
+//
+// Sorteringi er ikkje alfabetisk. Ho er *kven som treng deg*: fyrst dei
+// med ei frysing som ventar svar, so dei som ikkje hev vore her paa
+// lenge, so resten. Ei alfabetisk liste er rett naar ein leitar; men
+// den som leitar brukar søkjefeltet, og den som *ser* paa lista vil
+// vita kva som krev noko av henne.
+func (db *Database) FolkOversyn() ([]Person, error) {
+	rows, err := db.Conn.Query(`
+		SELECT u.id, u.name, u.email, COALESCE(u.phone, ''), COALESCE(u.birthdate, ''),
+		       COALESCE((SELECT GROUP_CONCAT(r.name, ', ') FROM user_roles ur
+		                 JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), ''),
+		       COALESCE(m.name, ''), COALESCE(um.status, ''), COALESCE(m.price, 0),
+		       COALESCE((SELECT SUM(uk.remaining_klipp) FROM user_klippekort uk WHERE uk.user_id = u.id), 0),
+		       COALESCE((SELECT SUM(uk.total_klipp) FROM user_klippekort uk WHERE uk.user_id = u.id), 0),
+		       (SELECT MAX(e.start_time) FROM event_signups es
+		        JOIN events e ON e.id = es.event_id
+		        WHERE es.user_id = u.id AND e.start_time < CURRENT_TIMESTAMP),
+		       COALESCE((SELECT COUNT(*) FROM event_signups es
+		                 JOIN events e ON e.id = es.event_id
+		                 WHERE es.user_id = u.id AND e.start_time < CURRENT_TIMESTAMP
+		                 AND e.start_time > datetime('now', '-1 year')), 0)
+		FROM users u
+		LEFT JOIN user_memberships um ON um.user_id = u.id AND um.status != 'cancelled'
+		LEFT JOIN memberships m ON m.id = um.membership_id
+		ORDER BY u.name COLLATE NOCASE`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ut []Person
+	for rows.Next() {
+		var p Person
+		// MAX() gjev ein streng ut or SQLite, ikkje ei tid — aggregatet
+		// misser typen som kolonna hadde. Difor lyt han tolkast her.
+		var sist sql.NullString
+		if err := rows.Scan(&p.ID, &p.Namn, &p.Epost, &p.Telefon, &p.Fodd, &p.Roller,
+			&p.Medlemskap, &p.MedlemStod, &p.MedlemPris,
+			&p.KlippAtt, &p.KlippTotalt, &sist, &p.TimarIAar); err != nil {
+			return nil, err
+		}
+		if sist.Valid && sist.String != "" {
+			for _, mal := range []string{
+				"2006-01-02 15:04:05-07:00", "2006-01-02 15:04:05Z07:00",
+				time.RFC3339, "2006-01-02 15:04:05", "2006-01-02T15:04:05Z",
+			} {
+				if t0, err := time.Parse(mal, sist.String); err == nil {
+					p.SistHer = &t0
+					break
+				}
+			}
+		}
+		p.TrengSvar = p.MedlemStod == "freeze_requested"
+		p.ErLaerar = harRolla(p.Roller, RollaLaerar)
+		p.ErAdmin = harRolla(p.Roller, RollaAdmin)
+		ut = append(ut, p)
+	}
+	return ut, rows.Err()
 }

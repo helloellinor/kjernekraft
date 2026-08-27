@@ -35,3 +35,18 @@ go.work.sum
 server
 kjernekraft
 *.db
+
+# Umgjevnad
+.env
+.envrc
+
+# Union Gothic er CC BY-NC-ND og skal ikkje redistribuerast med repoet.
+# Han er ei mellombils visningsskrift; stilarket fell attende paa Ubuntu
+# Condensed naar fila ikkje finst. Sjaa @font-face i kjernekraft.css.
+static/fonts/UnionGothic-Variable.woff2
+
+# Utviklingstenaren
+.køyr.pid
+.køyr.logg
+.kjernekraft-bin
+build.feil

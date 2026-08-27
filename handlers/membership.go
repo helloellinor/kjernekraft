@@ -3,6 +3,7 @@ package handlers
 import (
 	"html/template"
 	"kjernekraft/models"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -18,13 +19,22 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get language from cookies/request (using new system)
 	lang := GetLanguageFromRequest(r)
-	
+
+	// Pakkorne kjem or basen, ikkje or malen. Sjaa klippekjop.go.
+	pakkar, err := DB.GetAllKlippekortPackages()
+	if err != nil {
+		log.Printf("klippekortpakkar: %v", err)
+	}
+
 	data := map[string]interface{}{
+		"Kategoriar":  Kategoriar(pakkar),
 		"Title":       "Klippekort",
 		"CurrentPage": "klippekort",
 		"UserName":    user.Name,
 		"User":        user,
 		"Lang":        lang,
+		"CSRFToken":   CSRFToken(r),
+		"IsAdmin":     sessionIsAdmin(r),
 	}
 
 	// Use the new template system
@@ -49,41 +59,51 @@ func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
 		return
 	}
-	
+
+	kvalifisert := Kvalifisert(user)
+	valbare, err := DB.MedlemskapFor(kvalifisert)
+	if err != nil {
+		log.Printf("medlemskap for brukar %d: %v", user.ID, err)
+	}
+
 	// Check if user has a membership
 	membership, err := DB.GetUserMembership(int64(user.ID))
 	hasCurrentMembership := membership != nil && err == nil
-	
+
 	// Check if user has ever had a membership (for hiding offers)
 	// For now, we'll just use the current membership check
 	hasHadMembership := hasCurrentMembership
-	
+
 	// Determine page title and show special offer
 	pageTitle := "Finn ditt perfekte medlemskap"
 	showSpecialOffer := true
-	
+
 	if hasCurrentMembership {
 		pageTitle = "Bytt medlemskapet mitt"
 	}
-	
+
 	if hasHadMembership {
 		showSpecialOffer = false
 	}
 
 	// Get language from cookies/request (using new system)
 	lang := GetLanguageFromRequest(r)
-	
+
 	data := map[string]interface{}{
 		"Title":                "Medlemskap",
 		"CurrentPage":          "medlemskap",
 		"PageTitle":            pageTitle,
 		"HasCurrentMembership": hasCurrentMembership,
+		"Kvalifisert":          kvalifisert,
+		"Valbare":              valbare,
 		"HasHadMembership":     hasHadMembership,
 		"ShowSpecialOffer":     showSpecialOffer,
 		"UserMembership":       membership,
 		"UserName":             user.Name,
 		"User":                 user,
 		"Lang":                 lang,
+		"CSRFToken":            CSRFToken(r),
+		"IsAdmin":              sessionIsAdmin(r),
 	}
 
 	// Use the new template system
@@ -113,7 +133,10 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isStudentSenior := r.FormValue("is_student_senior") == "true"
+	// Student- og honnørstatus kjem or profilen, ikkje or skjemaet.
+	// Skjemaet spurde um det kvar gong — um noko systemet alt visste, og
+	// som ikkje endrar seg fraa gong til gong.
+	isStudentSenior := Kvalifisert(GetUserFromSession(r))
 	commitment := r.FormValue("commitment")
 	startTime := r.FormValue("start_time")
 
@@ -162,7 +185,7 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if this is an HTMX request
 	isHTMX := r.Header.Get("HX-Request") != ""
-	
+
 	if isHTMX {
 		// Return HTML fragment for HTMX
 		data := struct {
@@ -223,7 +246,7 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 		tmplFuncs := template.FuncMap{
 			"divf": func(a, b interface{}) float64 {
 				var aFloat, bFloat float64
-				
+
 				switch v := a.(type) {
 				case int:
 					aFloat = float64(v)
@@ -232,7 +255,7 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 				default:
 					return 0
 				}
-				
+
 				switch v := b.(type) {
 				case int:
 					bFloat = float64(v)
@@ -241,7 +264,7 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 				default:
 					return 0
 				}
-				
+
 				if bFloat == 0 {
 					return 0
 				}
@@ -357,7 +380,7 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 		tmplFuncs := template.FuncMap{
 			"divf": func(a, b interface{}) float64 {
 				var aFloat, bFloat float64
-				
+
 				switch v := a.(type) {
 				case int:
 					aFloat = float64(v)
@@ -366,7 +389,7 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 				default:
 					return 0
 				}
-				
+
 				switch v := b.(type) {
 				case int:
 					bFloat = float64(v)
@@ -375,7 +398,7 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 				default:
 					return 0
 				}
-				
+
 				if bFloat == 0 {
 					return 0
 				}
@@ -465,6 +488,8 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 		"Birthdate":   user.Birthdate,
 		"ShowSuccess": showSuccess,
 		"Lang":        lang,
+		"CSRFToken":   CSRFToken(r),
+		"IsAdmin":     sessionIsAdmin(r),
 	}
 
 	// Use the new template system

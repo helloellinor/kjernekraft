@@ -1,0 +1,29 @@
+{{define "content"}}
+<div class="login-container">
+    <div class="login-language-selector">
+        {{template "language_selector" .}}
+    </div>
+
+    <span class="merke doermerke" aria-hidden="true"></span>
+
+    <h1 class="page-title">{{t .Lang "forgot.title"}}</h1>
+
+    <!-- Her stod det ingen ting. Lenkja paa innloggingssida peika paa
+         /glemt-passord, og /glemt-passord fanst ikkje — 404, kvar gong
+         nokon gløymde passordet sitt.
+
+         Sida segjer det som er sant: det finst ingen sjølvvend
+         attendestilling enno, av di ho krev e-postutsending og
+         eingongsmerke med utlaupstid. Til det er paa plass gjeng vegen
+         gjenom studioet, som er ein veg som *verkar*. Eit skjema som
+         svarar «me hev sendt deg ein e-post» utan aa senda noko er
+         verre enn ei 404: daa sit folk og ventar. -->
+    <p class="login-subtitle">{{t .Lang "forgot.intro"}}</p>
+
+    <p><a href="mailto:{{.StudioEpost}}?subject={{t .Lang "forgot.mail_subject"}}" class="btn-primary login-btn">{{t .Lang "forgot.write_to_studio"}}</a></p>
+
+    <p class="forgot-password">{{t .Lang "forgot.what_to_write"}}</p>
+
+    <p class="attende"><a href="/innlogging">{{t .Lang "forgot.back"}}</a></p>
+</div>
+{{end}}

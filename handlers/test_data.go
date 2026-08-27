@@ -44,24 +44,23 @@ func shuffleTestData() error {
 	// Initialize random seed
 	rand.Seed(time.Now().UnixNano())
 
-	// Define class types with colors and descriptions
+	// Kjernekraft Oslo held yoga, pilates og fascia — i salen eller paa
+	// reformeren. Det stod tretten slag her, med boksing, spinning og
+	// crossfit; eit studio som ikkje finst.
 	classTypes := []ClassTypeInfo{
-		{Type: "yoga", Color: "#8e44ad", Titles: []string{"Basic Yoga", "Forrest Yoga", "Yin Yoga", "Vinyasa Flow", "Hatha Yoga", "Power Yoga", "Restorative Yoga"}},
-		{Type: "pilates", Color: "#27ae60", Titles: []string{"Klassisk Pilates", "Pilates Reformer", "Pilates Mat", "Power Pilates", "Gentle Pilates", "Core Pilates", "Pilates Flow"}},
-		{Type: "strength", Color: "#e74c3c", Titles: []string{"Strength Training", "Circuit Training", "Functional Training", "HIIT Strength", "Body Sculpt", "Weight Training", "CrossFit"}},
-		{Type: "cardio", Color: "#f39c12", Titles: []string{"Spin Class", "Zumba", "Aerobics", "Dance Cardio", "Boxing Cardio", "HIIT Cardio", "Step Aerobics"}},
-		{Type: "flexibility", Color: "#3498db", Titles: []string{"Stretching", "Flexibility Focus", "Mobility Training", "Gentle Stretch", "Recovery Session", "Deep Stretch", "Myofascial Release"}},
+		{Type: "yoga", Color: "", Titles: []string{"Hatha Yoga", "Vinyasa Flow", "Yin Yoga", "Basic Yoga", "Yoga Styrke 45"}},
+		{Type: "pilates", Color: "", Titles: []string{"Classical Pilates", "Klassisk Pilates Matte", "Pilates Apparatus", "Self Practice Pilates Apparatus"}},
+		{Type: "fascia", Color: "", Titles: []string{"Fascia Movement", "Fascia Flyt"}},
 	}
 
-	// Norwegian teacher names
+	// Dei som faktisk held timar i Storgata 23.
 	teachers := []string{
-		"Anna Larsen", "Erik Nordmann", "Kari Solberg", "Magnus Haugen", "Silje Andersen",
-		"Lars Eriksen", "Ingrid Johansen", "Ole Hansen", "Nina Olsen", "Bjørn Kristiansen",
-		"Hanne Nilsen", "Tor Pedersen", "Astrid Svensson", "Gunnar Andersen", "Lise Berg",
+		"Gry", "Ida", "Kristina", "Carla", "Cyrena",
+		"Torunn", "Amanda", "Mariamah Aurora", "Leon", "Veronica",
 	}
 
 	// Studio locations
-	studios := []string{"Studio 1", "Studio 2", "Studio 3", "Hovedstudio", "Yogastudio", "Pilatesstudio"}
+	studios := []string{"Salen", "Reformer"}
 
 	// Time slots (hour of day)
 	timeSlots := []int{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}
@@ -75,7 +74,7 @@ func shuffleTestData() error {
 	// Generate 5-12 events per day with randomization
 	for dayOffset := 0; dayOffset < 7; dayOffset++ {
 		currentDay := monday.AddDate(0, 0, dayOffset)
-		
+
 		// Randomize number of events per day (more events on weekdays)
 		var numEvents int
 		if currentDay.Weekday() == time.Saturday || currentDay.Weekday() == time.Sunday {
@@ -304,7 +303,7 @@ func ShuffleAllTestDataHandler(w http.ResponseWriter, r *http.Request) {
 // shuffleMembershipData shuffles membership names and prices
 func shuffleMembershipData() error {
 	membershipNames := []string{
-		"Basis", "Standard", "Premium", "VIP", "Student", "Senior", 
+		"Basis", "Standard", "Premium", "VIP", "Student", "Senior",
 		"Familie", "Duo", "Unlimited", "Flex", "Morning", "Evening",
 		"Weekend", "Prøve", "Høst Special", "Vinter Deal", "Sommer Pass",
 	}
@@ -350,7 +349,7 @@ func shuffleUserKlippekortData() error {
 
 	for _, klipp := range userKlippekort {
 		newRemaining := rand.Intn(klipp.TotalKlipp + 1)
-		_, err := DB.Conn.Exec(`UPDATE user_klippekort SET remaining_klipp = ? WHERE id = ?`, 
+		_, err := DB.Conn.Exec(`UPDATE user_klippekort SET remaining_klipp = ? WHERE id = ?`,
 			newRemaining, klipp.UserKlippekort.ID)
 		if err != nil {
 			log.Printf("Error updating user klippekort %d: %v", klipp.UserKlippekort.ID, err)

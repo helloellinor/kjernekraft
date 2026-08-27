@@ -1,186 +1,205 @@
 # Kjernekraft
-Yoga studio management system in Oslo
 
-## Architecture Overview
+Studiosystem for eit yogastudio i Oslo: timeplan, påmelding, medlemskap
+og klippekort, med ei administrasjonsside for dei som driv huset.
 
-This application uses a scope-based file organization system with comprehensive multi-language support and modular template architecture.
+Go og [chi](https://github.com/go-chi/chi) på serversida, SQLite som
+base, `html/template` og htmx på framsida. Ingen byggjesteg for
+frontenden — malar, CSS og JS blir lesne frå disken.
 
-### Template Organization
+## Kom i gang
 
-The template system is organized by scope of influence, making it easy to find and maintain related files:
+```sh
+export KJERNEKRAFT_SESSION_KEY=$(openssl rand -base64 32)
+export KJERNEKRAFT_ENV=development
 
-```
-handlers/templates/
-├── layouts/            # Site-wide scope (affects all pages)
-│   └── base.html      # Main layout with navigation, styles, and structure
-├── pages/             # Page-specific scope (individual page templates)
-│   ├── dashboard.html # User dashboard
-│   ├── admin.html     # Admin dashboard  
-│   ├── innlogging.html # Login page
-│   ├── min-profil.html # User profile
-│   ├── membership.html # Membership selection
-│   ├── klippekort.html # Punch cards
-│   ├── betaling.html  # Payments
-│   └── timeplan.html  # Schedule
-├── components/        # Cross-page scope (reusable UI elements)
-│   ├── navigation/    # Site navigation
-│   │   ├── navigation.html
-│   │   └── navigation-styles.html
-│   └── common/        # Shared components and styles
-│       ├── common-styles.html      # Base styles for all pages
-│       ├── event-card-styles.html  # Event card styling
-│       ├── language-selector.html  # Language switching component
-│       ├── profile-styles.html     # Profile page styles
-│       ├── betaling-styles.html    # Payment page styles
-│       └── login-styles.html       # Login page styles
-└── modules/           # Feature-specific scope (related functionality)
-    ├── dashboard/     # Dashboard-specific modules
-    │   ├── signed-up-classes.html
-    │   ├── todays-classes.html
-    │   ├── dashboard-membership.html
-    │   ├── dashboard-klippekort.html
-    │   └── dashboard-scripts.html
-    ├── admin/         # Admin panel modules
-    │   ├── admin-users-table.html
-    │   ├── admin-events-table.html
-    │   ├── admin-freeze-requests-table.html
-    │   ├── admin-scripts.html
-    │   └── admin-styles.html
-    ├── membership/    # Membership management
-    │   ├── membership.html
-    │   ├── charges.html
-    │   └── klippekort.html
-    └── events/        # Event-related functionality
-        └── event_card.html
+go run .          # http://localhost:8080
 ```
 
-### Component vs Module Distinction
+Tenaren nektar å starte utan `KJERNEKRAFT_SESSION_KEY`. `KJERNEKRAFT_ENV`
+er valfri, men alt anna enn `development` — det tome med — blir handsama
+som drift: `Secure` på kakene, og testdata-rutene svarar 404. Sjå
+`.env.example`.
 
-- **Components** (`components/`): Reusable UI elements that can be used across multiple pages
-  - Navigation, styles, language selectors, common layouts
-  - Think "building blocks" that many pages might need
+Basen blir laga og migrert ved oppstart, så det trengst ikkje noko
+oppsett før første køyring.
 
-- **Modules** (`modules/`): Feature-specific functionality grouped by business domain
-  - Dashboard widgets, admin tools, membership features
-  - Think "feature packages" that belong to specific areas of the app
+Til dagleg arbeid er `./køyr` betre enn `go run .` — sjå
+[Utviklingstenaren](#utviklingstenaren) nedanfor.
 
-### Language System
+## Det som held påstandane sanne
 
-The application supports three languages with cookie-based persistence:
+Dette er den eine regelen som er verd å lese før resten.
 
-- **Norwegian Bokmål** (nb) 🇩🇰 - Default language
-- **Norwegian Nynorsk** (nn) 🇳🇴  
-- **English** (en) 🇺🇸
-
-Language preferences are:
-1. Stored in cookies with 1-year expiration
-2. Available on all pages including login (before authentication)
-3. Automatically detected from cookies or URL parameters
-4. Integrated into user profile for easy switching
-
-### Adding New Features
-
-1. **New Page**: Create in `pages/` directory using `{{define "content"}}` 
-2. **Reusable Component**: Add to `components/common/` for cross-page use
-3. **Feature Module**: Create in `modules/[feature-name]/` for domain-specific functionality
-4. **Localization**: Add keys to all three language files in `locales/`
-
-### Development Guidelines
-
-- All pages use the base layout system - no custom HTML structure
-- All text must use localization keys - no hardcoded strings
-- Related files (HTML, CSS, JS) should be co-located by feature
-- Use the scope hierarchy to determine file placement
-    │   ├── membership.css
-    │   ├── klippekort.html
-    │   ├── klippekort.css
-    │   ├── charges.html
-    │   └── charges.css
-    └── events/       # Event-related modules
-        ├── event_card.html
-        └── event_card.css
-```
-
-### Organizational Principles
-
-**Scope of Influence Hierarchy:**
-1. **Layouts** - Site-wide impact (affects all pages)
-2. **Pages** - Page-specific impact (single page)
-3. **Components** - Cross-page impact (used across multiple pages)
-4. **Modules** - Feature-specific impact (related to specific functionality)
-
-**File Grouping Rules:**
-- Files that do similar things are placed together
-- Related CSS and HTML files are co-located in the same directory
-- Module directories group all files related to a specific feature
-- No duplication - each template has a single authoritative location
-
-**Adding New Features:**
-1. Page templates go in `pages/`
-2. Cross-page UI elements go in `components/`
-3. Feature-specific modules go in `modules/{feature_name}/`
-4. Keep related CSS files in the same directory as their HTML templates
-
-### Handler Organization
+Ein påstand i eit dokument veit ikkje når han blir usann. Difor er dei
+påstandane som betyr noko her ikkje skrivne ned i prosa — dei er prøver
+som brest, og namna deira er sjølve påstanden:
 
 ```
-handlers/
-├── config/           # Configuration management
-├── modules/          # Go modules for template data
-├── template_manager.go # Central template loading and management
-├── localization.go   # Multi-language support
-├── dashboard.go      # Dashboard page handlers
-├── admin.go         # Admin panel handlers
-├── membership.go    # Membership, klippekort, and profile handlers
-├── users.go         # User authentication handlers
-├── timeplan.go      # Schedule page handlers
-├── betaling.go      # Payment page handlers
-└── ...              # Other feature-specific handlers
+TestAlleMaalHevDeiSameNyklane          språkfilene har ikkje drive frå kvarandre
+TestMalaneBedBerreUmNyklarSomFinst     ingen mal ber om ein nykel som ikkje finst
+TestIngenUmsetjingErTom                ingen nykel står att som tom streng
+TestStandardmaaletErNynorsk            nynorsk er det du får utan å velje
+TestDeiTvoMyrkeBlokkaneErSamde         kvart myrkt token har eit ljost motstykke
+TestSundagenHoyrerTilVikaSomGjengUt    vikerekninga er samd med seg sjølv
+TestHelsingaSegjerDenSameKlokkaSomTimen  helsinga flyt ikkje to timar
 ```
 
-### Localization System
+`go test ./...` køyrer alle. Legg du til ein streng i ein mal utan å
+setje han i alle tre språkfilene, fell `./handlers` — han renderer ikkje
+berre bort nykelen i stilla.
 
-The application supports three languages:
-- **Norwegian Bokmål** (`nb`) - Default
-- **Norwegian Nynorsk** (`nn`)
-- **English** (`en`)
+Skriv du ein ny påstand i dette dokumentet, skriv prøva òg. Elles er han
+sann berre den dagen han blei skriven.
 
-All user-facing text uses localization keys:
-```html
-{{t .Lang "navigation.home"}}
-{{t .Lang "admin.approve"}}
+## Tilgang
+
+Autorisasjonen ligg i rutaren, ikkje i handsamarane. `server.go` set opp
+fire grupper, og det er plasseringa til ruta som gjev løyvet:
+
+| Gruppe | Middleware | Inneheld |
+|---|---|---|
+| open | — | `/`, `/signup`, `/terms`, `/innlogging`, `/logout`, `/static/*` |
+| innlogga | `RequireAuth` | `/elev/*` og dei `/api/*`-endane ein elev nyttar |
+| administrasjon | `RequireAdmin` | `/admin`, `/api/admin/*`, `/users/assign-role` |
+| utvikling | `RequireDevelopment` | testdata-rutene og `/arket`; 404 utan `KJERNEKRAFT_ENV=development` |
+
+To reglar held dette saman:
+
+- **Rolla kjem frå basen, ein gong per soknad.** Øktkaka held ein
+  brukar-id og ikkje noko meir. `WithUser` hentar brukaren, og
+  `RequireAdmin` les rolla av han. Ei rolla i kaka er ei rolla nettlesaren
+  kan skrive om.
+- **Kvar mutasjon ber ein CSRF-nykel.** `CSRF` legg han i økta og speglar
+  han i ei lesbar kake; `static/js/csrf.js` heng han på htmx- og
+  `fetch`-kall, og skjema ber han i eit gøymt `csrf_token`-felt. Ein
+  `POST` utan han får 403.
+
+Ei rute lagd utanfor ei gruppe er open. Det er den eine tingen som må
+sitje i denne fila.
+
+Rollene systemet kjenner står i `database/roller.go`: `admin` og
+`teacher`. Namna er engelske av di dei låg i basen frå før; det synlege
+ordet kjem gjennom `{{t}}`.
+
+## Huset
+
+```
+server.go              rutene, og dermed tilgangen
+handlers/              ein fil per område; malane under templates/
+  ├── modules/         Go-sida av malmodulane (klippekort, charges, admin-stats)
+  ├── config/          innstillingar, m.a. tidssona
+  └── templates/
+      ├── layouts/     base.html — hovud, <main>, botnline
+      ├── pages/       ei fil per side
+      ├── components/  attbrukande bitar (navigasjon, dagmerke, week-grid)
+      └── modules/     funksjonsbolkar etter område (dashboard, admin, membership)
+database/              spurningar og migrering; ei fil per område
+models/                dei formene som går mellom base og mal
+locales/               nn, nb, en
+static/css|js|img|fonts
+scripts/               eingongsskript: seed (medlemskap og prisar), testbrukar
+cmd/, test/            prøvedata og prøvene som treng ei eiga base
+docs/                  teikningane og stilboka
 ```
 
-Translation files are located in `locales/` directory.
+Skiljet mellom `components/` og `modules/`: ein **komponent** er ein bit
+fleire sider treng (navigasjonen, språkveljaren, dagmerket). Ein **modul**
+høyrer til eitt forretningsområde (klippekortbolken, folkelista). All stil
+ligg i `static/css/kjernekraft.css` — det finst ikkje stilmalar per
+komponent.
 
-## Development Guidelines
+Nokre delar det er verd å vite om:
 
-### Template Development
-- Use the modular system - compose pages from existing modules when possible
-- Add the `Lang` field to all handler data structures for localization
-- Keep templates small and focused on a single responsibility
-- Use descriptive template names that match their function
+- **`handlers/timeregel.go`** — timeplanen er reglar, ikkje enkelttimar.
+  «Yoga med Leon, måndag 18:00» er regelen; timane er utslaga hans og ber
+  regel-id-en sin. Administrasjonen endrar regelen.
+- **`handlers/tid.go`** — tidene i basen er veggklokka i Oslo, lagra utan
+  sone, og drivaren les dei som UTC. `veggklokka` byggjer tida opp att av
+  tala som faktisk står der. Rekn ikkje om ei tid frå basen utan han.
+- **`handlers/vike.go`** — vikerekninga, teken ut av timeplanhandsamaren
+  så ho kan prøvast. Ho har eit motstykke i `static/js/timeplan-veke.js`
+  som går andre vegen; dei to må vere samde.
+- **`handlers/merkeform.go`** og **`handlers/aktivitet.go`** — figurar blir
+  rekna ut i Go og ikkje i malen. Ein mal syner kva som er i figuren; kvar
+  kvart punkt ligg er ein annan slags kunnskap.
+- **`handlers/klippekjop.go`** — pakkene kjem frå basen. Dei stod i HTML-en
+  før, og dei to sanningane var ikkje samde.
 
-### Adding New Pages
-1. Create page template in `pages/`
-2. Create handler function that includes `Lang` field
-3. Compose page from existing modules or create new ones as needed
-4. Add localization keys for any new text
+## Språka
 
-### File Organization
-- Respect the scope hierarchy when placing files
-- Keep related files together (HTML, CSS, and any assets)
-- Avoid creating deep nested directories
-- Use clear, descriptive names for directories and files
+Nynorsk (`nn`, standard), bokmål (`nb`) og engelsk (`en`). Valet ligg i ei
+kake med eitt års levetid og verkar òg før innlogging; `?lang=en` på kva
+adresse som helst byter.
 
-## Getting Started
+All synleg tekst går gjennom `{{t .Lang "nykel.namn"}}`. Filene ligg i
+`locales/`. Sjå `docs/LOCALIZATION.md` for korleis ein legg til eit språk.
 
-```bash
-# Start the application
-go run server.go
+Legg du til ein nykel, legg han i alle tre filene. Prøvene i
+`./handlers` er det som seier frå.
 
-# Access the application
-http://localhost:8080
+## Arket
+
+Stilboka er `docs/DESIGN_GUIDELINES.md`, og ho er reglar med grunngjeving:
+held ikkje grunngjevinga i eit høve, er det regelen som skal skrivast om.
+`docs/FASETTEN.md` skildrar den eine djupna i systemet — to pikslar, på
+felt ein kan skrive i. `docs/KORREKTUREN.md` skildrar redigeringsforma:
+du skriv rett på teksten, og det du har endra får eit merke i margen.
+
+`/arket` er verkstaden — heile stilarket på éi side, i begge tema. Han
+svarar berre i utvikling, og han teiknar seg sjølv i prøvene.
+
+## Utviklingstenaren
+
+```sh
+./køyr              # startar, og byggjer på nytt når Go-filer endrar seg
+./køyr --ein-gong   # startar utan vaktar
+./køyr --stogg      # stoggar
 ```
 
-The application will start with default Norwegian Bokmål language. Add `?lang=en` or `?lang=nn` to any URL to switch languages.
+Han lyder på <http://localhost:8080> og skriv til `.køyr.logg`.
+
+| Du endrar | Kva som skjer |
+|---|---|
+| `.go` | vaktaren byggjer og startar på nytt, kring eitt sekund |
+| malar i `handlers/templates/` | ingenting — dei blir lesne per soknad. Oppdater sida. |
+| `static/css`, `static/js` | ingenting. Oppdater sida. |
+
+Dei to siste gjeld berre når `KJERNEKRAFT_ENV=development`, som `./køyr`
+set. I utvikling går både sidene og dei statiske filene ut med
+`Cache-Control: no-store` — elles sit ein og ser på si eiga gamle CSS og
+lurer på kvifor endringa ikkje slo inn. Skriftene er unntekne og blir
+bufra hardt i begge; skiftar ei skriftfil namn, skiftar ho òg adresse.
+
+Skriptet set ein fast `KJERNEKRAFT_SESSION_KEY`, så ein ikkje blir logga
+ut kvar gong tenaren startar. Han er **berre** til dette.
+
+### Prøvebrukar
+
+`POST /api/setup-test-data` (eller `/elev/testdata` i nettlesaren) lagar
+`anna@example.com` / `password123`.
+
+Ho får rolla `user` og **ikkje** `admin` — `/admin` svarar 403 for henne
+rett etter oppsettet. Rutene som deler ut roller ligg sjølve bak
+`RequireAdmin`, så den første administratoren må setjast i basen:
+
+```sh
+sqlite3 kjernekraft.db "
+  INSERT OR IGNORE INTO roles (name) VALUES ('admin');
+  INSERT OR IGNORE INTO user_roles (user_id, role_id)
+  SELECT u.id, r.id FROM users u, roles r
+  WHERE u.email = 'anna@example.com' AND r.name = 'admin';"
+```
+
+Etter det kan resten delast ut frå `/admin`.
+
+## Dokumenta
+
+| Fil | Kva han er |
+|---|---|
+| `docs/BLUEPRINT.md` | grunnteikninga — heile huset, skjerm for skjerm. Ei teikning, ikkje ein byggjeplass |
+| `docs/DESIGN_GUIDELINES.md` | stilboka: reglar med grunngjeving |
+| `docs/FASETTEN.md` | den eine djupna i systemet |
+| `docs/KORREKTUREN.md` | redigeringsforma — retting i margen |
+| `docs/LOCALIZATION.md` | språk: legge til, omsetje, halde ved lag |
+| `docs/STRUCTURE_AUDIT.md` | ettersynet av dokumentstrukturen, med funn som står att |

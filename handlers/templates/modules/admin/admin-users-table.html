@@ -1,31 +1,80 @@
 {{define "admin_users_table"}}
-<div class="section">
-    <h2>{{t .Lang "admin.users"}}</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>{{t .Lang "admin.user_table.id"}}</th>
-                <th>{{t .Lang "admin.user_table.name"}}</th>
-                <th>{{t .Lang "admin.user_table.birthdate"}}</th>
-                <th>{{t .Lang "admin.user_table.email"}}</th>
-                <th>{{t .Lang "admin.user_table.phone"}}</th>
-                <th>{{t .Lang "admin.user_table.roles"}}</th>
-                <th>{{t .Lang "admin.user_table.created"}}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{range .Users}}
-            <tr>
-                <td>{{.ID}}</td>
-                <td>{{.Name}}</td>
-                <td>{{.Birthdate}}</td>
-                <td>{{.Email}}</td>
-                <td>{{.Phone}}</td>
-                <td class="roles">{{range $i, $role := .Roles}}{{if $i}}, {{end}}{{$role}}{{end}}</td>
-                <td>-</td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
+{{/* Folk.
+     Ein tabell er rett naar ein samanliknar rader paa tvers. Her
+     samanliknar ingen nokon ting: Ida slær upp *ein* person, av di det
+     stend ein person framfor henne i resepsjonen. Difor er søkjefeltet
+     skjermen, og det hev fokus naar sida opnar.
+
+     Tri fakta per person — kven, kva han held, naar han sist var her —
+     og resten kjem naar rada vert opna. Rada opnar seg paa staden; ein
+     slær ikkje upp ein person ved aa forlata lista yver folk. */}}
+<div class="folk" id="folk">
+    <div class="folk-sok">
+        <input type="search" id="folk-sok" class="soke" autofocus
+               placeholder="{{t .Lang "admin.search_people"}}"
+               aria-label="{{t .Lang "admin.search_people"}}">
+        <span class="folk-tal" id="folk-tal" aria-live="polite" data-alle="{{t .Lang "admin.people"}}" data-av="{{t .Lang "timeplan.of"}}"></span>
+    </div>
+
+    <ul class="folk-liste">
+        {{range .Folk}}
+        <li class="folk-rad{{if .TrengSvar}} treng-svar{{end}}"
+            data-sok="{{.Namn}} {{.Epost}} {{.Telefon}}">
+            <button type="button" class="folk-hovud" aria-expanded="false">
+                <span class="folk-namn">{{.Namn}}</span>
+
+                <span class="folk-held">
+                    {{if .Medlemskap}}
+                    <span class="held held-medlem status-{{.MedlemStod}}">{{.Medlemskap}}</span>
+                    {{end}}
+                    {{if .KlippAtt}}
+                    <span class="held held-klipp">{{.KlippAtt}} {{t $.Lang "admin.clips_left"}}</span>
+                    {{end}}
+                    {{if not .Medlemskap}}{{if not .KlippAtt}}
+                    <span class="held held-ingen">{{t $.Lang "admin.holds_nothing"}}</span>
+                    {{end}}{{end}}
+                </span>
+
+                <span class="folk-sist">
+                    {{if .SistHer}}{{sidan $.Lang .SistHer}}{{else}}{{t $.Lang "admin.never_here"}}{{end}}
+                </span>
+            </button>
+
+            <div class="folk-meir" hidden>
+                <dl class="folk-detalj">
+                    <dt>{{t $.Lang "signup.email"}}</dt><dd><a href="mailto:{{.Epost}}">{{.Epost}}</a></dd>
+                    {{if .Telefon}}<dt>{{t $.Lang "signup.phone"}}</dt><dd>{{.Telefon}}</dd>{{end}}
+                    {{if .Fodd}}<dt>{{t $.Lang "signup.birthdate"}}</dt><dd>{{.Fodd}}</dd>{{end}}
+                    {{if .Medlemskap}}<dt>{{t $.Lang "navigation.membership"}}</dt>
+                    <dd>{{.Medlemskap}} &middot; {{kroner .MedlemPris}}/mnd</dd>{{end}}
+                    {{if .KlippTotalt}}<dt>{{t $.Lang "navigation.punch_cards"}}</dt>
+                    <dd>{{.KlippAtt}} {{t $.Lang "admin.of_clips"}} {{.KlippTotalt}}</dd>{{end}}
+                    <dt>{{t $.Lang "admin.classes_last_year"}}</dt><dd>{{.TimarIAar}}</dd>
+                </dl>
+
+                {{/* Rollone ber same forma som det han held: eit merke.
+                     Skilnaden er at desse tvo er merke ein kann trykkja
+                     paa, og at dei stend der jamvel naar dei er av — ei
+                     rolla er ikkje noko ein *ser* at nokon manglar, so
+                     lista lyt syna baae utfalli.
+
+                     Ingi yverskrift stend yver deim. «Roller» hadde
+                     vore det same ordet som knappane alt segjer. */}}
+                <p class="rollor">
+                    <button type="button" class="held rolla" data-brukar="{{.ID}}"
+                            data-rolla="teacher" aria-pressed="{{if .ErLaerar}}true{{else}}false{{end}}">
+                        {{t $.Lang "admin.role_teacher"}}
+                    </button>
+                    <button type="button" class="held rolla" data-brukar="{{.ID}}"
+                            data-rolla="admin" aria-pressed="{{if .ErAdmin}}true{{else}}false{{end}}">
+                        {{t $.Lang "admin.role_admin"}}
+                    </button>
+                </p>
+            </div>
+        </li>
+        {{else}}
+        <li class="tomt midt">{{t .Lang "admin.no_people"}}</li>
+        {{end}}
+    </ul>
 </div>
 {{end}}

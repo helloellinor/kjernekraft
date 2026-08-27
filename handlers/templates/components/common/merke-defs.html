@@ -1,0 +1,62 @@
+{{define "merke_defs"}}
+{{/* Filtri timemerket nyttar. Dei stend éin gong paa sida, ikkje eitt
+     sett per merke — og for at det skal gaa, ber dei ingen farge.
+
+     Fyrste utgaava nytta feFlood med `flood-color: var(--kant)`. Det
+     verkar, men fargen vert løyst der *filteret* stend og ikkje der det
+     vert nytta, so eit sams sett gav alle merki fargane til rot-temaet.
+     Det synte seg med det same paa /arket, der ein ljos bolk stend
+     attmed ein myrk paa den same sida.
+
+     No arbeider filtri paa SourceGraphic i staden: dei flyttar og
+     klypper det elementet sjølv teiknar, so fargen kjem fraa CSS paa
+     merket og fylgjer temaet der det stend. Filteret veit ingen ting um
+     farge, og kann difor delast av alle. */}}
+<svg class="merke-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    {{/* Umrisset: silhuetten utvida éin einheit. feMorphology arbeider
+         paa silhuetten aat heile figuren, og det er grunnen til at han
+         er brukt: teikna ein dei tri formene ein gong til litt større,
+         vandra dei innhole hyrno innyver i staden for utyver, og lina
+         slapp upp nettupp i skøyten millom formene. */}}
+    <filter id="merkekant" x="-30%" y="-30%" width="160%" height="160%">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="1"/>
+    </filter>
+    {{/* Ringen utanpaa lina, som `0 0 0 1px var(--merke)` paa eit felt i fokus. */}}
+    <filter id="merkering" x="-30%" y="-30%" width="160%" height="160%">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="2"/>
+    </filter>
+
+    {{/* Fasetten. Bandet er silhuetten minus den same silhuetten skuven
+         eitt hakk ned og mjuka upp — det som vert att, er ei tunn stripa
+         inne i yverkanten. So vert elementet sjølv klypt til det bandet.
+         Det er `inset 0 1px 2px` skrive i eit filter. */}}
+    <filter id="merkedjup" x="-25%" y="-25%" width="150%" height="150%">
+      <feOffset in="SourceAlpha" dy="1" result="ned"/>
+      <feGaussianBlur in="ned" stdDeviation=".85" result="mjuk"/>
+      <feComposite in="SourceAlpha" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+    {{/* Same grepet i det smaa, til vindauga. */}}
+    <filter id="merkedjup-lite" x="-40%" y="-40%" width="180%" height="180%">
+      <feOffset in="SourceAlpha" dy=".9" result="ned"/>
+      <feGaussianBlur in="ned" stdDeviation=".5" result="mjuk"/>
+      <feComposite in="SourceAlpha" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+
+    {{/* Same grepet snutt: bandet inne i *nedkanten*. Det er ljoset som
+         slær i botnen av eit hol og kastar att upp — og det er berre
+         hol som hev det. Eit skrivefelt er ei grunn fordjuping i arket
+         og hev ingen slik botn; ei tom rute i vika er eit hol tvers
+         igjenom, og daa syner den nedre lippa seg. */}}
+    <filter id="merkeljos" x="-25%" y="-25%" width="150%" height="150%">
+      <feOffset in="SourceAlpha" dy="-1" result="upp"/>
+      <feGaussianBlur in="upp" stdDeviation=".8" result="mjuk"/>
+      <feComposite in="SourceAlpha" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+
+  </defs>
+</svg>
+{{end}}

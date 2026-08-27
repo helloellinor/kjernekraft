@@ -5,11 +5,18 @@ This document describes the complete process for localizing the Kjernekraft webs
 ## Overview
 
 The Kjernekraft website supports three languages:
-- **Norwegian Bokmål** (`nb`) - Default language
-- **Norwegian Nynorsk** (`nn`) 
+- **Norwegian Nynorsk** (`nn`) - Default language
+- **Norwegian Bokmål** (`nb`)
 - **English** (`en`)
 
 All user-facing text is stored in JSON translation files and accessed through template functions for consistent multilingual support.
+
+> **Translations are cached per process** (`sync.Once` in
+> `handlers/localization.go`). Templates hot-reload in development, but
+> a new key in `locales/*/common.json` is not picked up until the
+> server restarts — until then the raw key (e.g. `admin.rule_time`)
+> renders where the label should be. If labels look wrong after adding
+> keys, restart before debugging anything else.
 
 ## File Structure
 

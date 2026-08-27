@@ -1,39 +1,32 @@
 {{define "charges_module"}}
-<style>
-{{template "charges_module_styles"}}
-</style>
 
 {{if .HasCharges}}
 <div class="charges-list">
     {{range .Charges}}
+    {{/* Summen fyrst, so kortet, so kva det var for.
+         Det stod motsett fyrr — «10 klipp Gruppetimer Sal», so datoen,
+         so kortet, og til slutt tale. Men naar ein ser gjenom
+         belastningarne sine er det summen ein leitar etter; teksti
+         segjer berre kva han var for. */}}
     <div class="charge-item">
-        <div class="charge-info">
-            <div class="charge-description">{{.Description}}</div>
-            <div class="charge-date">{{.ChargeDate.Format "2. January 2006"}}</div>
-            {{if and .PaymentMethodBrand .PaymentMethodLast4}}
-            <div class="charge-payment-method">{{.PaymentMethodBrand | title}} •••• {{.PaymentMethodLast4}}</div>
-            {{else}}
-            <div class="charge-payment-method">{{t .Lang "charges.payment_method_removed"}}</div>
+        <p class="charge-line">
+            <b class="charge-amount">{{kroner .Amount}}</b>,
+            <span class="charge-card">{{if and .PaymentMethodBrand .PaymentMethodLast4}}{{.PaymentMethodBrand | title}} ••{{.PaymentMethodLast4}}{{else}}{{t $.Lang "charges.payment_method_removed"}}{{end}}</span>,
+            <span class="charge-what">{{.Description}}</span>.
+        </p>
+        <p class="charge-meta">
+            <span class="charge-date">{{norskDato .ChargeDate}}</span>
+            {{if ne .Status "succeeded"}}
+            <span class="charge-status {{.Status}}">{{if eq .Status "failed"}}{{t $.Lang "charges.status.failed"}}{{else if eq .Status "pending"}}{{t $.Lang "charges.status.pending"}}{{else}}{{.Status}}{{end}}</span>
             {{end}}
-        </div>
-        <div class="charge-amount">{{printf "%.0f" (divf .Amount 100)}} kr</div>
-        <div class="charge-status {{.Status}}">
-            {{if eq .Status "succeeded"}}{{t .Lang "charges.status.succeeded"}}
-            {{else if eq .Status "failed"}}{{t .Lang "charges.status.failed"}}
-            {{else if eq .Status "pending"}}{{t .Lang "charges.status.pending"}}
-            {{else}}{{.Status}}
-            {{end}}
-        </div>
+        </p>
     </div>
     {{end}}
 </div>
 {{else}}
 <div class="no-data">
-    {{t .Lang "charges.no_charges"}}
+    {{t $.Lang "charges.no_charges"}}
 </div>
 {{end}}
 {{end}}
 
-{{define "charges_module_styles"}}
-{{.ChargesCSS}}
-{{end}}
