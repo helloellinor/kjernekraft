@@ -50,7 +50,7 @@ func GrupperTimar(timar []models.Event, no time.Time) []Timeregel {
 	// tidi *er* veggklokka. Ei umrekning her hadde synt «19:45» for ein
 	// time heile timeplanen kallar «17:45».
 	for _, t := range timar {
-		if !t.EndTime.After(no) {
+		if !etter(t.EndTime, no) {
 			continue
 		}
 		st := t.StartTime
