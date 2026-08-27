@@ -41,10 +41,7 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	lang := GetLanguageFromRequest(r)
 
 	// Create module data
 	moduleData, err := modules.NewKlippekortModule(klippekort, lang)
@@ -97,7 +94,7 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 			year := now.Year()
 			bindingEndMonths := membership.BindingEnd.Month()
 			bindingEndYear := membership.BindingEnd.Year()
-			
+
 			totalMonths := (bindingEndYear-year)*12 + int(bindingEndMonths-months)
 			if membership.BindingEnd.Day() < now.Day() {
 				totalMonths--
@@ -120,10 +117,7 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	lang := GetLanguageFromRequest(r)
 
 	// Create module data
 	moduleData, err := modules.NewMembershipModule(membership, lang)
@@ -147,47 +141,67 @@ func UserMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// UserSignupsHandler provides HTMX endpoint for user's signed-up classes
+// UserSignupsHandler teiknar lista yver timar du hev meldt deg paa.
+//
+// Brotstykket vart teikna or si eigi fil fyrr — `modules/dashboard/
+// signed-up-classes` — og den fila kjenner korkje `timeliste` eller
+// `dagmerke`. Malen feila kvar einaste gong, tenaren svara 500, og
+// htmx byter ikkje ut noko naar svaret er ein feil. Difor stod det
+// «Lastar paameldingar…» paa heimesida for alltid.
+//
+// Malsettet aat ei *sida* hev alle komponentar og modular i seg. Difor
+// kjem brotstykket derifraa.
 func UserSignupsHandler(w http.ResponseWriter, r *http.Request) {
-	// Get user from session
 	user := GetUserFromSession(r)
 	if user == nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// Get user's upcoming signups (events in the future)
-	userSignups, err := DB.GetUserUpcomingSignups(int64(user.ID))
+	lang := GetLanguageFromRequest(r)
+	naa := config.GetInstance().GetCurrentTime()
+
+	paamelde, err := PaameldeFramsyningar(int64(user.ID), lang, naa)
 	if err != nil {
-		log.Printf("Error fetching user signups for user %d: %v", user.ID, err)
+		log.Printf("paameldingar for %d: %v", user.ID, err)
 		http.Error(w, "Could not fetch user signups", http.StatusInternalServerError)
 		return
 	}
 
-	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	teiknFragmentFraa(w, "pages/dashboard", "signed_up_classes_module", map[string]interface{}{
+		"PaameldeFramsyningar": paamelde,
+		"Lang":                 lang,
+		"CSRFToken":            CSRFToken(r),
+		"IsAdmin":              sessionIsAdmin(r),
+		"UserName":             sessionUserName(r),
+	})
+}
 
-	// Create template data
-	data := map[string]interface{}{
-		"HasSignups": len(userSignups) > 0,
-		"Signups":    userSignups,
-		"Lang":       lang,
-	}
-
-	// Get template manager and render
-	tm := GetTemplateManager()
-	tmpl, exists := tm.GetTemplate("modules/dashboard/signed-up-classes")
-	if !exists {
-		http.Error(w, "Template not found", http.StatusInternalServerError)
+// LedigPlassHandler teiknar lista yver timar med ledig plass i dag og i
+// morgon. Ho hentar seg att naar du melder deg paa eller av, so timen
+// flyt yver i «Paameld» utan at sida lastar paa nytt.
+func LedigPlassHandler(w http.ResponseWriter, r *http.Request) {
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html")
-	if err := tmpl.ExecuteTemplate(w, "signed_up_classes_module", data); err != nil {
-		log.Printf("Error executing signed-up classes template: %v", err)
-		http.Error(w, "Template execution error", http.StatusInternalServerError)
+	lang := GetLanguageFromRequest(r)
+	naa := config.GetInstance().GetCurrentTime()
+
+	ledige, err := LedigeFramsyningar(int64(user.ID), lang, naa)
+	if err != nil {
+		log.Printf("ledig plass for %d: %v", user.ID, err)
+		http.Error(w, "Could not fetch open classes", http.StatusInternalServerError)
+		return
 	}
+
+	teiknFragmentFraa(w, "pages/dashboard", "ledig_plass_module", map[string]interface{}{
+		"LedigeFramsyningar": ledige,
+		"Lang":               lang,
+		"CSRFToken":          CSRFToken(r),
+		"IsAdmin":            sessionIsAdmin(r),
+		"UserName":           sessionUserName(r),
+	})
 }

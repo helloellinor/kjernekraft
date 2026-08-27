@@ -1,28 +1,141 @@
 {{define "week_grid"}}
-<div class="week-grid">
-    {{range $index, $day := .WeekDays}}
-    {{$date := index $.WeekDates $index}}
-    {{$dateKey := $date.Format "2006-01-02"}}
-    {{$events := index $.EventsByDay $dateKey}}
-    <div class="day-column {{if lt $dateKey $.Today}}past{{end}}">
-        <div class="day-header">
-            <div class="day-name">{{$day}}</div>
-            <div class="day-date">{{formatDateShort $date}}</div>
+{{template "week_net" .}}
+{{template "timedokk" .}}
+{{end}}
+
+{{/* ---- dokka ----
+     Ho held det du ser paa i ro medan resten rullar. Vel du ein dag i
+     ei rad, stend timen her nede til du vel ein annan — du kann halda
+     fram med aa skanna vika utan at noko flyttar seg, og
+     paameldingsknappen er alltid paa den same staden.
+
+     Det var dette som gjorde timeplanen lang fyrr: kvart kort bar heile
+     detaljen sin, so vika vart eit tårn. No ber radi berre det ein
+     skannar etter, og detaljen bur i dokka.
+
+     Ho stod inni week_grid fyrr. No er ho eit namn for seg, av di
+     heimesida hev dei same merki i listone sine og skal kunna melda
+     paa fraa deim — same dokk, same knapp, same stad. */}}
+{{define "timedokk"}}
+<aside class="dokk" id="timedokk" hidden aria-live="polite">
+    <div class="dokkinnhald">
+        <div class="dokkkva">
+            <h3 class="dokktittel" id="dokk-tittel"></h3>
+            <p class="dokkkven"><span id="dokk-laerar"></span> <span class="timerom" id="dokk-rom"></span></p>
         </div>
-        {{if lt $dateKey $.Today}}
-            <div class="day-content">{{t $.Lang "timeplan.finished"}}</div>
-        {{else}}
-            <div class="day-events">
-                {{if $events}}
-                    {{range $events}}
-                    {{template "event_card" .}}
-                    {{end}}
-                {{else}}
-                    <div class="no-events">{{t $.Lang "timeplan.no_classes"}}</div>
+        <div class="dokknaar">
+            <span class="dokkdag" id="dokk-dag"></span>
+            <span class="dokkklokke" id="dokk-klokke"></span>
+        </div>
+        <div class="dokkplassar">
+            <div class="plassmaalar" id="dokk-maalar"></div>
+            <span class="event-plassar"><b id="dokk-teke"></b><span class="av" id="dokk-av"></span></span>
+        </div>
+        <div class="dokkhandling">
+            <button type="button" class="btn-primary" id="dokk-knapp"
+                    data-meld-paa="{{t .Lang "timeplan.signup"}}"
+                    data-venteliste="{{t .Lang "timeplan.waitlist"}}"
+                    data-meld-av="{{t .Lang "timeplan.cancel_signup"}}"></button>
+            <p class="dokkmelding" id="dokk-melding" role="status"></p>
+        </div>
+        <button type="button" class="dokklukk" id="dokk-lukk" aria-label="{{t .Lang "timeplan.close"}}">&times;</button>
+    </div>
+</aside>
+{{end}}
+
+{{/* Rutenetet aaleine, utan dokka. Verkstaden syner det for seg
+     sjølv — ein treng ikkje ei dokk for aa sjaa um spaltone stend
+     paa lina, og tvo dokker paa den same sida hadde delt id. */}}
+{{define "week_net"}}
+{{/* Vika klemd saman. Éi rad per time, eitt merke per dag han gjeng.
+     «Vinyasa Flow med Kristina 07:15» er éin time som gjeng tysdag og
+     torsdag — ikkje tvo. Fyrr stod dei som tvo like kort i kvar si
+     spalta, og lesaren laut lesa den same linja tvo gonger for aa sjaa
+     at det var den same. */}}
+<div class="timeplan">
+    {{/* Dagarne stend namngjevne ein gong, øvst. Kvart merke ligg i
+         spalta si, so alt som gjeng onsdag stend under kvarandre og ein
+         kann lesa nedyver ein dag. Fyrr flaut merki mot høgre og
+         stod aldri paa lina. */}}
+    {{/* Dagnamna var eit hovud og ingenting meir — `aria-hidden`, ei rein
+         teikning i den eine staden auga går når spørsmålet er
+         dagsforma: «kva kan eg gjere på torsdag?»
+
+         Dei er knappar no, men dei *filtrerer ikkje*. Å filtrere ville
+         teke frå rutenettet det einaste han kan som ei liste ikkje kan:
+         syne heile vika på ein gong, so ein ser at Vinyasa går tysdag
+         òg, og at torsdagen er full medan tysdagen ikkje er det. Ein
+         trykk løftar fram ein dag og dempar dei andre. Ingenting går
+         bort, og eit trykk til slepper han. */}}
+    <div class="timehovud">
+        {{/* Sikti stend i den fyrste ruta i vikehovudet — den som stend
+             yver spalta ho siktar i. Ho låg i tittellina fyrr, klemd
+             millom tittelen og kanten, og på bokmål klipte ho namni av.
+             Her hev ho heile spaltebreiddi, og ho seier med staden sin
+             kva ho gjeld: klassa og læraren stend rett under.
+
+             Rekkjefylgja er den same som i spalta under: klassa fyrst,
+             so læraren. */}}
+        {{if .Teachers}}
+        <div class="timesikt">
+            <select id="class-filter" onchange="applyFilters()" aria-label="{{t .Lang "timeplan.class_filter"}}">
+                <option value="">{{t .Lang "timeplan.all_classes"}}</option>
+                {{range .ClassTypes}}
+                <option value="{{.}}" {{if eq . $.SelectedClass}}selected{{end}}>{{t $.Lang (printf "timeplan.cat_%s" .)}}</option>
                 {{end}}
-            </div>
+            </select>
+            <select id="teacher-filter" onchange="applyFilters()" aria-label="{{t .Lang "timeplan.teacher_filter"}}">
+                <option value="">{{t .Lang "timeplan.all_teachers"}}</option>
+                {{range .Teachers}}
+                <option value="{{.}}" {{if eq . $.SelectedTeacher}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+        {{else}}<span class="timehovud-tom"></span>{{end}}
+        {{range $i, $d := .WeekDays}}
+        <button type="button"
+                class="dagnamn{{if eq (index $.WeekDates $i | dagStreng) $.Today}} idag{{end}}"
+                data-dag="{{add $i 1}}" aria-pressed="false">{{$d | dagKort3}}</button>
         {{end}}
+    </div>
+
+    {{range .Timebolkar}}
+    <div class="timerad">
+        <div class="timekva">
+            <h3 class="timetittel">{{.Tittel}} <span class="lengd">{{.Minutt}} min</span></h3>
+            <p class="timekven">{{.Laerar}}{{if .Rom}} <span class="timerom">{{.Rom}}</span>{{end}}</p>
+        </div>
+
+        {{/* Eitt merke per dag. Merket ber si eigi fylling, so ein ser
+             med det same at torsdagen er full og tysdagen ikkje. */}}
+        <div class="timedagar">
+            {{range .Rutor}}
+            {{if .Har}}{{template "dagmerke" .Framsyning}}
+            {{else}}
+            {{/* Den daude ruta. Ho gjer at rada hev sju plassar og ikkje
+                 tvo — ein ser kva som *ikkje* gjeng, og det er halve
+                 spursmaalet naar ein set upp ei vika. */}}
+            <span class="dagmerke daud{{if .ErIDag}} idag{{end}}{{if .ErUmme}} umme{{end}}"
+                  style="--dag: {{.Kolonne}}" aria-hidden="true">
+                <svg class="merkeform" viewBox="{{merkeViewBox}}"
+                     width="{{merkeBreidd}}" height="{{merkeHogd}}" aria-hidden="true" focusable="false">
+                    <path class="daudflate" d="{{merkeDaud}}"/>
+                    <path class="dauddjup"  d="{{merkeDaud}}" filter="url(#merkedjup)"/>
+                    <path class="daudljos"  d="{{merkeDaud}}" filter="url(#merkeljos)"/>
+                </svg>
+            </span>
+            {{end}}
+            {{end}}
+        </div>
+    </div>
+    {{else}}
+    {{/* Ho stod som ei line kursiv graa tekst i hyrna av eit tomt
+         rutenet. No stend ho midt i det rommet timarne vilde hatt. */}}
+    <div class="tomveke">
+        <p class="tomveke-tittel">{{t .Lang "timeplan.no_classes"}}</p>
+        <p class="tomveke-under">{{t .Lang "timeplan.no_classes_sub"}}</p>
     </div>
     {{end}}
 </div>
+
 {{end}}

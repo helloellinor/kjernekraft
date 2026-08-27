@@ -1,37 +1,54 @@
 {{define "klippekort_module"}}
-<style>
-{{template "klippekort_module_styles" .}}
-</style>
 
 {{if .HasKlippekort}}
+
+{{/* Kva som hastar, sagt fyrst. Ei lista yver kort svarar ikkje paa
+     dette av seg sjølv: eit kort med tjue klipp att og fire dagar til
+     utløp ser rikare ut enn eit med tvo klipp og eit halvt aar, av di
+     talet ein ser er klippa og ikkje dagane.
+
+     Lina er ogso den eine staden dei tvo bolkane paa sida møtest:
+     herifraa gjeng ein rett til aa fylla paa nettupp det kortet, i
+     staden for aa byrja paa «Steg 1» langt nede med seks flisor ein
+     lyt velja millom paa nytt. */}}
+{{if .Naermast}}
+<p class="klippfyrst{{if .Naermast.IsExpiring}} hastar{{end}}">
+    <span class="klippfyrst-kva">{{tf .Lang "klippekort.soonest" .Naermast.Category .Naermast.DaysUntilExpiry}}</span>
+    <span class="klippfyrst-att">{{tf .Lang "klippekort.soonest_left" .Naermast.RemainingKlipp}}</span>
+    <button type="button" class="lenkjeknapp" onclick="fillUpKlippekort('{{.Naermast.Category}}')">{{t .Lang "klippekort.fill_up"}}</button>
+</p>
+{{end}}
+
 <div class="klippekort-cards">
     {{range .Klippekort}}
-    <div class="klippekort-card {{if .IsExpiring}}expiring{{end}}">
-        {{if .IsExpiring}}
-        <div class="expiring-badge">{{t $.Lang "klippekort.expires"}}</div>
-        {{end}}
-        
+    <div class="kort klippekort-card {{if .IsExpiring}}expiring{{end}}">
+        {{/* Utgangsstoda stod her tri gonger: eit merke, teksti og
+             fargen paa bandet. Teksti og bandet ber henne aaleine no —
+             det er den same regelen som tok isbiten (§14). */}}
         <div class="card-header">
-            <h4 class="card-title">{{.Category}}</h4>
+            <h3 class="card-title">{{.Category}}</h3>
+            {{/* «utløper om 121 dager til utløp» — baade «expires» og
+                 «days_until_expiry» bar ordet utløp, og malen sette deim
+                 attmed kvarandre. No ber strengen sjølv kvar tale skal
+                 staa. */}}
             <span class="card-expiry">
-                {{if gt .DaysUntilExpiry 0}}
-                    {{t $.Lang "klippekort.expires"}} om {{.DaysUntilExpiry}} {{t $.Lang "klippekort.days_until_expiry"}}
-                {{else if eq .DaysUntilExpiry 0}}
-                    {{t $.Lang "klippekort.expires"}} i dag
-                {{else}}
-                    {{t $.Lang "klippekort.expired"}}
-                {{end}}
+                {{if gt .DaysUntilExpiry 0}}{{tf $.Lang "klippekort.expires_in" .DaysUntilExpiry}}
+                {{else if eq .DaysUntilExpiry 0}}{{t $.Lang "klippekort.expires_today"}}
+                {{else}}{{t $.Lang "klippekort.expired"}}{{end}}
             </span>
         </div>
-        
-        <div class="card-content">
-            <div class="klipp-count">
+
+        {{/* Éi lina: talet, bandet og knappen deler rada, so kortet er
+             tvo rader høgt og ikkje fire. Paa smale kort bryt rada seg
+             sjølv. */}}
+        <div class="klipprad">
+            <span class="klipp-count">
                 <span class="remaining">{{.RemainingKlipp}}</span>
-                <span class="total">/ {{.TotalKlipp}} {{t $.Lang "klippekort.remaining"}}</span>
-            </div>
-            
+                <span class="total">{{tf $.Lang "klippekort.clips_left_of" .TotalKlipp}}</span>
+            </span>
+
             <div class="progress-bar">
-                <div class="progress-segments">
+                <div class="progress-segments" style="--tende: {{.RemainingKlipp}}; --alle: {{.TotalKlipp}}">
                     {{range $i := seq .RemainingKlipp}}
                     <div class="progress-segment filled"></div>
                     {{end}}
@@ -40,12 +57,10 @@
                     {{end}}
                 </div>
             </div>
-            
-            <div class="card-actions">
-                <button class="fill-up-btn" onclick="fillUpKlippekort('{{.Category}}')">
-                    {{t $.Lang "klippekort.fill_up"}}
-                </button>
-            </div>
+
+            <button class="fill-up-btn" onclick="fillUpKlippekort('{{.Category}}')">
+                {{t $.Lang "klippekort.fill_up"}}
+            </button>
         </div>
     </div>
     {{end}}
@@ -59,12 +74,10 @@
 
 <script>
 function fillUpKlippekort(category) {
-    // Navigate to klippekort purchase page for the specific category
-    window.location.href = '/elev/klippekort#kjop-klipp?category=' + encodeURIComponent(category);
+    // Spyrjedelen lyt staa fyre emneknaggen — «#kjop-klipp?category=»
+    // la spyrjinga inni knaggen, og sida saag henne aldri.
+    window.location.href = '/elev/klippekort?fill=' + encodeURIComponent(category) + '#kjop-klipp';
 }
 </script>
 {{end}}
 
-{{define "klippekort_module_styles"}}
-{{.KlippekortCSS}}
-{{end}}

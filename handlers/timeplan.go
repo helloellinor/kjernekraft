@@ -3,8 +3,10 @@ package handlers
 import (
 	"kjernekraft/handlers/config"
 	"kjernekraft/models"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -16,7 +18,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
 		return
 	}
-	
+
 	settings := config.GetInstance()
 	now := settings.GetCurrentTime()
 
@@ -27,7 +29,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 			weekOffset = parsedWeek
 		}
 	}
-	
+
 	// Prevent navigating to past weeks
 	if weekOffset < 0 {
 		weekOffset = 0
@@ -38,15 +40,14 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	classFilter := r.URL.Query().Get("class")
 
 	// Calculate the target week's Monday
-	monday := now.AddDate(0, 0, -int(now.Weekday())+1)
-	if now.Weekday() == time.Sunday {
-		monday = monday.AddDate(0, 0, -7)
-	}
-	targetMonday := monday.AddDate(0, 0, weekOffset*7)
+	targetMonday := VikeMaandag(now, weekOffset)
 
 	// Get events for the target week
 	weekEvents, err := DB.GetEventsForWeek(targetMonday)
 	if err != nil {
+		// Feilen vart slukt her. Ein 500 utan grunn i loggen er ein
+		// feil ein lyt finna att med gissing.
+		log.Printf("vika %s: %v", targetMonday.Format("2006-01-02"), err)
 		http.Error(w, "Could not fetch week's events", http.StatusInternalServerError)
 		return
 	}
@@ -58,8 +59,18 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 			if teacherFilter != "" && event.TeacherName != teacherFilter {
 				continue
 			}
-			if classFilter != "" && event.Title != classFilter {
-				continue
+			// Filteret samanlikna med *tittelen*, so «yoga» aldri
+			// treft noko: ingen time heiter «yoga», dei heiter «Hatha
+			// Yoga». Han ser paa slaget no — og «reformer» er ikkje eit
+			// slag, det er rommet, som er slik ein tenkjer um det.
+			if classFilter != "" {
+				if classFilter == "reformer" {
+					if !strings.EqualFold(event.RoomName, "Reformer") {
+						continue
+					}
+				} else if !strings.EqualFold(event.ClassType, classFilter) {
+					continue
+				}
 			}
 			// Only show events that users can sign up for (not full and in the future)
 			if event.CurrentEnrolment >= event.Capacity && event.StartTime.Before(now) {
@@ -76,7 +87,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 		for i, event := range weekEvents {
 			eventIDs[i] = int64(event.ID)
 		}
-		
+
 		userSignups, err := DB.GetUserSignupsForEvents(int64(user.ID), eventIDs)
 		if err != nil {
 			// Log error but don't fail the request
@@ -123,7 +134,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	// Calculate week title
 	var weekTitle string
 	_, targetWeek := targetMonday.ISOWeek()
-	
+
 	if weekOffset == 0 {
 		weekTitle = loc.T(lang, "timeplan.this_week")
 	} else if weekOffset == 1 {
@@ -137,43 +148,43 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		teachers = []string{} // Continue with empty list if error
 	}
-	
-	classTypes, err := DB.GetDistinctClassTypes()
-	if err != nil {
-		classTypes = []string{} // Continue with empty list if error
-	}
+
+	// Kategoriar, ikkje titlar. Lista kom fraa DISTINCT class_type og
+	// gav tretten val — «boksing», «spinning», «crossfit» — eit studio
+	// som ikkje finst. Ein filtrerer paa kva slag time det er, og
+	// studioet hev tri slag: yoga, pilates og fascia. Reformer er ikkje
+	// eit slag, det er eit rom, men det er slik ein tenkjer um det, so
+	// han stend her og filtrerer paa rommet.
+	classTypes := []string{"yoga", "pilates", "reformer", "fascia"}
 
 	data := map[string]interface{}{
-		"Title":        "Timeplan",
-		"WeekTitle":    weekTitle,
-		"WeekNumber":   targetWeek,
-		"WeekOffset":   weekOffset,
-		"WeekDays":     weekdays,
-		"WeekDates":    weekDates,
-		"EventsByDay":  eventsByDay,
-		"Today":        now.Format("2006-01-02"),
-		"Teachers":     teachers,
-		"ClassTypes":   classTypes,
+		"Title":           "Timeplan",
+		"WeekTitle":       weekTitle,
+		"WeekNumber":      targetWeek,
+		"WeekOffset":      weekOffset,
+		"VikorIAaret":     VikorIAaret(targetMonday),
+		"WeekDays":        weekdays,
+		"WeekDates":       weekDates,
+		"EventsByDay":     eventsByDay,
+		"Timebolkar":      KlemVika(lang, weekEvents, now, targetMonday),
+		"Vekeval":         vekeval(lang, targetWeek, weekOffset),
+		"Today":           now.Format("2006-01-02"),
+		"Teachers":        teachers,
+		"ClassTypes":      classTypes,
 		"SelectedTeacher": teacherFilter,
 		"SelectedClass":   classFilter,
-		"CanGoBack":    weekOffset > 0,
-		"IsAdmin":      false, // TODO: Implement proper role checking
-		"ExternalCSS":  []string{"/static/css/event-card.css"},
-		"CurrentPage":  "timeplan",
-		"UserName":     user.Name,
-		"User":         user,
-		"Lang":         lang,
+		"CanGoBack":       weekOffset > 0,
+		"ExternalCSS":     []string{},
+		"CurrentPage":     "timeplan",
+		"UserName":        user.Name,
+		"User":            user,
+		"Lang":            lang,
+		"CSRFToken":       CSRFToken(r),
+		"IsAdmin":         sessionIsAdmin(r),
 	}
 
-	// Use the new template system
-	tm := GetTemplateManager()
-	if tmpl, exists := tm.GetTemplate("pages/timeplan"); exists {
-		w.Header().Set("Content-Type", "text/html")
-		if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
-			http.Error(w, "Template execution error", http.StatusInternalServerError)
-		}
-		return
-	}
+	renderPage(w, r, "pages/timeplan", data)
+	return
 
 	// If template doesn't exist, return error
 	http.Error(w, "Template not found", http.StatusInternalServerError)

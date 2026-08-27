@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"io/fs"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -41,6 +43,14 @@ func GetTemplateManager() *TemplateManager {
 func getTemplateFuncs() template.FuncMap {
 	settings := config.GetInstance()
 	return template.FuncMap{
+		// Ruta utan time. Ho er den same figuren for alle, so han vert
+		// rekna ein gong og ikkje per rute.
+		"merkeDaud": DaudSilhuett,
+		"merkeViewBox": func() string {
+			return fmt.Sprintf("%.2f 0 %.2f %.2f", MerkeVenstre, MerkeBreidd, MerkeHogd)
+		},
+		"merkeBreidd": func() float64 { return MerkeBreidd },
+		"merkeHogd":   func() float64 { return MerkeHogd },
 		"sub": func(a, b int) int {
 			return a - b
 		},
@@ -53,6 +63,45 @@ func getTemplateFuncs() template.FuncMap {
 				end = len(s)
 			}
 			return s[start:end]
+		},
+		// Pengar er lagra i øre og skal lesast i kronor. Tabellen synte
+		// «104000 øre» — paa den skjermen Ida redigerer prisar paa.
+		// Tusenskiljet er eit hardt mellomrom, so talet ikkje bryt
+		// midt i lina.
+		//
+		// Han tek imot baade heiltal og flyttal, av di prisen er `int`
+		// paa Membership og `float64` paa FreezeRequest. Det er ein
+		// lyte i modellane — pengar bør vera eitt slag heile vegen —
+		// men malen skal ikkje falla paa det.
+		"kroner": func(v interface{}) string {
+			var oere int64
+			switch n := v.(type) {
+			case int:
+				oere = int64(n)
+			case int32:
+				oere = int64(n)
+			case int64:
+				oere = n
+			case float32:
+				oere = int64(n)
+			case float64:
+				oere = int64(n)
+			default:
+				return ""
+			}
+			return skrivKronor(oere / 100)
+		},
+		// Kronor som eit reint tal, til eit talfelt.
+		"kronerTal": func(v interface{}) int64 {
+			switch n := v.(type) {
+			case int:
+				return int64(n) / 100
+			case int64:
+				return n / 100
+			case float64:
+				return int64(n) / 100
+			}
+			return 0
 		},
 		"divf": func(a, b interface{}) float64 {
 			var aFloat, bFloat float64
@@ -79,6 +128,58 @@ func getTemplateFuncs() template.FuncMap {
 		},
 		"formatTime": func(t time.Time, format string) string {
 			return t.In(settings.GetLocation()).Format(format)
+		},
+		// Go sitt Format gjev engelske dag- og maanadsnamn, og det finst
+		// ingen maate aa be honom um noko anna. Difor stend namni her.
+		// «Thursday 27. August» stod i dokka paa ei norsk sida.
+		// Dagen som tri bokstavar til rutenetshovudet, og datoen som
+		// streng so malen kann samanlikna med «i dag».
+		"dagKort3": func(namn string) string {
+			r := []rune(namn)
+			if len(r) > 3 {
+				r = r[:3]
+			}
+			return string(r)
+		},
+		"dagStreng": func(t time.Time) string { return t.Format("2006-01-02") },
+		// «for tri veker sidan» i staden for ein dato. Ein dato lyt ein
+		// rekna paa; «for tri veker sidan» svarar med det same paa det
+		// ein faktisk spør um — er dette nokon som er her, eller nokon
+		// som hev slutta?
+		"sidan": func(lang string, t0 *time.Time) string {
+			if t0 == nil {
+				return ""
+			}
+			d := time.Since(*t0)
+			switch dagar := int(d.Hours() / 24); {
+			case dagar <= 0:
+				return t(lang, "admin.ago_today")
+			case dagar == 1:
+				return t(lang, "admin.ago_yesterday")
+			case dagar < 14:
+				return fmt.Sprintf(t(lang, "admin.ago_days"), dagar)
+			case dagar < 60:
+				return fmt.Sprintf(t(lang, "admin.ago_weeks"), dagar/7)
+			default:
+				return fmt.Sprintf(t(lang, "admin.ago_months"), dagar/30)
+			}
+		},
+		// printf-omsetjing: strengen ber sjølv kvar tale skal staa, so
+		// ordstillingi kann vera ulik paa ulike maal.
+		"tf": func(lang, key string, a ...interface{}) string {
+			return fmt.Sprintf(t(lang, key), a...)
+		},
+		"norskDag": func(t time.Time) string {
+			return norskeDagar[t.Weekday()]
+		},
+		"norskDato": func(t time.Time) string {
+			return fmt.Sprintf("%s %d. %s", norskeDagar[t.Weekday()], t.Day(), norskeMaanader[t.Month()])
+		},
+		// Med årstal. «fredag 26. mars» er nok for ein time i denne veka,
+		// men ein fornyingsdato utan år er ikkje ein dato — han kan vere
+		// neste månad eller om to år.
+		"norskDatoAar": func(t time.Time) string {
+			return fmt.Sprintf("%d. %s %d", t.Day(), norskeMaanader[t.Month()], t.Year())
 		},
 		"formatTimeShort": func(t time.Time) string {
 			return t.In(settings.GetLocation()).Format("15:04")
@@ -129,6 +230,21 @@ func getTemplateFuncs() template.FuncMap {
 			}
 			return result
 		},
+		// Ei setning med eit val i seg står som «Medlemer %s oppgradere
+		// …» i umsetjingsfila — heile setninga på éin nykel, so han som
+		// omset ser samanhengen. `deling` deler henne ved %s, so malen
+		// kan setje veljaren midt inne i henne.
+		"deling": func(s string) []string {
+			i := strings.Index(s, "%s")
+			if i < 0 {
+				return []string{s, ""}
+			}
+			return []string{s[:i], s[i+2:]}
+		},
+		"add": func(a, b int) int { return a + b },
+		// `list` saman med `dict` er det som skal til for å gje ein
+		// komponent ei liste med ting frå ein mal — fanerekkja tek ei.
+		"list": func(values ...interface{}) []interface{} { return values },
 		"dict": func(values ...interface{}) map[string]interface{} {
 			if len(values)%2 != 0 {
 				return nil // Must have even number of arguments (key-value pairs)
@@ -197,11 +313,12 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 	if _, err := os.Stat(componentsPath); err == nil {
 		filepath.WalkDir(componentsPath, func(compPath string, d fs.DirEntry, err error) error {
 			if err == nil && !d.IsDir() && strings.HasSuffix(compPath, ".html") {
-				var parseErr error
-				t, parseErr = t.ParseFiles(compPath)
+				parsed, parseErr := t.ParseFiles(compPath)
 				if parseErr != nil {
 					log.Printf("Error parsing component %s: %v", compPath, parseErr)
+					return nil
 				}
+				t = parsed
 			}
 			return nil
 		})
@@ -212,11 +329,12 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 	if _, err := os.Stat(modulesPath); err == nil {
 		filepath.WalkDir(modulesPath, func(modPath string, d fs.DirEntry, err error) error {
 			if err == nil && !d.IsDir() && strings.HasSuffix(modPath, ".html") {
-				var parseErr error
-				t, parseErr = t.ParseFiles(modPath)
+				parsed, parseErr := t.ParseFiles(modPath)
 				if parseErr != nil {
 					log.Printf("Error parsing module %s: %v", modPath, parseErr)
+					return nil
 				}
+				t = parsed
 			}
 			return nil
 		})
@@ -231,17 +349,52 @@ func (tm *TemplateManager) loadPageTemplate(name, path string) {
 	tm.templates[name] = finalTemplate
 }
 
-// loadComponentTemplate loads a standalone component template
+// loadComponentTemplate loads a standalone component or module template.
+//
+// Han fær dei sams bitane under components/ med seg. Utan deim kunde ein
+// modul som vert teikna for seg — ein htmx-bit, til dømes — ikkje nytta
+// ein felles komponent: sida hans virka, men biten svara «no such
+// template». Det er den same malen, og han skal te seg likt kvar han
+// vert teikna.
+//
+// Feilen vart dessutan slukt her fyrr: malen datt berre ut or samlingi,
+// og det fyrste ein visste um det var at ein bolk mangla.
 func (tm *TemplateManager) loadComponentTemplate(name, path string) {
 	t := template.New(name).Funcs(getTemplateFuncs())
-	t, err := t.ParseFiles(path)
-	if err == nil {
-		tm.templates[name] = t
+
+	komponentar := filepath.Join(tm.basePath, "components")
+	if _, err := os.Stat(komponentar); err == nil {
+		filepath.WalkDir(komponentar, func(p string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() || !strings.HasSuffix(p, ".html") || p == path {
+				return nil
+			}
+			parsed, parseErr := t.ParseFiles(p)
+			if parseErr != nil {
+				log.Printf("Error parsing shared component %s: %v", p, parseErr)
+				return nil
+			}
+			t = parsed
+			return nil
+		})
 	}
+
+	parsed, err := t.ParseFiles(path)
+	if err != nil {
+		log.Printf("Error parsing component template %s: %v", path, err)
+		return
+	}
+	tm.templates[name] = parsed
 }
 
-// GetTemplate returns a template by name
+// GetTemplate returns a template by name.
+//
+// I utvikling vert malarne lesne paa nytt for kvar soknad, so ei endring
+// i ei .html-fil syner seg ved neste oppdatering — utan omstart, og utan
+// aa lura paa um ein ser det nye eller det gamle.
 func (tm *TemplateManager) GetTemplate(name string) (*template.Template, bool) {
+	if IsDevelopment() {
+		tm.loadTemplates()
+	}
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
 	tmpl, exists := tm.templates[name]
@@ -257,7 +410,7 @@ func (tm *TemplateManager) ReloadTemplates() {
 func (tm *TemplateManager) GetAvailableTemplates() []string {
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
-	
+
 	var names []string
 	for name := range tm.templates {
 		names = append(names, name)
@@ -291,4 +444,35 @@ func (tm *TemplateManager) ExecuteTemplate(w io.Writer, name string, data interf
 		return errors.New("template not found: " + name)
 	}
 	return tmpl.ExecuteTemplate(w, name, data)
+}
+
+// skrivKronor set hardt mellomrom som tusenskilje, so talet ikkje bryt
+// midt i lina.
+func skrivKronor(kr int64) string {
+	s := strconv.FormatInt(kr, 10)
+	var b strings.Builder
+	for i, c := range s {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			b.WriteRune('\u00a0')
+		}
+		b.WriteRune(c)
+	}
+	b.WriteString("\u00a0kr")
+	return b.String()
+}
+
+// Dag- og maanadsnamn paa norsk. Go kann berre engelsk, og eit
+// grensesnitt som segjer «Thursday» til ein som les nynorsk er ikkje
+// omsett — det er berre delvis skrive.
+var norskeDagar = map[time.Weekday]string{
+	time.Monday: "måndag", time.Tuesday: "tysdag", time.Wednesday: "onsdag",
+	time.Thursday: "torsdag", time.Friday: "fredag", time.Saturday: "laurdag",
+	time.Sunday: "sundag",
+}
+
+var norskeMaanader = map[time.Month]string{
+	time.January: "januar", time.February: "februar", time.March: "mars",
+	time.April: "april", time.May: "mai", time.June: "juni",
+	time.July: "juli", time.August: "august", time.September: "september",
+	time.October: "oktober", time.November: "november", time.December: "desember",
 }

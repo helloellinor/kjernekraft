@@ -39,24 +39,23 @@ func ShuffleTestData() error {
 	// Initialize random seed
 	rand.Seed(time.Now().UnixNano())
 
-	// Define class types with colors and descriptions
+	// Kjernekraft Oslo held yoga, pilates og fascia — i salen eller paa
+	// reformeren. Det stod tretten slag her, med boksing, spinning og
+	// crossfit; eit studio som ikkje finst.
 	classTypes := []ClassTypeInfo{
-		{Type: "yoga", Color: "#8e44ad", Titles: []string{"Basic Yoga", "Forrest Yoga", "Yin Yoga", "Vinyasa Flow", "Hatha Yoga", "Power Yoga", "Restorative Yoga"}},
-		{Type: "pilates", Color: "#27ae60", Titles: []string{"Klassisk Pilates", "Pilates Reformer", "Pilates Mat", "Power Pilates", "Gentle Pilates", "Core Pilates", "Pilates Flow"}},
-		{Type: "strength", Color: "#e74c3c", Titles: []string{"Strength Training", "Circuit Training", "Functional Training", "HIIT Strength", "Body Sculpt", "Weight Training", "CrossFit"}},
-		{Type: "cardio", Color: "#f39c12", Titles: []string{"Spin Class", "Zumba", "Aerobics", "Dance Cardio", "Boxing Cardio", "HIIT Cardio", "Step Aerobics"}},
-		{Type: "flexibility", Color: "#3498db", Titles: []string{"Stretching", "Flexibility Focus", "Mobility Training", "Gentle Stretch", "Recovery Session", "Deep Stretch", "Myofascial Release"}},
+		{Type: "yoga", Color: "", Titles: []string{"Hatha Yoga", "Vinyasa Flow", "Yin Yoga", "Basic Yoga", "Yoga Styrke 45"}},
+		{Type: "pilates", Color: "", Titles: []string{"Classical Pilates", "Klassisk Pilates Matte", "Pilates Apparatus", "Self Practice Pilates Apparatus"}},
+		{Type: "fascia", Color: "", Titles: []string{"Fascia Movement", "Fascia Flyt"}},
 	}
 
-	// Norwegian teacher names
+	// Dei som faktisk held timar i Storgata 23.
 	teachers := []string{
-		"Anna Larsen", "Erik Nordmann", "Kari Solberg", "Magnus Haugen", "Silje Andersen",
-		"Lars Eriksen", "Ingrid Johansen", "Ole Hansen", "Nina Olsen", "Bjørn Kristiansen",
-		"Hanne Nilsen", "Tor Pedersen", "Astrid Svensson", "Gunnar Andersen", "Lise Berg",
+		"Gry", "Ida", "Kristina", "Carla", "Cyrena",
+		"Torunn", "Amanda", "Mariamah Aurora", "Leon", "Veronica",
 	}
 
 	// Studio locations
-	studios := []string{"Studio 1", "Studio 2", "Studio 3", "Hovedstudio", "Yogastudio", "Pilatesstudio"}
+	studios := []string{"Salen", "Reformer"}
 
 	// Time slots (hour of day)
 	timeSlots := []int{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}
@@ -70,7 +69,7 @@ func ShuffleTestData() error {
 	// Generate 5-12 events per day with randomization
 	for dayOffset := 0; dayOffset < 7; dayOffset++ {
 		currentDay := monday.AddDate(0, 0, dayOffset)
-		
+
 		// Randomize number of events per day (more events on weekdays)
 		var numEvents int
 		if currentDay.Weekday() == time.Saturday || currentDay.Weekday() == time.Sunday {
@@ -189,7 +188,7 @@ func ShuffleTestData() error {
 			log.Printf("Error creating event %s: %v", event.Title, err)
 		} else {
 			successCount++
-			fmt.Printf("Created event: %s with %s on %s at %s (ID: %d)\n", 
+			fmt.Printf("Created event: %s with %s on %s at %s (ID: %d)\n",
 				event.Title, event.TeacherName, event.StartTime.Format("2006-01-02"), event.StartTime.Format("15:04"), id)
 		}
 	}
@@ -197,7 +196,7 @@ func ShuffleTestData() error {
 	fmt.Printf("\n✅ Successfully shuffled test data: Created %d new events out of %d total\n", successCount, len(events))
 	fmt.Println("📅 Events span current week plus first 3 days of next week")
 	fmt.Println("🔄 Refresh your browser to see the new randomized schedule!")
-	
+
 	return nil
 }
 

@@ -1,56 +1,68 @@
 {{define "base"}}
 <!DOCTYPE html>
-<html lang="no">
+<html lang="{{if .Lang}}{{.Lang}}{{else}}nn{{end}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}} - Kjernekraft</title>
-    <style>
-        /* Common page title styling */
-        .page-title {
-            font-size: 2rem;
-            margin: 2rem auto 1rem auto;
-            max-width: 1200px;
-            padding: 0 2rem;
-            color: #333;
-            font-weight: 600;
-            border-bottom: 2px solid #007cba;
-            padding-bottom: 0.5rem;
-            text-align: center;
-        }
-        
-        /* Responsive styles */
-        @media (max-width: 767px) {
-            .page-title {
-                padding: 0 1rem;
-            }
-        }
-    </style>
-    {{template "common_styles"}}
-    {{template "module_styles"}}
-    {{template "button_styles"}}
-    {{template "event_card_styles"}}
-    {{template "language_selector_styles"}}
-    {{if eq .CurrentPage "admin"}}{{template "admin_styles"}}{{end}}
-    {{if .CSS}}
-    <style>{{.CSS}}</style>
-    {{end}}
-    {{range .ExternalCSS}}
+    <title>{{.Title}} — Kjernekraft</title>
+
+    <!-- Eitt stilark for heile staden. Det stod i tjugofem <style>-blokkar
+         fyrr, og seks av deim vart lasta inn i kvar einaste sida. -->
+    <link rel="icon" href="/static/img/kjernekraft.svg" type="image/svg+xml">
+
+    {{/* Skriftene vert henta fyrr stilarket bed um deim. Utan dette
+         finn nettlesaren dei fyrst naar han hev lese ferdig CSS-en og
+         funne ut kva som skal teiknast med kva — og daa er fyrste
+         teikninga alt gjord med reserveskrifti. Dei tvo som ber sida
+         er lista her; dei hine kjem naar dei trengst.
+
+         `crossorigin` lyt staa. Skrifter vert alltid henta anonymt, og
+         ein preload utan honom hentar fila ein gong til. */}}
+    <link rel="preload" href="/static/fonts/UnionGothic-Variable.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/fonts/Ubuntu-R.woff2" as="font" type="font/woff2" crossorigin>
+
+    <link rel="stylesheet" href="/static/css/kjernekraft.css">
+
+    {{if .ExternalCSS}}{{range .ExternalCSS}}
     <link rel="stylesheet" href="{{.}}">
-    {{end}}
+    {{end}}{{end}}
     {{block "head" .}}{{end}}
 </head>
 <body>
+    <!-- Leidingi stend her, éin gong. Ho vart teikna av kvar av dei sju
+         sidone kvar for seg fyrr — og README-en hev heile tidi paastade
+         at ho stod her. -->
+    {{/* Filtri timemerket nyttar. Éin gong paa sida: dei ber ingen farge,
+         so alle merki kann dela deim. */}}
+    {{template "merke_defs" .}}
+
+    {{if .UserName}}{{template "navigation" .}}{{end}}
+
     <main>
         {{block "content" .}}{{end}}
     </main>
-    
-    {{if .JS}}
-    <script>{{.JS}}</script>
-    {{end}}
-    {{range .ExternalJS}}
+
+    {{if .UserName}}{{template "botnlina" .}}{{end}}
+
+    <!-- htmx ligg i repoet og vert lasta her. Han var aldri lasta paa ei
+         einaste sida som gjeng gjenom denne malen, so `hx-get` paa
+         paameldingslista henta aldri noko — ho stod og lasta i all
+         æva. csrf.js hektar seg paa honom, og lyt difor koma etter. -->
+    <script src="/static/js/htmx.min.js"></script>
+    <script src="/static/js/csrf.js"></script>
+    <script src="/static/js/ljosband.js"></script>
+    <script src="/static/js/faner.js"></script>
+    <script src="/static/js/dokk.js"></script>
+    <script src="/static/js/folk.js"></script>
+    <script src="/static/js/timeplan-veke.js"></script>
+    <script src="/static/js/dagfokus.js"></script>
+    <script src="/static/js/endringar.js"></script>
+    <script src="/static/js/prisar.js"></script>
+
+    {{if .JS}}<script>{{.JS}}</script>{{end}}
+    {{if .ExternalJS}}{{range .ExternalJS}}
     <script src="{{.}}"></script>
-    {{end}}
+    {{end}}{{end}}
     {{block "scripts" .}}{{end}}
 </body>
 </html>

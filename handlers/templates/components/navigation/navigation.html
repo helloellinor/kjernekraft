@@ -1,40 +1,68 @@
 {{define "navigation"}}
-{{template "navigation_styles"}}
+{{/* Éi lina, ikkje tvo. Merket, sidone og namnet stend paa den same
+     rada — dei høyrer til den same tingen, og tvo bjelkar tok dobbelt
+     so mykje høgd for aa segja det.
 
+     Maalveljaren stod her og var det breidaste i heile hovudet. Han
+     høyrer heime nedst: ein vel maal ein gong, ikkje kvar gong ein
+     opnar ei sida. */}}
 <header class="header">
     <div class="header-content">
-        <h1>{{t .Lang "navigation.dashboard_title"}}</h1>
+        {{/* Merket er vegen heim. Difor stod «Hjem» ein gong for mykje i
+             leidingi — same grunnen som at namnet erstatta «Min profil». */}}
+        <a class="merkeord{{if eq .CurrentPage "hjem"}} paa-heim{{end}}" href="/elev/hjem"
+           {{if eq .CurrentPage "hjem"}}aria-current="page"{{end}}>
+            <span class="merke" aria-hidden="true"></span>
+            <span class="merkenamn">{{t .Lang "site.title"}}</span>
+        </a>
+
+        <nav class="nav" aria-label="{{t .Lang "navigation.dashboard_title"}}">
+            <ul class="nav-list">
+                <li class="nav-item {{if eq .CurrentPage "timeplan"}}active{{end}}">
+                    <a href="/elev/timeplan" {{if eq .CurrentPage "timeplan"}}aria-current="page"{{end}}>{{t .Lang "navigation.schedule"}}</a>
+                </li>
+                <li class="nav-item {{if eq .CurrentPage "klippekort"}}active{{end}}">
+                    <a href="/elev/klippekort" {{if eq .CurrentPage "klippekort"}}aria-current="page"{{end}}>{{t .Lang "navigation.punch_cards"}}</a>
+                </li>
+                <li class="nav-item {{if eq .CurrentPage "medlemskap"}}active{{end}}">
+                    <a href="/elev/medlemskap" {{if eq .CurrentPage "medlemskap"}}aria-current="page"{{end}}>{{t .Lang "navigation.membership"}}</a>
+                </li>
+                <li class="nav-item {{if eq .CurrentPage "betaling"}}active{{end}}">
+                    <a href="/elev/betaling" {{if eq .CurrentPage "betaling"}}aria-current="page"{{end}}>{{t .Lang "navigation.payments"}}</a>
+                </li>
+                {{if .IsAdmin}}
+                <li class="nav-item nav-admin {{if eq .CurrentPage "admin"}}active{{end}}">
+                    <a href="/admin" {{if eq .CurrentPage "admin"}}aria-current="page"{{end}}>{{t .Lang "navigation.admin"}}</a>
+                </li>
+                {{end}}
+            </ul>
+        </nav>
+
+        {{/* Namnet er ein veljar, som vikenummeret. To utgangar ligg
+             attum det — profilen og utloggingi — og dei tek ingi plass
+             fyre ein spør etter deim. */}}
         <div class="auth-controls">
-            {{if .UserName}}
-            <span class="user-name">{{.UserName}}</span>
-            <a href="/logout" class="auth-link">{{t .Lang "navigation.logout"}}</a>
-            {{else}}
-            <a href="/innlogging" class="auth-link">{{t .Lang "navigation.login"}}</a>
-            {{end}}
+            <button type="button" class="user-name{{if eq .CurrentPage "profil"}} active{{end}}"
+                    id="namn-knapp" aria-expanded="false" aria-controls="namn-meny">{{.UserName}}</button>
+
+            <div class="namnemeny" id="namn-meny" hidden>
+                <a href="/elev/min-profil" class="namneval">{{t .Lang "navigation.my_profile"}}</a>
+                <form action="/logout" method="POST" class="auth-form">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <button type="submit" class="namneval namneval-ut">{{t .Lang "navigation.logout"}}</button>
+                </form>
+            </div>
         </div>
     </div>
 </header>
+{{end}}
 
-<nav class="nav">
-    <ul class="nav-list">
-        <li class="nav-item">
-            <a href="/elev/hjem" class="nav-link {{if eq .CurrentPage "hjem"}}active{{end}}">{{t .Lang "navigation.home"}}</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/timeplan" class="nav-link {{if eq .CurrentPage "timeplan"}}active{{end}}">{{t .Lang "navigation.schedule"}}</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/klippekort" class="nav-link {{if eq .CurrentPage "klippekort"}}active{{end}}">{{t .Lang "navigation.punch_cards"}}</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/medlemskap" class="nav-link {{if eq .CurrentPage "medlemskap"}}active{{end}}">{{t .Lang "navigation.membership"}}</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/betaling" class="nav-link {{if eq .CurrentPage "betaling"}}active{{end}}">{{t .Lang "navigation.payments"}}</a>
-        </li>
-        <li class="nav-item">
-            <a href="/elev/min-profil" class="nav-link {{if eq .CurrentPage "profil"}}active{{end}}">{{t .Lang "navigation.my_profile"}}</a>
-        </li>
-    </ul>
-</nav>
+{{define "botnlina"}}
+{{/* Nedst: det ein vel ein gong. */}}
+<footer class="botnlina">
+    <div class="botninnhald">
+        {{template "language_selector" .}}
+        <span class="botnmerke">{{t .Lang "site.title"}} &middot; Storgata 23, Oslo</span>
+    </div>
+</footer>
 {{end}}

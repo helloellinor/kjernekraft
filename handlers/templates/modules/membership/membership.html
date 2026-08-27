@@ -1,7 +1,4 @@
 {{define "membership_module"}}
-<style>
-{{template "membership_module_styles" .}}
-</style>
 
 {{if .HasMembership}}
 <div class="membership-card {{.Membership.Status}}">
@@ -10,7 +7,7 @@
     {{end}}
     
     <div class="membership-header">
-        <h3 class="membership-name">{{.Membership.Name}}</h3>
+        <h3 class="card-title">{{.Membership.Name}}</h3>
         <div class="membership-status status-{{.Membership.Status}}">
             {{if eq .Membership.Status "active"}}AKTIV
             {{else if eq .Membership.Status "paused"}}{{t .Lang "membership.frozen_until"}} 🧊
@@ -80,7 +77,7 @@
 </div>
 {{else}}
 <div class="no-membership">
-    <h3>{{t .Lang "membership.no_membership"}}</h3>
+    <h3 class="card-title">{{t .Lang "membership.no_membership"}}</h3>
     <p>Du har ikke et aktivt medlemskap for øyeblikket.</p>
     <a href="/medlemskap" class="get-membership-btn">Finn medlemskap</a>
 </div>
@@ -181,6 +178,3 @@ function cancelMembership() {
 </script>
 {{end}}
 
-{{define "membership_module_styles"}}
-{{.MembershipCSS}}
-{{end}}

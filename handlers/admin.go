@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"kjernekraft/database"
+	"kjernekraft/handlers/config"
 	"kjernekraft/handlers/modules"
 	"log"
 	"net/http"
@@ -10,8 +11,9 @@ import (
 var AdminDB *database.Database
 
 func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
-	// For now, we'll skip authentication check
-	// TODO: Add proper authentication to check if user has admin role
+	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
+	// Ligg denne handsamaren nokon gong utanfor den gruppa, er
+	// administrasjonen open att.
 
 	users, err := AdminDB.GetAllUsers()
 	if err != nil {
@@ -21,6 +23,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	events, err := AdminDB.GetAllEvents()
 	if err != nil {
+		log.Printf("admin: kunde ikkje henta timar: %v", err)
 		http.Error(w, "Kunne ikke hente events", http.StatusInternalServerError)
 		return
 	}
@@ -37,11 +40,11 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get language from request (default to Norwegian bokmål)
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		lang = "nb"
-	}
+	// Same veg som alle hine sidone. Denne eine las berre ?lang= og
+	// fall attende paa "nb", so administrasjonen stod på bokmaal same
+	// kva brukaren hadde valt — og fanone og korti på same skjermen
+	// kunde koma på kvar sitt maal.
+	lang := GetLanguageFromRequest(r)
 
 	// Create admin stats module
 	statsModule, err := modules.NewAdminStatsModule(len(users), len(events), len(freezeRequests), lang)
@@ -51,14 +54,39 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	folk, err := AdminDB.FolkOversyn()
+	if err != nil {
+		log.Printf("folkeoversyn: %v", err)
+	}
+
+	rooms, err := AdminDB.GetRooms()
+	if err != nil {
+		log.Printf("kunde ikkje henta rom: %v", err)
+	}
+
+	// Veljarane paa denne sida — ny time, vikarfeltet — les rollone.
+	// Datalista `laerarar` stod tom fyrr: ho las $.Teachers, og den
+	// nykelen vart aldri sett paa administrasjonssida i det heile.
+	laerarar, err := AdminDB.LaerarNamn()
+	if err != nil {
+		log.Printf("kunde ikkje henta lærarane: %v", err)
+	}
+
 	data := map[string]interface{}{
-		"Title":          "Admin Dashboard",
+		"Rooms":          rooms,
+		"Folk":           folk,
+		"Teachers":       laerarar,
+		"Title":          t(lang, "admin.title"),
 		"Users":          users,
 		"Events":         events,
+		"Timereglar":     GrupperTimar(events, config.GetInstance().GetCurrentTime()),
 		"FreezeRequests": freezeRequests,
 		"Memberships":    memberships,
 		"Stats":          statsModule,
 		"Lang":           lang,
+		"CSRFToken":      CSRFToken(r),
+		"IsAdmin":        sessionIsAdmin(r),
+		"UserName":       sessionUserName(r),
 		"CurrentPage":    "admin",
 		"ExternalCSS":    []string{},
 	}

@@ -1,0 +1,590 @@
+Kjernekraft
+  ✓ http://localhost:8080
+  vaktar Go-filer. ctrl-c stoggar.
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/timeplanbolk.go:168:4: syntax error: unexpected ) at end of statement
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/timeplanbolk.go:138:3: unknown field Merkelapp in struct literal of type Framsyning
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/membership.go:56:2: declared and not used: valbare
+    handlers/membership.go:58:3: undefined: log
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers/modules
+    handlers/modules/admin-stats.go:18:3: unknown field AdminStatsCSS in struct literal of type AdminStatsModuleData
+    handlers/modules/admin-stats.go:18:33: undefined: cssContent
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers/modules
+    handlers/modules/charges.go:27:3: unknown field ChargesCSS in struct literal of type ChargesModuleData
+    handlers/modules/charges.go:27:22: undefined: cssContent
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers/modules
+    handlers/modules/klippekort.go:27:3: unknown field KlippekortCSS in struct literal of type KlippekortModuleData
+    handlers/modules/klippekort.go:27:18: undefined: template
+    handlers/modules/klippekort.go:27:31: undefined: cssContent
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin.go:72:42: undefined: TimeNow
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin.go:72:42: undefined: config
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/timeregel.go:8:2: "kjernekraft/handlers/config" imported and not used
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin_classes.go:151:20: AdminDB.UpdateEventTeacher undefined (type *database.Database has no field or method UpdateEventTeacher)
+    handlers/events.go:81:15: DB.UpdateEventTime undefined (type *database.Database has no field or method UpdateEventTime)
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin_classes.go:151:20: AdminDB.UpdateEventTeacher undefined (type *database.Database has no field or method UpdateEventTeacher)
+    handlers/events.go:81:15: DB.UpdateEventTime undefined (type *database.Database has no field or method UpdateEventTime)
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin_classes.go:75:2: declared and not used: ruleID
+    handlers/admin_classes.go:159:20: AdminDB.UpdateEventTeacher undefined (type *database.Database has no field or method UpdateEventTeacher)
+    handlers/events.go:81:15: DB.UpdateEventTime undefined (type *database.Database has no field or method UpdateEventTime)
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin_classes.go:160:20: AdminDB.UpdateEventTeacher undefined (type *database.Database has no field or method UpdateEventTeacher)
+    handlers/events.go:81:15: DB.UpdateEventTime undefined (type *database.Database has no field or method UpdateEventTime)
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin_classes.go:159:54: undefined: config
+    handlers/admin_classes.go:187:8: undefined: config
+    handlers/admin_classes.go:188:10: undefined: config
+    handlers/events.go:81:15: DB.UpdateEventTime undefined (type *database.Database has no field or method UpdateEventTime)
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin_classes.go:159:54: undefined: config
+    handlers/admin_classes.go:187:8: undefined: config
+    handlers/admin_classes.go:188:10: undefined: config
+    handlers/events.go:81:15: DB.UpdateEventTime undefined (type *database.Database has no field or method UpdateEventTime)
+    handlers/medlemskapet.go:140:47: undefined: norskDatoStreng
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/events.go:81:15: DB.UpdateEventTime undefined (type *database.Database has no field or method UpdateEventTime)
+    handlers/medlemskapet.go:140:47: undefined: norskDatoStreng
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/events.go:81:15: DB.UpdateEventTime undefined (type *database.Database has no field or method UpdateEventTime)
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft
+    ./server.go:166:47: undefined: handlers.UpdateClassTeacherHandler
+    ./server.go:169:52: undefined: handlers.UpdateEventTimeHandler
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft
+    ./server.go:170:52: undefined: handlers.UpdateEventTimeHandler
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/timeregel.go:8:2: "kjernekraft/handlers/config" imported and not used
+    handlers/timeregel.go:83:29: undefined: sona
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/timeregel.go:8:2: "kjernekraft/handlers/config" imported and not used
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/database
+    database/database.go:340:18: undefined: sona
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin_reglar.go:59:2: undefined: renderFragment
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin_priser.go:35:17: DB.DeleteMembership undefined (type *database.Database has no field or method DeleteMembership)
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin_klippeprisar.go:85:11: undefined: reintNamn
+    handlers/admin_priser.go:91:11: undefined: reintNamn
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft
+    ./server.go:115:34: undefined: handlers.ChargesHandler
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/merkeform.go:7:2: "strings" imported and not used
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/merkeform.go:46:2: ruteR redeclared in this block
+    	handlers/aktivitet.go:23:2: other declaration of ruteR
+    handlers/merkeform.go:88:6: Merke redeclared in this block
+    	handlers/aktivitet.go:38:6: other declaration of Merke
+    handlers/merkeform.go:228:3: unknown field Ident in struct literal of type Merke
+    handlers/merkeform.go:229:3: unknown field ViewBox in struct literal of type Merke
+    handlers/merkeform.go:230:3: unknown field Breidd in struct literal of type Merke
+    handlers/merkeform.go:230:25: unknown field Hogd in struct literal of type Merke
+    handlers/aktivitet.go:106:55: undefined: maanadskort
+    handlers/aktivitet.go:122:16: undefined: merkelapp
+    handlers/aktivitet.go:132:16: undefined: samandrag
+    handlers/aktivitet.go:152:22: undefined: maanadskort
+    handlers/merkeform.go:230:25: too many errors
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/merkeform.go:46:2: ruteR redeclared in this block
+    	handlers/aktivitet.go:23:2: other declaration of ruteR
+    handlers/merkeform.go:88:6: Merke redeclared in this block
+    	handlers/aktivitet.go:38:6: other declaration of Merke
+    handlers/merkeform.go:228:3: unknown field Ident in struct literal of type Merke
+    handlers/merkeform.go:229:3: unknown field ViewBox in struct literal of type Merke
+    handlers/merkeform.go:230:3: unknown field Breidd in struct literal of type Merke
+    handlers/merkeform.go:230:25: unknown field Hogd in struct literal of type Merke
+    handlers/merkeform.go:231:3: unknown field Silhuett in struct literal of type Merke
+    handlers/merkeform.go:232:3: unknown field Fane in struct literal of type Merke
+    handlers/merkeform.go:233:3: unknown field Plett in struct literal of type Merke
+    handlers/merkeform.go:234:3: unknown field DagX in struct literal of type Merke
+    handlers/merkeform.go:234:3: too many errors
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/merkeform.go:46:2: ruteR redeclared in this block
+    	handlers/aktivitet.go:23:2: other declaration of ruteR
+    handlers/aktivitet.go:106:37: cannot use Merke{…} (value of struct type Merke) as Maanadsmerke value in argument to append
+    handlers/aktivitet.go:106:43: unknown field X in struct literal of type Merke
+    handlers/aktivitet.go:106:49: unknown field Namn in struct literal of type Merke
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/dashboard_components.go:8:2: "time" imported and not used
+    handlers/dashboard_components.go:165:19: undefined: PaameldeFramsyningar
+    handlers/dashboard_components.go:172:2: undefined: teiknFragmentFraa
+    handlers/dashboard_components.go:194:17: undefined: LedigeFramsyningar
+    handlers/dashboard_components.go:201:2: undefined: teiknFragmentFraa
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/admin_reglar.go:44:3: undefined: log
+    handlers/dashboard_components.go:8:2: "time" imported and not used
+    handlers/dashboard_components.go:165:19: undefined: PaameldeFramsyningar
+    handlers/dashboard_components.go:194:17: undefined: LedigeFramsyningar
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/timeplanbolk.go:320:3: undefined: log
+    handlers/dashboard_components.go:8:2: "time" imported and not used
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft/handlers
+    handlers/dashboard_components.go:8:2: "time" imported and not used
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft
+    ./tidprove_main.go:39:6: main redeclared in this block
+    	./server.go:16:6: other declaration of main
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✗ bygget feila:
+    # kjernekraft
+    ./tidprove2_main.go:11:6: main redeclared in this block
+    	./server.go:16:6: other declaration of main
+  (held fram med aa vakta)
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080
+  … endring, byggjer
+  ✓ http://localhost:8080

@@ -1,0 +1,25 @@
+{{define "timeliste"}}
+{{/* Timane som ei liste.
+
+     Radene er dei same som i timeplanen — same markering, same klassar,
+     same reglar. Ein time skal kjennast som *den same tingen* kvar ein
+     ser honom: same skrift, same storleik, same plassering. Skreiv ein
+     nye reglar for kvar side, vart timen ein abstraksjon som ser litt
+     ulik ut kvar gong, og ikkje ein ting ein kjenner att.
+
+     Namnet står til venstre av di det er det ein leitar etter. Merket
+     står til høgre og ber dagen, klokkeslettet og kor mange plassar som
+     er att — difor står ikkje klokkeslettet i teksten. Det ville vore
+     det same to gonger. */}}
+<div class="timeliste">
+  {{range .Rader}}
+  <div class="timerad heimerad{{if .ErUmme}} umme{{end}}">
+    <div class="timekva">
+      <h3 class="timetittel">{{.Event.Title}} <span class="lengd">{{.Minutt}} min</span></h3>
+      <p class="timekven">{{.Event.TeacherName}}{{if .Event.RoomName}} <span class="timerom">{{.Event.RoomName}}</span>{{end}}</p>
+    </div>
+    {{template "dagmerke" .}}
+  </div>
+  {{end}}
+</div>
+{{end}}

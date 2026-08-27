@@ -1,0 +1,64 @@
+{{define "admin_settings"}}
+<h2 class="section-title">{{t .Lang "admin.system_settings"}}</h2>
+
+        <div class="form-group">
+            <label for="timezone-select">Tidssone:</label>
+            <select id="timezone-select" onchange="updateTimezone()">
+                <option value="Europe/Oslo" {{if eq (currentTimezone) "Europe/Oslo"}}selected{{end}}>Oslo (Europe/Oslo)</option>
+                <option value="UTC" {{if eq (currentTimezone) "UTC"}}selected{{end}}>UTC</option>
+                <option value="America/New_York" {{if eq (currentTimezone) "America/New_York"}}selected{{end}}>New York (America/New_York)</option>
+                <option value="Europe/London" {{if eq (currentTimezone) "Europe/London"}}selected{{end}}>London (Europe/London)</option>
+                <option value="Asia/Tokyo" {{if eq (currentTimezone) "Asia/Tokyo"}}selected{{end}}>Tokyo (Asia/Tokyo)</option>
+            </select>
+        </div>
+        
+        <div class="current-time">
+            <strong>Gjeldende tid:</strong> <span id="current-time">{{formatDateTime (currentTime)}}</span>
+        </div>
+
+    <div id="settings-message" class="message" style="display: none;"></div>
+
+<script>
+function updateTimezone() {
+    const timezone = document.getElementById('timezone-select').value;
+    const messageDiv = document.getElementById('settings-message');
+    
+    fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ timezone: timezone })
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error('Failed to update timezone');
+    })
+    .then(data => {
+        messageDiv.textContent = 'Tidssone oppdatert! Siden vil lastes på nytt.';
+        messageDiv.className = 'message success';
+        messageDiv.style.display = 'block';
+        
+        // Reload page after 1 second to show updated timezone
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    })
+    .catch(error => {
+        messageDiv.textContent = 'Feil ved oppdatering av tidssone: ' + error.message;
+        messageDiv.className = 'message error';
+        messageDiv.style.display = 'block';
+    });
+}
+
+// Update current time every second
+function updateCurrentTime() {
+    // This will be updated when the page reloads after timezone change
+    // For real-time updates, we could use WebSocket or periodic fetch
+}
+
+setInterval(updateCurrentTime, 1000);
+</script>
+{{end}}

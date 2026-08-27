@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"net/http"
 	"kjernekraft/models"
+	"net/http"
 )
 
 // GetMembershipRulesHandler returns the current membership rules configuration
@@ -31,7 +31,7 @@ func SaveMembershipRulesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Add admin authentication check here
-	
+
 	var rules models.MembershipRules
 	if err := json.NewDecoder(r.Body).Decode(&rules); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)

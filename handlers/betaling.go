@@ -22,6 +22,8 @@ func BetalingHandler(w http.ResponseWriter, r *http.Request) {
 		"UserName":    user.Name,
 		"User":        user,
 		"Lang":        lang,
+		"CSRFToken":   CSRFToken(r),
+		"IsAdmin":     sessionIsAdmin(r),
 	}
 
 	// Use the new template system
