@@ -126,7 +126,7 @@
   --vidd-tittel:  125%;   /* kvar du er */
   --vidd-yver:    105%;   /* yverskrift i sida */
   --vidd-leiding:  90%;   /* leidingi */
-  --vidd-merkelapp: 68%;  /* merkelappar og bolkeyverskrifter */
+  --vidd-merkelapp: 68%;  /* merkelappar og undertitlar */
   --skrift:      "Ubuntu", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --skrift-tal:  "Ubuntu Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -466,7 +466,9 @@ main {
   font-stretch: var(--vidd-tittel);
   font-weight: 700;
   letter-spacing: -.01em;
-  margin: 0 0 var(--rom-3);
+  /* Bolkeoverskrifta under er ei overskrift no og ikkje ei merkelapp.
+     To overskrifter med rom-3 imellom les seg som éin blokk. */
+  margin: 0 0 var(--rom-6);
   padding: 0;
   border: 0;
   text-align: left;
@@ -488,16 +490,29 @@ main {
    Steg tvo og tri hadde same forma fyrr — ein h4 inne i ein h3 fekk
    ingi ny tyding, berre ein litt mindre bokstav. Lina er skiljet: ein
    bolk deler sida, ei gruppa deler berre bolken. */
+/* Ei bolkeoverskrift er ei overskrift, ikkje ei merkelapp.
+
+   Ho stod på merkelapp-trinnet: 1,05 rem, 68 % breidd, versalar og
+   sperra. Det er forma til noko som *namngjev* eit felt — og då les ein
+   henne som ein liten lapp og ikkje som ei overskrift ein tek i. Ho var
+   tung å lese attpåtil: versalar tek bort ordbiletet, og sperringa gjer
+   at auga må lese bokstav for bokstav.
+
+   No står ho på trinnet under sidetittelen: 105 % i staden for 125 % i
+   breidd, og godt under han i storleik. Breidda ber rangen, som elles i
+   huset — ein ser kva som er kva før ein har lese eit ord. */
 .section-title {
   font-family: var(--skrift-yver);
-  font-size: 1.05rem; font-weight: 500;
-  font-stretch: var(--vidd-merkelapp);
-  letter-spacing: .08em; text-transform: uppercase;
-  color: var(--blekk-lys);
+  font-size: 1.65rem; font-weight: 500;
+  font-stretch: var(--vidd-yver);
+  letter-spacing: -.005em;
+  line-height: 1.15;
+  color: var(--blekk);
   margin: 0 0 var(--rom-4);
   padding-bottom: var(--rom-2);
   border-bottom: 1px solid var(--haarlina);
   text-align: left;
+  text-wrap: balance;
 }
 
 .undertittel {
@@ -2650,6 +2665,10 @@ select.lappfelt { padding-right: var(--rom-6); }
   align-items: start;
 }
 .heimespalte { display: flex; flex-direction: column; gap: var(--rom-6); min-width: 0; }
+/* Sidespalta er smalare og underordna. Overskrifta der tek eit trinn ned
+   — elles bryt «Mitt medlemskap» i to linjer i ei spalte som er femten
+   rem brei. */
+.heimespalte-sida .section-title { font-size: 1.3rem; }
 /* Bolkane står i ei spalte med luft imellom; marginen under kvar av dei
    ville lagt seg oppå den lufta. */
 .heimeoppsett .content-section { margin-bottom: 0; }

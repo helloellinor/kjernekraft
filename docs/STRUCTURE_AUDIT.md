@@ -17,6 +17,9 @@
 > *funksjonell* mangel, ikkje ein strukturell, og er difor ikkje
 > retta her — men det er truleg den største grunnen til at nett den
 > sida kjennest kaotisk.
+>
+> *Sidan retta:* `.steg`-reglane i stilarket syner no eitt steg um
+> gongen, og det valde kortet ber produktfargen paa kanten.
 
 Dette er granskingi som ligg attum §15–§17 i stilboki. Stilboki segjer
 kva som skal gjelda; dette arket segjer kvar det ikkje gjeld i dag, med
