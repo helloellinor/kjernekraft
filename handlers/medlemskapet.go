@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"kjernekraft/models"
 )
@@ -47,6 +48,7 @@ func kroneTal(ore int) int { return ore / 100 }
 // MedlemskapetHandler syner medlemskapet, byta og belastningane.
 func MedlemskapetHandler(w http.ResponseWriter, r *http.Request) {
 	lang := GetLanguageFromRequest(r)
+	naa := time.Now()
 	user := GetUserFromSession(r)
 	if user == nil {
 		http.Redirect(w, r, "/innlogging", http.StatusSeeOther)
@@ -71,6 +73,34 @@ func MedlemskapetHandler(w http.ResponseWriter, r *http.Request) {
 
 	byte := byteval(lang, alle, noverande, kvalifisert, overstyrte)
 
+	// Bindinga.
+	//
+	// Sida sa båe delar før: «Bindinga har 13 månader att» og «Du er
+	// ikkje bunden». Grunnen var at setninga las
+	// `MonthsUntilBindingEnd`, som berre vert rekna ut i ein *annan*
+	// handsamar (htmx-modulen på heimesida) og difor var null her, medan
+	// bytelista las `CommitmentMonths` frå planen — 13 for eit
+	// medlemskap som heiter «12-måneder», og med ein bindingsdato som
+	// alt er gått ut.
+	//
+	// Bunden er du om det står ein bindingsdato *fram i tid*. Ikkje kva
+	// planen ein gong sa, og ikkje eit tal nokon andre rekna ut.
+	bunden := false
+	maanaderAtt := 0
+	if noverande != nil && noverande.BindingEnd != nil {
+		slutt := *noverande.BindingEnd
+		if slutt.After(naa) {
+			bunden = true
+			maanaderAtt = (slutt.Year()-naa.Year())*12 + int(slutt.Month()-naa.Month())
+			if slutt.Day() < naa.Day() {
+				maanaderAtt--
+			}
+			if maanaderAtt < 1 {
+				maanaderAtt = 1 // mindre enn ein månad er framleis bunden
+			}
+		}
+	}
+
 	// Namnet på det du har, kjem same vegen som namna i lista.
 	noverandeNamn := ""
 	if noverande != nil {
@@ -94,6 +124,8 @@ func MedlemskapetHandler(w http.ResponseWriter, r *http.Request) {
 		"Merkelapp":     t(lang, "medlemskapet.title"),
 		"Noverande":     noverande,
 		"NoverandeNamn": noverandeNamn,
+		"Bunden":        bunden,
+		"MaanaderAtt":   maanaderAtt,
 		"Byteval":       byte,
 	})
 }

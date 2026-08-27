@@ -335,11 +335,23 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
   text-decoration: none; color: var(--blekk);
   flex: none;
 }
-.merkeord:hover { color: var(--blekk); }
-
 /* Er du heime, stend merket i merkefargen. Det er den same meldingi som
    streken under ei vald sida, sagd med det som alt er der. */
 .merkeord.paa-heim .merke { color: var(--klas); }
+
+/* Peikar du på det, tek heile merkeordet fargen — ringen og namnet.
+   Det stod `color: var(--blekk)` her, som *låste* fargen: merket var
+   ei lenkje som ikkje fekk lov til å svare. Grunngjevinga var at det
+   ikkje skulle sjå ut som ei lenkje, men det er ikkje lenkjefargen som
+   er problemet — det er understreken, og han er alt av.
+
+   Heime og peika-på seier ikkje det same: heime står berre ringen i
+   fargen, medan eit peik tek heile lockupen. Difor kjem denne regelen
+   etter, so han vinn medan peikaren står der. */
+.merkeord:hover,
+.merkeord:focus-visible { color: var(--merke); }
+.merkeord:hover .merke,
+.merkeord:focus-visible .merke { color: var(--merke); }
 .merkeord .merke {
   /* 0,72em — kapitélhøgdi i Union Gothic, teki beinveges or fila
      (sCapHeight 720 av 1000, og K-glyfen maaler nett 720).
@@ -997,8 +1009,18 @@ tbody tr:hover td { background: var(--ark-djup); }
    når, lys underleppe der det slår i botnen og kastar att. Vekeveljaren
    *er* overskrifta til det rutenettet, så han låner rutenettet si form.
 
-   Flata er gjennomsynleg og ikkje --flate: sporet skal lesast som eit
-   hol i arket, ikkje som eit felt lagt oppå det. */
+   Flata er mjølkete og ikkje tett: --flate på 62 % med ei uskarpleik
+   bak, så arket under skin gjennom. Det er den gjennomsynlege flata
+   sporet treng for å lesast som eit hol i noko, og ikkje som ein boks
+   lagd oppå.
+
+   Det er *ingen* ring i merkefargen her, korkje i kvile eller i fokus.
+   Ein ring rundt gjer to ting gale: han legg ei hard line tvers over den
+   gjennomsynlege kanten, så heile effekten forsvinn, og han kjempar med
+   talet om å bli lesen. Feltet seier at det er skrivbart på to andre
+   måtar som held: den blinkande markøren i --klas, og — på ein telefon —
+   talpanelet som kjem opp. Fokus seier frå ved at flata blir eit hakk
+   mindre gjennomsynleg. */
 .vekefelt {
   font-family: var(--skrift-yver);
   font-size: clamp(2rem, 5vw, 3.4rem);
@@ -1006,25 +1028,21 @@ tbody tr:hover td { background: var(--ark-djup); }
   letter-spacing: inherit; line-height: 1;
   width: 2.6ch; field-sizing: content;
   padding: 0 .1em; margin: 0;
-  border: 0; border-radius: 2px;
-  background-color: color-mix(in srgb, var(--blekk) 6%, transparent);
+  border: 0; border-radius: 3px;
+  background-color: color-mix(in srgb, var(--flate) 62%, transparent);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
   box-shadow:
     inset 0 2px 2px -1px color-mix(in srgb, var(--blekk) 28%, transparent),
-    inset 0 -2px 1px -1px color-mix(in srgb, var(--flate) 80%, transparent);
+    inset 0 -2px 1px -1px color-mix(in srgb, var(--flate) 90%, transparent);
   color: var(--blekk);
   caret-color: var(--klas);
   text-align: center;
 }
 
-/* Ringen i merkefargen kjem attåt sporet, slik han gjer på kvart anna
-   felt: djupna seier «skrivbar», fargen seier «her er du no». */
 .vekefelt:focus {
   outline: none;
-  background-color: color-mix(in srgb, var(--blekk) 8%, transparent);
-  box-shadow:
-    inset 0 2px 2px -1px color-mix(in srgb, var(--blekk) 28%, transparent),
-    inset 0 -2px 1px -1px color-mix(in srgb, var(--flate) 80%, transparent),
-    0 0 0 1px var(--merke);
+  background-color: color-mix(in srgb, var(--flate) 82%, transparent);
 }
 .vekefelt::selection { background: color-mix(in srgb, var(--klas) 35%, transparent); }
 
@@ -1235,10 +1253,11 @@ tbody tr:hover td { background: var(--ark-djup); }
    No svarar merket med si eiga form: kanten tek merkefargen og flata
    lysnar eit hakk. Ingen kasse rundt, ingen skugge — det er den same
    silhuetten som ligg der, berre vaken. */
-.dagmerke:hover:not(:disabled) .form-kant { fill: var(--merke-lys); }
+.dagmerke:hover:not(:disabled) .form-kant,
+.dagmerke:hover:not(:disabled) .fanekant { fill: var(--merke-lys); }
 .dagmerke:hover:not(:disabled) .form-flate { fill: color-mix(in srgb, var(--merke) 7%, var(--flate)); }
 @media (prefers-reduced-motion: no-preference) {
-  .form-kant, .form-flate { transition: fill .12s ease-out; }
+  .form-kant, .form-flate, .fanekant, .faneflate { transition: fill .12s ease-out; }
 }
 
 /* Paameld. Dette stod som `border-color` og `background` på sjølve
@@ -1259,6 +1278,21 @@ tbody tr:hover td { background: var(--ark-djup); }
    det ser trykt ut og ikkje uppblaast. Sjaa docs/FASETTEN.md. */
 /* Filtri ber ingen farge; fargen stend her, paa elementi, og fylgjer
    difor temaet der merket stend. */
+/* ---- fana ----
+   Ho er ei fane og ikkje ein kul paa umrisset, og difor ber ho fanone
+   sine fargar: den same lukka flata som ei ulesen fana i
+   administrasjonen. Dagen det er i dag er den valde fana — merkefargen,
+   og namnet i merkefargen — og dei hine trekkjer seg attende. */
+.faneflate { fill: var(--faneflate); }
+.fanekant  { fill: var(--kant); }
+.dagmerke.idag .faneflate { fill: var(--merke-svak); }
+.dagmerke.idag .fanekant  { fill: var(--merke); }
+
+/* Plassmerket ligg inne i kroppen no og lyt difor teikna seg sjølv mot
+   flata hans. */
+.plettflate { fill: var(--flate); }
+.plettkant  { fill: var(--kant); }
+
 .form-ring  { fill: var(--merke); visibility: hidden; }
 .form-kant  { fill: var(--kant); }
 .form-flate { fill: var(--flate); }
@@ -1268,18 +1302,18 @@ tbody tr:hover td { background: var(--ark-djup); }
    den klassa i bruk, sette 7,2 px paa yverskrifti yver rutenetet — ein
    kollisjon som berre syner seg paa skjermen. */
 .merkedag {
-  font-family: var(--skrift-yver); font-size: 10.4px; font-weight: 500;
+  font-family: var(--skrift-yver); font-size: 10.0px; font-weight: 500;
   font-stretch: var(--vidd-merkelapp); letter-spacing: .06em;
-  fill: var(--blekk-lys); text-anchor: middle;
+  fill: var(--blekk-svakt); text-anchor: middle;
 }
 
 /* ---- skiva ----
    Indeksane ligg paa eit rektangulært spor og ikkje paa ein sirkel. Det
    er sporet som gjer at ho ser firkanta ut. Tolv indeksar, tal paa 12, 3
    og 9; sekstalet ligg under vindauga, som paa eit ur som er bygt slik. */
-.indeks { stroke: var(--blekk-svakt); stroke-width: 1.15; stroke-linecap: round; }
+.indeks { stroke: var(--blekk-svakt); stroke-width: 1.0; stroke-linecap: round; }
 .skivetal {
-  font-family: var(--skrift-tal); font-size: 6.4px;
+  font-family: var(--skrift-tal); font-size: 5.7px;
   fill: var(--blekk-svakt); text-anchor: middle; letter-spacing: -.04em;
 }
 
@@ -1287,20 +1321,20 @@ tbody tr:hover td { background: var(--ark-djup); }
    eit stykke er kor stor bit av dagen timen tek. Det bleike er tidi fram
    til timen — berre for timar i dag — og det farga er timen sjølv. */
 .kake-fyre  { fill: color-mix(in srgb, var(--blekk) 7%, transparent); }
-.kake-timen { fill: color-mix(in srgb, var(--merke) 20%, transparent); }
+.kake-timen { fill: color-mix(in srgb, var(--merke) 32%, transparent); }
 
 .visar { stroke-linecap: round; }
-.visar.time   { stroke: var(--blekk); stroke-width: 2.7; }
-.visar.minutt { stroke: var(--blekk-lys); stroke-width: 1.5; }
+.visar.time   { stroke: var(--blekk); stroke-width: 2.3; }
+.visar.minutt { stroke: var(--blekk-lys); stroke-width: 1.25; }
 /* Sluttvisaren er like lang som minuttvisaren og ber merkefargen: han
    syner kvar timen er ute. */
-.visar.slutt  { stroke: var(--merke); stroke-width: 1.5; }
+.visar.slutt  { stroke: var(--merke); stroke-width: 1.25; }
 .pinne { fill: var(--blekk); }
 
 /* ---- vindauga ---- */
 .ruteflate { fill: color-mix(in srgb, var(--blekk) 9%, var(--flate)); filter: url(#rutedjup); }
 .rutetal {
-  font-family: var(--skrift-tal); font-size: 8.8px;
+  font-family: var(--skrift-tal); font-size: 8.0px;
   fill: var(--blekk); text-anchor: middle; letter-spacing: -.03em;
 }
 
@@ -1313,7 +1347,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    Ein Reformer-time har fire plassar; ein time i salen har atten. Det er
    heile skilnaden, og han er borte i ein del. */
 .pletttal {
-  font-family: var(--skrift-tal); font-size: 6.6px;
+  font-family: var(--skrift-tal); font-size: 6.7px;
   fill: var(--blekk); text-anchor: middle; letter-spacing: -.04em;
 }
 .pletttal .av { fill: var(--blekk-svakt); font-size: .82em; }
@@ -1322,7 +1356,7 @@ tbody tr:hover td { background: var(--ark-djup); }
    eitt ord i, og ordet stend midt i lappa som veks til vinstre og held
    høgrekanten sin. */
 .fulltekst {
-  font-family: var(--skrift-yver); font-size: 7.6px; font-weight: 500;
+  font-family: var(--skrift-yver); font-size: 5.7px; font-weight: 500;
   font-stretch: var(--vidd-merkelapp); letter-spacing: .08em;
   fill: var(--blekk-lys); text-anchor: middle;
 }
@@ -2811,3 +2845,18 @@ select.lappfelt { padding-right: var(--rom-6); }
   color: var(--blekk); background: var(--merke-svak);
 }
 .dagmerke.utanfor-fokus { opacity: .28; }
+
+/* Medlemskapet som ein ting inne i fana. Setninga over sida rundar av —
+   «13 månader att» — og kortet her seier kva dag det er. Det eine er
+   stoda, det andre er papiret.
+
+   Han ber flata og lina sjølv og lener seg ikkje på `.module`: den
+   klassa er ikkje eit kort lenger. */
+.medlemskort {
+  max-width: 30rem;
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  padding: var(--rom-5);
+}
+.medlemskort.aktiv { border-left: 3px solid var(--merke); }
