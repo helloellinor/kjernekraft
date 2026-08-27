@@ -1921,23 +1921,43 @@ tbody tr:hover td { background: var(--ark-djup); }
   margin: 0; color: var(--blekk-lys);
 }
 
+/* Feltet i setninga er eit lappfelt som står i ei line — same djupna,
+   same fokus, same innhaldsbreidd. Det hadde ein turkis understrek før
+   og inga djupn i det heile, og det var gale på to måtar.
+
+   Det var den einaste skrivbare tingen i huset utan fasetten, så
+   «her kan du skrive» sa noko anna her enn på Min profil og i Prising
+   (FASETTEN §2). Og streken var --klas, som er fargen på medlemskapet:
+   ein farge som tyder eitt produkt kan ikkje samstundes tyde
+   «skrivefelt», elles tyder han ingen ting.
+
+   Djupna ber det no, slik ho gjer overalt elles. */
 .setning .felt {
   width: auto; min-width: 4.5rem; max-width: 16rem;
   field-sizing: content;
   padding: .1rem .4rem;
-  background: none;
-  border: 0; border-bottom: 2px solid var(--klas);
-  border-radius: 0;
+  background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate));
+  border: 0;
+  border-radius: 2px;
+  box-shadow: var(--fordjuping);
   color: var(--blekk); font-weight: 500; font-size: 1rem;
 }
-.setning .felt:focus {
-  outline: none; box-shadow: none;
-  border-bottom-color: var(--merke-lys);
-  background: var(--merke-svak);
-}
+.setning .felt:hover { background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
+.setning .felt:focus { outline: none; box-shadow: var(--fasett); }
 .setning .felt::placeholder { color: var(--blekk-svakt); font-weight: 400; }
 .setning .felt-tal { min-width: 3.2rem; text-align: center; font-family: var(--skrift-tal); }
-.setning select.felt { padding-right: var(--rom-5); background-position: right .4rem top 50%; }
+
+/* Ein veljar plukkar; han skriv ikkje. Difor inga fordjuping på han,
+   men hårlina han har overalt elles (FASETTEN §3). Det er skilnaden
+   mellom å skrive og å velje, og han skal vere synleg i setninga òg. */
+.setning select.felt {
+  background-color: var(--flate);
+  border: 1px solid var(--kant);
+  box-shadow: none;
+  padding-right: var(--rom-5); background-position: right .4rem top 50%;
+}
+.setning select.felt:hover { background-color: var(--flate); }
+.setning select.felt:focus { border-color: var(--merke); box-shadow: var(--fasett); }
 
 .setning .innelabel { color: var(--blekk-lys); font-size: 1rem; }
 .setning input[type="checkbox"] { accent-color: var(--klas); width: 1rem; height: 1rem; }
@@ -2116,36 +2136,43 @@ tbody tr:hover td { background: var(--ark-djup); }
 
 /* ===================================================================
    tal som setning
-   Tri flisor med eit tal og ei merkelapp under er ein maate aa unngaa
-   aa skriva ei setning paa. Lesaren lyt setja «6» og «TOTALT ANTALL
-   BRUKERE» saman sjølv; «6 medlemer» er alt sett saman.
+   Tre flisar med eit tal og ei merkelapp under er ein måte å unngå å
+   skrive ei setning på. Lesaren må setje «6» og «TOTALT ANTALL BRUKERE»
+   saman sjølv; «6 medlemer» er alt sett saman.
 
-   Breiddeaksa ber hierarkiet i staden for kassane: tale vidt og feitt,
-   ordet smalt attmed, setningi imillom i vanleg lesetekst. Same regelen
-   som elles — breidd tyder rang — berre nytta i ei linja.
-   =================================================================== */
+   Éi røyst ber setninga, og eitt einaste ord steg ut av henne: talet.
+   Ordet attmed stod smalt og med store bokstavar før — men det er nett
+   den røysta fanene har, og fanene står to centimeter under. To like
+   røyster oppå kvarandre las seg som ei rad faner til, ikkje som ei
+   setning. No er ordet berre mørkare enn resten av lina: det høyrer til
+   talet utan å seie det med ei ny skrift.
+
+   Difor står Union Gothic i to breidder på sida og ikkje i tre: 125 %
+   der noko er ei overskrift eller eit tal, 68 % på faner og
+   bolkoverskrifter. Setninga sjølv er lesetekst. */
 .tal-setning {
   font-size: clamp(1.15rem, 2.4vw, 1.6rem);
-  line-height: 1.55;
+  line-height: 1.6;
   max-width: 40ch;
   color: var(--blekk-lys);
-  margin: 0 0 var(--rom-6);
+  /* Helsinga står mellom overskrifta og fanene og treng luft til begge
+     sider — mest ned, så fanene byrjar for seg sjølve. */
+  margin: var(--rom-5) 0 var(--rom-7);
 }
 
 .tal-setning .tal {
   font-family: var(--skrift-yver);
-  font-stretch: 150%; font-weight: 700;
-  font-size: 1.25em; line-height: 1;
+  /* Same breidda som sidetittelen. Talet stod på 150 % før, altså
+     breiare enn overskrifta over det — og breidd tyder rang her. */
+  font-stretch: var(--vidd-tittel); font-weight: 700;
+  font-size: 1.15em; line-height: 1;
   color: var(--blekk);
   font-variant-numeric: tabular-nums;
   margin-right: .06em;
 }
 
 .tal-setning .ord {
-  font-family: var(--skrift-yver);
-  font-stretch: var(--vidd-merkelapp); font-weight: 500;
-  letter-spacing: .06em; text-transform: uppercase;
-  font-size: .72em;
+  font-weight: 500;
   color: var(--blekk);
 }
 
@@ -2634,38 +2661,25 @@ select.lappfelt { padding-right: var(--rom-6); }
   .heimeoppsett { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* ---- timelista ----
-   Namnet er overskrifta. Merket står attmed som det same tinget ein
-   kjenner att frå timeplanen, men det er ikkje lenger det som ber
-   opplysninga — på heimesida finst det inga radoverskrift som kan seie
-   kva timen heiter. */
-.timeliste { list-style: none; margin: 0; padding: 0; }
-.timelistrad {
-  display: grid; gap: var(--rom-4);
-  grid-template-columns: auto minmax(0, 1fr) auto;
+/* ---- timen i ei liste ----
+   Radene er dei same som i timeplanen — same klassar, same reglar. Ein
+   time skal kjennast som den same tingen kvar ein ser honom, og det gjer
+   han ikkje om kvar side skriv sine eigne reglar for korleis han ser ut.
+
+   Det einaste som skil er oppsettet: her er det éin dag og ikkje sju, so
+   namnet står til venstre og merket til høgre. */
+.timeliste > .timerad:first-child { border-top: 1px solid var(--haarlina); }
+.timerad.heimerad {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--rom-4);
+  padding: var(--rom-4) 0;
   align-items: center;
-  padding: var(--rom-3) 0;
-  border-top: 1px solid var(--haarlina);
 }
-.timelistrad:first-child { border-top: 0; }
-.timelistrad.umme { opacity: .5; }
-
-/* Merket er lite her, men ikkje så lite at klokkeslettet i vindauga
-   ikkje er til å lese. Under fire rem er det eit teikn og ikkje eit ur. */
-.timelistmerke { --merkestorleik: 4.4rem; line-height: 0; }
-.timelistkva { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
-.timelistnamn {
-  font-family: var(--skrift-yver); font-size: 1.15rem; font-weight: 500;
-  font-stretch: var(--vidd-yver); color: var(--blekk);
-  /* Den globale regelen bryt lange ord for å berge spalta. Eit
-     klassenamn er ikkje eit langt ord — «Reformer» vart «Refor mer». */
-  overflow-wrap: normal; word-break: normal; hyphens: none;
-}
-.timelistkven { font-size: .9rem; color: var(--blekk-lys); }
-
-.timelistnaar { display: flex; flex-direction: column; align-items: flex-end; gap: .1rem; text-align: right; }
-.timelistdag { font-size: .88rem; color: var(--blekk-lys); white-space: nowrap; }
-.timelistklokke { font-family: var(--skrift-tal); font-size: 1rem; color: var(--blekk); white-space: nowrap; }
+.timerad.heimerad .timetittel { font-size: 1.35rem; }
+.timerad.heimerad.umme { opacity: .5; }
+/* Merket ber dagen, klokkeslettet og plassane. Difor står ingen av dei
+   i teksten — det ville vore det same to gonger. */
+.timerad.heimerad .dagmerke { --merkestorleik: 4.4rem; }
 
 /* ===================================================================
    betalingsmåtane

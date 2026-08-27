@@ -119,7 +119,9 @@
     "i_dag": "today",
     "i_morgon": "tomorrow",
     "av_plassar": "%d of %d places left",
-    "fullt": "full"
+    "fullt": "full",
+    "ledig_plass": "Places available",
+    "ingen_ledig_plass": "Everything is full today and tomorrow."
   },
   "membership_actions": {
     "freeze_confirm": "Are you sure you want to freeze your membership?",
