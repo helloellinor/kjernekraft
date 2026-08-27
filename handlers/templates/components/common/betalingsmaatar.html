@@ -14,11 +14,11 @@
 {{if .Kort}}
 <ul class="kortliste">
   {{range .Kort}}
-  <li class="kortlapp{{if .IsDefault}} standard{{end}}">
+  <li class="kort kortlapp{{if .IsDefault}} valt{{end}}">
     <div class="kortkva">
       <span class="kortmerke">{{.Merke}}</span>
       <span class="korttal">•••• {{.Last4}}</span>
-      {{if .IsDefault}}<span class="stod stod-aktiv">{{t $.Lang "payments.standard"}}</span>{{end}}
+      {{if .IsDefault}}<span class="status status-active">{{t $.Lang "payments.standard"}}</span>{{end}}
     </div>
     <p class="kortdato">{{t $.Lang "payments.expires"}} {{.ExpiryMonth}}/{{.ExpiryYear}}</p>
     <div class="korthandling">

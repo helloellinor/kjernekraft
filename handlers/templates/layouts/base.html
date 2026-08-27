@@ -9,6 +9,18 @@
     <!-- Eitt stilark for heile staden. Det stod i tjugofem <style>-blokkar
          fyrr, og seks av deim vart lasta inn i kvar einaste sida. -->
     <link rel="icon" href="/static/img/kjernekraft.svg" type="image/svg+xml">
+
+    {{/* Skriftene vert henta fyrr stilarket bed um deim. Utan dette
+         finn nettlesaren dei fyrst naar han hev lese ferdig CSS-en og
+         funne ut kva som skal teiknast med kva — og daa er fyrste
+         teikninga alt gjord med reserveskrifti. Dei tvo som ber sida
+         er lista her; dei hine kjem naar dei trengst.
+
+         `crossorigin` lyt staa. Skrifter vert alltid henta anonymt, og
+         ein preload utan honom hentar fila ein gong til. */}}
+    <link rel="preload" href="/static/fonts/UnionGothic-Variable.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/fonts/Ubuntu-R.woff2" as="font" type="font/woff2" crossorigin>
+
     <link rel="stylesheet" href="/static/css/kjernekraft.css">
 
     {{if .ExternalCSS}}{{range .ExternalCSS}}

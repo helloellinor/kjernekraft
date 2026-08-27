@@ -1,18 +1,30 @@
 {{define "signed_up_classes_container"}}
-{{/* Heile bolken vert bytt ut, ikkje berre innhaldet: er du ikkje
-     påmeld noko, skal det ikkje stå ei overskrift som seier «Påmeldt»
-     med ei tom melding under. Det er «Ledig plass» som skal fange auga
-     då, og ho gjer ikkje det med ei tom rute over seg. */}}
-<div id="signed-up-classes" hx-get="/api/user/signups" hx-trigger="load" hx-swap="outerHTML">
-    <div class="loading-placeholder">{{t .Lang "dashboard.loading_signups"}}</div>
+{{/* Bolken vert teikna av tenaren med det same, og henta att berre naar
+     noko *hender*: melder du deg paa eller av — kvar som helst paa sida
+     — sender dokka «paamelding» paa <body>, og baae listone hentar seg
+     sjølve att.
+
+     Han låg og lasta med `hx-trigger="load"` fyrr. Det var tvo ting
+     gale i det: sida stod med «Lastar paameldingar…» til svaret kom, og
+     svaret kom aldri — brotstykket vart teikna or si eigi fil, og der
+     finst korkje `timeliste` eller `dagmerke`. Tenaren svara 500, og
+     htmx byter ikkje ut noko naar svaret er ein feil. Difor stod det
+     «lastar» for alltid.
+
+     Heile bolken vert bytt ut og ikkje berre innhaldet: er du ikkje
+     paameld noko, skal det ikkje standa ei yverskrift som seier
+     «Paameld» med ei tom melding under. */}}
+<div id="signed-up-classes" hx-get="/api/user/signups"
+     hx-trigger="paamelding from:body" hx-swap="innerHTML">
+    {{template "signed_up_classes_module" .}}
 </div>
 {{end}}
 
 {{define "signed_up_classes_module"}}
-{{if .HasSignups}}
+{{if .PaameldeFramsyningar}}
 <div class="content-section">
     <h2 class="section-title">{{t .Lang "dashboard.signed_up"}}</h2>
-    {{template "timeliste" (dict "Lang" .Lang "Rader" .Framsyningar)}}
+    {{template "timeliste" (dict "Lang" .Lang "Rader" .PaameldeFramsyningar)}}
 </div>
 {{end}}
 {{end}}

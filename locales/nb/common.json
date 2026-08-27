@@ -72,7 +72,8 @@
     "class_filter": "Klasse:",
     "all_teachers": "Alle lærere",
     "all_classes": "Alle klasser",
-    "no_classes": "Ingen klasser",
+    "no_classes": "Ingen timer denne uka",
+    "no_classes_sub": "Matta får hvile. Prøv neste uke.",
     "finished": "Avsluttet",
     "monday": "Mandag",
     "tuesday": "Tirsdag",
@@ -89,7 +90,6 @@
     "of": "av",
     "prev_week": "Forrige uke",
     "next_week_btn": "Neste uke",
-    "type_week": "skriv ukenummer",
     "cat_yoga": "Yoga",
     "cat_pilates": "Pilates",
     "cat_reformer": "Reformer",
@@ -121,7 +121,12 @@
     "av_plassar": "%d av %d plasser igjen",
     "fullt": "fullt",
     "ledig_plass": "Ledig plass",
-    "ingen_ledig_plass": "Alt er fullt i dag og i morgen."
+    "ingen_ledig_plass": "Alt er fullt i dag og i morgen.",
+    "no_membership": "ikke medlem",
+    "membership_details": "Se medlemskapet",
+    "medlemskap_aktivt": "Aktivt medlemskap",
+    "medlemskap_frose": "Medlemskapet er fryst",
+    "medlemskap_ingen": "Ingen medlemskap"
   },
   "membership_actions": {
     "freeze_confirm": "Er du sikker på at du vil fryse medlemskapet ditt?",
@@ -142,14 +147,16 @@
       "succeeded": "Vellykket",
       "failed": "Mislykket",
       "pending": "Venter"
-    }
+    },
+    "loading": "Laster belastninger…",
+    "could_not_load": "Kunne ikke laste belastningene."
   },
   "payments": {
     "title": "Betalinger",
-    "description": "Administrer dine betalingsmetoder og se betalingshistorikk.",
-    "payment_methods": "Betalingsmetoder",
-    "add_payment_method": "Legg til betalingsmetode",
-    "loading_payment_methods": "Laster betalingsmetoder...",
+    "description": "Kortene dine og det som er trukket.",
+    "payment_methods": "Kort",
+    "add_payment_method": "Legg til kort",
+    "loading_payment_methods": "Laster kort…",
     "loading_charges": "Laster betalingshistorikk...",
     "filter_by_status": "Filter etter status",
     "all_statuses": "Alle statuser",
@@ -157,11 +164,11 @@
     "all_types": "Alle typer",
     "membership": "Medlemskap",
     "klippekort": "Klippekort",
-    "standard": "Standard",
-    "set_standard": "Gjør til standard",
+    "standard": "I bruk",
+    "set_standard": "Bruk",
     "remove": "Fjern",
     "expires": "Utløper",
-    "no_payment_methods": "Du har ingen betalingsmåte registrert.",
+    "no_payment_methods": "Du har ikke lagt inn noe kort.",
     "card_ending": "kort som ender på %s"
   },
   "membership": {
@@ -193,7 +200,26 @@
     "fill_up": "Fyll på",
     "expires_in": "utløper om %d dager",
     "expires_today": "utløper i dag",
-    "clips_left_of": "av %d"
+    "clips_left_of": "av %d",
+    "soonest": "%s går ut om %d dager.",
+    "soonest_left": "%d klipp igjen.",
+    "soonest_none": "Ingen klipp går ut med det første.",
+    "buy": "Kjøp klipp",
+    "buy_lead": "Velg type trening, og så hvor mange klipp. Flere klipp gir lavere pris per gang.",
+    "step_kind": "Type trening",
+    "step_count": "Hvor mange klipp — %s",
+    "packages": "pakker",
+    "popular": "Mest valgt",
+    "n_klipp": "%d klipp",
+    "per_session": "%s per gang",
+    "valid_days": "gjelder i %d dager",
+    "confirm": "Valget ditt",
+    "buy_button": "Kjøp klippekort",
+    "no_payment_yet": "Betalingen er ikke koblet på ennå. Kjøpet legger kortet inn, men trekker ingen penger.",
+    "no_packages": "Ingen pakker er lagt ut for salg.",
+    "bought": "Klippekortet er lagt til.",
+    "buy_failed": "Kjøpet gikk ikke gjennom:",
+    "fill_up_prefix": "Fyll på"
   },
   "admin": {
     "title": "Administrasjon",
@@ -501,5 +527,30 @@
     "student_suffix": "%s, student og senior",
     "klipp": "%d klipp",
     "generert": "generert"
+  },
+  "maanad": {
+    "kort_1": "jan",
+    "kort_2": "feb",
+    "kort_3": "mar",
+    "kort_4": "apr",
+    "kort_5": "mai",
+    "kort_6": "jun",
+    "kort_7": "jul",
+    "kort_8": "aug",
+    "kort_9": "sep",
+    "kort_10": "okt",
+    "kort_11": "nov",
+    "kort_12": "des"
+  },
+  "aktivitet": {
+    "grunnlag": "Timer du var påmeldt. Frammøte er ikke registrert ennå.",
+    "ingen": "ingen timer",
+    "meir": "mer",
+    "mindre": "mindre",
+    "per_maanad": "Per måned",
+    "samandrag": "%d %s de siste %d ukene.",
+    "timar": "timer",
+    "time": "time",
+    "tittel": "Aktivitet"
   }
 }

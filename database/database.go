@@ -297,6 +297,69 @@ func Migrate(db *sql.DB) error {
 		log.Println("La til room_id paa events og kopla dei mot romi.")
 	}
 
+	// Regelen attum timane. «Kvar veke i aatte veker» vart skrive inn
+	// som aatte sjølvstendige rader, og kva som høyrde saman fanst
+	// berre som eit samantreff av like felt. No ber kvar time regelen
+	// sin; dei gamle radene vert kopla saman etter det same
+	// samantreffet — same time, lærar, rom, vekedag og klokkeslett —
+	// éin gong, her, og regelen fær det minste time-id-et sitt som
+	// namn.
+	var regelKolonne bool
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='rule_id'").Scan(&regelKolonne); err == nil && !regelKolonne {
+		if _, err := db.Exec("ALTER TABLE events ADD COLUMN rule_id INTEGER"); err != nil {
+			return err
+		}
+		if err := kopleTimarTilReglar(db); err != nil {
+			return err
+		}
+		log.Println("La til rule_id paa events og kopla timane til reglane sine.")
+	}
+
+	return nil
+}
+
+// kopleTimarTilReglar gjev kvar gamal time ein regel. Klokka vert lesi
+// som ho stend: den lagra tidi er veggklokka i heile huset, og skal
+// korkje reknast um her eller nokon annan stad.
+func kopleTimarTilReglar(db *sql.DB) error {
+	rows, err := db.Query(`SELECT id, title, COALESCE(teacher_name,''), COALESCE(location,''),
+		COALESCE(room_id, 0), start_time, end_time FROM events`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	grupper := map[string][]int64{}
+	for rows.Next() {
+		var id, romID int64
+		var tittel, laerar, stad string
+		var start, slutt time.Time
+		if err := rows.Scan(&id, &tittel, &laerar, &stad, &romID, &start, &slutt); err != nil {
+			return err
+		}
+		st := start
+		nykel := fmt.Sprintf("%s|%s|%s|%d|%d|%s|%d",
+			tittel, laerar, stad, romID, st.Weekday(), st.Format("15:04"),
+			int(slutt.Sub(start).Minutes()))
+		grupper[nykel] = append(grupper[nykel], id)
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	for _, idar := range grupper {
+		regel := idar[0]
+		for _, id := range idar {
+			if id < regel {
+				regel = id
+			}
+		}
+		for _, id := range idar {
+			if _, err := db.Exec("UPDATE events SET rule_id = ? WHERE id = ?", regel, id); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
@@ -580,10 +643,11 @@ func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]mo
 func (db *Database) CreateEvent(event models.Event) (int64, error) {
 	res, err := db.Conn.Exec(
 		`INSERT INTO events (title, description, start_time, end_time, location, room_id,
-			organizer, class_type, teacher_name, capacity, current_enrolment, color)
-		 VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?)`,
+			organizer, class_type, teacher_name, capacity, current_enrolment, color, rule_id)
+		 VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?, NULLIF(?, 0))`,
 		event.Title, event.Description, event.StartTime, event.EndTime, event.Location, event.RoomID,
 		event.Organizer, event.ClassType, event.TeacherName, event.Capacity, event.CurrentEnrolment, event.Color,
+		event.RuleID,
 	)
 	if err != nil {
 		return 0, err
@@ -591,18 +655,80 @@ func (db *Database) CreateEvent(event models.Event) (int64, error) {
 	return res.LastInsertId()
 }
 
-// UpdateEventTime updates the start and end time of an event
-func (db *Database) UpdateEventTime(eventID int64, startTime, endTime string) error {
+// NesteRegelID gjev namnet aat neste regel. Regelen finst ikkje som ei
+// eigi rad — han er talet timane hans ber saman.
+func (db *Database) NesteRegelID() (int64, error) {
+	var id int64
+	err := db.Conn.QueryRow("SELECT COALESCE(MAX(rule_id), 0) + 1 FROM events").Scan(&id)
+	return id, err
+}
+
+// UpdateRuleTeacher byter lærar paa alle komande timar i regelen. Det
+// som alt er halde stend som det var — historia skriv seg ikkje um.
+func (db *Database) UpdateRuleTeacher(ruleID int64, laerar string, fraa time.Time) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET teacher_name = ? WHERE rule_id = ? AND end_time > ?",
+		laerar, ruleID, fraa,
+	)
+	return err
+}
+
+// UpdateEventTeacher set vikar paa éin einskild time — tannlækjardagen.
+// Regelen stend urørd; det er nett denne dagen som fær eit anna namn.
+func (db *Database) UpdateEventTeacher(eventID int64, laerar string) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET teacher_name = ? WHERE id = ?",
+		laerar, eventID,
+	)
+	return err
+}
+
+// UpdateRuleDescription set skildringi paa alle komande timar i
+// regelen — det er regelen som hev ei skildring, timane arvar henne.
+func (db *Database) UpdateRuleDescription(ruleID int64, tekst string, fraa time.Time) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET description = ? WHERE rule_id = ? AND end_time > ?",
+		tekst, ruleID, fraa,
+	)
+	return err
+}
+
+// GetFutureEventsByRule gjev dei komande timane i ein regel, etter dato.
+func (db *Database) GetFutureEventsByRule(ruleID int64, fraa time.Time) ([]models.Event, error) {
+	rows, err := db.Conn.Query(
+		"SELECT id, start_time, end_time FROM events WHERE rule_id = ? AND end_time > ? ORDER BY start_time",
+		ruleID, fraa,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var timar []models.Event
+	for rows.Next() {
+		var e models.Event
+		if err := rows.Scan(&e.ID, &e.StartTime, &e.EndTime); err != nil {
+			return nil, err
+		}
+		timar = append(timar, e)
+	}
+	return timar, rows.Err()
+}
+
+// FlyttEvent set ny start og slutt paa éin time. Tidene gjeng inn som
+// time.Time, same vegen som CreateEvent — ein tekststreng her gav
+// radene tvo ulike datoformat i same kolonna.
+func (db *Database) FlyttEvent(eventID int64, start, slutt time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET start_time = ?, end_time = ? WHERE id = ?",
-		startTime, endTime, eventID,
+		start, slutt, eventID,
 	)
 	return err
 }
 
 // GetAllEvents fetches all events from the database
 func (db *Database) GetAllEvents() ([]models.Event, error) {
-	rows, err := db.Conn.Query("SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '') FROM events e LEFT JOIN rooms r ON r.id = e.room_id")
+	rows, err := db.Conn.Query("SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, ''), COALESCE(e.rule_id, 0) FROM events e LEFT JOIN rooms r ON r.id = e.room_id")
 	if err != nil {
 		return nil, err
 	}
@@ -611,7 +737,7 @@ func (db *Database) GetAllEvents() ([]models.Event, error) {
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName, &event.RuleID); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -1649,6 +1775,8 @@ type Person struct {
 	SistHer     *time.Time
 	TimarIAar   int
 	TrengSvar   bool // frysing som ventar
+	ErLaerar    bool
+	ErAdmin     bool
 }
 
 // FolkOversyn hentar alle medlemene med det ein treng for aa kjenna
@@ -1706,6 +1834,8 @@ func (db *Database) FolkOversyn() ([]Person, error) {
 			}
 		}
 		p.TrengSvar = p.MedlemStod == "freeze_requested"
+		p.ErLaerar = harRolla(p.Roller, RollaLaerar)
+		p.ErAdmin = harRolla(p.Roller, RollaAdmin)
 		ut = append(ut, p)
 	}
 	return ut, rows.Err()

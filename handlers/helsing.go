@@ -28,7 +28,10 @@ func Helsing(lang, namn string, neste *models.Event, naa time.Time) string {
 		return fmt.Sprintf("%s, %s!", t(lang, "site.welcome"), fyrenamn)
 	}
 
-	start := neste.StartTime.In(OsloLoc)
+	// Tidi i databasen er klokka på veggen; ho lyt byggjast opp att og
+	// ikkje reknast om. Sjå tid.go — det var ei umrekning her som gjorde
+	// at helsinga sa to timar for seint.
+	start := veggklokka(neste.StartTime)
 	naa = naa.In(OsloLoc)
 
 	iDag := naa.Format("2006-01-02")

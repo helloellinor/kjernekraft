@@ -1,0 +1,126 @@
+{{define "klippekjop_scripts"}}
+<script>
+// Klippekjøpet.
+//
+// Fyrr laag alt dette inne i sida som ein strengliteral, med prisane
+// skrivne inn i kvart onclick-kall. No stend tali paa elementi, og
+// skriptet les deim — so det finst berre éin stad ein pris kann vera
+// gal, og det er basen.
+//
+// Ingen alert, ingen confirm. Ein alert stoggar heile sida og lyt
+// lukkast; det som skulde seiast stend paa sida i staden, der det kann
+// lesast fyre ein trykkjer.
+(function () {
+    "use strict";
+
+    var valdPakke = null;
+
+    function vel(knapp, gruppe) {
+        [].forEach.call(document.querySelectorAll(gruppe), function (k) {
+            k.setAttribute("aria-pressed", "false");
+        });
+        knapp.setAttribute("aria-pressed", "true");
+    }
+
+    function synBolk(id) {
+        [].forEach.call(document.querySelectorAll(".steg"), function (b) { b.hidden = true; });
+        var b = document.getElementById(id);
+        if (b) {
+            b.hidden = false;
+            b.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return b;
+    }
+
+    document.addEventListener("click", function (e) {
+        var kat = e.target.closest(".kategorikort");
+        if (kat) {
+            vel(kat, ".kategorikort");
+            valdPakke = null;
+            synBolk("pakkar-" + kat.dataset.kategori);
+            return;
+        }
+
+        var pak = e.target.closest(".package-card");
+        if (pak) {
+            vel(pak, ".package-card");
+            valdPakke = pak.dataset.pakke;
+            var setning = document.getElementById("kjopsetning");
+            setning.textContent = pak.dataset.namn + " — " + pak.dataset.pris;
+            document.getElementById("kjopsvar").textContent = "";
+            synBolk("purchase-section");
+            return;
+        }
+
+        if (e.target.id === "kjop-knapp") kjop(e.target);
+    });
+
+    function kjop(knapp) {
+        if (!valdPakke) return;
+        var svar = document.getElementById("kjopsvar");
+        knapp.disabled = true;
+        svar.textContent = "";
+
+        fetch("/api/klippekort/purchase", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "package_id=" + encodeURIComponent(valdPakke)
+        })
+            .then(function (r) {
+                if (!r.ok) return r.text().then(function (t) { throw new Error(t); });
+                return r.json();
+            })
+            .then(function () {
+                svar.textContent = svar.dataset.ok;
+                svar.classList.remove("gale");
+                lastKort();
+                lastBelastningar();
+                synBolk("");
+                [].forEach.call(document.querySelectorAll(".package-card"), function (k) {
+                    k.setAttribute("aria-pressed", "false");
+                });
+                valdPakke = null;
+            })
+            .catch(function (f) {
+                svar.textContent = svar.dataset.gale + " " + f.message;
+                svar.classList.add("gale");
+            })
+            .then(function () { knapp.disabled = false; });
+    }
+
+    function hent(url, id, gale) {
+        fetch(url)
+            .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+            .then(function (h) { document.getElementById(id).innerHTML = h; })
+            .catch(function () {
+                document.getElementById(id).innerHTML = '<p class="tomt">' + gale + "</p>";
+            });
+    }
+
+    function lastKort() {
+        hent("/api/user/klippekort", "user-klippekort-container",
+            {{t .Lang "dashboard.could_not_load_punch_cards" | toJS}});
+    }
+    function lastBelastningar() {
+        hent("/api/charges?type=klippekort", "klippekort-charges-container",
+            {{t .Lang "charges.could_not_load" | toJS}});
+    }
+
+    lastKort();
+    lastBelastningar();
+
+    // Kom du hit fraa eit kort som gjeng ut, veit sida kva du vil.
+    var fyll = new URLSearchParams(window.location.search).get("fill");
+    if (fyll) {
+        var knapp = document.querySelector('.kategorikort[data-namn="' + fyll.replace(/"/g, '\\"') + '"]');
+        if (knapp) {
+            var yver = document.getElementById("kjop-klipp");
+            if (yver) yver.textContent = yver.dataset.fyll + " " + fyll;
+            var steg1 = document.getElementById("steg-1");
+            if (steg1) steg1.hidden = true;
+            knapp.click();
+        }
+    }
+})();
+</script>
+{{end}}

@@ -18,9 +18,14 @@
     </div>
     <div class="heimespalte heimespalte-sida">
         {{template "dashboard_membership_container" .}}
+        {{template "aktivitet_bolk" .}}
         {{template "dashboard_klippekort_container" .}}
     </div>
 </div>
 
-{{template "dashboard_scripts" .}}
+{{/* Dokka fylgjer merket og ikkje sida: klikkar du eit merke i ei liste
+     her, skal du kunna melda deg paa der du stend. Ho er den same dokka
+     som i timeplanen — same knapp, same stad, same svar. */}}
+{{template "timedokk" .}}
+
 {{end}}

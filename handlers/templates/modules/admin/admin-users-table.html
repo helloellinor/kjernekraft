@@ -25,7 +25,7 @@
 
                 <span class="folk-held">
                     {{if .Medlemskap}}
-                    <span class="held held-medlem stod-{{.MedlemStod}}">{{.Medlemskap}}</span>
+                    <span class="held held-medlem status-{{.MedlemStod}}">{{.Medlemskap}}</span>
                     {{end}}
                     {{if .KlippAtt}}
                     <span class="held held-klipp">{{.KlippAtt}} {{t $.Lang "admin.clips_left"}}</span>
@@ -50,8 +50,26 @@
                     {{if .KlippTotalt}}<dt>{{t $.Lang "navigation.punch_cards"}}</dt>
                     <dd>{{.KlippAtt}} {{t $.Lang "admin.of_clips"}} {{.KlippTotalt}}</dd>{{end}}
                     <dt>{{t $.Lang "admin.classes_last_year"}}</dt><dd>{{.TimarIAar}}</dd>
-                    {{if .Roller}}<dt>{{t $.Lang "admin.user_table.roles"}}</dt><dd>{{.Roller}}</dd>{{end}}
                 </dl>
+
+                {{/* Rollone ber same forma som det han held: eit merke.
+                     Skilnaden er at desse tvo er merke ein kann trykkja
+                     paa, og at dei stend der jamvel naar dei er av — ei
+                     rolla er ikkje noko ein *ser* at nokon manglar, so
+                     lista lyt syna baae utfalli.
+
+                     Ingi yverskrift stend yver deim. «Roller» hadde
+                     vore det same ordet som knappane alt segjer. */}}
+                <p class="rollor">
+                    <button type="button" class="held rolla" data-brukar="{{.ID}}"
+                            data-rolla="teacher" aria-pressed="{{if .ErLaerar}}true{{else}}false{{end}}">
+                        {{t $.Lang "admin.role_teacher"}}
+                    </button>
+                    <button type="button" class="held rolla" data-brukar="{{.ID}}"
+                            data-rolla="admin" aria-pressed="{{if .ErAdmin}}true{{else}}false{{end}}">
+                        {{t $.Lang "admin.role_admin"}}
+                    </button>
+                </p>
             </div>
         </li>
         {{else}}
