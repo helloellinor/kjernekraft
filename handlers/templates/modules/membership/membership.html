@@ -1,7 +1,7 @@
 {{define "membership_module"}}
 
 {{if .HasMembership}}
-<div class="membership-card {{.Membership.Status}}">
+<div class="kort membership-card {{.Membership.Status}}">
     {{if .Membership.IsSpecialOffer}}
     <div class="special-offer-badge">Spesialtilbud</div>
     {{end}}
