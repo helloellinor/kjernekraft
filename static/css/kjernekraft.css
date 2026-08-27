@@ -228,8 +228,31 @@
   --rom-4: 1rem;   --rom-5: 1.5rem; --rom-6: 2rem;   --rom-7: 3rem;
   /* Lufta over og under teksti i ein knapp. Mindre enn --rom-2, som
      stod her fyrr: han er eit steg i romskalaen, og eit steg i den
-     skalaen er for mykje til dette. */
-  --knapp-loddrett: .34rem;
+     skalaen er for mykje til dette.
+
+     Knappen stend i **éin** storleik. Det stod tri her ei stund —
+     liten, vanleg, stor — av di fyrebiletet synte tri, og det er ein
+     daarleg grunn: eit fyrebilete syner kva ei form *kann*, ikkje kva
+     eit hus *treng*. Ingen av dei tri vart nokon gong nytta utanfor
+     verkstaden, og eit steg som ingen tek er ikkje eit steg, det er
+     drift som ventar paa nokon som skal gissa. Att stend den minste,
+     som var den einaste nokon likte. */
+  --knapp-loddrett: .29rem;
+  /* Lufta i endane. Ho er ikkje eit steg i romskalaen som dei hine
+     maali her — ho er ei *fylgje av forma*, og difor stend ho i emme og
+     ikkje i rem.
+
+     Kapselen endar i ein halvsirkel, og radien hans er halve høgdi.
+     Skal kurva taka til nett der ordet slepper, lyt lufta i enden vera
+     nøyaktig den radien: er ho større, ligg det eit stykke rett kant
+     millom ordet og kurva, og knappen vert brei utan at noko fyller
+     breiddi. Fire og tjuge pikslar mot ein radius paa seksten er sju
+     pikslar daudt i kvar ende.
+
+     1,1 em er den radien for baade den vanlege og den vesle. Den store
+     ber meir luft loddrett og er difor høgre i høve til skrifti si; han
+     hev sitt eige tal nedanfyre. */
+  --knapp-vassrett: 1.1em;
 
   /* Skuggen finst i éi utgaava, og han er til det som flyt. */
   --skugge-flytande: 0 6px 20px rgb(28 31 27 / .14);
@@ -1108,7 +1131,7 @@ main {
   --knapp-attkast: var(--glans);   /* ljoset som kjem attende nedanfraa */
 
   font-family: var(--skrift);
-  font-size: .95rem; font-weight: 500;
+  font-size: .82rem; font-weight: 500;
   letter-spacing: 0; text-transform: none;
   /* Kapselen treng luft i endane. Er teksti klemd mot kurva, les forma
      seg som eit avrunda rektangel og ikkje som ein knapp.
@@ -1118,7 +1141,7 @@ main {
      som eit felt: han såg ut som noko ein skriv i. Ein knapp er ei
      linje med tekst og eit grep rundt henne — han skal vera brei og
      låg, ikkje kvadratisk. */
-  padding: var(--knapp-loddrett) var(--rom-5);
+  padding: var(--knapp-loddrett) var(--knapp-vassrett);
   border: 1px solid var(--knapp-kant);
   border-radius: var(--rund-knapp);
   color: var(--knapp-ord);
@@ -1269,19 +1292,6 @@ main {
 .btn-danger:hover, .cancel-signup-btn:hover, .cancel-btn:hover, .remove-btn:hover {
   --knapp-kropp: var(--aatvaring-svak);
 }
-
-/* ---- trappa ----
-   Den same kapselen i tri storleikar. Glaset er skrive i emme og i
-   prosent og ikkje i pikslar, so dropa, veggen og attkastet fylgjer
-   skrifti av seg sjølv: ein stor knapp fær eit stort ljos og ein liten
-   eit lite, og ingen av dei tri lyt teiknast paa nytt. Det er prøva paa
-   at laget er rett rekna.
-
-   Storleiken tyder kor ofte handlingi hender, ikkje kor viktig ho er —
-   det siste stend i fargen. Den store er kjøpsknappen og ingen ting
-   anna; den vesle er handlingi som bur inne i ei rad. */
-.btn-liten { font-size: .82rem; padding: calc(var(--knapp-loddrett) - .05rem) var(--rom-4); }
-.btn-stor  { font-size: 1.1rem;  padding: calc(var(--knapp-loddrett) + .2rem) var(--rom-6); }
 
 /* Avslegen: ingen dropa, ingen vegg, ingen skugge. Han er ikkje ein
    ting ein kann trykkja paa lenger, og daa skal han ikkje sjaa ut som

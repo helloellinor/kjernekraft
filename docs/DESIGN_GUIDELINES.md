@@ -619,16 +619,35 @@ fargen låg nett der flata er mørkast. Merkefargen er ei **linefarge**.
 Han er rekna for å halde éin piksel mot arket, ikkje for å bere ei
 setning.
 
-### Trappa
+### Éin storleik, og lufta er halve høgda
 
-Same kapselen i tre storleikar: `.btn-liten`, ingen klasse, `.btn-stor`.
-Glaset er rekna i `em` og i prosent og ikkje i pikslar, så dropa, veggen
-og attkastet fylgjer skrifta av seg sjølv. Må ein teikne glaset på nytt
-for ein ny storleik, er laget feil rekna.
+Det stod tre storleikar her ei stund — `.btn-liten`, ingen klasse,
+`.btn-stor` — av di førebiletet synte tre. Det er ein dårleg grunn: eit
+førebilete syner kva ei form *kan*, ikkje kva eit hus *treng*. Ingen av
+dei tre vart nokon gong brukte utanfor verkstaden, og eit steg ingen tek
+er ikkje eit steg — det er drift som ventar på nokon som skal gisse.
+Regelen som skulle styre dei («storleiken seier kor ofte handlinga
+hender») var skriven etter at klassane fanst, som forsvar for dei, og
+det er alltid feil veg.
 
-Storleiken seier kor ofte handlinga hender, ikkje kor viktig ho er — det
-siste står i fargen. Den store er kjøpsknappen og ingen ting anna; den
-vesle er handlinga som bur inne i ei rad.
+Att står den minste. Knappen har éin storleik, og då treng ingen vite
+når dei andre gjeld.
+
+**Lufta i endane er ikkje eit steg i romskalaen.** Ho er ei fylgje av
+forma, og difor står ho i `em`:
+
+```css
+--knapp-vassrett: 1.1em;   /* = halve høgda */
+```
+
+Kapselen endar i ein halvsirkel, og radien hans er halve høgda. Skal
+kurva ta til nett der ordet slepper, må lufta i enden vere nøyaktig den
+radien. Er ho større, ligg det eit stykke **rett kant** mellom ordet og
+kurva, og knappen blir brei utan at noko fyller breidda — `--rom-5` mot
+ein radius på seksten var sju pikslar daudt i kvar ende.
+
+Prøva er ei linje i konsollen: `padding-left` skal vere lik
+`height / 2`. I dag er avviket under ein tjuandedels piksel.
 
 **Trykt snur ljoset.** Dropa går ut — glas som er trykt inn har ikkje
 noko ljos oppå seg — attkastet vert veikt, skuggen fell inn ovanfrå, og
