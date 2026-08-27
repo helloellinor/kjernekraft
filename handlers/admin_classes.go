@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"kjernekraft/database"
 	"kjernekraft/handlers/config"
 	"kjernekraft/models"
 	"net/http"
@@ -81,13 +82,12 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Det som vert laga her er ein *regel*, ikkje ein time — timane er
 	// utslagi hans. Ein einskildtime er ein regel med eitt utslag.
-	ruleID, err := AdminDB.NesteRegelID()
-	if err != nil {
-		http.Error(w, "Could not create rule", http.StatusInternalServerError)
-		return
-	}
-
-	var createdEventIDs []int64
+	//
+	// Alle vekene vert bygde og prøvde fyrst, og skrivne etterpå. Fyrr
+	// gjekk prøva og skrivinga om kvarandre, so ein kollisjon i femte
+	// veka lét dei fire fyrste stå att i basen medan svaret var ein
+	// feil — og den som prøvde ein gong til fekk dei fire ein gong til.
+	var timar []models.Event
 
 	for week := 0; week < weeksToCreate; week++ {
 		weekOffset := time.Duration(week) * 7 * 24 * time.Hour
@@ -107,7 +107,6 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 			CurrentEnrolment: 0,
 			Color:            classData.Color,
 			RoomID:           int(classData.RoomID),
-			RuleID:           ruleID,
 		}
 
 		// Konflikten er alt synt medan ein skreiv, men han lyt prøvast
@@ -125,12 +124,13 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		eventID, err := AdminDB.CreateEvent(event)
-		if err != nil {
-			http.Error(w, "Could not create event", http.StatusInternalServerError)
-			return
-		}
-		createdEventIDs = append(createdEventIDs, eventID)
+		timar = append(timar, event)
+	}
+
+	_, createdEventIDs, err := AdminDB.LagRegel(timar)
+	if err != nil {
+		http.Error(w, "Could not create event", http.StatusInternalServerError)
+		return
 	}
 
 	response := map[string]interface{}{
@@ -241,14 +241,52 @@ func UpdateRuleLengthHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not fetch classes", http.StatusInternalServerError)
 		return
 	}
+	flyttingar := make([]database.Flytting, 0, len(timar))
 	for _, e := range timar {
-		if err := AdminDB.FlyttEvent(int64(e.ID), e.StartTime,
-			e.StartTime.Add(time.Duration(minutt)*time.Minute)); err != nil {
-			http.Error(w, "Could not update class length", http.StatusInternalServerError)
-			return
-		}
+		flyttingar = append(flyttingar, database.Flytting{
+			EventID: int64(e.ID),
+			Start:   e.StartTime,
+			Slutt:   e.StartTime.Add(time.Duration(minutt) * time.Minute),
+		})
+	}
+	if melding, ok := regelKrasjar(r, ruleID, timar, flyttingar); !ok {
+		http.Error(w, melding, http.StatusConflict)
+		return
+	}
+	if err := AdminDB.FlyttFleire(flyttingar); err != nil {
+		http.Error(w, "Could not update class length", http.StatusInternalServerError)
+		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+// regelKrasjar prøver dei nye tidene mot romi fyre noko vert lagra.
+//
+// Skjemaet for ein *ny* time hev alltid gjort dette; å flytta ein regel
+// gjorde det ikkje. Ein regel flytt frå måndag 18:00 til 19:00 i eit rom
+// der noko anna alt går 19:00, dobbeltbooka kvar einaste komande gong —
+// i stille, av di ingen spurde.
+func regelKrasjar(r *http.Request, ruleID int64, timar []models.Event, flyttingar []database.Flytting) (string, bool) {
+	rom := map[int64]int{}
+	for _, e := range timar {
+		rom[int64(e.ID)] = e.RoomID
+	}
+	for _, f := range flyttingar {
+		romID := int64(rom[f.EventID])
+		if romID == 0 {
+			continue // ingen rom, ingen kollisjon
+		}
+		kollisjon, err := AdminDB.RoomConflictUtanRegel(romID, ruleID, f.Start, f.Slutt)
+		if err != nil || kollisjon == nil {
+			continue
+		}
+		return fmt.Sprintf("%s %s–%s: %s",
+			t(GetLanguageFromRequest(r), "admin.room_busy"),
+			veggklokka(kollisjon.StartTime).Format("2.1. 15:04"),
+			veggklokka(kollisjon.EndTime).Format("15:04"),
+			kollisjon.Title), false
+	}
+	return "", true
 }
 
 // UpdateRuleDescriptionHandler set skildringi paa regelen — alle
@@ -308,6 +346,7 @@ func UpdateRuleClockHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	flyttingar := make([]database.Flytting, 0, len(timar))
 	for _, e := range timar {
 		// Klokka vert lesi og skrivi som ho stend — den lagra tidi er
 		// veggklokka (sjaa GrupperTimar), so den nye tidi vert bygd i
@@ -316,10 +355,17 @@ func UpdateRuleClockHandler(w http.ResponseWriter, r *http.Request) {
 		dag := e.StartTime
 		start := time.Date(dag.Year(), dag.Month(), dag.Day(),
 			klokke.Hour(), klokke.Minute(), 0, 0, dag.Location())
-		if err := AdminDB.FlyttEvent(int64(e.ID), start, start.Add(lengd)); err != nil {
-			http.Error(w, "Could not move class", http.StatusInternalServerError)
-			return
-		}
+		flyttingar = append(flyttingar, database.Flytting{
+			EventID: int64(e.ID), Start: start, Slutt: start.Add(lengd),
+		})
+	}
+	if melding, ok := regelKrasjar(r, ruleID, timar, flyttingar); !ok {
+		http.Error(w, melding, http.StatusConflict)
+		return
+	}
+	if err := AdminDB.FlyttFleire(flyttingar); err != nil {
+		http.Error(w, "Could not move class", http.StatusInternalServerError)
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 }

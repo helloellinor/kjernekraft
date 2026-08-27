@@ -184,8 +184,4 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	renderPage(w, r, "pages/timeplan", data)
-	return
-
-	// If template doesn't exist, return error
-	http.Error(w, "Template not found", http.StatusInternalServerError)
 }

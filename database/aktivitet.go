@@ -20,7 +20,7 @@ func (db *Database) AktivitetPerDag(userID int64, fraa, til time.Time) (map[stri
 		JOIN events e ON e.id = es.event_id
 		WHERE es.user_id = ?
 		  AND e.start_time >= ? AND e.start_time < ?
-		GROUP BY dag`, userID, fraa, til)
+		GROUP BY dag`, userID, veggtekst(fraa), veggtekst(til))
 	if err != nil {
 		return nil, err
 	}

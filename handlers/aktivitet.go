@@ -85,6 +85,27 @@ func niva(tal int) int {
 	}
 }
 
+// aktivitetMaanadar er kor mange maanadsbjelkar raden syner.
+const aktivitetMaanadar = 6
+
+// AktivitetFraa gjev den fyrste dagen begge bileti treng tal for.
+//
+// Dei tvo spyrja ikkje um det same tidsrommet: kartet gjeng vikevis
+// attende fraa maandagen i denne vika, medan bjelkane gjeng maanadsvis
+// attende fraa den fyrste i denne maanaden. Handsamaren henta berre det
+// kartet trong, og daa mangla den eldste bjelken dei dagane som laag
+// fyre den maandagen — upp til aatte av deim. Bjelken saag daa lægre ut
+// enn maanaden var, og kor mykje kom an paa kva dag i maanaden det var.
+func AktivitetFraa(naa time.Time, vekor int) time.Time {
+	kart := VikeMaandag(naa, 0).AddDate(0, 0, -7*(vekor-1))
+	bjelkar := time.Date(naa.Year(), naa.Month(), 1, 0, 0, 0, 0, naa.Location()).
+		AddDate(0, -(aktivitetMaanadar - 1), 0)
+	if bjelkar.Before(kart) {
+		return bjelkar
+	}
+	return kart
+}
+
 // NyAktivitet byggjer baae bileti for dei siste `vekor` vikone fram til
 // og med vika `naa` ligg i.
 func NyAktivitet(lang string, perDag map[string]int, naa time.Time, vekor int) Aktivitet {
@@ -139,7 +160,7 @@ func NyAktivitet(lang string, perDag map[string]int, naa time.Time, vekor int) A
 // hadde sagt det same ein gong til med ein kanal som daa ikkje kann
 // segja noko anna.
 func (a *Aktivitet) byggBjelkar(lang string, perDag map[string]int, naa time.Time) {
-	const tal = 6
+	const tal = aktivitetMaanadar
 
 	type mnd struct {
 		namn string
