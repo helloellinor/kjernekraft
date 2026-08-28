@@ -1,0 +1,147 @@
+{
+  "responseType": "classes",
+  "classes": [
+    {
+      "id": 2582970,
+      "archived": 0,
+      "date": "2026-08-31",
+      "start_time": "17:30",
+      "end_time": "18:20",
+      "subtitle": "Åpent nivå",
+      "seats": 18,
+      "cancelled": false,
+      "free": false,
+      "room_id": 621,
+      "class_type_id": 10088,
+      "client_id": 265,
+      "class_type": {
+        "createdAt": 1724918830670,
+        "updatedAt": 1772206791721,
+        "id": 10088,
+        "archived": 0,
+        "name": "Classical Pilates",
+        "description": "Classical Pilates is a system of movemen",
+        "color": "#194d33",
+        "client": 265,
+        "urban_sports_club_event_category_id": null,
+        "image_id": 107968
+      },
+      "room": {
+        "id": 621,
+        "name": "Salen"
+      },
+      "teachers": [
+        {
+          "id": 228639,
+          "first_name": "Cyrena",
+          "last_name": "Drusine"
+        }
+      ]
+    },
+    {
+      "id": 2894322,
+      "archived": 0,
+      "date": "2026-08-31",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "subtitle": "Åpent nivå",
+      "seats": 18,
+      "cancelled": false,
+      "free": false,
+      "room_id": 621,
+      "class_type_id": 3799,
+      "client_id": 265,
+      "class_type": {
+        "createdAt": 1669755681101,
+        "updatedAt": 1772207581421,
+        "id": 3799,
+        "archived": 0,
+        "name": "Fascia Flyt ",
+        "description": "Sitter du mye på jobb? Føler du at du ha",
+        "color": "#806578",
+        "client": 265,
+        "urban_sports_club_event_category_id": null,
+        "image_id": 107958
+      },
+      "room": {
+        "id": 621,
+        "name": "Salen"
+      },
+      "teachers": [
+        {
+          "id": 162648,
+          "first_name": "Gry",
+          "last_name": "Bech-Hanssen"
+        }
+      ]
+    },
+    {
+      "id": 888888,
+      "archived": 0,
+      "date": "2026-09-01",
+      "start_time": "07:15",
+      "end_time": "08:00",
+      "subtitle": "",
+      "seats": 0,
+      "cancelled": false,
+      "free": false,
+      "room_id": 621,
+      "class_type_id": 10088,
+      "client_id": 265,
+      "class_type": {
+        "createdAt": 1724918830670,
+        "updatedAt": 1772206791721,
+        "id": 10088,
+        "archived": 0,
+        "name": "Classical Pilates",
+        "description": "Classical Pilates is a system of movemen",
+        "color": "#194d33",
+        "client": 265,
+        "urban_sports_club_event_category_id": null,
+        "image_id": 107968
+      },
+      "room": {
+        "id": 621,
+        "name": "Salen"
+      },
+      "teachers": []
+    },
+    {
+      "id": 999999,
+      "archived": 0,
+      "date": "2026-08-31",
+      "start_time": "16:30",
+      "end_time": "17:20",
+      "subtitle": "Mandatory pre-approval required",
+      "seats": 5,
+      "cancelled": true,
+      "free": false,
+      "room_id": 623,
+      "class_type_id": 7215,
+      "client_id": 265,
+      "class_type": {
+        "createdAt": 1704296228365,
+        "updatedAt": 1772206652552,
+        "id": 7215,
+        "archived": 0,
+        "name": "Pilates Apparatus",
+        "description": "Drop-in on Pilates Reformer/Apparatus. T",
+        "color": "#194d33",
+        "client": 265,
+        "urban_sports_club_event_category_id": null,
+        "image_id": 107967
+      },
+      "room": {
+        "id": 623,
+        "name": "Reformer "
+      },
+      "teachers": [
+        {
+          "id": 228639,
+          "first_name": "Cyrena",
+          "last_name": "Drusine"
+        }
+      ]
+    }
+  ]
+}
