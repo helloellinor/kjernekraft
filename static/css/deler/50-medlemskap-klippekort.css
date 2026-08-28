@@ -34,8 +34,16 @@
   font-stretch: var(--vidd-yver); font-weight: 500;
 }
 
-/* Merket sjølv. Forma segjer stoda; fargen segjer berre um ho er i live. */
-.membership-status {
+/* Merket sjølv. Forma segjer stoda; fargen segjer berre um ho er i live.
+
+   `.stodalinje` stod ikkje her fyrr, og det var feilen: ho er den klassa
+   korti *faktisk* skriv — medlemskortet, heimespalta, betalingsmaatane —
+   medan `.membership-status` berre stend i verkstaden. Ho hadde ingi
+   skriftregel nokon stad, berre margar, so stoda las seg i lesetypen paa
+   16 px der ho skulde bera merkelapp-røysta: 68 % breidd, versalar,
+   sperra (§5). */
+.membership-status, .stodalinje {
+  margin: 0;
   font-stretch: var(--vidd-merkelapp);
   display: inline-flex; align-items: center; gap: var(--rom-2);
   font-family: var(--skrift-yver);
@@ -43,10 +51,14 @@
   background: none; border: 0; padding: 0;
   color: var(--blekk-lys);
 }
-.membership-status::before {
+.membership-status::before, .stodalinje::before {
   content: ""; width: .5rem; height: .5rem; border-radius: 50%;
   border: 1px solid currentColor; background: currentColor; flex: none;
 }
+/* Ber merket ei lampa, teiknar det ikkje prikken sin attaat: tvo merke
+   for éin tilstand er eitt for mykje. */
+.membership-status:has(.ljos)::before,
+.stodalinje:has(.ljos)::before { display: none; }
 .status-active { color: var(--produkt, var(--merke)); }
 .status-freeze_requested { color: var(--produkt, var(--merke)); }
 .status-freeze_requested::before { background: none; }
@@ -58,8 +70,18 @@
 .price-info { display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap; margin: var(--rom-3) 0; }
 .price-info .price { font-family: var(--skrift-tal); font-size: 1.6rem; letter-spacing: -.02em; }
 .dates-info { display: flex; flex-direction: column; gap: var(--rom-1); }
+/* Utlaupet er *stoda* aat kortet, ikkje ei bilina — §9 nemner dei tri i
+   same andedraget: «lampa, stodaordet, utlaupet» stend til høgre paa den
+   øvste lina. Daa lyt dei bera den same røysta og.
+
+   Han stod i lesetypen medan stodaordet fekk merkelapp-røysta, og daa
+   var dei like store og ulike av skrift — det ser ut som ein feil, av di
+   det er ein. */
 .card-expiry, .renewal-date {
-  font-size: .88rem; color: var(--blekk-lys);
+  font-family: var(--skrift-yver);
+  font-stretch: var(--vidd-merkelapp);
+  text-transform: uppercase; letter-spacing: .09em;
+  font-size: .78rem; color: var(--blekk-lys);
 }
 /* Det som hastar fær vekt, ikkje farge — farge her ville tyda «i live». */
 .renewal-date.urgent { color: var(--blekk); font-weight: 500; }
@@ -155,7 +177,28 @@
    grunnlina hans. */
 .klippekort-card .card-header { flex-wrap: nowrap; gap: var(--rom-4); }
 .klippekort-card .card-expiry {
-  white-space: nowrap; display: inline-block; transform: translateY(-.489em);
+  white-space: nowrap; display: inline-block;
+
+  /* Yverkanten skal liggja paa x-høgdi i tittelen. Talet var maalt —
+     -.489em — og maalt mot ein *annan* skrift: utlaupet stod i lesetypen
+     med smaa bokstavar den gongen. No ber han merkelapp-røysta, og daa
+     er toppen hans kapitelhøgdi og ikkje ein staveleng.
+     
+     Difor er han rekna i staden for maalt, og han treng ingi
+     skrifttal for aa gjera det:
+     
+       tittelen og lappen er same skrifti, so x-høgdi er den same
+       brøkdelen av kvar av deim. Sedd i lappen si eigi eining er
+       x-høgdi i tittelen difor `(tittel / lapp) × 1ex`, og toppen aat
+       lappen er `1cap`, av di han stend i versalar.
+       
+     Lyftingi er skilnaden. Skifter stigen, fylgjer ho med av seg sjølv.
+     
+     Fyrste lina er reserven for nettlesarar utan `cap`: dei fær eit
+     rimeleg fast tal i staden, og ikkje ei ugild `calc` som slær heile
+     regelen ut. */
+  transform: translateY(-.29em);
+  transform: translateY(calc(1cap - (var(--steg-tittel) / var(--steg-lapp)) * 1ex));
 }
 
 /* Stilboki teiknar kortet paa 34 rem og set `nowrap` av di det er rom
@@ -286,7 +329,13 @@
    Same grunneining, same forholdstal. Ratioane er dei same stegi som
    yverskriftene fylgjer (e^¼): 1,649 for tittelen, 1,284 for ordi. */
 .klippekort-card, .medlemskort {
-  --kortgrunn: clamp(.55rem, 3.25cqi, 1rem);
+  /* Grunneiningi. Ho stod paa 3,25 cqi med taket paa 1 rem — teikna for
+     hakkortet aaleine, i full breidd. I ei sidespalta paa 24 rem gav det
+     0,78 rem, og daa var merkelappen 0,66: skrifti var for lita mot
+     kortet ho stod i. No naar ho taket tidlegare og fell ikkje so djupt,
+     so forholdet millom skrift og kasse held seg jamnare yver dei
+     breiddone kortet faktisk stend i. */
+  --kortgrunn: clamp(.8rem, 3.9cqi, 1.2rem);
 
   /* ---- stigen paa kortet ----
      Kommentaren yver sa at tali var «gonga med grunneiningi», men dei
@@ -307,11 +356,19 @@
      fyllet yver honom, so sirkelen laag mest inntil yverkanten. ARKET §8
      segjer dessutan at merket veks ingen stad utanum dei tvo staderne
      han er maalt for. Her er han eit ord attmed tittelen. */
-  --kort-tal:    calc(4.482 * var(--kortgrunn));
-  --kort-tittel: calc(1.649 * var(--kortgrunn));
-  --kort-ord:    calc(1.284 * var(--kortgrunn));
-  --kort-verd:   calc(1 * var(--kortgrunn));
-  --kort-lapp:   calc(.85 * var(--kortgrunn));
+  /* Stegi stend fyrst som reine tal, so forholdet millom tvo av deim
+     kann reknast — den optiske lyftingi under treng nettupp det. */
+  --steg-tal:    4.482;
+  --steg-tittel: 1.649;
+  --steg-ord:    1.284;
+  --steg-verd:   1;
+  --steg-lapp:   .85;
+
+  --kort-tal:    calc(var(--steg-tal) * var(--kortgrunn));
+  --kort-tittel: calc(var(--steg-tittel) * var(--kortgrunn));
+  --kort-ord:    calc(var(--steg-ord) * var(--kortgrunn));
+  --kort-verd:   calc(var(--steg-verd) * var(--kortgrunn));
+  --kort-lapp:   calc(var(--steg-lapp) * var(--kortgrunn));
   --kort-merke:  var(--kort-ord);
 
   /* Fylli og lufti er kortet si eigi, so dei skalerer med resten.
@@ -355,15 +412,16 @@
    (versalar, 68 % breidd, sperra) og stend paa grunnlina aat tittelen;
    det som mangla var maalestokken. Lampa fylgjer med, elles vert ho
    større enn ordet ho høyrer til. */
-.klippekort-card .membership-status,
-.medlemskort .membership-status { font-size: calc(.85 * var(--kortgrunn)); }
-.klippekort-card .membership-status::before,
-.medlemskort .membership-status::before {
+.klippekort-card :is(.membership-status, .stodalinje),
+.medlemskort :is(.membership-status, .stodalinje) { font-size: var(--kort-lapp); }
+.klippekort-card :is(.membership-status, .stodalinje)::before,
+.medlemskort :is(.membership-status, .stodalinje)::before,
+.klippekort-card .ljos, .medlemskort .ljos {
   width: calc(.55 * var(--kortgrunn)); height: calc(.55 * var(--kortgrunn));
 }
 
-.klippekort-card .klipptal { font-size: calc(1.284 * var(--kortgrunn)); gap: calc(.75 * var(--kortgrunn)); }
-.klippekort-card .klipptal .att { font-size: calc(4.482 * var(--kortgrunn)); }
+.klippekort-card .klipptal { font-size: var(--kort-ord); gap: calc(.75 * var(--kortgrunn)); }
+.klippekort-card .klipptal .att { font-size: var(--kort-tal); }
 
 /* Knappen skalerer med, men ikkje heilt ned: han er noko ein *trykkjer*,
    og ei flate ein trykkjer paa hev ei nedre grense som ikkje er

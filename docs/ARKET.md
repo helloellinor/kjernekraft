@@ -518,12 +518,26 @@ grows nowhere else: a mark standing large on every page is a background.
      the number answers "how many". Packages run 5/10/20 and the cap is 20, so
      1:1 would need either a card twice as tall or notches too small to be
      notches. A 20-clip card gets one hole per two clips.
-   - **The header wraps below 48rem.** The reference sets `flex-wrap: nowrap` on
-     a 34rem card, which is right at that width; on a phone «Gruppetimar» plus
+   - **The header wraps on a narrow *card*, not a narrow screen.** The reference
+     sets `flex-wrap: nowrap` on a 34rem card; on a phone «Gruppetimar» plus
      «gjeng ut um 54 dagar» is wider than the card and pushed the expiry out of
-     the box. §4 outranks fidelity to a width the reference never drew. The
-     `translateY(-.489em)` lift goes with it — it is an optical correction for
-     sitting on the title's line, and it is no longer on that line.
+     the box. §4 outranks fidelity to a width the reference never drew. This was
+     a media query first, and that was the wrong question: the screen can be
+     1280 while the card is 370. It is a container query now — the card answers
+     for itself, so it behaves the same in a wide column, a narrow one, or a
+     sidebar. The expiry's lift goes with the wrap, being an optical correction
+     for sitting on the title's line, and it is no longer on that line.
+   - **The expiry's lift is derived, not measured.** It was `translateY(-.489em)`,
+     a number measured against the reading face back when the expiry was set in
+     it, lowercase. The expiry now carries the label voice with the status and
+     the lamp — the three are one indicator, so they are one voice — and its top
+     edge is therefore a cap line rather than an ascender. Because title and
+     expiry are now the *same* face, the lift needs no font metrics to state:
+     x-height is the same fraction of both, so the title's x-height expressed in
+     the expiry's own units is `(tittel ÷ lapp) × 1ex`, and the expiry's top is
+     `1cap`. The lift is the difference. Change a step on the ladder and it
+     follows by itself. A plain `em` value precedes it for browsers without
+     `cap`, so an unsupported unit drops one declaration instead of the rule.
 
    The light band (`.progress-segments`) stays for meters where a lit cell is
    something that **exists** rather than something spent: `.plassmaalar` in the
