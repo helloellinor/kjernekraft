@@ -19,6 +19,7 @@ cd "$(dirname "$0")"
 # aa gjera.
 export PORT="${PORT:-8080}"
 PID_FIL=".køyr.pid"
+VAKT_FIL=".køyr.vakt"
 LOGG=".køyr.logg"
 
 # Ein fast nykel i utvikling, so ein ikkje vert logga ut kvar gong
@@ -28,6 +29,29 @@ export KJERNEKRAFT_SESSION_KEY="${KJERNEKRAFT_SESSION_KEY:-utvikling-berre-lokal
 export KJERNEKRAFT_ENV=development
 
 stogg() {
+    # Vaktaren fyrst, og det er ikkje ein detalj: drep ein tenaren medan
+    # vaktaren lever, byggjer han honom att med ein gong, og «--stogg»
+    # ser ut til aa ikkje verka.
+    #
+    # Verre var det som hopa seg upp. `--stogg` drap tenaren og det som
+    # heldt porten, og ingen ting meir — so kvar `./køyr` nokon hadde
+    # starta laag att og gjekk `find . -name '*.go'` yver heile treet
+    # kvart sekund, for alltid. Dei var fem og fyrti her ein dag. Dei
+    # aat ingi merkande CPU kvar for seg, so ingen saag deim; det dei
+    # aat var disk, og `go test ./handlers` gjekk fraa ni sekund til
+    # fire og fyrti med 39 % CPU — han sat og venta paa fila.
+    if [[ -f "$VAKT_FIL" ]]; then
+        local vakt
+        vakt=$(cat "$VAKT_FIL" 2>/dev/null)
+        [[ -n "$vakt" && "$vakt" != "$$" ]] && kill "$vakt" 2>/dev/null
+        rm -f "$VAKT_FIL"
+    fi
+    # Bakstoppet, for dei som vart starta fyre fila fanst. Alle andre
+    # køyringar av dette skriptet enn denne.
+    local andre
+    andre=$(pgrep -f "bash .*køyr" 2>/dev/null | grep -vx "$$" || true)
+    [[ -n "$andre" ]] && kill $andre 2>/dev/null
+
     if [[ -f "$PID_FIL" ]]; then
         kill "$(cat "$PID_FIL")" 2>/dev/null
         rm -f "$PID_FIL"
@@ -102,6 +126,10 @@ nyaste() {
     find . -name '*.go' -not -path './.git/*' -exec stat "${STATFLAGG[@]}" {} + 2>/dev/null |
         sort -rn | head -1
 }
+
+# Vaktaren skriv seg sjølv i fila, so ei seinare `--stogg` finn honom.
+echo $$ > "$VAKT_FIL"
+trap 'rm -f "$VAKT_FIL"' EXIT
 
 echo "  vaktar Go-filer. ctrl-c stoggar."
 SIST=$(nyaste)

@@ -50,6 +50,7 @@ static/fonts/UnionGothic-Variable.woff2
 
 # Utviklingstenaren
 .køyr.pid
+.køyr.vakt
 .køyr.logg
 .kjernekraft-bin
 build.feil
