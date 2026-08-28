@@ -35,11 +35,24 @@
          fargane til rot-temaet, og eit ljost merke paa ei myrk sida
          hadde fenge feil glans. Same fella som med filtri. */}}
     <defs>
-      <linearGradient id="glas-{{.Form.Ident}}" x1="0" y1="0" x2="0" y2="1">
+      {{/* Glaset er ei kule og ikkje eit band.
+
+           Her stod ein linear-gradient ovanfraa og ned. Han var flat av
+           di han ikkje visste at det laag eit krumt glas under seg — eit
+           band tvers yver, same kva forma gjorde. No sit speglingi der
+           sola stend (`--sol`, 34 % 22 %) med den same falloff-trappa som
+           kulone i brettet og kula i plassmaalaren, so alt runda i huset
+           fangar ljoset paa den same staden.
+
+           SVG kann ikkje lesa `--glim-rund` — ein gradient er eit element
+           her og ikkje ein verdi — so trappa er skrivi ut. Endrar du
+           `--glim-rund`, endra denne med. */}}
+      <radialGradient id="glas-{{.Form.Ident}}" cx="0.34" cy="0.22" r="0.62">
         <stop offset="0"    class="glas-topp"/>
-        <stop offset="0.26" class="glas-midt"/>
-        <stop offset="0.54" class="glas-ut"/>
-      </linearGradient>
+        <stop offset="0.36" class="glas-midt"/>
+        <stop offset="0.64" class="glas-svak"/>
+        <stop offset="0.84" class="glas-ut"/>
+      </radialGradient>
     </defs>
 
     {{/* Fana ligg attum kroppen. Ho gjeng ned under yverkanten hans,

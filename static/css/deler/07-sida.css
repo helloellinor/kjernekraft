@@ -25,8 +25,14 @@ main {
   font-weight: 700;
   letter-spacing: -.01em;
   /* Bolkeoverskrifta under er ei overskrift no og ikkje ei merkelapp.
-     To overskrifter med rom-3 imellom les seg som éin blokk. */
-  margin: 0 0 var(--rom-6);
+     To overskrifter med rom-3 imellom les seg som éin blokk.
+
+     Eitt steg meir enn resten fekk (28.8.2026). Den stramme stigen tok
+     lufta under sidetittelen fraa 2rem til 1,5, og det var det eine
+     staden strammingi gjekk for langt: tittelen segjer *kvar du er*, og
+     han treng eit tydeleg brot ned til det fyrste ein kann gjera. Det er
+     eit steg paa stigen og ikkje eit nytt tal — §6 held. */
+  margin: 0 0 var(--rom-7);
   padding: 0;
   border: 0;
   text-align: left;

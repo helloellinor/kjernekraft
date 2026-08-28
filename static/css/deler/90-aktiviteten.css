@@ -95,46 +95,17 @@
    skuggen mot arket stend att der — han skal *ikkje* skalera, av di
    arket ligg like langt under uansett kor stor pinnen er. */
 .hol.pinne {
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--ned) 18%, transparent);
-  /* Ljoset er det same for alle tri styrkane; berre kroppen skiftar.
-     `--lippe-ljos` og `--glans` er alt ulike i dei tvo temai (55 % kvitt
-     i ljost, 26 % i mørkt), so det trengst ingen eigen mørk regel —
-     freistar ein aa skriva ljoset med `#fff` beinveges, vert det tri
-     gonger for sterkt i ljost tema. */
-  background-image:
-    /* Speglingi. Brei og mjuk, og ikkje sterkare enn dette.
-       Eit lite kvast punkt gjer ein ting *flatare* og ikkje rundare: det
-       les seg som ein blank klistrelapp paa ei skive. Rundleiken kjem
-       ikkje herifraa. */
-    radial-gradient(ellipse 62% 50% at 36% 22%,
-      color-mix(in srgb, var(--glans) 72%, transparent) 0%,
-      color-mix(in srgb, var(--glans) 40%, transparent) 36%,
-      color-mix(in srgb, var(--glans) 11%, transparent) 64%,
-      transparent 84%),
-    /* Kroppen, og det er *han* som gjer kula rund.
-
-       Her stod eit attkast fraa arket ei stund — fyrst som ei rett
-       stripa tvers yver botnen, so som ein ljos sigd langs den
-       burtvende kanten. Baae er burte. Ei kule teikna slik ein teiknar
-       ei kule hev ikkje ljost nedst: ho hev eit ljospunkt, so ein jamn
-       yvergang, og so vert ho berre mørkare heilt ut til den kanten som
-       vender fraa ljoset. Attkast er noko blank lakk gjer mot ei kvit
-       flate, og det er ikkje det denne er.
-
-       Ljoset kjem ovanfraa til venstre. Det er ikkje eit val her: det
-       er bjelkane som avgjer det, med glimet sitt paa 34 % av breiddi,
-       og tvo ting i same biletet kann ikkje ha kvar si sol. Difor ligg
-       midpunktet paa 34 % 22 %, det same som speglingi.
-
-       Vidddi er sett (`82% 82%`) og ikkje reikna av seg sjølv: med
-       `farthest-corner` hadde 100 % lege i hyrna paa kassen, langt
-       utanfor sirkelen, og den mørkaste tonen aldri vorte synleg. No
-       ligg 100 % nett paa den kanten som er lengst burte. */
-    radial-gradient(ellipse 82% 82% at 34% 22%,
-      transparent 20%,
-      color-mix(in srgb, var(--ned) 7%, transparent) 54%,
-      color-mix(in srgb, var(--ned) 19%, transparent) 78%,
-      color-mix(in srgb, var(--ned) 32%, transparent) 100%);
+  /* Skuggen mot arket stend i px og skalerer ikkje — arket ligg like
+     langt under uansett kor stor pinnen er. */
+  box-shadow: var(--skugge-kule);
+  /* Glansen er `--glim-rund` i 00-token.css, delt med kula i
+     plassmaalaren og skiva paa ein plakett.
+     
+     Han stod skriven ut her, og dei tvo laga hadde drive fraa kvarandre:
+     speglingi laag paa `36% 22%` og kroppen paa `34% 22%` — tvo solar
+     paa den same kula, medan kommentaren attmed sa at dei var like.
+     Det er nettupp det `--sol` finst for aa hindra. */
+  background-image: var(--glim-rund);
 }
 /* Eit slag ingen hev teikna laanar ingen produktfarge; han er berre
    blekk — og reserven stend inne i `var()`, ikkje som ei eigi

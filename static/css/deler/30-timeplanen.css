@@ -498,8 +498,11 @@
    det er ei kvelv, ikkje ei bobla. Laget ligg yverst og fangar difor
    visarane med, slik eit glas gjer. */
 .form-glas { pointer-events: none; }
-.glas-topp { stop-color: var(--glans); }
-.glas-midt { stop-color: color-mix(in srgb, var(--glans) 34%, transparent); }
+/* Trappa er den same som i `--glim-rund`: 72 → 40 → 11 → gjenomsynleg.
+   Ho er skrivi ut av di SVG ikkje kann lesa eit gradient-token. */
+.glas-topp { stop-color: color-mix(in srgb, var(--glans) 72%, transparent); }
+.glas-midt { stop-color: color-mix(in srgb, var(--glans) 40%, transparent); }
+.glas-svak { stop-color: color-mix(in srgb, var(--glans) 11%, transparent); }
 .glas-ut   { stop-color: transparent; }
 
 .form-ring  { fill: var(--merke); visibility: hidden; }

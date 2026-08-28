@@ -279,6 +279,11 @@
       color-mix(in srgb, var(--ned) 6%, transparent) 76%,
       color-mix(in srgb, var(--ned) 13%, transparent) 100%);
 
+  /* Skuggen ei kule kastar mot arket. Han stend i px og skalerer ikkje:
+     arket ligg like langt under uansett kor stor kula er. Pinnen paa
+     brettet og kula i plassmaalaren les den same. */
+  --skugge-kule: 0 1px 2px color-mix(in srgb, var(--ned) 18%, transparent);
+
   /* Pila i ein veljar. Ho stend som eit token av di kvar stad som tek
      glansen av att lyt kunna setja henne attende aaleine. */
   --pil: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
