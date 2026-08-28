@@ -78,11 +78,14 @@
 .charge-status { color: var(--aatvaring); }
 .charge-status.pending { color: var(--blekk-lys); }
 
-/* Den feila belastningi. Aatvaringi ligg paa talet og ordet, som paa
-   klippekortet som gjeng ut (§1) — vengen og flata rører me ikkje, for
-   raudt paa heile kortet drog auga fraa alt anna paa sida. Summen fær
-   òg strek gjenom seg: pengane gjekk aldri, og forma seier det same som
-   fargen, so rada les rett ogso i graatt. */
+/* Den feila belastningi skal ikkje kunna oversjaast: heile flata tek
+   den veike aatvaringsvasken. Det er aatvaringi sin blyge slektning og
+   ikkje --togu — roseraudt fraa raudt tyder «gjekk gale», medan togu
+   tyder «klippekort», og ei feila belastning maa ikkje kle seg ut som
+   eit produkt (§1). Den sterke aatvaringi ligg som fyrr berre paa talet
+   og ordet, og streken gjenom summen seier det same som fargen, so rada
+   les rett ogso i graatt. */
+.charge-item.status-failed { background: var(--aatvaring-svak); }
 .charge-item.status-failed .charge-amount {
   color: var(--aatvaring);
   text-decoration: line-through;
