@@ -33,6 +33,14 @@ import (
 // ei heil rekkja. Ein port ein hugsar er ein port ein ikkje gissar paa.
 const standardPort = "18108"
 
+// cmpOr gjev det fyrste som ikkje er tomt.
+func cmpOr(a, b string) string {
+	if a != "" {
+		return a
+	}
+	return b
+}
+
 func main() {
 	// Initialize global settings (this will set up Oslo timezone by default)
 	settings := config.GetInstance()
@@ -72,6 +80,12 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	// Ein panikk i ein handsamar skal gjeva 500 og ikkje eit samband som
+	// berre dett. Utan denne skriv net/http stakken til stderr og stengjer
+	// sambandet — nettlesaren ser «tilkoplinga vart broti», som ser ut som
+	// eit nettverksproblem og ikkje som ein feil i huset. Tenaren stend
+	// like fullt; det er kva *brukaren* ser som er skilnaden.
+	r.Use(middleware.Recoverer)
 
 	// I utvikling skal ingen ting bufrast — korkje sidone eller bitane
 	// htmx hentar. Statiske filer fekk `no-store` fyrr, men sjølve
@@ -290,8 +304,16 @@ func main() {
 	if port == "" {
 		port = standardPort
 	}
-	log.Printf("Serving on http://localhost:%s", port)
-	err = http.ListenAndServe(":"+port, r)
+	// Kven som fær naa tenaren. Tom tyder alle grensesnitt, som fyrr.
+	//
+	// Stend han bak ein tunnel, skal han lyda paa 127.0.0.1 og ingen
+	// annan stad: elles svarar han ogso beinveges paa porten sin, utan
+	// TLS, og heile arbeidet med aa fœra folk gjenom https er umsonst
+	// for den som skriv adressa sjølv. Paa heim var han naaeleg utanfraa
+	// paa 18108 medan tunnelen stod ved sida av.
+	bind := os.Getenv("KJERNEKRAFT_BIND")
+	log.Printf("Serving on http://%s:%s", cmpOr(bind, "localhost"), port)
+	err = http.ListenAndServe(bind+":"+port, r)
 	if err != nil {
 		log.Fatal(err)
 	}
