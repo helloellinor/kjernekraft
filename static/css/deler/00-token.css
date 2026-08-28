@@ -373,11 +373,16 @@
   --upp: #fff;
   --lippe-djup: var(--l-lippe-djup);
   --lippe-ljos: var(--l-lippe-ljos);
+  /* Fallet er tvo skuggar og ikkje ein. Den tette segjer at han ligg
+     paa noko; den vide og veike segjer kor høgt. Fyrr var det ei einaste
+     line paa tvo pikslar, og daa laag knappen klistra paa arket i staden
+     for aa liggja paa det. */
   --knappedjup:
     inset 0 1px 0 var(--glans),
     inset 0 -1px 1px color-mix(in srgb, #fff 40%, transparent),
-    inset 0 -3px 4px -2px color-mix(in srgb, var(--blekk) 13%, transparent),
-    0 1px 2px color-mix(in srgb, var(--blekk) 15%, transparent);
+    inset 0 -4px 6px -3px color-mix(in srgb, var(--blekk) 14%, transparent),
+    0 1px 1px color-mix(in srgb, var(--blekk) 11%, transparent),
+    0 4px 9px -3px color-mix(in srgb, var(--blekk) 18%, transparent);
   --knappedjup-inn:
     inset 0 2px 4px -1px color-mix(in srgb, var(--blekk) 26%, transparent),
     inset 0 -1px 0 var(--glans-svak);
@@ -423,6 +428,27 @@
      stod her fyrr: han er eit steg i romskalaen, og eit steg i den
      skalaen er for mykje til dette. */
   --knapp-loddrett: .34rem;
+  /* Lufta i endane. Ho er ikkje eit steg i romskalaen som dei hine
+     maali her — ho er ei *fylgje av forma*, og difor stend ho i emme og
+     ikkje i rem.
+
+     Kapselen endar i ein halvsirkel, og radien hans er halve høgdi.
+     Skal kurva taka til nett der ordet slepper, lyt lufta i enden vera
+     nøyaktig den radien: er ho større, ligg det eit stykke rett kant
+     millom ordet og kurva, og knappen vert brei utan at noko fyller
+     breiddi. `--rom-5` stod her fyrr, og det er fire og ein halv piksel
+     daudt i kvar ende. */
+  --knapp-vassrett: 1.1em;
+
+  /* Ordet som er rispa ned i glaset. Ljoset kjem ovanfraa, og daa er den
+     nedre lippa i ei rispa den einaste kanten som fangar det: eit glim
+     paa éin piksel under bokstaven, og ingen ting yver honom. Det er den
+     same fysikken som fordjupingi i eit felt, berre paa ein bokstav.
+
+     Han stend i kvila og ikkje berre i trykket. Ei rispa er noko som er
+     *skore* i ei flate, og eit snitt gjeng ikkje att av di ingen held
+     fingeren nede. */
+  --ordet-inn: 0 1px 0 var(--glans);
   /* Linehøgdi i ein knapp. Ho er eit token av di runde knappar reknar
      storleiken sin av henne — sjaa `.dokklukk`.
 

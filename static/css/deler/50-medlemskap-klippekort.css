@@ -61,12 +61,63 @@
 .klippekort-card { --produkt: var(--togu); }
 
 
-.membership-card.active, .klippekort-card:not(.expired), .medlemskort.active {
-  border-left: 3px solid var(--produkt);
+/* ---- vengen ----
+   Lina i venstre kanten som segjer kva slag kortet er. Ho var ein
+   `border-left`, og det gav tvo lyter.
+
+   Den eine: kanten stend 1 px paa dei hine tri sidone, so eit kort med
+   veng fekk innhaldet skuve tvo pikslar mot høgre og eit utan fekk det
+   ikkje. Kortet flytte seg naar lina kom, og det er nettupp det ho
+   ikkje skal gjera.
+
+   Den andre er den som synte: `dashed`. Nettlesaren reknar sjølv kor
+   lange stripone vert, og paa ei lina paa tri pikslar vert dei tri
+   pikslar lange med tri imillom. Det les seg ikkje som ei *broti* lina
+   — det les seg som eit korn, eller som ein lyte i teikningi.
+
+   No er ho maala og ikkje ramma: eit bakgrunnslag paa `--venge`, pinna
+   til venstre kanten. Kanten stend 1 px heile vegen rundt og ingen ting
+   flyttar seg, og rundingi klypper lina i hyrni som ho skal. */
+.membership-card, .klippekort-card, .medlemskort {
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: var(--venge) 100%;
 }
+.membership-card.active, .klippekort-card:not(.expired), .medlemskort.active {
+  background-image: linear-gradient(var(--produkt), var(--produkt));
+}
+/* Frose eller sagt upp er ikkje i live, og ber difor ikkje livsfargen. */
 .membership-card.paused, .membership-card.cancelled,
-.medlemskort.paused, .medlemskort.cancelled { border-left: 3px solid var(--blekk-svakt); }
-.membership-card.freeze_requested, .medlemskort.freeze_requested { border-left: 3px dashed var(--produkt); }
+.medlemskort.paused, .medlemskort.cancelled {
+  background-image: linear-gradient(var(--blekk-svakt), var(--blekk-svakt));
+}
+/* Bede um og ikkje svara enno: lina er der, men ho er ikkje heil. Same
+   tanken som den opne ringen i livsmerket.
+
+   Ei broti lina skal byrja og enda i fargen, og dei tvo ytste stykki
+   skal vera like lange. Det tyder N stykke og N-1 glipor, og det er ei
+   likning: N·s + (N-1)·g = H. Held ein N og g faste, gjev ho seg sjølv,
+   og ho let seg skriva i CSS av di feltet «100%» er H:
+
+     rutehøgd  T = (100% + g) / N
+     stykket   s = T - g
+
+   Den fyrste stripa tek til paa null; den siste tek slutt paa
+   N·T - g = 100%. Nøyaktig i baae endar, kva høgd kortet so hev.
+
+   Stykki veks difor med kortet, og talet paa dei stend fast. Det er
+   rett veg rundt: rytmen er noko ein les yver *heile* lina, og fire
+   stykke les seg som fire same kor lang ho er. */
+.membership-card.freeze_requested, .medlemskort.freeze_requested {
+  --veng-tal: 4;        /* stykke. Glipone er alltid eitt færre. */
+  --veng-glipe: .5rem;
+  --veng-rute: calc((100% + var(--veng-glipe)) / var(--veng-tal));
+  background-image: repeating-linear-gradient(to bottom,
+    var(--produkt) 0,
+    var(--produkt) calc(var(--veng-rute) - var(--veng-glipe)),
+    transparent   calc(var(--veng-rute) - var(--veng-glipe)),
+    transparent   var(--veng-rute));
+}
 
 .membership-header, .card-header {
   display: flex; justify-content: space-between; align-items: baseline;

@@ -38,7 +38,7 @@
      som eit felt: han såg ut som noko ein skriv i. Ein knapp er ei
      linje med tekst og eit grep rundt henne — han skal vera brei og
      låg, ikkje kvadratisk. */
-  padding: var(--knapp-loddrett) var(--rom-5);
+  padding: var(--knapp-loddrett) var(--knapp-vassrett);
   line-height: var(--knapp-linehogd);
   border: 1px solid var(--kant);
   border-radius: var(--rund-knapp);
@@ -56,6 +56,9 @@
       color-mix(in srgb, var(--blekk) 3%, var(--flate)) 100%);
   box-shadow: var(--knappedjup);
   color: var(--blekk);
+  /* Ordet er skore ned i glaset, ikkje prenta uppaa det. Sjaa
+     `--ordet-inn` i 00-token.css. */
+  text-shadow: var(--ordet-inn);
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
@@ -122,7 +125,7 @@
 button:disabled, .btn:disabled, .btn-primary:disabled, .btn-danger:disabled {
   color: var(--blekk-svakt); border-color: var(--haarlina);
   background: none; background-image: none;
-  box-shadow: none; transform: none; cursor: not-allowed;
+  box-shadow: none; text-shadow: none; transform: none; cursor: not-allowed;
 }
 
 /* Ein naken `<button>` er ingen ting: han ber skrifta rundt seg og
