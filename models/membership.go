@@ -35,7 +35,10 @@ type UserMembership struct {
 	EndDate      *time.Time `json:"end_date"`    // NULL if ongoing
 	BindingEnd   *time.Time `json:"binding_end"` // When binding period ends
 	LastBilled   time.Time  `json:"last_billed"` // When user was last billed
-	CreatedAt    time.Time  `json:"created_at"`
+	// FrozenAt = naar frysingi tok til; NULL naar medlemskapet gjeng.
+	// Utlaupet tel ikkje medan han er sett. Sjaa GjeldTil.
+	FrozenAt  *time.Time `json:"frozen_at"`
+	CreatedAt time.Time  `json:"created_at"`
 }
 
 // MembershipWithDetails combines membership info with user-specific data
@@ -50,4 +53,49 @@ type MembershipWithDetails struct {
 	// finst ingi rad aa frysa eller seia upp, so malen skal gøyma dei
 	// knappane. Sjaa database/svartmedlem.go.
 	Tildelt bool `json:"tildelt"`
+}
+
+// GjeldTil svarar paa kor lenge kortet gjeld — utlaupsdatoen.
+//
+// nil tyder *utan utlaup*: eit tildelt medlemskap fylgjer ei rolla og
+// hev ingen dato aa syna. Kortet teiknar ∞ der.
+//
+// Fire greiner, og kvar av dei hev ein grunn:
+//
+//	tildelt        ingen dato — rolla avgjer, ikkje kalenderen
+//	sagt upp       fornyingi — du hev kjøpt ut den perioden og ikkje meir.
+//	               Uppseiingi skriv berre `status` og rører korkje
+//	               `end_date` eller `binding_end`, so bindingi stend att
+//	               i basen som um ho gjaldt; utan denne greini hadde eit
+//	               uppsagt aarskort sagt «2027» medan sida attmed sa
+//	               «ut den tidi du hev betalt for».
+//	binding > 0    slutten paa bindingi — eit aarskort varer tolv maanader
+//	elles          fornyingi — eit maanadskort varer ein maanad
+//
+// Og so klokka: er medlemskapet frose *no*, hev ikkje utlaupet talt
+// sidan `FrozenAt`, so den lagra datoen er for tidleg. Me legg til den
+// tidi frysingi hev vart, som er nettupp det UnfreezeMembership skriv
+// naar han set medlemskapet i gang att. Kortet syner difor det same
+// fyre og etter, og talet er sant kvar dag frysingi varer.
+func (m MembershipWithDetails) GjeldTil(naa time.Time) *time.Time {
+	if m.Tildelt {
+		return nil
+	}
+
+	var ut time.Time
+	switch {
+	case m.Status == "cancelled":
+		ut = m.RenewalDate
+	case m.CommitmentMonths > 0 && m.BindingEnd != nil:
+		ut = *m.BindingEnd
+	default:
+		ut = m.RenewalDate
+	}
+
+	if m.Status == "paused" && m.FrozenAt != nil {
+		if stod := naa.Sub(*m.FrozenAt); stod > 0 {
+			ut = ut.Add(stod)
+		}
+	}
+	return &ut
 }

@@ -14,8 +14,14 @@
          Difor stend dei ikkje i den same lista: den dagen «gjev tilgang
          til reformer» ser ut som «gjer til administrator», er dei tvo
          det same for handi som gjer dei. */}}
+    {{/* Gruppone og folkelista er tvo bolkar paa den same sida, og ein
+         bolk ber ei `h2` med lina under (§5: steget fylgjer djupni i
+         dokumentet, og `.section-title` er kva ein bolk *ser ut* som).
+         Dette stod som ei `.undertittel` — 0,78 rem versalar, som er
+         maalet til noko som namngjev ein kategori inni ein bolk, ikkje
+         til bolken sjølv. */}}
     <div class="bolkhovud">
-        <h3 class="undertittel">{{t .Lang "admin.group_admin"}}</h3>
+        <h2 class="section-title">{{t .Lang "admin.group_admin"}}</h2>
     </div>
 
     {{if .Grupper}}
@@ -27,7 +33,14 @@
             {{/* Aatvaringi stend paa sida fyre trykket, og knappen bed um
                  trykk nummer tvo sjølv (§7). Timane gruppa heldt vert
                  opne for alle att — dei kverv ikkje med henne. */}}
-            <button type="button" class="gruppeslett"
+            {{/* `.btn-danger` attaat kroken, ikkje kroken aaleine (§9).
+                 `.gruppeslett` sette berre farge og storleik, og ein
+                 knapp som hev ein klasse men ingen familieklasse fell
+                 gjenom kvar regel i huset: han vart teikna av
+                 nettlesaren — systemskrift, graa flate, feil runding.
+                 Raud av di ei gruppa som gjeng burt ikkje kjem att;
+                 trykk nummer tvo bur i `data-stadfest` (§7). */}}
+            <button type="button" class="btn-danger gruppeslett"
                     data-stadfest="{{t $.Lang "admin.delete_group_confirm"}}">{{t $.Lang "admin.delete_group"}}</button>
         </li>
         {{end}}
@@ -43,14 +56,61 @@
         <button type="button" class="btn" id="lag-gruppe">{{t .Lang "admin.new_group"}}</button>
     </p>
 
+    {{/* Folkelista er sin eigen bolk, og han ber tittelen sin.
+         Bunkane stend paa tittellina og ikkje i ei rad under henne: §9
+         segjer at ein bolk som siktar ber sikti si paa tittellina —
+         eit filter er ei stilling paa det du alt ser paa, ikkje eit
+         spursmaal du lyt svara paa fyrst. Ei rad for seg hadde gjort
+         tri liner aa lesa fyre lista: tittel, spursmaal, svar.
+
+         Søkjefeltet vert verande under. Det er ikkje sikti — det er
+         det ein *gjer* i bolken — og talet attmed er svaret hans. */}}
+    <div class="bolkhovud">
+        <h2 class="section-title">{{t .Lang "admin.find_people"}}</h2>
+
+        {{/* Bunkane.
+             Same skyvaren som fanone elles i huset — `.faner` og
+             `.fane`, ikkje ein ny kontroll som liknar. Han ber
+             `data-rolla` og ikkje `data-bolk`, so `faner.js` ser honom
+             ikkje: han byter ikkje bolk, han siktar ei lista. Same
+             grepet som dagskyvaren i timeplanen.
+
+             «Alle» stend fyrst og er vald naar sida kjem. Søkjefeltet
+             er skjermen i denne bolken — ein slær upp den som stend
+             framfor ein — og eit filter som er utgangsstoda hadde late
+             eit søk etter ein lærar svara «ingen» av di Ida stod i feil
+             bunke. Det er du som tek dei hine burt, ikkje sida.
+
+             Ingi adressa: dagskyvaren skriv valet sitt i hashen, men
+             administrasjonen hev alt ei fanerekkja som eig han
+             (`#folk`), og tvo som skriv den same hashen stel han fraa
+             kvarandre. */}}
+        <div class="faner rollefaner" role="tablist" aria-label="{{t .Lang "admin.vel_bunke"}}">
+            <button type="button" class="fane" role="tab" data-rolla=""
+                    aria-selected="true" aria-controls="folk-liste">{{t .Lang "admin.bunke_alle"}}</button>
+            <button type="button" class="fane" role="tab" data-rolla="elev"
+                    aria-selected="false" aria-controls="folk-liste">{{t .Lang "admin.bunke_elevar"}}</button>
+            <button type="button" class="fane" role="tab" data-rolla="laerar"
+                    aria-selected="false" aria-controls="folk-liste">{{t .Lang "admin.bunke_laerarar"}}</button>
+            <button type="button" class="fane" role="tab" data-rolla="sjef"
+                    aria-selected="false" aria-controls="folk-liste">{{t .Lang "admin.bunke_sjefar"}}</button>
+        </div>
+    </div>
+
     <div class="folk-sok">
-        <input type="search" id="folk-sok" class="soke" autofocus
+        <input type="search" id="folk-sok" class="sok" autofocus
                placeholder="{{t .Lang "admin.search_people"}}"
                aria-label="{{t .Lang "admin.search_people"}}">
         <span class="folk-tal" id="folk-tal" aria-live="polite" data-alle="{{t .Lang "admin.people"}}" data-av="{{t .Lang "timeplan.of"}}"></span>
     </div>
 
-    <ul class="folk-liste">
+    <ul class="folk-liste" id="folk-liste">
+        {{/* Eit filter som gjev ingen ting lyt segja det. Elles stend
+             berre ein tom ramma kasse att, og han ser ut som um sida
+             rauk. Ho stend fyrst i lista og ikkje sist, av di
+             `.folk-rad:last-child` slær botnkanten av den siste rada —
+             ei line etter henne hadde teke det frå henne. */}}
+        <li class="tomt midt" id="folk-inkje" hidden>{{t .Lang "admin.no_people_hit"}}</li>
         {{range .Folk}}
         <li class="folk-rad{{if .TrengSvar}} treng-svar{{end}}"
             data-sok="{{.Namn}} {{.Epost}} {{.Telefon}}">

@@ -1,0 +1,28 @@
+/* ===================================================================
+   søkjefeltet
+   Eitt felt, ein stad. Det var tri fyrr — `.soke` i folkelista,
+   `.siktsok` i timeseriane, `.dropinnsok` yver disken — alle tri
+   `<input type="search">`, alle tri det same arbeidet, og alle tri
+   med si eigi skrift og sitt eige fyll. Dei stod 50, 28 og 47 pikslar
+   høge mot ein grunnstil paa 41. Kvar av deim var maalt mot det som
+   stod attmed *han* i staden for mot komponenten, so ingen av deim
+   visste at dei hine fanst.
+
+   Forma kjem fraa grunnstilen i `20-skjema.css` og stend ikkje her:
+   ei renne, inga ramme, `--skraakant` i kvile. Det som stend her er
+   det som er søkjefeltet sitt aaleine.
+
+   Maalet — kor breidt feltet er — høyrer heime der feltet stend, ikkje
+   her. Eit søkjefelt i ei liste vil ha breidd; eitt yver ein disk vil
+   ha ei fast rute som ikkje skubbar noko medan du skriv (§3). Difor er
+   det spalta som set breiddi, som ho set avstandi (§6), og `.sok` ber
+   berre eit tak so feltet ikkje renn tvers yver ei brei spalta.
+   =================================================================== */
+.sok {
+  max-width: 32rem;
+}
+
+/* Ledeteksti er eit spursmaal, ikkje eit svar, og skal lesast som det
+   svakaste blekket i feltet — same vali som `.setning .felt` og
+   `.lappfelt` alt gjer. */
+.sok::placeholder { color: var(--blekk-svakt); }

@@ -68,6 +68,24 @@
    verkstaden paa /arket set ljost og myrkt attmed kvarandre paa den
    same sida, og det gjeng berre naar tokeni kann bu paa ein div. */
 :root, [data-theme="light"] {
+  /* ---- kva nettlesaren skal teikna sine eigne ting i ----
+     Alt me teiknar sjølve les tokeni yver. Men nokre ting teiknar
+     nettlesaren, og dei les *ikkje* tokeni: rullefelt, nedfallslista
+     aat ein `select`, dato- og klokkeveljarane, krysset i eit
+     søkjefelt — og `buttontext`, som er blekket ein `<button>` fær um
+     ingen segjer noko anna.
+
+     Utan denne lina er alt det ljost same kva temaet er. `buttontext`
+     er svart, og eit ord i ein knapp som ingen hev gjeve farge stend
+     daa svart paa myrk grunn. Det hende: klokka i timeserielista
+     (`.serienaar`) var uleseleg i myrkt tema, av di rada er ein
+     `<button>` med klasse og difor fell utanum baade `.btn`-fylgjet og
+     `button:not([class])` (ARKET §9).
+
+     Ho er arvd, so ho fylgjer `[data-theme]` paa kva element som helst,
+     som tokeni gjer — og /arket kann syna baae tema paa éi side. */
+  color-scheme: light;
+
   /* ---- verdi, og so tydingane ----
      Kvar flat farge stend éin gong, med `--l-` for ljost og `--m-` for
      myrkt (nedst i blokki). Dei fire tema-blokkene under les deim og
@@ -97,6 +115,7 @@
   --l-aatvaring-svak: #f0e0dc;
   --l-glans:      color-mix(in srgb, #fff 55%, transparent);
   --l-glans-svak: color-mix(in srgb, #fff 14%, transparent);
+  --l-glans-farga:color-mix(in srgb, #fff 55%, transparent);
   --l-lippe-djup: color-mix(in srgb, var(--ned) 22%, transparent);
   --l-lippe-ljos: color-mix(in srgb, var(--upp) 55%, transparent);
   --l-skugge-flytande: 0 6px 20px rgb(28 31 27 / .14);
@@ -223,6 +242,32 @@
   --glans:       var(--l-glans);
   --glans-svak:  var(--l-glans-svak);
 
+  /* ---- glansen paa ein *farga* kropp ----
+     Talet ovanfor er maalt mot papiret: 20 % kvitt paa ei mest svart
+     flate gjev det same draget som 55 % gjev paa ei ljos. Ein pinne, ei
+     kula og ein bjelke er ikkje papir. Dei ber ein slag- eller
+     produktfarge, og i det myrke temaet er den fargen *ljos* — `--klas`
+     stend paa L* 78 der han stend paa L* 54 i det ljose — so kvitt hev
+     mest ingen stad aa gjera av seg. Maalt paa den fulle pinnen: glimet
+     drog ΔL +17 i det ljose og +2,5 i det myrke. Det er ikkje ei kula
+     med mindre ljos paa seg; det er ei farga skiva med ein skugge paa.
+
+     Difor eit eige tal for dei farga kroppane. 55 % i det ljose er det
+     same som fyrr, so det ljose temaet stend urørt; 40 % i det myrke
+     gjev ΔL +5,5 paa den fulle pinnen og +19 paa den veike. Den veike
+     fær meir enn han fær i det ljose (+7), og det er rett veg: ein myrk
+     kropp hev meir rom yver seg enn ein ljos, og det er nettupp difor
+     eitt tal ikkje kann tena baae flatene.
+
+     Den myrke sida — `--ned` i `--glim-rund` — stend som ho stod. Ho
+     hadde spelerom nok fraa fyrst av (ΔL -23 i myrkret mot -17 i det
+     ljose); det som mangla var ljoset, ikkje skuggen.
+
+     `--glans` sjølv er urørt og gjeld framleis alt som ligg paa ein
+     *papirfarga* kropp: knappen, veljaren, den valde fana og glaset i
+     dagmerket. Sjaa ARKET §2. */
+  --glans-farga: var(--l-glans-farga);
+
   /* ---- sola ----
      Ljoset kjem ovanfraa og til venstre, og *dette er talet*. Bjelkane
      sette han fyrst — glimet deira toppar paa 34 % av breiddi — og daa
@@ -245,9 +290,9 @@
      utanfor sirkelen, og den mørkaste tonen aldri vorte synleg. */
   --glim-rund:
     radial-gradient(ellipse 62% 50% at var(--sol),
-      color-mix(in srgb, var(--glans) 72%, transparent) 0%,
-      color-mix(in srgb, var(--glans) 40%, transparent) 36%,
-      color-mix(in srgb, var(--glans) 11%, transparent) 64%,
+      color-mix(in srgb, var(--glans-farga) 72%, transparent) 0%,
+      color-mix(in srgb, var(--glans-farga) 40%, transparent) 36%,
+      color-mix(in srgb, var(--glans-farga) 11%, transparent) 64%,
       transparent 84%),
     radial-gradient(ellipse 82% 82% at var(--sol),
       transparent 20%,
@@ -287,6 +332,29 @@
   /* Pila i ein veljar. Ho stend som eit token av di kvar stad som tek
      glansen av att lyt kunna setja henne attende aaleine. */
   --pil: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  /* ---- rommet pila treng ----
+     Pila er tvo trekantar som er skuva ein kvart rem fraa kvarandre, og
+     teksti i veljaren lyt stogga fyre den vinstre av dei. Det er tvo
+     tal som lyt fylgjast aat — kvar pila stend, og kor mykje fyll som
+     held teksti unna henne — og dei stod skrivne kvar for seg fire
+     stader i huset:
+
+       grunnstilen        pila 1,05/0,80 rem, fyll 1,5 rem   → 2,2 px glipe
+       `.setning`         pila 0,85/0,60 rem, fyll 1,25 rem  → 1,4 px glipe
+       `.sikt`            pila 0,55/0,35 rem, fyll 1,25 rem
+       maalveljaren       pila 0,45/0,25 rem, fyll 1,25 rem
+
+     Fire gissingar paa den same tingen, og dei tvo fyrste so trongt at
+     pila stend inntil bokstaven. Paa ein telefon, der setningi bryt og
+     veljaren vert klemd, les det seg som eit samanstøyt.
+
+     No er det eitt tal: `--pil-inn` er kvar pila stend, og `--pilrom`
+     er fyllet som fylgjer av det. Fyllet kann ikkje drifta fraa pila
+     lenger, av di det er rekna av henne. */
+  --pil-storleik: 5px;
+  --pil-inn: .8rem;
+  --pil-glipe: var(--rom-2);
+  --pilrom: calc(var(--pil-inn) + .25rem + var(--pil-storleik) + var(--pil-glipe));
 
 
   /* ---- lippone ----
@@ -402,6 +470,7 @@
   --m-aatvaring-svak: #2b1c18;
   --m-glans:      color-mix(in srgb, #fff 20%, transparent);
   --m-glans-svak: color-mix(in srgb, #fff 7%, transparent);
+  --m-glans-farga:color-mix(in srgb, #fff 40%, transparent);
   /* Maalt, ikkje gjetta: 55 % kvitt paa ei mest svart flate gjev eit
      drag paa ΔL +0.318, mot +0.073 i det ljose. 26 % gjev +0.093 og er
      difor den same lippa og ikkje ei sterkare. */
@@ -429,6 +498,7 @@
    veljar ein kann slaa upp. */
 @media (prefers-color-scheme: dark) {
   :root {
+    color-scheme: dark;
     --ark: var(--m-ark);
     --ark-djup: var(--m-ark-djup);
     --flate: var(--m-flate);
@@ -448,6 +518,7 @@
     --aatvaring-svak: var(--m-aatvaring-svak);
     --glans: var(--m-glans);
     --glans-svak: var(--m-glans-svak);
+    --glans-farga: var(--m-glans-farga);
     --lippe-djup: var(--m-lippe-djup);
     --lippe-ljos: var(--m-lippe-ljos);
     --skugge-flytande: var(--m-skugge-flytande);
@@ -462,6 +533,7 @@
 
 /* Ljost av val. Han lyt staa etter media-blokki for aa vinna yver henne. */
 [data-theme="light"] {
+  color-scheme: light;
   --ark: var(--l-ark);
   --ark-djup: var(--l-ark-djup);
   --flate: var(--l-flate);
@@ -481,6 +553,7 @@
   --aatvaring-svak: var(--l-aatvaring-svak);
   --glans: var(--l-glans);
   --glans-svak: var(--l-glans-svak);
+  --glans-farga: var(--l-glans-farga);
   --lippe-djup: var(--l-lippe-djup);
   --lippe-ljos: var(--l-lippe-ljos);
   --skugge-flytande: var(--l-skugge-flytande);
@@ -494,6 +567,7 @@
 
 /* Myrkt av val. Ordrett lik media-blokki yver. */
 [data-theme="dark"] {
+  color-scheme: dark;
   --ark: var(--m-ark);
   --ark-djup: var(--m-ark-djup);
   --flate: var(--m-flate);
@@ -513,6 +587,7 @@
   --aatvaring-svak: var(--m-aatvaring-svak);
   --glans: var(--m-glans);
   --glans-svak: var(--m-glans-svak);
+  --glans-farga: var(--m-glans-farga);
   --lippe-djup: var(--m-lippe-djup);
   --lippe-ljos: var(--m-lippe-ljos);
   --skugge-flytande: var(--m-skugge-flytande);

@@ -75,6 +75,12 @@
     {{if eq .CurrentPage "profil"}}
     <script defer src="{{asset "js/endringar.js"}}"></script>
     {{end}}
+    {{/* Vekereglane. Timeplanen hev vikeveljaren sin, og administrasjonen
+         hev tvo vekefelt i timebolken — alle tri les `veketal.js`, so
+         han lyt liggja fyre dei som brukar honom. */}}
+    {{if or (eq .CurrentPage "timeplan") (eq .CurrentPage "admin")}}
+    <script defer src="{{asset "js/veketal.js"}}"></script>
+    {{end}}
     {{if eq .CurrentPage "timeplan"}}
     <script defer src="{{asset "js/timeplan-veke.js"}}"></script>
     <script defer src="{{asset "js/dagfokus.js"}}"></script>

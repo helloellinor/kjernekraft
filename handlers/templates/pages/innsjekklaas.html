@@ -2,11 +2,11 @@
 {{/* Døri til kiosken. Éin iPad, fire siffer, ein gong — kaka hugsar
      resten av aaret. Koden er ein terskel og ikkje eit vern; det han
      skal stogga, er ein telefon utanfor huset, ikkje ein innbrotstjuv. */}}
-<div class="login-container">
+<div class="doer">
     <span class="merke doermerke" aria-hidden="true"></span>
 
     <h1 class="page-title">{{t .Lang "innsjekk.title"}}</h1>
-    <p class="login-subtitle">{{t .Lang "innsjekk.laas_leiing"}}</p>
+    <p class="doerleiding">{{t .Lang "innsjekk.laas_leiing"}}</p>
 
     {{if .Feil}}
     <p class="login-error" role="alert">{{t .Lang "innsjekk.laas_feil"}}</p>

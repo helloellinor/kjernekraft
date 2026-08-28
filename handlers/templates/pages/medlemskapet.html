@@ -53,7 +53,7 @@
            på det same spørsmålet — kva dette kostar meg — og ein les dei
            saman. */}}
       <div class="two-column-grid">
-        <div>
+        <div class="kortbolk">
       <h2 class="section-title">{{t .Lang "medlemskapet.medlemskortet"}}</h2>
       {{if .Noverande}}
       {{/* Sjølve medlemskapet som ein ting: dei nøyaktige datoane og
@@ -73,7 +73,7 @@
       {{template "medlemskort" (dict
         "Medlemskap" .Noverande "Namn" .NoverandeNamn "UserName" .UserName
         "Lang" .Lang "MedlemSidan" .MedlemSidan
-        "Bunden" .Bunden "Handlingar" true "KannSeiaUpp" .KannSeiaUpp)}}
+        "Handlingar" true "KannSeiaUpp" .KannSeiaUpp)}}
 
       {{/* Kva som hender, sagt fyre du trykkjer. Det stod i ein
              `confirm()` fyrr — ei rute som spring upp *etter* trykket og
@@ -96,7 +96,7 @@
       {{end}}
         </div>
 
-        <div>
+        <div class="kortbolk">
           <h2 class="section-title">{{t .Lang "medlemskapet.tab_belastningar"}}</h2>
           {{/* Berre avgiftene for medlemskapet. Lista stod utan filter
                fyrr og bar klippekorti med — dei høyrer til klippekortsida,

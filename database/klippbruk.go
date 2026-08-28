@@ -101,6 +101,18 @@ func brukKlipp(tx *sql.Tx, eventID, userID int64, naa time.Time) error {
 		return nil
 	}
 
+	// Er klippet alt teke, er det teke. Ei PT-økt vert klippa naar ho
+	// vert *sett upp* (sjaa BokPrivatTime) og ikkje i døri, so utan
+	// denne lina hadde ho kosta tvo klipp: eitt for tingingi og eitt for
+	// krysset. Prøva er generell av di ho skal vera det — aa klippa det
+	// same paameldet tvo gonger er gale kva vegen det skjer.
+	var alt sql.NullInt64
+	if err := tx.QueryRow(`
+		SELECT klipp_kort_id FROM event_signups
+		WHERE event_id = ? AND user_id = ?`, eventID, userID).Scan(&alt); err == nil && alt.Valid {
+		return nil
+	}
+
 	var kortID int64
 	err := tx.QueryRow(`
 		SELECT uk.id

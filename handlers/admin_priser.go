@@ -56,6 +56,16 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		rader := make([]Prisrad, 0, len(alle))
 		for _, m := range alle {
+			// Det svarte kortet stend ikkje her. Det er ikkje eit
+			// produkt: det fylgjer ei rolla, det vert betalt med Karma,
+			// og prisen er null av di det ikkje *hev* ein pris. Ei rad
+			// i prislista seier at nokon kann setja talet, og det kann
+			// dei ikkje. `Skjult` er alt flagget som segjer at
+			// medlemskapet ikkje stend i lista der folk vel (sjaa
+			// database/svartmedlem.go); det gjeld her med.
+			if m.Skjult {
+				continue
+			}
 			generert := MedlemskapNamn(lang, m)
 			namn := Namn(overstyrte[m.ID], lang, generert)
 			rader = append(rader, Prisrad{
@@ -82,6 +92,13 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, m := range alle {
+		// Same grunnen som i GET-greini: eit medlemskap som ikkje kann
+		// teiknast i lista kann heller ikkje skrivast fraa henne. Utan
+		// dette hadde eit skjema som sende id-en likevel — handskrive
+		// eller frae ei gamal fana — fenge lov aa setja prisen paa Svart.
+		if m.Skjult {
+			continue
+		}
 		id := strconv.Itoa(m.ID)
 
 		// Slett fyrst: er raden merkt, er det ingen vits i å skrive

@@ -20,6 +20,16 @@
 .setning {
   font-size: 1.15rem; line-height: 2.4;
   margin: 0; color: var(--blekk-lys);
+  /* Ingi lesebreidd — og det er *denne* lina som ser til det.
+     Kommentaren yver hev sagt sidan 54ch-kappa gjekk ut at ei setning av
+     felt ikkje er tekst, men `.setning` er eit `<p>`, og `p` i
+     token-blokka ber `max-width: 62ch`. Han er svakare enn klassa berre
+     paa dei eigenskapane klassa nemner, og max-width var ikkje ein av
+     deim — so kappa stod att, berre aatte teikn lenger ute, og skjemaet
+     braut midt paa ei brei spalta med den andre helvti tom. Spalta set
+     breiddi; setningi bryt naar spalta krev det og ikkje fyrr.
+     Vil ein ha eit brot ein stad, set ein <br> der ein vil ha honom. */
+  max-width: none;
 }
 
 /* Feltet i setninga er eit lappfelt som står i ei line — same djupna,
@@ -48,20 +58,49 @@
 .setning .felt::placeholder { color: var(--blekk-svakt); font-weight: 400; }
 .setning .felt-tal { min-width: 3.2rem; text-align: center; font-family: var(--skrift-tal); }
 
-/* Ein veljar plukkar; han skriv ikkje. Difor inga fordjuping på han,
-   men hårlina han har overalt elles (FASETTEN §3). Det er skilnaden
-   mellom å skrive og å velje, og han skal vere synleg i setninga òg. */
-.setning select.felt {
-  background-color: var(--flate);
-  border: 1px solid var(--kant);
-  box-shadow: none;
-  padding-right: var(--rom-5); background-position: right .4rem top 50%;
-}
-.setning select.felt:hover { background-color: var(--flate); }
-.setning select.felt:focus { border-color: var(--merke); box-shadow: var(--skraakant-fasett); }
+/* Ein veljar plukkar; han skriv ikkje — og det er *pili* som segjer det,
+   ikkje ei onnor form. Difor stend det berre maal her.
 
-.setning .innelabel { color: var(--blekk-lys); font-size: 1rem; }
-.setning input[type="checkbox"] { accent-color: var(--klas); width: 1rem; height: 1rem; }
+   Her stod flate, haarlina og `box-shadow: none` fyrr, skrivi den gongen
+   veljaren skulde skilja seg fraa feltet ved forma si (FASETTEN §3).
+   Daa veljaren vart kapsel i grunnstilen, tok desse tri lineone flata og
+   kanten attende — men ikkje rundingi — og resultatet var ein pilleforma
+   boks med tunn ramme og eit glans-drag yver ei flate som ikkje var
+   kvelvd. Uleseleg i det ljose temaet, og ulikt kvar einaste kasse
+   kring seg.
+
+   To reglar som skulde einast um forma, og som møttest i ei tridje som
+   ingen hadde teikna. No er det éi form i grunnstilen, og setningi
+   stiller ingen ting.
+
+   Her stod eit smalare fyll og ei pil flutt inn etter det: 1,4 px
+   millom bokstaven og pila, mot 2,2 i grunnstilen — som ogso var for
+   lite. Paa ein telefon, der setningi bryt og veljaren vert klemd, las
+   det seg som at pila laag yver teksti.
+
+   Grunnen ligg eit hakk høgare: `.setning .felt` set eit *trongt* fyll
+   (.1rem .4rem) med `field-sizing: content`, av di eit felt i ei setning
+   skal vera so breidt som ordet i det. Paa eit skrivefelt er det rett.
+   Paa ein veljar er det ikkje: han ber ei pil i fyllet til høgre, og
+   6,4 px er ikkje rom aat henne — ho vert teikna under bokstavane.
+
+   Difor stend fyllet til høgre att, men det er ikkje lenger eit tal
+   nokon hev gissa: `--pilrom` er rekna av kvar pila faktisk stend
+   (00-token.css), so dei tvo kann ikkje drifta fraa kvarandre meir. Dei
+   tri andre sidone er framleis setningi sine. Same rettingi som
+   `select.lappfelt` i 84-prisane.css — det er dei tvo stadene i huset
+   der ei feltklassa set fyll paa alle fire sidone.
+
+   Pila si eigi plassering stend ikkje her lenger: ho er den same i kvar
+   veljar i huset. `:focus` stod her og med, og `.setning .felt:focus`
+   ovanfor seier alt det same. */
+.setning select.felt { padding-right: var(--pilrom); }
+
+/* Her stod `.innelabel` og ein regel for avkryssingar i setningi. Baae
+   er burte med «kvar veke»-avkryssingi: ei setning hev ingen
+   avkryssingar lenger, av di eit val millom tvo tilstandar er eit val og
+   ikkje ei utsegn ein hukar av. Finn du att ein bruk for deim, skriv
+   deim paa nytt — men sjaa etter um det ikkje er ein veljar du treng. */
 
 /* Det systemet reknar ut. Det stend under setningi og ikkje inni
    henne: du skreiv det ikkje, og du kann ikkje endra det. */

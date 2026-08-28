@@ -14,10 +14,18 @@ import (
 // med eitt utslag; det einaste ein gjer med eit einskilt utslag er aa
 // avlysa det.
 type Timeserie struct {
-	SerieID    int64
-	Tittel     string
-	Laerar     string
-	Rom        string
+	SerieID int64
+	Tittel  string
+	Laerar  string
+	// Alle namni som stend paa timane i rekkja: læraren fyrst, so
+	// vikarane. `Laerar` er den eine serien *hev*; denne er kven som
+	// faktisk held timane, og ho er lengre enn eitt namn den vika nokon
+	// steig inn.
+	Laerarar []string
+	Rom      string
+	// Kva slag trening rekkja er — yoga, pilates, reformer. Han ber
+	// vengefargen, og han er den same kvar gong rekkja gjeng.
+	Slag       string
 	Vekedag    time.Weekday
 	Klokke     string // «18:00»
 	Lengd      int    // minutt
@@ -52,6 +60,18 @@ func (r Timeserie) VekedagNykel() string {
 		"timeplan.sunday", "timeplan.monday", "timeplan.tuesday",
 		"timeplan.wednesday", "timeplan.thursday", "timeplan.friday",
 		"timeplan.saturday",
+	}[r.Vekedag]
+}
+
+// VekedagFleirtalNykel gjev vekedagen i fleirtal. Ei timerekkje som
+// gjeng meir enn ein gong gjeng paa «maandagar», ikkje paa «maandag» —
+// lista til venstre er rekkjone og ikkje utslagi deira, so ho lyt tala
+// um dagen slik han er: gjentaken.
+func (r Timeserie) VekedagFleirtalNykel() string {
+	return [...]string{
+		"timeplan.sundays", "timeplan.mondays", "timeplan.tuesdays",
+		"timeplan.wednesdays", "timeplan.thursdays", "timeplan.fridays",
+		"timeplan.saturdays",
 	}[r.Vekedag]
 }
 
@@ -102,8 +122,21 @@ func GrupperTimar(timar []models.Event, no time.Time) []Timeserie {
 		fyrste := g.Timar[0]
 		st := fyrste.StartTime
 		g.Tittel = fyrste.Title
-		g.Laerar = fyrste.TeacherName
+		// Læraren er unnataket fraa den regelen, og det var ein reell
+		// tap av data.
+		//
+		// Han stod som den næraste timen sin, og feltet i seriesetningi
+		// ber honom — det same feltet som `UpdateSerieTeacher` skriv til
+		// *alle* timane i rekkja. Gav du den næraste timen ein vikar,
+		// var vikaren serien sin lærar ved neste lasting, og neste
+		// lagring — kva ho enn galdt, tittelen, rommet, plassane —
+		// skreiv vikarnamnet yver heile rekkja.
+		//
+		// Ein vikar er per definisjon unnataket, so det namnet som
+		// gjeng att oftast er læraren.
+		g.Laerar, g.Laerarar = laerarane(g.Timar)
 		g.Rom = fyrste.RoomName
+		g.Slag = fyrste.ClassType
 		g.Vekedag = st.Weekday()
 		g.Klokke = st.Format("15:04")
 		g.Lengd = int(fyrste.EndTime.Sub(fyrste.StartTime).Minutes())
@@ -147,6 +180,49 @@ type Siktdag struct {
 type Siktval struct {
 	Dagar    []Siktdag
 	Laerarar []string
+}
+
+// laerarane gjev læraren rekkja hev, og heile namnelista attaat.
+//
+// Ingi spyrjing: timane ligg alt her, so det som skal til er aa telja
+// dei. Flest timar vinn; stend det likt, vinn den som kjem fyrst, og
+// rekkja er sortert paa dato — so det er den næraste timen.
+//
+// Namnelista byrjar med læraren og held fram med vikarane i den
+// rekkjefylgda dei kjem: «Leon og Vikar» les seg som «Leon, og so ein
+// vikar ei vika».
+func laerarane(timar []models.Event) (string, []string) {
+	tal := map[string]int{}
+	var rekkje []string
+	for _, t := range timar {
+		namn := t.TeacherName
+		if namn == "" {
+			continue
+		}
+		if tal[namn] == 0 {
+			rekkje = append(rekkje, namn)
+		}
+		tal[namn]++
+	}
+	if len(rekkje) == 0 {
+		return "", nil
+	}
+
+	hovud := rekkje[0]
+	for _, namn := range rekkje[1:] {
+		if tal[namn] > tal[hovud] {
+			hovud = namn
+		}
+	}
+
+	ut := make([]string, 0, len(rekkje))
+	ut = append(ut, hovud)
+	for _, namn := range rekkje {
+		if namn != hovud {
+			ut = append(ut, namn)
+		}
+	}
+	return hovud, ut
 }
 
 // SiktvalFor plukkar dei ulike dagane, lærarane og romi ut or seriane.

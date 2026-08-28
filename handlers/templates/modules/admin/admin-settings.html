@@ -18,6 +18,14 @@
 
     <div id="settings-message" class="message" style="display: none;"></div>
 
+{{/* ---- skissone ----
+     Handteikna portrett av lærarane. Dei stend her av di dette er sida
+     til dei som driv huset, og dei er huset. */}}
+<figure class="skissone">
+    <img src="{{asset "img/laerarane.svg"}}" alt="{{t .Lang "admin.skissone_alt"}}">
+    <figcaption>{{t .Lang "admin.skissone_tekst"}}</figcaption>
+</figure>
+
 <script>
 function updateTimezone() {
     const timezone = document.getElementById('timezone-select').value;

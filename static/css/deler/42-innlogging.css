@@ -1,13 +1,59 @@
 /* ===================================================================
-   innloggingi — den eine sida utan leiding
+   dørene — sidone du stend paa fyre du er komen inn
+
+   Innlogging, registrering, gløymt passord og laasen paa innsjekken.
+   Fire sidor, éin ting: eit smalt kort midt paa arket, med merket yver
+   og éi line ut att nedst.
+
+   Dei var *tri* sidor og eitt unnatak. Registreringi stod i `.smal` —
+   ein rein breiddegrense utan flate, utan kant, utan skugge — so
+   den eine døri du gjeng inn gjenom fyrste gongen var den eine som
+   ikkje saag ut som ei dør. Ho ligg i det same kortet no.
+
+   Namnet er `doer` og ikkje `login`: tri av dei fire sidone er ikkje
+   innlogging, og ein klasse som heiter `login-container` kring
+   registreringsskjemaet er ei skildring som ljug. `.doermerke` i
+   65-merket.css bar alt ordet.
    =================================================================== */
-.login-container {
-  max-width: 26rem; margin: var(--rom-7) auto; padding: var(--rom-6);
+.doer {
+  /* 26 rem, ikkje 34 som registreringi stod i. Ei dør er smal med
+     vilje: det er eitt skjema og ingen ting attmed, og ei brei spalta
+     gjev lange lesestrekk yver eit felt som er tvo ord langt.
+     `.form-row` (postnummer og poststad) fell til éi spalta her, og det
+     er rett — dei tvo felti stod side um side berre av di kortet var
+     aatte rem breidare enn det tarv. */
+  max-width: 26rem;
+  margin: var(--rom-7) auto;
+  padding: var(--rom-6);
   background: var(--flate);
   border: 1px solid var(--haarlina);
-  border-radius: 2px;
+  border-radius: var(--rund);
   box-shadow: var(--skugge-kort);
 }
-.login-subtitle { color: var(--blekk-lys); font-size: .95rem; margin-bottom: var(--rom-5); }
-.forgot-password, .signup-link { font-size: .9rem; margin-top: var(--rom-4); color: var(--blekk-lys); }
-.signup-link { border-top: 1px solid var(--haarlina); padding-top: var(--rom-4); }
+
+/* Leidingi under tittelen. Ho er ikkje `.page-description` (som er 62ch
+   brei og laga for ei sida med spaltor); inne i ei dør er breiddi
+   kortet si, og lufta under er mindre av di det som kjem er eit skjema
+   og ikkje ein bolk. */
+.doerleiding { color: var(--blekk-lys); font-size: .95rem; margin-bottom: var(--rom-5); }
+
+/* Ei line som berre upplyser: kva du skal skriva, kvar du finn
+   passordet. Ho ber ingen strek — ho høyrer til skjemaet yver seg. */
+.forgot-password { font-size: .9rem; margin-top: var(--rom-4); color: var(--blekk-lys); }
+
+/* Vegen ut att: «Har du konto?», «Attende til innlogginga».
+   Ho stend under streken av di ho ikkje høyrer til skjemaet — ho er den
+   andre døri, for den som kom til feil ei. Strek og ikkje ein kasse:
+   §6 gjev eitt maala rom millom arket og innhaldet, og det er kortet.
+
+   Ho stod som tri klassar fyrr — `.signup-link` med strek paa
+   innloggingi, `.attende` utan strek paa registreringi og gløymt
+   passord — so den same setningi paa den same staden i det same kortet
+   saag ulik ut alt etter kva dør du stod i. */
+.doerfot {
+  margin-top: var(--rom-4);
+  padding-top: var(--rom-4);
+  border-top: 1px solid var(--haarlina);
+  font-size: .9rem;
+  color: var(--blekk-lys);
+}

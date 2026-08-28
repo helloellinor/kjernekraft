@@ -70,6 +70,14 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("kunde ikkje henta lærarane: %v", err)
 	}
 
+	// Slagi som alt er i bruk. Feltet er fritekst, so utan ei lista aa
+	// plukka fraa vert «Yoga» og «yoga» tvo sortar — og daa ber dei kvar
+	// sin venge i lista.
+	slagsortar, err := AdminDB.Slagsortar()
+	if err != nil {
+		log.Printf("kunde ikkje henta slagi: %v", err)
+	}
+
 	// Gruppone ein time kann vera open for.
 	grupper, err := AdminDB.Grupper()
 	if err != nil {
@@ -88,17 +96,31 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// kjem av deim, og tvo utrekningar av det same kann skilja lag.
 	seriar := GrupperTimar(events, config.GetInstance().GetCurrentTime())
 
+	// Meldingane som ventar. Ein feil her skal ikkje taka heile
+	// administrasjonssida: fana stend tom, og resten verkar.
+	meldingar, err := AdminDB.VentandeMeldingar()
+	if err != nil {
+		log.Printf("meldingar: %v", err)
+	}
+
 	data := map[string]interface{}{
-		"Rooms":          rooms,
-		"Folk":           folk,
-		"Teachers":       laerarar,
-		"Title":          t(lang, "admin.title"),
-		"Events":         events,
-		"Grupper":        grupper,
-		"Rabattkrav":     rabattkrav,
-		"Timereglar":     seriar,
-		"Siktval":        SiktvalFor(seriar),
+		"Rooms":      rooms,
+		"Folk":       folk,
+		"Teachers":   laerarar,
+		"Slagsortar": slagsortar,
+		"Title":      t(lang, "admin.title"),
+		"Events":     events,
+		"Grupper":    grupper,
+		"Rabattkrav": rabattkrav,
+		"Timereglar": seriar,
+		"Siktval":    SiktvalFor(seriar),
+		// Vekefelti i timebolken tel i dei same ISO-vikone som
+		// timeplanen. Talet kjem herifraa og ikkje fraa lesaren:
+		// klokka i innstillingane er den huset held seg til.
+		"VekeNo":         veketalNo(),
+		"VikorIAaret":    VikorIAaret(config.GetInstance().GetCurrentTime()),
 		"FreezeRequests": freezeRequests,
+		"Meldingar":      meldingar,
 		"Memberships":    memberships,
 		"Stats":          statsModule,
 		"Lang":           lang,

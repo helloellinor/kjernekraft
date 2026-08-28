@@ -30,20 +30,25 @@ import (
 
 // serieskjema er det skjemaet sender.
 type serieskjema struct {
-	SerieID   int64
-	Tittel    string
-	Laerar    string
-	RomID     int64
-	Vekedag   int
-	Klokke    time.Time
-	Minutt    int
-	Plassar   int
-	GruppeID  int64
-	Skildring string
-	Veker     int
-	Avlys     map[int64]bool
-	Vikar     map[int64]string
-	Flytt     map[int64]time.Time
+	SerieID int64
+	Tittel  string
+	Laerar  string
+	Slag    string
+	// Læraren som stod i feltet daa sida vart teikna. Han vert ikkje
+	// lagra; han er der berre for aa svara paa «rørde nokon dette
+	// feltet» — sjaa skrivinga nedanfor.
+	LaerarFyrr string
+	RomID      int64
+	Vekedag    int
+	Klokke     time.Time
+	Minutt     int
+	Plassar    int
+	GruppeID   int64
+	Skildring  string
+	Veker      int
+	Avlys      map[int64]bool
+	Vikar      map[int64]string
+	Flytt      map[int64]time.Time
 }
 
 func lesSerieskjema(r *http.Request) (*serieskjema, error) {
@@ -83,6 +88,11 @@ func lesSerieskjema(r *http.Request) (*serieskjema, error) {
 	if s.Laerar = strings.TrimSpace(r.FormValue("laerar")); s.Laerar == "" {
 		return nil, fmt.Errorf("laerar is required")
 	}
+	s.LaerarFyrr = strings.TrimSpace(r.FormValue("laerar_fyrr"))
+	// Slaget kann vera tomt: ikkje kvar time er ein av dei sortane
+	// huset kjenner, og ein venge utan farge er sannare enn ein
+	// tilfeldig ein (§1).
+	s.Slag = strings.TrimSpace(r.FormValue("slag"))
 	if s.RomID, err = strconv.ParseInt(r.FormValue("room_id"), 10, 64); err != nil {
 		return nil, fmt.Errorf("invalid room_id")
 	}
@@ -229,8 +239,28 @@ func LagraSerieHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not save title", http.StatusInternalServerError)
 		return
 	}
-	if err := AdminDB.UpdateSerieTeacher(s.SerieID, s.Laerar, no); err != nil {
-		http.Error(w, "Could not save teacher", http.StatusInternalServerError)
+	// Læraren vert skriven berre naar nokon hev rørt feltet.
+	//
+	// `UpdateSerieTeacher` skriv til *kvar* komande time i rekkja, og
+	// det er rett naar ein byter lærar paa serien. Men feltet stod med
+	// eit namn i seg kva ein enn kom for aa gjera, so kvar lagring —
+	// ein ny tittel, eit anna rom, tvo plassar til — skreiv det namnet
+	// yver alle timane og tok med seg kvar vikar som var sett ei anna
+	// vika. Ein vikar er nettupp den eine timen som *ikkje* skal fylgja
+	// serien.
+	//
+	// `laerar_fyrr` er det som stod i feltet daa sida vart teikna. Er
+	// dei tvo like, bad ingen um noko her, og daa skal ingen ting
+	// skrivast. Same tanken som `data-lagra` i `endringar.js`: ei
+	// endring er skilnaden fraa det som var, ikkje det som stend.
+	if s.Laerar != s.LaerarFyrr {
+		if err := AdminDB.UpdateSerieTeacher(s.SerieID, s.Laerar, no); err != nil {
+			http.Error(w, "Could not save teacher", http.StatusInternalServerError)
+			return
+		}
+	}
+	if err := AdminDB.UpdateSerieClassType(s.SerieID, s.Slag, no); err != nil {
+		http.Error(w, "Could not save class type", http.StatusInternalServerError)
 		return
 	}
 	if s.RomID > 0 {

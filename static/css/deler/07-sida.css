@@ -92,9 +92,25 @@ main {
 }
 .undertittel:first-child { margin-top: 0; }
 
+/* Tvo spaltor med kort i. Ho stend paa tri sidor — medlemskapet,
+   klippekortet og betalingane — og alle tri held kort.
+   
+   Spaltone var `1fr` fyrr, og daa voks dei med skjermen medan kortet i
+   deim stogga ved `--kortbreidd`. Avstanden ein *saag* millom dei tvo
+   korti var difor ikkje `gap`, han var gapet pluss den tome resten av
+   baae spaltone — paa ein brei skjerm eit godt stykke meir enn nokon
+   hadde vald. Med taket paa spalta er avstanden det han er sett til.
+   
+   `justify-content: start` av di spaltone daa ikkje lenger fyller rada:
+   dei skal leggja seg mot venstre kanten som alt anna paa arket, og
+   ikkje flyta ut mot midten.
+   
+   Sjølve talet er stigen sitt: §6 gjev `--rom-5` til «gap millom
+   spaltor», og det er nettupp det dette er. */
 .two-column-grid {
   display: grid; gap: var(--rom-5);
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(20rem, var(--kortbreidd)));
+  justify-content: start;
 }
 
 /* ---- bolkhovudet ----
@@ -184,9 +200,11 @@ main {
   border: 0; background-color: transparent; border-radius: 2px;
   box-shadow: none;
   background-image: var(--pil);
-  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
-  background-position: right .55rem top 50%, right .35rem top 50%;
-  background-size: 5px 5px, 5px 5px;
+  /* Sikti er naken, og det er det einaste som skil henne. Pila stend
+     der ho stend i kvar annan veljar — ho hadde sin eigen posisjon her
+     fyrr, og eit hus med fire pilestader er eit hus der ingen av dei er
+     rett. Berre det loddrette fyllet er sikti sitt eige. */
+  padding: var(--rom-1) var(--pilrom) var(--rom-1) var(--rom-2);
   color: var(--blekk-lys);
 }
 .sikt select:hover { border-color: transparent; }
@@ -197,4 +215,25 @@ main {
    aa setja ei klassa paa noko han alt veit. */
 .sikt select:has(option:checked:not([value=""])) {
   color: var(--blekk); background-color: var(--merke-svak);
+}
+
+
+/* ---- berre for skjermlesaren ----
+   Eit ord som stend i staden for ein glyf som ber tyding. Kortet skriv
+   ∞ for eit medlemskap som ikkje gjeng ut (ARKET §7 slepper glyfen
+   gjenom — han er typografi i lesetypen og ikkje ein emoji), men kva
+   ein skjermlesar *segjer* um U+221E er ikkje noko me raar yver: nokre
+   segjer «infinity», nokre segjer ingen ting. Ordet stend difor attmed,
+   usynleg for auga.
+
+   `clip-path` og ikkje `display: none`: det siste tek teksti ut or
+   treet og daa les ingen honom. Ei rute paa éin piksel utan yverflaum,
+   som er den einaste maaten som verkar i alle lesarar. */
+.skjermlesar {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

@@ -225,6 +225,7 @@ func main() {
 		r.Post("/api/admin/class", handlers.CreateClassHandler)
 		r.Post("/api/admin/serie/lagra", handlers.LagraSerieHandler)
 		r.Post("/api/admin/rabattkrav", handlers.RabattkravHandler)
+		r.Post("/api/admin/melding", handlers.MeldingHandsamaHandler)
 		r.Post("/api/admin/gruppe", handlers.LagGruppeHandler)
 		r.Post("/api/admin/gruppe/slett", handlers.SlettGruppeHandler)
 		r.Post("/api/admin/gruppemedlem", handlers.GruppemedlemHandler)

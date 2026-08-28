@@ -296,7 +296,7 @@ func TestDagradaErTekstOgIkkjeEitSkjema(t *testing.T) {
 func TestDagradaLiknarRegelrada(t *testing.T) {
 	lista := dagliste(t, teiknTimestyringa(t, tvoTimar()))
 
-	for _, del := range []string{"dagnamn", "daglaerar", "dagklokke", "dagplassar"} {
+	for _, del := range []string{"dagveke", "dagmaanad", "daglaerar", "dagklokke", "dagplassar"} {
 		if !strings.Contains(lista, del) {
 			t.Errorf("dagrada ber ikkje %s", del)
 		}
@@ -307,30 +307,47 @@ func TestDagradaLiknarRegelrada(t *testing.T) {
 	}
 }
 
-// Raden som verkar paa dei merkte stend yver lista og ikkje under henne.
+// Det som verkar paa dei merkte stend yver lista og ikkje under henne.
 //
 // Ein serie kann vera femti dagar lang, og ein knapp under femti rader er
 // ein knapp du lyt rulla for aa finna — etter at du alt hev merkt det du
 // vil gjera noko med.
-func TestValsetningaStendYverLista(t *testing.T) {
+//
+// Det var éi setning som bar baade vikaren og avlysingi fyrr. Dei er tvo
+// bolkar med kvar si yverskrift no, og daa er det knappane sjølve prøva
+// lyt fylgja — regelen galdt aldri eit klassenamn, han galdt kor langt du
+// lyt rulla.
+func TestHandlinganeStendYverLista(t *testing.T) {
 	html := teiknTimestyringa(t, tvoTimar())
 
-	val := strings.Index(html, `class="setning valsetning"`)
 	lista := strings.Index(html, `class="daglista"`)
-	if val < 0 || lista < 0 {
-		t.Fatal("fann ikkje valsetningi eller lista")
+	if lista < 0 {
+		t.Fatal("fann ikkje lista")
 	}
-	if val > lista {
-		t.Error("valsetningi stend under lista — daa lyt ein rulla for aa naa henne")
+	for _, handling := range []string{`class="felt val-vikar"`, `class="btn-danger val-avlys"`} {
+		i := strings.Index(html, handling)
+		if i < 0 {
+			t.Errorf("fann ikkje %s", handling)
+			continue
+		}
+		if i > lista {
+			t.Errorf("%s stend under lista — daa lyt ein rulla for aa naa han", handling)
+		}
 	}
 }
 
-// Setningi som gjeld dei merkte ber alle handlingane, og stend stengd i
-// kvile.
+// Setningi som gjeld dei merkte ber handlingane, og stend stengd i kvile.
+//
+// Ho bar dato og klokke med fyrr. Dei er ute (30.8.2026): timane i ei
+// rekkje gjeng til den same tidi — det er det ei rekkje *er* — so ein
+// klokkeveljar spurde um noko som alt var svara, og ein datoveljar gav
+// berre meining for éin rad um gongen. Regelen prøva held er den same:
+// det som er reiskap stend stengt til noko er merkt, og vert ikkje talt
+// som ei endring.
 func TestValsetningaGjeldDeiMerkte(t *testing.T) {
 	html := teiknTimestyringa(t, tvoTimar())
 
-	for _, felt := range []string{"val-dato", "val-klokke", "val-vikar", "val-avlys"} {
+	for _, felt := range []string{"val-vikar", "val-avlys"} {
 		if !strings.Contains(html, felt) {
 			t.Errorf("%s stend ikkje i valsetningi", felt)
 		}
@@ -338,14 +355,17 @@ func TestValsetningaGjeldDeiMerkte(t *testing.T) {
 			t.Errorf("%s stend open endaa ingen dag er merkt", felt)
 		}
 	}
+	for _, burte := range []string{"val-dato", "val-klokke"} {
+		if strings.Contains(html, burte) {
+			t.Errorf("%s stend att; timane i ei rekkje gjeng til den same tidi", burte)
+		}
+	}
 	// Reiskapen er ikkje ei endring: dokka skal ikkje telja det du skriv
 	// i verktyet som noko som skal lagrast.
-	for _, felt := range []string{"val-dato", "val-klokke", "val-vikar"} {
-		i := strings.Index(html, felt)
-		byrjing := strings.LastIndex(html[:i], "<input")
-		if !strings.Contains(html[byrjing:i+strings.Index(html[i:], ">")], "data-ikkje-endring") {
-			t.Errorf("%s vert talt som ei endring", felt)
-		}
+	i := strings.Index(html, "val-vikar")
+	byrjing := strings.LastIndex(html[:i], "<input")
+	if !strings.Contains(html[byrjing:i+strings.Index(html[i:], ">")], "data-ikkje-endring") {
+		t.Error("val-vikar vert talt som ei endring")
 	}
 }
 

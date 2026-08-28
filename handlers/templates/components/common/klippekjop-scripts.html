@@ -98,11 +98,11 @@
     }
 
     function lastKort() {
-        hent("/api/user/klippekort", "user-klippekort-container",
+        hent("/api/user/klippekort", "klippekorta-plass",
             {{t .Lang "dashboard.could_not_load_punch_cards" | toJS}});
     }
     function lastBelastningar() {
-        hent("/api/charges?type=klippekort", "klippekort-charges-container",
+        hent("/api/charges?type=klippekort", "belastningar-plass",
             {{t .Lang "charges.could_not_load" | toJS}});
     }
 

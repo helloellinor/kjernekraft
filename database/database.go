@@ -193,6 +193,12 @@ func Migrate(db *sql.DB) error {
 		end_date DATETIME,
 		binding_end DATETIME,
 		last_billed DATETIME DEFAULT CURRENT_TIMESTAMP,
+		-- Naar frysingi tok til. NULL naar medlemskapet ikkje er frose.
+		-- Klokka stend medan han er sett: utlaupsdatoen vert skuva fram
+		-- med den same tidi naar medlemskapet vert sett i gang att, so
+		-- eit aarskort gjev tolv maanader *bruk* og ikkje tolv maanader
+		-- paa kalenderen. Sjaa UnfreezeMembership.
+		frozen_at DATETIME,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id),
 		FOREIGN KEY (membership_id) REFERENCES memberships(id)
@@ -316,6 +322,17 @@ func Migrate(db *sql.DB) error {
 		log.Println("Added last_billed column to user_memberships table")
 	}
 
+	// Same mønsteret for `frozen_at`. Han skal *ikkje* fyllast ut for
+	// rader som alt finst: NULL tyder «ikkje frose», og eit medlemskap
+	// som stod frose fyre denne kolonna fanst hev me ingi klokka paa.
+	var frosenFinst bool
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('user_memberships') WHERE name='frozen_at'").Scan(&frosenFinst); err == nil && !frosenFinst {
+		if _, err := db.Exec("ALTER TABLE user_memberships ADD COLUMN frozen_at DATETIME"); err != nil {
+			return err
+		}
+		log.Println("La til frozen_at i user_memberships")
+	}
+
 	// Student- eller honnørbevis. Studioet gjev 20 % rabatt til den som
 	// hev det, og det er brukaren som fortel at han hev det — studioet
 	// ser beviset i resepsjonen. Alderen kjem av fødselsdagen; ho treng
@@ -413,6 +430,12 @@ func Migrate(db *sql.DB) error {
 	}
 
 	// Den private timen. Sjaa privattime.go.
+	if err := MigrerLaga(db); err != nil {
+		return err
+	}
+	if err := MigrerMeldingar(db); err != nil {
+		return err
+	}
 	if err := MigrerPrivatTime(db); err != nil {
 		return err
 	}
@@ -643,6 +666,16 @@ func (db *Database) TimeRom(eventID int64) (int64, error) {
 }
 
 // GetRooms gjev romi studioet hev, med kapasiteten deira.
+// SetRomPlassar set kor mange rommet held.
+//
+// Talet er ikkje pynt: kvar time som ikkje ber si eigi kapasitet arvar
+// det (`COALESCE(NULLIF(e.capacity, 0), r.capacity, 0)`), so eit rom som
+// stend for laagt gjer timane fulle fyre dei er det.
+func (db *Database) SetRomPlassar(romID, plassar int) error {
+	_, err := db.Conn.Exec("UPDATE rooms SET capacity = ? WHERE id = ?", plassar, romID)
+	return err
+}
+
 func (db *Database) GetRooms() ([]models.Room, error) {
 	rows, err := db.Conn.Query(`SELECT id, name, capacity FROM rooms WHERE active ORDER BY capacity DESC`)
 	if err != nil {
@@ -985,6 +1018,54 @@ func (db *Database) UpdateEventTeacher(eventID int64, laerar string) error {
 		laerar, eventID,
 	)
 	return err
+}
+
+// UpdateSerieClassType set slaget paa alle komande timar i serien.
+//
+// Slaget er kva slag trening timen er — yoga, pilates, reformer,
+// fascia — og det er serien som hev det: alle utslagi av «Vinyasa Flow
+// maandag 18:00» er yoga. Det ber vengefargen i lista og i timeplanen
+// (`.slag-*` i 00-token.css), og det er ogso det klippekortpakkane
+// samanliknar `category` mot, so ein time utan slag kann ikkje betalast
+// med eit klipp som er øyremerkt.
+func (db *Database) UpdateSerieClassType(serieID int64, slag string, fraa time.Time) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET class_type = ? WHERE serie_id = ? AND end_time > ?",
+		slag, serieID, veggtekst(fraa),
+	)
+	return err
+}
+
+// Slagsortar gjev dei slagi som alt er i bruk, ein gong kvar.
+//
+// Feltet er fritekst — `slagklasse` vaskar det ned til ein CSS-krok, og
+// eit ukjent slag fær ingen farge i staden for feil farge — men fritekst
+// utan minne tyder at «Yoga», «yoga» og «Yoag» alle er nye sortar. Difor
+// hev feltet ei lista yver det huset alt hev sett, og ein plukkar i
+// staden for aa skriva paa nytt.
+//
+// Alle timar, ikkje berre dei komande: eit slag som gjekk i vaar er
+// framleis eit slag studioet driv med, og det er nettupp daa ein treng
+// aa finna det att.
+func (db *Database) Slagsortar() ([]string, error) {
+	rows, err := db.Conn.Query(`
+		SELECT DISTINCT TRIM(class_type) FROM events
+		WHERE TRIM(COALESCE(class_type, '')) <> ''
+		ORDER BY TRIM(class_type) COLLATE NOCASE`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ut []string
+	for rows.Next() {
+		var slag string
+		if err := rows.Scan(&slag); err != nil {
+			return nil, err
+		}
+		ut = append(ut, slag)
+	}
+	return ut, rows.Err()
 }
 
 // UpdateSerieDescription set skildringi paa alle komande timar i
@@ -1442,7 +1523,7 @@ func (db *Database) GetAllMemberships() ([]models.Membership, error) {
 // GetUserMembership fetches a user's current membership
 func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetails, error) {
 	query := `
-		SELECT um.id, um.user_id, um.membership_id, um.status, um.start_date, um.renewal_date, um.end_date, um.binding_end, um.last_billed, um.created_at,
+		SELECT um.id, um.user_id, um.membership_id, um.status, um.start_date, um.renewal_date, um.end_date, um.binding_end, um.last_billed, um.frozen_at, um.created_at,
 		       m.name, m.price, m.commitment_months, m.is_student_senior, m.is_special_offer, m.description, m.features, m.active
 		FROM user_memberships um
 		JOIN memberships m ON um.membership_id = m.id
@@ -1462,7 +1543,8 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 	err := db.Conn.QueryRow(query, userID).Scan(
 		&membership.UserMembership.ID, &membership.UserMembership.UserID, &membership.UserMembership.MembershipID,
 		&membership.UserMembership.Status, &membership.UserMembership.StartDate, &membership.UserMembership.RenewalDate,
-		&membership.UserMembership.EndDate, &membership.UserMembership.BindingEnd, &membership.UserMembership.LastBilled, &membership.UserMembership.CreatedAt,
+		&membership.UserMembership.EndDate, &membership.UserMembership.BindingEnd, &membership.UserMembership.LastBilled,
+		&membership.UserMembership.FrozenAt, &membership.UserMembership.CreatedAt,
 		&membership.Membership.Name, &membership.Membership.Price, &membership.Membership.CommitmentMonths,
 		&membership.Membership.IsStudentSenior, &membership.Membership.IsSpecialOffer, &membership.Membership.Description,
 		&membership.Membership.Features, &membership.Membership.Active,
@@ -1666,10 +1748,70 @@ func (db *Database) GetPendingFreezeRequests() ([]models.FreezeRequest, error) {
 	return requests, nil
 }
 
-// ApproveFreezeRequest approves a freeze request by setting status to 'paused'
+// ApproveFreezeRequest godkjenner ei fryseføresprunad.
+//
+// Han set klokka med det same: `frozen_at` er tidspunktet utlaupet
+// sluttar aa telja. Utan honom hadde ei frysing kosta medlemen den tidi
+// ho varde — eit aarskort frose i tvo maanader hadde gjeve ti maanader
+// bruk — og det er ikkje det studioet sel.
 func (db *Database) ApproveFreezeRequest(userID int64) error {
-	query := `UPDATE user_memberships SET status = 'paused' WHERE user_id = ? AND status = 'freeze_requested'`
+	query := `UPDATE user_memberships SET status = 'paused', frozen_at = CURRENT_TIMESTAMP
+	          WHERE user_id = ? AND status = 'freeze_requested'`
 	_, err := db.Conn.Exec(query, userID)
+	return err
+}
+
+// UnfreezeMembership set eit frose medlemskap i gang att og skuver
+// utlaupet fram med den tidi det stod.
+//
+// Dette er den *einaste* vegen ut or 'paused'. `UpdateMembershipStatus`
+// tek kva stoda som helst og veit ingen ting um klokka; kallar nokon
+// honom med "active" paa eit frose medlemskap, stend `frozen_at` att og
+// utlaupet driv for alltid. Difor eige kall, og difor stend det her.
+//
+// Tidi vert lagd til baade `renewal_date` og `binding_end`: den fyrste
+// er kva du hev betalt for, den andre er terminen du kjøpte, og ei
+// frysing tek ikkje av nokon av dei.
+func (db *Database) UnfreezeMembership(userID int64) error {
+	var frosen sql.NullTime
+	var fornying time.Time
+	var binding sql.NullTime
+	err := db.Conn.QueryRow(`SELECT frozen_at, renewal_date, binding_end FROM user_memberships
+	                         WHERE user_id = ? AND status = 'paused'
+	                         ORDER BY created_at DESC LIMIT 1`, userID).Scan(&frosen, &fornying, &binding)
+	if err == sql.ErrNoRows {
+		// Ikkje frose. Daa er dette ei vanleg stoda-endring, og den
+		// gamle vegen er rett.
+		return db.UpdateMembershipStatus(userID, "active")
+	}
+	if err != nil {
+		return err
+	}
+
+	// Stod han frose fyre kolonna fanst, hev me ingi klokka. Daa set me
+	// honom i gang att utan aa skuva noko: aa gissa paa ei lengd er
+	// verre enn aa lata vera.
+	if !frosen.Valid {
+		return db.UpdateMembershipStatus(userID, "active")
+	}
+
+	stod := time.Since(frosen.Time)
+	if stod < 0 {
+		stod = 0
+	}
+	nyFornying := fornying.Add(stod)
+
+	if binding.Valid {
+		_, err = db.Conn.Exec(`UPDATE user_memberships
+		                       SET status = 'active', frozen_at = NULL, renewal_date = ?, binding_end = ?
+		                       WHERE user_id = ? AND status = 'paused'`,
+			nyFornying, binding.Time.Add(stod), userID)
+	} else {
+		_, err = db.Conn.Exec(`UPDATE user_memberships
+		                       SET status = 'active', frozen_at = NULL, renewal_date = ?
+		                       WHERE user_id = ? AND status = 'paused'`,
+			nyFornying, userID)
+	}
 	return err
 }
 

@@ -79,8 +79,11 @@ func UnfreezeMembershipHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// UnfreezeMembership og ikkje UpdateMembershipStatus: det er han som
+	// skuver utlaupet fram med den tidi medlemskapet stod frose. Sjaa
+	// database/database.go.
 	userID := int64(user.ID)
-	err := DB.UpdateMembershipStatus(userID, "active")
+	err := DB.UnfreezeMembership(userID)
 	if err != nil {
 		http.Error(w, "Could not unfreeze membership", http.StatusInternalServerError)
 		return

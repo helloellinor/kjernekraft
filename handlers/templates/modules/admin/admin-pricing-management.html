@@ -9,9 +9,9 @@
      ligg inne i ei fane frå før; faner.js skil nivåa. */}}
 <div class="faneark">
   {{template "faner" (dict "Tabs" (list
-      (dict "Bolk" "medlemskap" "Namn" (t .Lang "admin.tab_membership"))
-      (dict "Bolk" "klippekort" "Namn" (t .Lang "admin.tab_klippekort"))
-      (dict "Bolk" "reglar" "Namn" (t .Lang "admin.tab_rules")))
+      (dict "Key" "medlemskap" "Name" (t .Lang "admin.tab_membership"))
+      (dict "Key" "klippekort" "Name" (t .Lang "admin.tab_klippekort"))
+      (dict "Key" "reglar" "Name" (t .Lang "admin.tab_rules")))
       "Label" (t .Lang "admin.tab_prices"))}}
 
   <div class="fanerom" data-bolk="medlemskap">

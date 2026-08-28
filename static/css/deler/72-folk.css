@@ -6,19 +6,36 @@
    rada opnar seg paa staden — ein slær ikkje upp ein person ved aa
    forlata lista yver folk.
    =================================================================== */
-.folk-sok { display: flex; align-items: baseline; gap: var(--rom-3); margin-bottom: var(--rom-4); }
-
-.soke {
-  /* Berre maal. Forma er grunnstilen sin. */
-  flex: 1 1 22rem; max-width: 32rem;
-  font-size: 1.05rem;
-  padding: var(--rom-3) var(--rom-4);
+/* Lina yver lista: feltet, bunkane og talet. Ho brydest — feltet, fire
+   fanor og eit tal fær ikkje plass paa ein telefon, og §4 gjev ingen
+   rullestong. Bunkane er ei rekkja som alt brydest i seg sjølv, so det
+   som hender paa smale glas er at ho legg seg under feltet. */
+.folk-sok {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: var(--rom-3); margin-bottom: var(--rom-4);
 }
+
+/* Skyvaren ber si eigi luft under seg naar han stend yver ein bolk. Her
+   stend han *i* ei lina som alt hev ein marg, og tvo margar paa rad er
+   ikkje eit rom — det er eit rom skrive tvo gonger (§6). */
+.rollefaner { margin-bottom: 0; }
+
+/* Berre maal. Forma er `.sok` og grunnstilen sin — spalta set breiddi,
+   feltet set han ikkje sjølv (§6). Det stod `font-size: 1.05rem` og eit
+   eige fyll her under ein kommentar som sa «berre maal»; storleik og
+   fyll er ikkje maal, det er form, og det var slik dette feltet vart
+   ni pikslar høgre enn det same feltet i timeseriane. */
+.folk-sok .sok { flex: 1 1 22rem; }
 .folk-tal { font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-svakt); }
 
 .folk-liste { list-style: none; margin: 0; padding: 0;
   border: 1px solid var(--haarlina); background: var(--flate);
   box-shadow: var(--skugge-kort); }
+
+/* Ei setning i lista — «ingen folk enno», «ingen i denne bunken» — er
+   ikkje ei rad, so ho fær ikkje fyllet fraa `.folk-hovud`. Utan dette
+   stod ho klistra i hyrna av ein ramma kasse. */
+.folk-liste > .tomt { padding: var(--rom-4); }
 
 .folk-rad { border-bottom: 1px solid var(--haarlina); }
 .folk-rad:last-child { border-bottom: 0; }
@@ -30,6 +47,11 @@
   gap: var(--rom-4); align-items: baseline;
   padding: var(--rom-3) var(--rom-4);
   background: none; border: 0; border-radius: 0;
+  /* Same grunnen som `.seriehovud`: ein klassa `<button>` arvar
+     `buttontext` um ingen segjer noko anna. Her hev kvart barn si eigi
+     farge, so det synte seg ikkje — men det er flaks og ikkje ei
+     ordning, og neste span utan farge hadde vore svart i myrkt tema. */
+  color: var(--blekk);
   font-family: var(--skrift); text-transform: none; letter-spacing: 0;
   cursor: pointer;
 }
@@ -66,7 +88,11 @@
 /* Den som treng eit svar stend fyrst i auga, ikkje fyrst i lista. */
 .folk-rad.treng-svar { border-left: 3px solid var(--togu); }
 
-.folk-meir { padding: 0 var(--rom-4) var(--rom-4) var(--rom-4); }
+/* Same fyllet heile vegen rundt. Toppen stod paa null, so e-posten —
+   det fyrste som stend i detaljen — laag klistra uppunder namnelina
+   medan botnen hadde si fulle luft. Ei opning er ein ting, og eit ting
+   ber det same rommet paa alle fire sidone. */
+.folk-meir { padding: var(--rom-4); }
 .folk-detalj {
   display: grid; grid-template-columns: auto minmax(0, 1fr);
   gap: var(--rom-1) var(--rom-4); margin: 0; max-width: 34rem;
@@ -135,6 +161,42 @@
   .kravrad { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* ---- meldingi ----
+   Same lista og same rada att, av same grunnen som kravet: det er ei
+   hending med eit menneske i, og lista yver folk er alt teikna. Skilnaden
+   er at fyrste leddet er ei *setning* og ikkje eit namn — «Anna sa fraa
+   seg PT som gjekk 4.9. 09:00» er éi hending med fire ledd, ikkje fire
+   tal ein samanliknar nedyver — so ho fær heile fyrste spalta og bryt
+   der ho lyt. */
+.meldingsrad {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto auto;
+  gap: var(--rom-2) var(--rom-4); align-items: baseline;
+  padding: var(--rom-3) var(--rom-4);
+}
+.meldingsord { color: var(--blekk); }
+/* Timen og tidi er det ein leitar etter i setningi, so dei ber vekti —
+   men ho er framleis ei setning, so det er feitting og tal, ikkje ei
+   eigi line. */
+.meldingstime { font-weight: 500; }
+.meldingstid { font-family: var(--skrift-tal); white-space: nowrap; }
+.meldingsepost { color: var(--blekk-lys); font-size: .92rem; }
+.meldingsnaar { font-family: var(--skrift-tal); font-size: .92rem; color: var(--blekk-lys); }
+.meldingshandling { display: flex; gap: var(--rom-2); }
+
+.meldingssvar {
+  grid-column: 1 / -1;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+}
+.meldingsrad.kvittert { opacity: .55; }
+.meldingsrad.gale .meldingssvar { color: var(--aatvaring); }
+
+@media (max-width: 48rem) {
+  .meldingsrad { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* ===================================================================
    gruppone
    Ei gruppe er kven du høyrer til; ei rolla er kva du fær gjera. Dei
@@ -157,8 +219,12 @@
 .gruppeliste li:last-child .grupperad { border-bottom: 0; }
 .gruppenamn { font-size: 1.05rem; color: var(--blekk); }
 .gruppetal { font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-svakt); }
-.gruppeslett { margin-left: auto; font-size: .82rem; color: var(--blekk-svakt); }
-.gruppeslett:hover { color: var(--aatvaring); }
+/* Berre maalet — kvar knappen stend. Forma og fargen kjem fraa
+   `.btn-danger` i malen (§9: ein krok aaleine fell gjenom kvar regel i
+   huset, og knappen vart teikna av nettlesaren). Her stod `font-size`
+   og `color` og ingen `background` eller `border`, so han var ein
+   systemknapp med graatt blekk paa. */
+.gruppeslett { margin-left: auto; }
 .gruppetal.gale { color: var(--aatvaring); }
 
 .nygruppe { font-size: 1rem; line-height: 1.9; margin-bottom: var(--rom-5); }

@@ -1,10 +1,21 @@
 {{define "content"}}
-<div class="smal">
+{{/* Registreringi er ei dør som alle dei hine (42-innlogging.css).
+     Ho stod i `.smal` — ei rein breiddegrense utan flate, kant eller
+     skugge — so den eine sida du *lyt* gjenom fyrste gongen var den
+     eine som ikkje saag ut som huset. Same kortet no, same merket,
+     same maalveljaren, same lina ut att nedst. */}}
+<div class="doer">
+    <div class="doermaal">
+        {{template "language_selector" .}}
+    </div>
+
     <span class="merke doermerke" aria-hidden="true"></span>
 
     <h1 class="page-title">{{t .Lang "signup.title"}}</h1>
-    <p class="page-description">{{t .Lang "signup.intro"}}</p>
+    <p class="doerleiding">{{t .Lang "signup.intro"}}</p>
 
+    {{/* Svaret fraa tenaren kjem hit. Han sender `<div class="error">`,
+         som er den same regelen innloggingsfeilen ber. */}}
     <div id="message" aria-live="polite"></div>
 
     <form hx-post="/signup" hx-target="#message" class="skjema">
@@ -72,10 +83,12 @@
             </label>
         </div>
 
-        <button type="submit" class="btn-primary">{{t .Lang "signup.submit"}}</button>
+        {{/* `.brei` som paa innloggingi: knappen er heile døri si
+             handling, og daa fyller han døri. */}}
+        <button type="submit" class="btn-primary brei">{{t .Lang "signup.submit"}}</button>
     </form>
 
-    <p class="attende"><a href="/innlogging">{{t .Lang "signup.have_account"}}</a></p>
+    <p class="doerfot"><a href="/innlogging">{{t .Lang "signup.have_account"}}</a></p>
 </div>
 
 <!-- Vilkaari ligg i eit <dialog>. Nettlesaren tek fokusfella, Escape og

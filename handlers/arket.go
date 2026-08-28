@@ -62,6 +62,80 @@ func merkeVika() (time.Time, time.Time, []models.Event) {
 	return maandag, naa, ut
 }
 
+// medlemskortProvor lagar dei medlemskorti verkstaden syner.
+//
+// Verkstaden teikna eit *anna* kort her fyrr: `.membership-card` med
+// `.membership-header`, `.price-info` og `.dates-info`, handskrive i
+// malen. Ingen av dei klassane fanst nokon annan stad enn i verkstaden
+// — sidone hev alltid nytta `medlemskort`-malen. Verkstaden viste
+// soleis ein komponent som ikkje finst, og det er verre enn ikkje aa
+// visa noko: ARKET §9 segjer at det ein ikkje teiknar her driv, og her
+// dreiv sjølve teikningi.
+//
+// No gjeng korti gjenom den same malen sidone nyttar, med dei fire
+// stodone `user_memberships.status` kann staa i, pluss studentraten og
+// eit tildelt medlemskap — dei tvo einaste tingi som endrar kva kortet
+// ber utan aa vera ei stoda.
+func medlemskortProvor(lang string) []map[string]interface{} {
+	// Faste datoar, so prøvone ikkje skifter medan ein ser paa deim.
+	medlemSidan := time.Date(2024, 3, 11, 0, 0, 0, 0, OsloLoc)
+	// Neste fornying er alltid ein maanad fram (database.go), og
+	// bindingi er start + commitment_months. Verkstaden lyt syna baae
+	// greinene av «Gjeld til», so tali her er dei som fell ut av eit
+	// kjøp gjort 11. mars.
+	nesteFornying := time.Date(2026, 9, 11, 0, 0, 0, 0, OsloLoc)
+	aaretUt := time.Date(2027, 3, 11, 0, 0, 0, 0, OsloLoc)
+
+	kort := func(namn, stoda string, pris, binding int, student, tildelt bool) models.MembershipWithDetails {
+		m := models.MembershipWithDetails{}
+		m.Name = namn
+		m.Price = pris
+		m.CommitmentMonths = binding
+		m.IsStudentSenior = student
+		m.Status = stoda
+		m.RenewalDate = nesteFornying
+		if binding > 0 {
+			m.BindingEnd = &aaretUt
+		}
+		m.Tildelt = tildelt
+		return m
+	}
+
+	provor := []struct {
+		namn     string
+		kort     models.MembershipWithDetails
+		handling bool
+		seiaUpp  bool
+	}{
+		// Aarskort: bindingi ber «Gjeld til», og ho stend eit aar fram.
+		{"Klas", kort("Klas", "active", 69000, 12, false, false), true, true},
+		{"Klas", kort("Klas", "freeze_requested", 69000, 12, false, false), true, false},
+		{"Klas", kort("Klas", "paused", 69000, 12, false, false), true, false},
+		// Uppsagt aarskort: bindingi stend att i basen, men kortet varer
+		// berre ut det som er betalt. Fornyingi, ikkje bindingi.
+		{"Klas", kort("Klas", "cancelled", 69000, 12, false, false), false, false},
+		// Maanadskort: ingi binding, so fornyingi ber henne — ein maanad fram.
+		{"Maanadskort", kort("Maanadskort", "active", 49000, 0, false, false), false, false},
+		{"Klas student", kort("Klas student", "active", 49000, 0, true, false), false, false},
+		// Svart fylgjer ei rolla og gjeng ikkje ut: ∞.
+		{"Svart", kort("Svart", "active", 0, 0, false, true), true, false},
+	}
+
+	ut := make([]map[string]interface{}, 0, len(provor))
+	for _, p := range provor {
+		ut = append(ut, map[string]interface{}{
+			"Medlemskap":  p.kort,
+			"Namn":        p.namn,
+			"Lang":        lang,
+			"UserName":    "Ellinor Linnea",
+			"MedlemSidan": &medlemSidan,
+			"Handlingar":  p.handling,
+			"KannSeiaUpp": p.seiaUpp,
+		})
+	}
+	return ut
+}
+
 // ArketHandler syner verkstaden: kvar komponent i stilarket, utanfor
 // arbeidet sitt, ljos og myrk attmed kvarandre.
 //
@@ -89,6 +163,9 @@ func ArketHandler(w http.ResponseWriter, r *http.Request) {
 		"IsAdmin":     sessionIsAdmin(r),
 		"UserName":    sessionUserName(r),
 		"Merkeprovor": merkeprovor,
+		// Medlemskorti gjeng gjenom den same malen sidone nyttar; sjaa
+		// medlemskortProvor ovanfor.
+		"Medlemskortprovor": medlemskortProvor(lang),
 		// Vika gjeng gjenom KlemVika som i timeplanen, so verkstaden
 		// syner rutenetet med den same koden — ikkje ei etterlikning.
 		"ClassRows": BuildWeekRows(lang, hendingar, naa, maandag),

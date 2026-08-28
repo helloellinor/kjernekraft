@@ -3,7 +3,7 @@
    Ingi flagg. Eit flagg er eit land, ikkje ei skriftform — og det
    danske flagget paa bokmaal segjer det tydelegare enn eg kann.
    =================================================================== */
-.language-selector, .login-language-selector {
+.language-selector, .doermaal {
   display: flex; align-items: center; gap: var(--rom-2);
   font-size: .82rem;
 }
@@ -19,15 +19,15 @@
    `.sikt select`. */
 .language-selector select {
   width: auto; min-width: 0;
-  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
+  /* Pila stend der ho stend i alle veljarar; `--pilrom` er rommet ho
+     treng. Same rettingi som `.sikt select`. */
+  padding: var(--rom-1) var(--pilrom) var(--rom-1) var(--rom-2);
   font-size: .82rem;
   border-color: transparent; background-color: transparent;
   border-radius: var(--rund);
   box-shadow: none;
   background-image: var(--pil);
-  background-size: 5px 5px, 5px 5px;
   color: var(--blekk-lys);
-  background-position: right .45rem top 50%, right .25rem top 50%;
 }
 .language-selector select:active { box-shadow: none; }
 .language-selector select:hover { border-color: var(--haarlina); color: var(--blekk); }

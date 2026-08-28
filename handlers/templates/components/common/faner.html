@@ -1,9 +1,18 @@
 {{define "faner"}}
 {{/* Fanerekkja, éin definisjon.
 
-     Ho tek ei liste med bolkar — `.Faner`, kvar med `Bolk` (namnet i
-     adressa) og `Namn` (det som står på fana) — og teiknar sjølve
-     rekkja. Bolkane står i malen som kallar, av di det er innhaldet, og
+     Ho tek `.Tabs`, ei liste med bolkar, kvar med **`Key`** (namnet i
+     adressa) og **`Name`** (det som står på fana), og teiknar sjølve
+     rekkja.
+
+     Dei tvo namni er kontrakten, og han er avgjord av `handlers.Tab` i
+     medlemskapet.go — ein Go-struct, so eit felt som heiter noko anna er
+     ein køyrefeil ein ser. Ein mal som byggjer lista med `dict` fær
+     ingen slik feil: eit uppslag som bommar er tom tekst og ingen ting
+     meir. Prisbolken i administrasjonen skreiv `Bolk` og `Namn`, og
+     fanerekkja hans stod med tri tome knappar og `data-bolk=""` — ingi
+     fana svara til nokon bolk, so ingen ting hende naar ein trykte.
+     Retta 28.8.2026 i kallaren; skriv `Key` og `Name` her. Bolkane står i malen som kallar, av di det er innhaldet, og
      innhaldet er alltid ulikt.
 
      Fyrste bolken er open; dei andre står `hidden` til faner.js seier
