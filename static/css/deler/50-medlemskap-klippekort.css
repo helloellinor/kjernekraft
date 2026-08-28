@@ -149,7 +149,7 @@
 
 /* Yverskrifti stend eit steg høgare enn `.card-title` elles i huset:
    dette kortet ber berre tvo ting, og daa toler tittelen meir. */
-.klippekort-card .card-title { font-size: 1.649rem; line-height: 1.05; }
+.klippekort-card .card-title { line-height: 1.05; }
 /* Ei linja, aldri tvo: utlaupet stend til høgre paa den same lina som
    namnet, lyft so det sit paa skuldri aat tittelen og ikkje paa
    grunnlina hans. */
@@ -226,11 +226,11 @@
   display: flex; align-items: baseline; gap: var(--rom-3);
   flex-wrap: nowrap; white-space: nowrap;
   font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
-  font-size: 1.284rem; font-weight: 500;
+  font-size: var(--kort-ord); font-weight: 500;
 }
 .klipptal .att {
   font-family: var(--skrift-tal); font-weight: 400;
-  font-size: 4.482rem; line-height: .9; letter-spacing: -.03em;
+  font-size: var(--kort-tal); line-height: .9; letter-spacing: -.03em;
   font-variant-numeric: tabular-nums;
   color: var(--blekk);
 }
@@ -288,6 +288,32 @@
 .klippekort-card, .medlemskort {
   --kortgrunn: clamp(.55rem, 3.25cqi, 1rem);
 
+  /* ---- stigen paa kortet ----
+     Kommentaren yver sa at tali var «gonga med grunneiningi», men dei
+     stod framleis i rem: berre fylli og hakki fylgde kortet, medan
+     skrifti stod still. Eit kort som krympar med spalta si og ber
+     4,482 rem tal er ikkje paa ein maalestokk, det er tvo.
+
+     Stegi er dei same som yverskriftene fylgjer (e^¼ ≈ 1,284):
+
+       tal    4,482   det ein kom for aa lesa
+       tittel 1,649
+       ord    1,284   og merket attmed tittelen
+       verd   1,000   grunneiningi sjølv
+       lapp   0,850   merkelapp, stod, utlaup
+
+     `--kort-merke` er skild ut av di merket ikkje er skrift: han tok
+     `1.5em` av tittelen fyrr — 2,47 einingar — og det er høgare enn
+     fyllet yver honom, so sirkelen laag mest inntil yverkanten. ARKET §8
+     segjer dessutan at merket veks ingen stad utanum dei tvo staderne
+     han er maalt for. Her er han eit ord attmed tittelen. */
+  --kort-tal:    calc(4.482 * var(--kortgrunn));
+  --kort-tittel: calc(1.649 * var(--kortgrunn));
+  --kort-ord:    calc(1.284 * var(--kortgrunn));
+  --kort-verd:   calc(1 * var(--kortgrunn));
+  --kort-lapp:   calc(.85 * var(--kortgrunn));
+  --kort-merke:  var(--kort-ord);
+
   /* Fylli og lufti er kortet si eigi, so dei skalerer med resten.
      Tali er `--rom-4/5/6` uttrykte i grunneiningi. */
   padding: calc(1 * var(--kortgrunn)) calc(1.5 * var(--kortgrunn))
@@ -305,12 +331,24 @@
 .klipphakk { width: calc(1.6 * var(--kortgrunn)); }
 
 .klippekort-card .card-title,
-.medlemskort .card-title { font-size: calc(1.649 * var(--kortgrunn)); }
+.medlemskort .card-title { font-size: var(--kort-tittel); }
 .klippekort-card .card-header,
-.medlemskort .card-header { gap: calc(1 * var(--kortgrunn)); }
+.medlemskort .card-header { gap: var(--kort-verd); }
 .klippekort-card .card-expiry,
 .medlemskort .card-expiry,
-.medlemskort .renewal-date { font-size: calc(.85 * var(--kortgrunn)); }
+.medlemskort .renewal-date { font-size: var(--kort-lapp); }
+
+/* Merket attmed tittelen. Han tok `1.5em` av tittelen og vart daa
+   høgare enn fyllet yver honom. */
+.klippekort-card .card-title .merke,
+.medlemskort .card-title .merke { --merkestorleik: var(--kort-merke); }
+
+/* Detaljrada: lappen namngjev, verdet svarar. Baae fylgjer kortet, og
+   lufta millom radene med. */
+.medlemskort .detail-row { padding: calc(.5 * var(--kortgrunn)) 0; gap: var(--kort-ord); }
+.medlemskort .detail-label { font-size: var(--kort-lapp); }
+.medlemskort .detail-value { font-size: var(--kort-verd); }
+.medlemskort .medlemskort-eigar { font-size: var(--kort-ord); }
 
 /* Stoda stod paa .78rem same kor stort kortet var — det einaste paa den
    øvste lina som ikkje fylgde kortet. Ho ber alt merkelapp-røysta
