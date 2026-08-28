@@ -625,10 +625,29 @@
 /* ---- stodene ---- */
 /* Vald er det same grepet som fokus i eit skrivefelt: lina tek
    merkefargen, ein ring til legg seg utanpaa henne, og fordjupingi vert
-   djupare. Djupna segjer «dette kann du taka i», fargen «her er du no». */
+   djupare. Djupna segjer «dette kann du taka i», fargen «her er du no».
+
+   Flata tek fargen ogso, og det var ho som mangla. Ein kunde velja
+   merket paa tvo vegar — trykkja paa det, eller trykkja kvar som helst
+   i rada — og dei tvo saag ulike ut: trykte du paa merket, laag
+   peikaren yver det, so du fekk *hover* attaat og flata vart turkis.
+   Trykte du paa rada, stod peikaren ein annan stad, og daa fekk du
+   berre lina og ringen — ein turkis kasse kring eit merke som elles
+   var uendra. Same stoda, tvo bilete, og det eine kravde at handi laag
+   stille paa rett stad for aa syna seg.
+
+   Ei stoda skal ikkje vera avhengig av kvar peikaren er. `--merke` 12 %
+   mot flata er eit hakk sterkare enn dei 7 % hover legg paa: vald skal
+   lesast tyngre enn borti, og eit merke ein alt hev valt skal ikkje
+   bleikna naar ein fer yver det. Difor `:not(:disabled)` her ogso — han
+   gjev regelen den same vekti som hover-regelen, og han stend seinare i
+   fila, so han vinn. */
 .dagmerke[aria-pressed="true"] .form-ring { visibility: visible; }
 .dagmerke[aria-pressed="true"] .form-kant { fill: var(--merke); }
 .dagmerke[aria-pressed="true"] .form-djup { fill: color-mix(in srgb, var(--blekk) 16%, transparent); }
+.dagmerke[aria-pressed="true"]:not(:disabled) .form-flate {
+  fill: color-mix(in srgb, var(--merke) 12%, var(--flate));
+}
 
 /* Umme: timen er gjenomgjengen. Han stend der av di rada skal ha sju
    plassar, men han dreg ikkje auga. */
