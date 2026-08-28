@@ -379,9 +379,9 @@ for f in handlers/templates/pages/*.html; do echo "$(grep -c '<h1' $f) $f"; done
 
 | Step | | Means |
 |---|---|---|
-| `--rom-7` | 3rem | between sections on a page |
-| `--rom-6` | 2rem | title/lead down to the first section; above an `.undertittel` |
-| `--rom-5` | 1.5rem | padding inside a box; gap between columns |
+| `--rom-7` | 2rem | between sections on a page |
+| `--rom-6` | 1.5rem | title/lead down to the first section; above an `.undertittel` |
+| `--rom-5` | 1.25rem | padding inside a box; gap between columns |
 | `--rom-4` | 1rem | between cards in a grid; heading to its content; form rows |
 | `--rom-3` | 0.75rem | inside a group: label to field, buttons that belong together |
 | `--rom-2` | 0.5rem | things that read as one: icon and word, number and unit |
@@ -529,11 +529,21 @@ grows nowhere else: a mark standing large on every page is a background.
    something that **exists** rather than something spent: `.plassmaalar` in the
    dock, and `.medlemskapsmaalar`. Its unused nynorsk aliases (`.klippemaalar`,
    `.klipp`, `.tend`, `.kursmaalar`) are gone.
-3. **The tightened ladder.** Proposed: `--rom-5/6/7` → 1.25/1.5/2rem, and heading
-   sizes on a computed ladder with step e^¼ ≈ 1.284 topping out at e rem
-   (1 → 1.284 → 1.649 → 2.118 → 2.718). Tight means tighter space and *larger*
-   type, because space is what made the pages long. Steps below 1rem are fine
-   motor control — do not touch them.
+3. ~~**The tightened ladder.**~~ **Decided — it ships** (2026-08-28, from the
+   Arket design-system project). `--rom-5/6/7` are 1.25/1.5/2rem, and the
+   heading grades sit on step e^¼ ≈ 1.284 topping out at e rem:
+   1 → 1.284 → 1.649 → 2.118 → 2.718. **Tight means tighter space and
+   *larger* type**, because space was what made the pages long. The steps
+   below 1rem are untouched: they are distances *inside* a thing rather than
+   between things, and that is fine motor control.
+
+   Note the consequence, and it is intended: a bare `h2` is now 2.118rem while
+   `.section-title` is 1.649rem. §5 already says the step follows depth in the
+   document and the appearance comes from the role class — nearly every `h2` in
+   the house carries `.section-title`, so it renders at the class's grade. Width
+   carries the rank, not size, which is exactly why two headings can be almost
+   the same size and still say plainly which sits under which.
+
 4. **Dead code.** *Classes: done (2026-08-27).* 49 class selectors that no
    template, script or handler ever wrote are gone, `.tabell-rom` among them —
    mostly the leavings of `pages/membership.html` after `medlemskapet.html`

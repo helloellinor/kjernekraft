@@ -18,7 +18,8 @@ main {
   font-family: var(--skrift-yver);
   line-height: 1.02;
   text-wrap: balance;
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  /* Den stramme stigen, §10.3 — sjaa 00-token.css. */
+  font-size: clamp(2.118rem, 5vw, 2.718rem);
   overflow-wrap: break-word; hyphens: auto;
   font-stretch: var(--vidd-tittel);
   font-weight: 700;
@@ -60,7 +61,7 @@ main {
    huset — ein ser kva som er kva før ein har lese eit ord. */
 .section-title {
   font-family: var(--skrift-yver);
-  font-size: 1.65rem; font-weight: 500;
+  font-size: 1.649rem; font-weight: 500;
   font-stretch: var(--vidd-yver);
   letter-spacing: -.005em;
   line-height: 1.15;

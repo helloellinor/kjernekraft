@@ -340,8 +340,12 @@
      landa nett paa renna, ikkje paa kanten. */
   --renne: 3px;
 
+  /* AVGJORD (ARKET §10.3, 28.8.2026): den stramme stigen.
+     Stramt tyder *mindre* rom og *større* skrift, av di det var romet
+     som gjorde sidone lange. Stegi under 1rem er finmotorikk og er
+     urørde — dei er avstandar inne i ein ting, ikkje millom ting. */
   --rom-1: .25rem; --rom-2: .5rem;  --rom-3: .75rem;
-  --rom-4: 1rem;   --rom-5: 1.5rem; --rom-6: 2rem;   --rom-7: 3rem;
+  --rom-4: 1rem;   --rom-5: 1.25rem; --rom-6: 1.5rem;  --rom-7: 2rem;
   /* Lufta over og under teksti i ein knapp. Mindre enn --rom-2, som
      stod her fyrr: han er eit steg i romskalaen, og eit steg i den
      skalaen er for mykje til dette. */
@@ -574,16 +578,21 @@ h1, h2, h3, h4 {
   margin: 0;
   text-wrap: balance;
 }
+/* Den stramme stigen: steg e^¼ ≈ 1.284, med taket paa e rem.
+     1 → 1.284 → 1.649 → 2.118 → 2.718
+   Fire steg som er mest like store, og breiddi ber rangen (§5) — difor
+   kann tvo yverskrifter vera nær like store og endaa segja klaart kva
+   som ligg under kva. */
 h1 {
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-size: clamp(2.118rem, 5vw, 2.718rem);
   font-stretch: var(--vidd-tittel); font-weight: 700; letter-spacing: -.01em;
   /* Samansette norske ord er lange. Utan dette renn «Brukeradministrasjon»
      ut or spalta i 125 % breidd. */
   overflow-wrap: break-word; hyphens: auto;
 }
-h2 { font-size: 1.8rem; font-stretch: var(--vidd-yver);  font-weight: 600; }
-h3 { font-size: 1.3rem; font-stretch: var(--vidd-yver);  font-weight: 500; }
-h4 { font-size: 1.05rem; font-stretch: var(--vidd-yver); font-weight: 500; }
+h2 { font-size: 2.118rem; font-stretch: var(--vidd-yver);  font-weight: 600; }
+h3 { font-size: 1.649rem; font-stretch: var(--vidd-yver);  font-weight: 500; }
+h4 { font-size: 1.284rem; font-stretch: var(--vidd-yver); font-weight: 500; }
 
 p { margin: 0 0 var(--rom-4); max-width: 62ch; }
 p:last-child { margin-bottom: 0; }
