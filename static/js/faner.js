@@ -125,23 +125,7 @@
     }
 })();
 
-// Namnemenyen. Same grepet som vikeveljaren: ordet er knappen.
-(function () {
-    "use strict";
-    var knapp = document.getElementById("namn-knapp");
-    var meny = document.getElementById("namn-meny");
-    if (!knapp || !meny) return;
-
-    function set(open) {
-        meny.hidden = !open;
-        knapp.setAttribute("aria-expanded", open ? "true" : "false");
-    }
-
-    knapp.addEventListener("click", function () { set(meny.hidden); });
-    document.addEventListener("click", function (e) {
-        if (!meny.hidden && !meny.contains(e.target) && e.target !== knapp) set(false);
-    });
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && !meny.hidden) { set(false); knapp.focus(); }
-    });
-})();
+// Namnemenyen stod her fyrr. Han bur i `namnemeny.js` no: han høyrer til
+// hovudet og ikkje til innhaldet, og denne fila vert berre send til dei
+// sidone som hev ei fanerekkje. Paa heimesida og timeplanen var knappen
+// difor daud.

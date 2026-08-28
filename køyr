@@ -17,7 +17,7 @@ cd "$(dirname "$0")"
 # inn i koda: sette du PORT=9000, leita skriptet etter kven som heldt 9000
 # medan tenaren batt 8080, og dei tvo tala hadde ingen ting med kvarandre
 # aa gjera.
-export PORT="${PORT:-8080}"
+export PORT="${PORT:-18108}"
 PID_FIL=".køyr.pid"
 VAKT_FIL=".køyr.vakt"
 LOGG=".køyr.logg"
@@ -40,17 +40,24 @@ stogg() {
     # aat ingi merkande CPU kvar for seg, so ingen saag deim; det dei
     # aat var disk, og `go test ./handlers` gjekk fraa ni sekund til
     # fire og fyrti med 39 % CPU — han sat og venta paa fila.
+    # Fila held ein pid per lina og ikkje berre den siste. Det er nettupp
+    # det som let deim hopa seg upp: startar ein `./køyr` i tvo vindaugo,
+    # skreiv den andre yver den fyrste, og den fyrste vart usynleg for
+    # alle seinare `--stogg`.
+    #
+    # Me leita etter dei med `pgrep -f køyr` ei stund. Det var verre enn
+    # feilen: mynsteret fann ogso *skalet* som hadde starta skriptet — ei
+    # kommandolina som nemner «køyr» er ikkje det same som ein køyrande
+    # vaktar — og skriptet drap si eigi mor, som tok med seg tenaren den
+    # nett hadde starta. Ein pid ein hev skrive sjølv er den einaste ein
+    # veit kva er.
     if [[ -f "$VAKT_FIL" ]]; then
         local vakt
-        vakt=$(cat "$VAKT_FIL" 2>/dev/null)
-        [[ -n "$vakt" && "$vakt" != "$$" ]] && kill "$vakt" 2>/dev/null
+        while read -r vakt; do
+            [[ -n "$vakt" && "$vakt" != "$$" ]] && kill "$vakt" 2>/dev/null
+        done < "$VAKT_FIL"
         rm -f "$VAKT_FIL"
     fi
-    # Bakstoppet, for dei som vart starta fyre fila fanst. Alle andre
-    # køyringar av dette skriptet enn denne.
-    local andre
-    andre=$(pgrep -f "bash .*køyr" 2>/dev/null | grep -vx "$$" || true)
-    [[ -n "$andre" ]] && kill $andre 2>/dev/null
 
     if [[ -f "$PID_FIL" ]]; then
         kill "$(cat "$PID_FIL")" 2>/dev/null
@@ -128,8 +135,9 @@ nyaste() {
 }
 
 # Vaktaren skriv seg sjølv i fila, so ei seinare `--stogg` finn honom.
-echo $$ > "$VAKT_FIL"
-trap 'rm -f "$VAKT_FIL"' EXIT
+# `>>` og ikkje `>`: fleire vaktarar skal alle staa der, ikkje berre den
+# siste.
+echo $$ >> "$VAKT_FIL"
 
 echo "  vaktar Go-filer. ctrl-c stoggar."
 SIST=$(nyaste)

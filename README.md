@@ -13,7 +13,7 @@ frontenden — malar, CSS og JS blir lesne frå disken.
 export KJERNEKRAFT_SESSION_KEY=$(openssl rand -base64 32)
 export KJERNEKRAFT_ENV=development
 
-go run .          # http://localhost:8080
+go run .          # http://localhost:18108
 ```
 
 Tenaren nektar å starte utan `KJERNEKRAFT_SESSION_KEY`. `KJERNEKRAFT_ENV`
@@ -160,7 +160,10 @@ svarar berre i utvikling, og han teiknar seg sjølv i prøvene.
 ./køyr --stogg      # stoggar
 ```
 
-Han lyder på <http://localhost:8080> og skriv til `.køyr.logg`.
+Han lyder på <http://localhost:18108> og skriv til `.køyr.logg`. Porten
+stend i `standardPort` i `server.go`, og `PORT` byter honom: 8080 er den
+porten flest ting tek fyrst, og ein tenar som svarar utan å vera din er
+verre enn ein som ikkje svarar.
 
 | Du endrar | Kva som skjer |
 |---|---|

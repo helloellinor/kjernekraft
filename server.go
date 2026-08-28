@@ -14,6 +14,25 @@ import (
 	"kjernekraft/handlers/config"
 )
 
+// standardPort er 18108 og ikkje 8080.
+//
+// 8080 er den porten flest ting tek fyrst. Draheim stend paa honom paa
+// heim, og kvar andre tenar ein startar paa ei maskin gjer det same — so
+// «address already in use» er ikkje eit uhell, det er normaltilstanden.
+// Verre er det naar noko *anna* alt lyder der: daa svarar sida, men det
+// er ikkje denne sida, og ein sit og undrar seg yver kvifor endringane
+// ikkje syner seg.
+//
+// 18108 er ikkje skriven upp hjaa IANA, han ligg klaar av alt folk tek
+// til vanleg (3000, 5000, 8000, 8080, 8888, 9000), og han ligg under
+// 32768 — der byrjar dei portane kjernen deler ut til utgaaande
+// sambandi sjølv, og bind ein seg der, tek ein av og til plassen fraa
+// noko som alt hev fenge honom.
+//
+// Talet er 108, som er talet paa perlor i ei mala og paa solhelsingar i
+// ei heil rekkja. Ein port ein hugsar er ein port ein ikkje gissar paa.
+const standardPort = "18108"
+
 func main() {
 	// Initialize global settings (this will set up Oslo timezone by default)
 	settings := config.GetInstance()
@@ -268,7 +287,7 @@ func main() {
 	// in use» etter aa ha meldt at han lydde.
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = standardPort
 	}
 	log.Printf("Serving on http://localhost:%s", port)
 	err = http.ListenAndServe(":"+port, r)

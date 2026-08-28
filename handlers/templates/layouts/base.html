@@ -54,6 +54,11 @@
     <script defer src="{{asset "js/csrf.js"}}"></script>
     <script defer src="{{asset "js/ljosband.js"}}"></script>
     <script defer src="{{asset "js/klistrelag.js"}}"></script>
+    {{/* Namnemenyen høyrer til hovudet, og hovudet stend paa kvar side.
+         Han laag i `faner.js` fyrr — ein bunt som berre gjeng til dei
+         sidone som hev ei fanerekkje — og paa heimesida og timeplanen
+         fanst difor knappen utan at noko lydde paa honom. */}}
+    <script defer src="{{asset "js/namnemeny.js"}}"></script>
 
     {{/* Resten høyrer til éi eller få sidone. Å senda alle til kvar
          innlogging, vilkårsside og heimeside gav over 40 kB unødvendig
