@@ -43,7 +43,7 @@ func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
 	targetMonday := VikeMaandag(now, weekOffset)
 
 	// Get events for the target week
-	weekEvents, err := DB.GetEventsForWeek(targetMonday)
+	weekEvents, err := DB.GetEventsForWeek(targetMonday, int64(user.ID))
 	if err != nil {
 		// Feilen vart slukt her. Ein 500 utan grunn i loggen er ein
 		// feil ein lyt finna att med gissing.

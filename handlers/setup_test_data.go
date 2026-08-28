@@ -104,9 +104,15 @@ func setupMembershipAndKlippekortData(userID int64) error {
 		}
 	}
 
-	// Check if user already has klippekort
-	existingKlippekort, _ := DB.GetUserKlippekort(userID)
-	if len(existingKlippekort) == 0 {
+	// Tel beint i tabellen. GetUserKlippekort syner berre kort ein kann
+	// bruka, so eit oppbrukt kort hadde talt som «ingi kort» og gjeve
+	// brukaren eit nytt par for kvar gong testdataa vart sette upp.
+	var kortTal int
+	if err := DB.Conn.QueryRow(
+		`SELECT COUNT(*) FROM user_klippekort WHERE user_id = ?`, userID).Scan(&kortTal); err != nil {
+		log.Printf("Warning: Could not count user klippekort: %v", err)
+	}
+	if kortTal == 0 {
 		// Create user klippekort
 		now := time.Now()
 		expiryDate := now.AddDate(0, 4, 0) // Expires in 4 months

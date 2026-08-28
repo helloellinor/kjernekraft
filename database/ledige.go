@@ -8,7 +8,9 @@ import "kjernekraft/models"
 // plass». Ein time som er full, er ikkje eit tilbod; han er berre ei rad
 // ein les forbi. Og i dag åleine er for kort: er klokka sju om kvelden,
 // er det ingenting att av dagen, og då står bolken tom kvar kveld.
-func (db *Database) LedigeTimar() ([]models.Event, error) {
+// LedigeTimar gjev det `sjaaarID` skal sjaa: opne timar, og private som
+// er hans eigne. Sjaa privattime.go.
+func (db *Database) LedigeTimar(sjaaarID int64) ([]models.Event, error) {
 	query := `
 		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time,
 		       COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''),
@@ -17,9 +19,10 @@ func (db *Database) LedigeTimar() ([]models.Event, error) {
 		       COALESCE(e.color, ''), COALESCE(r.name, e.location, '')
 		FROM events e LEFT JOIN rooms r ON r.id = e.room_id
 		WHERE DATE(e.start_time) IN (DATE('now', 'localtime'), DATE('now', 'localtime', '+1 day'))
+		  AND ` + synlegFor + `
 		ORDER BY e.start_time ASC
 	`
-	rows, err := db.Conn.Query(query)
+	rows, err := db.Conn.Query(query, sjaaarID)
 	if err != nil {
 		return nil, err
 	}

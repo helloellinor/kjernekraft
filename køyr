@@ -82,11 +82,27 @@ if [[ "${1:-}" == "--ein-gong" ]]; then
     wait
 fi
 
+# `stat` talar tvo maal. BSD (macOS) vil ha `-f '%m'`, GNU (Linux) vil ha
+# `-c '%Y'`. Skriptet nytta berre BSD-forma, og paa Linux gav ho tom
+# utgreiding kvar gong: SIST og NAA var baae tome, dei var alltid like,
+# og vaktaren bygde aldri paa nytt. Han sa framleis «vaktar Go-filer»,
+# so ein sat og undra seg yver kvifor endringane ikkje synte seg.
+if stat -c '%Y' . >/dev/null 2>&1; then
+    STATFLAGG=(-c '%Y')      # GNU
+else
+    STATFLAGG=(-f '%m')      # BSD
+fi
+
+nyaste() {
+    find . -name '*.go' -not -path './.git/*' -exec stat "${STATFLAGG[@]}" {} + 2>/dev/null |
+        sort -rn | head -1
+}
+
 echo "  vaktar Go-filer. ctrl-c stoggar."
-SIST=$(find . -name '*.go' -not -path './.git/*' -newer /dev/null -exec stat -f '%m' {} + 2>/dev/null | sort -rn | head -1)
+SIST=$(nyaste)
 while true; do
     sleep 1
-    NAA=$(find . -name '*.go' -not -path './.git/*' -exec stat -f '%m' {} + 2>/dev/null | sort -rn | head -1)
+    NAA=$(nyaste)
     if [[ "$NAA" != "$SIST" ]]; then
         SIST="$NAA"
         echo "  … endring, byggjer"

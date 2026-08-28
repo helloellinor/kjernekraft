@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -36,7 +37,39 @@ var (
 	stilarkLaas  sync.RWMutex
 	stilarkBytes []byte
 	stilarkTid   time.Time
+	// Avtrykket av delmappa slik ho saag ut sist arket vart sett saman.
+	stilarkAvtrykkSist string
 )
+
+// stilarkAvtrykk lagar ein streng av namn, storleik og endringstid for
+// delfilene, so ein ser um noko er endra utan aa lesa innhaldet.
+func stilarkAvtrykk() string {
+	oppf, err := os.ReadDir(stilarkMappe)
+	if err != nil {
+		return ""
+	}
+	var b strings.Builder
+	for _, o := range oppf {
+		if o.IsDir() || !strings.HasSuffix(o.Name(), ".css") {
+			continue
+		}
+		info, err := o.Info()
+		if err != nil {
+			return ""
+		}
+		fmt.Fprintf(&b, "%s|%d|%d\n", o.Name(), info.Size(), info.ModTime().UnixNano())
+	}
+	return b.String()
+}
+
+// stilarkEndra segjer um noko hev skift sidan sist me sette arket saman.
+func stilarkEndra() bool {
+	naa := stilarkAvtrykk()
+	stilarkLaas.RLock()
+	same := naa == stilarkAvtrykkSist && naa != ""
+	stilarkLaas.RUnlock()
+	return !same
+}
 
 // byggStilark les alle delane og set deim saman.
 func byggStilark() ([]byte, error) {
@@ -76,16 +109,24 @@ func StilarkHandler(w http.ResponseWriter, r *http.Request) {
 	bufra := stilarkBytes
 	stilarkLaas.RUnlock()
 
-	if bufra == nil || IsDevelopment() {
+	// I utvikling vart arket sett saman paa nytt for kvar soknad: alle
+	// 31 delfilene lesne, kvar gong, ogso naar ingen ting var endra.
+	// Same grepet som for malarne — stat fyrst, les berre naar noko er
+	// endra. Endringane dine syner seg framleis ved neste oppdatering.
+	if bufra != nil && IsDevelopment() && !stilarkEndra() {
+		// arket me hev er rett
+	} else if bufra == nil || IsDevelopment() {
 		ny, err := byggStilark()
 		if err != nil {
 			log.Printf("stilarket: %v", err)
 			http.Error(w, "Fann ikkje stilarket", http.StatusInternalServerError)
 			return
 		}
+		avtrykk := stilarkAvtrykk()
 		stilarkLaas.Lock()
 		stilarkBytes = ny
 		stilarkTid = time.Now()
+		stilarkAvtrykkSist = avtrykk
 		stilarkLaas.Unlock()
 		bufra = ny
 	}

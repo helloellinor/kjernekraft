@@ -5,6 +5,7 @@ import (
 	"html"
 	"kjernekraft/database"
 	"kjernekraft/models"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -83,6 +84,18 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, "Session error", http.StatusInternalServerError)
 			return
+		}
+
+		// Utviklarlista er ei fil, ikkje ei rolla nokon set — so det
+		// finst ingen augneblink der nokon «vert» utviklar som me kunde
+		// hekta oss paa. Innloggingi er den fyrste gongen me veit kven
+		// dette er etter at fila kann ha skift, og difor er det her
+		// faktureringi vert stogga for deim. Læraren er alt stogga i
+		// SettRolla; dette tek den hine vegen.
+		if stogga, err := DB.SynkFriMedlemskap(int64(user.ID)); err != nil {
+			log.Printf("fritt medlemskap for %d: %v", user.ID, err)
+		} else if stogga {
+			log.Printf("brukar %d er forfremja; den betalte avtalen er avslutta", user.ID)
 		}
 
 		// Redirect to dashboard
