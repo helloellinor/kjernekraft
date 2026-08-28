@@ -50,3 +50,10 @@ static/fonts/UnionGothic-Variable.woff2
 .køyr.logg
 .kjernekraft-bin
 build.feil
+
+# Kvar kopi av honom, ikkje berre den i static/fonts
+**/UnionGothic-Variable.woff2
+
+# Maskinstøv og agent-arbeidskatalogar
+.DS_Store
+.claude/

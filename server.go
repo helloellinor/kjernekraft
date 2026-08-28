@@ -85,6 +85,11 @@ func main() {
 	//
 	// Difor: alt anna `no-store` i utvikling, skriftene bufra hardt i
 	// baae. Skiftar ei skriftfil namn, skiftar ho ogso adressa.
+	// Stilarket kjem fyre filtenaren: han er sett saman av mange filer
+	// under static/css/deler/, men hev framleis éi adresse. Sjaa
+	// handlers/stilark.go.
+	r.Get("/static/css/kjernekraft.css", handlers.StilarkHandler)
+
 	statiske := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	r.Handle("/static/*", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if strings.HasPrefix(req.URL.Path, "/static/fonts/") {
@@ -119,6 +124,20 @@ func main() {
 	r.Post("/innlogging", handlers.InnloggingHandler)
 	r.Post("/logout", handlers.LogoutHandler)
 
+	// Innsjekkskjermen i vestibylen. Han stend utanfor innloggingi med
+	// vilje — skulde folk logga seg paa fyre dei kryssa av, hadde ingen
+	// kryssa av. Personvernet ligg i tidsvindauget i staden: sida syner
+	// berre timar som byrjar snart eller gjeng no. Sjaa handlers/innsjekk.go.
+	r.Get("/innsjekk", handlers.InnsjekkHandler)
+	r.Get("/innsjekk/laas", handlers.InnsjekkLaasHandler)
+	r.Post("/innsjekk/laas", handlers.InnsjekkLaasHandler)
+	r.Post("/api/innsjekk", handlers.InnsjekkMerkHandler)
+	// Drop-in over disken: søk upp namnet og gakk paa timen, um det er
+	// plass. Same vindauge, same vakthold.
+	r.Get("/api/innsjekk/sok", handlers.InnsjekkSokHandler)
+	r.Post("/api/innsjekk/dropin", handlers.InnsjekkDropinHandler)
+	r.Post("/api/innsjekk/angre", handlers.InnsjekkAngreHandler)
+
 	// ---- innlogga rutor ----
 	r.Group(func(r chi.Router) {
 		r.Use(handlers.RequireAuth)
@@ -131,7 +150,6 @@ func main() {
 
 		// Dashboard component routes (HTMX endpoints)
 		r.Get("/api/user/klippekort", handlers.UserKlippekortHandler)
-		r.Get("/api/user/membership", handlers.UserMembershipHandler)
 		r.Get("/api/user/signups", handlers.UserSignupsHandler)
 		r.Get("/api/user/ledig-plass", handlers.LedigPlassHandler)
 
@@ -170,7 +188,7 @@ func main() {
 		r.Get("/elev/hjem", handlers.ElevDashboardHandler)
 		r.Get("/elev/timeplan", handlers.ElevTimeplanHandler)
 		r.Get("/elev/klippekort", handlers.KlippekortPageHandler)
-		r.Get("/elev/medlemskap", handlers.MedlemskapetHandler)
+		r.Get("/elev/medlemskap", handlers.MembershipPageHandler)
 		r.Post("/elev/medlemskap/recommendations", handlers.MembershipRecommendationsHandler)
 		r.Get("/elev/betaling", handlers.BetalingHandler)
 		r.Get("/elev/min-profil", handlers.MinProfilHandler)
@@ -202,11 +220,7 @@ func main() {
 		r.Delete("/api/admin/membership", handlers.DeleteMembershipHandler)
 		r.Get("/api/admin/class/conflict", handlers.RoomConflictHandler)
 		r.Post("/api/admin/class", handlers.CreateClassHandler)
-		r.Post("/api/admin/rule/teacher", handlers.UpdateRuleTeacherHandler)
-		r.Post("/api/admin/rule/klokke", handlers.UpdateRuleClockHandler)
-		r.Post("/api/admin/rule/beskriving", handlers.UpdateRuleDescriptionHandler)
-		r.Post("/api/admin/rule/lengd", handlers.UpdateRuleLengthHandler)
-		r.Post("/api/admin/class/vikar", handlers.UpdateClassVikarHandler)
+		r.Post("/api/admin/rule/lagra", handlers.SaveRuleHandler)
 		r.Put("/api/admin/class/*", handlers.UpdateClassHandler)
 		r.Delete("/api/admin/class/*", handlers.DeleteClassHandler)
 		r.Post("/api/admin/freeze-requests/approve", handlers.ApproveFreezeRequestHandler)

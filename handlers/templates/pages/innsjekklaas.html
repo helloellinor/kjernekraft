@@ -1,0 +1,28 @@
+{{define "content"}}
+{{/* Døri til kiosken. Éin iPad, fire siffer, ein gong — kaka hugsar
+     resten av aaret. Koden er ein terskel og ikkje eit vern; det han
+     skal stogga, er ein telefon utanfor huset, ikkje ein innbrotstjuv. */}}
+<div class="login-container">
+    <span class="merke doermerke" aria-hidden="true"></span>
+
+    <h1 class="page-title">{{t .Lang "innsjekk.title"}}</h1>
+    <p class="login-subtitle">{{t .Lang "innsjekk.laas_leiing"}}</p>
+
+    {{if .Feil}}
+    <p class="login-error" role="alert">{{t .Lang "innsjekk.laas_feil"}}</p>
+    {{end}}
+
+    <form action="/innsjekk/laas" method="POST">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <div class="form-group">
+            {{/* Setningi yver er merkelappen; feltet ber henne som
+                 aria-label so ho vert lesi upp med. */}}
+            <input type="password" name="kode" class="laasfelt"
+                   inputmode="numeric" pattern="[0-9]*" maxlength="4"
+                   autocomplete="off" required autofocus
+                   aria-label="{{t .Lang "innsjekk.laas_leiing"}}">
+        </div>
+        <button type="submit" class="btn-primary brei">{{t .Lang "innsjekk.laas_knapp"}}</button>
+    </form>
+</div>
+{{end}}
