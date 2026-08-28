@@ -140,7 +140,15 @@
        varselbobla sit. */}}
   <span class="plettmerke" aria-hidden="true"
         style="--hyrne-x: {{printf "%.3f" .Form.HyrneX}}%; --hyrne-y: {{printf "%.3f" .Form.HyrneY}}%">
-    {{- if .Form.Full}}FULL{{else}}{{.Form.Remaining}}<span class="av">/{{.Form.Capacity}}</span>{{end -}}
+    {{/* Eitt tal, og talet er kor mange plassar som er *att*.
+
+         Han stod som «4/18» — ein brøk av det som var att, og det er
+         gale paa baae vis. Ein brøk kann ikkje skiljast: tvo att av ti
+         ser likt ut som fire att av tjue (§9). Og der huset *hev* ein
+         brøk — dokka, lista — syner han kor mange plassar som er
+         *tekne*. Merket ber eitt tal, og eitt tal segjer kor mange du
+         kann faa. */}}
+    {{- if .Form.Full}}FULL{{else}}{{.Form.Remaining}}{{end -}}
   </span>
 </button>
 {{end}}

@@ -490,7 +490,6 @@
 }
 /* Tale av eit anna, ikkje eit tal med eit mindre under seg: same
    storleik, og berre eit hakk mindre blekk. */
-.plettmerke .av { color: var(--blekk-lys); }
 
 /* ---- glaset ----
    Merket er ein klokke, og ein klokke hev eit glas. Ljoset fell ovanfraa

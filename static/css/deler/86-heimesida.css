@@ -102,20 +102,9 @@
      ei linje i ei liste og den siste linja ikkje skal ha ei under seg.
      Her er kanten ikkje ei skiljelinje — han er kanten på kortet. */
   border-bottom: 1px solid var(--haarlina);
-  /* Fyllet.
-     Loddrett: ulikt i dei tvo endane, so *avstanden* vert lik. Det som
-     stikk lengst ned er ikkje kassen på merket — det er plassmerket,
-     som står med midten på hyrna og difor heng om lag 0,10 av breidda
-     under kassen. Med same fyllet i båe endar krysste bobla kanten.
-     Botnfyllet lyt difor rydda henne først, og *so* leggja til den same
-     lufta som står over fana.
-     Vassrett: `--rom-4` og ikkje `--rom-5` som på eit vanleg kort. Ei
-     liste er tettare enn eit kort som står åleine, og fyllet lyt like
-     fullt vera breidt nok til at plassmerket — som heng ut til høgre av
-     same grunn som det heng ned — ikkje kjem borti kanten.
-     Byter storleiken på bobla (`.plettmerke` i 30-timeplanen.css), lyt
-     båe måtast på nytt. */
-  padding: var(--rom-1) var(--rom-4) var(--rom-3);
+  --merkeluft: var(--rom-2);
+  padding: var(--merkeluft) var(--rom-4)
+           calc(var(--merkeluft) + var(--merkestorleik) * .10);
   /* Båe står frå toppen. `center` la teksti midt i ei rad som merket
      hadde gjort høg, og daa flaut yverskrifti eit stykke ned frå lina
      ho høyrer til. */
