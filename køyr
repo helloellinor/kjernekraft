@@ -12,7 +12,12 @@
 set -uo pipefail
 cd "$(dirname "$0")"
 
-PORT="${PORT:-8080}"
+# Porten gjeng vidare til tenaren og ikkje berre til `lsof` her nede.
+# Han stod som ein rein skalvariabel fyrr, medan server.go batt 8080 skrive
+# inn i koda: sette du PORT=9000, leita skriptet etter kven som heldt 9000
+# medan tenaren batt 8080, og dei tvo tala hadde ingen ting med kvarandre
+# aa gjera.
+export PORT="${PORT:-8080}"
 PID_FIL=".køyr.pid"
 LOGG=".køyr.logg"
 

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -258,8 +259,19 @@ func main() {
 		r.Get("/arket", handlers.ArketHandler)
 	})
 
-	log.Println("Serving on http://localhost:8080")
-	err = http.ListenAndServe(":8080", r)
+	// Porten kjem or umgjevnaden. Han stod som «:8080» skriven inn her,
+	// og `./køyr` sette `PORT` som um det gjorde noko — skriptet nytta
+	// talet til aa leita upp kven som heldt porten, medan tenaren batt
+	// 8080 kva enn ein sa. Dei tvo var samde so lenge ingen prøvde noko
+	// anna, og dei var det ikkje den dagen nokon gjorde det: paa heim
+	// stend det alt noko paa 8080, og tenaren fall med «address already
+	// in use» etter aa ha meldt at han lydde.
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Serving on http://localhost:%s", port)
+	err = http.ListenAndServe(":"+port, r)
 	if err != nil {
 		log.Fatal(err)
 	}
