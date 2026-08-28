@@ -22,6 +22,14 @@ const (
 // basesoknader.
 func WithUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Statiske filer treng aldri brukaren. Nettlesaren sender likevel
+		// øktkaka med kvar CSS-, JS- og biletforespurnad, so utan dette
+		// vernet vart det ei basesøkning per fil for innlogga brukarar.
+		if strings.HasPrefix(r.URL.Path, "/static/") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		// I utvikling skal alt som ligg paa disken lesast paa nytt —
 		// malar, stilark og umsetjingar. Elles ser ein nykelen sjølv og
 		// trur ein hev skrive han gale.
@@ -50,7 +58,7 @@ func RequireAuth(next http.Handler) http.Handler {
 	})
 }
 
-// RequireAdmin krev rolla «admin», og rolla vert lesi or basen — ikkje or
+// RequireAdmin krev løyvet «admin», og løyvet vert lesi or basen — ikkje or
 // kaka lesaren sender.
 func RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -267,7 +275,7 @@ func sessionUserName(r *http.Request) string {
 	return ""
 }
 
-// sessionIsAdmin segjer um den innlogga brukaren hev admin-rolla, so
+// sessionIsAdmin segjer um den innlogga brukaren hev admin-løyvet, so
 // malen kann syna administrasjonslenkja for dei som faktisk kjem inn.
 func sessionIsAdmin(r *http.Request) bool {
 	return IsAdmin(GetUserFromSession(r))

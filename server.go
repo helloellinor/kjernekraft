@@ -94,6 +94,11 @@ func main() {
 	r.Handle("/static/*", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if strings.HasPrefix(req.URL.Path, "/static/fonts/") {
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		} else if !handlers.IsDevelopment() && req.URL.Query().Get("v") != "" &&
+			(strings.HasPrefix(req.URL.Path, "/static/css/") || strings.HasPrefix(req.URL.Path, "/static/js/")) {
+			// Malane legg eit innhaldsavtrykk på CSS- og JS-adressene. Ein
+			// ny utgåve får ny adresse, så denne kan trygt bufrast hardt.
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		} else if strings.HasPrefix(req.URL.Path, "/static/img/") {
 			// Bilete er ikkje skrifter — ein *kann* retta ein SVG medan
 			// ein arbeider — men dei skal ikkje hentast paa nytt for
@@ -142,7 +147,6 @@ func main() {
 	r.Group(func(r chi.Router) {
 		r.Use(handlers.RequireAuth)
 
-		r.Get("/users/roles", handlers.GetUserRolesHandler)
 		r.Get("/users/payment-methods", handlers.GetUserPaymentMethodsHandler)
 
 		// Event routes
@@ -196,13 +200,12 @@ func main() {
 	})
 
 	// ---- administrasjon ----
-	// Rolla vert lesi or basen for kvar soknad, ikkje or kaka.
+	// Løyvet vert lesi or basen for kvar soknad, ikkje or kaka.
 	r.Group(func(r chi.Router) {
 		r.Use(handlers.RequireAdmin)
 
 		r.Get("/admin", handlers.AdminPageHandler)
-		r.Post("/users/assign-role", handlers.AssignRoleToUserHandler)
-		r.Post("/api/admin/rolla", handlers.SettRollaHandler)
+		r.Post("/api/admin/loyve", handlers.SettLoyveHandler)
 
 		r.Post("/api/events", handlers.CreateEventHandler)
 
@@ -220,7 +223,12 @@ func main() {
 		r.Delete("/api/admin/membership", handlers.DeleteMembershipHandler)
 		r.Get("/api/admin/class/conflict", handlers.RoomConflictHandler)
 		r.Post("/api/admin/class", handlers.CreateClassHandler)
-		r.Post("/api/admin/rule/lagra", handlers.SaveRuleHandler)
+		r.Post("/api/admin/serie/lagra", handlers.LagraSerieHandler)
+		r.Post("/api/admin/rabattkrav", handlers.RabattkravHandler)
+		r.Post("/api/admin/melding", handlers.MeldingHandsamaHandler)
+		r.Post("/api/admin/gruppe", handlers.LagGruppeHandler)
+		r.Post("/api/admin/gruppe/slett", handlers.SlettGruppeHandler)
+		r.Post("/api/admin/gruppemedlem", handlers.GruppemedlemHandler)
 		r.Put("/api/admin/class/*", handlers.UpdateClassHandler)
 		r.Delete("/api/admin/class/*", handlers.DeleteClassHandler)
 		r.Post("/api/admin/freeze-requests/approve", handlers.ApproveFreezeRequestHandler)

@@ -14,7 +14,7 @@ import (
 // det ikkje. Ho stend i ei fil paa tenaren, og det er heile skilnaden:
 // ho gjev fri tilgang til huset, so ho skal koma fraa den som eig
 // maskini — ikkje fraa den som eig ein knapp i administrasjonen. Difor
-// stend ho ikkje i RollaFinst, og difor ligg ho aldri i user_roles: det
+// stend ho ikkje i LoyveFinst, og difor ligg ho aldri i brukarloyve: det
 // finst ingi skriveveg til henne gjenom nettet i det heile.
 //
 // Fila er ei liste yver e-postar, ei per lina. Tome liner og liner som

@@ -4,6 +4,7 @@ import (
 	"kjernekraft/database"
 	"kjernekraft/models"
 	"testing"
+	"time"
 
 	"github.com/leanovate/gopter"
 	"github.com/leanovate/gopter/gen"
@@ -31,7 +32,7 @@ type ChangeMembershipAction struct {
 
 func (a *ChangeMembershipAction) Apply(state *MembershipState, db *database.Database) error {
 	// Simulate checking if membership change is allowed
-	canChange, _ := db.CanChangeMembership(state.UserID, a.NewMembershipID)
+	canChange, _ := db.CanChangeMembership(state.UserID, a.NewMembershipID, time.Now())
 	if !canChange {
 		return nil // Not allowed, but not an error for testing
 	}
@@ -119,7 +120,7 @@ func TestMembershipActionsPropertyBased(t *testing.T) {
 				Phone:     "11111111",
 				Birthdate: "1990-01-01",
 				Password:  "testpassword",
-				Roles:     []string{"user"},
+				Loyve:     []string{"user"},
 			}
 
 			id, err := db.CreateUser(user)
@@ -177,7 +178,7 @@ func TestMembershipActionsPropertyBased(t *testing.T) {
 				Phone:     "22222222",
 				Birthdate: "1990-01-01",
 				Password:  "testpassword",
-				Roles:     []string{"user"},
+				Loyve:     []string{"user"},
 			}
 
 			id, err := db.CreateUser(user)
@@ -219,7 +220,7 @@ func TestMembershipInvariants(t *testing.T) {
 		Phone:     "33333333",
 		Birthdate: "1990-01-01",
 		Password:  "testpassword",
-		Roles:     []string{"user"},
+		Loyve:     []string{"user"},
 	}
 
 	userID, err := db.CreateUser(user)
@@ -283,7 +284,7 @@ func BenchmarkMembershipActionSequence(b *testing.B) {
 		Phone:     "44444444",
 		Birthdate: "1990-01-01",
 		Password:  "testpassword",
-		Roles:     []string{"user"},
+		Loyve:     []string{"user"},
 	}
 
 	userID, err := db.CreateUser(user)

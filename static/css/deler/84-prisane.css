@@ -43,10 +43,11 @@
    like godt på ein telefon som på ein skjerm. */
 .nyrad { margin-top: var(--rom-5); }
 
-/* Veljaren i setninga ber den same fordjupinga som felta rundt seg —
-   `.lappfelt` set flate og skugge, og select-regelen ovanfor held pila
-   og breidda. Utan `padding-right` legg teksten seg under pila. */
-select.lappfelt { padding-right: var(--rom-6); }
+/* `.lappfelt` set fyll paa alle fire sidone, og paa ein veljar tek det
+   burt rommet pila stend i. Difor lyt det setjast attende — men med
+   `--pilrom`, som er rekna av kvar pila faktisk stend (00-token.css), og
+   ikkje med eit tal som er gissa her. */
+select.lappfelt { padding-right: var(--pilrom); }
 
 /* Ein rad som ikkje er lagra enno ber det same merket som eit endra
    felt — heile raden, av di det er heile raden som er ny. */

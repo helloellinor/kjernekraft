@@ -14,12 +14,15 @@
    tvo margar som møtest her gav tri og ein halv rem mellom det siste
    kortet og «Legg til kort» — nok til at knappen såg ut til å høyre til
    noko anna. */
+/* Breiddi ligg paa bolken (`.kortbolk` i 50-medlemskap-klippekort.css)
+   og ikkje her. Ho stod ein augneblink som `.betalingsbolk: 30rem` — eit
+   eige tal for den same tingen, og so var det tvo tal aa halda i takt
+   der eitt gjer arbeidet. Kortet sluttar aa veksa ved `--kortbreidd`;
+   bolken som held det gjer det same. */
+
 .kortliste {
   list-style: none; margin: 0; padding: 0;
   display: flex; flex-direction: column; gap: var(--rom-4);
-  /* Eit kort er eit kort. Strekt over heile spalta les det seg som eit
-     banner, og eit banner er det ein er van med å sjå på ei spamside. */
-  max-width: 30rem;
 }
 
 .kortlapp { --produkt: var(--merke); }

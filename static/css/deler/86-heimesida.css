@@ -89,7 +89,28 @@
 
 .timerad.heimerad {
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--rom-4);
+  /* Fyllet og gapet stend paa `.timerad` i 30-timeplanen.css, saman med
+     grunngjevingi. Dei stod ein gong til her med andre tal, og daa laag
+     merket tettare i toppen og lenger ut fraa namnet paa heimesida enn
+     i vika — same tingen, tvo maal. Det som skil dei tvo stadene er
+     oppsettet: éin dag her og sju der. Ikkje rommet kring merket.
+
+     `--merkestorleik` stend paa rada og ikkje paa merket, av di
+     botnfyllet der inne reknar klareringi aat bobla av henne. Sett paa
+     merket fanst ho ikkje i det `calc`-et, og rada rydda for ei bobla
+     som var ein rem større enn den som hekk der.
+
+     Merket ber dagen, klokkeslettet og plassane. Difor står ingen av
+     dei i teksten — det ville vore det same to gonger. */
+  /* Merket er den høgste tingen i rada, og difor er det *han* som set
+     høgdi hennar — ikkje teksten. I 4,4 rem vart merket 103 pikslar
+     høgt mot dei 47 som namnet og læraren tek, og resten var luft yver
+     og under teksten. Det var ikkje ro; det var eit hol. I 3,4 rem er
+     merket framleis lesbart — klokkeslettet og plasstalet stend i
+     skrifta si — og rada gjekk fraa 137 til 105 pikslar. Lista med ti
+     timar gjekk fraa 1362 til 1047, og fær difor plass paa ein
+     skjerm. */
+  --merkestorleik: 3.4rem;
   /* Vengen ber slaget, ikkje produktet.
      Kortet ligg i vinstre spalta og medlemskortet i høgre, so dei tvo
      vengene stend på same skjermen — sjå åtvaringi i 00-token.css.
@@ -97,25 +118,11 @@
      Fallet er `--haarlina` og ikkje `--merke`: eit slag huset ikkje
      kjenner har ingen farge, og turkisen ville gjort det til yoga.
      Ein grå venge seier «ingen farge», som er sant. */
-  border-left: 3px solid var(--slagfarge, var(--haarlina));
+  border-left: var(--venge) solid var(--slagfarge, var(--haarlina));
   /* `.timerad:last-child` slår botnkanten av i timeplanen, der raden er
      ei linje i ei liste og den siste linja ikkje skal ha ei under seg.
      Her er kanten ikkje ei skiljelinje — han er kanten på kortet. */
   border-bottom: 1px solid var(--haarlina);
-  /* Fyllet.
-     Loddrett: ulikt i dei tvo endane, so *avstanden* vert lik. Det som
-     stikk lengst ned er ikkje kassen på merket — det er plassmerket,
-     som står med midten på hyrna og difor heng om lag 0,10 av breidda
-     under kassen. Med same fyllet i båe endar krysste bobla kanten.
-     Botnfyllet lyt difor rydda henne først, og *so* leggja til den same
-     lufta som står over fana.
-     Vassrett: `--rom-4` og ikkje `--rom-5` som på eit vanleg kort. Ei
-     liste er tettare enn eit kort som står åleine, og fyllet lyt like
-     fullt vera breidt nok til at plassmerket — som heng ut til høgre av
-     same grunn som det heng ned — ikkje kjem borti kanten.
-     Byter storleiken på bobla (`.plettmerke` i 30-timeplanen.css), lyt
-     båe måtast på nytt. */
-  padding: var(--rom-1) var(--rom-4) var(--rom-3);
   /* Båe står frå toppen. `center` la teksti midt i ei rad som merket
      hadde gjort høg, og daa flaut yverskrifti eit stykke ned frå lina
      ho høyrer til. */
@@ -126,14 +133,35 @@
   align-self: start;
   /* Ingen marg. Merket står som det er: SVG-en ber si eigi eining i båe
      endar, og kortet legg fyllet sitt til utanpå. */
+  /* Spalta er merket si eigi, ikkje dagen sin.
+     `.dagmerke` ber `grid-column: calc(var(--dag) + 1)` av di han i vika
+     stend i spalta til dagen sin — sju spaltor, ei per dag. Her er det
+     tvo spaltor, namnet og merket, og daa peikar det same talet ut or
+     nettet: eit merke paa ein tysdag hamna i spalta 3, som ikkje finst,
+     so nettleseren laga henne — 0 px brei, med eit gap paa kvar sida.
+     Glipa millom namnet og merket vart 24 px i staden for 12, og ho
+     vaks med vekedagen: eit sundagsmerke stod i spalta 8 og drog seks
+     tome gap med seg.
+     Same retting som `.merkerad` gjer, og av same grunnen: utan eit
+     rutenet av dagar tyder `--dag` ingen ting. */
+  grid-column: auto;
 }
 /* Teksti ber ingi fylling og står midt i rada.
    Ho *må* vera lægre enn kassen: er ho høgare, er det ho som set høgdi
    på rada, og daa held korkje toppen eller botnen på kassen kanten
    lenger. Med fyll på `--rom-3` var ho 86 px mot kassen sine 73. */
 .timerad.heimerad .timekva { padding: 0; align-self: center; }
-.timerad.heimerad .timetittel { font-size: 1.35rem; }
+/* Namnet er ikkje ei yverskrift her — det er ei line i ei liste.
+
+   Det stod i 1,35 rem, og det er nesten so stort som «Ledig plass»
+   yver lista. Daa ropar kvar einskild time like høgt som bolken dei
+   alle ligg i, og ein les ti rop etter kvarandre i staden for ei liste.
+   Lengre namn broytte ogso i tvo liner utan grunn: «Self Practice
+   Pilates Apparatus» tok tvo liner i ei spalte som er brei nok til
+   heile namnet.
+
+   1,1 rem er framleis det største og feitaste i rada — namnet er det
+   ein leitar etter — men no ser ein at det er tale um éin time og ikkje
+   um ein ny bolk. */
+.timerad.heimerad .timetittel { font-size: 1.1rem; line-height: 1.2; }
 .timerad.heimerad.umme { opacity: .5; }
-/* Merket ber dagen, klokkeslettet og plassane. Difor står ingen av dei
-   i teksten — det ville vore det same to gonger. */
-.timerad.heimerad .dagmerke { --merkestorleik: 4.4rem; }

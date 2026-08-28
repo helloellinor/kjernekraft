@@ -35,11 +35,34 @@
          fargane til rot-temaet, og eit ljost merke paa ei myrk sida
          hadde fenge feil glans. Same fella som med filtri. */}}
     <defs>
-      <linearGradient id="glas-{{.Form.Ident}}" x1="0" y1="0" x2="0" y2="1">
+      {{/* Glaset er ei kule og ikkje eit band.
+
+           Her stod ein linear-gradient ovanfraa og ned. Han var flat av
+           di han ikkje visste at det laag eit krumt glas under seg — eit
+           band tvers yver, same kva forma gjorde. No sit speglingi der
+           sola stend (`--sol`, 34 % 22 %) med den same falloff-trappa som
+           kulone i brettet og kula i plassmaalaren, so alt runda i huset
+           fangar ljoset paa den same staden.
+
+           SVG kann ikkje lesa `--glim-rund` — ein gradient er eit element
+           her og ikkje ein verdi — so trappa er skrivi ut. Endrar du
+           *trappa* i `--glim-rund`, endra denne med. Talet ho er mengd
+           av er derimot ikkje det same: glaset ligg paa `--flate` og tek
+           `--glans`, medan pinnen og kula ber ein slagfarge og tek
+           `--glans-farga`. Stoppi stend i 30-timeplanen.css.
+
+           `userSpaceOnUse` og ikkje prosent av omrisset: omrisset er
+           høgare enn det er breidt, og ein objectBoundingBox-gradient
+           vert strekt med det — daa er speglingi ein oval og ikkje eit
+           ljospunkt, og ho les seg som ei flekk. Midpunktet og radien
+           kjem fraa merkeform.go, som er autoriteten paa geometrien. */}}
+      <radialGradient id="glas-{{.Form.Ident}}" gradientUnits="userSpaceOnUse"
+                      cx="{{.Form.GlasX}}" cy="{{.Form.GlasY}}" r="{{.Form.GlasR}}">
         <stop offset="0"    class="glas-topp"/>
-        <stop offset="0.26" class="glas-midt"/>
-        <stop offset="0.54" class="glas-ut"/>
-      </linearGradient>
+        <stop offset="0.36" class="glas-midt"/>
+        <stop offset="0.64" class="glas-svak"/>
+        <stop offset="0.84" class="glas-ut"/>
+      </radialGradient>
     </defs>
 
     {{/* Fana ligg attum kroppen. Ho gjeng ned under yverkanten hans,
@@ -120,7 +143,15 @@
        varselbobla sit. */}}
   <span class="plettmerke" aria-hidden="true"
         style="--hyrne-x: {{printf "%.3f" .Form.HyrneX}}%; --hyrne-y: {{printf "%.3f" .Form.HyrneY}}%">
-    {{- if .Form.Full}}FULL{{else}}{{.Form.Remaining}}<span class="av">/{{.Form.Capacity}}</span>{{end -}}
+    {{/* Eitt tal, og talet er kor mange plassar som er *att*.
+
+         Han stod som «4/18» — ein brøk av det som var att, og det er
+         gale paa baae vis. Ein brøk kann ikkje skiljast: tvo att av ti
+         ser likt ut som fire att av tjue (§9). Og der huset *hev* ein
+         brøk — dokka, lista — syner han kor mange plassar som er
+         *tekne*. Merket ber eitt tal, og eitt tal segjer kor mange du
+         kann faa. */}}
+    {{- if .Form.Full}}FULL{{else}}{{.Form.Remaining}}{{end -}}
   </span>
 </button>
 {{end}}

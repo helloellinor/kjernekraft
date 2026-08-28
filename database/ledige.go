@@ -1,6 +1,10 @@
 package database
 
-import "kjernekraft/models"
+import (
+	"time"
+
+	"kjernekraft/models"
+)
 
 // Timar med ledig plass i dag og i morgon.
 //
@@ -10,7 +14,9 @@ import "kjernekraft/models"
 // er det ingenting att av dagen, og då står bolken tom kvar kveld.
 // LedigeTimar gjev det `sjaaarID` skal sjaa: opne timar, og private som
 // er hans eigne. Sjaa privattime.go.
-func (db *Database) LedigeTimar(sjaaarID int64) ([]models.Event, error) {
+func (db *Database) LedigeTimar(sjaaarID int64, naa time.Time) ([]models.Event, error) {
+	start := time.Date(naa.Year(), naa.Month(), naa.Day(), 0, 0, 0, 0, naa.Location())
+	slutt := start.AddDate(0, 0, 2)
 	query := `
 		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time,
 		       COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''),
@@ -18,11 +24,11 @@ func (db *Database) LedigeTimar(sjaaarID int64) ([]models.Event, error) {
 		       COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment,
 		       COALESCE(e.color, ''), COALESCE(r.name, e.location, '')
 		FROM events e LEFT JOIN rooms r ON r.id = e.room_id
-		WHERE DATE(e.start_time) IN (DATE('now', 'localtime'), DATE('now', 'localtime', '+1 day'))
+		WHERE e.start_time >= ? AND e.start_time < ?
 		  AND ` + synlegFor + `
 		ORDER BY e.start_time ASC
 	`
-	rows, err := db.Conn.Query(query, sjaaarID)
+	rows, err := db.Conn.Query(query, veggtekst(start), veggtekst(slutt), sjaaarID, sjaaarID)
 	if err != nil {
 		return nil, err
 	}

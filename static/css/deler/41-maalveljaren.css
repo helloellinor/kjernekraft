@@ -3,16 +3,31 @@
    Ingi flagg. Eit flagg er eit land, ikkje ei skriftform — og det
    danske flagget paa bokmaal segjer det tydelegare enn eg kann.
    =================================================================== */
-.language-selector, .login-language-selector {
+.language-selector, .doermaal {
   display: flex; align-items: center; gap: var(--rom-2);
   font-size: .82rem;
 }
+/* Naken, som sikti. Veljaren vart ein kapsel med kuppel og glans
+   28.8.2026, og det er rett i eit skjema — men maalveljaren stend i
+   hovudet og i foten, ikkje i eit skjema, og han skal ikkje sjaa ut som
+   ein knapp du kann trykkja paa.
+
+   Det held ikkje aa taka ramma av: utan `box-shadow: none` fylgde
+   kuppelen med, og utan `background-image: var(--pil)` fekk han tri
+   glanslag attaat pila — og daa stod pila paa feil stad, av di
+   posisjonslista er rekna for fem lag og ikkje tvo. Same rettingi som
+   `.sikt select`. */
 .language-selector select {
   width: auto; min-width: 0;
-  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
+  /* Pila stend der ho stend i alle veljarar; `--pilrom` er rommet ho
+     treng. Same rettingi som `.sikt select`. */
+  padding: var(--rom-1) var(--pilrom) var(--rom-1) var(--rom-2);
   font-size: .82rem;
   border-color: transparent; background-color: transparent;
+  border-radius: var(--rund);
+  box-shadow: none;
+  background-image: var(--pil);
   color: var(--blekk-lys);
-  background-position: right .45rem top 50%;
 }
+.language-selector select:active { box-shadow: none; }
 .language-selector select:hover { border-color: var(--haarlina); color: var(--blekk); }

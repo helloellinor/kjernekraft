@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/russross/blackfriday/v2"
 )
@@ -12,6 +13,31 @@ import (
 // StudioEpost er adressa folk naar studioet paa. Ho stend her og ikkje
 // spreidd i malarne, so ho kann bytast ein stad.
 const StudioEpost = "post@kjernekraftoslo.no"
+
+var (
+	termsOnce sync.Once
+	termsBody template.HTML
+	termsErr  error
+)
+
+func lesVilkaar() (template.HTML, error) {
+	content, err := os.ReadFile("static/vilkår.md")
+	if err != nil {
+		return "", err
+	}
+	// Kjelda er ei fil me eig sjølve, ikkje noko ein brukar hev skrive,
+	// so det er trygt aa lata henne staa som HTML.
+	return template.HTML(blackfriday.Run(content)), nil
+}
+
+func vilkaarsinnhald() (template.HTML, error) {
+	// Utvikling skal framleis syna markdown-endringar ved neste last.
+	if IsDevelopment() {
+		return lesVilkaar()
+	}
+	termsOnce.Do(func() { termsBody, termsErr = lesVilkaar() })
+	return termsBody, termsErr
+}
 
 // TermsHandler syner handelsvilkaari.
 //
@@ -21,16 +47,12 @@ const StudioEpost = "post@kjernekraftoslo.no"
 // framleis den nakne bolken, som er det skuffa paa registreringssida
 // hentar.
 func TermsHandler(w http.ResponseWriter, r *http.Request) {
-	content, err := os.ReadFile("static/vilkår.md")
+	body, err := vilkaarsinnhald()
 	if err != nil {
 		log.Printf("vilkaar: %v", err)
 		http.Error(w, "Kunde ikkje lasta vilkaari", http.StatusInternalServerError)
 		return
 	}
-
-	// Kjelda er ei fil me eig sjølve, ikkje noko ein brukar hev skrive,
-	// so det er trygt aa lata henne staa som HTML.
-	body := template.HTML(blackfriday.Run(content))
 
 	if r.URL.Query().Get("fragment") == "1" {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")

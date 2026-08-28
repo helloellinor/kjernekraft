@@ -60,20 +60,57 @@
 /* ---- belastningar ----
    Same mellomrom som klippekorti paa hi sida. Dei stod med ulik luft og
    las seg difor som tvo ulike slag lister. */
-.charges-list { display: flex; flex-direction: column; gap: var(--rom-3); }
-.charge-item { padding: var(--rom-3) var(--rom-4); }
-.charge-line { margin: 0; font-size: .95rem; color: var(--blekk-lys); max-width: none; }
+/* Rommet er `--kortrom` som i kvar annan kortstabel — sjaa
+   50-medlemskap-klippekort.css. Det stod i `--rom-3` her og `--rom-4`
+   der, for den same tingen. */
+.charges-list { display: flex; flex-direction: column; gap: var(--kortrom); }
+/* Forma, fylli og maalestokken kjem fraa den delte kortblokki i
+   50-medlemskap-klippekort.css — belastningi er ein tridjepart av eit
+   medlemskort. Her stend berre det som er hennar eige.
+
+   Skrifti stod i rem: .95 for lina, 1,05 for summen, .88 for kortet og
+   .8 for undertekstene. Det er den same feilen medlemskortet hadde —
+   ein kasse som skalerer med spalta og ei skrift som ikkje gjer det —
+   so tali er flutte yver paa stigen: summen ber ordsteget, lina og
+   kortet grunnsteget, undertekstene merkelappsteget. Ved 28 rem er dei
+   tri innanfor ein piksel av det dei var. */
+/* Linehøgdi er kortet si og ikkje prosa si. Ho arva 1,6 fraa lesetypen,
+   og det er maalet for ein tekst ein *les seg gjenom*; ei kvittering er
+   tvo liner ein ser paa. Med prosahøgdi bar belastningi seg sjølv høgare
+   enn tridjeparten og formi gav etter for henne — 93 px der ho skulde
+   vera 91. */
+.charge-line { margin: 0; font-size: var(--kort-verd); line-height: 1.35; color: var(--blekk-lys); max-width: none; }
 .charge-amount {
-  font-family: var(--skrift-tal); font-size: 1.05rem; font-weight: 400;
+  font-family: var(--skrift-tal); font-size: var(--kort-ord); font-weight: 400;
   color: var(--blekk);
 }
-.charge-card { font-family: var(--skrift-tal); font-size: .88rem; }
+.charge-card { font-family: var(--skrift-tal); font-size: var(--kort-verd); }
 .charge-what { color: var(--blekk); }
 .charge-meta {
-  margin: var(--rom-1) 0 0; display: flex; gap: var(--rom-3);
-  font-size: .8rem; color: var(--blekk-svakt);
+  margin: 0; display: flex; flex-wrap: wrap; gap: calc(.75 * var(--kortgrunn));
+  line-height: 1.35;
+  font-size: var(--kort-lapp); color: var(--blekk-svakt);
 }
 /* Ei vellukka betaling treng ikkje segja at ho gjekk bra — det er berre
    naar noko *ikkje* gjekk at ein vil vita det. */
 .charge-status { color: var(--aatvaring); }
 .charge-status.pending { color: var(--blekk-lys); }
+
+/* Den feila belastningi skal ikkje kunna oversjaast: heile flata tek
+   den veike aatvaringsvasken. Det er aatvaringi sin blyge slektning og
+   ikkje --togu — roseraudt fraa raudt tyder «gjekk gale», medan togu
+   tyder «klippekort», og ei feila belastning maa ikkje kle seg ut som
+   eit produkt (§1). Den sterke aatvaringi ligg som fyrr berre paa talet
+   og ordet, og streken gjenom summen seier det same som fargen, so rada
+   les rett ogso i graatt. */
+.charge-item.status-failed { background: var(--aatvaring-svak); }
+.charge-item.status-failed .charge-amount {
+  color: var(--aatvaring);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.charge-item.status-failed .charge-what { color: var(--blekk-lys); }
+
+/* Grunnen, med vanleg blekk: han er opplysning, ikkje alarm — alarmen
+   stend alt paa talet og ordet attmed. */
+.charge-failure { color: var(--blekk-lys); }

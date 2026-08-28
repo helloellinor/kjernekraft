@@ -57,6 +57,7 @@ func GetTemplateManager() *TemplateManager {
 func getTemplateFuncs() template.FuncMap {
 	settings := config.GetInstance()
 	return template.FuncMap{
+		"asset": staticURL,
 		// Klassetypen som ein CSS-krok. Verdet kjem raatt fraa
 		// `events.class_type`, der administrasjonen skriv fritt, so det
 		// vert vaska: smaa bokstavar og ingen ting utanum a-z. Er det
@@ -209,6 +210,13 @@ func getTemplateFuncs() template.FuncMap {
 		// Med årstal. «fredag 26. mars» er nok for ein time i denne veka,
 		// men ein fornyingsdato utan år er ikkje ein dato — han kan vere
 		// neste månad eller om to år.
+		// Utlaupet paa eit medlemskap. Reglane bur i modellen av di dei
+		// er reglar og ikkje teikning — fire greiner og ei klokka som
+		// stend medan medlemskapet er frose — og av di dei daa kann
+		// provast. nil tyder «utan utlaup», og kortet teiknar ∞.
+		"gjeldTil": func(m models.MembershipWithDetails) *time.Time {
+			return m.GjeldTil(time.Now())
+		},
 		"norskDatoAar": func(t time.Time) string {
 			return fmt.Sprintf("%d. %s %d", t.Day(), norskeMaanader[t.Month()], t.Year())
 		},
@@ -254,6 +262,55 @@ func getTemplateFuncs() template.FuncMap {
 				"timeplan.wednesday", "timeplan.thursday", "timeplan.friday",
 				"timeplan.saturday",
 			}[t.Weekday()]
+		},
+		// Maanaden ein dato fell i, som umsetjingsnykel. Stutt form: han
+		// stend under vekenummeret paa dagrada som ei merkelapp, og ei
+		// merkelapp skal ikkje taka meir rom enn ho er verd (§5).
+		"maanadnykel": func(t time.Time) string {
+			return [...]string{
+				"", "timeplan.jan", "timeplan.feb", "timeplan.mar", "timeplan.apr",
+				"timeplan.mai", "timeplan.jun", "timeplan.jul", "timeplan.aug",
+				"timeplan.sep", "timeplan.okt", "timeplan.nov", "timeplan.des",
+			}[int(t.Month())]
+		},
+		// Vekenummeret ein dato fell i, ISO-8601 — det same talet
+		// vikeveljaren i timeplanen tel i, so «veke 37» tyder det same
+		// tvo stader. Serien gjentek seg kvar vike, so nummeret er det
+		// eine talet som skil éin time i rekkja fraa dei hine.
+		"veketal": func(t time.Time) int {
+			_, v := t.ISOWeek()
+			return v
+		},
+		// `eq` i malen krev same typen. Gruppa si id er int64 fraa basen
+		// og timen si er int, og ei samanlikning av dei tvo er ein
+		// køyrefeil midt i teikningi.
+		"int64": func(n interface{}) int64 {
+			switch v := n.(type) {
+			case int:
+				return int64(v)
+			case int64:
+				return v
+			}
+			return 0
+		},
+		// Namni i ei setning: «Leon», «Leon og Vikar», «Leon, Anna og
+		// Vikar». Rekkja er lærar fyrst, so vikarane — sjaa
+		// `laerarane` i timeserie.go — so setningi les seg som «Leon,
+		// og so ein vikar ei vika».
+		//
+		// Ordet imillom kjem or umsetjingane som alt anna (§7). Han
+		// stend i malen og ikkje i ei Go-lista av di det er *skrifti* og
+		// ikkje rekkja som skil maali.
+		"namneliste": func(lang string, namn []string) string {
+			switch len(namn) {
+			case 0:
+				return ""
+			case 1:
+				return namn[0]
+			}
+			siste := namn[len(namn)-1]
+			return strings.Join(namn[:len(namn)-1], ", ") +
+				" " + t(lang, "admin.stats_and") + " " + siste
 		},
 		"gonger": func(lang string, n int) string {
 			if n == 1 {

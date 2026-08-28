@@ -1,20 +1,25 @@
 {{define "content"}}
-<div class="login-container">
-    <!-- Language Selector at top -->
-    <div class="login-language-selector">
+<div class="doer">
+    {{/* Maalveljaren stend yverst paa kvar dør: den som ikkje er logga
+         inn hev ingi lagra innstilling, so valet lyt vera her fyre han
+         les noko. */}}
+    <div class="doermaal">
         {{template "language_selector" .}}
     </div>
-    
+
     <span class="merke doermerke" aria-hidden="true"></span>
 
     <h1 class="page-title">{{t .Lang "login.title"}}</h1>
-    <p class="login-subtitle">{{t .Lang "login.subtitle"}}</p>
+    <p class="doerleiding">{{t .Lang "login.subtitle"}}</p>
     
     {{if .Error}}
     <p class="login-error" role="alert">{{t .Lang .Error}}</p>
     {{end}}
 
-    <form action="/innlogging" method="POST">
+    {{/* `.skjema` og ikkje margar paa kvart felt: rommet millom felti er
+         foreldret sitt (§6), og daa er det éin stad aa endra det. Same
+         klassa som registreringi. */}}
+    <form action="/innlogging" method="POST" class="skjema">
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
         <div class="form-group">
             <label for="email">{{t .Lang "login.email"}}</label>
@@ -29,13 +34,14 @@
         <button type="submit" class="btn-primary brei">{{t .Lang "login.login_button"}}</button>
     </form>
     
-    <div class="forgot-password">
+    <p class="forgot-password">
         <a href="/glemt-passord">{{t .Lang "login.forgot_password"}}</a>
-    </div>
-    
-    <div class="signup-link">
+    </p>
+
+    {{/* Vegen til den andre døri, under streken. */}}
+    <p class="doerfot">
         {{t .Lang "login.no_account"}} <a href="/signup">{{t .Lang "login.create_account"}}</a>
-    </div>
+    </p>
 </div>
 
 {{end}}

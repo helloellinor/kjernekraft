@@ -88,8 +88,18 @@
 }
 .dropinn > * { margin: 0; }
 .dropinnspor { color: var(--blekk-lys); }
-.dropinnfelt { position: relative; }
-.dropinnsok { width: 16rem; max-width: 100%; font-size: 1.25rem; }
+/* Feltet og svari under det vert lesne yver ein disk og ikkje i fanget,
+   so dei stend eit steg større enn resten av sida. Storleiken stend
+   *her*, paa rutet som held baade feltet og lista, og ikkje paa kvar
+   av deim: feltet ber `font: inherit` fraa grunnstilen og fylgjer med
+   av seg sjølv, og det er den eine skilnaden millom dette søkjefeltet
+   og dei hine i huset. Sporet og statuslina attmed stend utanfyre og
+   held maalet sitt.
+
+   Fast breidd. Eit felt som veks med teksten skuvar setningi attmed
+   seg medan du skriv (§3). */
+.dropinnfelt { position: relative; font-size: 1.25rem; }
+.dropinnfelt .sok { width: 16rem; max-width: 100%; }
 
 /* Svari flyt yver sida og skubbar ingenting — det er det som skil eit
    søkjeresultat fraa ei liste: det er ikkje kome enno. */
@@ -105,7 +115,7 @@
 .dropinnval {
   width: 100%;
   padding: var(--rom-3) var(--rom-4);
-  font: inherit; font-size: 1.25rem;
+  font: inherit;
   text-align: left; cursor: pointer;
   color: var(--blekk);
   background: none; border: none; border-radius: var(--rund);

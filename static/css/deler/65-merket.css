@@ -52,51 +52,55 @@
 .teikning svg { width: 100%; height: 100%; display: block; }
 
 /* ---- plassmaalaren ----
-   Same ljoset som klippekortet, men med ei anna tyding: her er ei tend
-   rute ein *teken* plass. Regelen er den same i baae — ei tend rute er
-   noko som finst — og difor er ein full time heilt tend. Det er den
-   tilstanden Ida ser etter, og han treng ingen farge for aa skilja seg:
-   han er den einaste som ikkje hev mørke rutor att. */
+   ---- plassane er hol, og ein teken plass er ei kula i eit hol ----
+
+   Han var ei rekkja tende ruter fyrr, laant fraa klippekortbandet med
+   motsett tyding. Tvo ting var gale med det. Ljos tyder *noko som brenn*
+   i dette huset — eit medlemskap som gjeng, eit klipp du hev att — og
+   ein teken plass brenn ikkje: han er *upteken*. Og ljos i ei rute paa
+   ni piksel vart korkje ljos eller rute; det vart eit farga band.
+
+   No er det den forma huset alt hev til dette, og ho er den beste
+   teikningi i systemet: brettet i vestibylen. **Eit hol er ein plass; ei
+   kula i holet tyder at plassen er teken.** Det er den *same* tydingi
+   som paa aktivitetsbrettet — der er holet ei vika og kula segjer at du
+   var her — so forma ber éi tyding og ikkje tvo, og §1 held.
+
+   Klippi fekk ikkje dette laanet, og grunnen er den same regelen sedd
+   fraa hi sida: eit klipp du hev att er ikkje ein ting du hev lagt fraa
+   deg. Det brenn framleis.
+
+   Ein full time er difor eit fullt brett — ingen tome hol att — og det
+   er den tilstanden ein ser etter. Han treng ingen farge for aa skilja
+   seg. */
 .plassmaalar {
-  --klippfarge: var(--klas);
-  --rib: 2px;
-  display: flex; gap: var(--rib);
-  height: 9px; margin: var(--rom-2) 0 var(--rom-1);
-  position: relative; isolation: isolate;
+  /* Faste kulor og ikkje spaltor som deler breiddi: atten plassar paa ei
+     dokk-spalta gav fem piksel kvar, og ei kula paa fem piksel er ein
+     prikk. Dei bryt til ei rad til i staden — og daa les rekkja seg som
+     eit sitjekart, som er kva ho er. */
+  display: flex; flex-wrap: wrap; gap: 3px;
+  margin: var(--rom-2) 0 var(--rom-1);
 }
+/* Holet. Same forma som paa brettet, den tome dagen i vika og det klipte
+   hakket: `--skraakant-djup`, myrk yverleppe og ljos underleppe, av di
+   ljoset kjem ovanfraa (§2). */
 .plass {
-  position: relative; flex: 1 1 0; min-width: 2px;
-  border: 1px solid var(--haarlina); border-radius: 1px;
-  background: var(--ark-djup);
+  flex: none; width: 9px; height: 9px;
+  border: 0; border-radius: 50%;
+  background: var(--ark);
+  box-shadow: var(--skraakant-djup);
 }
+/* Kula i holet. Glansen er `--glim-rund` — den same sola og den same
+   falloff-trappa som pinnen paa brettet. */
 .plass.teken {
-  border-color: color-mix(in srgb, var(--klippfarge) 55%, var(--haarlina));
-  background:
-    radial-gradient(ellipse 60% 40% at 50% 50%,
-      color-mix(in srgb, var(--klippfarge) 26%, #fff) 0%, transparent 100%),
-    color-mix(in srgb, var(--klippfarge) 84%, var(--flate));
+  background-color: var(--klas);
+  background-image: var(--glim-rund);
+  box-shadow: var(--skugge-kule);
 }
-.plass.teken::after {
-  content: ""; position: absolute; z-index: -1;
-  left: -4px; right: -4px; top: -5px; bottom: -5px; pointer-events: none;
-  background:
-    radial-gradient(ellipse 40% 30% at 50% 50%,
-      color-mix(in srgb, var(--klippfarge) 80%, transparent) 0%,
-      color-mix(in srgb, var(--klippfarge) 44%, transparent) 38%, transparent 76%),
-    radial-gradient(ellipse 110% 80% at 50% 55%,
-      color-mix(in srgb, var(--klippfarge) 16%, transparent) 0%, transparent 82%);
-}
-.plass::before {
-  content: ""; position: absolute; z-index: 2;
-  top: -6px; bottom: -6px;
-  right: calc(-1px - var(--rib)); width: var(--rib);
-  background: var(--flate); pointer-events: none;
-}
-.plass:last-child::before { display: none; }
 
 .event-plassar { font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-lys); }
 .event-plassar b { color: var(--blekk); font-weight: 400; }
 .event-plassar .av { color: var(--blekk-svakt); }
 
-
-@media (prefers-reduced-motion: reduce) { .plass.teken::after { display: none; } }
+/* Kula kastar ingen glød, so her er ingen ting aa slaa av under
+   `prefers-reduced-motion`. */

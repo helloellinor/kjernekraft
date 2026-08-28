@@ -5,21 +5,30 @@
    HTML utan so mykje som eit <html>-merke, og gløymt-passord fanst
    ikkje i det heile — lenkja paa innloggingi gav 404.
    =================================================================== */
-.smal { max-width: 34rem; }
-
 .skjema { display: flex; flex-direction: column; gap: var(--rom-4); }
 .skjema .form-group { margin-bottom: 0; }
 
 /* Stjerna er ei paaminning, ikkje ei aatvaring. Ho skal ikkje ropa. */
 .paakravd { color: var(--blekk-svakt); }
 
+/* Adressa er ei gruppa i skjemaet, ikkje ein kasse i kortet.
+   Ho bar kant, runding, skugge og eige fyll — og daa stod ho som ein
+   kasse inni døra, som sjølv er ein kasse. §6 gjev høgst éin maala
+   kasse millom arket og innhaldet, og det er døra.
+   Det som held gruppa saman no er det §6 seier det skal vera: eit namn
+   yver og luft ikring. Lappen er merkelappmaalet fraa §5 — versalar,
+   sperring, 68 % breidd — som er nettupp språket til noko som *namngjev
+   ein kategori*. */
 .bolk {
-  border: 1px solid var(--haarlina);
-  border-radius: 2px;
-  box-shadow: var(--skugge-kort);
-  padding: var(--rom-4) var(--rom-5) var(--rom-5);
+  border: 0; padding: 0;
   display: flex; flex-direction: column; gap: var(--rom-4);
-  margin: 0;
+  /* Lufta *utanfor* gruppa lyt vera større enn lufta inni henne — det er
+     heile §6, og det er ho som gjer at ein ser ei gruppa utan ein vegg
+     kring henne. Skjemaet gjev `--rom-4` millom alt; her legg gruppa til
+     eit steg, so ho stend med `--rom-6` yver seg og `--rom-4` inni.
+     Utan dette laag lappen «ADRESSE» like tett paa passordfeltet yver
+     som paa sitt eige fyrste felt, og daa namngjev han ingen ting. */
+  margin: var(--rom-2) 0 0;
 }
 .bolk legend {
   font-family: var(--skrift-yver);
@@ -27,7 +36,8 @@
   font-stretch: var(--vidd-merkelapp);
   letter-spacing: .08em; text-transform: uppercase;
   color: var(--blekk-lys);
-  padding: 0 var(--rom-2);
+  padding: 0;
+  margin-bottom: var(--rom-3);
 }
 
 .avkryssing { display: flex; align-items: start; gap: var(--rom-3); }
@@ -46,7 +56,9 @@
 }
 .lenkjeknapp:hover { color: var(--merke-lys); background: none; border: 0; }
 
-.attende { margin-top: var(--rom-5); font-size: .92rem; }
+/* `.attende` stod her — vegen ut att, med marg men utan strek, medan
+   den same lina paa innloggingi bar strek. Ho er `.doerfot` no, og
+   stend i 42-innlogging.css saman med resten av døri. */
 
 /* ---- skuffa ----
    Det einaste paa heile arket som verkeleg flyt, og difor det einaste

@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -107,6 +108,50 @@ func (db *Database) PaameldeTil(eventID int64) ([]Paameld, error) {
 			p.Frammott = &t
 		}
 		ut = append(ut, p)
+	}
+	return ut, rows.Err()
+}
+
+// PaameldeTilTimar hentar dei påmelde til fleire timar i éi søkning.
+// Innsjekkskjermen viser gjerne fleire timar samtidig; eitt kall per
+// time gjorde då sidebygginga til N+1 søkningar.
+func (db *Database) PaameldeTilTimar(eventIDs []int64) (map[int64][]Paameld, error) {
+	ut := make(map[int64][]Paameld, len(eventIDs))
+	if len(eventIDs) == 0 {
+		return ut, nil
+	}
+
+	plasshaldarar := make([]string, len(eventIDs))
+	args := make([]any, len(eventIDs))
+	for i, id := range eventIDs {
+		plasshaldarar[i] = "?"
+		args[i] = id
+		ut[id] = nil
+	}
+
+	rows, err := db.Conn.Query(fmt.Sprintf(`
+		SELECT es.event_id, u.id, u.name, es.attended_at
+		FROM event_signups es
+		INNER JOIN users u ON u.id = es.user_id
+		WHERE es.event_id IN (%s)
+		ORDER BY es.event_id ASC, u.name COLLATE NOCASE ASC`, strings.Join(plasshaldarar, ", ")), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var eventID int64
+		var p Paameld
+		var naar sql.NullTime
+		if err := rows.Scan(&eventID, &p.UserID, &p.Namn, &naar); err != nil {
+			return nil, err
+		}
+		if naar.Valid {
+			t := naar.Time
+			p.Frammott = &t
+		}
+		ut[eventID] = append(ut[eventID], p)
 	}
 	return ut, rows.Err()
 }

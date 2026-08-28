@@ -13,16 +13,111 @@
 /* Produktfargen stend paa vengen. Turkis medlemskap, rosa klippekort,
    lilla kurs — det er den einaste staden fargen segjer kva slag ting
    kortet er, og han skiftar aldri av seg sjølv. */
-.membership-card { --produkt: var(--klas); }
+/* ---- forma og rytmen ----
+   Dei stend i `:root` og ikkje paa kortet, av di eit kort ikkje veit um
+   det stend aaleine eller i ein stabel — og det er stabelen som treng
+   rommet. */
+:root {
+  /* Forma. `e^½` = 1,6487, andre steget paa den stigen skrifti stend
+     paa (ARKET §10.3: 1 → 1,284 → 1,649 → 2,118 → 2,718), so forma og
+     storleikane kjem or eitt system. Fire prosent fraa eit verkelegt
+     kort (ISO ID-1, 1,586) og tvo fraa gullsnittet. */
+  --kortform: 1.649;
+  /* Den naturlege storleiken paa eit kort — der det sluttar aa veksa,
+     so eit kort aaleine paa ei brei sida ikkje vert ei plakat.
+     
+     Han stod inne i kortregelen fyrr. Han lyt staa her, av di det ikkje
+     berre er kortet som treng honom: bolken som held korti lyt vita det
+     same talet, elles er bolken breidare enn det han held, og lina under
+     yverskrifti hans gjeng forbi det siste kortet. */
+  --kortbreidd: 28rem;
+  /* Grunneiningi ved `--kortbreidd`. Ho er baade taket paa `--kortgrunn`
+     og talet rytmen er rekna av. */
+  --kortgrunn-full: .92rem;
+  /* Fylli inni kortet, i grunneiningar. */
+  --kortfyll: 1.1;
+
+  /* ---- rommet millom tvo kort ----
+     Det stod tri ulike tal for den same tingen: klippekortstabelen bar
+     `--rom-4`, belastningslista `--rom-3` og verkstaden `--rom-4`. Ingen
+     av dei var vald; dei var arva kvar for seg. No er det eitt tal, og
+     det er `--rom-4` — steget §6 alt gjev til «millom kort i eit
+     rutenet».
+
+     Det er *ikkje* rekna av forma, og her stend kvi. Rekna av forma vart
+     han fylli gonga med kortforma — 1,1 × 1,649 = 1,814 grunneiningar =
+     1,669 rem = 26,7 px — og det er for mykje. Ein stabel skal lesast
+     som ein stabel; med so mykje luft imillom fell korti fraa kvarandre.
+
+     Ei ting stend uløyst og skal ikkje løysast aaleine: §6 segjer at
+     rommet utanfor ein ting alltid er større enn rommet inni honom, og
+     her er dei mest like — 16 px imillom mot ei fyll paa 16,2. Vegane
+     ut er tvo: setja `--kortfyll` ned til 1 (14,7 px inni), eller taka
+     eit steg upp i stigen til `--rom-5` (20 px imillom). Den fyrste
+     rører ikkje rytmen, den andre rører ikkje kortet. */
+  --kortrom: var(--rom-4);
+}
+
 .klippekort-card { --produkt: var(--togu); }
 
 
-.membership-card.active, .klippekort-card:not(.expired), .medlemskort.active {
-  border-left: 3px solid var(--produkt);
+/* ---- vengen ----
+   Lina i venstre kanten som segjer kva slag kortet er. Ho var ein
+   `border-left`, og det gav tvo lyter.
+
+   Den eine: kanten stend 1 px paa dei hine tri sidone, so eit kort med
+   veng fekk innhaldet skuve tvo pikslar mot høgre og eit utan fekk det
+   ikkje. Kortet flytte seg naar lina kom, og det er nettupp det ho
+   ikkje skal gjera.
+
+   Den andre er den som synte: `dashed`. Nettlesaren reknar sjølv kor
+   lange stripone vert, og paa ei lina paa tri pikslar vert dei tri
+   pikslar lange med tri imillom. Det les seg ikkje som ei *broti* lina
+   — det les seg som eit korn, eller som ein lyte i teikningi.
+
+   No er ho maala og ikkje ramma: eit bakgrunnslag paa `--venge`, pinna
+   til venstre kanten. Kanten stend 1 px heile vegen rundt og ingen ting
+   flyttar seg, og rundingi klypper lina i hyrni som ho skal. */
+.membership-card, .klippekort-card, .medlemskort {
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: var(--venge) 100%;
 }
+.membership-card.active, .klippekort-card:not(.expired), .medlemskort.active {
+  background-image: linear-gradient(var(--produkt), var(--produkt));
+}
+/* Frose eller sagt upp er ikkje i live, og ber difor ikkje livsfargen. */
 .membership-card.paused, .membership-card.cancelled,
-.medlemskort.paused, .medlemskort.cancelled { border-left: 3px solid var(--blekk-svakt); }
-.membership-card.freeze_requested, .medlemskort.freeze_requested { border-left: 3px dashed var(--produkt); }
+.medlemskort.paused, .medlemskort.cancelled {
+  background-image: linear-gradient(var(--blekk-svakt), var(--blekk-svakt));
+}
+/* Bede um og ikkje svara enno: lina er der, men ho er ikkje heil. Same
+   tanken som den opne ringen i livsmerket.
+
+   Ei broti lina skal byrja og enda i fargen, og dei tvo ytste stykki
+   skal vera like lange. Det tyder N stykke og N-1 glipor, og det er ei
+   likning: N·s + (N-1)·g = H. Held ein N og g faste, gjev ho seg sjølv,
+   og ho let seg skriva i CSS av di feltet «100%» er H:
+
+     rutehøgd  T = (100% + g) / N
+     stykket   s = T - g
+
+   Den fyrste stripa tek til paa null; den siste tek slutt paa
+   N·T - g = 100%. Nøyaktig i baae endar, kva høgd kortet so hev.
+
+   Stykki veks difor med kortet, og talet paa dei stend fast. Det er
+   rett veg rundt: rytmen er noko ein les yver *heile* lina, og fire
+   stykke les seg som fire same kor lang ho er. */
+.membership-card.freeze_requested, .medlemskort.freeze_requested {
+  --veng-tal: 4;        /* stykke. Glipone er alltid eitt færre. */
+  --veng-glipe: .5rem;
+  --veng-rute: calc((100% + var(--veng-glipe)) / var(--veng-tal));
+  background-image: repeating-linear-gradient(to bottom,
+    var(--produkt) 0,
+    var(--produkt) calc(var(--veng-rute) - var(--veng-glipe)),
+    transparent   calc(var(--veng-rute) - var(--veng-glipe)),
+    transparent   var(--veng-rute));
+}
 
 .membership-header, .card-header {
   display: flex; justify-content: space-between; align-items: baseline;
@@ -34,8 +129,18 @@
   font-stretch: var(--vidd-yver); font-weight: 500;
 }
 
-/* Merket sjølv. Forma segjer stoda; fargen segjer berre um ho er i live. */
-.membership-status {
+/* Merket sjølv. Forma segjer stoda; fargen segjer berre um ho er i live.
+
+   `.stodalinje` stod ikkje her fyrr, og det var feilen: ho er den klassa
+   korti *faktisk* skriv — medlemskortet, heimespalta, betalingsmaatane.
+   `.membership-status` stod attmed henne i kvar regel og var den klassa
+   berre verkstaden skreiv; ho gjekk ut daa verkstaden tok til aa teikna
+   det verkelege kortet. Ho hadde ingi
+   skriftregel nokon stad, berre margar, so stoda las seg i lesetypen paa
+   16 px der ho skulde bera merkelapp-røysta: 68 % breidd, versalar,
+   sperra (§5). */
+.stodalinje {
+  margin: 0;
   font-stretch: var(--vidd-merkelapp);
   display: inline-flex; align-items: center; gap: var(--rom-2);
   font-family: var(--skrift-yver);
@@ -43,10 +148,13 @@
   background: none; border: 0; padding: 0;
   color: var(--blekk-lys);
 }
-.membership-status::before {
+.stodalinje::before {
   content: ""; width: .5rem; height: .5rem; border-radius: 50%;
   border: 1px solid currentColor; background: currentColor; flex: none;
 }
+/* Ber merket ei lampa, teiknar det ikkje prikken sin attaat: tvo merke
+   for éin tilstand er eitt for mykje. */
+.stodalinje:has(.ljos)::before { display: none; }
 .status-active { color: var(--produkt, var(--merke)); }
 .status-freeze_requested { color: var(--produkt, var(--merke)); }
 .status-freeze_requested::before { background: none; }
@@ -58,11 +166,19 @@
 .price-info { display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap; margin: var(--rom-3) 0; }
 .price-info .price { font-family: var(--skrift-tal); font-size: 1.6rem; letter-spacing: -.02em; }
 .dates-info { display: flex; flex-direction: column; gap: var(--rom-1); }
+/* Utlaupet er *stoda* aat kortet, ikkje ei bilina — §9 nemner dei tri i
+   same andedraget: «lampa, stodaordet, utlaupet» stend til høgre paa den
+   øvste lina. Daa lyt dei bera den same røysta og.
+
+   Han stod i lesetypen medan stodaordet fekk merkelapp-røysta, og daa
+   var dei like store og ulike av skrift — det ser ut som ein feil, av di
+   det er ein. */
 .card-expiry, .renewal-date {
-  font-size: .88rem; color: var(--blekk-lys);
+  font-family: var(--skrift-yver);
+  font-stretch: var(--vidd-merkelapp);
+  text-transform: uppercase; letter-spacing: .09em;
+  font-size: .78rem; color: var(--blekk-lys);
 }
-/* Det som hastar fær vekt, ikkje farge — farge her ville tyda «i live». */
-.renewal-date.urgent { color: var(--blekk); font-weight: 500; }
 
 
 /* ---- klippekortet: tale ber lesingi, hòli ber sanningi ----
@@ -77,8 +193,12 @@
 /* Stilboki stablar korti og let dei vera 34 rem breide. Eit rutenet med
    smale spaltor gjorde tale — det einaste ein kom for — mindre enn
    yverskrifti attmed det. */
-.klippekort-cards {
-  display: flex; flex-direction: column; gap: var(--rom-4);
+/* Ein stabel med kort. `.klippekort-cards` er den stabelen klippekorti
+   alt stod i; `.kortstabel` er den same tingen for kort som ikkje hev
+   ein eigen stabel enno — medlemskorti i verkstaden. Baae er
+   containerar: sjaa `container-type` lenger nede. */
+.klippekort-cards, .kortstabel {
+  display: flex; flex-direction: column; gap: var(--kortrom);
 }
 
 /* Hòli ligg *utanfor* kanten aat kortet, so ingen ting maa klippa deim
@@ -93,11 +213,10 @@
 .klippekort-card {
   position: relative;
   overflow: visible;
-  max-width: 34rem;
-  /* Stilboki si eigi fyll: mindre yver enn under, og rom aat hakki paa
-     vinstre sida. */
-  padding: var(--rom-4) var(--rom-5) var(--rom-5) var(--rom-6);
-  gap: var(--rom-4);
+  /* Fylli og gapet stod her, i rem, og vart yverskrivne av den delte
+     blokki lenger nede — som er den som eig dei, av di dei er kortet
+     sin maalestokk og ikkje klippekortet sin. Berre vinstre sida er
+     ulik, og ho stend saman med hakkrekkja der nede. */
 
   /* Hakkrekkja, i tal. `--klipphakk-tal` speglar `models.HolPerKort`:
      stend dei tvo i utakt, renn rekkja ut or kortet. */
@@ -123,25 +242,19 @@
      `--vidd-yver`, lyt dette maalast upp att. Det skal ikkje gjetast. */
   --klipphakk-topp: calc(var(--rom-4) + .5rem);
 
-  /* Rekkja er ti hakk lang same kor lite kortet elles ber, so kortet
-     lyt vera høgt nok til aa halda henne. Utan dette rann hakki ned
-     under kanten med ein gong knappen flutte upp paa taltlina.
-
-     Botnromet her er `--rom-4` og ikkje `--rom-5`: hakki stend paa
-     vengen og ikkje i tekstspalta, so dei treng ikkje den fylli teksti
-     treng. Med `--rom-5` vart minstehøgdi 45 px større enn det kortet
-     faktisk bar, og heile den slakken la seg nedst — 17 px luft yver
-     innhaldet og 69 px under. Skilnaden paa fylli yver og under er
-     meint (§ fylli ovanfor); den slakken var det ikkje.
-
-     Slik han stend no bind han ikkje paa eit vanleg kort — han er
-     tryggingi for eit kort som ber mindre. */
-  min-height: calc(var(--klipphakk-topp)
-                   + var(--klipphakk-tal) * var(--klipphakk-hogd)
-                   + (var(--klipphakk-tal) - 1) * var(--klipphakk-gap)
-                   + var(--rom-4));
+  /* Her stod ei minstehøgd rekna av hakkrekkja, so ho ikkje skulde renna
+     ut under kanten paa eit kort som bar lite. Ho er ikkje naudsynt
+     lenger: kortet hev ei fast form no, og høgdi er difor kjend fyre
+     innhaldet er det. Rekkja er skalert til aa gaa upp i henne — sjaa
+     `--klipphakk-hogd` nedanfor. */
 }
-.klippekort-card .card-header { margin-bottom: 0; }
+/* `.card-header` ber ein `margin-bottom` som er sin eigen — §6 segjer at
+   foreldret set lufti, so han gjeng ut paa baae korti og gapet gjer
+   arbeidet aaleine. Han stod i `--rom-3`, eit fast tal: paa eit kort som
+   skalerer er ei fast luft det same som ei luft som veks naar kortet
+   krympar, og det er ho som skuvar innhaldet ut or formi. */
+.klippekort-card .card-header,
+.medlemskort .card-header { margin-bottom: 0; }
 /* Ein knapp i ein spalteflex vert strekt so brei som kortet um ingen
    segjer noko anna, og daa les han seg som ei rad og ikkje som ein
    knapp. `.kort` er ein spalteflex, so dette lyt staa. */
@@ -149,13 +262,34 @@
 
 /* Yverskrifti stend eit steg høgare enn `.card-title` elles i huset:
    dette kortet ber berre tvo ting, og daa toler tittelen meir. */
-.klippekort-card .card-title { font-size: 1.649rem; line-height: 1.05; }
+.klippekort-card .card-title { line-height: 1.05; }
 /* Ei linja, aldri tvo: utlaupet stend til høgre paa den same lina som
    namnet, lyft so det sit paa skuldri aat tittelen og ikkje paa
    grunnlina hans. */
 .klippekort-card .card-header { flex-wrap: nowrap; gap: var(--rom-4); }
 .klippekort-card .card-expiry {
-  white-space: nowrap; display: inline-block; transform: translateY(-.489em);
+  white-space: nowrap; display: inline-block;
+
+  /* Yverkanten skal liggja paa x-høgdi i tittelen. Talet var maalt —
+     -.489em — og maalt mot ein *annan* skrift: utlaupet stod i lesetypen
+     med smaa bokstavar den gongen. No ber han merkelapp-røysta, og daa
+     er toppen hans kapitelhøgdi og ikkje ein staveleng.
+     
+     Difor er han rekna i staden for maalt, og han treng ingi
+     skrifttal for aa gjera det:
+     
+       tittelen og lappen er same skrifti, so x-høgdi er den same
+       brøkdelen av kvar av deim. Sedd i lappen si eigi eining er
+       x-høgdi i tittelen difor `(tittel / lapp) × 1ex`, og toppen aat
+       lappen er `1cap`, av di han stend i versalar.
+       
+     Lyftingi er skilnaden. Skifter stigen, fylgjer ho med av seg sjølv.
+     
+     Fyrste lina er reserven for nettlesarar utan `cap`: dei fær eit
+     rimeleg fast tal i staden, og ikkje ei ugild `calc` som slær heile
+     regelen ut. */
+  transform: translateY(-.29em);
+  transform: translateY(calc(1cap - (var(--steg-tittel) / var(--steg-lapp)) * 1ex));
 }
 
 /* Stilboki teiknar kortet paa 34 rem og set `nowrap` av di det er rom
@@ -172,7 +306,48 @@
    Naar utlaupet fell ned paa si eigi lina, gjeng lyftet ut med det:
    `translateY` er ei optisk retting for aa sitja paa skuldri aat
    tittelen, og der sit han ikkje lenger. */
-.klippekort-card { container-type: inline-size; }
+/* Containeren stend paa *foreldret* og ikkje paa kortet, og det er ei
+   retting og ikkje ein smak.
+
+   Han stod paa kortet, og eit kort kann ikkje spyrja um si eigi breidd:
+   `cqi` slær upp den næraste containeren *ovanfor* seg. For born av
+   kortet — tittelen, talet, merkelappane — var det kortet, og dei
+   skalerte rett. For kortet sine *eigne* eigenskapar fanst ingen
+   container, so `cqi` fall attende paa glaset og landa paa klemma si
+   yvre grensa. Maalt: fylli stod paa 19,2 / 28,8 / 28,8 / 38,4 px ved
+   *kvar* breidd fraa 18 til 42 rem. Kommentaren nedanfor sa at fylli
+   skalerte med kortet; ho gjorde det aldri.
+
+   Fylgja var at skrifta voks med kortet medan kassen ikkje gjorde det,
+   og daa kann forma ikkje halda seg. Med containeren eit hakk ut tyder
+   `cqi` det same baae stader.
+
+   ---- eitt namn for jobben ----
+   Fem klassar stod i denne lina fyrr — `.kortplass`, `.klippekort-cards`,
+   `.kortstabel`, `.charges-list`, `.verkstad-stabel` — og det var ikkje
+   fem slag maalekassar, det var fem stader som *tilfeldigvis* var
+   foreldret aat eit kort. Kvar ny stabel laut leggjast til her, og gløymde
+   ein det, fall kortet attende paa glaset utan at noko sa fraa.
+
+   `.kortplass` er jobben, og han stend no som ei eigi klassa attmed den
+   klassa som gjer utlegget: `class="klippekort-cards kortplass"`. Det
+   eine ordet segjer «her ligg kort under kvarandre», det andre «her vert
+   dei maalte». Tvo jobbar, tvo ord — og ein ny stabel treng berre skriva
+   det andre for aa verka. */
+.kortplass { container-type: inline-size; }
+
+/* ---- bolken er so brei som det han held ----
+   Eit kort sluttar aa veksa ved `--kortbreidd`. Alt kring det gjorde
+   ikkje det: bolken, spalta og div-en skriptet skriv i stod i full
+   breidd, so paa ei brei skjerm var kassen tri centimeter breidare enn
+   kortet i honom — og lina under `h2` er bolken si, so ho gjekk forbi
+   det siste kortet og sa «alt dette høyrer saman» um tom luft.
+   
+   Maalet høyrer til den som *held* korti og ikkje til kortet aaleine
+   (§6, same regelen som gjev avstanden). Kortet fyller det han fær;
+   bolken fær ikkje meir enn eit kort treng. Daa endar yverskrifti, lina,
+   korti og merknaden under paa den same kanten av seg sjølve. */
+.kortbolk { max-width: var(--kortbreidd); }
 @container (max-width: 20rem) {
   .klippekort-card .card-header { flex-wrap: wrap; gap: var(--rom-1) var(--rom-4); }
   .klippekort-card .card-expiry { transform: none; }
@@ -226,11 +401,11 @@
   display: flex; align-items: baseline; gap: var(--rom-3);
   flex-wrap: nowrap; white-space: nowrap;
   font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
-  font-size: 1.284rem; font-weight: 500;
+  font-size: var(--kort-ord); font-weight: 500;
 }
 .klipptal .att {
   font-family: var(--skrift-tal); font-weight: 400;
-  font-size: 4.482rem; line-height: .9; letter-spacing: -.03em;
+  font-size: var(--kort-tal); line-height: .9; letter-spacing: -.03em;
   font-variant-numeric: tabular-nums;
   color: var(--blekk);
 }
@@ -260,56 +435,234 @@
    var *maalestokken* som ikkje fylgde med.
 
    `--kortgrunn` er den maalestokken. `cqi` er ein prosent av breiddi aat
-   kortet sjølv (containeren er sett yver), so grunneiningi krympar naar
-   kortet krympar. Alle tali under er dei same forholdstali som fyrr,
-   berre gonga med henne i staden for med `1rem`:
+   *foreldret* — sjaa containeren lenger uppe for kvi han ikkje kann vera
+   kortet sjølv — og kortet er so breidt som foreldret upp til
+   `--kortbreidd`, so grunneiningi krympar naar kortet krympar. Alle
+   tali under er forholdstal, gonga med henne i staden for med `1rem`:
 
      tittel 1,649   ordi 1,284   talet 4,482   utlaupet 0,85
      hakket 1,6 breidt og 0,5 høgt, med 0,25 imillom
 
-   3,25 cqi naar 1 rem ved 34 rem — nett der stilboki teiknar kortet.
-   (`cqi` er ein prosent av *innhaldskassen*, ikkje kantkassen, so
-   koeffisienten er stroken opp for fylli; 2,9 gav eit kort 12 % for
-   lite ved full breidd.) Yver det er han kappa, so eit kort aaleine paa
-   ei brei sida ikkje veks til ei plakat. Under fylgjer han breiddi ned
-   til 0,55 rem, kring 18 rem kortbreidd — smalare enn det stend kortet
-   ikkje nokon stad i huset.
+   Kappa er `.92rem`, som er kva 3,28 cqi gjev nettupp ved
+   `--kortbreidd` = 28 rem: yver den breiddi stend kortet stilt, so eit
+   kort aaleine paa ei brei sida ikkje veks til ei plakat. Ingi nedre
+   klemma — grunnen stend ved `--kortgrunn`.
 
    Fylgja er at kortet ser likt ut kvar det enn stend. Ingen brotstad,
    ingen skjermspørjing: forholdet millom talet og kassen er det same
    paa ein telefon som i sidespalta som paa klippekortsida. */
+/* Medlemskortet stod ikkje paa nokon maalestokk i det heile: tittelen
+   var 1,3 rem og stoda 0,78 rem, kva breidd kortet enn hadde. Difor saag
+   dei tvo korti ulike ut attmed kvarandre paa heimesida — hakkortet
+   skalerte med spalta si, medlemskortet ikkje.
+
+   Same grunneining, same forholdstal. Ratioane er dei same stegi som
+   yverskriftene fylgjer (e^¼): 1,649 for tittelen, 1,284 for ordi. */
+.klippekort-card, .medlemskort, .charge-item {
+  /* Grunneiningi. Ho stod paa 3,25 cqi med taket paa 1 rem — teikna for
+     hakkortet aaleine, i full breidd. I ei sidespalta paa 24 rem gav det
+     0,78 rem, og daa var merkelappen 0,66: skrifti var for lita mot
+     kortet ho stod i. No naar ho taket tidlegare og fell ikkje so djupt,
+     so forholdet millom skrift og kasse held seg jamnare yver dei
+     breiddone kortet faktisk stend i. */
+  /* ---- forma ----
+     Dei tvo tingi studioet sel er tvo kort, og eit kort hev ei form.
+     Ho stod ikkje nokon stad, so høgdi var det innhaldet tilfeldigvis
+     kravde: maalt fraa 18 til 42 rem gjekk medlemskortet fraa 1,15 til
+     1,75 og klippekortet fraa 1,25 til 3,63. Det siste er ikkje eit
+     kort lenger, det er ei stripa.
+
+     Talet er `e^½` = 1,6487, andre steget paa den same stigen skrifti
+     stend paa (`e^¼` ≈ 1,284, sjaa steggi under): forma og storleikane
+     kjem daa or eitt system og ikkje tvo. Det er dessutan 4 % fraa eit
+     verkelegt kort (ISO ID-1, 1,586) og 2 % fraa gullsnittet, so det les
+     seg som noko ein hev i lomma.
+
+     `--kortbreidd` er den naturlege storleiken — der kortet sluttar aa
+     veksa. Under han krympar kortet *heilt*: skrift, fyll og hakk gjeng
+     ned i lag, av di alt heng i `--kortgrunn` og han heng i breiddi.
+     Det er meiningi med regelen: kortet kann verta mindre, det kann
+     ikkje verta ei onnor form. (Talet stend i `:root` øvst — bolken kring
+     korti les honom med.) */
+  /* Kor mykje av kortet dette kortet er. Medlemskortet er heilt;
+     klippekortet er *halvt*, og det er ei tyding og ikkje ein storleik:
+     tvo klippekort stablar seg til eitt medlemskap. Det ber ogso mindre
+     — tvo liner mot fem — so eit heilt kort hadde stade med eit tomt
+     midtparti berre for aa naa formi.
+
+     Belastningi er ein *tridjepart*. Ho er ikkje noko ein hev kjøpt, ho
+     er kvitteringi for det, men ho stend i den same spalta og er det
+     same slaget papir. Heilt, halvt, tridjepart: forholdi millom dei
+     tri er det lettaste i huset aa sjaa etter, av di dei gjeng upp i
+     kvarandre.
+
+     Formi er ein fyremuns-storleik og ikkje ei tvang: er teksti for lang
+     til henne, veks kassen. Ei kvittering med ei lang skildring skal
+     ikkje klippast, og eit kort i ei spalta smalare enn nokor i huset
+     skal ikkje det heller. */
+  --korthogd: 1;
+  width: min(100%, var(--kortbreidd));
+  aspect-ratio: calc(var(--kortform) / var(--korthogd));
+
+  /* Grunneiningi. `cqi` er no ein prosent av *foreldret* (sjaa
+     containeren lenger uppe), og kortet er `min(100%, --kortbreidd)`
+     breidt, so kappa lyt vera den same staden: 3,28 cqi naar .92rem
+     nettupp ved 28 rem. Yver det stend kortet stilt.
+
+     Ingi nedre klemma. Ei slik klemma er nettupp det som bryt forma —
+     skrifti sluttar aa krympa medan kassen held fram, og daa renn
+     innhaldet ut or ei fast høgd. Prøvd fraa 16 rem og upp med eit
+     langt eigarnamn og ein tvolina tittel: det held. */
+  --kortgrunn: min(3.28cqi, var(--kortgrunn-full));
+
+  /* ---- stigen paa kortet ----
+     Kommentaren yver sa at tali var «gonga med grunneiningi», men dei
+     stod framleis i rem: berre fylli og hakki fylgde kortet, medan
+     skrifti stod still. Eit kort som krympar med spalta si og ber
+     4,482 rem tal er ikkje paa ein maalestokk, det er tvo.
+
+     Stegi er dei same som yverskriftene fylgjer (e^¼ ≈ 1,284):
+
+       tal    4,482   det ein kom for aa lesa
+       tittel 1,649
+       ord    1,284   og merket attmed tittelen
+       verd   1,000   grunneiningi sjølv
+       lapp   0,850   merkelapp, stod, utlaup
+
+     `--kort-merke` er skild ut av di merket ikkje er skrift: han tok
+     `1.5em` av tittelen fyrr — 2,47 einingar — og det er høgare enn
+     fyllet yver honom, so sirkelen laag mest inntil yverkanten. ARKET §8
+     segjer dessutan at merket veks ingen stad utanum dei tvo staderne
+     han er maalt for. Her er han eit ord attmed tittelen. */
+  /* Stegi stend fyrst som reine tal, so forholdet millom tvo av deim
+     kann reknast — den optiske lyftingi under treng nettupp det. */
+  --steg-tal:    4.482;
+  --steg-tittel: 1.649;
+  --steg-ord:    1.284;
+  --steg-verd:   1;
+  --steg-lapp:   .85;
+
+  --kort-tal:    calc(var(--steg-tal) * var(--kortgrunn));
+  --kort-tittel: calc(var(--steg-tittel) * var(--kortgrunn));
+  --kort-ord:    calc(var(--steg-ord) * var(--kortgrunn));
+  --kort-verd:   calc(var(--steg-verd) * var(--kortgrunn));
+  --kort-lapp:   calc(var(--steg-lapp) * var(--kortgrunn));
+  --kort-merke:  var(--kort-ord);
+
+  /* Fylli og lufti er kortet si eigi, og no skalerer dei *faktisk* med
+     resten — sjaa containeren lenger uppe for kvi dei ikkje gjorde det.
+
+     Dei er ogso mindre enn dei var. Tali stod paa 1 / 1,5 / 1,5 / 2 og
+     var rekna medan dei laag fast paa klemma si yvre grensa: paa eit
+     kort i ei smal spalta var det 38 px inn fraa vinstre kanten. Eit
+     kort ber lite og treng ikkje den lufti; forma ber det no.
+
+     Vinstre sida er den einaste som er ulik, og berre paa klippekortet:
+     der stend hakkrekkja. */
+  padding: calc(.8 * var(--kortgrunn)) calc(var(--kortfyll) * var(--kortgrunn))
+           calc(var(--kortfyll) * var(--kortgrunn)) calc(var(--kortfyll) * var(--kortgrunn));
+  gap: calc(.75 * var(--kortgrunn));
+
+  /* Høgdi er kjend fyre innhaldet er det, so slakken lyt fordelast og
+     ikkje leggja seg nedst. Det som namngjev kortet stend øvst, det ein
+     kom for stend nedst — som talet paa eit kort i lomma.
+
+     `.kort` er alt ein spalteflex; belastningi er ikkje eit `.kort`, so
+     ho fær det her. Utan det hev `space-between` ingen ting aa fordela. */
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Belastningi: ein tridjepart av kortet. `calc(1 / 3)` og ikkje `.333`,
+   so det stend kva talet *er*. */
+.charge-item { --korthogd: calc(1 / 3); }
+
 .klippekort-card {
-  --kortgrunn: clamp(.55rem, 3.25cqi, 1rem);
-
-  /* Fylli og lufti er kortet si eigi, so dei skalerer med resten.
-     Tali er `--rom-4/5/6` uttrykte i grunneiningi. */
-  padding: calc(1 * var(--kortgrunn)) calc(1.5 * var(--kortgrunn))
-           calc(1.5 * var(--kortgrunn)) calc(2 * var(--kortgrunn));
-  gap: calc(1 * var(--kortgrunn));
-
   /* Hakki er ei form og ikkje ein maalar (sjaa uver), men forma lyt
      halda seg i forhold til kortet ho er klipt i. */
-  --klipphakk-hogd: calc(.5 * var(--kortgrunn));
-  --klipphakk-gap: calc(.25 * var(--kortgrunn));
-  --klipphakk-topp: calc(1.5 * var(--kortgrunn));
+  --korthogd: .5;
+  /* Rekkja lyt ned i lag med kortet: ho stod paa .5 og .25, som er
+     6,75 einingar med hakkrekkje i eit kort som no er 9,25 høgt, og med
+     fyll og yverkant rann ho ut under botnen. Forholdet henne imillom
+     er det same — hakket er dobbelt so høgt som lufta under det. */
+  --klipphakk-hogd: calc(.42 * var(--kortgrunn));
+  --klipphakk-gap: calc(.21 * var(--kortgrunn));
+  --klipphakk-topp: calc(1.3 * var(--kortgrunn));
+  /* Rom aat rekkja paa vengen. Dei tri andre sidone er kortet si vanlege
+     fyll; denne er den eine som ber noko. */
+  padding-left: calc(1.9 * var(--kortgrunn));
 }
 .klipphakk { width: calc(1.6 * var(--kortgrunn)); }
 
-.klippekort-card .card-title { font-size: calc(1.649 * var(--kortgrunn)); }
-.klippekort-card .card-header { gap: calc(1 * var(--kortgrunn)); }
-.klippekort-card .card-expiry { font-size: calc(.85 * var(--kortgrunn)); }
+.klippekort-card .card-title,
+.medlemskort .card-title { font-size: var(--kort-tittel); }
+.klippekort-card .card-header,
+.medlemskort .card-header { gap: var(--kort-verd); }
+.klippekort-card .card-expiry,
+.medlemskort .card-expiry,
+.medlemskort .renewal-date { font-size: var(--kort-lapp); }
 
-.klippekort-card .klipptal { font-size: calc(1.284 * var(--kortgrunn)); gap: calc(.75 * var(--kortgrunn)); }
-.klippekort-card .klipptal .att { font-size: calc(4.482 * var(--kortgrunn)); }
+/* Merket attmed tittelen. Han tok `1.5em` av tittelen og vart daa
+   høgare enn fyllet yver honom. */
+.klippekort-card .card-title .merke,
+.medlemskort .card-title .merke { --merkestorleik: var(--kort-merke); }
+
+/* Detaljrada: lappen namngjev, verdet svarar. Baae fylgjer kortet, og
+   lufta millom radene med. */
+.medlemskort .detail-row { padding: calc(.5 * var(--kortgrunn)) 0; gap: var(--kort-ord); }
+.medlemskort .detail-label { font-size: var(--kort-lapp); }
+.medlemskort .detail-value { font-size: var(--kort-verd); }
+.medlemskort .medlemskort-eigar { font-size: var(--kort-ord); }
+
+/* Stoda stod paa .78rem same kor stort kortet var — det einaste paa den
+   øvste lina som ikkje fylgde kortet. Ho ber alt merkelapp-røysta
+   (versalar, 68 % breidd, sperra) og stend paa grunnlina aat tittelen;
+   det som mangla var maalestokken. Lampa fylgjer med, elles vert ho
+   større enn ordet ho høyrer til. */
+.klippekort-card .stodalinje,
+.medlemskort .stodalinje { font-size: var(--kort-lapp); }
+.klippekort-card .stodalinje::before,
+.medlemskort .stodalinje::before,
+.klippekort-card .ljos, .medlemskort .ljos {
+  width: calc(.55 * var(--kortgrunn)); height: calc(.55 * var(--kortgrunn));
+}
+
+.klippekort-card .klipptal { font-size: var(--kort-ord); gap: calc(.75 * var(--kortgrunn)); }
+.klippekort-card .klipptal .att { font-size: var(--kort-tal); }
 
 /* Knappen skalerer med, men ikkje heilt ned: han er noko ein *trykkjer*,
    og ei flate ein trykkjer paa hev ei nedre grense som ikkje er
    estetisk. Difor eigi klemme, og romsleg fyll i `em` so han fylgjer
-   skrifti si. */
-.klippekort-card .btn {
-  font-size: clamp(.8rem, calc(.95 * var(--kortgrunn)), .95rem);
+   skrifti si.
+
+   Regelen stod berre paa klippekortet. Medlemskortet ber tvo knappar og
+   dei stod i .95 rem kva breidd kortet enn hadde — det einaste store i
+   kortet som ikkje fylgde maalestokken, og difor det som fyrst braut
+   formi naar kortet vart smalt.
+
+   Klemma er den siste tingen som ikkje fylgjer forma, og det er med
+   vilje. Ho batt paa .8 rem heilt upp til kring 26 rem kortbreidd, og
+   daa var *klippekortet* — som er halvt so høgt og difor har halvt so
+   mykje aa gaa paa — 3 % for høgt i sidespalta. Ho stend paa .7 rem no,
+   som slepper knappen fri fraa kring 22,5 rem og upp: der forma skal
+   halda nøyaktig, held ho nøyaktig.
+
+   Under det bind ho, og kortet vert nokre prosent høgare enn formi.
+   Det er byttet: ein knapp under elleve pikslar er ikkje ein knapp. Det
+   gjeld berre spaltor smalare enn nokor i huset — telefonen ber kortet
+   i kring 20 rem — og der ligg kortet 4 % for høgt og ingen ser det.
+
+   Same stad gjer `@container (max-width: 20rem)` yverskrifti tvolina, og
+   det legg endaa ei lina til. Det er ogso rett: §4 (ingen ting skal
+   renna ut sidelengs) veg tyngre enn formi. */
+.klippekort-card .btn,
+.medlemskort :is(.btn, .btn-danger) {
+  font-size: clamp(.7rem, calc(.95 * var(--kortgrunn)), .95rem);
   padding: .42em 1.15em;
 }
+/* Knapperada er kortet sitt gap som alt anna; ho bar ein fast
+   `margin-top: var(--rom-5)` fraa 82-medlemskapet-mitt.css. */
+.medlemskort .medlemsknappar { margin-top: 0; gap: calc(.75 * var(--kortgrunn)); }
 
 .klippekort-card.expiring .klipptal .att,
 .klippekort-card.expiring .card-expiry { color: var(--aatvaring); }

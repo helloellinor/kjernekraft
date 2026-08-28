@@ -86,12 +86,12 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Utviklarlista er ei fil, ikkje ei rolla nokon set — so det
+		// Utviklarlista er ei fil, ikkje eit løyve nokon set — so det
 		// finst ingen augneblink der nokon «vert» utviklar som me kunde
 		// hekta oss paa. Innloggingi er den fyrste gongen me veit kven
 		// dette er etter at fila kann ha skift, og difor er det her
 		// faktureringi vert stogga for deim. Læraren er alt stogga i
-		// SettRolla; dette tek den hine vegen.
+		// SettLoyve; dette tek den hine vegen.
 		if stogga, err := DB.SynkFriMedlemskap(int64(user.ID)); err != nil {
 			log.Printf("fritt medlemskap for %d: %v", user.ID, err)
 		} else if stogga {
@@ -140,46 +140,6 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/innlogging", http.StatusSeeOther)
 }
 
-// AssignRoleToUserHandler ligg bak RequireAdmin i rutaren. Han var open
-// fyrr, og daa var «gjer meg til admin» eitt einaste kall.
-func AssignRoleToUserHandler(w http.ResponseWriter, r *http.Request) {
-	userIDStr := r.URL.Query().Get("user_id")
-	roleName := r.URL.Query().Get("role")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil || roleName == "" {
-		http.Error(w, "Invalid user_id or role", http.StatusBadRequest)
-		return
-	}
-	roleID, err := DB.AddRole(roleName)
-	if err != nil {
-		http.Error(w, "Could not add role", http.StatusInternalServerError)
-		return
-	}
-	if err := DB.AssignRoleToUser(userID, roleID); err != nil {
-		http.Error(w, "Could not assign role", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Role assigned"))
-}
-
-// GetUserRolesHandler gjev rollone aat den innlogga brukaren. Han tok
-// eit user_id or spurnadsstrengen fyrr, og daa kunde kven som helst
-// lesa kven som helst.
-func GetUserRolesHandler(w http.ResponseWriter, r *http.Request) {
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Ikkje innlogga", http.StatusUnauthorized)
-		return
-	}
-	roles, err := DB.GetUserRoles(int64(user.ID))
-	if err != nil {
-		http.Error(w, "Could not fetch roles", http.StatusInternalServerError)
-		return
-	}
-	json.NewEncoder(w).Encode(roles)
-}
-
 // AddPaymentMethodHandler er teken burt. Han laga ein betalingsmaate
 // paa kva som helst user_id or spurnadsstrengen, utan innlogging. Naar
 // Stripe vert kopla paa, kjem betalingsmaatarne derifraa — ikkje fraa
@@ -202,7 +162,7 @@ func GetUserPaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // AddUserHandler er teken burt. Han tok imot vilkaarleg JSON, sette
-// rollone brukaren sjølv bad um, og skreiv passordet slik det kom inn —
+// løyvi brukaren sjølv bad um, og skreiv passordet slik det kom inn —
 // utan bcrypt. SignUpHandler er den einaste vegen inn no.
 
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
@@ -270,7 +230,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		Password:               string(hashedPassword),
 		NewsletterSubscription: newsletter,
 		TermsAccepted:          termsAccepted,
-		Roles:                  []string{"user"}, // Default role
+		Loyve:                  []string{"user"}, // Default role
 	}
 
 	// Create user in database

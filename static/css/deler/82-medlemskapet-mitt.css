@@ -89,4 +89,3 @@ a.byteveg { white-space: nowrap; }
   /* Tettare enn resten: talet og knappen som gjeld det høyrer saman. */
   .byterad form, .byterad a.byteveg { margin-top: calc(var(--rom-1) - var(--rom-2)); }
 }
-}

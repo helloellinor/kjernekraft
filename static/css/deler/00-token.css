@@ -68,19 +68,73 @@
    verkstaden paa /arket set ljost og myrkt attmed kvarandre paa den
    same sida, og det gjeng berre naar tokeni kann bu paa ein div. */
 :root, [data-theme="light"] {
+  /* ---- kva nettlesaren skal teikna sine eigne ting i ----
+     Alt me teiknar sjølve les tokeni yver. Men nokre ting teiknar
+     nettlesaren, og dei les *ikkje* tokeni: rullefelt, nedfallslista
+     aat ein `select`, dato- og klokkeveljarane, krysset i eit
+     søkjefelt — og `buttontext`, som er blekket ein `<button>` fær um
+     ingen segjer noko anna.
+
+     Utan denne lina er alt det ljost same kva temaet er. `buttontext`
+     er svart, og eit ord i ein knapp som ingen hev gjeve farge stend
+     daa svart paa myrk grunn. Det hende: klokka i timeserielista
+     (`.serienaar`) var uleseleg i myrkt tema, av di rada er ein
+     `<button>` med klasse og difor fell utanum baade `.btn`-fylgjet og
+     `button:not([class])` (ARKET §9).
+
+     Ho er arvd, so ho fylgjer `[data-theme]` paa kva element som helst,
+     som tokeni gjer — og /arket kann syna baae tema paa éi side. */
+  color-scheme: light;
+
+  /* ---- verdi, og so tydingane ----
+     Kvar flat farge stend éin gong, med `--l-` for ljost og `--m-` for
+     myrkt (nedst i blokki). Dei fire tema-blokkene under les deim og
+     gjev deim tyding. Fyrr stod verdi skrivne inn i kvar blokk, og den
+     myrke blokki var skrivi tvo gonger ord for ord — dei hadde alt
+     drive fraa kvarandre i innrykk (ARKET §10.4, utført 28.8.2026).
+
+     Dei *avleidde* — --merke, --merke-svak, --togu-svak, --tuneup-svak,
+     --glodkjerne — stend framleis i kvar blokk: prosenttalet er eit
+     anna i myrkret (18 % mot 12 %), so dei kann ikkje delast. */
+  --l-ark:        #edeeea;
+  --l-ark-djup:   #e4e6e1;
+  --l-flate:      #f5f6f3;
+  --l-blekk:      #1c1f1b;
+  --l-blekk-lys:  #565b54;
+  --l-blekk-svakt:#868b83;
+  --l-haarlina:   #cfd2cb;
+  --l-kant:       #bec2b9;
+  --l-togu:       #d6006e;
+  --l-klas:       #00908c;
+  --l-tuneup:     #6d2e9e;
+  --l-fjellraeven: #c8901a;
+  --l-student:    #8a6a00;
+  --l-svartkort:  #0b0d0a;
+  --l-merke-lys:  #00a8a2;
+  --l-aatvaring:  #8c3a2b;
+  --l-aatvaring-svak: #f0e0dc;
+  --l-glans:      color-mix(in srgb, #fff 55%, transparent);
+  --l-glans-svak: color-mix(in srgb, #fff 14%, transparent);
+  --l-glans-farga:color-mix(in srgb, #fff 55%, transparent);
+  --l-lippe-djup: color-mix(in srgb, var(--ned) 22%, transparent);
+  --l-lippe-ljos: color-mix(in srgb, var(--upp) 55%, transparent);
+  --l-skugge-flytande: 0 6px 20px rgb(28 31 27 / .14);
+  --l-skugge-kort:
+    0 1px 2px rgb(28 31 27 / .07),
+    0 6px 14px -3px rgb(28 31 27 / .13);
   /* flatone */
-  --ark:        #edeeea;
-  --ark-djup:   #e4e6e1;
-  --flate:      #f5f6f3;
+  --ark:        var(--l-ark);
+  --ark-djup:   var(--l-ark-djup);
+  --flate:      var(--l-flate);
 
   /* blekket, i tri styrkar */
-  --blekk:      #1c1f1b;
-  --blekk-lys:  #565b54;
-  --blekk-svakt:#868b83;
+  --blekk:      var(--l-blekk);
+  --blekk-lys:  var(--l-blekk-lys);
+  --blekk-svakt:var(--l-blekk-svakt);
 
   /* linone. --haarlina teiknar eit kort; --kant skil tvo bolkar. */
-  --haarlina:   #cfd2cb;
-  --kant:       #bec2b9;
+  --haarlina:   var(--l-haarlina);
+  --kant:       var(--l-kant);
 
   /* ---- fargane ----
      Dei er tekne av tingi som ligg i salen: den rosa Togu-ballen, den
@@ -96,15 +150,15 @@
 
      Merket er turkisen: han er den rolegaste av dei tri og toler aa
      staa paa knappar og lenkjor heile dagen. */
-  --togu:       #d6006e;
-  --klas:       #00908c;
-  --tuneup:     #6d2e9e;
+  --togu:       var(--l-togu);
+  --klas:       var(--l-klas);
+  --tuneup:     var(--l-tuneup);
   /* Fjällräven-gul. Fjerde slaget trening, naar dei tri produktfargane
      er upptekne av produkt. Ochre og ikkje sitron: han skal halda seg
      paa kalksteinen utan aa skrika, og han skal ha nok blekk til aa
      lesast mot arket. */
-  --fjellraeven: #c8901a;
-  --student:    #8a6a00;
+  --fjellraeven: var(--l-fjellraeven);
+  --student:    var(--l-student);
 
   /* Det tildelte medlemskapet — Black. Han er ikkje eit produkt ein
      kjøper, so han deler ikkje farge med dei tri: han *er* svart, og
@@ -118,10 +172,10 @@
 
      Ljosare enn `--blekk` i mørkt tema med vilje: er han lik brødteksti,
      les kanten som tekst og ikkje som eit slag. */
-  --svartkort:  #0b0d0a;
+  --svartkort:  var(--l-svartkort);
 
   --merke:      var(--klas);
-  --merke-lys:  #00a8a2;
+  --merke-lys:  var(--l-merke-lys);
   --merke-svak: color-mix(in srgb, var(--klas) 12%, var(--ark));
   --togu-svak:   color-mix(in srgb, var(--togu) 12%, var(--ark));
   --tuneup-svak: color-mix(in srgb, var(--tuneup) 12%, var(--ark));
@@ -129,7 +183,7 @@
   /* Aatvaringi er ikkje merket. Ho stend berre paa noko som gjekk gale
      eller ikkje kann gjerast um att, og difor lyt ho vera ein annan
      farge — elles tyder merket tvo ting. */
-  --aatvaring:  #8c3a2b;
+  --aatvaring:  var(--l-aatvaring);
 
   /* Slagfargen. Kva *slag* trening timen er — ikkje kva produkt han
      vert betalt med. Sjaa kartet nedanfor `:root`-blokkene. */
@@ -143,7 +197,7 @@
   /* Flata i ei lukka fana. Han er rekna av blekket og arket, so han
      fylgjer temaet av seg sjølv og skal ikkje skrivast um att. */
   --faneflate: color-mix(in srgb, var(--blekk) 6%, var(--ark));
-  --aatvaring-svak: #f0e0dc;
+  --aatvaring-svak: var(--l-aatvaring-svak);
 
   /* skriftene */
   --skrift-yver: "Union Gothic", "Ubuntu Condensed", "Ubuntu", ui-sans-serif, system-ui, sans-serif;
@@ -185,8 +239,123 @@
 
      Tali er lave med vilje. Ein glans paa 55 % er ei kvelv; ein paa 90 %
      er plast. */
-  --glans:       color-mix(in srgb, #fff 55%, transparent);
-  --glans-svak:  color-mix(in srgb, #fff 14%, transparent);
+  --glans:       var(--l-glans);
+  --glans-svak:  var(--l-glans-svak);
+
+  /* ---- glansen paa ein *farga* kropp ----
+     Talet ovanfor er maalt mot papiret: 20 % kvitt paa ei mest svart
+     flate gjev det same draget som 55 % gjev paa ei ljos. Ein pinne, ei
+     kula og ein bjelke er ikkje papir. Dei ber ein slag- eller
+     produktfarge, og i det myrke temaet er den fargen *ljos* — `--klas`
+     stend paa L* 78 der han stend paa L* 54 i det ljose — so kvitt hev
+     mest ingen stad aa gjera av seg. Maalt paa den fulle pinnen: glimet
+     drog ΔL +17 i det ljose og +2,5 i det myrke. Det er ikkje ei kula
+     med mindre ljos paa seg; det er ei farga skiva med ein skugge paa.
+
+     Difor eit eige tal for dei farga kroppane. 55 % i det ljose er det
+     same som fyrr, so det ljose temaet stend urørt; 40 % i det myrke
+     gjev ΔL +5,5 paa den fulle pinnen og +19 paa den veike. Den veike
+     fær meir enn han fær i det ljose (+7), og det er rett veg: ein myrk
+     kropp hev meir rom yver seg enn ein ljos, og det er nettupp difor
+     eitt tal ikkje kann tena baae flatene.
+
+     Den myrke sida — `--ned` i `--glim-rund` — stend som ho stod. Ho
+     hadde spelerom nok fraa fyrst av (ΔL -23 i myrkret mot -17 i det
+     ljose); det som mangla var ljoset, ikkje skuggen.
+
+     `--glans` sjølv er urørt og gjeld framleis alt som ligg paa ein
+     *papirfarga* kropp: knappen, veljaren, den valde fana og glaset i
+     dagmerket. Sjaa ARKET §2. */
+  --glans-farga: var(--l-glans-farga);
+
+  /* ---- sola ----
+     Ljoset kjem ovanfraa og til venstre, og *dette er talet*. Bjelkane
+     sette han fyrst — glimet deira toppar paa 34 % av breiddi — og daa
+     lyt kvar annan rund og heva ting i det same biletet taka speglingi
+     si fraa den same staden. Tvo ting attmed kvarandre kann ikkje ha
+     kvar si sol.
+
+     Han stend i *prosent* og ikkje i px: den same pinnen er 11 px i
+     skalaen under brettet og 20 px paa brettet, og ljoset lyt sitja
+     likt paa baae. */
+  --sol: 34% 22%;
+
+  /* ---- glansen paa ei kula ----
+     Tvo lag, og baae lyt vera med. Fyrst speglingi: brei og mjuk — eit
+     lite kvast punkt gjer ein ting *flatare* og ikkje rundare. So
+     kroppen, og det er *han* som gjer kula rund.
+
+     Vidddi er sett (82 % 82 %) og ikkje reikna av seg sjølv: med
+     `farthest-corner` hadde 100 % lege i hyrna paa kassen, langt
+     utanfor sirkelen, og den mørkaste tonen aldri vorte synleg. */
+  --glim-rund:
+    radial-gradient(ellipse 62% 50% at var(--sol),
+      color-mix(in srgb, var(--glans-farga) 72%, transparent) 0%,
+      color-mix(in srgb, var(--glans-farga) 40%, transparent) 36%,
+      color-mix(in srgb, var(--glans-farga) 11%, transparent) 64%,
+      transparent 84%),
+    radial-gradient(ellipse 82% 82% at var(--sol),
+      transparent 20%,
+      color-mix(in srgb, var(--ned) 7%, transparent) 54%,
+      color-mix(in srgb, var(--ned) 19%, transparent) 78%,
+      color-mix(in srgb, var(--ned) 32%, transparent) 100%);
+
+  /* ---- glansen paa ein kapsel ----
+     Den same sola, den same tanken, ei onnor form. Ein kapsel er ein
+     *liggjande sylinder*: han fangar ljoset i ein strek og ikkje i eit
+     punkt, so speglingi er ein brei flat oval — ikkje det gamle bandet
+     tvers yver heile breiddi, som var flatt av di det ikkje visste noko
+     um forma under seg. Endane bøygjer seg burt fraa ljoset.
+
+     Rimet — den tunne ljose lina langs toppen — bur i `--knappedjup` og
+     ikkje her. Det er *han* som gjer tingen vaat. */
+  --glim-kapsel:
+    radial-gradient(ellipse 42% 78% at var(--sol),
+      color-mix(in srgb, var(--glans) 78%, transparent) 0%,
+      color-mix(in srgb, var(--glans) 44%, transparent) 38%,
+      color-mix(in srgb, var(--glans) 12%, transparent) 66%,
+      transparent 86%),
+    linear-gradient(to right,
+      color-mix(in srgb, var(--ned) 10%, transparent) 0%,
+      transparent 13%, transparent 87%,
+      color-mix(in srgb, var(--ned) 10%, transparent) 100%),
+    linear-gradient(to bottom,
+      transparent 44%,
+      color-mix(in srgb, var(--ned) 6%, transparent) 76%,
+      color-mix(in srgb, var(--ned) 13%, transparent) 100%);
+
+  /* Skuggen ei kule kastar mot arket. Han stend i px og skalerer ikkje:
+     arket ligg like langt under uansett kor stor kula er. Pinnen paa
+     brettet og kula i plassmaalaren les den same. */
+  --skugge-kule: 0 1px 2px color-mix(in srgb, var(--ned) 18%, transparent);
+
+  /* Pila i ein veljar. Ho stend som eit token av di kvar stad som tek
+     glansen av att lyt kunna setja henne attende aaleine. */
+  --pil: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  /* ---- rommet pila treng ----
+     Pila er tvo trekantar som er skuva ein kvart rem fraa kvarandre, og
+     teksti i veljaren lyt stogga fyre den vinstre av dei. Det er tvo
+     tal som lyt fylgjast aat — kvar pila stend, og kor mykje fyll som
+     held teksti unna henne — og dei stod skrivne kvar for seg fire
+     stader i huset:
+
+       grunnstilen        pila 1,05/0,80 rem, fyll 1,5 rem   → 2,2 px glipe
+       `.setning`         pila 0,85/0,60 rem, fyll 1,25 rem  → 1,4 px glipe
+       `.sikt`            pila 0,55/0,35 rem, fyll 1,25 rem
+       maalveljaren       pila 0,45/0,25 rem, fyll 1,25 rem
+
+     Fire gissingar paa den same tingen, og dei tvo fyrste so trongt at
+     pila stend inntil bokstaven. Paa ein telefon, der setningi bryt og
+     veljaren vert klemd, les det seg som eit samanstøyt.
+
+     No er det eitt tal: `--pil-inn` er kvar pila stend, og `--pilrom`
+     er fyllet som fylgjer av det. Fyllet kann ikkje drifta fraa pila
+     lenger, av di det er rekna av henne. */
+  --pil-storleik: 5px;
+  --pil-inn: .8rem;
+  --pil-glipe: var(--rom-2);
+  --pilrom: calc(var(--pil-inn) + .25rem + var(--pil-storleik) + var(--pil-glipe));
+
 
   /* ---- lippone ----
      Skraakanten sine tvo kantar. `--ned` og `--upp` er ikkje fargar,
@@ -202,13 +371,18 @@
      mindre kvitt for aa syna det same. Sjaa docs/SKRAAKANTEN.md §3. */
   --ned: #000;
   --upp: #fff;
-  --lippe-djup: color-mix(in srgb, var(--ned) 22%, transparent);
-  --lippe-ljos: color-mix(in srgb, var(--upp) 55%, transparent);
+  --lippe-djup: var(--l-lippe-djup);
+  --lippe-ljos: var(--l-lippe-ljos);
+  /* Fallet er tvo skuggar og ikkje ein. Den tette segjer at han ligg
+     paa noko; den vide og veike segjer kor høgt. Fyrr var det ei einaste
+     line paa tvo pikslar, og daa laag knappen klistra paa arket i staden
+     for aa liggja paa det. */
   --knappedjup:
     inset 0 1px 0 var(--glans),
     inset 0 -1px 1px color-mix(in srgb, #fff 40%, transparent),
-    inset 0 -3px 4px -2px color-mix(in srgb, var(--blekk) 13%, transparent),
-    0 1px 2px color-mix(in srgb, var(--blekk) 15%, transparent);
+    inset 0 -4px 6px -3px color-mix(in srgb, var(--blekk) 14%, transparent),
+    0 1px 1px color-mix(in srgb, var(--blekk) 11%, transparent),
+    0 4px 9px -3px color-mix(in srgb, var(--blekk) 18%, transparent);
   --knappedjup-inn:
     inset 0 2px 4px -1px color-mix(in srgb, var(--blekk) 26%, transparent),
     inset 0 -1px 0 var(--glans-svak);
@@ -244,12 +418,37 @@
      landa nett paa renna, ikkje paa kanten. */
   --renne: 3px;
 
+  /* AVGJORD (ARKET §10.3, 28.8.2026): den stramme stigen.
+     Stramt tyder *mindre* rom og *større* skrift, av di det var romet
+     som gjorde sidone lange. Stegi under 1rem er finmotorikk og er
+     urørde — dei er avstandar inne i ein ting, ikkje millom ting. */
   --rom-1: .25rem; --rom-2: .5rem;  --rom-3: .75rem;
-  --rom-4: 1rem;   --rom-5: 1.5rem; --rom-6: 2rem;   --rom-7: 3rem;
+  --rom-4: 1rem;   --rom-5: 1.25rem; --rom-6: 1.5rem;  --rom-7: 2rem;
   /* Lufta over og under teksti i ein knapp. Mindre enn --rom-2, som
      stod her fyrr: han er eit steg i romskalaen, og eit steg i den
      skalaen er for mykje til dette. */
   --knapp-loddrett: .34rem;
+  /* Lufta i endane. Ho er ikkje eit steg i romskalaen som dei hine
+     maali her — ho er ei *fylgje av forma*, og difor stend ho i emme og
+     ikkje i rem.
+
+     Kapselen endar i ein halvsirkel, og radien hans er halve høgdi.
+     Skal kurva taka til nett der ordet slepper, lyt lufta i enden vera
+     nøyaktig den radien: er ho større, ligg det eit stykke rett kant
+     millom ordet og kurva, og knappen vert brei utan at noko fyller
+     breiddi. `--rom-5` stod her fyrr, og det er fire og ein halv piksel
+     daudt i kvar ende. */
+  --knapp-vassrett: 1.1em;
+
+  /* Ordet som er rispa ned i glaset. Ljoset kjem ovanfraa, og daa er den
+     nedre lippa i ei rispa den einaste kanten som fangar det: eit glim
+     paa éin piksel under bokstaven, og ingen ting yver honom. Det er den
+     same fysikken som fordjupingi i eit felt, berre paa ein bokstav.
+
+     Han stend i kvila og ikkje berre i trykket. Ei rispa er noko som er
+     *skore* i ei flate, og eit snitt gjeng ikkje att av di ingen held
+     fingeren nede. */
+  --ordet-inn: 0 1px 0 var(--glans);
   /* Linehøgdi i ein knapp. Ho er eit token av di runde knappar reknar
      storleiken sin av henne — sjaa `.dokklukk`.
 
@@ -269,86 +468,163 @@
      arket. Difor tvo lag: eit tett som ligg rett under nedkanten og
      teiknar han, og eit mjukt som ber resten. Faller det fyrste burt,
      flyt kortet; faller det andre burt, er kortet klistra ned. */
-  --skugge-flytande: 0 6px 20px rgb(28 31 27 / .14);
-  --skugge-kort:
-    0 1px 2px rgb(28 31 27 / .07),
-    0 6px 14px -3px rgb(28 31 27 / .13);
+  --skugge-flytande: var(--l-skugge-flytande);
+  --skugge-kort: var(--l-skugge-kort);
 
   --breidd: 68rem;
+
+  /* ---- det myrke temaet, éin gong ----
+     Berre dei *flate* verdi stend her; dei avleidde fylgjer temaet av
+     seg sjølv og lyt skrivast i kvar blokk, av di prosenttalet er eit
+     anna i myrkret. */
+  --m-ark:        #161815;
+  --m-ark-djup:   #101210;
+  --m-flate:      #1d201c;
+  --m-blekk:      #e2e5dd;
+  --m-blekk-lys:  #9aa094;
+  --m-blekk-svakt:#6f756a;
+  --m-haarlina:   #32362f;
+  --m-kant:       #3d423a;
+  --m-togu:       #ff5fa8;
+  --m-klas:       #2fd6c6;
+  --m-tuneup:     #b085f5;
+  --m-fjellraeven: #f0c04a;
+  --m-student:    #e8bf4d;
+  --m-svartkort:  #f2f4ee;
+  --m-merke-lys:  #6ae4d8;
+  --m-aatvaring:  #d08574;
+  --m-aatvaring-svak: #2b1c18;
+  --m-glans:      color-mix(in srgb, #fff 20%, transparent);
+  --m-glans-svak: color-mix(in srgb, #fff 7%, transparent);
+  --m-glans-farga:color-mix(in srgb, #fff 40%, transparent);
+  /* Maalt, ikkje gjetta: 55 % kvitt paa ei mest svart flate gjev eit
+     drag paa ΔL +0.318, mot +0.073 i det ljose. 26 % gjev +0.093 og er
+     difor den same lippa og ikkje ei sterkare. */
+  --m-lippe-djup: color-mix(in srgb, var(--ned) 40%, transparent);
+  --m-lippe-ljos: color-mix(in srgb, var(--upp) 26%, transparent);
+  --m-skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
+  --m-skugge-kort:
+    0 1px 2px rgb(0 0 0 / .45),
+    0 6px 16px -3px rgb(0 0 0 / .55);
+
 }
 
+/* Dei tvo myrke blokkene er no ordrett like, og det er meiningi: den
+   fyrste er myrkt av systemet, den andre myrkt av val. Skil dei seg ein
+   dag, er det ein feil og ikkje ein finesse.
+
+   MERK: designsystemet skreiv `color-mix(in srgb, var(--merke) var(--merke)
+   22%, #fff)` i tri av dei fire blokkene — `var(--merke)` tvo gonger, som
+   ikkje er gild `color-mix`-syntaks. Det hadde slege ut glødi under
+   hovudet i myrkt tema og i kvart uttrykkeleg temaval. Retta her. */
+
+/* Systemet segjer myrkt. `:root` og ikkje `:root:not([data-theme="light"])`:
+   eit uttrykkeleg ljost val vinn i staden i blokki *etter* denne, som kjem
+   seinare i arket og hev same vekt. Same verknad, og tokeni bur i ein
+   veljar ein kann slaa upp. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --ark:        #161815;
-    --ark-djup:   #101210;
-    --flate:      #1d201c;
-    --blekk:      #e2e5dd;
-    --blekk-lys:  #9aa094;
-    --blekk-svakt:#6f756a;
-    --haarlina:   #32362f;
-    --kant:       #3d423a;
-    --togu:       #ff5fa8;
-    --klas:       #2fd6c6;
-    --tuneup:     #b085f5;
-    --fjellraeven: #f0c04a;
-    --student:    #e8bf4d;
-    --svartkort:  #f2f4ee;
+  :root {
+    color-scheme: dark;
+    --ark: var(--m-ark);
+    --ark-djup: var(--m-ark-djup);
+    --flate: var(--m-flate);
+    --blekk: var(--m-blekk);
+    --blekk-lys: var(--m-blekk-lys);
+    --blekk-svakt: var(--m-blekk-svakt);
+    --haarlina: var(--m-haarlina);
+    --kant: var(--m-kant);
+    --togu: var(--m-togu);
+    --klas: var(--m-klas);
+    --tuneup: var(--m-tuneup);
+    --fjellraeven: var(--m-fjellraeven);
+    --student: var(--m-student);
+    --svartkort: var(--m-svartkort);
+    --merke-lys: var(--m-merke-lys);
+    --aatvaring: var(--m-aatvaring);
+    --aatvaring-svak: var(--m-aatvaring-svak);
+    --glans: var(--m-glans);
+    --glans-svak: var(--m-glans-svak);
+    --glans-farga: var(--m-glans-farga);
+    --lippe-djup: var(--m-lippe-djup);
+    --lippe-ljos: var(--m-lippe-ljos);
+    --skugge-flytande: var(--m-skugge-flytande);
+    --skugge-kort: var(--m-skugge-kort);
     --merke:      var(--klas);
-    --merke-lys:  #6ae4d8;
     --merke-svak: color-mix(in srgb, var(--klas) 18%, var(--ark));
     --togu-svak:   color-mix(in srgb, var(--togu) 18%, var(--ark));
     --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
-    --aatvaring:  #d08574;
-    --aatvaring-svak: #2b1c18;
     --glodkjerne: color-mix(in srgb, var(--merke) 22%, #fff);
-    --glans:       color-mix(in srgb, #fff 20%, transparent);
-    --glans-svak:  color-mix(in srgb, #fff 7%, transparent);
-    --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
-    --skugge-kort:
-      0 1px 2px rgb(0 0 0 / .45),
-      0 6px 16px -3px rgb(0 0 0 / .55);
-    /* Maalt, ikkje gjetta: 55 % kvitt paa ei mest svart flate gjev eit
-       drag paa ΔL +0.318, mot +0.073 i det ljose. 26 % gjev +0.093 og
-       er difor den same lippa og ikkje ei sterkare. */
-    --lippe-djup: color-mix(in srgb, var(--ned) 40%, transparent);
-    --lippe-ljos: color-mix(in srgb, var(--upp) 26%, transparent);
   }
 }
+
+/* Ljost av val. Han lyt staa etter media-blokki for aa vinna yver henne. */
+[data-theme="light"] {
+  color-scheme: light;
+  --ark: var(--l-ark);
+  --ark-djup: var(--l-ark-djup);
+  --flate: var(--l-flate);
+  --blekk: var(--l-blekk);
+  --blekk-lys: var(--l-blekk-lys);
+  --blekk-svakt: var(--l-blekk-svakt);
+  --haarlina: var(--l-haarlina);
+  --kant: var(--l-kant);
+  --togu: var(--l-togu);
+  --klas: var(--l-klas);
+  --tuneup: var(--l-tuneup);
+  --fjellraeven: var(--l-fjellraeven);
+  --student: var(--l-student);
+  --svartkort: var(--l-svartkort);
+  --merke-lys: var(--l-merke-lys);
+  --aatvaring: var(--l-aatvaring);
+  --aatvaring-svak: var(--l-aatvaring-svak);
+  --glans: var(--l-glans);
+  --glans-svak: var(--l-glans-svak);
+  --glans-farga: var(--l-glans-farga);
+  --lippe-djup: var(--l-lippe-djup);
+  --lippe-ljos: var(--l-lippe-ljos);
+  --skugge-flytande: var(--l-skugge-flytande);
+  --skugge-kort: var(--l-skugge-kort);
+  --merke:      var(--klas);
+  --merke-svak: color-mix(in srgb, var(--klas) 12%, var(--ark));
+  --togu-svak:   color-mix(in srgb, var(--togu) 12%, var(--ark));
+  --tuneup-svak: color-mix(in srgb, var(--tuneup) 12%, var(--ark));
+  --glodkjerne: color-mix(in srgb, var(--merke) 72%, #000);
+}
+
+/* Myrkt av val. Ordrett lik media-blokki yver. */
 [data-theme="dark"] {
-  --ark:        #161815;
-  --ark-djup:   #101210;
-  --flate:      #1d201c;
-  --blekk:      #e2e5dd;
-  --blekk-lys:  #9aa094;
-  --blekk-svakt:#6f756a;
-  --haarlina:   #32362f;
-  --kant:       #3d423a;
-  --togu:     #ff5fa8;
-  --klas:     #2fd6c6;
-  --tuneup:   #b085f5;
-  --fjellraeven: #f0c04a;
-  --student:  #e8bf4d;
-  --svartkort:  #f2f4ee;
-  --merke:    var(--klas);
-  --merke-lys:  #6ae4d8;
+  color-scheme: dark;
+  --ark: var(--m-ark);
+  --ark-djup: var(--m-ark-djup);
+  --flate: var(--m-flate);
+  --blekk: var(--m-blekk);
+  --blekk-lys: var(--m-blekk-lys);
+  --blekk-svakt: var(--m-blekk-svakt);
+  --haarlina: var(--m-haarlina);
+  --kant: var(--m-kant);
+  --togu: var(--m-togu);
+  --klas: var(--m-klas);
+  --tuneup: var(--m-tuneup);
+  --fjellraeven: var(--m-fjellraeven);
+  --student: var(--m-student);
+  --svartkort: var(--m-svartkort);
+  --merke-lys: var(--m-merke-lys);
+  --aatvaring: var(--m-aatvaring);
+  --aatvaring-svak: var(--m-aatvaring-svak);
+  --glans: var(--m-glans);
+  --glans-svak: var(--m-glans-svak);
+  --glans-farga: var(--m-glans-farga);
+  --lippe-djup: var(--m-lippe-djup);
+  --lippe-ljos: var(--m-lippe-ljos);
+  --skugge-flytande: var(--m-skugge-flytande);
+  --skugge-kort: var(--m-skugge-kort);
+  --merke:      var(--klas);
   --merke-svak: color-mix(in srgb, var(--klas) 18%, var(--ark));
   --togu-svak:   color-mix(in srgb, var(--togu) 18%, var(--ark));
   --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
-  --aatvaring:  #d08574;
-  --aatvaring-svak: #2b1c18;
   --glodkjerne: color-mix(in srgb, var(--merke) 22%, #fff);
-  --glans:       color-mix(in srgb, #fff 20%, transparent);
-    --glans-svak:  color-mix(in srgb, #fff 7%, transparent);
-    --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
-    --skugge-kort:
-      0 1px 2px rgb(0 0 0 / .45),
-      0 6px 16px -3px rgb(0 0 0 / .55);
-    /* Maalt, ikkje gjetta: 55 % kvitt paa ei mest svart flate gjev eit
-       drag paa ΔL +0.318, mot +0.073 i det ljose. 26 % gjev +0.093 og
-       er difor den same lippa og ikkje ei sterkare. */
-  --lippe-djup: color-mix(in srgb, var(--ned) 40%, transparent);
-    --lippe-ljos: color-mix(in srgb, var(--upp) 26%, transparent);
 }
+
 
 /* ---- grunnen ---- */
 /* hidden-merket skal alltid vinna.
@@ -408,16 +684,21 @@ h1, h2, h3, h4 {
   margin: 0;
   text-wrap: balance;
 }
+/* Den stramme stigen: steg e^¼ ≈ 1.284, med taket paa e rem.
+     1 → 1.284 → 1.649 → 2.118 → 2.718
+   Fire steg som er mest like store, og breiddi ber rangen (§5) — difor
+   kann tvo yverskrifter vera nær like store og endaa segja klaart kva
+   som ligg under kva. */
 h1 {
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-size: clamp(2.118rem, 5vw, 2.718rem);
   font-stretch: var(--vidd-tittel); font-weight: 700; letter-spacing: -.01em;
   /* Samansette norske ord er lange. Utan dette renn «Brukeradministrasjon»
      ut or spalta i 125 % breidd. */
   overflow-wrap: break-word; hyphens: auto;
 }
-h2 { font-size: 1.8rem; font-stretch: var(--vidd-yver);  font-weight: 600; }
-h3 { font-size: 1.3rem; font-stretch: var(--vidd-yver);  font-weight: 500; }
-h4 { font-size: 1.05rem; font-stretch: var(--vidd-yver); font-weight: 500; }
+h2 { font-size: 2.118rem; font-stretch: var(--vidd-yver);  font-weight: 600; }
+h3 { font-size: 1.649rem; font-stretch: var(--vidd-yver);  font-weight: 500; }
+h4 { font-size: 1.284rem; font-stretch: var(--vidd-yver); font-weight: 500; }
 
 p { margin: 0 0 var(--rom-4); max-width: 62ch; }
 p:last-child { margin-bottom: 0; }

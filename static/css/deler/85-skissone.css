@@ -1,0 +1,51 @@
+/* ===================================================================
+   skissone — teikningane av lærarane
+
+   Dei stend nedst i innstillingsfana.
+
+   ---- kvifor dette ikkje bryt §7 ----
+
+   §7 skildrar kva ei *teikning* er i dette huset: SVG, `currentColor`,
+   `fill: none`, kvadratisk viewBox, éin strektjukkleik. Den regelen er
+   skrivi um ikon — settet som tok yver etter emojiane — og grunnen han
+   gjev er at eit ikon lyt fylgja temaet og kunna bera produktfargen.
+   Eit *portrett* kann ikkje det. Det er ikkje eit teikn som staar for
+   noko; det er ein person, teikna med dei fargane han er teikna med.
+   §7 namngjev ikkje den kategorien, og han burde gjera det.
+
+   ---- gjenomsynleg grunn ----
+
+   Pixelmator la eit kvitt rektangel yver heile lerretet ved eksporten.
+   Det er teke ut: ein SVG med gjenomsynleg grunn er heile grunnen til
+   at ho *er* ein SVG, og eit kvitt rektangel paa eit myrkt ark er ikkje
+   ei teikning, det er ein lapp.
+
+   Strekane er lyse graatonar med 6–39 % dekk, so paa den myrke sida
+   fell andletet attende medan haaret og topparne lyser. Det er
+   *sjekka* i baae temai og late staa: teikningi les seg som eit kritt-
+   riss paa svart tavla, og det er ikkje ein feil — det er den same
+   teikningi paa ein annan grunn. Noko filter som lyfter henne der
+   vilde ha skift fargane ho er teikna med.
+
+   Legg ein nokon gong eit lyft her, maal det i ΔL mot arket, som §2
+   krev av alt anna ljos i huset.
+   =================================================================== */
+.skissone {
+  /* Bolkeavstand yver. Ho stend sist i fana og hev ingen ting under. */
+  margin: var(--rom-7) 0 0;
+}
+
+/* Ingi ramma, ingi flate, ingen skugge. Teikningi er ikkje eit kort —
+   ho ligg paa arket, og arket er det som er attum henne. */
+.skissone img { display: block; width: 100%; height: auto; }
+
+/* Bilettekst, ikkje ei yverskrift: ho namngjev kva du ser paa, og det
+   er merkelappmaalet fraa §5 — versalar, sperring, 68 % breidd. */
+.skissone figcaption {
+  font-family: var(--skrift-yver);
+  font-size: .72rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+  margin-top: var(--rom-3);
+}

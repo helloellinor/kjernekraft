@@ -1,13 +1,16 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"kjernekraft/database"
 	"kjernekraft/handlers/config"
 	"kjernekraft/models"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -36,6 +39,17 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		RecurringWeeks int    `json:"recurring_weeks"`
 		// Sett = ei privat økt for den eine. Sjaa database/privattime.go.
 		PrivateUserID int64 `json:"private_user_id"`
+		// Adressa aat den eine, naar skjemaet spurde um ho i staden for
+		// aa be nokon finna namnet i ei liste yver alle. Ho vert slegi
+		// upp her: lesaren skal ikkje ha eit register yver kven som
+		// finst, og ein id fraa lesaren er ein id nokon kann skriva.
+		PrivateEmail string `json:"private_email"`
+		// Gruppa timen er open for. Null er open for alle.
+		GruppeID int64 `json:"gruppe_id"`
+		// Kor mange vikor fram fyrste timen skal liggja. Null er den
+		// fyrste komande gongen vekedagen kjem. Lesaren reknar talet av
+		// eit vekenummer (`veketal.js`); her er det berre vikor.
+		StartWeekOffset int `json:"start_week_offset"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&classData); err != nil {
@@ -46,6 +60,24 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	if classData.Weekday < 0 || classData.Weekday > 6 {
 		http.Error(w, "Invalid weekday", http.StatusBadRequest)
 		return
+	}
+
+	// Adressa fyrst, so resten av prøvingi ser éin id same kva vegen
+	// han kom. Ho er den eine staden namnet vert til eit tal.
+	if strings.TrimSpace(classData.PrivateEmail) != "" {
+		var id int64
+		err := AdminDB.Conn.QueryRow(
+			`SELECT id FROM users WHERE lower(email) = lower(?)`,
+			strings.TrimSpace(classData.PrivateEmail)).Scan(&id)
+		if err == sql.ErrNoRows {
+			http.Error(w, t(GetLanguageFromRequest(r), "admin.unknown_email"), http.StatusBadRequest)
+			return
+		}
+		if err != nil {
+			http.Error(w, "Could not look up user", http.StatusInternalServerError)
+			return
+		}
+		classData.PrivateUserID = id
 	}
 
 	// Ei privat økt er sett av til ein *namngjeven* person. Finst han
@@ -63,10 +95,29 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Ukjend brukar for privat time", http.StatusBadRequest)
 			return
 		}
-		// Personlig Trening er éin deltakar. Set ingen noko anna, er
-		// det talet me meiner.
-		if classData.Capacity == 0 {
-			classData.Capacity = 1
+		// Personlig Trening er éin deltakar. Ikkje «naar ingen hev sagt
+		// noko anna» — alltid: det er ikkje eit utgangspunkt, det er kva
+		// ei privat økt *er*. Skjemaet stengjer plassefeltet naar ein
+		// vel privat, men ein POST er ikkje eit skjema, og ei økta for
+		// éin med atten plassar er ikkje ei økta for éin.
+		classData.Capacity = 1
+		// Og ho lyt segja kva ho kostar. Klippet vert funne ved at
+		// timen sin `class_type` møter pakka si `category` — sjaa
+		// klippbruk.go — so ei privat økt utan type er ei økt som
+		// kostar ingen ting, utan at nokon hev sagt det. Skjemaet
+		// sender tom type, av di typen ikkje er noko ein skriv der.
+		if strings.TrimSpace(classData.ClassType) == "" {
+			classData.ClassType = database.PTKategori
+		}
+	}
+
+	// Gruppa lyt finnast. Ein time som peikar paa ei gruppe som ikkje er
+	// der, er ein time ingen kann sjaa — og ingen ting hadde sagt fraa.
+	if classData.GruppeID > 0 {
+		finst, err := AdminDB.GruppeFinst(classData.GruppeID)
+		if err != nil || !finst {
+			http.Error(w, "Ukjend gruppe", http.StatusBadRequest)
+			return
 		}
 	}
 
@@ -82,7 +133,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Regelen hev ein vekedag, ikkje ein dato. Fyrste utslaget er neste
+	// Serien hev ein vekedag, ikkje ein dato. Fyrste utslaget er neste
 	// gongen den dagen kjem — i dag, um klokka ikkje alt er gjengi.
 	// Tidene vert bygde i UTC av di den lagra tidi er veggklokka (sjaa
 	// GrupperTimar); klokka i innstillingane segjer kva ho er no.
@@ -92,6 +143,21 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		fram = 7
 	}
 	fyrste := no.AddDate(0, 0, fram)
+
+	// «Fraa veke N». Lesaren hev alt rekna nummeret um til kor mange
+	// vikor fram det ligg, av di ei vike som er gjengi ikkje finst — bed
+	// du um veke 2 i veke 51, er det den komande veke 2 du meiner. Her
+	// er det berre vikor aa leggja til.
+	//
+	// Taket er eit aar. Eit tal yver det er ikkje ei vike lenger fram,
+	// det er eit tal nokon hev sendt oss.
+	if classData.StartWeekOffset > 0 {
+		if classData.StartWeekOffset > 53 {
+			http.Error(w, "Invalid start week", http.StatusBadRequest)
+			return
+		}
+		fyrste = fyrste.AddDate(0, 0, 7*classData.StartWeekOffset)
+	}
 
 	startDateTime := time.Date(fyrste.Year(), fyrste.Month(), fyrste.Day(),
 		startTime.Hour(), startTime.Minute(), 0, 0, time.UTC)
@@ -104,8 +170,8 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		weeksToCreate = classData.RecurringWeeks
 	}
 
-	// Det som vert laga her er ein *regel*, ikkje ein time — timane er
-	// utslagi hans. Ein einskildtime er ein regel med eitt utslag.
+	// Det som vert laga her er ein *serie*, ikkje ein time — timane er
+	// utslagi hans. Ein einskildtime er ein serie med eitt utslag.
 	//
 	// Alle vekene vert bygde og prøvde fyrst, og skrivne etterpå. Fyrr
 	// gjekk prøva og skrivinga om kvarandre, so ein kollisjon i femte
@@ -151,13 +217,24 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		timar = append(timar, event)
 	}
 
-	_, createdEventIDs, err := AdminDB.LagRegel(timar)
+	_, createdEventIDs, err := AdminDB.LagSerie(timar)
 	if err != nil {
 		http.Error(w, "Could not create event", http.StatusInternalServerError)
 		return
 	}
 
-	// Økta vert sett av etter at ho er laga. Alle utslagi av regelen
+	// Kven som sette timen upp. Det er ikkje det same som kven som held
+	// honom (`teacher_name` er fri tekst) — det er den meldingi skal
+	// til naar nokon segjer fraa seg ei økt.
+	if uid, ok := sessionUserID(r); ok {
+		for _, id := range createdEventIDs {
+			if err := AdminDB.SettLagaAv(id, uid); err != nil {
+				log.Printf("laga-av for time %d: %v", id, err)
+			}
+		}
+	}
+
+	// Økta vert sett av etter at ho er laga. Alle utslagi av serien
 	// høyrer den same personen til: eit PT-kjøp paa aatte vekor er aatte
 	// timar med same namnet paa.
 	if classData.PrivateUserID > 0 {
@@ -165,6 +242,30 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 			if err := AdminDB.SettPrivatTime(id, classData.PrivateUserID); err != nil {
 				log.Printf("privat time %d: %v", id, err)
 				http.Error(w, "Could not mark class private", http.StatusInternalServerError)
+				return
+			}
+			// Økta er tinga i det ho er sett upp, og eit klipp fylgjer
+			// med — um det finst eit. Finst det ikkje, stend økta lell
+			// og ingi skuld vert skrivi: sjaa BokPrivatTime.
+			//
+			// Ein feil her stoggar ikkje timane som alt er laga. Dei
+			// stend i basen, og aa svara med ein feil hadde bede den
+			// som prøvde ein gong til — og daa ligg dei der tvo gonger.
+			// Det som kann skorta er klippet, og det er noko
+			// administrasjonen kann sjaa og retta.
+			if err := AdminDB.BokPrivatTime(id, classData.PrivateUserID, no); err != nil {
+				log.Printf("klipp for privat time %d: %v", id, err)
+			}
+		}
+	}
+
+	// Gruppa gjeld heile serien av same grunnen: er reformer-timen open
+	// for dei upplærde, er han det kvar veke og ikkje berre den fyrste.
+	if classData.GruppeID > 0 {
+		for _, id := range createdEventIDs {
+			if err := AdminDB.SettGruppePaaTime(id, classData.GruppeID); err != nil {
+				log.Printf("gruppetime %d: %v", id, err)
+				http.Error(w, "Could not set group", http.StatusInternalServerError)
 				return
 			}
 		}

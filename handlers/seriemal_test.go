@@ -9,7 +9,7 @@ import (
 	"kjernekraft/models"
 )
 
-// Ein time som ikkje ber nokon regel skal ikkje by fram felt som ikkje
+// Ein time som ikkje ber nokon serie skal ikkje by fram felt som ikkje
 // kan lagrast.
 //
 // Rada stod med rule_id="0" fyrr, og felti stod opne. Endra ein noko der,
@@ -44,22 +44,22 @@ func TestRegelUtanNamnStengjerFelti(t *testing.T) {
 
 	for _, p := range []struct {
 		namn    string
-		regelID int64
+		serieID int64
 		stengd  bool
 	}{
-		{"utan regel", 0, true},
-		{"med regel", 42, false},
+		{"utan serie", 0, true},
+		{"med serie", 42, false},
 	} {
 		t.Run(p.namn, func(t *testing.T) {
-			regel := GrupperTimar(timar, time.Date(2026, 9, 1, 12, 0, 0, 0, time.UTC))
-			if len(regel) != 1 {
-				t.Fatalf("fekk %d reglar, venta 1", len(regel))
+			serie := GrupperTimar(timar, time.Date(2026, 9, 1, 12, 0, 0, 0, time.UTC))
+			if len(serie) != 1 {
+				t.Fatalf("fekk %d seriar, venta 1", len(serie))
 			}
-			regel[0].RegelID = p.regelID
+			serie[0].SerieID = p.serieID
 
 			var ut strings.Builder
 			if err := mal.ExecuteTemplate(&ut, "admin_class_management", map[string]interface{}{
-				"Lang": "nn", "Timereglar": regel, "Teachers": []string{"Leon"},
+				"Lang": "nn", "Timereglar": serie, "Teachers": []string{"Leon"},
 				"CSRFToken": "x", "IsAdmin": true, "UserName": "prøve",
 			}); err != nil {
 				t.Fatalf("malen feila: %v", err)
@@ -67,7 +67,7 @@ func TestRegelUtanNamnStengjerFelti(t *testing.T) {
 
 			html := ut.String()
 			// Felti ber skjemanamn no, ikkje krokklassor: heile
-			// regelen gjeng i eitt kall gjenom dokka, so kvart felt
+			// serien gjeng i eitt kall gjenom dokka, so kvart felt
 			// lyt ha eit `name` tenaren kjenner att.
 			stengd := lestengd(t, html, `name="laerar"`) &&
 				lestengd(t, html, `name="klokke"`) &&
@@ -76,8 +76,8 @@ func TestRegelUtanNamnStengjerFelti(t *testing.T) {
 			if stengd != p.stengd {
 				t.Errorf("stengde felt = %v, venta %v", stengd, p.stengd)
 			}
-			if p.stengd && !strings.Contains(html, t2("nn", "admin.rule_none_hint")) {
-				t.Errorf("vinket um at timen ikkje hev nokon regel stend ikkje der")
+			if p.stengd && !strings.Contains(html, t2("nn", "admin.serie_none_hint")) {
+				t.Errorf("vinket um at timen ikkje hev nokon serie stend ikkje der")
 			}
 		})
 	}

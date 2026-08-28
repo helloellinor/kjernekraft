@@ -124,13 +124,20 @@ func InnsjekkHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	eventIDs := make([]int64, len(timar))
+	for i, e := range timar {
+		eventIDs[i] = int64(e.ID)
+	}
+	paamelde, err := DB.PaameldeTilTimar(eventIDs)
+	if err != nil {
+		log.Printf("innsjekk, paamelde: %v", err)
+		http.Error(w, "Kunne ikkje henta dei påmelde", http.StatusInternalServerError)
+		return
+	}
+
 	var ut []InnsjekkTime
 	for _, e := range timar {
-		folk, err := DB.PaameldeTil(int64(e.ID))
-		if err != nil {
-			log.Printf("innsjekk, paamelde til %d: %v", e.ID, err)
-			continue
-		}
+		folk := paamelde[int64(e.ID)]
 		t := InnsjekkTime{Event: e, Klokke: veggklokka(e.StartTime).Format("15:04"),
 			Ledige: e.Ledige()}
 		for _, p := range folk {

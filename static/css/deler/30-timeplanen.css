@@ -23,15 +23,25 @@
   /* Fyllet er knapt her, og det er med vilje.
      Alt i den frosne stabelen er pikslar eit kort kverv attum: stabelen
      sluttar der han sluttar, og kvar piksel luft i honom er ein piksel
-     timen din vert eten tidlegare. Under tittelen trengst ingen: under
-     honom stend skyvaren, og skyvaren ber si eigi renne og sin eigen
-     kant — han er alt skild fraa tittelen utan at nokon legg luft til.
+     timen din vert eten tidlegare.
      Yver er `--rom-2` nok til aa skilja tittelen fraa hovudlina.
 
      Rekneskapen: 12 px yver og 16 under gjorde stabelen 179,8 høg og
      lina var midt paa skyvaren. Med 8 og 0 sluttar han paa 159,8 — nett
-     der midten laag. */
-  padding-block: var(--rom-2) 0;
+     der midten laag.
+
+     Under stod 0, med den grunngjevingi at skyvaren ber si eigi renne og
+     sin eigen kant og difor er skild fraa tittelen utan hjelp. Det var
+     rett um *skiljet* og gale um *forma*: `.page-title` gjeng med
+     line-height 1,02, som er tettare enn skrifta sin nedgang, so
+     nedhalen paa ein «p» heng utanfor si eigi linekasse. «Timeplan» og
+     «Schedule» endar baae paa noko som heng ned, og halen la seg nedi
+     skyvaren. Eitt steg (`--rom-2`) er nok til aa taka honom.
+
+     Og det lyt vera *fyll* og ikkje marg: lina er klistra og ugjenomsynleg,
+     og ein marg er eit gjenomsynleg glas der korti under syner seg medan
+     dei rullar forbi (§9). Stabelen veks 8 px av dette, og det er prisen. */
+  padding-block: var(--rom-2) var(--rom-2);
   margin-block: calc(var(--rom-2) * -1) 0;
   /* Flata lyt gaa heilt ut i sidefyllet aat <main>.
      Ho stod i innhaldskassen fyrr, og daa var ho *smalare* enn det som
@@ -109,7 +119,8 @@
 /* Eit avvist tal — ei vike som er gjengi. Bobla fer ein augneblink i
    åtvaringsfargen. Ikkje ein ring: ein ring er nettopp det ei bobla
    aldri tek, og eit avvist tal er ikkje ein grunn til å bryte det. */
-.bobla.nekta { background-color: color-mix(in srgb, var(--aatvaring) 22%, transparent); }
+/* Sjølve neiet stend i 20-skjema.css: tri vekefelt i huset nyttar det,
+   og berre eitt av dei er ei bobla. */
 @media (prefers-reduced-motion: no-preference) {
   .bobla { transition: background-color .18s ease-out; }
 }
@@ -168,16 +179,6 @@
 
 .vekepil { color: var(--blekk-svakt); }
 .vekepil:disabled { opacity: .3; cursor: default; }
-.vekeval {
-  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
-  font-size: .8rem; letter-spacing: .06em; text-transform: uppercase;
-  padding: var(--rom-2) var(--rom-3);
-  color: var(--blekk-lys); text-decoration: none;
-  border: 1px solid transparent; border-radius: 2px;
-}
-.vekeval:hover { color: var(--blekk); border-color: var(--haarlina); }
-.vekeval.no { color: var(--klas); border-color: var(--klas); }
-
 /* Korgi flyt. Laag ho i flyten, skuva ho heile timeplanen ein tomme
    ned kvar gong nokon opna henne — og det er nettupp det ein ikkje skal
    gjera med noko ein opnar for aa *sjaa* paa noko anna.
@@ -239,12 +240,71 @@
   margin-block-start: var(--rom-3);
 }
 
+/* Fyllet og gapet er rada sine eigne, og dei er dei same kvar rada
+   stend — i vika og i listone paa heimesida. Dei stod tvo stader med
+   tvo verdiar (12 px mot 8 px yver merket, 12 px mot 16 px attmed det),
+   og daa er ein time ikkje den same tingen paa dei tvo sidone. Han er
+   ein abstraksjon som ser litt ulik ut kvar gong.
+
+   Loddrett: ulikt i dei tvo endane, so *avstanden* vert lik. Lufta yver
+   er maald fraa fana — ho stikk elleve einingar upp yver kroppen og er
+   teikna, ho er ikkje luft. Under kassen heng plassmerket, som stend
+   med midten paa hyrna og difor gjeng um lag 0,10 av merkebreiddi
+   nedanfor; botnfyllet lyt rydda henne fyrst og *so* leggja til den
+   same lufta som stend yver fana. Klareringi er rekna av
+   `--merkestorleik` og fylgjer difor merket til kva storleik det hev.
+
+   Difor lyt `--merkestorleik` staa paa *rada* der ho vert stelt paa, og
+   ikkje paa merket: ein variabel sett paa barnet finst ikkje i
+   foreldret sitt `calc`, og daa reknar botnfyllet med ein annan
+   storleik enn den bobla faktisk hev.
+
+   Vassrett: `--rom-4` og ikkje `--rom-5` som paa eit kort som stend
+   aaleine. Ei lista er tettare enn eit einslegt kort, og fyllet er like
+   fullt breidt nok til at plassmerket — som heng ut til høgre av same
+   grunn som det heng ned — ikkje kjem borti kanten.
+
+   Gapet er `--rom-3`: det same som millom merki som stend for seg
+   sjølve (`.merkerad`), og det er det same rommet baae stader — inne i
+   ei gruppa (§6). Byter storleiken paa bobla (`.plettmerke` nedanfor),
+   lyt fyllet maatast paa nytt.
+
+   ---- toppen er maald fraa fana, ikkje fraa kassen ----
+
+   Fana byrjar *éi einheit inne i* kassen: `faneY = merkeKant = 1` i
+   merkeform.go, av 73 einheiter i høgdi. Toppfyllet stod til kassen,
+   og daa var lufta yver merket éi einheit mindre enn lufta under det.
+   Maalt paa heimesida: 8,00 px yver mot 8,99 under og 10,16 til høgre —
+   og det var toppen som stakk seg ut, av di merket der stend inntil tri
+   kantar av kortet og kvar skilnad difor er synleg.
+
+   `--merkeeining` er den einheiti: merket er teikna i eit viewBox som
+   er 58 breidt (`MarkWidth` i merkeform.go), so ei einheit er breiddi
+   delt paa 58. Endrar `kroppB` eller `merkeKant` seg der, endrar dette
+   talet seg med — det er den eine staden CSS-en lyt kjenna geometrien,
+   og han er skriven ned her av di han ikkje kann spyrja um honom.
+
+   Etter dette: 9,21 mot 8,99 paa heimesida, 9,49 mot 9,44 i vika. Lufta
+   er den same yver fana som under bobla, og botnen treng ingi retting —
+   `.10` viste seg aa vera rett gjeta.
+
+   `--merkeeining` stend paa rada og ikkje paa `:root`, og det er ikkje
+   ein smak: ein eigenskap som er skrivi som `calc(var(--x) / 58)` vert
+   *løyst der ho stend*, og so er det svaret som gjeng i arv. Paa roti
+   hadde ho vore rekna av dei 5,4 rem som stend der, og heimesida — som
+   set 4,4 rem paa rada — hadde arva ei einheit som høyrde til eit anna
+   merke. Maalt: baae sidone fekk 9,49 i staden for 9,21 og 9,49. Same
+   fella som `--merkestorleik` sjølv, som lyt staa paa rada og ikkje paa
+   merket for at botnfyllet skal rekna med rett tal. */
 .timerad {
   display: grid;
   grid-template-columns: var(--timetrapp);
   gap: var(--rom-3);
   align-items: center;
-  padding: var(--rom-3) var(--rom-4);
+  --merkeluft: var(--rom-2);
+  --merkeeining: calc(var(--merkestorleik) / 58);
+  padding: calc(var(--merkeluft) + var(--merkeeining)) var(--rom-4)
+           calc(var(--merkeluft) + var(--merkestorleik) * .10);
 }
 
 /* Hovudet var eit rutenett med den same spaltestigen som radene, av di
@@ -480,7 +540,6 @@
 }
 /* Tale av eit anna, ikkje eit tal med eit mindre under seg: same
    storleik, og berre eit hakk mindre blekk. */
-.plettmerke .av { color: var(--blekk-lys); }
 
 /* ---- glaset ----
    Merket er ein klokke, og ein klokke hev eit glas. Ljoset fell ovanfraa
@@ -488,8 +547,17 @@
    det er ei kvelv, ikkje ei bobla. Laget ligg yverst og fangar difor
    visarane med, slik eit glas gjer. */
 .form-glas { pointer-events: none; }
-.glas-topp { stop-color: var(--glans); }
-.glas-midt { stop-color: color-mix(in srgb, var(--glans) 34%, transparent); }
+/* Trappa er den same som i `--glim-rund`: 72 → 40 → 11 → gjenomsynleg.
+   Ho er skrivi ut av di SVG ikkje kann lesa eit gradient-token.
+
+   Talet er `--glans` her og `--glans-farga` der, og det er med vilje:
+   `--glim-rund` ligg paa pinnen og kula, som ber ein slagfarge, medan
+   glaset her ligg paa `--flate` — papir. Ein papirfarga kropp fekk
+   glansen sin maalt mot papiret og treng ingi retting. Trappa er den
+   same; det er berre kva ho er mengd av som skil. Sjaa 00-token.css. */
+.glas-topp { stop-color: color-mix(in srgb, var(--glans) 72%, transparent); }
+.glas-midt { stop-color: color-mix(in srgb, var(--glans) 40%, transparent); }
+.glas-svak { stop-color: color-mix(in srgb, var(--glans) 11%, transparent); }
 .glas-ut   { stop-color: transparent; }
 
 .form-ring  { fill: var(--merke); visibility: hidden; }

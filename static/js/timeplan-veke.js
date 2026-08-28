@@ -40,41 +40,14 @@
     // Kva `?week=`-offset skal til for aa koma til vike v?
     //
     // Tenaren tel vikor fram fraa den ein stend i, so det er skilnaden i
-    // vikenummer — heilt til aaret skiftar. Veke 2 sedd fraa veke 51 er
-    // tri vikor *fram*, ikkje ni og førti attende.
-    //
-    // Peikar reknestykket bakover, legg me eit aar til. Studioet syner
-    // ikkje vikor som er gjengne, so den komande veke 2 er den einaste
-    // veke 2 som finst aa gaa til — og daa er ho det talet tyder.
-    //
-    // Fyrr galdt dette berre dei tolv siste vikone i aaret mot dei tolv
-    // fyrste. Bad ein um veke 20 fraa veke 51, fall ein utanfor det
-    // vindauga, offseten vart eit stort negativt tal, og feltet berre
-    // blinka raudt: heile det komande aaret fraa veke 13 og ut var
-    // ikkje til aa naa.
+    // vikenummer. Golvet er minus den vika ein alt hev bladd fram til:
+    // lenger attende enn den vika ein *er* i finst ikkje. Regelen og
+    // rekninga stend i `veketal.js`.
     function offsetTil(v) {
-        var skilnad = v - naa;
-        if (naaOffset + skilnad < 0) {
-            skilnad += vekerIAar;
-        }
-        return naaOffset + skilnad;
+        return naaOffset + Veketal.framover(v, naa, vekerIAar, naaOffset);
     }
 
-    // Ei vike som er gjengi finst ikkje i timeplanen. Fyrr sette feltet
-    // seg berre attende og sa ingen ting, og daa ser det ut som um
-    // feltet ikkje verkar. Bobla fer ein augneblink i aatvaringsfargen:
-    // ingen ring, og ingi melding som lyt lesast og lukkast.
-    function nekt() {
-        felt.value = "";
-        felt.classList.add("nekta");
-        setTimeout(function () { felt.classList.remove("nekta"); }, 900);
-    }
-
-    // Aaret hev 52 vikor, stundom 53. Eit tal utanfor det er ikkje ei
-    // vike i det heile, og det er det einaste feltet no seier nei til.
-    function gyldig(v) {
-        return !isNaN(v) && v >= 1 && v <= vekerIAar;
-    }
+    function gyldig(v) { return Veketal.gyldig(v, vekerIAar); }
 
     function gaa() {
         var v = parseInt(felt.value, 10);
@@ -82,30 +55,18 @@
             felt.value = "";    // det same, eller ingen ting — attende til framlegget
             return;
         }
-        if (!gyldig(v)) { nekt(); return; }
+        if (!gyldig(v)) { Veketal.nekt(felt); return; }
         var offset = offsetTil(v);
-        if (offset < 0) { nekt(); return; }
+        if (offset < 0) { Veketal.nekt(felt); return; }
 
         var url = new URL(window.location);
         url.searchParams.set("week", offset);
         window.location.href = url.toString();
     }
 
-    // Markøren, ikkje eit merke. Feltet er tomt naar det opnar, so dette
-    // set berre markøren der han skal vera og hindrar at nettlesaren
-    // merkjer noko av seg sjølv.
-    felt.addEventListener("focus", function () {
-        felt.setSelectionRange(felt.value.length, felt.value.length);
-    });
-    felt.addEventListener("blur", gaa);
-    felt.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") { e.preventDefault(); felt.blur(); }
-        if (e.key === "Escape") { felt.value = ""; opna(false); knapp.focus(); }
-    });
-
-    // Tvo siffer *er* ferdig skrive; daa treng ein ikkje trykkja noko.
-    felt.addEventListener("input", function () {
-        felt.value = felt.value.replace(/[^0-9]/g, "");
-        if (felt.value.length === 2 && gyldig(parseInt(felt.value, 10))) gaa();
+    Veketal.bind(felt, {
+        gyldig: gyldig,
+        ferdig: gaa,
+        escape: function () { felt.value = ""; opna(false); knapp.focus(); }
     });
 })();

@@ -173,7 +173,18 @@
         <p class="verkstad-regel">
             Fire stoder, og vengen segjer kva slag: heil lina i
             produktfargen naar det gjeng, stipla naar det ventar paa
-            svar, graa naar det er frose eller sagt upp.
+            svar, graa naar det er frose eller sagt upp. Kortet ber
+            fire ting og ikkje fleire: kva slag det er, kven det høyrer
+            til, um det gjeld, og kva det kostar. Forma er
+            <code>e^½</code> = 1,649 — eit klippekort er halvt so høgt,
+            ei belastning ein tridjepart. «Gjeld til» er utlaupet:
+            aarskortet varer tolv maanader, maanadskortet ein, eit
+            uppsagt kort ut det du hev betalt for, og Svart ber
+            <code>∞</code>. Er kortet frose, stend klokka — utlaupet
+            vert skuva fram med den tidi frysingi varde, so tolv
+            maanader er tolv maanader <em>bruk</em>. (Prøvone her er
+            ikkje frosne; ein frosen dato hadde flutt seg for kvar dag
+            og verkstaden skal stande stille.)
         </p>
         <div class="verkstad-par">
             <div class="verkstad-prova" data-tema="ljos" data-theme="light">{{template "prov_medlemskapet" .}}</div>
@@ -337,7 +348,7 @@
 {{end}}
 
 {{define "prov_kortet"}}
-<div class="verkstad-stabel">
+<div class="verkstad-stabel kortplass">
     <div class="kort package-card">
         <h3 class="package-name">Halvaars</h3>
         <p class="package-description">Fri tilgang til alle timar i salen.</p>
@@ -354,7 +365,10 @@
 {{end}}
 
 {{define "prov_klippekortet"}}
-<div class="verkstad-stabel">
+{{/* Stabelen er `.klippekort-cards`, den same som klippekortsida
+     nyttar, og ikkje verkstaden sin eigen: rommet millom tvo kort er
+     ein del av komponenten og skal provast med honom. */}}
+<div class="klippekort-cards kortplass">
     <div class="kort klippekort-card">
         <div class="klippehakka" aria-hidden="true">
             <i class="klipphakk klipt"></i>
@@ -438,39 +452,18 @@
 {{end}}
 
 {{define "prov_medlemskapet"}}
-<div class="verkstad-stabel">
-    <div class="membership-card active">
-        <div class="membership-header">
-            <h3 class="card-title">Aarskort</h3>
-            <div class="membership-status status-active">Aktiv</div>
-        </div>
-        <div class="price-info"><span class="price">590</span> <span class="commitment">kr/md · 12 månader</span></div>
-        <div class="dates-info"><div class="renewal-date">Neste fornying: 1. oktober 2026</div></div>
-    </div>
+{{/* Kortet er den *same* malen sidone nyttar — components/common/
+     medlemskort.html — og ikkje ei etterlikning.
 
-    <div class="membership-card freeze_requested">
-        <div class="membership-header">
-            <h3 class="card-title">Halvaars</h3>
-            <div class="membership-status status-freeze_requested">Førespurnad send</div>
-        </div>
-        <div class="dates-info"><div class="renewal-date">Ventar paa svar fraa studioet</div></div>
-    </div>
-
-    <div class="membership-card paused">
-        <div class="membership-header">
-            <h3 class="card-title">Halvaars</h3>
-            <div class="membership-status status-paused">Frose</div>
-        </div>
-        <div class="dates-info"><div class="renewal-date">Frose til 1. november 2026</div></div>
-    </div>
-
-    <div class="membership-card cancelled">
-        <div class="membership-header">
-            <h3 class="card-title">Maanadskort</h3>
-            <div class="membership-status status-cancelled">Sagt upp</div>
-        </div>
-        <div class="dates-info"><div class="renewal-date urgent">Gjeng ut 30. september 2026</div></div>
-    </div>
+     Her stod fire handskrivne `.membership-card`. Dei bar klassar
+     (`.membership-header`, `.price-info`, `.dates-info`,
+     `.renewal-date`) som ingen annan stad i huset skreiv: verkstaden
+     teikna ein komponent som ikkje fanst, medan det kortet folk
+     faktisk ser aldri vart teikna her. Det er den eine feilen ein
+     verkstad ikkje kann gjera. Data kjem fraa `medlemskortProvor` i
+     handlers/arket.go. */}}
+<div class="kortstabel kortplass">
+    {{range .Medlemskortprovor}}{{template "medlemskort" .}}{{end}}
 </div>
 {{end}}
 
@@ -478,6 +471,18 @@
 <div class="form-group">
     <label for="prov-namn-{{.Lang}}">Namn</label>
     <input type="text" id="prov-namn-{{.Lang}}" value="Anna Bakken">
+</div>
+{{/* Søkjefeltet stend her attmed skrivefeltet med vilje. Det er den
+     same boksen — grunnstilen sin — og einaste maaten aa sjaa at han
+     hev drive er aa sjaa dei tvo ved sida av kvarandre. Det var ikkje
+     teikna her fyrr, og medan det ikkje var det, vart det teikna tri
+     gonger ute i huset i tri ulike storleikar. I bruk ber det ingi
+     synleg merkelapp — namnet stend i `aria-label`, av di ledeteksti
+     alt segjer det same. */}}
+<div class="form-group">
+    <label for="prov-sok-{{.Lang}}">Søk</label>
+    <input type="search" class="sok" id="prov-sok-{{.Lang}}"
+           placeholder="Søk etter person">
 </div>
 <div class="form-group">
     <label for="prov-slag-{{.Lang}}">Klassetype</label>
@@ -547,7 +552,7 @@
 {{end}}
 
 {{define "prov_tomrommet"}}
-<div class="verkstad-stabel">
+<div class="verkstad-stabel kortplass">
     <div class="no-data">Ingen timar denne veka</div>
     <div class="loading-placeholder">Hentar klippekorti …</div>
     <div class="kort no-klippekort">

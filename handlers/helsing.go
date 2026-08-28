@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"kjernekraft/handlers/config"
 	"strings"
 	"time"
 	"unicode"
@@ -307,14 +308,5 @@ func Kvalifisert(u *models.User) bool {
 	if u == nil {
 		return false
 	}
-	if u.StudentSenior {
-		return true
-	}
-	if fodd, err := time.Parse("2006-01-02", u.Birthdate); err == nil {
-		aar := time.Since(fodd).Hours() / 24 / 365.25
-		if aar >= 67 {
-			return true
-		}
-	}
-	return false
+	return u.KvalifisertFor(config.GetInstance().GetCurrentTime())
 }

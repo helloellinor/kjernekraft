@@ -140,6 +140,25 @@ func EventCancelSignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Ei privat økt gjeng ein annan veg ut. Ho er tinga og klippa naar
+	// ho vart sett upp (BokPrivatTime), og læraren hev sett av tidi si —
+	// so klippet lyt attende, og nokon lyt faa vita det. Ei vanleg
+	// paamelding er berre ei paamelding: ho gjeng, og det er heile saki.
+	privat, err := DB.ErPrivatTime(eventID)
+	if err != nil {
+		http.Error(w, "Event not found", http.StatusNotFound)
+		return
+	}
+	if privat {
+		if err := DB.AvlysPrivatTime(eventID, int64(user.ID), now); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Successfully cancelled signup"))
+		return
+	}
+
 	// Cancel user signup for event
 	err = DB.CancelUserSignupForEvent(int64(user.ID), eventID)
 	if err != nil {

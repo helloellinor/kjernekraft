@@ -1,6 +1,6 @@
 {{define "content"}}
-<div class="login-container">
-    <div class="login-language-selector">
+<div class="doer">
+    <div class="doermaal">
         {{template "language_selector" .}}
     </div>
 
@@ -18,12 +18,12 @@
          gjenom studioet, som er ein veg som *verkar*. Eit skjema som
          svarar «me hev sendt deg ein e-post» utan aa senda noko er
          verre enn ei 404: daa sit folk og ventar. -->
-    <p class="login-subtitle">{{t .Lang "forgot.intro"}}</p>
+    <p class="doerleiding">{{t .Lang "forgot.intro"}}</p>
 
     <p><a href="mailto:{{.StudioEpost}}?subject={{t .Lang "forgot.mail_subject"}}" class="btn-primary brei">{{t .Lang "forgot.write_to_studio"}}</a></p>
 
     <p class="forgot-password">{{t .Lang "forgot.what_to_write"}}</p>
 
-    <p class="attende"><a href="/innlogging">{{t .Lang "forgot.back"}}</a></p>
+    <p class="doerfot"><a href="/innlogging">{{t .Lang "forgot.back"}}</a></p>
 </div>
 {{end}}

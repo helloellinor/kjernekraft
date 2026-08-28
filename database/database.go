@@ -6,6 +6,7 @@ import (
 	"kjernekraft/models"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -73,6 +74,17 @@ func Connect() (*sql.DB, error) {
 }
 
 func Migrate(db *sql.DB) error {
+	// Løyvi fyrst, og fyre alt anna.
+	//
+	// `CREATE TABLE IF NOT EXISTS loyve` lenger nede vilde ha laga ein
+	// tom tabell i ein base som alt hev `roles`, og so hadde
+	// umdøypingi hoppa yver — av di `loyve` no fanst — og kvar einaste
+	// administrator og lærar hadde vorte liggjande att i ein tabell
+	// ingen les meir. Rekkjefylgda er heile skiljet.
+	if err := MigrerLoyve(db); err != nil {
+		return err
+	}
+
 	eventsTableSQL := `
 	CREATE TABLE IF NOT EXISTS events (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,18 +137,18 @@ func Migrate(db *sql.DB) error {
 	);
 	`
 	rolesTableSQL := `
-	CREATE TABLE IF NOT EXISTS roles (
+	CREATE TABLE IF NOT EXISTS loyve (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL UNIQUE
 	);
 	`
 	userRolesTableSQL := `
-	CREATE TABLE IF NOT EXISTS user_roles (
+	CREATE TABLE IF NOT EXISTS brukarloyve (
 		user_id INTEGER NOT NULL,
-		role_id INTEGER NOT NULL,
-		PRIMARY KEY (user_id, role_id),
+		loyve_id INTEGER NOT NULL,
+		PRIMARY KEY (user_id, loyve_id),
 		FOREIGN KEY (user_id) REFERENCES users(id),
-		FOREIGN KEY (role_id) REFERENCES roles(id)
+		FOREIGN KEY (loyve_id) REFERENCES loyve(id)
 	);
 	`
 	paymentMethodsTableSQL := `
@@ -181,6 +193,12 @@ func Migrate(db *sql.DB) error {
 		end_date DATETIME,
 		binding_end DATETIME,
 		last_billed DATETIME DEFAULT CURRENT_TIMESTAMP,
+		-- Naar frysingi tok til. NULL naar medlemskapet ikkje er frose.
+		-- Klokka stend medan han er sett: utlaupsdatoen vert skuva fram
+		-- med den same tidi naar medlemskapet vert sett i gang att, so
+		-- eit aarskort gjev tolv maanader *bruk* og ikkje tolv maanader
+		-- paa kalenderen. Sjaa UnfreezeMembership.
+		frozen_at DATETIME,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id),
 		FOREIGN KEY (membership_id) REFERENCES memberships(id)
@@ -304,6 +322,17 @@ func Migrate(db *sql.DB) error {
 		log.Println("Added last_billed column to user_memberships table")
 	}
 
+	// Same mønsteret for `frozen_at`. Han skal *ikkje* fyllast ut for
+	// rader som alt finst: NULL tyder «ikkje frose», og eit medlemskap
+	// som stod frose fyre denne kolonna fanst hev me ingi klokka paa.
+	var frosenFinst bool
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('user_memberships') WHERE name='frozen_at'").Scan(&frosenFinst); err == nil && !frosenFinst {
+		if _, err := db.Exec("ALTER TABLE user_memberships ADD COLUMN frozen_at DATETIME"); err != nil {
+			return err
+		}
+		log.Println("La til frozen_at i user_memberships")
+	}
+
 	// Student- eller honnørbevis. Studioet gjev 20 % rabatt til den som
 	// hev det, og det er brukaren som fortel at han hev det — studioet
 	// ser beviset i resepsjonen. Alderen kjem av fødselsdagen; ho treng
@@ -314,6 +343,17 @@ func Migrate(db *sql.DB) error {
 			return err
 		}
 		log.Println("La til student_senior paa users.")
+	}
+
+	// Gruppone: ein time kann vera open for somme og ikkje for alle.
+	if err := MigrerGrupper(db); err != nil {
+		return err
+	}
+
+	// Rabattkravet: avkryssingi i profilen er eit krav som ventar paa at
+	// nokon hev sett beviset, ikkje ein rabatt som gjeld med ein gong.
+	if err := migrerRabattkrav(db); err != nil {
+		return err
 	}
 
 	// Rommet paa ein time. Timane som fanst fyrr peika paa rom gjenom
@@ -329,26 +369,54 @@ func Migrate(db *sql.DB) error {
 		log.Println("La til room_id paa events og kopla dei mot romi.")
 	}
 
-	// Regelen attum timane. «Kvar veke i aatte veker» vart skrive inn
+	// Serien attum timane. «Kvar veke i aatte veker» vart skrive inn
 	// som aatte sjølvstendige rader, og kva som høyrde saman fanst
-	// berre som eit samantreff av like felt. No ber kvar time regelen
+	// berre som eit samantreff av like felt. No ber kvar time serien
 	// sin; dei gamle radene vert kopla saman etter det same
 	// samantreffet — same time, lærar, rom, vekedag og klokkeslett —
-	// éin gong, her, og regelen fær det minste time-id-et sitt som
+	// éin gong, her, og serien fær det minste time-id-et sitt som
 	// namn.
-	// Feilen her vart svelgd fyrr — `err == nil && !regelKolonne`. Svara
+	// Feilen her vart svelgd fyrr — `err == nil && !serieKolonne`. Svara
 	// ikkje spurningi, hoppa migreringa over kolonna og sa ingen ting,
-	// og so fall kvart uppslag som les e.rule_id med «no such column»
+	// og so fall kvart uppslag som les e.serie_id med «no such column»
 	// ein heilt annan stad. Ei migrering som ikkje kann prøva om ho
 	// trengst, skal stogga.
-	var regelKolonne bool
-	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='rule_id'").Scan(&regelKolonne); err != nil {
+	// Kolonna heitte `serie_id`. «Regel» tydde tvo ting i huset — ei
+	// timerekkje og ein medlemskapsregel — og eitt namn paa tvo ting gjer
+	// at ein ikkje kann vita kva ein les. Seriane heiter serie no, ogso
+	// her nede.
+	//
+	// Omdøypingi kjem fyre prøva under: ein base som alt hev `serie_id`
+	// skal faa namnet skift, ikkje ei ny og tom kolonne attaat.
+	var gamaltNamn, nyttNamn bool
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='rule_id'").Scan(&gamaltNamn); err != nil {
 		return err
-	} else if !regelKolonne {
-		if err := leggTilRegelKolonne(db); err != nil {
+	}
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='serie_id'").Scan(&nyttNamn); err != nil {
+		return err
+	}
+	if gamaltNamn && !nyttNamn {
+		if _, err := db.Exec("ALTER TABLE events RENAME COLUMN rule_id TO serie_id"); err != nil {
 			return err
 		}
-		log.Println("La til rule_id paa events og kopla timane til reglane sine.")
+		// Det gamle registeret ber det gamle namnet. SQLite fylgjer
+		// kolonna gjenom omdøypingi, so han verkar — men han heiter
+		// framleis noko som ikkje finst, og det er ein av dei tingi som
+		// staar att og forvirrar den neste.
+		if _, err := db.Exec("DROP INDEX IF EXISTS idx_events_rule"); err != nil {
+			return err
+		}
+		log.Println("Døypte om rule_id til serie_id paa events.")
+	}
+
+	var serieKolonne bool
+	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='serie_id'").Scan(&serieKolonne); err != nil {
+		return err
+	} else if !serieKolonne {
+		if err := leggTilSerieKolonne(db); err != nil {
+			return err
+		}
+		log.Println("La til serie_id paa events og kopla timane til seriane sine.")
 	}
 
 	// Frammøtet. Sjaa frammote.go.
@@ -362,6 +430,12 @@ func Migrate(db *sql.DB) error {
 	}
 
 	// Den private timen. Sjaa privattime.go.
+	if err := MigrerLaga(db); err != nil {
+		return err
+	}
+	if err := MigrerMeldingar(db); err != nil {
+		return err
+	}
 	if err := MigrerPrivatTime(db); err != nil {
 		return err
 	}
@@ -394,11 +468,11 @@ func lagRegister(db *sql.DB) error {
 		`CREATE INDEX IF NOT EXISTS idx_user_klippekort_user ON user_klippekort(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_user_memberships_user ON user_memberships(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_user_memberships_status ON user_memberships(status)`,
-		`CREATE INDEX IF NOT EXISTS idx_user_roles_user ON user_roles(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_brukarloyve_user ON brukarloyve(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_user_payment_methods_user ON user_payment_methods(user_id)`,
-		// Timeplanen hentar ei veke um gongen: BETWEEN paa start_time.
+		// Timeplanen hentar ei halvopen veke um gongen på start_time.
 		`CREATE INDEX IF NOT EXISTS idx_events_start ON events(start_time)`,
-		`CREATE INDEX IF NOT EXISTS idx_events_rule ON events(rule_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_events_serie ON events(serie_id)`,
 		// Innloggingi slær upp e-post for kvar freistnad.
 		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
 	}
@@ -410,33 +484,33 @@ func lagRegister(db *sql.DB) error {
 	return nil
 }
 
-// leggTilRegelKolonne gjer kolonna og etterfyllinga til éi økt.
+// leggTilSerieKolonne gjer kolonna og etterfyllinga til éi økt.
 //
 // Dei stod kvar for seg fyrr, og ALTER TABLE var alt lagra då
 // etterfyllinga gjekk. Datt tenaren midt i, fanst kolonna — so vakti
 // yver hoppa migreringa neste gong — medan resten av timane stod att
-// med rule_id NULL for alltid. Dei hamna då i den regellause gruppa,
-// der kvar endring på regelen er eit stille ingen ting.
-func leggTilRegelKolonne(db *sql.DB) error {
+// med serie_id NULL for alltid. Dei hamna då i den serielause gruppa,
+// der kvar endring på serien er eit stille ingen ting.
+func leggTilSerieKolonne(db *sql.DB) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
-	if _, err := tx.Exec("ALTER TABLE events ADD COLUMN rule_id INTEGER"); err != nil {
+	if _, err := tx.Exec("ALTER TABLE events ADD COLUMN serie_id INTEGER"); err != nil {
 		return err
 	}
-	if err := kopleTimarTilReglar(tx); err != nil {
+	if err := kopleTimarTilSeriar(tx); err != nil {
 		return err
 	}
 	return tx.Commit()
 }
 
-// kopleTimarTilReglar gjev kvar gamal time ein regel. Klokka vert lesi
+// kopleTimarTilSeriar gjev kvar gamal time ein serie. Klokka vert lesi
 // som ho stend: den lagra tidi er veggklokka i heile huset, og skal
 // korkje reknast um her eller nokon annan stad.
-func kopleTimarTilReglar(tx *sql.Tx) error {
+func kopleTimarTilSeriar(tx *sql.Tx) error {
 	rows, err := tx.Query(`SELECT id, title, COALESCE(teacher_name,''), COALESCE(location,''),
 		COALESCE(room_id, 0), start_time, end_time FROM events`)
 	if err != nil {
@@ -468,14 +542,14 @@ func kopleTimarTilReglar(tx *sql.Tx) error {
 	}
 
 	for _, idar := range grupper {
-		regel := idar[0]
+		serie := idar[0]
 		for _, id := range idar {
-			if id < regel {
-				regel = id
+			if id < serie {
+				serie = id
 			}
 		}
 		for _, id := range idar {
-			if _, err := tx.Exec("UPDATE events SET rule_id = ? WHERE id = ?", regel, id); err != nil {
+			if _, err := tx.Exec("UPDATE events SET serie_id = ? WHERE id = ?", serie, id); err != nil {
 				return err
 			}
 		}
@@ -521,21 +595,21 @@ func (db *Database) RoomConflict(romID int64, start, slutt time.Time) (*models.E
 	return &e, nil
 }
 
-// RoomConflictUtanRegel er den same prøva, men blind for regelen sine
+// RoomConflictUtanSerie er den same prøva, men blind for serien sine
 // eigne timar.
 //
-// Flytter ein heile regelen til eit nytt klokkeslett, står dei gamle
+// Flytter ein heile serien til eit nytt klokkeslett, står dei gamle
 // radene framleis i det gamle sporet medan prøva gjeng. Utan unntaket
-// hadde regelen kollidert med seg sjølv og ingen ting late seg flytta.
-func (db *Database) RoomConflictUtanRegel(romID, ruleID int64, start, slutt time.Time) (*models.Event, error) {
+// hadde serien kollidert med seg sjølv og ingen ting late seg flytta.
+func (db *Database) RoomConflictUtanSerie(romID, serieID int64, start, slutt time.Time) (*models.Event, error) {
 	var e models.Event
 	err := db.Conn.QueryRow(`
 		SELECT id, title, COALESCE(teacher_name, ''), start_time, end_time
 		FROM events
-		WHERE room_id = ? AND COALESCE(rule_id, 0) <> ?
+		WHERE room_id = ? AND COALESCE(serie_id, 0) <> ?
 		  AND start_time < ? AND end_time > ?
 		ORDER BY start_time LIMIT 1`,
-		romID, ruleID, veggtekst(slutt), veggtekst(start)).
+		romID, serieID, veggtekst(slutt), veggtekst(start)).
 		Scan(&e.ID, &e.Title, &e.TeacherName, &e.StartTime, &e.EndTime)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -548,13 +622,13 @@ func (db *Database) RoomConflictUtanRegel(romID, ruleID int64, start, slutt time
 
 // RoomConflictUtanTime er den same prøva, blind for éin einskild time.
 //
-// Ho er syskenet til RoomConflictUtanRegel, og skilnaden er rekkjevidda.
-// Flytter ein *heile* regelen, lyt prøva vera blind for alle timane hans.
+// Ho er syskenet til RoomConflictUtanSerie, og skilnaden er rekkjevidda.
+// Flytter ein *heile* serien, lyt prøva vera blind for alle timane hans.
 // Flytter ein éin einskild time — Leon er sjuk den eine tysdagen, og
 // timen gjeng ein time seinare — lyt ho vera blind berre for den eine:
-// dei andre utslagi av regelen stend framleis, og eit av dei er nett det
-// ein kann koma til aa flytta seg oppi. Var ho blind for heile regelen
-// her, kunde tvo utslag av den same regelen leggja seg oppaa kvarandre i
+// dei andre utslagi av serien stend framleis, og eit av dei er nett det
+// ein kann koma til aa flytta seg oppi. Var ho blind for heile serien
+// her, kunde tvo utslag av den same serien leggja seg oppaa kvarandre i
 // det same rommet utan at nokon sa fraa.
 func (db *Database) RoomConflictUtanTime(romID, eventID int64, start, slutt time.Time) (*models.Event, error) {
 	var e models.Event
@@ -592,6 +666,16 @@ func (db *Database) TimeRom(eventID int64) (int64, error) {
 }
 
 // GetRooms gjev romi studioet hev, med kapasiteten deira.
+// SetRomPlassar set kor mange rommet held.
+//
+// Talet er ikkje pynt: kvar time som ikkje ber si eigi kapasitet arvar
+// det (`COALESCE(NULLIF(e.capacity, 0), r.capacity, 0)`), so eit rom som
+// stend for laagt gjer timane fulle fyre dei er det.
+func (db *Database) SetRomPlassar(romID, plassar int) error {
+	_, err := db.Conn.Exec("UPDATE rooms SET capacity = ? WHERE id = ?", plassar, romID)
+	return err
+}
+
 func (db *Database) GetRooms() ([]models.Room, error) {
 	rows, err := db.Conn.Query(`SELECT id, name, capacity FROM rooms WHERE active ORDER BY capacity DESC`)
 	if err != nil {
@@ -615,37 +699,28 @@ func isColumnExistsError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "duplicate column name")
 }
 
-// AddRole adds a new role to the roles table
-func (db *Database) AddRole(name string) (int64, error) {
-	res, err := db.Conn.Exec("INSERT INTO roles (name) VALUES (?)", name)
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
-}
-
-// AssignRoleToUser links a role to a user
-func (db *Database) AssignRoleToUser(userID, roleID int64) error {
-	_, err := db.Conn.Exec("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)", userID, roleID)
+// GjevLoyve gjev eit løyve til ein brukar.
+func (db *Database) GjevLoyve(userID, loyveID int64) error {
+	_, err := db.Conn.Exec("INSERT INTO brukarloyve (user_id, loyve_id) VALUES (?, ?)", userID, loyveID)
 	return err
 }
 
-// GetUserRoles fetches all roles for a user
-func (db *Database) GetUserRoles(userID int64) ([]string, error) {
-	rows, err := db.Conn.Query(`SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?`, userID)
+// LoyveFor gjev løyvi ein brukar hev.
+func (db *Database) LoyveFor(userID int64) ([]string, error) {
+	rows, err := db.Conn.Query(`SELECT r.name FROM loyve r JOIN brukarloyve ur ON r.id = ur.loyve_id WHERE ur.user_id = ?`, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var roles []string
+	var loyve []string
 	for rows.Next() {
-		var role string
-		if err := rows.Scan(&role); err != nil {
+		var eit string
+		if err := rows.Scan(&eit); err != nil {
 			return nil, err
 		}
-		roles = append(roles, role)
+		loyve = append(loyve, eit)
 	}
-	return roles, nil
+	return loyve, nil
 }
 
 // AddPaymentMethod adds a payment method for a user
@@ -709,13 +784,13 @@ func (db *Database) CreateUser(u models.User) (int64, error) {
 		return 0, err
 	}
 
-	// Assign roles to user
-	for _, roleName := range u.Roles {
-		roleID, err := db.GetOrCreateRole(roleName)
+	// Løyvi brukaren skal ha
+	for _, loyveNamn := range u.Loyve {
+		loyveID, err := db.LoyveIDFor(loyveNamn)
 		if err != nil {
 			return 0, err
 		}
-		if err := db.AssignRoleToUser(userID, roleID); err != nil {
+		if err := db.GjevLoyve(userID, loyveID); err != nil {
 			return 0, err
 		}
 	}
@@ -767,16 +842,16 @@ func (db *Database) SimulateBilling(userID int64, amount int, description, charg
 	return err
 }
 
-func (db *Database) GetOrCreateRole(name string) (int64, error) {
-	// Try to get existing role first
-	var roleID int64
-	err := db.Conn.QueryRow("SELECT id FROM roles WHERE name = ?", name).Scan(&roleID)
+func (db *Database) LoyveIDFor(name string) (int64, error) {
+	// Finst løyvet frå fyrr?
+	var loyveID int64
+	err := db.Conn.QueryRow("SELECT id FROM loyve WHERE name = ?", name).Scan(&loyveID)
 	if err == nil {
-		return roleID, nil
+		return loyveID, nil
 	}
 
-	// Create new role if it doesn't exist
-	res, err := db.Conn.Exec("INSERT INTO roles (name) VALUES (?)", name)
+	// Elles lagar me det.
+	res, err := db.Conn.Exec("INSERT INTO loyve (name) VALUES (?)", name)
 	if err != nil {
 		return 0, err
 	}
@@ -785,7 +860,22 @@ func (db *Database) GetOrCreateRole(name string) (int64, error) {
 
 // GetAllUsers fetches all users from the database
 func (db *Database) GetAllUsers() ([]models.User, error) {
-	rows, err := db.Conn.Query("SELECT id, name, birthdate, email, phone, address, postal_code, city, country, newsletter_subscription, terms_accepted FROM users")
+	// COALESCE paa kvar kolonne som kann vera NULL.
+	//
+	// Ho las deim raatt, og eit einaste NULL i eit adressefelt tok heile
+	// administrasjonssida med seg: `Scan` gjev «converting NULL to string
+	// is unsupported», handsamaren svarar 500, og ingen kjem inn. Ho hev
+	// vore slik heile tidi — det trongst berre ein brukar utan adresse
+	// fyre det synte seg, og prøvebrukarane er nettupp det.
+	//
+	// GetUserByID rett nedanfor gjorde det rett fraa fyrr. Tvo spurningar
+	// mot den same tabellen som ikkje er samde um kva som kann mangla, er
+	// ei felle som ventar paa den fyrste rada som nyttar seg av det.
+	rows, err := db.Conn.Query(`SELECT id, name, COALESCE(birthdate, ''), email,
+		COALESCE(phone, ''), COALESCE(address, ''), COALESCE(postal_code, ''),
+		COALESCE(city, ''), COALESCE(country, ''),
+		COALESCE(newsletter_subscription, 0), COALESCE(terms_accepted, 0)
+		FROM users`)
 	if err != nil {
 		return nil, err
 	}
@@ -798,12 +888,12 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 			return nil, err
 		}
 
-		// Get roles for this user
-		roles, err := db.GetUserRoles(int64(u.ID))
+		// Løyvi denne brukaren hev
+		loyve, err := db.LoyveFor(int64(u.ID))
 		if err != nil {
 			return nil, err
 		}
-		u.Roles = roles
+		u.Loyve = loyve
 
 		users = append(users, u)
 	}
@@ -848,11 +938,11 @@ func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]mo
 func (db *Database) CreateEvent(event models.Event) (int64, error) {
 	res, err := db.Conn.Exec(
 		`INSERT INTO events (title, description, start_time, end_time, location, room_id,
-			organizer, class_type, teacher_name, capacity, current_enrolment, color, rule_id)
+			organizer, class_type, teacher_name, capacity, current_enrolment, color, serie_id)
 		 VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?, NULLIF(?, 0))`,
 		event.Title, event.Description, veggtekst(event.StartTime), veggtekst(event.EndTime), event.Location, event.RoomID,
 		event.Organizer, event.ClassType, event.TeacherName, event.Capacity, event.CurrentEnrolment, event.Color,
-		event.RuleID,
+		event.SerieID,
 	)
 	if err != nil {
 		return 0, err
@@ -860,20 +950,20 @@ func (db *Database) CreateEvent(event models.Event) (int64, error) {
 	return res.LastInsertId()
 }
 
-// LagRegel skriv alle timane i ein ny regel i éi økt.
+// LagSerie skriv alle timane i ein ny serie i éi økt.
 //
-// Regelen finst ikkje som ei eigi rad — han er talet timane hans ber
-// saman — og talet vart fyrr henta med eit eige `MAX(rule_id) + 1` fyre
+// Serien finst ikkje som ei eigi rad — han er talet timane hans ber
+// saman — og talet vart fyrr henta med eit eige `MAX(serie_id) + 1` fyre
 // innskrivinga tok til. To administratorar som la inn kvar sin time i
 // same augneblinken fekk då det same talet, og dei to urelaterte
-// reglane vart éin: eit lærarbyte på den eine skreiv seg inn på den
+// seriane vart éin: eit lærarbyte på den eine skreiv seg inn på den
 // andre òg. Talet vert henta inni økta no, og økta held det til alle
 // timane står der.
 //
 // Innskrivinga er dessutan alt eller ingen ting. Feila den femte av åtte
 // vekene fyrr, stod dei fire fyrste att i basen medan svaret var ein
 // feil — og den som prøvde ein gong til fekk dei fire ein gong til.
-func (db *Database) LagRegel(timar []models.Event) (ruleID int64, ider []int64, err error) {
+func (db *Database) LagSerie(timar []models.Event) (serieID int64, ider []int64, err error) {
 	if len(timar) == 0 {
 		return 0, nil, nil
 	}
@@ -883,17 +973,17 @@ func (db *Database) LagRegel(timar []models.Event) (ruleID int64, ider []int64, 
 	}
 	defer tx.Rollback()
 
-	if err := tx.QueryRow("SELECT COALESCE(MAX(rule_id), 0) + 1 FROM events").Scan(&ruleID); err != nil {
+	if err := tx.QueryRow("SELECT COALESCE(MAX(serie_id), 0) + 1 FROM events").Scan(&serieID); err != nil {
 		return 0, nil, err
 	}
 
 	for _, e := range timar {
 		res, err := tx.Exec(
 			`INSERT INTO events (title, description, start_time, end_time, location, room_id,
-				organizer, class_type, teacher_name, capacity, current_enrolment, color, rule_id)
+				organizer, class_type, teacher_name, capacity, current_enrolment, color, serie_id)
 			 VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?, ?)`,
 			e.Title, e.Description, veggtekst(e.StartTime), veggtekst(e.EndTime), e.Location, e.RoomID,
-			e.Organizer, e.ClassType, e.TeacherName, e.Capacity, e.CurrentEnrolment, e.Color, ruleID,
+			e.Organizer, e.ClassType, e.TeacherName, e.Capacity, e.CurrentEnrolment, e.Color, serieID,
 		)
 		if err != nil {
 			return 0, nil, err
@@ -907,21 +997,21 @@ func (db *Database) LagRegel(timar []models.Event) (ruleID int64, ider []int64, 
 	if err := tx.Commit(); err != nil {
 		return 0, nil, err
 	}
-	return ruleID, ider, nil
+	return serieID, ider, nil
 }
 
-// UpdateRuleTeacher byter lærar paa alle komande timar i regelen. Det
+// UpdateSerieTeacher byter lærar paa alle komande timar i serien. Det
 // som alt er halde stend som det var — historia skriv seg ikkje um.
-func (db *Database) UpdateRuleTeacher(ruleID int64, laerar string, fraa time.Time) error {
+func (db *Database) UpdateSerieTeacher(serieID int64, laerar string, fraa time.Time) error {
 	_, err := db.Conn.Exec(
-		"UPDATE events SET teacher_name = ? WHERE rule_id = ? AND end_time > ?",
-		laerar, ruleID, veggtekst(fraa),
+		"UPDATE events SET teacher_name = ? WHERE serie_id = ? AND end_time > ?",
+		laerar, serieID, veggtekst(fraa),
 	)
 	return err
 }
 
 // UpdateEventTeacher set vikar paa éin einskild time — tannlækjardagen.
-// Regelen stend urørd; det er nett denne dagen som fær eit anna namn.
+// Serien stend urørd; det er nett denne dagen som fær eit anna namn.
 func (db *Database) UpdateEventTeacher(eventID int64, laerar string) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET teacher_name = ? WHERE id = ?",
@@ -930,49 +1020,97 @@ func (db *Database) UpdateEventTeacher(eventID int64, laerar string) error {
 	return err
 }
 
-// UpdateRuleDescription set skildringi paa alle komande timar i
-// regelen — det er regelen som hev ei skildring, timane arvar henne.
-func (db *Database) UpdateRuleDescription(ruleID int64, tekst string, fraa time.Time) error {
+// UpdateSerieClassType set slaget paa alle komande timar i serien.
+//
+// Slaget er kva slag trening timen er — yoga, pilates, reformer,
+// fascia — og det er serien som hev det: alle utslagi av «Vinyasa Flow
+// maandag 18:00» er yoga. Det ber vengefargen i lista og i timeplanen
+// (`.slag-*` i 00-token.css), og det er ogso det klippekortpakkane
+// samanliknar `category` mot, so ein time utan slag kann ikkje betalast
+// med eit klipp som er øyremerkt.
+func (db *Database) UpdateSerieClassType(serieID int64, slag string, fraa time.Time) error {
 	_, err := db.Conn.Exec(
-		"UPDATE events SET description = ? WHERE rule_id = ? AND end_time > ?",
-		tekst, ruleID, veggtekst(fraa),
+		"UPDATE events SET class_type = ? WHERE serie_id = ? AND end_time > ?",
+		slag, serieID, veggtekst(fraa),
 	)
 	return err
 }
 
-// UpdateRuleTitle byter namn paa alle komande timar i regelen.
+// Slagsortar gjev dei slagi som alt er i bruk, ein gong kvar.
+//
+// Feltet er fritekst — `slagklasse` vaskar det ned til ein CSS-krok, og
+// eit ukjent slag fær ingen farge i staden for feil farge — men fritekst
+// utan minne tyder at «Yoga», «yoga» og «Yoag» alle er nye sortar. Difor
+// hev feltet ei lista yver det huset alt hev sett, og ein plukkar i
+// staden for aa skriva paa nytt.
+//
+// Alle timar, ikkje berre dei komande: eit slag som gjekk i vaar er
+// framleis eit slag studioet driv med, og det er nettupp daa ein treng
+// aa finna det att.
+func (db *Database) Slagsortar() ([]string, error) {
+	rows, err := db.Conn.Query(`
+		SELECT DISTINCT TRIM(class_type) FROM events
+		WHERE TRIM(COALESCE(class_type, '')) <> ''
+		ORDER BY TRIM(class_type) COLLATE NOCASE`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ut []string
+	for rows.Next() {
+		var slag string
+		if err := rows.Scan(&slag); err != nil {
+			return nil, err
+		}
+		ut = append(ut, slag)
+	}
+	return ut, rows.Err()
+}
+
+// UpdateSerieDescription set skildringi paa alle komande timar i
+// serien — det er serien som hev ei skildring, timane arvar henne.
+func (db *Database) UpdateSerieDescription(serieID int64, tekst string, fraa time.Time) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET description = ? WHERE serie_id = ? AND end_time > ?",
+		tekst, serieID, veggtekst(fraa),
+	)
+	return err
+}
+
+// UpdateSerieTitle byter namn paa alle komande timar i serien.
 //
 // Namnet er det du leitar etter i lista, og til no laut ein leggja
-// regelen ned og laga honom paa nytt for aa retta ein skrivefeil i
+// serien ned og laga honom paa nytt for aa retta ein skrivefeil i
 // honom — som tok med seg paameldingane.
-func (db *Database) UpdateRuleTitle(ruleID int64, tittel string, fraa time.Time) error {
+func (db *Database) UpdateSerieTitle(serieID int64, tittel string, fraa time.Time) error {
 	_, err := db.Conn.Exec(
-		"UPDATE events SET title = ? WHERE rule_id = ? AND end_time > ?",
-		tittel, ruleID, veggtekst(fraa),
+		"UPDATE events SET title = ? WHERE serie_id = ? AND end_time > ?",
+		tittel, serieID, veggtekst(fraa),
 	)
 	return err
 }
 
-// UpdateRuleRoom flytter alle komande timar i regelen til eit anna rom.
+// UpdateSerieRoom flytter alle komande timar i serien til eit anna rom.
 //
 // `location` fylgjer med. Han er namnet paa rommet skrive inn i rada, og
 // er det gamle namnet naar rommet er eit anna — timeplanen les rom-namnet
 // gjenom join-en, men fleire eldre stader les framleis `location`.
-func (db *Database) UpdateRuleRoom(ruleID, romID int64, namn string, fraa time.Time) error {
+func (db *Database) UpdateSerieRoom(serieID, romID int64, namn string, fraa time.Time) error {
 	_, err := db.Conn.Exec(
-		"UPDATE events SET room_id = NULLIF(?, 0), location = ? WHERE rule_id = ? AND end_time > ?",
-		romID, namn, ruleID, veggtekst(fraa),
+		"UPDATE events SET room_id = NULLIF(?, 0), location = ? WHERE serie_id = ? AND end_time > ?",
+		romID, namn, serieID, veggtekst(fraa),
 	)
 	return err
 }
 
-// UtvidRegel legg fleire timar til ein regel som alt finst.
+// UtvidSerie legg fleire timar til ein serie som alt finst.
 //
-// LagRegel tek eit nytt regelnamn kvar gong; ho kann ikkje brukast til
+// LagSerie tek eit nytt serienamn kvar gong; ho kann ikkje brukast til
 // aa forlengja ein serie, av di dei nye timane daa hadde vorte ein
-// *annan* regel med det same namnet, og lista hadde synt tvo rader der
+// *annan* serie med det same namnet, og lista hadde synt tvo rader der
 // det er éin time.
-func (db *Database) UtvidRegel(ruleID int64, timar []models.Event) ([]int64, error) {
+func (db *Database) UtvidSerie(serieID int64, timar []models.Event) ([]int64, error) {
 	if len(timar) == 0 {
 		return nil, nil
 	}
@@ -986,10 +1124,10 @@ func (db *Database) UtvidRegel(ruleID int64, timar []models.Event) ([]int64, err
 	for _, e := range timar {
 		res, err := tx.Exec(
 			`INSERT INTO events (title, description, start_time, end_time, location, room_id,
-				organizer, class_type, teacher_name, capacity, current_enrolment, color, rule_id)
+				organizer, class_type, teacher_name, capacity, current_enrolment, color, serie_id)
 			 VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?, ?)`,
 			e.Title, e.Description, veggtekst(e.StartTime), veggtekst(e.EndTime), e.Location, e.RoomID,
-			e.Organizer, e.ClassType, e.TeacherName, e.Capacity, 0, e.Color, ruleID,
+			e.Organizer, e.ClassType, e.TeacherName, e.Capacity, 0, e.Color, serieID,
 		)
 		if err != nil {
 			return nil, err
@@ -1006,20 +1144,20 @@ func (db *Database) UtvidRegel(ruleID int64, timar []models.Event) ([]int64, err
 	return ider, nil
 }
 
-// SisteITimeregel gjev den siste komande timen i regelen, heil.
+// SisteITimeserie gjev den siste komande timen i serien, heil.
 //
-// GetFutureEventsByRule les fire kolonnor — nok til aa flytta ei rad,
+// GetFutureEventsBySerie les fire kolonnor — nok til aa flytta ei rad,
 // for lite til aa laga ei ny. Forlengjer ein serien, lyt den nye timen
 // arva alt det den gamle bar: namn, lærar, rom, plassar, skildring.
-func (db *Database) SisteITimeregel(ruleID int64, fraa time.Time) (*models.Event, error) {
+func (db *Database) SisteITimeserie(serieID int64, fraa time.Time) (*models.Event, error) {
 	var e models.Event
 	err := db.Conn.QueryRow(`
 		SELECT id, title, COALESCE(description, ''), start_time, end_time,
 		       COALESCE(location, ''), COALESCE(organizer, ''), COALESCE(class_type, ''),
 		       COALESCE(teacher_name, ''), COALESCE(capacity, 0), COALESCE(color, ''),
 		       COALESCE(room_id, 0)
-		FROM events WHERE rule_id = ? AND end_time > ?
-		ORDER BY start_time DESC LIMIT 1`, ruleID, veggtekst(fraa)).
+		FROM events WHERE serie_id = ? AND end_time > ?
+		ORDER BY start_time DESC LIMIT 1`, serieID, veggtekst(fraa)).
 		Scan(&e.ID, &e.Title, &e.Description, &e.StartTime, &e.EndTime,
 			&e.Location, &e.Organizer, &e.ClassType, &e.TeacherName, &e.Capacity,
 			&e.Color, &e.RoomID)
@@ -1032,32 +1170,32 @@ func (db *Database) SisteITimeregel(ruleID int64, fraa time.Time) (*models.Event
 	return &e, nil
 }
 
-// UpdateRuleCapacity set plassane paa alle komande timar i regelen.
+// UpdateSerieCapacity set plassane paa alle komande timar i serien.
 //
 // Null tyder «ingi eigi» og gjev rommet ordet attende — difor NULLIF.
 // Skreiv me 0 raatt, hadde timen havt null plassar, og COALESCE-en som
 // hentar rommet sitt tal hadde aldri sett noko aa henta.
-func (db *Database) UpdateRuleCapacity(ruleID int64, plassar int, fraa time.Time) error {
+func (db *Database) UpdateSerieCapacity(serieID int64, plassar int, fraa time.Time) error {
 	_, err := db.Conn.Exec(
-		"UPDATE events SET capacity = NULLIF(?, 0) WHERE rule_id = ? AND end_time > ?",
-		plassar, ruleID, veggtekst(fraa),
+		"UPDATE events SET capacity = NULLIF(?, 0) WHERE serie_id = ? AND end_time > ?",
+		plassar, serieID, veggtekst(fraa),
 	)
 	return err
 }
 
-// PaameldeYver gjev den fyrste komande timen i regelen som hev fleire
+// PaameldeYver gjev den fyrste komande timen i serien som hev fleire
 // paamelde enn `plassar`, um nokon hev det.
 //
 // Set ein plassane ned under det som alt er selt, er ikkje spursmaalet
 // kva basen toler — det er kven som misser plassen sin. Difor vert det
 // spurt fyre, og svaret ber datoen og talet med seg.
-func (db *Database) PaameldeYver(ruleID int64, plassar int, fraa time.Time) (*models.Event, error) {
+func (db *Database) PaameldeYver(serieID int64, plassar int, fraa time.Time) (*models.Event, error) {
 	var e models.Event
 	err := db.Conn.QueryRow(`
 		SELECT id, title, start_time, current_enrolment
 		FROM events
-		WHERE rule_id = ? AND end_time > ? AND current_enrolment > ?
-		ORDER BY start_time LIMIT 1`, ruleID, veggtekst(fraa), plassar).
+		WHERE serie_id = ? AND end_time > ? AND current_enrolment > ?
+		ORDER BY start_time LIMIT 1`, serieID, veggtekst(fraa), plassar).
 		Scan(&e.ID, &e.Title, &e.StartTime, &e.CurrentEnrolment)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -1110,12 +1248,12 @@ func (db *Database) AvlysFleire(ider []int64) error {
 	return tx.Commit()
 }
 
-// GetFutureEventsByRule gjev dei komande timane i ein regel, etter dato.
-func (db *Database) GetFutureEventsByRule(ruleID int64, fraa time.Time) ([]models.Event, error) {
+// GetFutureEventsBySerie gjev dei komande timane i ein serie, etter dato.
+func (db *Database) GetFutureEventsBySerie(serieID int64, fraa time.Time) ([]models.Event, error) {
 	rows, err := db.Conn.Query(
 		`SELECT id, start_time, end_time, COALESCE(room_id, 0)
-		 FROM events WHERE rule_id = ? AND end_time > ? ORDER BY start_time`,
-		ruleID, veggtekst(fraa),
+		 FROM events WHERE serie_id = ? AND end_time > ? ORDER BY start_time`,
+		serieID, veggtekst(fraa),
 	)
 	if err != nil {
 		return nil, err
@@ -1146,11 +1284,11 @@ func (db *Database) FlyttEvent(eventID int64, start, slutt time.Time) error {
 
 // FlyttFleire flytter alle timane i eit knippe i éi økt.
 //
-// Ein regel er éin ting, og å flytta han er ei handling. Gjekk
+// Ein serie er éin ting, og å flytta han er ei handling. Gjekk
 // oppdateringane kvar for seg og den fjerde feila, låg tri timar på det
 // nye klokkeslettet og resten på det gamle — og flata sa berre «kunne
 // ikkje lagra» og sette feltet attende, so ingen visste at rada var
-// delt. Anten flytter heile regelen seg, eller ingen ting gjer det.
+// delt. Anten flytter heile serien seg, eller ingen ting gjer det.
 type Flytting struct {
 	EventID      int64
 	Start, Slutt time.Time
@@ -1179,7 +1317,7 @@ func (db *Database) FlyttFleire(flyttingar []Flytting) error {
 
 // GetAllEvents fetches all events from the database
 func (db *Database) GetAllEvents() ([]models.Event, error) {
-	rows, err := db.Conn.Query("SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, ''), COALESCE(e.rule_id, 0), COALESCE(e.room_id, 0), COALESCE(e.capacity, 0), COALESCE(r.capacity, 0) FROM events e LEFT JOIN rooms r ON r.id = e.room_id")
+	rows, err := db.Conn.Query("SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, ''), COALESCE(e.serie_id, 0), COALESCE(e.room_id, 0), COALESCE(e.capacity, 0), COALESCE(r.capacity, 0), COALESCE(e.gruppe_id, 0) FROM events e LEFT JOIN rooms r ON r.id = e.room_id")
 	if err != nil {
 		return nil, err
 	}
@@ -1188,7 +1326,7 @@ func (db *Database) GetAllEvents() ([]models.Event, error) {
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName, &event.RuleID, &event.RoomID, &event.EigenPlassar, &event.RoomCapacity); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName, &event.SerieID, &event.RoomID, &event.EigenPlassar, &event.RoomCapacity, &event.GruppeID); err != nil {
 			return nil, err
 		}
 		events = append(events, event)
@@ -1251,8 +1389,10 @@ func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 // GetEventsForWeek gjev veka slik `sjaaarID` skal sjaa henne: alle opne
 // timar, og dei private som er hans eigne. Sjaa privattime.go.
 func (db *Database) GetEventsForWeek(mondayDate time.Time, sjaaarID int64) ([]models.Event, error) {
-	// Calculate the Sunday of the same week
-	sundayDate := mondayDate.AddDate(0, 0, 6)
+	// Halvopen veke: måndag 00:00 til neste måndag 00:00. Han let
+	// SQLite nytta idx_events_start; DATE(e.start_time) gjorde kvar
+	// time til ei funksjonsutrekning og tvinga fram tabellskann.
+	nesteMaandag := mondayDate.AddDate(0, 0, 7)
 
 	// Kapasiteten kjem av rommet. Timen kann setja henne lægre — ein
 	// workshop i salen med ti plassar — men han kann ikkje setja henne
@@ -1266,13 +1406,13 @@ func (db *Database) GetEventsForWeek(mondayDate time.Time, sjaaarID int64) ([]mo
 		       COALESCE(r.id, 0), COALESCE(r.name, e.location, ''), COALESCE(r.capacity, 0)
 		FROM events e
 		LEFT JOIN rooms r ON r.id = e.room_id
-		WHERE DATE(e.start_time) >= DATE(?)
-		AND DATE(e.start_time) <= DATE(?)
+		WHERE e.start_time >= ?
+		AND e.start_time < ?
 		AND ` + synlegFor + `
 		ORDER BY e.start_time ASC
 	`
 	rows, err := db.Conn.Query(query,
-		mondayDate.Format("2006-01-02"), sundayDate.Format("2006-01-02"), sjaaarID)
+		veggtekst(mondayDate), veggtekst(nesteMaandag), sjaaarID, sjaaarID)
 	if err != nil {
 		return nil, err
 	}
@@ -1350,7 +1490,7 @@ func (db *Database) MedlemskapFor(kvalifisert bool) ([]models.Membership, error)
 		if m.IsStudentSenior && !kvalifisert {
 			continue
 		}
-		// Black kann ikkje kjøpast. Han fylgjer ei rolla, og ein pris
+		// Black kann ikkje kjøpast. Han fylgjer eit løyve, og ein pris
 		// paa 0 kr i lista hadde vore ei innbjoding til aa klikka paa
 		// honom. Sjaa svartmedlem.go.
 		if m.Skjult {
@@ -1383,7 +1523,7 @@ func (db *Database) GetAllMemberships() ([]models.Membership, error) {
 // GetUserMembership fetches a user's current membership
 func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetails, error) {
 	query := `
-		SELECT um.id, um.user_id, um.membership_id, um.status, um.start_date, um.renewal_date, um.end_date, um.binding_end, um.last_billed, um.created_at,
+		SELECT um.id, um.user_id, um.membership_id, um.status, um.start_date, um.renewal_date, um.end_date, um.binding_end, um.last_billed, um.frozen_at, um.created_at,
 		       m.name, m.price, m.commitment_months, m.is_student_senior, m.is_special_offer, m.description, m.features, m.active
 		FROM user_memberships um
 		JOIN memberships m ON um.membership_id = m.id
@@ -1392,8 +1532,8 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 		LIMIT 1
 	`
 
-	// Rolla gjeng fyre. Ein lærar hev Black so lenge han er lærar, og
-	// det skal ikkje spela nokor rolla kva som elles ligg i basen paa
+	// Løyvet gjeng fyre. Ein lærar hev Black so lenge han er lærar, og
+	// det skal ikkje spela nokor løyvet kva som elles ligg i basen paa
 	// honom. Sjaa svartmedlem.go.
 	if fri, err := db.HarFriMedlemskap(userID); err == nil && fri {
 		return db.svartMedlemskapFor(userID)
@@ -1403,7 +1543,8 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 	err := db.Conn.QueryRow(query, userID).Scan(
 		&membership.UserMembership.ID, &membership.UserMembership.UserID, &membership.UserMembership.MembershipID,
 		&membership.UserMembership.Status, &membership.UserMembership.StartDate, &membership.UserMembership.RenewalDate,
-		&membership.UserMembership.EndDate, &membership.UserMembership.BindingEnd, &membership.UserMembership.LastBilled, &membership.UserMembership.CreatedAt,
+		&membership.UserMembership.EndDate, &membership.UserMembership.BindingEnd, &membership.UserMembership.LastBilled,
+		&membership.UserMembership.FrozenAt, &membership.UserMembership.CreatedAt,
 		&membership.Membership.Name, &membership.Membership.Price, &membership.Membership.CommitmentMonths,
 		&membership.Membership.IsStudentSenior, &membership.Membership.IsSpecialOffer, &membership.Membership.Description,
 		&membership.Membership.Features, &membership.Membership.Active,
@@ -1455,7 +1596,7 @@ func (db *Database) GetAllKlippekortPackages() ([]models.KlippekortPackage, erro
 // til FALSE, so eit oppbrukt kort kunde aldri gaa burt av seg sjølv.
 // Det laag der til det gjekk ut paa dato, kanskje eit halvt aar seinare.
 //
-// Talet paa heimeskjermen kunde regelen fraa fyrr (sjaa dashboard.go:
+// Talet paa heimeskjermen kunde serien fraa fyrr (sjaa dashboard.go:
 // «tome kort er ikkje noko ein hev att»), men *kortlista* kunde honom
 // ikkje, so dei sa tvo ulike ting um det same kortet: null att i talet,
 // og eit kort paa skjermen.
@@ -1523,12 +1664,12 @@ func (db *Database) AuthenticateUser(email, password string) (*models.User, erro
 		return nil, fmt.Errorf("ugyldig e-post eller passord")
 	}
 
-	// Get user roles
-	roles, err := db.GetUserRoles(int64(user.ID))
+	// Løyvi brukaren hev
+	loyve, err := db.LoyveFor(int64(user.ID))
 	if err != nil {
 		return nil, err
 	}
-	user.Roles = roles
+	user.Loyve = loyve
 
 	return &user, nil
 }
@@ -1537,16 +1678,24 @@ func (db *Database) AuthenticateUser(email, password string) (*models.User, erro
 func (db *Database) GetUserByID(userID int64) (*models.User, error) {
 	var user models.User
 
-	query := `SELECT id, name, COALESCE(birthdate, ''), email, COALESCE(phone, ''),
-	                 COALESCE(address, ''), COALESCE(postal_code, ''), COALESCE(city, ''),
-	                 COALESCE(country, ''), newsletter_subscription, terms_accepted,
-	                 COALESCE(student_senior, 0)
-	          FROM users WHERE id = ?`
+	query := `SELECT u.id, u.name, COALESCE(u.birthdate, ''), u.email, COALESCE(u.phone, ''),
+	                 COALESCE(u.address, ''), COALESCE(u.postal_code, ''), COALESCE(u.city, ''),
+	                 COALESCE(u.country, ''), u.newsletter_subscription, u.terms_accepted,
+	                 COALESCE(u.student_senior, 0), u.student_senior_gjeng_ut,
+	                 COALESCE(GROUP_CONCAT(r.name), '')
+	          FROM users u
+	          LEFT JOIN brukarloyve ur ON ur.user_id = u.id
+	          LEFT JOIN loyve r ON r.id = ur.loyve_id
+	          WHERE u.id = ?
+	          GROUP BY u.id`
 
+	var gjengUt sql.NullTime
+	var loyveTekst string
 	err := db.Conn.QueryRow(query, userID).Scan(
 		&user.ID, &user.Name, &user.Birthdate, &user.Email, &user.Phone, &user.Address,
 		&user.PostalCode, &user.City, &user.Country,
 		&user.NewsletterSubscription, &user.TermsAccepted, &user.StudentSenior,
+		&gjengUt, &loyveTekst,
 	)
 
 	if err != nil {
@@ -1556,12 +1705,10 @@ func (db *Database) GetUserByID(userID int64) (*models.User, error) {
 		return nil, err
 	}
 
-	// Get user roles
-	roles, err := db.GetUserRoles(userID)
-	if err != nil {
-		return nil, err
+	user.StudentSeniorGjengUt = gjengUt.Time
+	if loyveTekst != "" {
+		user.Loyve = strings.Split(loyveTekst, ",")
 	}
-	user.Roles = roles
 
 	return &user, nil
 }
@@ -1601,10 +1748,70 @@ func (db *Database) GetPendingFreezeRequests() ([]models.FreezeRequest, error) {
 	return requests, nil
 }
 
-// ApproveFreezeRequest approves a freeze request by setting status to 'paused'
+// ApproveFreezeRequest godkjenner ei fryseføresprunad.
+//
+// Han set klokka med det same: `frozen_at` er tidspunktet utlaupet
+// sluttar aa telja. Utan honom hadde ei frysing kosta medlemen den tidi
+// ho varde — eit aarskort frose i tvo maanader hadde gjeve ti maanader
+// bruk — og det er ikkje det studioet sel.
 func (db *Database) ApproveFreezeRequest(userID int64) error {
-	query := `UPDATE user_memberships SET status = 'paused' WHERE user_id = ? AND status = 'freeze_requested'`
+	query := `UPDATE user_memberships SET status = 'paused', frozen_at = CURRENT_TIMESTAMP
+	          WHERE user_id = ? AND status = 'freeze_requested'`
 	_, err := db.Conn.Exec(query, userID)
+	return err
+}
+
+// UnfreezeMembership set eit frose medlemskap i gang att og skuver
+// utlaupet fram med den tidi det stod.
+//
+// Dette er den *einaste* vegen ut or 'paused'. `UpdateMembershipStatus`
+// tek kva stoda som helst og veit ingen ting um klokka; kallar nokon
+// honom med "active" paa eit frose medlemskap, stend `frozen_at` att og
+// utlaupet driv for alltid. Difor eige kall, og difor stend det her.
+//
+// Tidi vert lagd til baade `renewal_date` og `binding_end`: den fyrste
+// er kva du hev betalt for, den andre er terminen du kjøpte, og ei
+// frysing tek ikkje av nokon av dei.
+func (db *Database) UnfreezeMembership(userID int64) error {
+	var frosen sql.NullTime
+	var fornying time.Time
+	var binding sql.NullTime
+	err := db.Conn.QueryRow(`SELECT frozen_at, renewal_date, binding_end FROM user_memberships
+	                         WHERE user_id = ? AND status = 'paused'
+	                         ORDER BY created_at DESC LIMIT 1`, userID).Scan(&frosen, &fornying, &binding)
+	if err == sql.ErrNoRows {
+		// Ikkje frose. Daa er dette ei vanleg stoda-endring, og den
+		// gamle vegen er rett.
+		return db.UpdateMembershipStatus(userID, "active")
+	}
+	if err != nil {
+		return err
+	}
+
+	// Stod han frose fyre kolonna fanst, hev me ingi klokka. Daa set me
+	// honom i gang att utan aa skuva noko: aa gissa paa ei lengd er
+	// verre enn aa lata vera.
+	if !frosen.Valid {
+		return db.UpdateMembershipStatus(userID, "active")
+	}
+
+	stod := time.Since(frosen.Time)
+	if stod < 0 {
+		stod = 0
+	}
+	nyFornying := fornying.Add(stod)
+
+	if binding.Valid {
+		_, err = db.Conn.Exec(`UPDATE user_memberships
+		                       SET status = 'active', frozen_at = NULL, renewal_date = ?, binding_end = ?
+		                       WHERE user_id = ? AND status = 'paused'`,
+			nyFornying, binding.Time.Add(stod), userID)
+	} else {
+		_, err = db.Conn.Exec(`UPDATE user_memberships
+		                       SET status = 'active', frozen_at = NULL, renewal_date = ?
+		                       WHERE user_id = ? AND status = 'paused'`,
+			nyFornying, userID)
+	}
 	return err
 }
 
@@ -1747,7 +1954,7 @@ func (db *Database) GetMembershipByID(membershipID int64) (*models.Membership, e
 }
 
 // CanChangeMembership checks if a user can change to a specific membership
-func (db *Database) CanChangeMembership(userID int64, newMembershipID int64) (bool, string) {
+func (db *Database) CanChangeMembership(userID int64, newMembershipID int64, naa time.Time) (bool, string) {
 	// Get membership rules
 	rules, err := db.GetMembershipRules()
 	if err != nil {
@@ -1791,10 +1998,19 @@ func (db *Database) CanChangeMembership(userID int64, newMembershipID int64) (bo
 		return false, "Nedgraderinger er ikke tillatt ifølge gjeldende regler"
 	}
 
-	// Check if switching involves adding a discount (would require admin approval)
+	// Studentprisen krev at nokon hev sett beviset.
+	//
+	// Her stod eit blankt nei: *ingen* kunde byta til studentprisen, ogso
+	// den som hadde vist beviset, av di det ikkje fanst nokon veg til aa
+	// godkjenna det. No finst han (sjaa rabattkrav.go), og daa er
+	// spursmaalet ikkje «er dette ein rabatt» men «hev denne fenge
+	// honom». Same serien som lista yver prisar les, so ho ikkje syner
+	// deg noko du ikkje fær kjøpa.
 	if newMembership.IsStudentSenior && !currentMembership.IsStudentSenior {
-		// This would require admin approval - for now we block it
-		return false, "Bytte til student/senior-rabatt krever godkjenning fra admin"
+		brukar, err := db.GetUserByID(userID)
+		if err != nil || !brukar.KvalifisertFor(naa) {
+			return false, "Studentprisen krev at studioet hev sett beviset"
+		}
 	}
 
 	return true, ""
@@ -1945,6 +2161,25 @@ func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 	}
 	if eigar.Valid && eigar.Int64 != userID {
 		return fmt.Errorf("timen er sett av til ein annan")
+	}
+
+	// Og same spursmaalet for gruppa. Ein reformer-time som berre dei
+	// upplærde ser, er framleis eit id nokon kann POSta seg paa.
+	var gruppe sql.NullInt64
+	if err := tx.QueryRow(
+		`SELECT gruppe_id FROM events WHERE id = ?`, eventID).Scan(&gruppe); err != nil {
+		return err
+	}
+	if gruppe.Valid {
+		var med int
+		if err := tx.QueryRow(
+			`SELECT COUNT(*) FROM gruppemedlem WHERE gruppe_id = ? AND user_id = ?`,
+			gruppe.Int64, userID).Scan(&med); err != nil {
+			return err
+		}
+		if med == 0 {
+			return fmt.Errorf("timen er open for ei gruppa du ikkje er med i")
+		}
 	}
 
 	var exists int
@@ -2260,7 +2495,7 @@ type Person struct {
 	Epost       string
 	Telefon     string
 	Fodd        string
-	Roller      string
+	Loyve       string
 	Medlemskap  string
 	MedlemStod  string
 	MedlemPris  int
@@ -2271,6 +2506,10 @@ type Person struct {
 	TrengSvar   bool // frysing som ventar
 	ErLaerar    bool
 	ErAdmin     bool
+	// Gruppone personen er med i. Settet er det malen slær upp i;
+	// strengen er berre vegen ut or basen.
+	GruppeIDar string
+	GruppeSett map[int64]bool
 }
 
 // FolkOversyn hentar alle medlemene med det ein treng for aa kjenna
@@ -2283,22 +2522,44 @@ type Person struct {
 // vita kva som krev noko av henne.
 func (db *Database) FolkOversyn() ([]Person, error) {
 	rows, err := db.Conn.Query(`
+		WITH
+		loyve_per_brukar AS (
+			SELECT ur.user_id, GROUP_CONCAT(r.name, ', ') AS loyve
+			FROM brukarloyve ur
+			JOIN loyve r ON r.id = ur.loyve_id
+			GROUP BY ur.user_id
+		),
+		grupper_per_brukar AS (
+			SELECT user_id, GROUP_CONCAT(gruppe_id) AS grupper
+			FROM gruppemedlem
+			GROUP BY user_id
+		),
+		klipp_per_brukar AS (
+			SELECT user_id, SUM(remaining_klipp) AS att, SUM(total_klipp) AS totalt
+			FROM user_klippekort
+			GROUP BY user_id
+		),
+		aktivitet_per_brukar AS (
+			SELECT es.user_id,
+			       MAX(CASE WHEN e.start_time < CURRENT_TIMESTAMP THEN e.start_time END) AS sist_her,
+			       SUM(CASE WHEN e.start_time < CURRENT_TIMESTAMP
+			                 AND e.start_time > datetime('now', '-1 year') THEN 1 ELSE 0 END) AS timar_i_aar
+			FROM event_signups es
+			JOIN events e ON e.id = es.event_id
+			GROUP BY es.user_id
+		)
 		SELECT u.id, u.name, u.email, COALESCE(u.phone, ''), COALESCE(u.birthdate, ''),
-		       COALESCE((SELECT GROUP_CONCAT(r.name, ', ') FROM user_roles ur
-		                 JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), ''),
+		       COALESCE(lp.loyve, ''), COALESCE(gp.grupper, ''),
 		       COALESCE(m.name, ''), COALESCE(um.status, ''), COALESCE(m.price, 0),
-		       COALESCE((SELECT SUM(uk.remaining_klipp) FROM user_klippekort uk WHERE uk.user_id = u.id), 0),
-		       COALESCE((SELECT SUM(uk.total_klipp) FROM user_klippekort uk WHERE uk.user_id = u.id), 0),
-		       (SELECT MAX(e.start_time) FROM event_signups es
-		        JOIN events e ON e.id = es.event_id
-		        WHERE es.user_id = u.id AND e.start_time < CURRENT_TIMESTAMP),
-		       COALESCE((SELECT COUNT(*) FROM event_signups es
-		                 JOIN events e ON e.id = es.event_id
-		                 WHERE es.user_id = u.id AND e.start_time < CURRENT_TIMESTAMP
-		                 AND e.start_time > datetime('now', '-1 year')), 0)
+		       COALESCE(kp.att, 0), COALESCE(kp.totalt, 0),
+		       ap.sist_her, COALESCE(ap.timar_i_aar, 0)
 		FROM users u
 		LEFT JOIN user_memberships um ON um.user_id = u.id AND um.status != 'cancelled'
 		LEFT JOIN memberships m ON m.id = um.membership_id
+		LEFT JOIN loyve_per_brukar lp ON lp.user_id = u.id
+		LEFT JOIN grupper_per_brukar gp ON gp.user_id = u.id
+		LEFT JOIN klipp_per_brukar kp ON kp.user_id = u.id
+		LEFT JOIN aktivitet_per_brukar ap ON ap.user_id = u.id
 		ORDER BY u.name COLLATE NOCASE`)
 	if err != nil {
 		return nil, err
@@ -2311,7 +2572,8 @@ func (db *Database) FolkOversyn() ([]Person, error) {
 		// MAX() gjev ein streng ut or SQLite, ikkje ei tid — aggregatet
 		// misser typen som kolonna hadde. Difor lyt han tolkast her.
 		var sist sql.NullString
-		if err := rows.Scan(&p.ID, &p.Namn, &p.Epost, &p.Telefon, &p.Fodd, &p.Roller,
+		if err := rows.Scan(&p.ID, &p.Namn, &p.Epost, &p.Telefon, &p.Fodd, &p.Loyve,
+			&p.GruppeIDar,
 			&p.Medlemskap, &p.MedlemStod, &p.MedlemPris,
 			&p.KlippAtt, &p.KlippTotalt, &sist, &p.TimarIAar); err != nil {
 			return nil, err
@@ -2328,8 +2590,14 @@ func (db *Database) FolkOversyn() ([]Person, error) {
 			}
 		}
 		p.TrengSvar = p.MedlemStod == "freeze_requested"
-		p.ErLaerar = harRolla(p.Roller, RollaLaerar)
-		p.ErAdmin = harRolla(p.Roller, RollaAdmin)
+		p.ErLaerar = harLoyve(p.Loyve, LoyveLaerar)
+		p.ErAdmin = harLoyve(p.Loyve, LoyveAdmin)
+		p.GruppeSett = map[int64]bool{}
+		for _, t := range strings.Split(p.GruppeIDar, ",") {
+			if id, err := strconv.ParseInt(strings.TrimSpace(t), 10, 64); err == nil {
+				p.GruppeSett[id] = true
+			}
+		}
 		ut = append(ut, p)
 	}
 	return ut, rows.Err()

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"html/template"
+	"kjernekraft/database"
 	"kjernekraft/handlers/config"
 	"kjernekraft/models"
 	"log"
@@ -424,6 +425,29 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Avkryssingi for studentrabatt er eit *krav*, ikkje ein rabatt.
+		//
+		// Ho vart ikkje lesi her i det heile fyrr: skjemaet bar feltet,
+		// dokka sa «lagra», og ingen ting hende — flata lova ein rabatt
+		// ho korkje gav eller bad um. No stend krysset som eit krav til
+		// nokon i studioet hev sett beviset (sjaa database/rabattkrav.go).
+		//
+		// Krysset av att er «eg er ikkje student lenger», og det tek baade
+		// kravet som ventar og rabatten som alt er gjeven.
+		bedd := r.FormValue("student_senior") != ""
+		har, _, err := DB.StudentrabattFor(int64(user.ID))
+		if err == nil {
+			if bedd && !har {
+				if err := DB.LagRabattkrav(int64(user.ID), config.GetInstance().GetCurrentTime()); err != nil {
+					log.Printf("rabattkrav: %v", err)
+				}
+			} else if !bedd {
+				if err := DB.TrekkRabattkrav(int64(user.ID)); err != nil {
+					log.Printf("rabattkrav trekt: %v", err)
+				}
+			}
+		}
+
 		// Update session with new user data
 		err = SetUserInSession(w, r, user)
 		if err != nil {
@@ -441,6 +465,14 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get language from cookies/request (using new system)
 	lang := GetLanguageFromRequest(r)
+
+	// Stoda paa studentrabatten. Malen bar `.StudentSenior` fraa fyrr, men
+	// datakartet sette han aldri — so krysset stod tomt same kva, og den
+	// som hadde rabatten saag ingen stad at han hadde honom.
+	rabattHar, rabattTil, _ := DB.StudentrabattFor(int64(user.ID))
+	krav, _ := DB.SisteRabattkrav(int64(user.ID))
+	rabattVentar := krav != nil && krav.Ventar()
+	rabattAvvist := krav != nil && krav.Stoda == database.RabattAvvist
 
 	data := map[string]interface{}{
 		"Title":       "Min profil",
@@ -461,6 +493,13 @@ func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
 		"Lang":        lang,
 		"CSRFToken":   CSRFToken(r),
 		"IsAdmin":     sessionIsAdmin(r),
+		// Krysset stend for det du hev *bede um* like mykje som for det du
+		// hev fenge: eit krav som ventar skal ikkje sjaa ut som om du
+		// ombestemte deg.
+		"StudentSenior": rabattHar || rabattVentar,
+		"RabattVentar":  rabattVentar,
+		"RabattAvvist":  rabattAvvist,
+		"RabattTil":     rabattTil,
 	}
 
 	// Use the new template system

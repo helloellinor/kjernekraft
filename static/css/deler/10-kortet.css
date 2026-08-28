@@ -15,7 +15,7 @@
    `--produkt` er den eine kroken: kortet set han, og alt inni som skal
    bera produktfargen les han. Ingen skriv turkis eller rosa i ein
    komponent lenger — dei skriv `var(--produkt)`. */
-.kort, .charge-item, .activity-placeholder, .no-data {
+.kort, .charge-item, .no-data {
   background: var(--flate);
   border: 1px solid var(--haarlina);
   border-radius: 2px;
@@ -26,13 +26,37 @@
 .kort { display: flex; flex-direction: column; gap: var(--rom-2); }
 
 /* Eit kort som *er* noko — valt, i bruk, framheva — fær ei lina i
-   produktfargen langs vinstre kanten. Éi lina, ikkje ei ramme, og
-   kortet flyttar seg ikkje naar ho kjem. */
+   produktfargen langs vinstre kanten. Éi lina, ikkje ei ramme.
+
+   Lina er ein `inset`-skugge og ikkje ein `border-left`. Ho var ein
+   border fyrr, og daa laag ho *utanpaa* haarlina paa 1px: kanten voks
+   fraa 1 til 3, og av di alt i huset er `border-box`, kryest
+   innhaldsboksen med tvo pikslar og teksti flutte seg like langt inn.
+   Paa pakkekorti stend det heile rada attmed kvarandre, so det
+   framhevede kortet hadde teksti si tvo pikslar lenger inne enn
+   grannane sine, og eit kort som vart valt rykte i det du trykte
+   (§3: ingen ting skal flytta seg).
+
+   Ein `inset`-skugge tek ingen plass i utrekningi, og difor kann lina
+   koma og gaa utan at noko rører seg — same kva fyll varianten hev.
+   `.timerad` stiller um fyllet sitt, og ei paddingutrekning her hadde
+   slege det ut. Kortskuggen lyt vera med i den same lista, elles slær
+   ho honom av. (§2 held elles skuggen aat ljoset; dette er den eine
+   staden ein `inset` teiknar ei lina, av di §3 veg tyngre.)
+
+   Tvo pikslar inset og ikkje tri: haarlina som alt er der vert farga
+   med, so lina les tri pikslar breid som fyrr. Kanten skifter berre
+   farge og ikkje breidd, som §3 vil ha det.
+
+   `.medlemskort` hev framleis ein ekte `border-left`: han stend der
+   alltid, so han flytter ingen ting, og han lyt kunna vera `dashed`
+   naar medlemskapet ventar paa fryse. */
 .kort.valt, .kort.framheva, .kort[aria-pressed="true"] {
-  border-left: 3px solid var(--produkt, var(--merke));
+  border-left-color: var(--produkt, var(--merke));
+  box-shadow: inset 2px 0 0 var(--produkt, var(--merke)), var(--skugge-kort);
 }
 
-.no-data, .activity-placeholder, .loading-placeholder {
+.no-data, .loading-placeholder {
   color: var(--blekk-svakt);
   text-align: center;
   padding: var(--rom-6) var(--rom-4);
@@ -121,8 +145,9 @@
 }
 .kategorikort:hover, .package-card:hover { border-color: var(--produkt); color: inherit; }
 
-/* Det valde kortet ber produktfargen aat klippekortet — rosa (§2) — og
-   held kanten sin, so ingen ting flyttar seg naar ein vel. */
+/* Det valde kortet ber produktfargen aat klippekortet — rosa (§2).
+   Kanten stend urørd; vengen ovanfyre er ein inset-skugge, so korkje
+   han eller flata flyttar noko naar ein vel. */
 .kategorikort[aria-pressed="true"], .package-card[aria-pressed="true"] {
   background: var(--togu-svak);
 }

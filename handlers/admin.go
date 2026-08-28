@@ -15,12 +15,6 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Ligg denne handsamaren nokon gong utanfor den gruppa, er
 	// administrasjonen open att.
 
-	users, err := AdminDB.GetAllUsers()
-	if err != nil {
-		http.Error(w, "Kunne ikke hente brukere", http.StatusInternalServerError)
-		return
-	}
-
 	events, err := AdminDB.GetAllEvents()
 	if err != nil {
 		log.Printf("admin: kunde ikkje henta timar: %v", err)
@@ -46,17 +40,21 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// kunde koma på kvar sitt maal.
 	lang := GetLanguageFromRequest(r)
 
-	// Create admin stats module
-	statsModule, err := modules.NewAdminStatsModule(len(users), len(events), len(freezeRequests), lang)
+	folk, err := AdminDB.FolkOversyn()
+	if err != nil {
+		log.Printf("folkeoversyn: %v", err)
+		http.Error(w, "Kunne ikke hente brukere", http.StatusInternalServerError)
+		return
+	}
+
+	// FolkOversyn er både medlemslista og kjelda til PT-veljaren. Før
+	// vart alle brukarar henta ein gong til berre for den vesle veljaren;
+	// GetAllUsers slo dessutan opp løyve éin gong per brukar.
+	statsModule, err := modules.NewAdminStatsModule(len(folk), len(events), len(freezeRequests), lang)
 	if err != nil {
 		log.Printf("Error creating admin stats module: %v", err)
 		http.Error(w, "Error creating admin module", http.StatusInternalServerError)
 		return
-	}
-
-	folk, err := AdminDB.FolkOversyn()
-	if err != nil {
-		log.Printf("folkeoversyn: %v", err)
 	}
 
 	rooms, err := AdminDB.GetRooms()
@@ -64,7 +62,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("kunde ikkje henta rom: %v", err)
 	}
 
-	// Veljarane paa denne sida — ny time, vikarfeltet — les rollone.
+	// Veljarane paa denne sida — ny time, vikarfeltet — les løyvi.
 	// Datalista `laerarar` stod tom fyrr: ho las $.Teachers, og den
 	// nykelen vart aldri sett paa administrasjonssida i det heile.
 	laerarar, err := AdminDB.LaerarNamn()
@@ -72,20 +70,57 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("kunde ikkje henta lærarane: %v", err)
 	}
 
-	// Reglane vert rekna ein gong: baade lista og vali sikti tilbyd
+	// Slagi som alt er i bruk. Feltet er fritekst, so utan ei lista aa
+	// plukka fraa vert «Yoga» og «yoga» tvo sortar — og daa ber dei kvar
+	// sin venge i lista.
+	slagsortar, err := AdminDB.Slagsortar()
+	if err != nil {
+		log.Printf("kunde ikkje henta slagi: %v", err)
+	}
+
+	// Gruppone ein time kann vera open for.
+	grupper, err := AdminDB.Grupper()
+	if err != nil {
+		log.Printf("grupper: %v", err)
+	}
+
+	// Krav um studentrabatt som ventar paa svar. Dei høyrer heime i
+	// meldingsfana attmed frysingane: baae er noko nokon hev bede um og
+	// som ingen ting hender med fyrr studioet svarar.
+	rabattkrav, err := AdminDB.VentandeRabattkrav()
+	if err != nil {
+		log.Printf("rabattkrav: %v", err)
+	}
+
+	// Seriane vert rekna ein gong: baade lista og vali sikti tilbyd
 	// kjem av deim, og tvo utrekningar av det same kann skilja lag.
-	reglar := GrupperTimar(events, config.GetInstance().GetCurrentTime())
+	seriar := GrupperTimar(events, config.GetInstance().GetCurrentTime())
+
+	// Meldingane som ventar. Ein feil her skal ikkje taka heile
+	// administrasjonssida: fana stend tom, og resten verkar.
+	meldingar, err := AdminDB.VentandeMeldingar()
+	if err != nil {
+		log.Printf("meldingar: %v", err)
+	}
 
 	data := map[string]interface{}{
-		"Rooms":          rooms,
-		"Folk":           folk,
-		"Teachers":       laerarar,
-		"Title":          t(lang, "admin.title"),
-		"Users":          users,
-		"Events":         events,
-		"Timereglar":     reglar,
-		"Siktval":        SiktvalFor(reglar),
+		"Rooms":      rooms,
+		"Folk":       folk,
+		"Teachers":   laerarar,
+		"Slagsortar": slagsortar,
+		"Title":      t(lang, "admin.title"),
+		"Events":     events,
+		"Grupper":    grupper,
+		"Rabattkrav": rabattkrav,
+		"Timereglar": seriar,
+		"Siktval":    SiktvalFor(seriar),
+		// Vekefelti i timebolken tel i dei same ISO-vikone som
+		// timeplanen. Talet kjem herifraa og ikkje fraa lesaren:
+		// klokka i innstillingane er den huset held seg til.
+		"VekeNo":         veketalNo(),
+		"VikorIAaret":    VikorIAaret(config.GetInstance().GetCurrentTime()),
 		"FreezeRequests": freezeRequests,
+		"Meldingar":      meldingar,
 		"Memberships":    memberships,
 		"Stats":          statsModule,
 		"Lang":           lang,

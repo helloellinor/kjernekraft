@@ -1,13 +1,10 @@
 package handlers
 
 import (
-	"html/template"
 	"kjernekraft/models"
 	"log"
 	"net/http"
-	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -178,24 +175,13 @@ func ChargesHandler(w http.ResponseWriter, r *http.Request) {
 		Lang:       GetLanguageFromRequest(r),
 	}
 
-	// Malen nyttar `t` til umsetjingi, og ho hadde si eigi funksjons-
-	// samling med berre `divf` og `title` i. Daa feila parsingi paa
-	// «function "t" not defined», og /api/charges svara 500 kvar gong.
-	// Ho fær den same samlingi som alle hine malarne no.
-	tmplFuncs := getTemplateFuncs()
-	tmplFuncs["title"] = func(s string) string {
-		if len(s) == 0 {
-			return s
-		}
-		return strings.ToUpper(s[:1]) + s[1:]
-	}
-
-	// Malen ligg i modules/membership/, ikkje i components/.
-	templatePath := filepath.Join("handlers", "templates", "modules", "membership", "charges.html")
-	t, err := template.New("charges.html").Funcs(tmplFuncs).ParseFiles(templatePath)
-	if err != nil {
+	// TemplateManager lastar alle modular éin gong i drift, og lastar
+	// dei på nytt når ei fil er endra i utvikling. Det sparer parsing på
+	// kvar htmx-forespurnad utan å gjera malendringar trege å sjå.
+	t, ok := GetTemplateManager().GetTemplate("modules/membership/charges")
+	if !ok {
 		http.Error(w, "Template error", http.StatusInternalServerError)
-		log.Printf("Error parsing charges template: %v", err)
+		log.Printf("Charges template not found")
 		return
 	}
 

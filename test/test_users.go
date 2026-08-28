@@ -26,28 +26,28 @@ func TestUsers() {
 			Birthdate: "1990-01-01",
 			Email:     "ola@example.com",
 			Phone:     "12345678",
-			Roles:     []string{"admin", "reformer"},
+			Loyve:     []string{"admin", "reformer"},
 		},
 		{
 			Name:      "Kari Nordmann",
 			Birthdate: "1992-02-02",
 			Email:     "kari@example.com",
 			Phone:     "87654321",
-			Roles:     []string{"user", "reformer"},
+			Loyve:     []string{"user", "reformer"},
 		},
 		{
 			Name:      "Per Hansen",
 			Birthdate: "1988-03-15",
 			Email:     "per@example.com",
 			Phone:     "55512345",
-			Roles:     []string{"user", "plutocrat"},
+			Loyve:     []string{"user", "plutocrat"},
 		},
 		{
 			Name:      "Scrumbo Jones",
 			Birthdate: "1948-03-15",
 			Email:     "scrumbo@example.com",
 			Phone:     "55512345",
-			Roles:     []string{"user", "plutocrat"},
+			Loyve:     []string{"user", "plutocrat"},
 		},
 	}
 
@@ -67,6 +67,6 @@ func TestUsers() {
 	}
 	fmt.Println("Alle brukere i databasen:")
 	for _, u := range allUsers {
-		fmt.Printf("ID: %d, Navn: %s, Roller: %v\n", u.ID, u.Name, u.Roles)
+		fmt.Printf("ID: %d, Navn: %s, Roller: %v\n", u.ID, u.Name, u.Loyve)
 	}
 }

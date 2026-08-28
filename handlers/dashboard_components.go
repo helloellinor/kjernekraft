@@ -6,7 +6,28 @@ import (
 	"kjernekraft/models"
 	"log"
 	"net/http"
+	"time"
 )
+
+// klargjerKlippekort reknar felta kortmalen og dashboard-briefingen
+// treng frå éi og same liste. Heimesida lasta korta, talde klippa og
+// sende så ei ny henting for å teikna dei same korta.
+func klargjerKlippekort(klippekort []models.KlippekortWithDetails, now time.Time) int {
+	klippAtt := 0
+	for i := range klippekort {
+		k := &klippekort[i]
+		if k.TotalKlipp > 0 {
+			k.ProgressPercentage = (k.RemainingKlipp * 100) / k.TotalKlipp
+		}
+		k.KlipteHol = models.KlipteHolAv(k.TotalKlipp-k.RemainingKlipp, k.TotalKlipp)
+		k.DaysUntilExpiry = int(k.ExpiryDate.Sub(now).Hours() / 24)
+		k.IsExpiring = k.DaysUntilExpiry <= 30 && k.DaysUntilExpiry > 0
+		if k.RemainingKlipp > 0 && k.ExpiryDate.After(now) {
+			klippAtt += k.RemainingKlipp
+		}
+	}
+	return klippAtt
+}
 
 // UserKlippekortHandler provides HTMX endpoint for user's klippekort display
 func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,25 +46,7 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Calculate additional fields for display
-	for i := range klippekort {
-		k := &klippekort[i]
-
-		// Calculate progress percentage (remaining klipps)
-		if k.TotalKlipp > 0 {
-			k.ProgressPercentage = (k.RemainingKlipp * 100) / k.TotalKlipp
-		}
-
-		// Hakkrekkja paa kortet. Alltid ti hol; dei klipte er dei
-		// brukte klippi rekna um til den skalaen. Sjaa models.HolPerKort.
-		k.KlipteHol = models.KlipteHolAv(k.TotalKlipp-k.RemainingKlipp, k.TotalKlipp)
-
-		// Calculate days until expiry
-		settings := config.GetInstance()
-		now := settings.GetCurrentTime()
-		k.DaysUntilExpiry = int(k.ExpiryDate.Sub(now).Hours() / 24)
-		k.IsExpiring = k.DaysUntilExpiry <= 30 && k.DaysUntilExpiry > 0
-	}
+	klargjerKlippekort(klippekort, config.GetInstance().GetCurrentTime())
 
 	// Get language from request (default to Norwegian bokmål)
 	lang := GetLanguageFromRequest(r)

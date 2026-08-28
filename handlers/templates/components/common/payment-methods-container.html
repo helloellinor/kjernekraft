@@ -1,8 +1,11 @@
 {{define "payment_methods_container"}}
-<section class="content-section">
+{{/* Bolken ber breiddi, ikkje kortlista. Lina under yverskrifti er
+     bolken si, so ho gjekk forbi det siste kortet den gongen berre lista
+     var smal. Sjaa 88-betalingsmaatar.css. */}}
+<section class="content-section kortbolk">
     <h2 class="section-title">{{t .Lang "payments.payment_methods"}}</h2>
 
-    <div id="payment-methods-container">
+    <div id="betalingsmaatar-plass">
         <div class="loading-placeholder">{{t .Lang "payments.loading_payment_methods"}}</div>
     </div>
 

@@ -69,7 +69,7 @@
          {{if le .Ledige 0}}hidden{{end}}>
         <p class="dropinnspor">{{t $.Lang "innsjekk.dropinn_spor"}}</p>
         <span class="dropinnfelt">
-            <input type="search" class="dropinnsok" autocomplete="off"
+            <input type="search" class="sok" autocomplete="off"
                    placeholder="{{t $.Lang "innsjekk.dropinn_sok"}}"
                    aria-label="{{t $.Lang "innsjekk.dropinn_sok"}}">
             <ul class="dropinnresultat" hidden></ul>
@@ -189,7 +189,7 @@ function talDei(bolk, kryssa, nye) {
 // skrive minst tri teikn, og ho ventar til fingeren hev stogga.
 var sokTimar = new WeakMap();
 document.addEventListener("input", function (e) {
-    var felt = e.target.closest(".dropinnsok");
+    var felt = e.target.closest(".dropinn .sok");
     if (!felt) return;
     var blokk = felt.closest(".dropinn");
     var resultat = blokk.querySelector(".dropinnresultat");
@@ -279,7 +279,7 @@ document.addEventListener("click", function (e) {
         lista.hidden = false;
         talDei(bolk, 1, 1);
 
-        blokk.querySelector(".dropinnsok").value = "";
+        blokk.querySelector(".sok").value = "";
         var resultat = blokk.querySelector(".dropinnresultat");
         resultat.hidden = true;
         resultat.textContent = "";

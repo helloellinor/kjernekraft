@@ -1,6 +1,10 @@
 package handlers
 
-import "time"
+import (
+	"time"
+
+	"kjernekraft/handlers/config"
+)
 
 // Vikerekninga. Ho laag inne i timeplanhandsamaren og var difor ikkje
 // noko ein kunde prøva — og ho er grunnlaget for eit reknestykke som
@@ -35,4 +39,11 @@ func VikorIAaret(t time.Time) int {
 	aar, _ := t.ISOWeek()
 	_, siste := time.Date(aar, time.December, 28, 0, 0, 0, 0, t.Location()).ISOWeek()
 	return siste
+}
+
+// veketalNo gjev ISO-vikenummeret for i dag, etter klokka huset held
+// seg til. Vekefelti i administrasjonen tel fraa det.
+func veketalNo() int {
+	_, v := config.GetInstance().GetCurrentTime().ISOWeek()
+	return v
 }

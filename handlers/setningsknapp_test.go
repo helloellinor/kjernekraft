@@ -34,9 +34,21 @@ func TestKnappenSlutterSetningiOgStendIkkjeAaleine(t *testing.T) {
 		t.Error("foten er attende; knappen skal slutta setningi, ikkje staa i eit rom for seg")
 	}
 
-	i := strings.Index(html, `<p class="setning"`)
+	// Regelen: knappen skal staa inni ei setning og ikkje aaleine paa ei
+	// lina. Prøva saag paa den *fyrste* `<p class="setning">` den gongen
+	// det berre fanst ei; skjemaet er tvo setningar no — timen, og kven
+	// han er open for — og knappen sluttar den siste. Difor gjeng ho
+	// andre vegen: finn knappen, gaa attende til avsnittet han stend i,
+	// og sjaa etter at det avsnittet *er* ei setning med noko meir i seg
+	// enn knappen. Det er regelen sagt beint fram, og han fylgjer med um
+	// det skulde koma ei tridje setning.
+	k := strings.Index(html, `type="submit"`)
+	if k < 0 {
+		t.Fatal("knappen fanst ikkje")
+	}
+	i := strings.LastIndex(html[:k], "<p ")
 	if i < 0 {
-		t.Fatal("setningi fanst ikkje")
+		t.Fatal("knappen stend ikkje i eit avsnitt i det heile")
 	}
 	slutt := strings.Index(html[i:], "</p>")
 	if slutt < 0 {
@@ -44,8 +56,13 @@ func TestKnappenSlutterSetningiOgStendIkkjeAaleine(t *testing.T) {
 	}
 	setning := html[i : i+slutt]
 
-	if !strings.Contains(setning, `type="submit"`) {
-		t.Error("knappen stend utanfor setningi")
+	if !strings.Contains(setning, `class="setning`) {
+		t.Error("knappen stend i eit avsnitt som ikkje er ei setning")
+	}
+	// Ei setning med berre ein knapp i er ei lina for seg sjølv med ei
+	// onnor drakt.
+	if !strings.Contains(setning, "<input") && !strings.Contains(setning, "<select") {
+		t.Error("knappen stend aaleine i si eigi setning")
 	}
 
 	// Fylgja er ikkje ein del av setningi — du skreiv henne ikkje. Ho

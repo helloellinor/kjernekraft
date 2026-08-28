@@ -40,24 +40,22 @@ label, .detail-label {
   width: 100%;
 }
 
-/* Veljaren hev kant og inga djupn. Han plukkar eitt av nokre faae — han
-   er ein knapp med ei liste attum, ikkje ei renna ein hell noko nedi
-   (FASETTEN §3). Det er den einaste skilnaden som er att, og han tyder
-   noko. */
+/* Veljaren hev den same forma som feltet, og pili er heile skilnaden.
+   Sjaa den lange grunngjevingi nede ved `select`. */
 :where(select) {
   font: inherit;
   padding: var(--rom-2) var(--rom-3);
-  background: var(--flate);
+  background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate));
   color: var(--blekk);
-  border: 1px solid var(--kant);
+  border: 0;
   border-radius: 2px;
   width: 100%;
 }
 
-/* Fordjupingi segjer «her kann du skriva», og difor stend ho berre paa
-   det ein skriv i. Ein veljar plukkar ein or ei liste — han er ein knapp
-   med ei liste attum, ikkje ei renna. */
-:where(input:not([type="checkbox"]):not([type="radio"]), textarea) {
+/* Djupni stend paa alt ein kann taka i. Ho sa «her kann du skriva» og
+   stod difor ikkje paa veljaren — sjaa `select` nedanfor for kvifor det
+   ikkje heldt. */
+:where(input:not([type="checkbox"]):not([type="radio"]), textarea, select) {
   box-shadow: var(--skraakant);
 }
 /* ---- fasetten ----
@@ -122,7 +120,25 @@ input:hover:not([type="checkbox"]):not([type="radio"]), textarea:hover {
   background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate));
 }
 input:focus, textarea:focus { outline: none; box-shadow: var(--skraakant-fasett); }
-select:focus { outline: none; border-color: var(--merke); box-shadow: var(--skraakant-fasett); }
+
+/* ---- neiet ----
+   Eit felt som ikkje kann taka det du skreiv fer ein augneblink i
+   aatvaringsfargen og vert tomt. Ikkje ein ring, og ingi melding som
+   lyt lesast og lukkast: du saag kva som hende, og du er alt i feltet.
+
+   Han stend etter `:hover` med vilje. Same vekt, og daa er det
+   rekkjefylgda som avgjer — laag han fyrr, tok hover neiet burt i det
+   same augneblinken du saag det, av di peikaren stend i feltet.
+
+   Tri vekefelt i huset nyttar honom (`veketal.js`), og berre eitt av
+   dei er ei bobla, so han kann ikkje bu der lenger. */
+.nekta { background-color: color-mix(in srgb, var(--aatvaring) 22%, transparent); }
+@media (prefers-reduced-motion: no-preference) {
+  .nekta { transition: background-color .18s ease-out; }
+}
+/* Fokus legg ringen utanpaa kuppelen og tek honom ikkje burt: djupna
+   segjer kva tingen *er*, ringen kvar du er. */
+select:focus { outline: none; box-shadow: var(--skraakant-fasett); }
 select {
   /* Eit skrivefelt strekkjer seg, av di ingen veit kor langt det ein
      skriv vert. Ein veljar veit det: valdi stend der alt. Difor er han
@@ -132,15 +148,43 @@ select {
   width: auto;
   max-width: 100%;
 
-  /* Nedfallslista er den eine tingen som *faktisk* flyt. */
+  /* ---- veljaren hev feltet si form, og pili er skilnaden ----
+     Han var ein kapsel med kuppel og glans i tvo dagar (28.–30.8.2026),
+     paa den grunngjevingi at han er «ein knapp med ei liste attum».
+     Det er sant um kva han *gjer*, og det synte seg aa vera feil um kva
+     han *er* naar ein ser paa ei side.
+
+     Tri ting felte det:
+
+     1. Kapselen møtte aldri kuppelen sin. `.setning select.felt` var
+        skrivi fyrr og tok flate og haarlina attende, men ikkje
+        rundingi — so i kvar setning i huset stod veljaren som ein
+        pilleforma boks med ei tunn ramme og ein glans lagd yver ei flate
+        som ikkje var kvelvd. I det ljose temaet er `--glans` 55 % kvitt,
+        og det vart eit kvitt drag tvers yver ein mest kvit boks.
+     2. Prisbolken gav veljarane sine `.lappfelt` — feltet si form — og
+        han var den einaste staden dei saag rette ut. Huset gjorde alt
+        det motsette av regelen.
+     3. Ein kapsel i ei rad av kassar fylgjer ikkje kassane. Alt anna paa
+        arket hev broten kant (§2); ein pille millom deim er ikkje ein
+        knapp, han er ein framandkropp.
+
+     No hev han feltet si form — 3 % blekk, `--rund`, skraakanten — og
+     **pili** segjer at han vert plukka og ikkje skriven. Ho stend der
+     alltid, so skiljet er alltid synleg. Éi form for alt ein kann taka
+     i, eitt merke for det eine som skil. Det er billegare enn tvo
+     former som lyt haldast i takt i kvar einaste regel som rører eit
+     felt. FASETTEN §3 segjer framleis det motsette; sjaa ARKET §9. */
   appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
-                    linear-gradient(135deg, currentColor 50%, transparent 50%);
-  background-position: right 1.05rem top 50%, right .8rem top 50%;
-  background-size: 5px 5px, 5px 5px;
+  background-image: var(--pil);
+  /* Pila og fyllet kjem baae av `--pil-inn`; sjaa 00-token.css for kvi
+     dei ikkje kann skrivast kvar for seg. */
+  background-position: right calc(var(--pil-inn) + .25rem) top 50%, right var(--pil-inn) top 50%;
+  background-size: var(--pil-storleik) var(--pil-storleik), var(--pil-storleik) var(--pil-storleik);
   background-repeat: no-repeat;
-  padding-right: var(--rom-7);
+  padding-right: var(--pilrom);
 }
+select:hover { background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
 
 .error, .login-error {
   color: var(--aatvaring);
