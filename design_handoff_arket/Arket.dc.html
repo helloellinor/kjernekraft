@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+@font-face { font-family: "Ubuntu"; src: url("fonts/Ubuntu-R.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Ubuntu"; src: url("fonts/Ubuntu-M.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Ubuntu"; src: url("fonts/Ubuntu-B.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Ubuntu Condensed"; src: url("fonts/Ubuntu-C.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Ubuntu Mono"; src: url("fonts/UbuntuMono-R.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Union Gothic"; src: url("fonts/UnionGothic-Variable.woff2") format("woff2-variations"), url("fonts/UnionGothic-Variable.woff2") format("woff2"); font-weight: 400 1000; font-stretch: 50% 200%; font-display: swap; }
+
+:root, [data-theme="light"] {
+  --ark: #edeeea; --ark-djup: #e4e6e1; --flate: #f5f6f3;
+  --blekk: #1c1f1b; --blekk-lys: #565b54; --blekk-svakt: #868b83;
+  --haarlina: #cfd2cb; --kant: #bec2b9;
+  --togu: #d6006e; --klas: #00908c; --tuneup: #6d2e9e;
+  --merke: var(--klas); --merke-lys: #00a8a2;
+  --merke-svak: color-mix(in srgb, var(--klas) 12%, var(--ark));
+  --togu-svak: color-mix(in srgb, var(--togu) 12%, var(--ark));
+  --tuneup-svak: color-mix(in srgb, var(--tuneup) 12%, var(--ark));
+  --aatvaring: #8c3a2b; --aatvaring-svak: #f0e0dc;
+  --glodkjerne: color-mix(in srgb, var(--merke) 72%, #000);
+  --faneflate: color-mix(in srgb, var(--blekk) 6%, var(--ark));
+  --glans: color-mix(in srgb, #fff 55%, transparent);
+  --glans-svak: color-mix(in srgb, #fff 14%, transparent);
+  --ned: #000; --upp: #fff;
+  --lippe-djup: color-mix(in srgb, var(--ned) 22%, transparent);
+  --lippe-ljos: color-mix(in srgb, var(--upp) 55%, transparent);
+  --skugge-flytande: 0 6px 20px rgb(28 31 27 / .14);
+}
+[data-theme="dark"] {
+  --ark: #161815; --ark-djup: #101210; --flate: #1d201c;
+  --blekk: #e2e5dd; --blekk-lys: #9aa094; --blekk-svakt: #6f756a;
+  --haarlina: #32362f; --kant: #3d423a;
+  --togu: #ff5fa8; --klas: #2fd6c6; --tuneup: #b085f5;
+  --merke: var(--klas); --merke-lys: #6ae4d8;
+  --merke-svak: color-mix(in srgb, var(--klas) 18%, var(--ark));
+  --togu-svak: color-mix(in srgb, var(--togu) 18%, var(--ark));
+  --tuneup-svak: color-mix(in srgb, var(--tuneup) 18%, var(--ark));
+  --aatvaring: #d08574; --aatvaring-svak: #2b1c18;
+  --glodkjerne: color-mix(in srgb, var(--merke) 22%, #fff);
+  --glans: color-mix(in srgb, #fff 20%, transparent);
+  --glans-svak: color-mix(in srgb, #fff 7%, transparent);
+  --lippe-djup: color-mix(in srgb, var(--ned) 40%, transparent);
+  --lippe-ljos: color-mix(in srgb, var(--upp) 26%, transparent);
+  --skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
+}
+
+:root {
+  --rom-1: .25rem; --rom-2: .5rem; --rom-3: .75rem;
+  --rom-4: 1rem; --rom-5: 1.5rem; --rom-6: 2rem; --rom-7: 3rem;
+  --vidd-tittel: 125%; --vidd-yver: 105%; --vidd-leiding: 90%; --vidd-merkelapp: 68%;
+  --skrift-yver: "Union Gothic", "Ubuntu Condensed", "Ubuntu", ui-sans-serif, sans-serif;
+  --skrift: "Ubuntu", ui-sans-serif, system-ui, sans-serif;
+  --skrift-tal: "Ubuntu Mono", ui-monospace, Menlo, monospace;
+  --rund: 2px; --rund-knapp: 999px;
+  --knapp-loddrett: .34rem;
+  --tittel: clamp(2rem, 5vw, 3.4rem); --bolktittel: 1.65rem; --korttittel: 1.25rem;
+  --skraakant: inset 0 1px 2px var(--lippe-djup), inset 0 -1px 1px var(--lippe-ljos);
+  --skraakant-djup: inset 0 2px 2px -1px var(--lippe-djup), inset 0 -2px 1px -1px var(--lippe-ljos);
+  --knappedjup: inset 0 1px 0 var(--glans), inset 0 -1px 1px color-mix(in srgb, #fff 40%, transparent), inset 0 -3px 4px -2px color-mix(in srgb, var(--blekk) 13%, transparent), 0 1px 2px color-mix(in srgb, var(--blekk) 15%, transparent);
+}
+/* Den tette trappa er ikkje mindre skrift — ho er tettare rom og ei jamn
+   trapp. Steget er e^¼ = 1,284, og toppen er e rem: 1 → 1,284 → 1,649 →
+   2,118 → 2,718. Eit tal som er rekna av seg sjølv driv ikkje. */
+[data-skala="tett"] {
+  --rom-5: 1.25rem; --rom-6: 1.5rem; --rom-7: 2rem;
+  --tittel: clamp(2.718rem, 5vw, 3.49rem); --bolktittel: 1.649rem; --korttittel: 1.284rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+:where(body *) { min-width: 0; }
+:where(p, li, td, th, dt, dd, label, h1, h2, h3, h4) { overflow-wrap: break-word; text-wrap: pretty; }
+body { margin: 0; background: var(--ark); color: var(--blekk); font: 400 17px/1.55 var(--skrift); -webkit-font-smoothing: antialiased; }
+a { color: var(--merke); text-decoration-thickness: 1px; text-underline-offset: .16em; }
+a:hover { color: var(--merke-lys); }
+[data-sidenav][aria-current="true"] { color: var(--blekk); border-left-color: var(--merke); }
+[data-fane][aria-selected="true"] { padding-top: calc(var(--rom-2) + 2px); background: var(--flate); color: var(--blekk); box-shadow: none; }
+:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
+</style>
+</helmet>
+
+<div data-theme="{{ tema }}" data-skala="{{ skala }}" style="display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); min-height: 100vh; background: var(--ark); color: var(--blekk)">
+
+  <nav style="border-right: 1px solid var(--haarlina); padding: var(--rom-6) 0 var(--rom-7); position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; gap: var(--rom-5)">
+    <div style="display: flex; align-items: center; gap: var(--rom-2); padding: 0 var(--rom-5)">
+      <span style="width: 2.118rem; height: 2.118rem; flex: none; background: currentColor; color: var(--klas); -webkit-mask: url('img/kjernekraft.svg') center / contain no-repeat; mask: url('img/kjernekraft.svg') center / contain no-repeat"></span>
+      <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: 2.118rem; font-weight: 500; letter-spacing: -.01em; line-height: 1">Arket</span>
+    </div>
+    <p style="margin: 0 var(--rom-5); padding: var(--rom-3); background: var(--flate); border: 1px solid var(--haarlina); border-radius: var(--rund); font-size: .8rem; line-height: 1.45; color: var(--blekk-lys)">Stilboki for Kjernekraft, med komponentane teikna av dei same tokeni.</p>
+
+    <div style="display: flex; flex-direction: column; gap: var(--rom-1)">
+      <sc-for list="{{ grunnlag }}" as="s" hint-placeholder-count="7">
+        <button type="button" data-sidenav="1" aria-current="{{ s.no }}" onClick="{{ s.vel }}" style="text-align: left; font: inherit; font-size: 1.02rem; background: none; border: 0; border-left: 2px solid transparent; color: var(--blekk-lys); padding: .3rem var(--rom-5); cursor: pointer" style-hover="color: var(--blekk)">{{ s.namn }}</button>
+      </sc-for>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: var(--rom-1); padding-top: var(--rom-4); border-top: 1px solid var(--haarlina); margin: 0 var(--rom-5)">
+      <sc-for list="{{ praksis }}" as="s" hint-placeholder-count="4">
+        <button type="button" data-sidenav="1" aria-current="{{ s.no }}" onClick="{{ s.vel }}" style="text-align: left; font: inherit; font-size: 1.02rem; background: none; border: 0; border-left: 2px solid transparent; color: var(--blekk-lys); padding: .3rem var(--rom-5); cursor: pointer" style-hover="color: var(--blekk)">{{ s.namn }}</button>
+      </sc-for>
+    </div>
+
+    <div style="margin-top: auto; padding: var(--rom-5) var(--rom-5) 0; border-top: 1px solid var(--haarlina); display: flex; flex-direction: column; gap: var(--rom-2)">
+      <button type="button" onClick="{{ byteTema }}" style="font-family: var(--skrift); font-size: .9rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid var(--kant); border-radius: var(--rund-knapp); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, transparent 72%), linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--blekk) 7%, var(--flate)) 100%); box-shadow: var(--knappedjup); color: var(--blekk); cursor: pointer">{{ temaknapp }}</button>
+      <span style="font-size: .72rem; color: var(--blekk-svakt); font-family: var(--skrift-tal)">skala: {{ skala }}</span>
+    </div>
+  </nav>
+
+  <main style="padding: var(--rom-7) var(--rom-6) var(--rom-7); max-width: 62rem; width: 100%">
+
+  <sc-if value="{{ pPrinsipp }}" hint-placeholder-val="{{ true }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Prinsippi</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Seks lover. Kvar av dei er skrivi so ho kann prøvast, og kvar av dei ber ei grunngjeving — held ikkje grunngjevingi, er det lovi som skal skrivast um.</p>
+    </header>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: var(--rom-4)">
+      <sc-for list="{{ lover }}" as="l" hint-placeholder-count="6">
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-radius: var(--rund); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-2)">
+          <span style="font-family: var(--skrift-tal); font-size: .78rem; color: var(--blekk-svakt)">{{ l.nr }}</span>
+          <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--korttittel); font-weight: 500">{{ l.tittel }}</h3>
+          <p style="margin: 0; font-size: .92rem; color: var(--blekk-lys)">{{ l.kva }}</p>
+        </div>
+      </sc-for>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Kvar tingi bur</h2>
+      <dl style="margin: 0; display: grid; grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); gap: var(--rom-2) var(--rom-5); font-size: .93rem">
+        <dt style="font-family: var(--skrift-tal); color: var(--blekk)">static/css/kjernekraft.css</dt>
+        <dd style="margin: 0; color: var(--blekk-lys)">alle tokeni og alle komponentane. Eitt stilark, ingi anna.</dd>
+        <dt style="font-family: var(--skrift-tal); color: var(--blekk)">/arket</dt>
+        <dd style="margin: 0; color: var(--blekk-lys)">verkstaden i appen: komponentane teikna av den <em>same</em> koden som sidone brukar.</dd>
+        <dt style="font-family: var(--skrift-tal); color: var(--blekk)">docs/DESIGN_GUIDELINES.md</dt>
+        <dd style="margin: 0; color: var(--blekk-lys)">grunngjevingane i lang form. Denne boki er kortforma av henne.</dd>
+        <dt style="font-family: var(--skrift-tal); color: var(--blekk)">locales/{nn,nb,en}</dt>
+        <dd style="margin: 0; color: var(--blekk-lys)">kvar streng brukaren ser. Hardkoda tekst er ein feil.</dd>
+      </dl>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Denne utgaava</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Fire ting er nye, og alle fire er <em>framlegg</em> — dei stend i <a href="#" onClick="{{ tilEndring }}">Endringar</a> med tal og grunn: ei tettare trapp, ei sidebygging der regelen kjem fyre prøva, hovudknappen som segjer tvo ting, og daudt som skal ut. Fargar og skrifter er ikkje rørde.</p>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pFarge }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Farge</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Alle fargar stend i <code style="font-family: var(--skrift-tal)">:root</code> og ingen annan stad. Fargen segjer <em>kva</em>; forma segjer <em>korleis</em>. Dei ligg paa kvar sin kanal og kolliderer difor aldri.</p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Paletten, baae tema</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: var(--rom-4)">
+        <div data-theme="light" style="background: var(--ark); color: var(--blekk); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-3)">
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--blekk-svakt)">ljost</span>
+          <sc-for list="{{ fargar }}" as="f" hint-placeholder-count="12">
+            <div style="display: grid; grid-template-columns: 1.6rem minmax(0, 9rem) minmax(0, 1fr); align-items: center; gap: var(--rom-3); font-size: .82rem">
+              <i style="height: 1.1rem; border: 1px solid var(--haarlina); background: {{ f.verd }}"></i>
+              <b style="font-family: var(--skrift-tal); font-weight: 400">{{ f.token }}</b>
+              <span style="color: var(--blekk-lys)">{{ f.kva }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div data-theme="dark" style="background: var(--ark); color: var(--blekk); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-3)">
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--blekk-svakt)">myrkt</span>
+          <sc-for list="{{ fargar }}" as="f" hint-placeholder-count="12">
+            <div style="display: grid; grid-template-columns: 1.6rem minmax(0, 9rem) minmax(0, 1fr); align-items: center; gap: var(--rom-3); font-size: .82rem">
+              <i style="height: 1.1rem; border: 1px solid var(--haarlina); background: {{ f.verd }}"></i>
+              <b style="font-family: var(--skrift-tal); font-weight: 400">{{ f.token }}</b>
+              <span style="color: var(--blekk-lys)">{{ f.kva }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Kva fargen tyder</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Dei tri produktfargane er tekne av tingi som ligg i salen. Ein komponent tek fargen gjenom <code style="font-family: var(--skrift-tal)">--produkt</code> og aldri beinveges.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: var(--rom-4)">
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--klas); padding: var(--rom-4); display: flex; flex-direction: column; gap: var(--rom-1)">
+          <b style="font-family: var(--skrift-tal); font-weight: 400; font-size: .85rem; color: var(--klas)">--klas</b>
+          <span style="font-size: .93rem">medlemskapet</span>
+          <span style="font-size: .85rem; color: var(--blekk-lys)">det som gjeng og gjeng. Er ogso <code style="font-family: var(--skrift-tal)">--merke</code>.</span>
+        </div>
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--togu); padding: var(--rom-4); display: flex; flex-direction: column; gap: var(--rom-1)">
+          <b style="font-family: var(--skrift-tal); font-weight: 400; font-size: .85rem; color: var(--togu)">--togu</b>
+          <span style="font-size: .93rem">klippekortet</span>
+          <span style="font-size: .85rem; color: var(--blekk-lys)">det som vert talt.</span>
+        </div>
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--tuneup); padding: var(--rom-4); display: flex; flex-direction: column; gap: var(--rom-1)">
+          <b style="font-family: var(--skrift-tal); font-weight: 400; font-size: .85rem; color: var(--tuneup)">--tuneup</b>
+          <span style="font-size: .93rem">kurs, PT, rettleiding</span>
+          <span style="font-size: .85rem; color: var(--blekk-lys)">det som hender ein gong.</span>
+        </div>
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--aatvaring); padding: var(--rom-4); display: flex; flex-direction: column; gap: var(--rom-1)">
+          <b style="font-family: var(--skrift-tal); font-weight: 400; font-size: .85rem; color: var(--aatvaring)">--aatvaring</b>
+          <span style="font-size: .93rem">ugjenkalleg</span>
+          <span style="font-size: .85rem; color: var(--blekk-lys)">er ikkje ein av dei tri: vart han det, tydde ein farge tvo ting.</span>
+        </div>
+      </div>
+      <pre style="margin: 0; font-family: var(--skrift-tal); font-size: .82rem; background: var(--ark-djup); border: 1px solid var(--haarlina); padding: var(--rom-4); white-space: pre-wrap; color: var(--blekk-lys)">.membership-card { --produkt: var(--klas); }
+.klippekort-card { --produkt: var(--togu); }
+.kurskort       { --produkt: var(--tuneup); }</pre>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Tri tilstandar, alltid alle tri</h2>
+      <pre style="margin: 0; font-family: var(--skrift-tal); font-size: .82rem; background: var(--ark-djup); border: 1px solid var(--haarlina); padding: var(--rom-4); white-space: pre-wrap; color: var(--blekk-lys)">:root                                                     /* ljos: heile paletten */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }
+:root[data-theme="dark"]                                   /* dei same tokeni ein gong til */</pre>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Ein farge som berre stend inne i eit media- eller <code style="font-family: var(--skrift-tal)">[data-theme]</code>-blokk gjeld aldri i den ustempla tilstanden — og det er den tilstanden dei fleste ser. Rekna token stend éin gong: <code style="font-family: var(--skrift-tal)">--faneflate</code> er <code style="font-family: var(--skrift-tal)">color-mix</code> av blekket og arket og fylgjer difor temaet sjølv.</p>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Prøva: <code style="font-family: var(--skrift-tal)">grep -rn 'style="[^"]*#' handlers/templates/</code> skal gjeva ingen ting.</p>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pSkrift }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Skrift</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Union Gothic ber yverskriftene, Ubuntu ber lesetekst, Ubuntu Mono ber tal som skal staa i kolonne. Alle er sjølvvertsette. Ikkje eit einaste kall ut paa netet.</p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Breiddi tyder rang</h2>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-4)">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--rom-4)"><span style="font-family: var(--skrift-yver); font-stretch: 125%; font-size: 2.1rem; font-weight: 700">Kvar du er</span><small style="font-family: var(--skrift-tal); font-size: .78rem; color: var(--blekk-svakt)">--vidd-tittel · 125%</small></div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--rom-4)"><span style="font-family: var(--skrift-yver); font-stretch: 105%; font-size: 1.65rem; font-weight: 500">Yverskrift i sida</span><small style="font-family: var(--skrift-tal); font-size: .78rem; color: var(--blekk-svakt)">--vidd-yver · 105%</small></div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--rom-4)"><span style="font-family: var(--skrift-yver); font-stretch: 90%; font-size: 1.15rem">Leidingi paa sida</span><small style="font-family: var(--skrift-tal); font-size: .78rem; color: var(--blekk-svakt)">--vidd-leiding · 90%</small></div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--rom-4)"><span style="font-family: var(--skrift-yver); font-stretch: 68%; font-size: .78rem; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-svakt)">Merkelapp</span><small style="font-family: var(--skrift-tal); font-size: .78rem; color: var(--blekk-svakt)">--vidd-merkelapp · 68%</small></div>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Det vidaste stend øvst og det smalaste nedst, so ein ser kva som er kva fyre ein hev lese eit ord. Ein merkelapp skal ikkje taka meir plass enn han er verd.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Rangstigen</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Steget fylgjer djupni i dokumentet; utsjaanaden kjem av rolleklassa. Dei tvo skal aldri veljast kvar for seg. Éin <code style="font-family: var(--skrift-tal)">h1</code> per sida, alltid éin.</p>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5)">
+        <div style="font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; line-height: 1.02; letter-spacing: -.01em; margin-bottom: var(--rom-6)">Timeplanen</div>
+        <div style="font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2); margin-bottom: var(--rom-4)">Denne veka</div>
+        <div style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--blekk-svakt); margin-bottom: var(--rom-3)">Maandag</div>
+        <div style="display: flex; justify-content: space-between; gap: var(--rom-4); padding: var(--rom-2) 0; border-bottom: 1px solid var(--haarlina)"><span style="font-size: .9rem; color: var(--blekk-lys)">Lærar</span><span style="font-family: var(--skrift-tal); font-size: .95rem">Gry</span></div>
+        <div style="display: flex; justify-content: space-between; gap: var(--rom-4); padding: var(--rom-2) 0"><span style="font-size: .9rem; color: var(--blekk-lys)">Rom</span><span style="font-family: var(--skrift-tal); font-size: .95rem">Salen</span></div>
+      </div>
+      <table style="border-collapse: collapse; width: 100%; table-layout: fixed; font-size: .9rem">
+        <thead><tr>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Steg</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Rolla</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Klasse</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{ rangstigen }}" as="r" hint-placeholder-count="4">
+            <tr>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); font-family: var(--skrift-tal); vertical-align: top">{{ r.steg }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); color: var(--blekk-lys); vertical-align: top">{{ r.rolla }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); font-family: var(--skrift-tal); vertical-align: top">{{ r.klasse }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Tal og lisens</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Tal som stend under kvarandre ber <code style="font-family: var(--skrift-tal)">--skrift-tal</code> og <code style="font-family: var(--skrift-tal)">font-variant-numeric: tabular-nums</code>, elles dansar kolonna. Union Gothic er mellombils — fila er CC BY-NC-ND og ligg i <code style="font-family: var(--skrift-tal)">.gitignore</code>; manglar ho, fell alt attende paa Ubuntu Condensed av seg sjølv, og byte av skrift er éi <code style="font-family: var(--skrift-tal)">@font-face</code>-blokk.</p>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); font-family: var(--skrift-tal); font-variant-numeric: tabular-nums; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--rom-2) var(--rom-5); font-size: 1.05rem">
+        <span>690 kr</span><span>7 av 10</span><span>17:30</span>
+        <span>1 190 kr</span><span>18 av 18</span><span>09:00</span>
+      </div>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pRom }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Rom &amp; rutenet</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Éi trapp, so ingen finn paa 13&nbsp;px. Lovi attum: romet utanfor ein ting er alltid større enn romet inni honom. Det er slik auga ser kva som høyrer saman utan vegger.</p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Trappa</h2>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-3)">
+        <sc-for list="{{ romtrappa }}" as="r" hint-placeholder-count="7">
+          <div style="display: grid; grid-template-columns: 6rem 3.5rem minmax(0, 1fr); align-items: center; gap: var(--rom-4); font-size: .85rem">
+            <span style="font-family: var(--skrift-tal); color: var(--blekk)">{{ r.token }}</span>
+            <span style="font-family: var(--skrift-tal); color: var(--blekk-svakt); text-align: right">{{ r.verd }}</span>
+            <span style="display: flex; align-items: center; gap: var(--rom-3)"><i style="height: .6rem; background: var(--merke); width: {{ r.verd }}"></i><span style="color: var(--blekk-lys)">{{ r.tyder }}</span></span>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Komponenten ber ikkje rom sjølv; foreldra set gapet. Ein komponent med eigen margin veit kvar han stend, og daa kann han ikkje flytta paa seg.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Ingen rullestenger</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Sidelengs rulling er forbode. Ei side rullar ned, og ikkje til sidone. Naar noko ikkje fær plass, er svaret eitt av desse:</p>
+      <table style="border-collapse: collapse; width: 100%; table-layout: fixed; font-size: .9rem">
+        <thead><tr>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">I staden for</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Gjer</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{ ikkjerulla }}" as="r" hint-placeholder-count="4">
+            <tr>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); color: var(--blekk-lys); vertical-align: top">{{ r.a }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); vertical-align: top">{{ r.b }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <pre style="margin: 0; font-family: var(--skrift-tal); font-size: .82rem; background: var(--ark-djup); border: 1px solid var(--haarlina); padding: var(--rom-4); white-space: pre-wrap; color: var(--blekk-lys)">:where(body *) { min-width: 0; }                     /* elles renn rutenetet ut */
+:where(p, li, td, th, label, h1, h2, h3, h4) { overflow-wrap: break-word; }</pre>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem"><code style="font-family: var(--skrift-tal)">min-width: 0</code> er den som vert gløymd: eit rute- eller flexbarn hev <code style="font-family: var(--skrift-tal)">min-width: auto</code> som standard og nektar aa verta smalare enn innhaldet sitt.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Eitt lag</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Millom arket og innhaldet ligg høgst éin maala boks. Det som skil tvo bolkar er rom, ikkje vegger. Og ein div skal anten maala eller leggja ut — hev han korkje bakgrunn, kant, fyll, flex eller rute, er han att fraa eit gamalt stilark og skal burt.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: var(--rom-4)">
+        <div style="border: 1px solid var(--haarlina); background: var(--flate); padding: var(--rom-4)">
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--merke)">rett</span>
+          <div style="margin-top: var(--rom-3); font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: 1.1rem; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Bolken</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--rom-4); margin-top: var(--rom-4)">
+            <div style="background: var(--ark); border: 1px solid var(--haarlina); height: 3rem"></div>
+            <div style="background: var(--ark); border: 1px solid var(--haarlina); height: 3rem"></div>
+          </div>
+        </div>
+        <div style="border: 1px solid var(--haarlina); background: var(--flate); padding: var(--rom-4)">
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--aatvaring)">gale</span>
+          <div style="margin-top: var(--rom-3); border: 1px solid var(--kant); padding: var(--rom-3); background: var(--ark-djup)">
+            <div style="border: 1px solid var(--kant); padding: var(--rom-3); background: var(--flate)">
+              <div style="background: var(--ark); border: 1px solid var(--haarlina); height: 3rem"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pLjos }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Ljos &amp; djupn</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Arket er flatt. Ting paa arket er det ikkje. Ljoset kjem ovanfraa — det er den eine regelen ein aldri bryt, av di eit einaste skeivt drag segjer at ljoset stend ein annan stad, og daa maa alt anna verta samde um kva veg.</p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Kva ljoset gjer</h2>
+      <table style="border-collapse: collapse; width: 100%; table-layout: fixed; font-size: .9rem">
+        <thead><tr>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Ting</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Kva ljoset gjer</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Token</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{ djupni }}" as="d" hint-placeholder-count="5">
+            <tr>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); vertical-align: top">{{ d.ting }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); color: var(--blekk-lys); vertical-align: top">{{ d.kva }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); font-family: var(--skrift-tal); font-size: .82rem; vertical-align: top">{{ d.token }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Dei fire formene</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: var(--rom-4)">
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-3)">
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--blekk-svakt)">grøft — feltet</span>
+          <input type="text" value="Anna Bakken" style="font: inherit; font-size: .93rem; padding: var(--rom-2) var(--rom-3); background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate)); color: var(--blekk); border: 0; border-radius: var(--rund); width: 100%; box-shadow: var(--skraakant)" />
+        </div>
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-3)">
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--blekk-svakt)">kvelv — knappen</span>
+          <button type="button" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid var(--kant); border-radius: var(--rund-knapp); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 62%, transparent) 20%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%), linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--blekk) 7%, var(--flate)) 62%, color-mix(in srgb, var(--blekk) 3%, var(--flate)) 100%); box-shadow: var(--knappedjup); color: var(--blekk); cursor: pointer">Endra</button>
+        </div>
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-3)">
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--blekk-svakt)">hòl — tom dag</span>
+          <div style="height: 2.6rem; background: color-mix(in srgb, var(--blekk) 6%, transparent); border-radius: var(--rund); box-shadow: var(--skraakant-djup)"></div>
+        </div>
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-3)">
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--blekk-svakt)">kjelda — ljosbandet</span>
+          <div style="position: relative; height: 2.6rem; display: flex; align-items: center">
+            <div style="position: absolute; left: 0; right: 0; top: 50%; height: 34px; transform: translateY(-50%); background: radial-gradient(ellipse 40% 60% at 50% 50%, var(--glodkjerne) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 50% 50%, color-mix(in srgb, var(--merke) 55%, transparent) 0%, transparent 72%), radial-gradient(ellipse 90% 90% at 50% 50%, color-mix(in srgb, var(--merke) 16%, transparent) 0%, transparent 80%)"></div>
+            <div style="position: relative; width: 100%; height: 3px; background: linear-gradient(to bottom, var(--haarlina) 0 1px, transparent 1px 2px, var(--haarlina) 2px 3px)"></div>
+          </div>
+        </div>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Kortet stend ikkje i lista: paa flatt papir hender ingen ting. Fallskugge finst i éi utgaava, <code style="font-family: var(--skrift-tal)">--skugge-flytande</code>, og han er berre til det som faktisk flyt — ei nedfallsliste, ein dialog.</p>
+      <div style="border: 1px solid var(--kant); border-left: 3px solid var(--merke); background: var(--flate); padding: var(--rom-4) var(--rom-5); max-width: 62ch">
+        <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--merke)">lovi um ljos</span>
+        <p style="margin: var(--rom-2) 0 0; font-size: .95rem"><b style="font-weight: 500">Ljosbandet skal alltid diffundera heilt ut or divet sitt.</b> Ljos stoggar ikkje ved ei kanta — ein glød som vert kutta av ein kant er ikkje ljos lenger, han er ein maala boks. Difor: ingen <code style="font-family: var(--skrift-tal)">overflow: hidden</code> og ingi <code style="font-family: var(--skrift-tal)">isolation</code>-lag kring eit ljos, ingen <code style="font-family: var(--skrift-tal)">z-index: -1</code> som legg glødi under kortet, og kvart lag skal falla til gjenomsynleg <em>innanfor</em> si eigi kassa — ein gradient paa <code style="font-family: var(--skrift-tal)">150%</code> av kassa naar kanten med farge att og stend som ei rett lina. Kassa aat glødi er større enn bandet med vilje: 13 pikslar yver og under ei lina paa tvo.</p>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Retning, ikkje farge</h2>
+      <pre style="margin: 0; font-family: var(--skrift-tal); font-size: .82rem; background: var(--ark-djup); border: 1px solid var(--haarlina); padding: var(--rom-4); white-space: pre-wrap; color: var(--blekk-lys)">--ned: #000;  --upp: #fff;              /* tyngdi snur ikkje naar fargane gjer det */
+--lippe-djup: color-mix(in srgb, var(--ned) 22%, transparent);   /* 40% i myrkt */
+--lippe-ljos: color-mix(in srgb, var(--upp) 55%, transparent);   /* 26% i myrkt */
+--glans:      color-mix(in srgb, #fff 55%, transparent);         /* 20% i myrkt */</pre>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Tali er maalte, ikkje gjetta: 55&nbsp;% kvitt paa ei mest svart flate gjev ΔL&nbsp;+0,318 mot +0,073 i det ljose, og 26&nbsp;% gjev +0,093 — same lippa, ikkje ei sterkare.</p>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pKomp }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Komponentar</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Kvar komponent stend her med regelen sin, prøva og klassenamni. Prøvone er teikna av dei same tokeni som stilarket, so ser du noko rart her, ser ein brukar det same.</p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Knappen</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Ein kapsel, ikkje eit avrunda rektangel. Éi hovudhandling per skjerm. Røysta er eit verb i setningsform — «Lag timen», ikkje «LAG TIMEN» — og ljoset fell paa kvelvi ovanfraa: glim øvst, myrkare mot foten, og trykt snur det.</p>
+      <div style="border: 1px solid var(--kant); border-left: 3px solid var(--aatvaring); background: var(--flate); padding: var(--rom-4) var(--rom-5); max-width: 62ch">
+        <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--aatvaring)">drift — tvo kjelder segjer ulikt</span>
+        <p style="margin: var(--rom-2) 0 0; font-size: .93rem; color: var(--blekk-lys)">Stilboki §18 segjer at hovudknappen ber fargen i <em>lina og i ordet</em> og aldri i flata: «ein raud klump dreg auga fraa alt anna» — og ein turkis klump gjer det same. <code style="font-family: var(--skrift-tal)">static/css/kjernekraft.css</code> fyller honom likevel med <code style="font-family: var(--skrift-tal)">--merke-lys</code> → <code style="font-family: var(--skrift-tal)">--merke</code>. Prøva ovanfor er teikna av <em>koden</em>, so det du ser er det brukaren ser. Kva som gjeld, er ikkje avgjort: sjaa <a href="#" onClick="{{ tilEndring }}">Endringar §3</a>.</p>
+      </div>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-wrap: wrap; gap: var(--rom-3); align-items: center">
+        <button type="button" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid color-mix(in srgb, var(--merke) 70%, var(--blekk)); border-radius: var(--rund-knapp); color: var(--flate); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 62%, transparent) 20%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%), linear-gradient(to bottom, color-mix(in srgb, var(--merke-lys) 84%, #fff) 0%, var(--merke-lys) 46%, var(--merke) 100%); box-shadow: var(--knappedjup); cursor: pointer">Meld paa</button>
+        <button type="button" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid var(--kant); border-radius: var(--rund-knapp); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 62%, transparent) 20%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%), linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--blekk) 7%, var(--flate)) 62%, color-mix(in srgb, var(--blekk) 3%, var(--flate)) 100%); box-shadow: var(--knappedjup); color: var(--blekk); cursor: pointer" style-hover="border-color: var(--merke); color: var(--merke)">Endra</button>
+        <button type="button" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid var(--aatvaring); border-radius: var(--rund-knapp); color: var(--aatvaring); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, transparent 72%), linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--aatvaring) 9%, var(--flate)) 100%); box-shadow: var(--knappedjup); cursor: pointer" style-hover="background: var(--aatvaring-svak)">Sei upp</button>
+        <button type="button" disabled="disabled" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid var(--haarlina); border-radius: var(--rund-knapp); color: var(--blekk-svakt); background: none; box-shadow: none; cursor: not-allowed">Fullt</button>
+      </div>
+      <pre style="margin: 0; font-family: var(--skrift-tal); font-size: .82rem; background: var(--ark-djup); border: 1px solid var(--haarlina); padding: var(--rom-4); white-space: pre-wrap; color: var(--blekk-lys)">.btn-primary   fyllt --merke-lys → --merke (koden i dag) — éi per skjerm
+.btn           --kant / --blekk / --flate
+.btn-danger    --aatvaring i line og ord, inga flate
+:disabled      ingen glans, ingen skugge, ingi djupn
+button:not([class])  ber skrifti rundt seg og ingen ting meir</pre>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Livsmerket</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Fargen tyder «dette er i live». Alt anna er form: open ring ventar, strek er frose, prikka er utgjenge. Difor les rekkja seg like godt i graatt. Klassenamni er dei basen brukar.</p>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-wrap: wrap; gap: var(--rom-6)">
+        <span style="display: inline-flex; align-items: center; gap: var(--rom-2); font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; letter-spacing: .09em; text-transform: uppercase; color: var(--merke)"><i style="width: .5rem; height: .5rem; border-radius: 50%; border: 1px solid currentColor; background: currentColor"></i>Aktiv</span>
+        <span style="display: inline-flex; align-items: center; gap: var(--rom-2); font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; letter-spacing: .09em; text-transform: uppercase; color: var(--merke)"><i style="width: .5rem; height: .5rem; border-radius: 50%; border: 1px solid currentColor; background: none"></i>Ventar</span>
+        <span style="display: inline-flex; align-items: center; gap: var(--rom-2); font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys)"><i style="width: .7rem; height: 1px; background: currentColor"></i>Frose</span>
+        <span style="display: inline-flex; align-items: center; gap: var(--rom-2); font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-svakt)"><i style="width: .5rem; height: .5rem; border-radius: 50%; border: 1px dotted currentColor; background: none"></i>Utgjenge</span>
+      </div>
+      <pre style="margin: 0; font-family: var(--skrift-tal); font-size: .82rem; background: var(--ark-djup); border: 1px solid var(--haarlina); padding: var(--rom-4); white-space: pre-wrap; color: var(--blekk-lys)">.status-active           fylt merke i --produkt
+.status-freeze_requested open ring i --produkt
+.status-paused           strek i --blekk-lys
+.status-cancelled        prikka ring i --blekk-svakt</pre>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Kortet</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Éin definisjon: flate, hårline, <code style="font-family: var(--skrift-tal)">--rund</code>, fyll <code style="font-family: var(--skrift-tal)">--rom-5</code>. Eit kort som <em>er</em> noko fær ei lina i produktfargen langs vinstre kanten — éi lina, ikkje ei ramme, og kortet flyttar seg ikkje naar ho kjem.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: var(--rom-4)">
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-radius: var(--rund); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-2)">
+          <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--korttittel); font-weight: 500">Halvaars</h3>
+          <p style="margin: 0; font-size: .92rem; color: var(--blekk-lys)">Fri tilgang til alle timar i salen.</p>
+          <div style="font-family: var(--skrift-tal); font-size: 1.5rem; letter-spacing: -.02em; font-variant-numeric: tabular-nums">690 kr/md</div>
+          <div style="font-size: .85rem; color: var(--blekk-lys)">6 maanaders binding</div>
+        </div>
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--klas); border-radius: var(--rund); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-2)">
+          <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--korttittel); font-weight: 500">Aars</h3>
+          <p style="margin: 0; font-size: .92rem; color: var(--blekk-lys)">Det same, eit heilt aar.</p>
+          <div style="font-family: var(--skrift-tal); font-size: 1.5rem; letter-spacing: -.02em; font-variant-numeric: tabular-nums">590 kr/md</div>
+          <div style="display: inline-flex; align-items: center; gap: var(--rom-2); font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; letter-spacing: .09em; text-transform: uppercase; color: var(--klas)"><i style="width: .5rem; height: .5rem; border-radius: 50%; background: currentColor"></i>Aktiv</div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Medlemskapet</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Fire stoder, og vengen segjer kva slag: heil lina i produktfargen naar det gjeng, stipla naar det ventar paa svar, graa naar det er frose eller sagt upp. Fargen tyder «i live»; forma tyder kva slags ikkje-liv.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: var(--rom-4)">
+        <div style="--produkt: var(--klas); background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--produkt); border-radius: var(--rund); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-2)">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: var(--rom-3)">
+            <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--korttittel); font-weight: 500">Aarskort</h3>
+            <span style="display: inline-flex; align-items: center; gap: var(--rom-2); font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; color: var(--produkt)"><i style="width: .5rem; height: .5rem; border-radius: 50%; background: currentColor"></i>Aktiv</span>
+          </div>
+          <div><span style="font-family: var(--skrift-tal); font-size: 1.5rem; letter-spacing: -.02em; font-variant-numeric: tabular-nums">590</span> <span style="font-size: .85rem; color: var(--blekk-lys)">kr/md · 12 maanader</span></div>
+          <div style="font-size: .85rem; color: var(--blekk-lys)">Neste fornying: 1. oktober 2026</div>
+        </div>
+        <div style="--produkt: var(--klas); background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px dashed var(--produkt); border-radius: var(--rund); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-2)">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: var(--rom-3)">
+            <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--korttittel); font-weight: 500">Halvaars</h3>
+            <span style="display: inline-flex; align-items: center; gap: var(--rom-2); font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; color: var(--produkt)"><i style="width: .5rem; height: .5rem; border-radius: 50%; border: 1px solid currentColor"></i>Ventar</span>
+          </div>
+          <div style="font-size: .85rem; color: var(--blekk-lys)">Ventar paa svar fraa studioet</div>
+        </div>
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--kant); border-radius: var(--rund); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-2)">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: var(--rom-3)">
+            <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--korttittel); font-weight: 500">Halvaars</h3>
+            <span style="display: inline-flex; align-items: center; gap: var(--rom-2); font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys)"><i style="width: .7rem; height: 1px; background: currentColor"></i>Frose</span>
+          </div>
+          <div style="font-size: .85rem; color: var(--blekk-lys)">Frose til 1. november 2026</div>
+        </div>
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--haarlina); border-radius: var(--rund); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-2)">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: var(--rom-3)">
+            <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--korttittel); font-weight: 500; color: var(--blekk-lys)">Maanadskort</h3>
+            <span style="display: inline-flex; align-items: center; gap: var(--rom-2); font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-svakt)"><i style="width: .5rem; height: .5rem; border-radius: 50%; border: 1px dotted currentColor"></i>Sagt upp</span>
+          </div>
+          <div style="font-size: .85rem; color: var(--aatvaring)">Gjeng ut 30. september 2026</div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Klippemaalaren</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Eit klippekort er ikkje ei mengd — det er eit tal, so ein tel rutor og maalar ikkje prosent. Eit brukt klipp er ikkje burte, berre ikkje tent: ruta stend der framleis. Det er ljoset som slokknar, ikkje ruta som forsvinn.</p>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--togu); border-radius: var(--rund); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-2)">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: var(--rom-4)">
+          <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--korttittel); font-weight: 500">Reformer</h3>
+          <span style="font-size: .85rem; color: var(--blekk-lys); white-space: nowrap">gjeng ut um 121 dagar</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: var(--rom-5); flex-wrap: wrap">
+          <span style="font-size: .93rem"><b style="font-family: var(--skrift-tal); font-weight: 400; font-size: 1.15rem">{{ tende }}</b> <span style="color: var(--blekk-lys)">av 10 klipp att</span></span>
+          <div style="flex: 1 1 14rem; --klippfarge: var(--togu); --rib: 3px; --alle: 10; --tende: {{ tende }}; display: flex; gap: 3px; height: 2px; margin: var(--rom-5) 0 var(--rom-4); position: relative">
+            <div style="position: absolute; pointer-events: none; left: 0; top: -13px; bottom: -13px; --klippbreidd: calc((100% - (var(--alle) - 1) * var(--rib)) / var(--alle)); width: calc(var(--tende) * var(--klippbreidd) + (var(--tende) - 1) * var(--rib)); background: linear-gradient(to bottom, transparent 46%, color-mix(in srgb, var(--klippfarge) 34%, #fff) 50%, transparent 54%), linear-gradient(to bottom, transparent 36%, color-mix(in srgb, var(--klippfarge) 72%, transparent) 50%, transparent 64%), linear-gradient(to bottom, transparent 16%, color-mix(in srgb, var(--klippfarge) 22%, transparent) 50%, transparent 84%), linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--klippfarge) 9%, transparent) 50%, transparent 100%); -webkit-mask-image: linear-gradient(to right, transparent 0, black 9px, black calc(100% - 9px), transparent 100%); mask-image: linear-gradient(to right, transparent 0, black 9px, black calc(100% - 9px), transparent 100%)"></div>
+            <sc-for list="{{ klippi }}" as="k" hint-placeholder-count="10">
+              <div style="position: relative; flex: 1 1 0; min-width: 2px; height: 2px; background: {{ k.bg }}"></div>
+            </sc-for>
+          </div>
+          <button type="button" onClick="{{ brukKlipp }}" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid var(--kant); border-radius: var(--rund-knapp); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, transparent 72%), linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--blekk) 7%, var(--flate)) 100%); box-shadow: var(--knappedjup); color: var(--blekk); cursor: pointer" style-hover="border-color: var(--merke); color: var(--merke)">{{ klippknapp }}</button>
+        </div>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Lina er 2&nbsp;px og glødi 13&nbsp;px yver og under: det er forholdet millom dei tvo som gjer at det ser ut som ljos. Ribbone skjer lina, ikkje glødi. Glødi er <em>éin</em> ting paa heile bandet, og breiddi hennar er rekna av <code style="font-family: var(--skrift-tal)">--tende</code> — ikkje ein glød per klipp. Under <code style="font-family: var(--skrift-tal)">prefers-reduced-motion</code> er ho slegi av.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Fanone</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Ei fana er eit blad i ei mappa: lina gjeng attum dei lukka og er broti under den opne. Det er brotet som gjer at rekkja les seg som fanor. Den opne fana stikk upp ved at fyllet aukar — teksti flyt ikkje. Valet stend i adressa.</p>
+      <div>
+        <div role="tablist" style="display: flex; align-items: flex-end; gap: .15rem; margin: 0 0 0 var(--rom-2)">
+          <sc-for list="{{ fanor }}" as="f" hint-placeholder-count="3">
+            <button type="button" role="tab" data-fane="1" aria-selected="{{ f.valt }}" onClick="{{ f.vel }}" style="position: relative; z-index: 0; flex: none; padding: var(--rom-2) var(--rom-4); margin-bottom: -1px; border: 1px solid var(--haarlina); border-bottom: 1px solid var(--haarlina); border-radius: 3px 3px 0 0; background: var(--faneflate); background-clip: padding-box; color: var(--blekk-lys); font-family: var(--skrift-yver); font-size: .92rem; font-weight: 500; font-stretch: var(--vidd-merkelapp); letter-spacing: .08em; text-transform: uppercase; cursor: pointer; box-shadow: 0 -2px 5px -3px color-mix(in srgb, var(--blekk) 40%, transparent)">{{ f.namn }}</button>
+          </sc-for>
+        </div>
+        <div style="border: 1px solid var(--haarlina); background: var(--flate); padding: var(--rom-5); position: relative; z-index: 2">
+          <p style="margin: 0; font-size: .95rem; color: var(--blekk-lys)">{{ fanetekst }}</p>
+        </div>
+      </div>
+      <pre style="margin: 0; font-family: var(--skrift-tal); font-size: .82rem; background: var(--ark-djup); border: 1px solid var(--haarlina); padding: var(--rom-4); white-space: pre-wrap; color: var(--blekk-lys)">.faneark { --fanekant: 1px; --fot: 1px; --fotfarge: var(--haarlina); --loft: 2px; }
+/* loftet i heile pikslar; background-clip: padding-box, elles stend ingi fana paa noko */</pre>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Skjema</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Eit skrivefelt strekkjer seg, av di ingen veit kor langt det ein skriv vert. Ein veljar veit det — valdi stend der alt — og er difor so brei som det breidaste valet. Skraakanten segjer «her kann du skriva» og stend paa alle felt heile tidi, ikkje berre i fokus.</p>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-4); max-width: 34rem">
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2)">
+          <label for="p-namn" style="font-size: .88rem; color: var(--blekk-lys)">Namn</label>
+          <input id="p-namn" type="text" value="Anna Bakken" style="font: inherit; padding: var(--rom-2) var(--rom-3); background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate)); color: var(--blekk); border: 0; border-radius: var(--rund); width: 100%; box-shadow: var(--skraakant)" />
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2)">
+          <label for="p-slag" style="font-size: .88rem; color: var(--blekk-lys)">Klassetype</label>
+          <select id="p-slag" style="font: inherit; padding: var(--rom-2) var(--rom-7) var(--rom-2) var(--rom-3); background: var(--flate); color: var(--blekk); border: 1px solid var(--kant); border-radius: var(--rund); width: auto; max-width: 100%; appearance: none; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: right 1.05rem top 50%, right .8rem top 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat">
+            <option>Yoga</option>
+            <option>Pilates</option>
+            <option>Reformer</option>
+          </select>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2)">
+          <label for="p-um" style="font-size: .88rem; color: var(--blekk-lys)">Skildring</label>
+          <textarea id="p-um" rows="2" style="font: inherit; padding: var(--rom-2) var(--rom-3); background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate)); color: var(--blekk); border: 0; border-radius: var(--rund); width: 100%; box-shadow: var(--skraakant)">Roleg time, alle kann vera med.</textarea>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2)">
+          <label for="p-stengd" style="font-size: .88rem; color: var(--blekk-lys)">Eit felt som ikkje kann rørast</label>
+          <input id="p-stengd" type="text" value="Salen" disabled="disabled" style="font: inherit; padding: var(--rom-2) var(--rom-3); background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate)); color: var(--blekk-svakt); border: 0; border-radius: var(--rund); width: 100%; box-shadow: none" />
+        </div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Tabellen og tomrommet</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Ingi rutenetlinor: ei hårline under kvar rad, ei sterkare under yverskrifti. <code style="font-family: var(--skrift-tal)">table-layout: fixed</code>, tekst som bryt, ingi sidelengs rulling. Talspaltone ber taldskrift og stend høgrestilte.</p>
+      <div style="border: 1px solid var(--haarlina); background: var(--flate)">
+        <table style="border-collapse: collapse; width: 100%; table-layout: fixed; font-size: .93rem">
+          <thead><tr>
+            <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .8rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Tittel</th>
+            <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .8rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Lærar</th>
+            <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .8rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: right; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Paamelde</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{ timar }}" as="t" hint-placeholder-count="3">
+              <tr>
+                <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); vertical-align: top">{{ t.tittel }}</td>
+                <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); vertical-align: top; color: var(--blekk-lys)">{{ t.laerar }}</td>
+                <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); vertical-align: top; text-align: right; font-family: var(--skrift-tal); font-variant-numeric: tabular-nums">{{ t.tal }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--rom-4)">
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-radius: var(--rund); color: var(--blekk-svakt); text-align: center; padding: var(--rom-6) var(--rom-4); font-size: .95rem">Ingen timar denne veka</div>
+        <div style="color: var(--blekk-svakt); text-align: center; padding: var(--rom-6) var(--rom-4); font-size: .95rem">Hentar klippekorti …</div>
+        <div style="background: var(--flate); border: 1px solid var(--haarlina); border-radius: var(--rund); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-3); align-items: flex-start">
+          <p style="margin: 0; font-size: .95rem; color: var(--blekk-lys)">Du hev ingen klippekort.</p>
+          <button type="button" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid color-mix(in srgb, var(--merke) 70%, var(--blekk)); border-radius: var(--rund-knapp); color: var(--flate); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, transparent 72%), linear-gradient(to bottom, color-mix(in srgb, var(--merke-lys) 84%, #fff) 0%, var(--merke-lys) 46%, var(--merke) 100%); box-shadow: var(--knappedjup); cursor: pointer">Kjøp klippekort</button>
+        </div>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Tri ulike ting: det som ikkje finst, det som ikkje er kome enno, og det som er tomt av di du ikkje hev kjøpt noko. Berre det siste skal ha ein veg ut av seg.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Merket</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Aatte K-ar i ein ring, teikna som <em>eitt</em> teikn snutt aatte gonger. <code style="font-family: var(--skrift-tal)">.merke</code> er ei maske i <code style="font-family: var(--skrift-tal)">currentColor</code>, ikkje eit bilete: éi fil paa disken, og han fylgjer temaet utan aa skrivast um. Han skal ikkje veksa nokon annan stad enn i hovudet (1,7&nbsp;rem) og paa døri (4&nbsp;rem).</p>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; align-items: flex-end; gap: var(--rom-5)">
+        <span style="width: 1.7rem; height: 1.7rem; background: currentColor; -webkit-mask: url('img/kjernekraft.svg') center / contain no-repeat; mask: url('img/kjernekraft.svg') center / contain no-repeat"></span>
+        <span style="width: 2.5rem; height: 2.5rem; background: currentColor; -webkit-mask: url('img/kjernekraft.svg') center / contain no-repeat; mask: url('img/kjernekraft.svg') center / contain no-repeat"></span>
+        <span style="width: 4rem; height: 4rem; color: var(--klas); background: currentColor; -webkit-mask: url('img/kjernekraft.svg') center / contain no-repeat; mask: url('img/kjernekraft.svg') center / contain no-repeat"></span>
+        <span style="width: 4rem; height: 4rem; color: var(--togu); background: currentColor; -webkit-mask: url('img/kjernekraft.svg') center / contain no-repeat; mask: url('img/kjernekraft.svg') center / contain no-repeat"></span>
+        <span style="width: 4rem; height: 4rem; color: var(--tuneup); background: currentColor; -webkit-mask: url('img/kjernekraft.svg') center / contain no-repeat; mask: url('img/kjernekraft.svg') center / contain no-repeat"></span>
+      </div>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pKlipp }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--aatvaring)">framlegg — avløyser ljosbandet i klippekortet</span>
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Klippet</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Eit klippekort er eit kort som vert klipt, og eit klipp er eit hòl. Men brukaren spør um <em>eitt</em> tale — kor mange hev eg att — og daa kann ikkje svaret vera noko ein tel. <b style="color: var(--blekk); font-weight: 500">Tale ber lesingi; hòli ber sanningi.</b></p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--rom-4); border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">
+        <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500">Kortet</h2>
+        <button type="button" onClick="{{ klippTang }}" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid var(--kant); border-radius: var(--rund-knapp); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, transparent 72%), linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--blekk) 7%, var(--flate)) 100%); box-shadow: var(--knappedjup); color: var(--blekk); cursor: pointer" style-hover="border-color: var(--merke); color: var(--merke)">{{ tangknapp }}</button>
+      </div>
+
+      <div style="--produkt: var(--togu); position: relative; background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--produkt); border-radius: var(--rund); padding: var(--rom-4) var(--rom-5) var(--rom-5) var(--rom-6); display: flex; flex-direction: column; gap: var(--rom-4); max-width: 34rem">
+        <div style="position: absolute; left: -3px; top: var(--rom-4); bottom: var(--rom-4); display: flex; flex-direction: column; justify-content: space-between; pointer-events: none">
+          <sc-for list="{{ holRund }}" as="h" hint-placeholder-count="10">
+            <i style="{{ h.stil }}"></i>
+          </sc-for>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: var(--rom-4); flex-wrap: nowrap">
+          <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: 1.649rem; font-weight: 500; line-height: 1.05">Reformer</h3>
+          <span style="font-size: .85rem; color: var(--blekk-lys); white-space: nowrap; display: inline-block; transform: translateY(-.489em)">gjeng ut um 121 dagar</span>
+        </div>
+        <p style="margin: 0; display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: nowrap; white-space: nowrap; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: 1.284rem; font-weight: 500">
+          <b style="font-family: var(--skrift-tal); font-weight: 400; font-size: 4.482rem; line-height: .9; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--blekk)">{{ att }}</b>
+          <span>klipp att <span style="color: var(--blekk-lys)">av 10</span></span>
+        </p>
+      </div>
+
+      <div style="--produkt: var(--togu); position: relative; background: var(--flate); border: 1px solid var(--haarlina); border-left: 3px solid var(--produkt); border-radius: var(--rund); padding: var(--rom-4) var(--rom-5) var(--rom-5) var(--rom-6); display: flex; flex-direction: column; gap: var(--rom-4); max-width: 34rem">
+        <div style="position: absolute; left: -3px; top: var(--rom-4); bottom: var(--rom-4); display: flex; flex-direction: column; justify-content: space-between; pointer-events: none">
+          <sc-for list="{{ holNesten }}" as="h" hint-placeholder-count="10">
+            <i style="{{ h.stil }}"></i>
+          </sc-for>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: var(--rom-4); flex-wrap: nowrap">
+          <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: 1.649rem; font-weight: 500; line-height: 1.05">Yoga</h3>
+          <span style="font-size: .85rem; color: var(--aatvaring); white-space: nowrap; display: inline-block; transform: translateY(-.489em)">gjeng ut i morgon</span>
+        </div>
+        <p style="margin: 0; display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: nowrap; white-space: nowrap; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: 1.284rem; font-weight: 500">
+          <b style="font-family: var(--skrift-tal); font-weight: 400; font-size: 4.482rem; line-height: .9; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--aatvaring)">1</b>
+          <span>klipp att <span style="color: var(--blekk-lys)">av 10</span></span>
+        </p>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Naar det brenn, er det <em>tale</em> som byter farge og ikkje hòlrekkja. Eit hòl er ei hending som hev hendt; ho vert ikkje meir aatvarande av at det er få att. Difor ber tale og utlaupslina aatvaringsfargen, og rekkja stend uendra.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Kvifor tale og ikkje rekkja</h2>
+      <ul style="margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: var(--rom-3); max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">
+        <li><b style="color: var(--blekk); font-weight: 500">Ein prosentstripe segjer «tri fjerdedelar att»; du vil vita «sju».</b> Det stod i stilboki fraa fyrste dagen, men svaret vart eit band ein lyt telja — og aa telja tie smaa ting er ikkje lettare enn aa lesa ein brøk.</li>
+        <li><b style="color: var(--blekk); font-weight: 500">Tale stend i 4,482 rem</b> — e<sup>3/2</sup> paa trappa, eit steg yver sidetittelen — i taldskrifti, med <code style="font-family: var(--skrift-tal)">tabular-nums</code>. Han er det største paa kortet, og han er det ein hev kome for.</li>
+        <li><b style="color: var(--blekk); font-weight: 500">Ordi stend attmed, ikkje under.</b> «7 klipp att av 10» er ei setning (Røyst §tal som setning) og ikkje tri flisor med tal i.</li>
+        <li><b style="color: var(--blekk); font-weight: 500">Hakki er kvitteringi.</b> Dei svarar paa eit anna spursmaal — «kva hev eg brukt» — og dei svarar det utan aa krevja noko: ingen farge, ingen glød, inga rørsle, ingi tal. Ein tel dei ikkje; ein ser at kortet er klipt.</li>
+        <li><b style="color: var(--blekk); font-weight: 500">Ruta stend.</b> Han byter ikkje breidd naar du klippar (§6): det er papiret som gjeng, ikkje rada.</li>
+      </ul>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Hakket</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Systemet hev alt formi: den tome dagen i vika er eit hòl, teikna med <code style="font-family: var(--skrift-tal)">--skraakant-djup</code> — myrk yverleppe, ljos underleppe, av di ljoset kjem ovanfraa. Eit klipp er det same hòlet i eit mindre format. Ingi nye token, ingen nye fargar.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--rom-4)">
+        <div style="--produkt: var(--togu); position: relative; border: 1px solid var(--haarlina); border-left: 3px solid var(--produkt); background: var(--flate); padding: var(--rom-5) var(--rom-5) var(--rom-5) var(--rom-6); min-height: 7rem; display: flex; align-items: center">
+          <div style="position: absolute; left: -3px; top: var(--rom-2); bottom: var(--rom-2); display: flex; flex-direction: column; justify-content: space-between; pointer-events: none">
+            <i style="flex: none; width: 1.6rem; height: 1.1rem; border-radius: 0 999px 999px 0; background: var(--ark); box-shadow: var(--skraakant-djup)"></i>
+            <i style="flex: none; width: 1.6rem; height: 1.1rem"></i>
+            <i style="flex: none; width: 1.6rem; height: 1.1rem; border-radius: 0 999px 999px 0; background: var(--ark); box-shadow: var(--skraakant-djup)"></i>
+            <i style="flex: none; width: 1.6rem; height: 1.1rem"></i>
+          </div>
+          <span style="font-size: .93rem"><b style="font-weight: 500">Hakket.</b> <span style="color: var(--blekk-lys)">Klipt er bite ut or vengen: flata er <code style="font-family: var(--skrift-tal)">--ark</code> — sida sjølv, sedd gjenom kortet — med lippone kring. Uklipt teiknar ingen ting, so vengen stend heil.</span></span>
+        </div>
+        <div style="border: 1px solid var(--haarlina); background: var(--flate); padding: var(--rom-5); min-height: 7rem; display: flex; align-items: center">
+          <span style="font-size: .93rem"><b style="font-weight: 500">Kvifor kanten.</b> <span style="color: var(--blekk-lys)">Han treng ingen eigen komponent: hakket <em>er</em> vengen som alt segjer kva produkt kortet er (§2). Ingen farge, ingi rad med tie ting inne i kortet, og ingen ting som kann lesast som ein maalar — kortet ser klipt ut, og tale segjer kor mange.</span></span>
+        </div>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Ei stipla lina tyder «ventar» i dette huset, so vengen kann ikkje vera dotta upp i ti bitar i kvila: berre dei klipte hakki bryt honom. Hakki fordeler seg yver høgdi aat kortet — eit kort med meir innhald hev difor lengre avstand millom klippi, og det er den prisen forma kostar.</p>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Rundingi er ikkje arkrundingi: <code style="font-family: var(--skrift-tal)">--rund</code> er 2&nbsp;px av di papir hev broten kant. Eit hakk hev ingi kant aa brjota — forma kjem av verktyet, og tangi er rund.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Kva som gjeng ut</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Ljosbandet i klippekortet — <code style="font-family: var(--skrift-tal)">.progress-segments</code> med glødi si — og med det dei fem hardkoda <code style="font-family: var(--skrift-tal)">#fff</code> i maalaren. Bandet stend framleis i <a href="#" onClick="{{ tilKomp }}">Komponentar</a> so lenge koden gjer det, og det held fram med aa gjelda tvo stader der ei tend rute er noko som <em>finst</em> og ikkje noko som er brukt: plassmaalaren i dokka og medlemskapsmaalaren. Der er ljos rett — der er det ingen ting som vert klipt.</p>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pVika }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Vika &amp; merket</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Éi rad per time, eitt merke per dag han gjeng. «Vinyasa Flow med Gry 07:15» er éin time som gjeng maandag og fredag — ikkje tvo. Merket er eit ur i ein høg kasse, og han er den same tingen kvar du ser honom: i rutenetet, i lista yver det du er paameld paa, og her.</p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Dagmerket</h2>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; flex-wrap: wrap; gap: var(--rom-6)">
+        <div style="display: flex; flex-direction: column; gap: var(--rom-3); align-items: center">
+          <dc-import name="Dagmerke" dag="TY" fraa="17:30" til="18:30" att="2" plassar="18" hint-size="58px,73px"></dc-import>
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .68rem; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-svakt)">vanleg</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--rom-3); align-items: center">
+          <dc-import name="Dagmerke" dag="ON" fraa="12:30" til="13:15" att="14" plassar="18" idag="true" hint-size="58px,73px"></dc-import>
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .68rem; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-svakt)">i dag</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--rom-3); align-items: center">
+          <dc-import name="Dagmerke" dag="FR" fraa="20:00" til="21:30" att="9" plassar="18" paameld="true" hint-size="58px,73px"></dc-import>
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .68rem; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-svakt)">paameld</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--rom-3); align-items: center">
+          <dc-import name="Dagmerke" dag="TO" fraa="07:15" til="08:15" att="0" plassar="18" full="true" hint-size="58px,73px"></dc-import>
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .68rem; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-svakt)">full</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--rom-3); align-items: center">
+          <div style="position: relative; width: 58px; height: 73px">
+            <span style="position: absolute; left: 7px; top: 1px; width: 44px; height: 17px; border-radius: 3px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: inset 0 2px 2px -1px var(--lippe-djup)"></span>
+            <span style="position: absolute; left: 1px; top: 12px; width: 56px; height: 60px; border-radius: 4px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: var(--skraakant-djup)"></span>
+          </div>
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .68rem; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-svakt)">daud rute</span>
+        </div>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Kassen er 56&nbsp;×&nbsp;60 med ei fana som loftar 11 yver honom. <code style="font-family: var(--skrift-tal)">kroppH</code> er det eine talet ein stiller paa — botnstripa, plassmerket og skiva er rekna ut or honom og flytter seg med. Skal merket verta større, er det éin skala som endrar seg: strek, skrift og rom fylgjer i det same forholdet, so det er den same tingen som kjem nærare og ikkje ei ny teikning.</p>
+      <table style="border-collapse: collapse; width: 100%; table-layout: fixed; font-size: .9rem">
+        <thead><tr>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant); width: 8rem">Lag</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Kva han er</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant); width: 13rem">Klasse</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{ merkelag }}" as="m" hint-placeholder-count="6">
+            <tr>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); vertical-align: top">{{ m.lag }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); color: var(--blekk-lys); vertical-align: top">{{ m.kva }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); font-family: var(--skrift-tal); font-size: .78rem; vertical-align: top">{{ m.klasse }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <div style="border: 1px solid var(--kant); border-left: 3px solid var(--merke); background: var(--flate); padding: var(--rom-4) var(--rom-5); max-width: 62ch">
+        <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--merke)">tri fellor som alt er falne i</span>
+        <ul style="margin: var(--rom-2) 0 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: var(--rom-2); font-size: .93rem; color: var(--blekk-lys)">
+          <li><b style="color: var(--blekk); font-weight: 500">Gradienten bur inne i kvart merke</b>, ikkje i eit sams def-sett. Ein <code style="font-family: var(--skrift-tal)">stop-color: var(--glans)</code> vert løyst der gradienten stend — eit delt sett gjev alle merki fargane aat rot-temaet, og eit ljost merke paa ei myrk sida fær gal glans. Det same gjeld filtri.</li>
+          <li><b style="color: var(--blekk); font-weight: 500">Skivemidten vert rekna</b>, ikkje skriven. Stod han som 38, hekk skiva for laagt den dagen kassen skifte høgd.</li>
+          <li><b style="color: var(--blekk); font-weight: 500">Plassmerket er eit tal</b>, ikkje eit kakestykke. Ein del kann ikkje skiljast: tvo att av ti ser likt ut som fire att av tjue.</li>
+        </ul>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Punkti er rekna i <code style="font-family: var(--skrift-tal)">merkeform.go</code> — ein mal skal syna kva som er i figuren; kvar kvart punkt ligg, er ein annan slags kunnskap. Merki ovanfor er teikna av dei same tali (kasse 58&nbsp;×&nbsp;73, skiva i 29,34, spor 17,6, kake 14,7, visarar 10,1 og 14,7), so dei stend paa den same geometrien — men <code style="font-family: var(--skrift-tal)">/arket</code> er den einaste staden dei er teikna av sjølve koden.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Rutenetet</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Sju spaltor som <em>deler</em> breiddi. Dagnamni stend namngjevne ein gong, øvst, og kvart merke ligg i spalta si — so alt som gjeng onsdag stend under kvarandre og ein kann lesa nedyver ein dag. Hovudet og radene deler den same trappa, og trappa er rekna av <code style="font-family: var(--skrift-tal)">--merkestorleik</code>.</p>
+      <div style="border: 1px solid var(--haarlina); background: var(--flate)">
+        <div style="display: grid; grid-template-columns: minmax(9rem, 1fr) repeat(7, 48px); gap: var(--rom-3); align-items: center; padding: var(--rom-3) var(--rom-4) var(--rom-2); border-bottom: 1px solid var(--kant)">
+          <span></span>
+          <sc-for list="{{ vikedagar }}" as="d" hint-placeholder-count="7">
+            <span style="{{ d.stil }}">{{ d.namn }}</span>
+          </sc-for>
+        </div>
+        <div style="display: grid; grid-template-columns: minmax(9rem, 1fr) repeat(7, 48px); gap: var(--rom-3); align-items: center; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina)" style-hover="background: var(--ark-djup)">
+          <div>
+            <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-weight: 600; font-size: 1.55rem; line-height: 1.05">Vinyasa Flow <span style="font-family: var(--skrift-tal); font-size: .78rem; font-weight: 400; font-stretch: normal; letter-spacing: 0; color: var(--blekk-svakt); white-space: nowrap">60 min</span></h3>
+            <p style="margin: .1rem 0 0; font-size: .92rem; color: var(--blekk-lys)">Gry <span style="color: var(--blekk); font-weight: 500">Salen</span></p>
+          </div>
+          <dc-import name="Dagmerke" dag="MA" fraa="07:15" til="08:15" att="11" plassar="18" breidd="48" hint-size="48px,60px" style="justify-self: center"></dc-import>
+          <span style="position: relative; display: block; justify-self: center; width: 48px; height: 60px"><i style="position: absolute; left: 6px; top: 1px; width: 36px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: inset 0 2px 2px -1px var(--lippe-djup)"></i><i style="position: absolute; left: 1px; top: 10px; width: 46px; height: 49px; border-radius: 4px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: var(--skraakant-djup)"></i></span>
+          <span style="position: relative; display: block; justify-self: center; width: 48px; height: 60px"><i style="position: absolute; left: 6px; top: 1px; width: 36px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: inset 0 2px 2px -1px var(--lippe-djup)"></i><i style="position: absolute; left: 1px; top: 10px; width: 46px; height: 49px; border-radius: 4px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: var(--skraakant-djup)"></i></span>
+          <dc-import name="Dagmerke" dag="TO" fraa="07:15" til="08:15" att="0" plassar="18" full="true" breidd="48" hint-size="48px,60px" style="justify-self: center"></dc-import>
+          <dc-import name="Dagmerke" dag="FR" fraa="07:15" til="08:15" att="7" plassar="18" paameld="true" breidd="48" hint-size="48px,60px" style="justify-self: center"></dc-import>
+          <span style="position: relative; display: block; justify-self: center; width: 48px; height: 60px"><i style="position: absolute; left: 6px; top: 1px; width: 36px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: inset 0 2px 2px -1px var(--lippe-djup)"></i><i style="position: absolute; left: 1px; top: 10px; width: 46px; height: 49px; border-radius: 4px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: var(--skraakant-djup)"></i></span>
+          <span style="position: relative; display: block; justify-self: center; width: 48px; height: 60px"><i style="position: absolute; left: 6px; top: 1px; width: 36px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: inset 0 2px 2px -1px var(--lippe-djup)"></i><i style="position: absolute; left: 1px; top: 10px; width: 46px; height: 49px; border-radius: 4px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: var(--skraakant-djup)"></i></span>
+        </div>
+        <div style="display: grid; grid-template-columns: minmax(9rem, 1fr) repeat(7, 48px); gap: var(--rom-3); align-items: center; padding: var(--rom-3) var(--rom-4)" style-hover="background: var(--ark-djup)">
+          <div>
+            <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-weight: 600; font-size: 1.55rem; line-height: 1.05">Reformer <span style="font-family: var(--skrift-tal); font-size: .78rem; font-weight: 400; font-stretch: normal; letter-spacing: 0; color: var(--blekk-svakt); white-space: nowrap">45 min</span></h3>
+            <p style="margin: .1rem 0 0; font-size: .92rem; color: var(--blekk-lys)">Ida <span style="color: var(--blekk); font-weight: 500">Reformer</span></p>
+          </div>
+          <span style="position: relative; display: block; justify-self: center; width: 48px; height: 60px"><i style="position: absolute; left: 6px; top: 1px; width: 36px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: inset 0 2px 2px -1px var(--lippe-djup)"></i><i style="position: absolute; left: 1px; top: 10px; width: 46px; height: 49px; border-radius: 4px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: var(--skraakant-djup)"></i></span>
+          <dc-import name="Dagmerke" dag="TY" fraa="09:00" til="10:00" att="1" plassar="4" breidd="48" hint-size="48px,60px" style="justify-self: center"></dc-import>
+          <span style="position: relative; display: block; justify-self: center; width: 48px; height: 60px"><i style="position: absolute; left: 6px; top: 1px; width: 36px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: inset 0 2px 2px -1px var(--lippe-djup)"></i><i style="position: absolute; left: 1px; top: 10px; width: 46px; height: 49px; border-radius: 4px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: var(--skraakant-djup)"></i></span>
+          <span style="position: relative; display: block; justify-self: center; width: 48px; height: 60px"><i style="position: absolute; left: 6px; top: 1px; width: 36px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: inset 0 2px 2px -1px var(--lippe-djup)"></i><i style="position: absolute; left: 1px; top: 10px; width: 46px; height: 49px; border-radius: 4px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: var(--skraakant-djup)"></i></span>
+          <span style="position: relative; display: block; justify-self: center; width: 48px; height: 60px"><i style="position: absolute; left: 6px; top: 1px; width: 36px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: inset 0 2px 2px -1px var(--lippe-djup)"></i><i style="position: absolute; left: 1px; top: 10px; width: 46px; height: 49px; border-radius: 4px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: var(--skraakant-djup)"></i></span>
+          <dc-import name="Dagmerke" dag="LA" fraa="10:00" til="11:00" att="2" plassar="8" idag="true" breidd="48" hint-size="48px,60px" style="justify-self: center"></dc-import>
+          <span style="position: relative; display: block; justify-self: center; width: 48px; height: 60px"><i style="position: absolute; left: 6px; top: 1px; width: 36px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: inset 0 2px 2px -1px var(--lippe-djup)"></i><i style="position: absolute; left: 1px; top: 10px; width: 46px; height: 49px; border-radius: 4px; background: color-mix(in srgb, var(--blekk) 6%, transparent); box-shadow: var(--skraakant-djup)"></i></span>
+        </div>
+        <button type="button" style="display: flex; align-items: baseline; gap: var(--rom-2); width: 100%; padding: var(--rom-2) var(--rom-4); background: none; border: 0; border-top: 1px solid var(--haarlina); font-family: var(--skrift); font-size: .8rem; color: var(--blekk-svakt); text-align: left; cursor: pointer">
+          <span style="font-family: var(--skrift-tal)">3 timar hev gjenge</span>
+          <span style="text-decoration: underline; text-underline-offset: 2px">syn dei</span>
+        </button>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Den daude ruta gjer at rada hev sju plassar og ikkje tvo: ein ser kva som <em>ikkje</em> gjeng, og det er halve spursmaalet naar ein set upp ei vika. Ho er hòlet fraa <a href="#" onClick="{{ tilLjos }}">Ljos &amp; djupn</a> — same lippone, tvo pikslar inn.</p>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Prøva her stend paa 48&nbsp;px merkestorleik so ho fær plass i lesespalta; i appen er <code style="font-family: var(--skrift-tal)">--merkestorleik</code> 5,4&nbsp;rem, og trappa er <code style="font-family: var(--skrift-tal)">minmax(8rem, 1fr) repeat(7, minmax(0, var(--merkestorleik)))</code>. Storleiken er éin knapp og ingen ting anna: alt i figuren er rekna i eit viewBox, so skrift, strekar og rom fylgjer med i det same forholdet.</p>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Lista rullar i seg sjølv — <code style="font-family: var(--skrift-tal)">max-height: min(70vh, 48rem)</code> med <code style="font-family: var(--skrift-tal)">scrollbar-gutter: stable</code> — so dagnamni stend att medan timarne gjeng forbi. <code style="font-family: var(--skrift-tal)">max-height</code> og ikkje <code style="font-family: var(--skrift-tal)">height</code>: er vika stutt, kjem det ingi rulling i det heile, og ei rullesteng som stend der utan aa ha noko aa rulla er berre eit merke um at nokon ikkje maalte. Radene som hev vore ligg samanbrotne under eit tal som segjer kor mange dei er; dei kjem attende bleikare (<code style="font-family: var(--skrift-tal)">opacity: .45</code>) og paa sin rette plass i rekkja.</p>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Under 62&nbsp;rem vert kvar dag ein bolk under den fyrre, med dagen som yverskrift, so ein time framleis høyrer til ein dag. Dagnamni er knappar, men dei <em>filtrerer ikkje</em>: eit trykk løftar fram ein dag og dempar dei andre. Aa filtrera hadde teke fraa rutenetet det einaste han kann som ei liste ikkje kann — syna heile vika paa ein gong.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Dokka</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Ho held det du ser paa i ro medan resten rullar. Vel du ein dag i ei rad, stend timen her nede til du vel ein annan — du kann halda fram med aa skanna vika utan at noko flyttar seg, og paameldingsknappen er alltid paa den same staden. Kortet bar heile detaljen sin fyrr, og daa vart vika eit tårn.</p>
+      <div style="position: relative; background: var(--flate); border-top: 1px solid color-mix(in srgb, var(--merke) 55%, var(--haarlina)); box-shadow: var(--skugge-flytande); padding: var(--rom-4) var(--rom-5); display: flex; flex-wrap: wrap; gap: var(--rom-5); align-items: center; margin-top: 14px">
+        <div style="position: absolute; left: 0; right: 0; top: -14px; height: 15px; pointer-events: none; background: linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--merke) 7%, transparent) 52%, color-mix(in srgb, var(--merke) 20%, transparent) 86%, color-mix(in srgb, var(--merke) 34%, transparent) 100%)"></div>
+        <div style="flex: 1 1 12rem">
+          <h3 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: 1.25rem; font-weight: 500">Vinyasa Flow</h3>
+          <p style="margin: 0; font-size: .88rem; color: var(--blekk-lys)">Gry <span style="color: var(--blekk); font-weight: 500">Salen</span></p>
+        </div>
+        <div style="display: flex; flex-direction: column">
+          <span style="font-size: .82rem; color: var(--blekk-lys)">Måndag 24. august</span>
+          <span style="font-family: var(--skrift-tal); font-size: 1.05rem; font-variant-numeric: tabular-nums">07:15–08:15</span>
+        </div>
+        <div style="min-width: 9rem">
+          <div style="display: flex; gap: 2px; height: 9px; margin: var(--rom-2) 0 var(--rom-1); position: relative; isolation: isolate">
+            <sc-for list="{{ plassmaalar }}" as="p" hint-placeholder-count="18">
+              <div style="flex: 1 1 0; min-width: 2px; border-radius: 1px; background: {{ p.bg }}; border: 1px solid {{ p.kant }}"></div>
+            </sc-for>
+          </div>
+          <span style="font-size: .85rem; color: var(--blekk-lys)"><b style="font-family: var(--skrift-tal); font-weight: 400; color: var(--blekk)">11</b><span style="color: var(--blekk-svakt)">/18</span> plassar</span>
+        </div>
+        <button type="button" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid color-mix(in srgb, var(--merke) 70%, var(--blekk)); border-radius: var(--rund-knapp); color: var(--flate); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, transparent 72%), linear-gradient(to bottom, color-mix(in srgb, var(--merke-lys) 84%, #fff) 0%, var(--merke-lys) 46%, var(--merke) 100%); box-shadow: var(--knappedjup); cursor: pointer">Meld paa</button>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Dokka er det som <em>faktisk</em> flyt, og ho ber difor den eine fallskuggen. Sida legg til luft under seg av same høgd som dokka (<code style="font-family: var(--skrift-tal)">--dokkhogd</code>), so det siste sida hev aa syna ikkje ligg under henne.</p>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Yverkanten var ein maala strek — tvo pikslar rein turkis tvers yver skjermen — medan hovudet hadde eit <em>ljos</em> i den same lina. Tvo ulike slag ting i kvar sin ende av sida. No er kanten ei hårline med ljoset yver, og glødi stig upp <em>utanfor</em> dokka: 15 pikslar yver kanten, i den same familien som ljosbandet, berre roleg — dokka er ei heil flata og ikkje eit punkt, so ho lyser jamt i staden for aa ha ein kjerne.</p>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Plassmaalaren er det same ljoset som klippekortet med ei anna tyding: her er ei tend rute ein <em>teken</em> plass. Regelen er den same i baae — ei tend rute er noko som finst — og difor er ein full time heilt tend. Det er den stoda Ida ser etter, og han treng ingen farge for aa skilja seg: han er den einaste som ikkje hev myrke rutor att.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Den tome vika</h2>
+      <div style="border: 1px solid var(--haarlina); background: var(--flate); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--rom-2); min-height: 14rem; padding: var(--rom-7) var(--rom-5); text-align: center">
+        <p style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-weight: 500; font-size: clamp(1.4rem, 3.4vw, 2rem); line-height: 1.15; color: var(--blekk-lys); text-wrap: balance">Ingen timar denne vika</p>
+        <p style="margin: 0; font-size: .95rem; color: var(--blekk-svakt); max-width: 34ch">Prøv ei anna vika, eller ta bort sikti.</p>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Ho stod som ei line kursiv graa tekst i hyrna av eit tomt rutenet. No stend ho midt i det rommet timarne vilde hatt.</p>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pRorsle }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Rørsle</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Ingen ting skal skuva seg. Klikkar du paa noko, skal du framleis sjaa paa den staden du saag paa — skuvar innhaldet seg, lyt auga finna seg att, og daa er handlingi dyrare enn ho ser ut.</p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Reglane</h2>
+      <ul style="margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: var(--rom-3); max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">
+        <li>Kantar stend heile tidi og skifter berre farge. Ein kant som kjem og gjeng flytter alt kring seg med ein piksel.</li>
+        <li>Bolkar vert ikkje bytte ut. Alle fanebolkarne stend i dokumentet samstundes; <code style="font-family: var(--skrift-tal)">hidden</code> avgjer kva som er synleg.</li>
+        <li>Skiftar ein ting storleik, skift fyllet og ikkje kanten.</li>
+        <li>Ei rute som vert tom skal enno vera ei rute.</li>
+        <li>Eit felt som byter til redigering skal halda breiddi si.</li>
+      </ul>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Den eine rørsli</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Knappen som vert trykt: glimet gjeng ut, skuggen fell inn ovanfraa, og han sig éin piksel. Det er den einaste staden i huset der noko flyttar seg — og han flyttar seg av di han er ein ting ein trykkjer paa. Trykk paa denne:</p>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: flex; gap: var(--rom-4); align-items: center">
+        <button type="button" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid var(--kant); border-radius: var(--rund-knapp); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 62%, transparent) 20%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, transparent 72%), linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--blekk) 7%, var(--flate)) 100%); box-shadow: var(--knappedjup); color: var(--blekk); cursor: pointer; transition: box-shadow .08s ease-out, transform .08s ease-out" style-active="background-image: none; box-shadow: inset 0 2px 4px -1px color-mix(in srgb, var(--blekk) 26%, transparent), inset 0 -1px 0 var(--glans-svak); transform: translateY(1px)">Trykk meg</button>
+        <code style="font-family: var(--skrift-tal); font-size: .8rem; color: var(--blekk-lys)">transition: box-shadow .08s ease-out, transform .08s ease-out</code>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Alle overgangar ligg i <code style="font-family: var(--skrift-tal)">@media (prefers-reduced-motion: no-preference)</code>, og all glød er slegi av under <code style="font-family: var(--skrift-tal)">reduce</code>. Det finst ingi inn-animasjon, ingi sliding, ingen «fade in» — ei side som er ferdig teikna er ferdig.</p>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pRoyst }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Røyst &amp; ord</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Kvar streng er ein umsetjingsnykel: <code style="font-family: var(--skrift-tal)">&#123;&#123;t .Lang "bolk.nykel"&#125;&#125;</code>, og nykelen finst i alle tri filone under <code style="font-family: var(--skrift-tal)">locales/</code>. Hardkodar du ein streng i ein mal, finst han berre paa eitt maal, og ingen oppdagar det fyrr nokon byter maal.</p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Kven talar</h2>
+      <table style="border-collapse: collapse; width: 100%; table-layout: fixed; font-size: .9rem">
+        <thead><tr>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Rolla</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Forma</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Døme</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{ royster }}" as="r" hint-placeholder-count="5">
+            <tr>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); vertical-align: top">{{ r.rolla }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); color: var(--blekk-lys); vertical-align: top">{{ r.forma }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); vertical-align: top">{{ r.dome }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Tal som setning</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Tri flisor med eit tal og ei merkelapp under er ein maate aa unngaa aa skriva ei setning paa. Tale er vidt, ordet smalt attmed.</p>
+      <div style="background: var(--flate); border: 1px solid var(--haarlina); padding: var(--rom-5); display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: var(--rom-5)">
+        <div>
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--merke)">rett</span>
+          <p style="margin: var(--rom-3) 0 0; font-size: 1.05rem"><b style="font-family: var(--skrift-tal); font-weight: 400; font-variant-numeric: tabular-nums">6</b> medlemer kjem paa <b style="font-family: var(--skrift-tal); font-weight: 400; font-variant-numeric: tabular-nums">3</b> timar denne veka, og <b style="font-family: var(--skrift-tal); font-weight: 400">2</b> ventar paa svar.</p>
+        </div>
+        <div>
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--aatvaring)">gale</span>
+          <div style="display: flex; gap: var(--rom-4); margin-top: var(--rom-3)">
+            <div style="border: 1px solid var(--haarlina); padding: var(--rom-3); text-align: center; flex: 1 1 0"><div style="font-family: var(--skrift-tal); font-size: 1.4rem">6</div><div style="font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--blekk-svakt)">medlemer</div></div>
+            <div style="border: 1px solid var(--haarlina); padding: var(--rom-3); text-align: center; flex: 1 1 0"><div style="font-family: var(--skrift-tal); font-size: 1.4rem">3</div><div style="font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--blekk-svakt)">timar</div></div>
+            <div style="border: 1px solid var(--haarlina); padding: var(--rom-3); text-align: center; flex: 1 1 0"><div style="font-family: var(--skrift-tal); font-size: 1.4rem">2</div><div style="font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--blekk-svakt)">ventar</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Ingen emoji</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Emoji er ikkje eit teiknesprog: dei er teikna av tri selskap kvar for seg, dei ser ulike ut paa kvar maskina, dei ber hudfarge og kjøn me ikkje hev bede um, og dei kann ikkje ta produktfargen. Kravi til ei teikning er dei same som til merket: SVG, <code style="font-family: var(--skrift-tal)">stroke="currentColor"</code>, <code style="font-family: var(--skrift-tal)">fill="none"</code>, kvadratisk <code style="font-family: var(--skrift-tal)">viewBox 0 0 64 64</code>, éin strekbreidd kring 2,7&nbsp;% av breiddi, <code style="font-family: var(--skrift-tal)">stroke-linecap="butt"</code>, ingen tekst i fila. Boksen <code style="font-family: var(--skrift-tal)">.teikning</code> er fast alt no, so ingen ting hoppar den dagen teikningi kjem.</p>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pProvor }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Prøvor</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Ein regel du ikkje kann prøva, er ei meining. Desse gjeng paa kommandolina og i nettlesaren.</p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Paa kommandolina</h2>
+      <pre style="margin: 0; font-family: var(--skrift-tal); font-size: .82rem; background: var(--ark-djup); border: 1px solid var(--haarlina); padding: var(--rom-4); white-space: pre-wrap; color: var(--blekk-lys)">grep -rn 'style="[^"]*#' handlers/templates/     # ingen fargar i attributt
+grep -rn 'overflow-x' static/css/                # ingi sidelengs rulling
+grep -c 'font-stretch' static/css/               # breiddetrappa er i bruk
+grep -rnE '&lt;h[1-6]( [^&gt;]*)?&gt;' handlers/templates/ | grep -v 'class='   # ingi naken yverskrift
+for f in handlers/templates/pages/*.html; do echo "$(grep -c '&lt;h1' $f) $f"; done  # høgst 1
+
+document.documentElement.scrollWidth &gt; window.innerWidth   // skal vera false</pre>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">Gjer / gjer ikkje</h2>
+      <div style="display: flex; flex-direction: column; gap: var(--rom-4)">
+        <sc-for list="{{ provor }}" as="p" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: var(--rom-4); border: 1px solid var(--haarlina); background: var(--flate); padding: var(--rom-4)">
+            <div style="display: flex; flex-direction: column; gap: var(--rom-2)">
+              <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--merke)">gjer</span>
+              <span style="font-size: .93rem">{{ p.gjer }}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: var(--rom-2)">
+              <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--aatvaring)">ikkje</span>
+              <span style="font-size: .93rem; color: var(--blekk-lys)">{{ p.ikkje }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </article>
+  </sc-if>
+
+  <sc-if value="{{ pEndring }}">
+  <article style="display: flex; flex-direction: column; gap: var(--rom-6)">
+    <header style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--aatvaring)">framlegg — ikkje sett i drift</span>
+      <h1 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-tittel); font-size: var(--tittel); font-weight: 700; letter-spacing: -.01em; line-height: 1.02">Endringar</h1>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys)">Fire framlegg. Fargar og skrifter er ikkje rørde i noko av dei — verdi som stend i <code style="font-family: var(--skrift-tal)">:root</code> er dei same, og lisensen er difor uroga.</p>
+    </header>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">1 · Ei tettare trapp</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Trappa hev sju steg, men dei tri øvste tyder nesten det same: 1,5 → 2 → 3 rem er tri maatar aa segja «eit skilje». Toppen av henne er ogso der sidone vert lange: <code style="font-family: var(--skrift-tal)">--rom-7</code> stend millom kvar bolk <em>og</em> under kvar sida. Framlegget krympar toppen og lèt botnen staa — tale under 1 rem er finmotorikk og skal ikkje rørast.</p>
+      <table style="border-collapse: collapse; width: 100%; table-layout: fixed; font-size: .9rem">
+        <thead><tr>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Token</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: right; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">No</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: right; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Tett</th>
+          <th style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .78rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--blekk-lys); text-align: left; padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--kant)">Kvifor</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{ tetting }}" as="t" hint-placeholder-count="6">
+            <tr>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); font-family: var(--skrift-tal); font-size: .82rem; vertical-align: top">{{ t.token }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); font-family: var(--skrift-tal); font-size: .82rem; text-align: right; color: var(--blekk-svakt); vertical-align: top">{{ t.no }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); font-family: var(--skrift-tal); font-size: .82rem; text-align: right; color: var(--merke); vertical-align: top">{{ t.tett }}</td>
+              <td style="padding: var(--rom-3) var(--rom-4); border-bottom: 1px solid var(--haarlina); color: var(--blekk-lys); vertical-align: top">{{ t.kvifor }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Steget i trappa er <b style="color: var(--blekk); font-weight: 500">e<sup>¼</sup> = 1,284</b>, og toppen er <b style="color: var(--blekk); font-weight: 500">e rem</b>: 1 → 1,284 → 1,649 → 2,118 → 2,718. Tett tyder difor ikkje mindre skrift — det tyder tettare rom og større bokstav, av di det er romet som gjorde sidone lange, ikkje teksti. Eit tal som er rekna av seg sjølv driv ikkje: finn du 1,4 eller 2,4 i eit stilark, veit du at nokon gissa.</p>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Denne boki stend paa den tette trappa no — <code style="font-family: var(--skrift-tal)">skala</code> i Tweaks byter henne attende til «no», so du kann sjaa skilnaden paa kvar side utan aa lesa eit tal.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">2 · Ei meir logisk sida</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Verkstaden paa <code style="font-family: var(--skrift-tal)">/arket</code> er ei lang rulla med sekstan bolkar, kvar med regelen sin i eit avsnitt og prøva tvo gonger — ljos og myrk attmed kvarandre. Det er dobbelt so mykje markering for éin ting, og ein kann ikkje lenka til noko.</p>
+      <ul style="margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: var(--rom-2); max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">
+        <li><b style="color: var(--blekk); font-weight: 500">Ti sidor, ikkje éi rulla.</b> Grunnlag (prinsipp, farge, skrift, rom, ljos, komponentar) og praksis (rørsle, røyst, prøvor, endringar). Sida stend i adressa, som i fanone.</li>
+        <li><b style="color: var(--blekk); font-weight: 500">Eitt tema um gongen.</b> Temaknappen byter heile boki. Paret ljos/myrk stend berre der det er sjølve poenget: paletten. Det er halvparten so mykje markering, og prøva vert ikkje mindre sann.</li>
+        <li><b style="color: var(--blekk); font-weight: 500">Regel, prøva, klassenamn — i den rekkjefylgji.</b> Grunngjevingi i lang form bur i <code style="font-family: var(--skrift-tal)">docs/</code>; her stend éi linja som kann prøvast, og so tingen sjølv.</li>
+        <li><b style="color: var(--blekk); font-weight: 500">Ut gjekk:</b> merknader um kva som var gale fyrr (dei høyrer i git), duplikatprøvor, og bolkar som var eit avsnitt utan ein komponent.</li>
+      </ul>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">3 · Hovudknappen: line eller flate</h2>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Stilboki og stilarket er ikkje samde, og det er den einaste staden i huset der dei ikkje er det. §18 segjer line og ord; koden fyller flata. Ei bok som segjer eitt og ein kode som gjer eit anna er verre enn baae valdi — kvar ny knapp vert daa eit smaksval.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--rom-4)">
+        <div style="border: 1px solid var(--haarlina); background: var(--flate); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-4); align-items: flex-start">
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--blekk-svakt)">stilboki §18 — line og ord</span>
+          <button type="button" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid var(--merke); border-radius: var(--rund-knapp); color: var(--merke); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, transparent 72%), var(--merke-svak); box-shadow: var(--knappedjup); cursor: pointer">Meld paa</button>
+        </div>
+        <div style="border: 1px solid var(--haarlina); background: var(--flate); padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-4); align-items: flex-start">
+          <span style="font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--merke)">koden i dag — fylt flate</span>
+          <button type="button" style="font-family: var(--skrift); font-size: .95rem; font-weight: 500; padding: var(--knapp-loddrett) var(--rom-5); border: 1px solid color-mix(in srgb, var(--merke) 70%, var(--blekk)); border-radius: var(--rund-knapp); color: var(--flate); background: linear-gradient(to bottom, var(--glans) 0%, color-mix(in srgb, var(--glans) 62%, transparent) 20%, color-mix(in srgb, var(--glans) 24%, transparent) 42%, color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%), linear-gradient(to bottom, color-mix(in srgb, var(--merke-lys) 84%, #fff) 0%, var(--merke-lys) 46%, var(--merke) 100%); box-shadow: var(--knappedjup); cursor: pointer">Meld paa</button>
+        </div>
+      </div>
+      <p style="margin: 0; max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">Framlegget er <b style="color: var(--blekk); font-weight: 500">flata</b>, og at §18 vert skrivi um. Grunnen er ikkje at klumpen er finare: han er den einaste tingen paa sida som segjer «gjer dette», og eit hus bygd av hårlinor hev ikkje noko anna middel att til aa segja det. Vel me lina i staden, lyt §18 staa ved lag og koden retta seg — men <em>eitt</em> av dei tvo lyt gjeva seg fyre neste knapp vert skriven.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: var(--rom-4)">
+      <h2 style="margin: 0; font-family: var(--skrift-yver); font-stretch: var(--vidd-yver); font-size: var(--bolktittel); font-weight: 500; border-bottom: 1px solid var(--haarlina); padding-bottom: var(--rom-2)">4 · Daudt som skal ut</h2>
+      <ul style="margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: var(--rom-3); max-width: 62ch; color: var(--blekk-lys); font-size: .95rem">
+        <li><code style="font-family: var(--skrift-tal)">--fordjuping</code> og <code style="font-family: var(--skrift-tal)">--fasett</code> er ikkje nytta av noko sidan skraakanten tok yver. Vert han verande, skal dei tvo ut — og FASETTEN §1 med deim.</li>
+        <li>Det myrke blokket stend tvo gonger, ord for ord: <code style="font-family: var(--skrift-tal)">@media (prefers-color-scheme: dark)</code> og <code style="font-family: var(--skrift-tal)">[data-theme="dark"]</code>. Dei hev alt drive fraa kvarandre i innrykk. Legg verdi i <code style="font-family: var(--skrift-tal)">:root</code> som <code style="font-family: var(--skrift-tal)">--m-ark</code>, <code style="font-family: var(--skrift-tal)">--m-blekk</code> … og lat baae blokki vera <code style="font-family: var(--skrift-tal)">--ark: var(--m-ark)</code>. Tvo veljarar, éi liste med tal.</li>
+        <li>Dei ni emojiane (§14 i stilboki) stend framleis. Boksen er fast, so byte er ei fil om gongen.</li>
+        <li><code style="font-family: var(--skrift-tal)">.tabell-rom</code> og <code style="font-family: var(--skrift-tal)">.kort</code> teiknar den same boksen med kvar sine tal. Éin definisjon.</li>
+      </ul>
+    </section>
+  </article>
+  </sc-if>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;tema&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;skala&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tett&quot;,&quot;no&quot;],&quot;default&quot;:&quot;tett&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { side: "prinsipp", tema: null, fane: "oversyn", tende: 7, brukte: 3 };
+
+  get tema() { return this.state.tema || this.props.tema || "light"; }
+
+  renderVals() {
+    const side = this.state.side;
+    const g = (id, namn) => ({
+      id, namn,
+      no: side === id ? "true" : "false",
+      vel: () => this.setState({ side: id })
+    });
+    const alle = 10;
+    const tende = this.state.tende;
+    const tent = "linear-gradient(to right, color-mix(in srgb, var(--klippfarge) 70%, transparent) 0%, color-mix(in srgb, var(--klippfarge) 30%, #fff) 35%, color-mix(in srgb, var(--klippfarge) 22%, #fff) 65%, color-mix(in srgb, var(--klippfarge) 70%, transparent) 100%)";
+    const sloknet = "color-mix(in srgb, var(--blekk) 13%, transparent)";
+    // Hakket i kanten: klipt er ei bite ut or vengen, uklipt teiknar ingen ting
+    // — vengen skal staa heil i kvila (ei stipla lina tyder alt «ventar»).
+    const hol = (klipt) => "flex: none; width: 1.05rem; height: .58rem; "
+      + (klipt
+        ? "border-radius: 0 999px 999px 0; background: var(--ark); box-shadow: var(--skraakant-djup)"
+        : "");
+
+    const fanetekstar = {
+      oversyn: "Bolken under fanone er den same flata som den opne fana. Det er difor lina er broti under henne og ikkje under dei hine.",
+      timeplan: "Alle bolkarne stend i dokumentet samstundes; hidden avgjer kva som er synleg. Vart dei bytte ut, laut nettlesaren leggja sida ut paa nytt for kvart klikk.",
+      prisar: "Valet stend i adressa, so ei lenkja peikar dit ho segjer og ei umlasting kjem attende til same staden."
+    };
+
+    return {
+      tema: this.tema,
+      skala: this.props.skala || "tett",
+      temaknapp: this.tema === "light" ? "Til myrkt" : "Til ljost",
+      byteTema: () => this.setState({ tema: this.tema === "light" ? "dark" : "light" }),
+      tilEndring: (e) => { e.preventDefault(); this.setState({ side: "endring" }); },
+
+      grunnlag: [
+        g("prinsipp", "Prinsippi"), g("farge", "Farge"), g("skrift", "Skrift"),
+        g("rom", "Rom & rutenet"), g("ljos", "Ljos & djupn"), g("komp", "Komponentar"),
+        g("klipp", "Klippet"), g("vika", "Vika & merket")
+      ],
+      praksis: [
+        g("rorsle", "Rørsle"), g("royst", "Røyst & ord"),
+        g("provor", "Prøvor"), g("endring", "Endringar")
+      ],
+
+      pPrinsipp: side === "prinsipp", pFarge: side === "farge", pSkrift: side === "skrift",
+      pRom: side === "rom", pLjos: side === "ljos", pKomp: side === "komp",
+      pKlipp: side === "klipp", pVika: side === "vika",
+      merkelag: [
+        { lag: "fana", kva: "dagnamnet. Ho ligg attum kroppen og stikk upp — same grepet som fanone i administrasjonen, berre teikna.", klasse: ".faneflate / .fanekant / .merkedag" },
+        { lag: "kroppen", kva: "ringen (berre naar merket er valt), lina, flata og fordjupingi — alle fire av den same silhuetten.", klasse: ".form-ring / -kant / -flate / -djup" },
+        { lag: "skiva", kva: "indeksar, tal, tri visarar: time og minutt der timen byrjar, og ein i merkefargen der han er ute.", klasse: ".indeks / .skivetal / .visar" },
+        { lag: "kakestykket", kva: "timen lagd ut paa døgeret. Ligg yver visarane: minuttvisaren er det ein les fyrst, stykket er draget som kjem etterpaa.", klasse: ".kake-timen" },
+        { lag: "botnstripa", kva: "klokkeslettet i klartekst nede til vinstre, plassmerket nede til høgre. Baae inne i kroppen.", klasse: ".ruteflate / .rutetal / .plettflate" },
+        { lag: "glaset", kva: "eit ur hev eit glas, og glaset fangar ljoset ovanfraa. Difor ligg det yverst — yver visarane, yver alt.", klasse: ".form-glas" }
+      ],
+      vikedagar: ["Mån", "Tys", "Ons", "Tor", "Fre", "Lau", "Sun"].map((n, i) => ({
+        namn: n,
+        stil: "font: inherit; text-align: center; padding: var(--rom-1) var(--rom-2); border-radius: 2px; color: "
+          + (i === 5 ? "var(--klas)" : "var(--blekk-lys)")
+      })),
+      plassmaalar: Array.from({ length: 18 }, (_, i) => ({
+        bg: i < 11
+          ? "radial-gradient(ellipse 60% 40% at 50% 50%, color-mix(in srgb, var(--klas) 26%, #fff) 0%, transparent 100%), color-mix(in srgb, var(--klas) 84%, var(--flate))"
+          : "var(--ark-djup)",
+        kant: i < 11 ? "color-mix(in srgb, var(--klas) 55%, var(--haarlina))" : "var(--haarlina)"
+      })),
+      tilLjos: (e) => { e.preventDefault(); this.setState({ side: "ljos" }); },
+      pRorsle: side === "rorsle", pRoyst: side === "royst",
+      pProvor: side === "provor", pEndring: side === "endring",
+
+      lover: [
+        { nr: "01", tittel: "Arket er flatt", kva: "Kort, bolkar, tabellar og faner skil seg med ei hårline paa éin piksel og ingen ting meir. Papir hev inga djupn." },
+        { nr: "02", tittel: "Ting paa arket er det ikkje", kva: "Ein knapp, eit felt, eit ljos — dei ligg oppaa papiret og fangar ljos. Aa nekta dei det gjer dei ikkje reinare." },
+        { nr: "03", tittel: "Ljoset kjem ovanfraa", kva: "I baae temaom. Ein skugge som fell til sida segjer at ljoset stend skeivt, og daa maa alt anna verta samde um kva veg." },
+        { nr: "04", tittel: "Ingen ting skal skuva seg", kva: "Kantar stend heile tidi og skifter berre farge. Skiftar noko storleik, skift fyllet." },
+        { nr: "05", tittel: "Ingi sidelengs rulling", kva: "Ei side rullar ned. Fær noko ikkje plass, bryt det, deler breiddi eller gjeng ut — aldri ein rullestong." },
+        { nr: "06", tittel: "Fargen segjer kva", kva: "Forma segjer korleis: fylt, open, streka, prikka. Tvo kanalar som ikkje kolliderer, og som les seg i graatt." }
+      ],
+
+      fargar: [
+        { token: "--ark", verd: "var(--ark)", kva: "sida" },
+        { token: "--ark-djup", verd: "var(--ark-djup)", kva: "under" },
+        { token: "--flate", verd: "var(--flate)", kva: "kort, felt, faner" },
+        { token: "--blekk", verd: "var(--blekk)", kva: "teksti" },
+        { token: "--blekk-lys", verd: "var(--blekk-lys)", kva: "det andre" },
+        { token: "--blekk-svakt", verd: "var(--blekk-svakt)", kva: "utgjenge" },
+        { token: "--haarlina", verd: "var(--haarlina)", kva: "teiknar eit kort" },
+        { token: "--kant", verd: "var(--kant)", kva: "skil tvo bolkar" },
+        { token: "--klas", verd: "var(--klas)", kva: "medlemskapet · --merke" },
+        { token: "--togu", verd: "var(--togu)", kva: "klippekortet" },
+        { token: "--tuneup", verd: "var(--tuneup)", kva: "kurs, PT, rettleiding" },
+        { token: "--merke-svak", verd: "var(--merke-svak)", kva: "rekna: 12 % i ark" },
+        { token: "--faneflate", verd: "var(--faneflate)", kva: "rekna: lukka fana" },
+        { token: "--aatvaring", verd: "var(--aatvaring)", kva: "ugjenkalleg" }
+      ],
+
+      rangstigen: [
+        { steg: "h1", rolla: "sidetittelen — kvar du er. Éin per sida, alltid éin.", klasse: ".page-title" },
+        { steg: "h2", rolla: "ein bolk paa sida, med lina under", klasse: ".section-title" },
+        { steg: "h3", rolla: "eit kort i bolken, eller ei gruppa utan lina", klasse: ".undertittel" },
+        { steg: "h4", rolla: "ei rad eller eit felt i kortet — sjeldan; oftast gjer dt arbeidet", klasse: "—" }
+      ],
+
+      romtrappa: [
+        { token: "--rom-1", verd: ".25rem", tyder: "den minste lufti, der null hadde klistra" },
+        { token: "--rom-2", verd: ".5rem", tyder: "ting som les seg som eitt: ikon og ord, tal og eining" },
+        { token: "--rom-3", verd: ".75rem", tyder: "inne i ei gruppa: merkelapp og felt, knappar som høyrer saman" },
+        { token: "--rom-4", verd: "1rem", tyder: "millom kort i eit rutenet; yverskrift til innhald; skjemarader" },
+        { token: "--rom-5", verd: "1.5rem", tyder: "fyllet i ein boks; gapet millom spaltor" },
+        { token: "--rom-6", verd: "2rem", tyder: "fraa sidetittel ned til fyrste bolken" },
+        { token: "--rom-7", verd: "3rem", tyder: "millom bolkar paa sida" }
+      ],
+
+      ikkjerulla: [
+        { a: "rutenet som renn ut", b: "spaltor som deler breiddi, minmax(0, 1fr), og bolkar under kvarandre under ein brotstad" },
+        { a: "tabell som renn ut", b: "table-layout: fixed og tekst som bryt" },
+        { a: "fanor som renn ut", b: "dei bryt ned paa ei rad til — som fanor i tvo lag i ei mappa" },
+        { a: "leiding som renn ut", b: "ho bryt" }
+      ],
+
+      djupni: [
+        { ting: "felt", kva: "fell ned i ei grøft — myrk yverkant, ljos underleppe", token: "--skraakant" },
+        { ting: "knapp", kva: "fell paa ei kvelv — glim øvst, myrkare mot foten", token: "--knappedjup" },
+        { ting: "tom dag i vika", kva: "fell ned i eit hòl — same lippone, tvo pikslar inn", token: "--skraakant-djup" },
+        { ting: "ljosbandet", kva: "er sjølv kjelda", token: "--glodkjerne" },
+        { ting: "kort", kva: "fell paa flatt papir — ingen ting hender", token: "--haarlina" },
+        { ting: "det som flyt", kva: "nedfallsliste, dialog — den eine fallskuggen", token: "--skugge-flytande" }
+      ],
+
+      tende: tende,
+      klippknapp: tende > 0 ? "Bruk eit klipp" : "Fyll upp",
+      brukKlipp: () => this.setState({ tende: tende > 0 ? tende - 1 : alle }),
+      klippi: Array.from({ length: alle }, (_, i) => ({ bg: i < tende ? tent : sloknet })),
+
+      att: alle - this.state.brukte,
+      tangknapp: this.state.brukte < alle ? "Klipp eit hòl" : "Nytt kort",
+      klippTang: () => this.setState({ brukte: this.state.brukte < alle ? this.state.brukte + 1 : 0 }),
+      holRund: Array.from({ length: alle }, (_, i) => ({ stil: hol(i < this.state.brukte) })),
+      holNesten: Array.from({ length: alle }, (_, i) => ({ stil: hol(i < 9) })),
+      tilKomp: (e) => { e.preventDefault(); this.setState({ side: "komp" }); },
+
+      fanor: ["oversyn", "timeplan", "prisar"].map((id) => ({
+        namn: id === "oversyn" ? "Oversyn" : (id === "timeplan" ? "Timeplan" : "Prisar"),
+        valt: this.state.fane === id ? "true" : "false",
+        vel: () => this.setState({ fane: id })
+      })),
+      fanetekst: fanetekstar[this.state.fane],
+
+      timar: [
+        { tittel: "Vinyasa Flow", laerar: "Gry", tal: "18 av 18" },
+        { tittel: "Reformer", laerar: "Ida", tal: "3 av 4" },
+        { tittel: "Fascia Flyt", laerar: "Torunn", tal: "6 av 18" }
+      ],
+
+      royster: [
+        { rolla: "knapp", forma: "eit verb i setningsform, ingi sperring", dome: "«Lag timen»" },
+        { rolla: "merkelapp, fane, tabellhovud", forma: "68 % breidd, versalar, sperra — han namngjev ein kategori", dome: "«KAPASITET»" },
+        { rolla: "sidetittel", forma: "kvar du er, eitt til tri ord", dome: "«Timeplanen»" },
+        { rolla: "tomrom", forma: "kva som ikkje finst, i klaartekst", dome: "«Ingen timar denne veka»" },
+        { rolla: "aatvaring", forma: "kva som hender, fyre du trykkjer — ikkje etterpaa", dome: "«Dette kann ikkje gjerast um att.»" }
+      ],
+
+      provor: [
+        { gjer: "var(--produkt) i komponenten", ikkje: "eit hex-tal i eit style-attributt: det verkar i eitt tema og lyg i det hine" },
+        { gjer: "éin h1 per sida, med .page-title", ikkje: "tvo h1, eller ei yverskrift utan rolleklasse" },
+        { gjer: "line og ord i merkefargen paa hovudknappen", ikkje: "ei fylt flate: ein klump dreg auga fraa yverskrifti" },
+        { gjer: "rom millom bolkar", ikkje: "ein boks inni ein boks — daa er ingen av dei eit ting lenger" },
+        { gjer: "padding som veks naar noko vert valt", ikkje: "ein kant som kjem og gjeng: han flytter alt kring seg" },
+        { gjer: "ein umsetjingsnykel i alle tri locales", ikkje: "ein hardkoda streng i malen" },
+        { gjer: "tabular-nums i talspaltor", ikkje: "lesetekstskrift i ein kolonne med tal — daa dansar han" }
+      ],
+
+      tetting: [
+        { token: "--rom-5", no: "1.5rem", tett: "1.25rem", kvifor: "fyllet i ein boks. 1,5 rem er meir luft enn ei hårline treng." },
+        { token: "--rom-6", no: "2rem", tett: "1.5rem", kvifor: "tittel til fyrste bolk. Skilnaden mot rom-5 held." },
+        { token: "--rom-7", no: "3rem", tett: "2rem", kvifor: "millom bolkar. Tri rem er eit tomt band, ikkje eit skilje." },
+        { token: "--tittel", no: "3.4rem", tett: "2.718rem", kvifor: "e rem. Taket er rekna, ikkje valt — og 125 % breidd ber rangen resten av vegen." },
+        { token: "--bolktittel", no: "1.65rem", tett: "1.649rem", kvifor: "e^¾ ÷ e^¼ … same steget ned: 2,718 ÷ e^¼ ÷ e^¼. Han stod alt her, no er han rekna." },
+        { token: "--korttittel", no: "1.25rem", tett: "1.284rem", kvifor: "e^¼. Litt større enn fyrr: trappa skal vera jamn, og ho toler ikkje eit hopp nedst." },
+        { token: "--rom-1…4", no: "uendra", tett: "uendra", kvifor: "under 1 rem er finmotorikk. Rører du henne, kollapsar gruppone." },
+        { token: "grunnstorleik", no: "16px", tett: "17px", kvifor: "tettare rom gjev rom til større bokstav. Trappa gjeng i rem og fylgjer med av seg sjølv." }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

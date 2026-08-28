@@ -24,6 +24,15 @@ type Event struct {
 	// og det er regelen administrasjonen endrar. Timane ber regel-id-en
 	// so dei kann finna kvarandre att.
 	RuleID int64 `json:"rule_id"`
+	// Timen si eigi kapasitet, raa som ho stend i rada — 0 tyder «ingi
+	// eigi», og daa gjeld rommet sitt tal.
+	//
+	// `Capacity` yver er det utrekna talet og kann ikkje svara paa um
+	// det *er* eit yverstyrt tal: eit rom med tolv plassar og ei
+	// yverstyring paa tolv gjev det same svaret. Administrasjonen lyt
+	// kunna skilja dei tvo, so feltet kann syna rommet sitt tal som eit
+	// framlegg og timen sitt som ein verdi.
+	EigenPlassar int `json:"eigen_plassar"`
 	// Rommet. Kapasiteten kjem herifraa naar timen ikkje set si eigi.
 	RoomID       int    `json:"room_id"`
 	RoomName     string `json:"room_name"`

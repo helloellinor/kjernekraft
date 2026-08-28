@@ -8,11 +8,11 @@
      To faner: medlemskapa, og reglane for å byte mellom dei. Fanerekkja
      ligg inne i ei fane frå før; faner.js skil nivåa. */}}
 <div class="faneark">
-  {{template "faner" (dict "Faner" (list
+  {{template "faner" (dict "Tabs" (list
       (dict "Bolk" "medlemskap" "Namn" (t .Lang "admin.tab_membership"))
       (dict "Bolk" "klippekort" "Namn" (t .Lang "admin.tab_klippekort"))
       (dict "Bolk" "reglar" "Namn" (t .Lang "admin.tab_rules")))
-      "Merkelapp" (t .Lang "admin.tab_prices"))}}
+      "Label" (t .Lang "admin.tab_prices"))}}
 
   <div class="fanerom" data-bolk="medlemskap">
     <div data-bolk="medlemskap" id="bolk-medlemskap" role="tabpanel" tabindex="0">

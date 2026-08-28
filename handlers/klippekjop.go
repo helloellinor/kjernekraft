@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+
 	"kjernekraft/models"
 )
 
@@ -16,31 +18,46 @@ import (
 // hadde seks, basen hev tvo, og dei fire som ikkje fanst kunde ikkje
 // kjøpast i det heile — korti deira mangla pakke-id, so knappen enda i
 // «Kunne ikke finne pakke-ID».
-type Kategori struct {
-	Namn   string
-	Nykel  string // trygg for id-ar og spurnadsstrengen
-	Pakkar []models.KlippekortPackage
+type Category struct {
+	Name     string
+	Key      string // trygg for id-ar og spurnadsstrengen
+	Packages []models.KlippekortPackage
 }
 
-// Kategoriar grupperer pakkorne i den rekkjefylgdi basen gjev deim.
+// Categories grupperer pakkorne i den rekkjefylgdi basen gjev deim.
 // GetAllKlippekortPackages sorterer alt paa kategori og so pris, so
 // grupperingi treng berre fylgja rekkja.
-func Kategoriar(pakkar []models.KlippekortPackage) []Kategori {
-	var ut []Kategori
+func Categories(pakkar []models.KlippekortPackage) []Category {
+	var ut []Category
+	// Nykelen endar i ein id paa sida, og tvo like id-ar er ein id som
+	// ikkje peikar. Namn som skil seg berre i teiknsetjing — «Yoga» og
+	// «Yoga!» — vert til den same strengen, og eit namn utan bokstavar
+	// vert til ingen ting. Daa nummererer me i staden: nykelen skal
+	// alltid peika paa éin bolk.
+	sedd := map[string]bool{}
 	for _, p := range pakkar {
-		if len(ut) == 0 || ut[len(ut)-1].Namn != p.Category {
-			ut = append(ut, Kategori{Namn: p.Category, Nykel: nykel(p.Category)})
+		if len(ut) == 0 || ut[len(ut)-1].Name != p.Category {
+			n := slugify(p.Category)
+			if n == "" {
+				n = "bolk"
+			}
+			grunn := n
+			for i := 2; sedd[n]; i++ {
+				n = fmt.Sprintf("%s-%d", grunn, i)
+			}
+			sedd[n] = true
+			ut = append(ut, Category{Name: p.Category, Key: n})
 		}
 		i := len(ut) - 1
-		ut[i].Pakkar = append(ut[i].Pakkar, p)
+		ut[i].Packages = append(ut[i].Packages, p)
 	}
 	return ut
 }
 
-// nykel gjer eit kategorinamn um til noko som toler aa staa i ein id og
+// slugify gjer eit kategorinamn um til noko som toler aa staa i ein id og
 // i ein spurnadsstreng. «Reformer/Apparatus» vart elles tvo stigsteg i
 // ei adressa.
-func nykel(s string) string {
+func slugify(s string) string {
 	ut := make([]rune, 0, len(s))
 	fyrre := '-'
 	for _, r := range s {

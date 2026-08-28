@@ -12,10 +12,39 @@
      knappen enda i «Kunne ikke finne pakke-ID». Tolv av atten kort var
      daude paa den maaten.
 
-     No kjem alt herifraa: {{.Kategoriar}} er basen, og malen teiknar
+     No kjem alt herifraa: {{.Categories}} er basen, og malen teiknar
      berre det som er der. */}}
 
 <h1 class="page-title">{{t .Lang "navigation.punch_cards"}}</h1>
+
+{{/* Same forma som medlemskapssida: tittel, ei lina som seier kva som
+     stend til, og so fanone.
+
+     Lina stod inni kort-lista fyrr, som ein eigen komponent
+     (`.klippfyrst`). Ho svarar paa det ei lista med kort ikkje svarar
+     paa av seg sjølv — kva gjeng ut fyrst — og det er nettupp det ein
+     briefing er til for. Dagtalet stend paa kortet; her held det aa
+     segja kva som hastar og kor mykje som er att. */}}
+{{if .Naermast}}
+<p class="briefing">
+  {{template "setning" (dict "Lang" .Lang "Nykel" "klippekort.setning_kva" "Verd" .Naermast.Category "Slag" "ord")}}
+
+  {{if eq .KlippAtt 1}}
+    {{template "setning" (dict "Lang" .Lang "Nykel" "klippekort.setning_klipp_one" "Verd" .KlippAtt "Slag" "tal")}}
+  {{else}}
+    {{template "setning" (dict "Lang" .Lang "Nykel" "klippekort.setning_klipp_many" "Verd" .KlippAtt "Slag" "tal")}}
+  {{end}}
+</p>
+{{end}}
+
+<div class="faneark">
+{{template "faner" .}}
+<div class="fanerom" data-bolk="korta">
+
+<div data-bolk="korta" id="bolk-korta" role="tabpanel" tabindex="0">
+{{/* Avgiftene stend attmed korti og ikkje i ei eigi fane: dei tvo
+     svarar paa det same spursmaalet — kva dette kostar meg — og ein
+     les dei saman. Same grunnen som paa medlemskapssida. */}}
 
 <div class="two-column-grid">
     <section class="content-section">
@@ -32,31 +61,33 @@
         </div>
     </section>
 </div>
+</div>
 
+<div data-bolk="kjop-klipp" id="bolk-kjop-klipp" role="tabpanel" tabindex="0" hidden>
 <h2 class="section-title" id="kjop-klipp" data-fyll="{{t .Lang "klippekort.fill_up_prefix"}}">{{t .Lang "klippekort.buy"}}</h2>
 <p class="page-description">{{t .Lang "klippekort.buy_lead"}}</p>
 
-{{if .Kategoriar}}
+{{if .Categories}}
 <section class="content-section" id="steg-1">
     <h3 class="undertittel">{{t .Lang "klippekort.step_kind"}}</h3>
     {{/* Ingen ikon. Resten av huset hev ingen, og seks emoji var det
          einaste som skilde denne sida fraa dei hine. */}}
     <div class="kategorival">
-        {{range .Kategoriar}}
-        <button type="button" class="kort kategorikort" data-kategori="{{.Nykel}}"
-                data-namn="{{.Namn}}" aria-pressed="false">
-            <span class="kategorinamn">{{.Namn}}</span>
-            <span class="kategorital">{{len .Pakkar}} {{t $.Lang "klippekort.packages"}}</span>
+        {{range .Categories}}
+        <button type="button" class="kort kategorikort" data-kategori="{{.Key}}"
+                data-namn="{{.Name}}" aria-pressed="false">
+            <span class="kategorinamn">{{.Name}}</span>
+            <span class="kategorital">{{len .Packages}} {{t $.Lang "klippekort.packages"}}</span>
         </button>
         {{end}}
     </div>
 </section>
 
-{{range .Kategoriar}}
-<section class="content-section steg" id="pakkar-{{.Nykel}}" hidden>
-    <h3 class="undertittel">{{tf $.Lang "klippekort.step_count" .Namn}}</h3>
+{{range .Categories}}
+<section class="content-section steg" id="pakkar-{{.Key}}" hidden>
+    <h3 class="undertittel">{{tf $.Lang "klippekort.step_count" .Name}}</h3>
     <div class="packages-grid">
-        {{range .Pakkar}}
+        {{range .Packages}}
         <button type="button" class="kort package-card{{if .IsPopular}} framheva{{end}}"
                 data-pakke="{{.ID}}" data-klipp="{{.KlippCount}}"
                 data-pris="{{kroner .Price}}" data-namn="{{.Name}}"
@@ -80,15 +111,20 @@
          ikkje kopla paa: kjøpet skriv eit kort i basen og tek ingen
          pengar. Det er ei mellombels stoda, og ho skal staa der ein kann
          sjaa henne — ikkje syna seg som ei yverrasking i ein alert. */}}
-    <p class="kjopsmerknad">{{t .Lang "klippekort.no_payment_yet"}}</p>
+    <p class="merknad">{{t .Lang "klippekort.no_payment_yet"}}</p>
     <button type="button" class="btn-primary" id="kjop-knapp">{{t .Lang "klippekort.buy_button"}}</button>
-    <p class="kjopsvar" id="kjopsvar" role="status"
+    <p class="svar" id="kjopsvar" role="status"
        data-ok="{{t .Lang "klippekort.bought"}}"
        data-gale="{{t .Lang "klippekort.buy_failed"}}"></p>
 </section>
 {{else}}
 <p class="tomt">{{t .Lang "klippekort.no_packages"}}</p>
 {{end}}
+
+</div>
+
+</div>
+</div>
 
 {{template "klippekjop_scripts" .}}
 {{end}}

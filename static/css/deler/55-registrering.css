@@ -1,0 +1,77 @@
+/* ===================================================================
+   registrering, vilkaar og gløymt passord
+   Dei tri sidone som stod utanfor systemet: registreringi var ei rein
+   fil med Arial og eigne fargar, vilkaari vart skrivne ut som naken
+   HTML utan so mykje som eit <html>-merke, og gløymt-passord fanst
+   ikkje i det heile — lenkja paa innloggingi gav 404.
+   =================================================================== */
+.smal { max-width: 34rem; }
+
+.skjema { display: flex; flex-direction: column; gap: var(--rom-4); }
+.skjema .form-group { margin-bottom: 0; }
+
+/* Stjerna er ei paaminning, ikkje ei aatvaring. Ho skal ikkje ropa. */
+.paakravd { color: var(--blekk-svakt); }
+
+.bolk {
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  box-shadow: var(--skugge-kort);
+  padding: var(--rom-4) var(--rom-5) var(--rom-5);
+  display: flex; flex-direction: column; gap: var(--rom-4);
+  margin: 0;
+}
+.bolk legend {
+  font-family: var(--skrift-yver);
+  font-size: .82rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  padding: 0 var(--rom-2);
+}
+
+.avkryssing { display: flex; align-items: start; gap: var(--rom-3); }
+.avkryssing input[type="checkbox"] {
+  width: 1.05rem; height: 1.05rem; margin: .22rem 0 0; flex: none;
+  accent-color: var(--merke);
+}
+.avkryssing label { color: var(--blekk); font-size: .95rem; }
+
+/* Ein knapp som opnar noko, men som stend inne i ei setning. */
+.lenkjeknapp {
+  background: none; border: 0; padding: 0;
+  font: inherit; text-transform: none; letter-spacing: 0;
+  color: var(--merke); text-decoration: underline;
+  text-underline-offset: .16em; cursor: pointer;
+}
+.lenkjeknapp:hover { color: var(--merke-lys); background: none; border: 0; }
+
+.attende { margin-top: var(--rom-5); font-size: .92rem; }
+
+/* ---- skuffa ----
+   Det einaste paa heile arket som verkeleg flyt, og difor det einaste
+   som fær skugge. */
+.skuffa {
+  border: 1px solid var(--kant);
+  border-radius: 2px;
+  background: var(--flate);
+  color: var(--blekk);
+  box-shadow: var(--skugge-flytande);
+  max-width: min(44rem, 92vw);
+  max-height: 82vh;
+  padding: var(--rom-5);
+}
+.skuffa::backdrop { background: rgb(0 0 0 / .55); }
+.skuffa h2 { margin-bottom: var(--rom-4); }
+.skuffa form { margin-top: var(--rom-5); }
+.skuffa-tekst { overflow-y: auto; max-height: 56vh; }
+.skuffa-tekst h1, .skuffa-tekst h2, .skuffa-tekst h3 { margin: var(--rom-5) 0 var(--rom-2); font-size: 1.15rem; }
+.skuffa-tekst h1:first-child { margin-top: 0; }
+.skuffa-tekst p, .skuffa-tekst li { font-size: .93rem; color: var(--blekk-lys); }
+.skuffa-tekst ul, .skuffa-tekst ol { padding-left: 1.2rem; }
+
+/* ---- vilkaarssida i full breidd ---- */
+.vilkaar { max-width: 46rem; }
+.vilkaar h1, .vilkaar h2, .vilkaar h3 { margin: var(--rom-6) 0 var(--rom-3); }
+.vilkaar h1:first-child { margin-top: 0; }
+.vilkaar li { margin-bottom: var(--rom-2); }

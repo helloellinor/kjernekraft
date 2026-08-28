@@ -1,0 +1,139 @@
+/* ===================================================================
+   heimesida
+   To spalter som ber kvar sitt slag: til venstre det som endrar seg —
+   timane du skal på, timane som går i dag — og til høgre det som ligg
+   fast: medlemskapet og klippa.
+
+   Før stod alle fire i eit rutenett med like breie spalter. Ei rad i eit
+   rutenett er like høg som den høgaste cella si, so den korte fekk eit
+   hol under seg, og holet stod midt på sida.
+   =================================================================== */
+.heimeoppsett {
+  display: grid; gap: var(--rom-6) var(--rom-7);
+  /* 1,7 mot 1 gav ei sidespalta paa kring 23 rem, og der er klippekortet
+     for trongt: tittelen bryt i tvo og utlaupet fær ikkje rom. Naa er ho
+     brei nok til at kortet stend som paa klippekortsida — hovudspalta
+     toler det, ho ber lister og ikkje eit tal paa fire og ein halv rem. */
+  grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 1fr);
+  align-items: start;
+}
+.heimespalte { display: flex; flex-direction: column; gap: var(--rom-6); min-width: 0; }
+/* Ein tom kasse er ikkje ein bolk.
+   htmx-kassane stend i dokumentet fyre dei hev fenge noko aa syna — det
+   er med vilje, so sida ikkje hoppar naar svaret kjem (§3) — men ein
+   flex-child utan høgd et likevel *tvo* gap, eitt fyre seg og eitt
+   etter. Det er den doble margen under briefingen naar ein ikkje stend
+   paa nokon time.
+   `:has(*)` og ikkje `:empty`: kassane er ikkje tome for teikn, dei er
+   fulle av linjeskift fraa malen. Det som avgjer er om det stend eit
+   *element* i dei. */
+.heimespalte > div:not(:has(*)) { display: none; }
+/* Tittelen og briefingen les seg som éin blokk — overskrifta og setninga
+   som utdjupar henne — og står difor tettare enn bolkane under. Dei ber
+   sine eigne margar for det høvet dei står åleine øvst på ei side; her
+   er det hovudet som set lufta, so margane går ut (§6).
+
+   Hovudet er ein eigen boks av di `gap` gjeld likt mellom alle barna i
+   ein spalteflex. Alternativet var ein negativ marg som drog dei to
+   saman att, og ein negativ marg er ikkje eit rom — han er ei retting av
+   eit rom som var feil. */
+/* `--rom-5` og ikkje `--rom-3`: dei to skal lesast som éin blokk, men
+   tittelen er 3,4 rem med line-height 1,02, og under han er eit kvart
+   rom mindre enn dette ikkje luft — det er ei kollisjon. Framleis mindre
+   enn `--rom-6`, som er avstanden ned til fyrste bolken, so grupperinga
+   held (§6: rommet utanfor ein ting er større enn rommet inni). */
+.heimehovud { display: flex; flex-direction: column; gap: var(--rom-5); }
+.heimehovud > .page-title, .heimehovud > .briefing { margin: 0; }
+/* Sidespalta hadde ei mindre bolkoverskrift fyrr — eit trinn ned, av di
+   «Mitt medlemskap» braut i to linjer i ei spalte på femten rem. Spalta
+   er breiare no, og ei overskrift som er mindre enn dei andre seier at
+   bolken er mindre viktig. Det er han ikkje; han står berre til høgre.
+   Alle bolkoverskrifter er den same overskrifta. */
+/* Stødelina er ei bilinja til bolken under henne, ikkje ein bolk for seg
+   sjølv. Med det fulle bolkegapet under seg skuva ho fyrste yverskrifti
+   i sidespalta 55.6 px ned — 23.6 px lina sjølv og 32 px gapet — og daa
+   las sidespalta seg som om ho byrja seinare enn hovudspalta, endaa
+   baae kassane byrjar paa same høgd.
+
+   §6: lufta *utanfor* ein ting er større enn lufta inni honom. Lina og
+   bolken under er éin ting, so dei fær `--rom-2` og ikkje `--rom-6`.
+   Gapet i spalta er sett med `gap`, so det lyt trekkjast av her. */
+.heimespalte-sida > .stodalinje { margin-bottom: calc(var(--rom-2) - var(--rom-6)); }
+/* Bolkane står i ei spalte med luft imellom; marginen under kvar av dei
+   ville lagt seg oppå den lufta. */
+.heimeoppsett .content-section { margin-bottom: 0; }
+
+@media (max-width: 54rem) {
+  /* Éi spalte. Sidespalta legg seg under, og då er ho ikkje ei
+     sidespalte lenger — men rekkjefylgda er framleis rett: det du skal
+     på fyrst, det du eig etterpå. */
+  .heimeoppsett { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- timen som eit kort ----
+   Radene ber dei same klassane som i timeplanen — `.timerad`, same
+   markering, same reglar. Ein time skal kjennast som den same tingen
+   kvar ein ser honom, og det gjer han ikkje om kvar side skriv sine
+   eigne reglar for korleis han ser ut.
+
+   Det som skil er oppsettet: her er det éin dag og ikkje sju, so namnet
+   står til venstre og merket til høgre — og her står timen åleine i ei
+   liste, ikkje i eit rutenett, so han får vera eit kort.
+
+   `.kort` og ikkje ein ny boks: huset teiknar alt den same boksen for
+   hand sju stader utanom `.kort`, og det er den vanen som lagar nye
+   eingongsklassar (§10). Raden tek klassen og overstyrer berre fyllet.
+   `display` og `gap` treng ikkje overstyrast — `.timerad` står i ei
+   seinare fil enn `.kort`, so rutenettet vinn av seg sjølv. */
+.timeliste { display: flex; flex-direction: column; gap: var(--rom-2); }
+
+.timerad.heimerad {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--rom-4);
+  /* Vengen ber slaget, ikkje produktet.
+     Kortet ligg i vinstre spalta og medlemskortet i høgre, so dei tvo
+     vengene stend på same skjermen — sjå åtvaringi i 00-token.css.
+
+     Fallet er `--haarlina` og ikkje `--merke`: eit slag huset ikkje
+     kjenner har ingen farge, og turkisen ville gjort det til yoga.
+     Ein grå venge seier «ingen farge», som er sant. */
+  border-left: 3px solid var(--slagfarge, var(--haarlina));
+  /* `.timerad:last-child` slår botnkanten av i timeplanen, der raden er
+     ei linje i ei liste og den siste linja ikkje skal ha ei under seg.
+     Her er kanten ikkje ei skiljelinje — han er kanten på kortet. */
+  border-bottom: 1px solid var(--haarlina);
+  /* Fyllet.
+     Loddrett: ulikt i dei tvo endane, so *avstanden* vert lik. Det som
+     stikk lengst ned er ikkje kassen på merket — det er plassmerket,
+     som står med midten på hyrna og difor heng om lag 0,10 av breidda
+     under kassen. Med same fyllet i båe endar krysste bobla kanten.
+     Botnfyllet lyt difor rydda henne først, og *so* leggja til den same
+     lufta som står over fana.
+     Vassrett: `--rom-4` og ikkje `--rom-5` som på eit vanleg kort. Ei
+     liste er tettare enn eit kort som står åleine, og fyllet lyt like
+     fullt vera breidt nok til at plassmerket — som heng ut til høgre av
+     same grunn som det heng ned — ikkje kjem borti kanten.
+     Byter storleiken på bobla (`.plettmerke` i 30-timeplanen.css), lyt
+     båe måtast på nytt. */
+  padding: var(--rom-1) var(--rom-4) var(--rom-3);
+  /* Båe står frå toppen. `center` la teksti midt i ei rad som merket
+     hadde gjort høg, og daa flaut yverskrifti eit stykke ned frå lina
+     ho høyrer til. */
+  align-items: start;
+}
+
+.timerad.heimerad .dagmerke {
+  align-self: start;
+  /* Ingen marg. Merket står som det er: SVG-en ber si eigi eining i båe
+     endar, og kortet legg fyllet sitt til utanpå. */
+}
+/* Teksti ber ingi fylling og står midt i rada.
+   Ho *må* vera lægre enn kassen: er ho høgare, er det ho som set høgdi
+   på rada, og daa held korkje toppen eller botnen på kassen kanten
+   lenger. Med fyll på `--rom-3` var ho 86 px mot kassen sine 73. */
+.timerad.heimerad .timekva { padding: 0; align-self: center; }
+.timerad.heimerad .timetittel { font-size: 1.35rem; }
+.timerad.heimerad.umme { opacity: .5; }
+/* Merket ber dagen, klokkeslettet og plassane. Difor står ingen av dei
+   i teksten — det ville vore det same to gonger. */
+.timerad.heimerad .dagmerke { --merkestorleik: 4.4rem; }

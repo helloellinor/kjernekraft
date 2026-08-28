@@ -18,8 +18,8 @@
 {{define "ledig_plass_module"}}
 <div class="content-section">
     <h2 class="section-title">{{t .Lang "dashboard.ledig_plass"}}</h2>
-    {{if .LedigeFramsyningar}}
-        {{template "timeliste" (dict "Lang" .Lang "Rader" .LedigeFramsyningar)}}
+    {{if .AvailableSessions}}
+        {{template "timeliste" (dict "Lang" .Lang "Rader" .AvailableSessions)}}
     {{else}}
         <p class="no-data">{{t .Lang "dashboard.ingen_ledig_plass"}}</p>
     {{end}}

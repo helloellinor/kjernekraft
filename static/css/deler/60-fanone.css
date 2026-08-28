@@ -1,0 +1,106 @@
+/* ===================================================================
+   fanone — ein skyvar, ikkje ei mappa
+
+   Dei var mapper fyrr: lina gjekk attum dei lukka og var *broti* under
+   den opne, og fire tal (`--fanekant`, `--fot`, `--fotfarge`, `--loft`)
+   heldt brotet i hop. Det var fint, og det var feil paa tvo maatar.
+
+   Stilboki §5 segjer at versalar + sperring + 68 % breidd er språket
+   til noko som *namngjev ein kategori* — «aldri ein knapp». Ei fana er
+   ein knapp: `<button role="tab">`. Ho las seg som ei merkelapp, og
+   difor som noko ein *les* i staden for noko ein *trykkjer*.
+
+   Og §6 segjer at det er høgst éin maala kasse millom arket og
+   innhaldet. Mappa hadde eit rom med kant kring seg, og inni det stod
+   korti — kasse i kasse.
+
+   No er det ein skyvar med posisjonar. Sporet er ei renne
+   (`--skraakant`, same ljoset som eit felt) og den valde posisjonen er
+   ein kuppel som ligg i henne (`--knappedjup`, same ljoset som ein
+   knapp). Ingi nye token, ingen ny farge, og forma segjer kva ho er:
+   noko som stend i éi av fleire stillingar.
+
+   Rommet under er sida sjølv. Ingen kant, ingen kasse.
+
+   `.faneark` hev ingen regel her, og det er med vilje: han maalar ikkje
+   og legg ikkje ut. Han er *avgrensingi* — `faner.js` nyttar
+   `closest(".faneark")` til aa halda tvo fanerekkjor fraa aa stela
+   fanor fraa kvarandre (administrasjonen hev ei rekkja inni fana
+   «Prising»). Slett honom ikkje som ein leivning; daa opnar alle
+   bolkarne seg paa ein gong.
+   =================================================================== */
+.faner {
+  display: inline-flex; flex-wrap: wrap;
+  gap: 0; padding: var(--renne); margin: 0 0 var(--rom-5);
+  list-style: none;
+  border: 1px solid var(--haarlina);
+  border-radius: var(--rund-knapp);
+  background: var(--ark-djup, var(--ark));
+  box-shadow: var(--skraakant);
+}
+
+.fane {
+  flex: none;
+  font-family: var(--skrift); font-size: .95rem; font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+  padding: var(--knapp-loddrett) var(--rom-5);
+  border: 1px solid transparent;
+  border-radius: var(--rund-knapp);
+  background: none;
+  color: var(--blekk-lys);
+  cursor: pointer; white-space: nowrap; line-height: 1.25;
+}
+.fane:hover { color: var(--blekk); }
+
+/* Den valde posisjonen er ein kuppel: glim paa yversida, myrkare mot
+   foten. Det er den same tvo-lags forma som `.btn`, av di det er den
+   same tingen — noko som stikk upp or flata. */
+.fane[aria-selected="true"] {
+  color: var(--blekk);
+  border-color: var(--kant);
+  background:
+    linear-gradient(to bottom,
+      var(--glans) 0%,
+      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
+      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
+      color-mix(in srgb, var(--glans) 6%, transparent) 58%,
+      transparent 72%),
+    linear-gradient(to bottom,
+      var(--flate) 0%,
+      color-mix(in srgb, var(--blekk) 7%, var(--flate)) 100%);
+  box-shadow: var(--knappedjup);
+}
+.fane:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
+
+/* Rommet er arket. Kanten og fyllet gjekk ut med mappa (§6). */
+.fanerom { border: 0; background: none; padding: 0; }
+
+/* Alle bolkarne stend i dokumentet heile tidi; det er berre synet som
+   skifter. Vart dei bytte ut, laut nettlesaren leggja sida ut paa nytt
+   for kvart klikk, og daa hoppar det. Kva bolk som er synleg, avgjer
+   faner.js med `hidden`. */
+
+/* Fyrste yverskrifti i ein bolk stend alt under skyvaren og treng ikkje
+   luft yver seg. */
+.fanerom > [data-bolk] > :first-child { margin-top: 0; }
+
+/* Smaating som fyrr stod som style-attributt med sine eigne hex-tal. */
+/* Kursiv finst ingen annan stad i huset — korkje i ei yverskrift, eit
+   merke eller ei lina brødtekst — og ei kursiv line er difor ikkje
+   «dempa», ho er *framand*. Fargen dempar henne alt. */
+.tomt { color: var(--blekk-svakt); }
+
+/* ---- den tome vika ----
+   Ei line i hyrna av eit stort tomt felt les seg som noko som er gløymt
+   att, ikkje som eit svar. Ho stend midt i det rommet timarne vilde
+   hatt no, i yverskriftsskrifta, med ei lettare line under. */
+/* `.tomveke` stod her: ein fjorten rem høg midtstilt kasse med eigen
+   yverskriftsgrad, for ei vika utan timar. Han er burte. Eit tomrom er
+   ei setning um kva som stend til, og huset hev alt ei form for det —
+   briefingen. Sjaa week-grid.html. */
+
+.midt { text-align: center; }
+
+/* Det framheva valet i medlemskapsveljaren. Han hadde ein oransje kant
+   og ein kvit fargeovergang; no ber han produktfargen som alt anna. */
+

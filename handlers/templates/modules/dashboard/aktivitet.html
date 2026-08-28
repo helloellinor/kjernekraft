@@ -1,49 +1,112 @@
 {{define "aktivitet_bolk"}}
-{{/* Aktiviteten. To bilete av det same halve aaret.
+{{/* Aktiviteten. Eit aar i 52 prikkar, og so kvar maanad som ein bjelke.
 
-     Fyrst kvar einskild dag som ei rute i eit rutenet — det er der ein
-     ser rytmen: tvo faste dagar i vika, eller tri vikor utan noko.
-     So kvar maanad som ein bjelke, som er det same tale summert til noko
-     ein kann samanlikna paa tvers.
+     Prikkane var 182 ruter i sju rader fyrr — kvar dag i eit halvt aar.
+     Det svara paa «kva dagar», og det er ikkje spursmaalet ein stiller
+     seg paa heimesida: ein vil vita um ein held det gaaende. Ei vika er
+     den minste eininga det spursmaalet hev eit svar i.
 
-     Ingen av deim hev ei fargeforklaring med namn i, av di det ikkje er
-     namn her: det er *ei* mengd i eitt trinnvis blekk. Skalaen nedanfor
-     kartet segjer kva vegen mørkare gjeng, og det er alt ho treng. */}}
+     Prikken ber tvo ting no. Lysstyrken er *kor mange* gonger: ei vika
+     ein var innom er tend, tri gonger er full styrke. Fargen er *kva
+     slag* trening det var mest av den vika. To kanalar, so dei kann
+     seiast samstundes utan aa gaa i vegen for kvarandre (§1). */}}
 <div class="content-section aktivitet">
     <h2 class="section-title">{{t .Lang "aktivitet.tittel"}}</h2>
 
-    <p class="aktivitet-samandrag">{{.Aktivitet.Samandrag}}</p>
+    <p class="aktivitet-samandrag">{{.Activity.Summary}}</p>
 
-    <svg class="varmekart" viewBox="{{.Aktivitet.ViewBox}}" role="img"
-         aria-label="{{.Aktivitet.Samandrag}}" preserveAspectRatio="xMinYMid meet">
-        {{range .Aktivitet.Maanadar}}<text class="varmemaanad" x="{{.X}}" y="-4">{{.Namn}}</text>{{end}}
-        {{range .Aktivitet.Rutar}}
-        <rect class="varmerute niv-{{.Niva}}" x="{{.X}}" y="{{.Y}}"
-              width="11" height="11" rx="2"><title>{{.Merkelapp}}</title></rect>
+    {{/* Yverskrifti og figuren hennar er ei gruppa. Utan det stod
+         yverskrifti like langt fraa biletet under som fraa biletet
+         yver, og daa veit ein ikkje kva ho namngjev (§6). */}}
+    <div class="aktivitet-gruppe">
+    <h3 class="undertittel">{{t .Lang "aktivitet.per_veke"}}</h3>
+
+    {{/* Brettet i vestibylen: eit bord med hol bora i, og ein pinne i
+         dei hola som er brukte. Hòlet er den forma huset alt hev —
+         `--skraakant-djup`, myrk yverleppe og ljos underleppe, av di
+         ljoset kjem ovanfraa (§2) — den same som den tome dagen i vika
+         og det klipte hakket. Pinnen er ein kuppel som ligg i hòlet,
+         same ljoset som ein knapp.
+
+         Rader og kolonnar kjem fraa Go; her stend berre hòli. */}}
+    <div class="brett" role="img" aria-label="{{.Activity.Summary}}"
+         style="--kolonnar: {{printf "%.0f" .Activity.Width}}">
+        {{range .Activity.Cells}}
+        <i class="hol{{if .Level}} pinne niv-{{.Level}}{{end}}{{if .Klasse}} {{.Klasse}}{{end}}"
+           title="{{.Label}}"></i>
         {{end}}
-    </svg>
+    </div>
 
     <p class="varmeskala">
         <span>{{t .Lang "aktivitet.mindre"}}</span>
-        <span class="varmeprikk niv-0"></span><span class="varmeprikk niv-1"></span><span class="varmeprikk niv-2"></span><span class="varmeprikk niv-3"></span><span class="varmeprikk niv-4"></span>
+        <span class="hol"></span>
+        <span class="hol pinne niv-1"></span><span class="hol pinne niv-2"></span><span class="hol pinne niv-3"></span>
         <span>{{t .Lang "aktivitet.meir"}}</span>
     </p>
+    </div>
 
+    <div class="aktivitet-gruppe">
     <h3 class="undertittel">{{t .Lang "aktivitet.per_maanad"}}</h3>
-    <svg class="bjelkerad" viewBox="{{.Aktivitet.BjelkeViewBox}}" role="img"
+    <svg class="bjelkerad" viewBox="{{.Activity.BarViewBox}}" role="img"
          aria-label="{{t .Lang "aktivitet.per_maanad"}}" preserveAspectRatio="xMinYMax meet">
-        {{range .Aktivitet.Bjelkar}}
+        {{/* Gradienten stend *inne* i figuren og ikkje i eit delt
+             `<defs>`: `stop-color: var(--glans)` løyser seg der han er
+             skriven, so eitt delt sett hadde gjeve kvar figur
+             rot-temaet sine fargar (§9, same grunnen som dagmerket). */}}
+        <defs>
+            <linearGradient id="bjelkeglim" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"  class="glim-0"/>
+                <stop offset="20%" class="glim-1"/>
+                <stop offset="42%" class="glim-2"/>
+                <stop offset="58%" class="glim-3"/>
+                <stop offset="72%" class="glim-4"/>
+                <stop offset="88%" class="glim-5"/>
+                <stop offset="100%" class="glim-6"/>
+            </linearGradient>
+            {{/* Kanten hev sin eigen gradient av di lippa paa knappen
+                 ikkje er jamn: ljos paa toppen, ingen ting paa sidone,
+                 svak attglans nedst. Ein `stroke` i éin farge hadde
+                 vorte ei ramme. */}}
+            {{/* Runningi gjeng paa tvers (`x2="1"`) av di ho er
+                 forma paa staven og ikkje retningi paa ljoset. */}}
+            <linearGradient id="bjelkerunding" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%"   class="rund-0"/>
+                <stop offset="6%"   class="rund-1"/>
+                <stop offset="18%"  class="rund-2"/>
+                <stop offset="34%"  class="rund-3"/>
+                <stop offset="52%"  class="rund-4"/>
+                <stop offset="72%"  class="rund-5"/>
+                <stop offset="90%"  class="rund-6"/>
+                <stop offset="100%" class="rund-7"/>
+            </linearGradient>
+            <linearGradient id="bjelkekant" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   class="kant-0"/>
+                <stop offset="6%"   class="kant-1"/>
+                <stop offset="22%"  class="kant-2"/>
+                <stop offset="86%"  class="kant-3"/>
+                <stop offset="100%" class="kant-4"/>
+            </linearGradient>
+        </defs>
+        {{range .Activity.Bars}}
         <g class="bjelkegruppe">
-            <title>{{.Merkelapp}}</title>
-            {{/* Ein bjelke med noko i fær runda dataende og flat fot:
-                 han er forankra i grunnlina, og runda i baae endar
-                 hadde late han flyta. */}}
-            {{if .D}}<path class="bjelke" d="{{.D}}"/>{{end}}
-            {{if .Tal}}<text class="bjelketal" x="{{.TalX}}" y="{{.TalY}}">{{.Tal}}</text>{{end}}
-            <text class="bjelkenamn" x="{{.TalX}}" y="78">{{.Namn}}</text>
+            <title>{{.Label}}</title>
+            {{/* Bjelken er delt i dei slagi maanaden var sett saman av,
+                 med dei same fargane som brettet yver. Berre den øvste
+                 biten fær runda dataende: dei under er midt inne i
+                 bjelken, og runda i baae endar hadde late deim sjaa ut
+                 som eigne bjelkar. */}}
+            {{range .Bitar}}<path class="bjelke {{.Klasse}}" d="{{.D}}"><title>{{.Label}}</title></path>{{end}}
+            {{/* Glimet ligg yverst og fangar ikkje peikaren: bjelken er
+                 ein ting som stikk upp or arket, som knappen og pinnen,
+                 og ein ting som stikk upp fær ljos ovanfraa (§2). */}}
+            {{if .GlimD}}<path class="bjelkerunding" d="{{.GlimD}}"/>
+            <path class="bjelkeglim" d="{{.GlimD}}"/>{{end}}
+            {{if .Value}}<text class="bjelketal" x="{{.ValueX}}" y="{{.ValueY}}">{{.Value}}</text>{{end}}
+            <text class="bjelkenamn" x="{{.ValueX}}" y="{{$.Activity.BarNameY}}">{{.Name}}</text>
         </g>
         {{end}}
     </svg>
+    </div>
 
     <p class="aktivitet-grunnlag">{{t .Lang "aktivitet.grunnlag"}}</p>
 </div>

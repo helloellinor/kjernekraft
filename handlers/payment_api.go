@@ -11,39 +11,28 @@ import (
 	"time"
 )
 
-// PaymentMethodsHandler provides HTMX endpoint for user's payment methods
-func PaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+// Betalingskort er eit kort slik sida syner det: sjølve kortet, og
+// merket skrive som folk kjenner det att.
+type Betalingskort struct {
+	models.PaymentMethod
+	Merke string
+}
 
-	// For now, return mock data since we don't have Stripe integration yet
-	paymentMethods := []models.PaymentMethod{
-		{
-			ID:          1,
-			UserID:      user.ID,
-			Type:        "card",
-			Last4:       "4242",
-			Brand:       "visa",
-			ExpiryMonth: 12,
-			ExpiryYear:  2025,
-			IsDefault:   true,
-			Active:      true,
-		},
-		{
-			ID:          2,
-			UserID:      user.ID,
-			Type:        "card",
-			Last4:       "5555",
-			Brand:       "mastercard",
-			ExpiryMonth: 8,
-			ExpiryYear:  2026,
-			IsDefault:   false,
-			Active:      true,
-		},
+// betalingskorta gjev korta brukaren hev.
+//
+// Dei er paadikta enno — Stripe er ikkje kopla paa — og det er nettupp
+// difor dei lyt koma fraa éin stad. Briefingen paa sida tel dei og
+// brotstykket teiknar dei; tvo kjeldor hadde sagt kvar sitt tal, og
+// «Du har 2 kort» yver ei tom lista er verre enn ingen briefing.
+func betalingskorta(user *models.User) []Betalingskort {
+	if user == nil {
+		return nil
+	}
+	raa := []models.PaymentMethod{
+		{ID: 1, UserID: user.ID, Type: "card", Last4: "4242", Brand: "visa",
+			ExpiryMonth: 12, ExpiryYear: 2025, IsDefault: true, Active: true},
+		{ID: 2, UserID: user.ID, Type: "card", Last4: "5555", Brand: "mastercard",
+			ExpiryMonth: 8, ExpiryYear: 2026, IsDefault: false, Active: true},
 	}
 
 	// Merket vert skrive som folk kjenner det att — «Visa», ikkje
@@ -52,22 +41,27 @@ func PaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
 	merke := map[string]string{
 		"visa": "Visa", "mastercard": "Mastercard", "amex": "American Express",
 	}
-	type kort struct {
-		models.PaymentMethod
-		Merke string
-	}
-	rader := make([]kort, 0, len(paymentMethods))
-	for _, p := range paymentMethods {
+	ut := make([]Betalingskort, 0, len(raa))
+	for _, p := range raa {
 		namn, finst := merke[p.Brand]
 		if !finst {
 			namn = p.Brand
 		}
-		rader = append(rader, kort{p, namn})
+		ut = append(ut, Betalingskort{p, namn})
 	}
+	return ut
+}
 
+// PaymentMethodsHandler provides HTMX endpoint for user's payment methods
+func PaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	teiknFragment(w, "betalingsmaatar", map[string]interface{}{
 		"Lang": GetLanguageFromRequest(r),
-		"Kort": rader,
+		"Kort": betalingskorta(user),
 	})
 }
 

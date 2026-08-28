@@ -1,0 +1,92 @@
+/* ===================================================================
+   medlemskapet mitt
+   Tre faner som svarar på kvar sitt spørsmål: kva du har, kva du kan
+   byte til, og kva du har betalt.
+
+   Ingen kasse rundt medlemskapet. Ein kasse skil eitt kort frå eit
+   anna, og her finst det berre eitt — du kan ikkje ha to medlemskap på
+   ein gong. Fana er alt ein kasse; eit kort inni han hadde vore ein
+   kasse i ein kasse.
+   =================================================================== */
+
+
+.medlemsknappar { display: flex; gap: var(--rom-3); flex-wrap: wrap; margin-top: var(--rom-5); }
+
+/* ---- bytelista ----
+   Eit byte er ikkje eit kjøp. Du har alt eit medlemskap, så det som tel
+   er *skilnaden* frå det du har — ikkje prisen i seg sjølv. Difor er
+   dette ei liste med skilnader og ikkje eit rutenett med prislappar.
+
+   Ingen fylt knapp: Arket seier at hovudhandlinga er den fylte og at det
+   er berre éi. Her finst inga hovudhandling — kva du byter til, er ditt
+   val og ikkje vårt. Ein fylt knapp på éi av radene hadde vore ei
+   tilråding skriven med form i staden for ord. */
+.bytehovud { color: var(--blekk-lys); margin: 0 0 var(--rom-5); max-width: 60ch; }
+.bytehovud strong { color: var(--blekk); font-weight: 500; }
+
+.byterad {
+  display: grid; gap: var(--rom-4); align-items: baseline;
+  grid-template-columns: minmax(9rem, 1.1fr) auto minmax(12rem, 1.4fr) auto;
+  padding: var(--rom-4) 0;
+  border-top: 1px solid var(--haarlina);
+}
+.byterad:last-of-type { border-bottom: 1px solid var(--haarlina); }
+.byterad form { margin: 0; }
+
+.bytenamn {
+  font-family: var(--skrift-yver); font-size: 1.15rem;
+  font-stretch: var(--vidd-yver); font-weight: 500;
+}
+.bytepris { font-family: var(--skrift-tal); font-size: 1.05rem; white-space: nowrap; }
+.bytesetning { color: var(--blekk-lys); font-size: .95rem; }
+
+/* Skilnaden er det einaste talet som er verdt ein farge: mindre er
+   merkefargen, meir er berre blekk. Åtvaringsfargen høyrer ikkje heime
+   her — eit dyrare medlemskap er ikkje noko som gjekk gale. */
+.bytemindre { color: var(--merke); }
+
+/* Ei stengd rad ber ikkje merkefargen. Fargen tyder «dette er i live»,
+   og ein pris du ikkje kan velje enno, er ikkje det. Grunnen står i
+   rada, og vegen ut av henne er ei lenkje — ei rad som berre er borte,
+   lærer deg ingenting. */
+.byterad.stengd .bytenamn,
+.byterad.stengd .bytepris,
+.byterad.stengd .bytesetning,
+.byterad.stengd .bytemindre { color: var(--blekk-svakt); }
+
+/* «Set studentstatus» er ei lenkja i markupen, men det er ein handling
+   for den som les: han gjer det same som «Byt til dette» i rada ovanfor
+   — han tek deg dit du kan gjera noko. Ei understreka lenkja attmed ein
+   kapsel les seg som noko mindre, og det er ho ikkje.
+   Difor stend `a.byteveg` i den same regelen som `.btn` (sjaa
+   15-knappen.css) og arvar line, kuppel og djupn derifraa. Her stend
+   berre det som er hennar eige. */
+a.byteveg { white-space: nowrap; }
+
+@media (max-width: 46rem) {
+  /* Fire spalter paa ein telefon vert fire ord under kvarandre. Rada
+     vert éi spalta, og rekkjefylgda vert den ein les i: kva det heiter,
+     kva som endrar seg, kva det kostar, og so knappen.
+
+     Prisen stend rett yver knappen med eit lite rom imillom. Han stod
+     yverst til høgre fyrr, med setningi millom seg og knappen — og daa
+     laag talet og handlingi som gjeld talet kvar sin stad paa skjermen.
+     `order` og ikkje ny markup: det er den same rada, berre lesi
+     nedyver.
+
+     Namnet og setningi bryt fritt; prisen og knappen gjer det ikkje, og
+     dei treng det ikkje — dei stend aaleine paa kvar si lina. */
+  .byterad {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--rom-2);
+    align-items: start;
+  }
+  .bytenamn    { order: 1; }
+  .bytesetning { order: 2; grid-column: 1; }
+  .bytepris    { order: 3; justify-self: end; }
+  .byterad form,
+  .byterad .byteveg { order: 4; justify-self: end; }
+  /* Tettare enn resten: talet og knappen som gjeld det høyrer saman. */
+  .byterad form, .byterad a.byteveg { margin-top: calc(var(--rom-1) - var(--rom-2)); }
+}
+}

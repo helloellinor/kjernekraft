@@ -86,7 +86,10 @@ func TestHelsingaStendYverArketOgIkkjeInniDet(t *testing.T) {
 	}
 	html := ut.String()
 
-	helsing := strings.Index(html, "tal-setning")
+	// Klassa heiter `briefing`, og lenkja inni henne `briefing-lenkje`.
+	// Eit laust sok etter «briefing» finn baae, so det lyt vera heile
+	// klasseverdet det vert leita etter.
+	helsing := strings.Index(html, `class="briefing"`)
 	arket := strings.Index(html, `class="faneark"`)
 	if helsing < 0 {
 		t.Fatal("helsinga vart ikkje teikna i det heile")
@@ -100,7 +103,7 @@ func TestHelsingaStendYverArketOgIkkjeInniDet(t *testing.T) {
 
 	// Ho skal staa *ein* stad. Vart ho ikkje teki ut or fana daa ho
 	// vart flutt upp, stend ho tvo gonger og tel same huset tvo gonger.
-	if n := strings.Count(html, "tal-setning"); n != 1 {
+	if n := strings.Count(html, `class="briefing"`); n != 1 {
 		t.Errorf("helsinga stend %d gonger, ikkje ein", n)
 	}
 

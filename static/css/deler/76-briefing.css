@@ -1,0 +1,79 @@
+/* ===================================================================
+   briefing — stoda sagd som ei setning
+   Ho heitte `.tal-setning` før. Namnet sa kva ho var laga av og ikkje
+   kva ho gjer, og «setning» var alt teke: `.setning` er skjemaet ein
+   *skriv* i. Dette er det motsette — ei lina ein *les*, som fortel
+   korleis det står til før du har opna noko. Difor briefing.
+
+   Tre flisar med eit tal og ei merkelapp under er ein måte å unngå å
+   skrive ei setning på. Lesaren må setje «6» og «TOTALT ANTALL BRUKERE»
+   saman sjølv; «6 medlemer» er alt sett saman.
+
+   Éi røyst ber setninga, og eitt einaste ord steg ut av henne: talet.
+   Ordet attmed stod smalt og med store bokstavar før — men det er nett
+   den røysta fanene har, og fanene står to centimeter under. To like
+   røyster oppå kvarandre las seg som ei rad faner til, ikkje som ei
+   setning. No er ordet berre mørkare enn resten av lina: det høyrer til
+   talet utan å seie det med ei ny skrift.
+
+   Difor står Union Gothic i to breidder på sida og ikkje i tre: 125 %
+   der noko er ei overskrift eller eit tal, 68 % på faner og
+   bolkoverskrifter. Setninga sjølv er lesetekst. */
+.briefing {
+  /* Ho stod paa 40ch — smalare enn lesemaalet elles i huset
+     (`.page-description` er 62ch) — og braut difor tidleg. Tri liner
+     for fire fakta, medan den høgre halvdelen av bandet stod tom.
+
+     No tek ho breidda ho har. Skriftgraden er fast og ikkje ein
+     `clamp`: ho er ei lina ein les, ikkje ei yverskrift, og ei
+     lesetekst som veks med glaset les seg som ei yverskrift. */
+  font-size: 1.15rem;
+  line-height: 1.45;
+  color: var(--blekk-lys);
+  /* Ho stend mellom overskrifta og det som kjem under, og treng luft
+     til begge sider — mest ned, so det under byrjar for seg sjølv. */
+  margin: var(--rom-3) 0 var(--rom-6);
+}
+
+.briefing .tal {
+  font-family: var(--skrift-yver);
+  /* Same breidda som sidetittelen. Talet stod på 150 % før, altså
+     breiare enn overskrifta over det — og breidd tyder rang her. */
+  font-stretch: var(--vidd-tittel); font-weight: 700;
+  font-size: 1.15em; line-height: 1;
+  color: var(--blekk);
+  font-variant-numeric: tabular-nums;
+  margin-right: .06em;
+}
+
+.briefing .ord {
+  font-weight: 500;
+  color: var(--blekk);
+}
+
+/* Det som ventar paa deg er det einaste ein kann gjera noko med, og
+   difor det einaste som er ei lenkja. */
+.briefing-lenkje { text-decoration: none; border-bottom: 2px solid var(--togu); }
+.briefing-lenkje .tal { color: var(--togu); }
+.briefing-lenkje:hover .tal, .briefing-lenkje:hover .ord { color: var(--togu); }
+
+/* ---- belastningar ----
+   Same mellomrom som klippekorti paa hi sida. Dei stod med ulik luft og
+   las seg difor som tvo ulike slag lister. */
+.charges-list { display: flex; flex-direction: column; gap: var(--rom-3); }
+.charge-item { padding: var(--rom-3) var(--rom-4); }
+.charge-line { margin: 0; font-size: .95rem; color: var(--blekk-lys); max-width: none; }
+.charge-amount {
+  font-family: var(--skrift-tal); font-size: 1.05rem; font-weight: 400;
+  color: var(--blekk);
+}
+.charge-card { font-family: var(--skrift-tal); font-size: .88rem; }
+.charge-what { color: var(--blekk); }
+.charge-meta {
+  margin: var(--rom-1) 0 0; display: flex; gap: var(--rom-3);
+  font-size: .8rem; color: var(--blekk-svakt);
+}
+/* Ei vellukka betaling treng ikkje segja at ho gjekk bra — det er berre
+   naar noko *ikkje* gjekk at ein vil vita det. */
+.charge-status { color: var(--aatvaring); }
+.charge-status.pending { color: var(--blekk-lys); }

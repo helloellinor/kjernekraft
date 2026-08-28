@@ -1,0 +1,18 @@
+/* ===================================================================
+   maalveljaren
+   Ingi flagg. Eit flagg er eit land, ikkje ei skriftform — og det
+   danske flagget paa bokmaal segjer det tydelegare enn eg kann.
+   =================================================================== */
+.language-selector, .login-language-selector {
+  display: flex; align-items: center; gap: var(--rom-2);
+  font-size: .82rem;
+}
+.language-selector select {
+  width: auto; min-width: 0;
+  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
+  font-size: .82rem;
+  border-color: transparent; background-color: transparent;
+  color: var(--blekk-lys);
+  background-position: right .45rem top 50%;
+}
+.language-selector select:hover { border-color: var(--haarlina); color: var(--blekk); }

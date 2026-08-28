@@ -1,13 +1,51 @@
 {{define "content"}}
 
 <h1 class="page-title">{{t .Lang "payments.title"}}</h1>
-<p class="page-description">
-    {{t .Lang "payments.description"}}
-</p>
 
-<div class="two-column-grid">
+{{/* Same forma som klippekort- og medlemskapssida: tittel, ei lina som
+     seier kva som stend til, og so fanone.
+
+     Lina seier berre kor mange kort du hev. Det er lite, men det er det
+     ein kjem for aa vita — og talet kjem fraa den same funksjonen som
+     teiknar lista, so dei kann ikkje segja kvar sitt. */}}
+{{if .KortTal}}
+<p class="briefing">
+  {{- if eq .KortTal 1 -}}
+    {{- template "setning" (dict "Lang" .Lang "Nykel" "payments.setning_kort_one" "Verd" .KortTal "Slag" "tal") -}}
+  {{- else -}}
+    {{- template "setning" (dict "Lang" .Lang "Nykel" "payments.setning_kort_many" "Verd" .KortTal "Slag" "tal") -}}
+  {{- end -}}
+</p>
+{{end}}
+
+<div class="faneark">
+{{template "faner" .}}
+<div class="fanerom" data-bolk="korta">
+
+{{/* Ladningane stend attmed korta og ikkje i ei eigi fane: dei tvo
+     svarar paa det same spursmaalet — kva dette kostar meg — og ein les
+     dei saman. Same grunnen som paa dei tvo hine sidone. */}}
+<div data-bolk="korta" id="bolk-korta" role="tabpanel" tabindex="0">
+  <div class="two-column-grid">
     {{template "payment_methods_container" .}}
     {{template "charges_container" .}}
+  </div>
+</div>
+
+{{/* Aa leggja til eit kort er ei eigi handling, og ho fær si eigi fana —
+     slik «Kjøp klipp» og «Bytt» gjer det.
+
+     Grunnen til at knappen ikkje gjer noko stend *fyre* honom og ikkje
+     under (§7): ei melding under ein avslegen knapp er eit svar paa eit
+     trykk som aldri kjem. */}}
+<div data-bolk="nytt-kort" id="bolk-nytt-kort" role="tabpanel" tabindex="0" hidden>
+  <p class="page-description">{{t .Lang "payments.add_not_connected"}}</p>
+  <button type="button" class="btn" disabled>
+    + {{t .Lang "payments.add_payment_method"}}
+  </button>
+</div>
+
+</div>
 </div>
 
 {{template "betaling_scripts" .}}

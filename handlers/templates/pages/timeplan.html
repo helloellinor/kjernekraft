@@ -40,6 +40,22 @@
             </span>
         </h1>
 
+        {{if .Teachers}}
+        <div class="sikt">
+            <select id="class-filter" onchange="applyFilters()" aria-label="{{t .Lang "timeplan.class_filter"}}">
+                <option value="">{{t .Lang "timeplan.all_classes"}}</option>
+                {{range .ClassTypes}}
+                <option value="{{.}}" {{if eq . $.SelectedClass}}selected{{end}}>{{t $.Lang (printf "timeplan.cat_%s" .)}}</option>
+                {{end}}
+            </select>
+            <select id="teacher-filter" onchange="applyFilters()" aria-label="{{t .Lang "timeplan.teacher_filter"}}">
+                <option value="">{{t .Lang "timeplan.all_teachers"}}</option>
+                {{range .Teachers}}
+                <option value="{{.}}" {{if eq . $.SelectedTeacher}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+        {{end}}
     </header>
 
     {{template "week_grid" .}}

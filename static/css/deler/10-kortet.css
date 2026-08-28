@@ -1,0 +1,211 @@
+/* ===================================================================
+   kortet
+   Ei hårfin lina, ein grunn skugge, ingen rundingar utyver det vesle.
+
+   Skuggen kom inn 28.8.2026 og kann gaa ut att like snøgt: alle korti i
+   huset les `--skugge-kort`, so `--skugge-kort: none` i token-blokka
+   skrur heile greia av utan at nokon annan fil vert rørd.
+   =================================================================== */
+/* Éin definisjon. Fem klassar teikna den same boksen kvar for seg fyrr
+   — flate, hårline, to pikslar runding, fem i fyll — og dei hadde alt
+   drive fraa kvarandre i fyll og radavstand. Det som skil eit medlemskort
+   fraa eit klippekort er kva som stend i det og kva farge produktet hev,
+   ikkje kva slag boks det er.
+
+   `--produkt` er den eine kroken: kortet set han, og alt inni som skal
+   bera produktfargen les han. Ingen skriv turkis eller rosa i ein
+   komponent lenger — dei skriv `var(--produkt)`. */
+.kort, .charge-item, .activity-placeholder, .no-data {
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  padding: var(--rom-5);
+  /* Kortet ligg eit blad upp fraa arket. Sjaa `--skugge-kort`. */
+  box-shadow: var(--skugge-kort);
+}
+.kort { display: flex; flex-direction: column; gap: var(--rom-2); }
+
+/* Eit kort som *er* noko — valt, i bruk, framheva — fær ei lina i
+   produktfargen langs vinstre kanten. Éi lina, ikkje ei ramme, og
+   kortet flyttar seg ikkje naar ho kjem. */
+.kort.valt, .kort.framheva, .kort[aria-pressed="true"] {
+  border-left: 3px solid var(--produkt, var(--merke));
+}
+
+.no-data, .activity-placeholder, .loading-placeholder {
+  color: var(--blekk-svakt);
+  text-align: center;
+  padding: var(--rom-6) var(--rom-4);
+  font-size: .95rem;
+}
+.loading-placeholder { background: none; border: 0; }
+
+/* ---- livsmerket ----
+   Fargen tyder «dette er i live». Alt anna er form og vekt:
+   ein open ring ventar, ein strek er frosen, graatt er utgjenge. */
+/* Tilstanden. Namni er dei *basen* brukar — «active», «paused»,
+   «cancelled», «freeze_requested» — og ikkje omsette namn attmed dei.
+   Det stod tvo sett her fyrr: `.stod-aktiv` og `.status-active` var den
+   same regelen skriven tvo gonger med kvar sine namn, og malane nytta
+   baae. Ei klasse som heiter det same som verdet ho kjem av, treng
+   ingen omsetjingstabell — og ingen kan gløyma aa halda han i takt. */
+.status, .popular-badge {
+  font-stretch: var(--vidd-merkelapp);
+  display: inline-flex; align-items: center; gap: var(--rom-2);
+  font-family: var(--skrift-yver);
+  font-size: .78rem; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  background: none; border: 0; padding: 0;
+}
+.status::before {
+  content: ""; width: .5rem; height: .5rem; border-radius: 50%;
+  border: 1px solid currentColor; background: currentColor;
+}
+
+
+/* Det som er utgjenge skal lesast som utgjenge, ikkje berre staa der. */
+.expired { color: var(--blekk-svakt); }
+
+.package-name {
+  font-family: var(--skrift-yver); font-size: 1.25rem;
+  font-stretch: var(--vidd-yver); font-weight: 500;
+  margin: 0 0 var(--rom-2);
+}
+.package-description, .charge-date { color: var(--blekk-lys); font-size: .92rem; }
+
+.package-price, .price {
+  font-family: var(--skrift-tal);
+  font-size: 1.5rem;
+  color: var(--blekk);
+  letter-spacing: -.02em;
+}
+.price-per-session, .commitment, .renewal-date {
+  font-size: .85rem; color: var(--blekk-lys);
+}
+
+.packages-grid {
+  display: grid; gap: var(--rom-4);
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+}
+
+/* ---- kjøpsflyten: eitt steg um gongen ----
+   JS-en hev alltid flutt `active` og `selected` — klassane fanst berre
+   ikkje i stilarket, so alle seks «Steg 2»-bolkane og kjøpsbolken stod
+   framme samstundes. No syner sida berre det steget du er i: vald
+   kategori → hennar tri pakkor → stadfestingi.
+
+   Det valde kortet held kanten sin og skifter berre farge (§6), og
+   fargen er produktfargen aat klippekortet (§2). */
+/* Eitt steg um gongen. `hidden` ber det no, ikkje ein klasse. Den gamle
+   `.steg.active` fanst i JS-en men ikkje i stilarket, so alle stegi stod
+   framme samstundes (STRUCTURE_AUDIT F11) — og daa var det ingen flyt,
+   berre ei lang rulla. Attributtet er det nettlesaren alt hev til dette,
+   og det verkar utan at nokon skriv ein regel. */
+[hidden] { display: none !important; }
+
+/* Kategori- og pakkekorti er knappar no og ikkje divar med onclick.
+   Knappestilen huset gjev alle knappar lyt difor skrellast av: han kjem
+   med store bokstavar, breiddesmal skrift og halvanna centimeter fyll,
+   og eit kort hev korkje. */
+.kategorival {
+  display: grid; gap: var(--rom-4);
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+.kategorikort, .package-card {
+  /* Kort som er knappar. Boksen kjem fraa `.kort`; dette er berre det
+     knappestilen lyt gjeva fraa seg. */
+  --produkt: var(--togu);
+  align-items: flex-start;
+  font: inherit; text-transform: none; letter-spacing: 0; text-align: left;
+  cursor: pointer; position: relative;
+}
+.kategorikort:hover, .package-card:hover { border-color: var(--produkt); color: inherit; }
+
+/* Det valde kortet ber produktfargen aat klippekortet — rosa (§2) — og
+   held kanten sin, so ingen ting flyttar seg naar ein vel. */
+.kategorikort[aria-pressed="true"], .package-card[aria-pressed="true"] {
+  background: var(--togu-svak);
+}
+
+.kategorinamn {
+  font-family: var(--skrift-yver); font-size: 1.25rem;
+  font-stretch: var(--vidd-yver); font-weight: 500; color: var(--blekk);
+}
+.kategorital { font-size: .88rem; color: var(--blekk-svakt); }
+.package-gyldig { font-size: .85rem; color: var(--blekk-svakt); }
+
+/* ---- stadfestingi ----
+   Kva du hev valt, og kva som *ikkje* hender enno. Merknaden stend paa
+   sida og ikkje i ei rute som spring upp etter at du hev trykt: ei
+   varselrute som fortel deg noko du skulde visst fyrr, kjem for seint. */
+.kjopsetning {
+  font-size: 1.15rem; color: var(--blekk); margin: 0 0 var(--rom-3);
+}
+/* Merknaden og svaret er eitt par og ikkje eitt per sida. Dei heitte
+   `.kjopsmerknad` og `.kjopsvar` og budde i klippekjøpet aaleine, so
+   kvar annan flyt som skulde segja det same laut finna paa sine eigne
+   namn — eller lata vera, og ta ein `confirm()` i staden. Namni her
+   segjer kva dei *gjer*: merknaden stend fyre trykket, svaret kjem
+   etter. */
+/* Lina i margen tek fargen gjenom `--merknadsfarge` og ikkje beinveges,
+   same grepet som `--produkt` paa eit kort (§1). Standarden er aatvaring:
+   ein merknad stend som oftast fyre noko som ikkje kann gjerast um att.
+
+   `.opplysing` byter honom til `--merke`, husets eigen kulør. Ei ruta ber ofte baae
+   slagi attmed kvarandre, og ber dei same fargen sluttar raudt aa tyda
+   noko. Det som berre er sant skal du vita; det ugjenkallege skal stogga
+   handi di, og berre det siste er raudt. */
+.merknad {
+  --merknadsfarge: var(--aatvaring);
+  font-size: .9rem; color: var(--blekk-lys);
+  border-left: 3px solid var(--merknadsfarge); padding-left: var(--rom-4);
+  /* Luft paa baae sidor. Han bar berre botnmargin fyrr, og daa laag han
+     klistra inntil det som stod yver honom: paa betalingssida hekk han
+     fast i det siste kortet, og paa klippekortsida i det som stod fyre.
+     Merknaden høyrer til baae — han forklarar det yver seg og aatvarar
+     um det under — so han treng rom til baae kantar. */
+  margin: var(--rom-4) 0 var(--rom-5); max-width: 44ch;
+}
+.merknad.opplysing { --merknadsfarge: var(--merke); }
+
+.svar { margin: var(--rom-4) 0 0; font-size: .95rem; color: var(--blekk-lys); }
+.svar.gale { color: var(--aatvaring); }
+/* Ei tom line er framleis ei line: svaret hev si høgd fraa fyrste stund,
+   so sida ikkje flyttar seg naar han kjem (§3). */
+.svar:empty::before { content: ""; display: inline-block; }
+/* …men ikkje der svaret er det siste i spalta si. Daa veks spalta
+   nedyver naar han kjem, og ingen ting du ser paa flyttar seg — medan
+   ei reservert line stend att som eit hòl nedst kvar einaste gong.
+   Same vurderingi som paa medlemskortet. */
+#betalingssvar:empty { display: none; }
+
+/* ---- detaljrader ---- */
+.detail-row {
+  display: flex; justify-content: space-between; gap: var(--rom-4);
+  padding: var(--rom-2) 0;
+  border-bottom: 1px solid var(--haarlina);
+}
+.detail-row:last-child { border-bottom: 0; }
+.detail-label { color: var(--blekk-lys); font-size: .9rem; }
+.detail-value { font-family: var(--skrift-tal); font-size: .95rem; }
+
+/* ---- klippekortmaalaren er burte ----
+   Ljosbandet — `.progress-segments`, 2 px lina med 13 px glød, ribbone
+   som skar lina men ikkje glødi — bar klippekortet fram til no. Det
+   svara paa feil spursmaal: ein prosentstripe segjer «tri fjerdedelar
+   att», og det du kom for er «sju». Kortet ber tal og hòl i staden
+   (§10.2, avgjord — sjaa `.klipptal` og `.klipphakk` lenger nede).
+
+   Med det fall den siste brukaren av bandet burt. `.medlemskapsmaalar`
+   var ei einsleg linja som sette `--klippfarge` og ingen mal skreiv
+   henne nokon gong; `.klippemaalar`, `.klipp` og `.tend` var nynorske
+   namn paa dei same reglane, og ingen skreiv deim heller. Alt er ute.
+
+   Plassmaalaren i dokka lever vidare og er ikkje dette: han hev si eigi
+   rutestyrke (`.plassmaalar`/`.plass`) lenger nede. Der er ei tend rute
+   ein *teken* plass — noko som finst — og daa er ljos rett.
+
+   Skal medlemskapsmaalaren nokon gong byggjast, stend bandet teikna i
+   `design_handoff_arket/Arket.dc.html` under «Komponentar». Det er
+   billegare aa henta det derifraa enn aa bera hundrad liner daud kode
+   i stilarket til det maatte henda. */

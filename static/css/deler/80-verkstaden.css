@@ -1,0 +1,129 @@
+/* ===================================================================
+   verkstaden (/arket)
+   Ei sida som syner komponentane utanfor arbeidet sitt.
+
+   Ho er ikkje ein katalog yver kva som *bør* finnast. Ho teiknar det
+   som faktisk stend i dette stilarket, med den same koden som sidone
+   nyttar — difor kann ho ikkje verta usann utan at sidone vert det med
+   det same.
+
+   Kvar komponent stend tvo gonger, ljos og myrk, attmed kvarandre. Det
+   er heile grunnen til at tokeni ovanfor tek [data-theme] paa kva
+   element som helst: ein lyt sjaa baae samstundes for aa sjaa at ein
+   farge lyg i det eine.
+
+   Verkstaden er berre open naar KJERNEKRAFT_ENV=development. Teksti
+   her er difor ikkje umsett — ho er ikkje ein del av det studioet
+   syner nokon.
+   =================================================================== */
+.verkstad { max-width: 78rem; }
+
+.verkstad-innleiding { color: var(--blekk-lys); max-width: 34em; }
+
+/* Innhaldslista. Ei rad med lenkjor, ikkje ei punktlista: ho skal
+   kunna lesast paa ein augnekast og ikkje taka ei skjermhøgd. */
+.verkstad-innhald {
+  display: flex; flex-wrap: wrap; gap: var(--rom-2) var(--rom-4);
+  list-style: none; padding: 0;
+  margin: var(--rom-5) 0 var(--rom-7);
+  border-top: 1px solid var(--haarlina);
+  border-bottom: 1px solid var(--haarlina);
+  padding-block: var(--rom-3);
+}
+.verkstad-innhald a {
+  font-family: var(--skrift-yver); font-size: .78rem;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-lys); text-decoration: none;
+}
+.verkstad-innhald a:hover { color: var(--merke); }
+
+.verkstad-bolk { margin-bottom: var(--rom-7); scroll-margin-top: var(--rom-5); }
+
+/* Regelen komponenten ber. Han stend her og ikkje berre i stilboki, av
+   di ein ser forma og grunngjevingi samstundes daa. */
+.verkstad-regel {
+  color: var(--blekk-lys); font-size: .92rem;
+  max-width: 46em; margin: 0 0 var(--rom-4);
+}
+.verkstad-regel code {
+  font-family: var(--skrift-tal); font-size: .88em; color: var(--blekk);
+}
+
+/* ---- paret ----
+   Tvo prøvor av det same, i kvar sitt tema. Dei deler breidd, so det er
+   den same komponenten paa den same plassen i baae. */
+.verkstad-par {
+  display: grid; gap: var(--rom-4);
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+}
+
+.verkstad-prova {
+  background: var(--ark);
+  color: var(--blekk);
+  border: 1px solid var(--kant);
+  padding: var(--rom-5);
+  position: relative;
+}
+/* Namnet paa temaet stend i kanten av prøva, i prøva sine eigne
+   fargar — daa segjer merkelappen ogso um tokeni verkar. */
+.verkstad-prova::before {
+  content: attr(data-tema);
+  position: absolute; top: 0; right: 0;
+  padding: var(--rom-1) var(--rom-2);
+  font-family: var(--skrift-yver); font-size: .68rem;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+}
+
+/* Ei rad med prøvor som skal staa attmed kvarandre og bryta naar det
+   vert trongt — knappar, merke, tilstandar. */
+.verkstad-rad {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: var(--rom-3);
+}
+.verkstad-rad + .verkstad-rad { margin-top: var(--rom-4); }
+
+/* Ei stabla rad, for det som er breidt av seg sjølv. */
+.verkstad-stabel { display: flex; flex-direction: column; gap: var(--rom-4); }
+
+/* ---- fargeflekkene ----
+   Flekken er ei rute i fargen med namnet under. Ho hev hårlina kring
+   seg, av di ein farge som er nesten lik arket elles ikkje syner kanten
+   sin — og det er nettupp dei fargane ein lyt sjaa. */
+.verkstad-fargar {
+  display: grid; gap: var(--rom-4);
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+}
+.verkstad-flekk { display: flex; flex-direction: column; gap: var(--rom-2); }
+.verkstad-flekk i {
+  display: block; height: 3rem;
+  border: 1px solid var(--haarlina);
+  background: var(--flekk);
+}
+.verkstad-flekk b {
+  font-family: var(--skrift-tal); font-size: .78rem; font-weight: 400;
+  color: var(--blekk); word-break: break-all;
+}
+.verkstad-flekk span { font-size: .78rem; color: var(--blekk-lys); }
+
+/* ---- skrifttrappa ---- */
+.verkstad-trapp { display: flex; flex-direction: column; gap: var(--rom-3); }
+.verkstad-trapp p { margin: 0; max-width: none; }
+.verkstad-trapp .vidd {
+  font-family: var(--skrift-yver); font-size: 1.4rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.verkstad-trapp small {
+  font-family: var(--skrift-tal); font-size: .72rem; color: var(--blekk-svakt);
+  display: block;
+}
+
+/* ---- romtrappa ----
+   Sju bjelkar i merkefargen. Ein trapp ein ser er lettare aa halda seg
+   til enn sju tal i ei fil. */
+.verkstad-rom { display: flex; flex-direction: column; gap: var(--rom-2); }
+.verkstad-rom span { display: flex; align-items: center; gap: var(--rom-3); }
+.verkstad-rom i { display: block; height: .5rem; background: var(--merke); width: var(--breidd-rom); }
+.verkstad-rom small { font-family: var(--skrift-tal); font-size: .72rem; color: var(--blekk-lys); }

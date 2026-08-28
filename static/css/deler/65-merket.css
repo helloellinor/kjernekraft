@@ -1,0 +1,102 @@
+/* ===================================================================
+   merket
+   Han stend som ei *maske* og ikkje som eit bilete, so han tek fargen
+   fraa teksti han stend i — same grepet som krossen paa sletteknappen i
+   ordboki. Difor finst det éi fil paa disken og ikkje ei per farge, og
+   han fylgjer temaet utan at nokon skriv honom um.
+   =================================================================== */
+.merke {
+  display: inline-block;
+  flex: none;
+  width: var(--merkestorleik, 1.5em);
+  height: var(--merkestorleik, 1.5em);
+  background: currentColor;
+  -webkit-mask: url("/static/img/kjernekraft.svg") center / contain no-repeat;
+          mask: url("/static/img/kjernekraft.svg") center / contain no-repeat;
+}
+
+/* Merket attmed namnet er skrive i hovudbolken lenger uppe. Ein
+   dublett stod her og — med ein annan storleik — og av di han kom
+   seinare i fila, var det han som gjaldt. Difor rørde ringen seg ikkje
+   naar eg endra talet der uppe. */
+
+/* Paa innloggingi og dei andre dørene stend han for seg sjølv yver
+   tittelen. Det er den einaste staden han fær vera stor. */
+/* Paa dørene stend han for seg sjølv, midt i spalta si. */
+.doermerke {
+  --merkestorleik: 4rem;
+  color: var(--blekk);
+  margin-inline: auto;
+  margin-bottom: var(--rom-5);
+  display: block;
+}
+
+/* ---- rom til teikningar ----
+   Der det stend emoji i dag. Boksen er fast og kvadratisk, so eit kort
+   ikkje skiftar høgd naar teikningi kjem paa plass — og so lenge ho
+   ikkje er der, stend det eit tomt rom av rett storleik i staden for at
+   alt hoppar den dagen ho kjem.
+
+   Teikningarne skal vera SVG med `stroke="currentColor"` og utan eigne
+   fargar, som merket. Daa verka dei i baae temaom, og dei kann bera
+   produktfargen der dei stend i eit produkt. */
+.teikning {
+  display: block;
+  width: var(--teikningstorleik, 3.5rem);
+  height: var(--teikningstorleik, 3.5rem);
+  margin-bottom: var(--rom-3);
+  color: var(--produkt, var(--blekk-lys));
+  font-size: var(--teikningstorleik, 3.5rem);
+  line-height: 1;
+}
+.teikning svg { width: 100%; height: 100%; display: block; }
+
+/* ---- plassmaalaren ----
+   Same ljoset som klippekortet, men med ei anna tyding: her er ei tend
+   rute ein *teken* plass. Regelen er den same i baae — ei tend rute er
+   noko som finst — og difor er ein full time heilt tend. Det er den
+   tilstanden Ida ser etter, og han treng ingen farge for aa skilja seg:
+   han er den einaste som ikkje hev mørke rutor att. */
+.plassmaalar {
+  --klippfarge: var(--klas);
+  --rib: 2px;
+  display: flex; gap: var(--rib);
+  height: 9px; margin: var(--rom-2) 0 var(--rom-1);
+  position: relative; isolation: isolate;
+}
+.plass {
+  position: relative; flex: 1 1 0; min-width: 2px;
+  border: 1px solid var(--haarlina); border-radius: 1px;
+  background: var(--ark-djup);
+}
+.plass.teken {
+  border-color: color-mix(in srgb, var(--klippfarge) 55%, var(--haarlina));
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 26%, #fff) 0%, transparent 100%),
+    color-mix(in srgb, var(--klippfarge) 84%, var(--flate));
+}
+.plass.teken::after {
+  content: ""; position: absolute; z-index: -1;
+  left: -4px; right: -4px; top: -5px; bottom: -5px; pointer-events: none;
+  background:
+    radial-gradient(ellipse 40% 30% at 50% 50%,
+      color-mix(in srgb, var(--klippfarge) 80%, transparent) 0%,
+      color-mix(in srgb, var(--klippfarge) 44%, transparent) 38%, transparent 76%),
+    radial-gradient(ellipse 110% 80% at 50% 55%,
+      color-mix(in srgb, var(--klippfarge) 16%, transparent) 0%, transparent 82%);
+}
+.plass::before {
+  content: ""; position: absolute; z-index: 2;
+  top: -6px; bottom: -6px;
+  right: calc(-1px - var(--rib)); width: var(--rib);
+  background: var(--flate); pointer-events: none;
+}
+.plass:last-child::before { display: none; }
+
+.event-plassar { font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-lys); }
+.event-plassar b { color: var(--blekk); font-weight: 400; }
+.event-plassar .av { color: var(--blekk-svakt); }
+
+
+@media (prefers-reduced-motion: reduce) { .plass.teken::after { display: none; } }

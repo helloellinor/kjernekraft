@@ -1,22 +1,60 @@
 {{define "dashboard_membership_container"}}
-{{/* Heile medlemskapet stod her fyrr: pris, fornying, binding, og
-     knappar for aa frysa og seia upp. Det er ei *forvaltning* — noko ein
-     gjer ein gong i halvaaret — og ho høyrer heime paa medlemskapssida.
+<div class="content-section">
+{{/* Medlemskortet, utan forvaltningi.
 
-     So stod det eit merke med namnet paa kortet og ei lenkja attmed. Det
-     var framleis for mykje: ei lenkja bed um aa verta klikka, og det er
-     ikkje det ein kom hit for. Det ein vil vita naar ein opnar
-     heimesida er eitt einaste: gjeld det. Difor eit ljos og fire ord.
-     Medlemskapet stend i leidingi for den som vil sjaa meir. */}}
+     Heile medlemskapet stod her ein gong: pris, fornying, binding, og
+     knappar for aa frysa og seia upp. So vart det skore heilt ned til
+     eit ljos og fire ord — «Aktivt medlemskap» — av di forvaltning er
+     noko ein gjer ein gong i halvaaret og høyrer heime paa
+     medlemskapssida.
+
+     Det vart for lite. Ei lina med eit ljos i er ikkje eit kort; ho
+     segjer at medlemskapet gjeld, men ikkje kva det *er*. Kortet er ein
+     ting ein hev, og ein ting ein hev skal syna seg.
+
+     So: det same kortet som paa medlemskapssida, med dei same fire
+     tingi — kva slag det er, kven det høyrer til, um det gjeld, og kva
+     det kostar — og utan knappane og merknadene. Frysing og uppseiing
+     er framleis der dei høyrer heime; her er det berre kortet.
+
+     Lat det staa i takt med kortet paa medlemskapssida: endrar det seg
+     der, endrar det seg her. */}}
+<h2 class="section-title">{{t .Lang "dashboard.my_membership"}}</h2>
+
+{{if .Medlemskap}}
+<div class="kort medlemskort {{.Medlemskap.Status}}{{if .Medlemskap.IsStudentSenior}} student{{end}}">
+    <div class="card-header">
+        <h3 class="card-title">
+            <span class="merke" aria-hidden="true"></span>{{.MedlemskapNamn}}
+        </h3>
+        <p class="stodalinje">
+            {{template "ljos" (dict "Status" .Medlemskap.Status)}}
+            {{- if eq .Medlemskap.Status "active"}}{{t .Lang "medlemskapet.status_active"}}
+            {{- else if eq .Medlemskap.Status "paused"}}{{t .Lang "medlemskapet.status_paused"}}
+            {{- else if eq .Medlemskap.Status "freeze_requested"}}{{t .Lang "medlemskapet.status_freeze_requested"}}
+            {{- else}}{{t .Lang "medlemskapet.status_cancelled"}}{{end}}
+        </p>
+    </div>
+
+    <p class="medlemskort-eigar">{{.UserName}}</p>
+
+    {{if .Medlemskap.BindingEnd}}
+    <div class="detail-row">
+        <span class="detail-label">{{t .Lang "medlemskapet.gjeld_til"}}</span>
+        <span class="detail-value">{{norskDatoAar .Medlemskap.BindingEnd}}</span>
+    </div>
+    {{end}}
+    <div class="detail-row">
+        <span class="detail-label">{{t .Lang "medlemskapet.pris"}}</span>
+        <span class="detail-value">{{printf "%.0f" (divf .Medlemskap.Price 100)}} {{t .Lang "membership.price_per_month"}}</span>
+    </div>
+</div>
+{{else}}
+{{/* Ingen medlemskap er ikkje eit tomt kort — det er inkje kort. Lina
+     seier det, og leidingi fører til vegen ut av det (§9). */}}
 <p class="stodalinje">
-    {{if .Medlemskap}}
-    {{if eq .Medlemskap.Status "paused"}}
-    <span class="ljos ljos-kvild" aria-hidden="true"></span>{{t .Lang "dashboard.medlemskap_frose"}}
-    {{else}}
-    <span class="ljos ljos-paa" aria-hidden="true"></span>{{t .Lang "dashboard.medlemskap_aktivt"}}
-    {{end}}
-    {{else}}
-    <span class="ljos ljos-av" aria-hidden="true"></span>{{t .Lang "dashboard.medlemskap_ingen"}}
-    {{end}}
+    {{template "ljos" (dict "Status" "")}}{{t .Lang "dashboard.medlemskap_ingen"}}
 </p>
+{{end}}
+</div>
 {{end}}

@@ -72,6 +72,10 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("kunde ikkje henta lærarane: %v", err)
 	}
 
+	// Reglane vert rekna ein gong: baade lista og vali sikti tilbyd
+	// kjem av deim, og tvo utrekningar av det same kann skilja lag.
+	reglar := GrupperTimar(events, config.GetInstance().GetCurrentTime())
+
 	data := map[string]interface{}{
 		"Rooms":          rooms,
 		"Folk":           folk,
@@ -79,7 +83,8 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		"Title":          t(lang, "admin.title"),
 		"Users":          users,
 		"Events":         events,
-		"Timereglar":     GrupperTimar(events, config.GetInstance().GetCurrentTime()),
+		"Timereglar":     reglar,
+		"Siktval":        SiktvalFor(reglar),
 		"FreezeRequests": freezeRequests,
 		"Memberships":    memberships,
 		"Stats":          statsModule,

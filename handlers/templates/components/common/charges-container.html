@@ -1,14 +1,21 @@
 {{define "charges_container"}}
 <section class="content-section">
-    <h2 class="section-title">{{t .Lang "charges.title"}}</h2>
-
-    <div class="charges-filter">
-        <label for="charges-type-filter">{{t .Lang "payments.filter_by_type"}}:</label>
-        <select id="charges-type-filter" onchange="filterCharges(this.value)">
-            <option value="">{{t .Lang "payments.all_types"}}</option>
-            <option value="medlemskap">{{t .Lang "payments.membership"}}</option>
-            <option value="klippekort">{{t .Lang "payments.klippekort"}}</option>
-        </select>
+    {{/* Sikti stend paa tittellina og ikkje under henne: ho er ei
+         innstilling paa lista ein alt ser, ikkje eit spursmaal ein lyt
+         svara paa fyrst. Same hovudet som timeplanen ber. */}}
+    <div class="bolkhovud">
+        <h2 class="section-title">{{t .Lang "charges.title"}}</h2>
+        <div class="sikt">
+            {{/* Merkelappen er usynleg av di det fyrste valet seier det
+                 same: «Alle typar». Namnet stend i `aria-label` for dei
+                 som ikkje ser lista. */}}
+            <select id="charges-type-filter" onchange="filterCharges(this.value)"
+                    aria-label="{{t .Lang "payments.filter_by_type"}}">
+                <option value="">{{t .Lang "payments.all_types"}}</option>
+                <option value="medlemskap">{{t .Lang "payments.membership"}}</option>
+                <option value="klippekort">{{t .Lang "payments.klippekort"}}</option>
+            </select>
+        </div>
     </div>
     
     <div id="charges-container">

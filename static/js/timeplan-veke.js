@@ -39,14 +39,22 @@
 
     // Kva `?week=`-offset skal til for aa koma til vike v?
     //
-    // Tenaren tel vikor fram fraa den ein stend i, so det er
-    // skilnaden i vikenummer — heilt til aaret skiftar. Veke 2 sedd
-    // fraa veke 51 er tri vikor *fram*, ikkje ni og førti attende, og
-    // fyrr rekna dette ut eit stort negativt tal som vart avvist i
-    // stilla. Nær aarsskiftet legg me difor aaret til.
+    // Tenaren tel vikor fram fraa den ein stend i, so det er skilnaden i
+    // vikenummer — heilt til aaret skiftar. Veke 2 sedd fraa veke 51 er
+    // tri vikor *fram*, ikkje ni og førti attende.
+    //
+    // Peikar reknestykket bakover, legg me eit aar til. Studioet syner
+    // ikkje vikor som er gjengne, so den komande veke 2 er den einaste
+    // veke 2 som finst aa gaa til — og daa er ho det talet tyder.
+    //
+    // Fyrr galdt dette berre dei tolv siste vikone i aaret mot dei tolv
+    // fyrste. Bad ein um veke 20 fraa veke 51, fall ein utanfor det
+    // vindauga, offseten vart eit stort negativt tal, og feltet berre
+    // blinka raudt: heile det komande aaret fraa veke 13 og ut var
+    // ikkje til aa naa.
     function offsetTil(v) {
         var skilnad = v - naa;
-        if (skilnad < 0 && naa > vekerIAar - 12 && v < 13) {
+        if (naaOffset + skilnad < 0) {
             skilnad += vekerIAar;
         }
         return naaOffset + skilnad;
@@ -62,16 +70,19 @@
         setTimeout(function () { felt.classList.remove("nekta"); }, 900);
     }
 
+    // Aaret hev 52 vikor, stundom 53. Eit tal utanfor det er ikkje ei
+    // vike i det heile, og det er det einaste feltet no seier nei til.
     function gyldig(v) {
-        return !isNaN(v) && v >= 1 && v <= 53;
+        return !isNaN(v) && v >= 1 && v <= vekerIAar;
     }
 
     function gaa() {
         var v = parseInt(felt.value, 10);
-        if (!gyldig(v) || v === naa) {
-            felt.value = "";    // ikkje eit tal, eller det same — attende til framlegget
+        if (v === naa || (isNaN(v) && felt.value.trim() === "")) {
+            felt.value = "";    // det same, eller ingen ting — attende til framlegget
             return;
         }
+        if (!gyldig(v)) { nekt(); return; }
         var offset = offsetTil(v);
         if (offset < 0) { nekt(); return; }
 

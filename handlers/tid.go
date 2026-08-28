@@ -1,6 +1,9 @@
 package handlers
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 // ---- klokka på veggen ----
 //
@@ -23,11 +26,32 @@ import "time"
 // om* etterpå, so kvar einaste klokke i huset hadde vorte to timar for
 // sein. Prøvd og forkasta.
 func veggklokka(t time.Time) time.Time {
-	if OsloLoc == nil {
+	loc := oslo()
+	if loc == nil {
 		return t
 	}
 	return time.Date(t.Year(), t.Month(), t.Day(),
-		t.Hour(), t.Minute(), t.Second(), 0, OsloLoc)
+		t.Hour(), t.Minute(), t.Second(), 0, loc)
+}
+
+var osloEinGong sync.Once
+
+// oslo gjev sona, og hentar henne sjølv um ho ikkje er sett.
+//
+// OsloLoc vert sett i main(). Alt som køyrer utanfor tenaren — prøvor,
+// skript, ein handsamar kalla frå ein annan samanheng — såg difor ein
+// nil, og då gjorde veggklokka ingen ting og gav tidi attende med den
+// gale merkelappen sin. Feilen var borte i tenaren og attende alle andre
+// stader, og ingen ting sa ifrå.
+func oslo() *time.Location {
+	if OsloLoc == nil {
+		osloEinGong.Do(func() {
+			if loc, err := time.LoadLocation("Europe/Oslo"); err == nil {
+				OsloLoc = loc
+			}
+		})
+	}
+	return OsloLoc
 }
 
 // fyre og etter set ei *lagra* tid opp mot eit verkeleg tidspunkt.

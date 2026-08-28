@@ -1,7 +1,9 @@
 {{define "admin_class_management"}}
-<h2 class="section-title">{{t .Lang "admin.class_management"}}</h2>
-
-<h3 class="undertittel">{{t .Lang "admin.create_new_class"}}</h3>
+{{/* Fana heiter alt «Timeplan», so ei yverskrift som heiter
+     «Timeplanen» segjer det same ein gong til. Ho segjer kva ein gjer
+     her i staden — og daa er merkelappen «Ny time» under henne den same
+     teksti for tridje gongen, og gjeng ut. */}}
+<h2 class="section-title">{{t .Lang "admin.create_new_class"}}</h2>
 <form id="new-class-form" class="setningsskjema" onsubmit="createClass(event)">
                 {{/* Timen som ei setning. Rekkjefylgdi er arbeidet — kva,
                      kven, kvar, naar, kor lenge — og ikkje rekkjefylgdi
@@ -53,129 +55,294 @@
                         {{t .Lang "admin.every_week"}}</label> <span id="veker-bolk" hidden>{{t .Lang "admin.for_weeks"}}
                         <input type="number" id="recurring-weeks" class="felt felt-tal" value="8" min="2" max="52"
                                aria-label="{{t .Lang "admin.weeks"}}"> {{t .Lang "admin.weeks"}}</span></span>.
+                    <button type="submit" class="btn-primary">{{t .Lang "admin.create_class"}}</button>
                 </p>
 
-                {{/* Foten aat setningi: kva det vert, og knappen som gjer
-                     det.
-
-                     Knappen stod som ein tridje jamstelt bolk under her
-                     fyrr, med den same lufti kring seg som fylgja hadde,
-                     og heilt til vinstre under ei setning som er femti
-                     teikn brei — so han laag aaleine i eit tomt felt og
-                     høyrde ingen stad til.
-
-                     Dei tvo høyrer saman: det eine er grunnlaget for det
-                     andre. Difor stend dei paa ei lina, innanfor breiddi
-                     aat setningi, med ei haarlina yver. Du les kva du
-                     hev skrive, so kva det vert, og so gjer du det.
-
-                     Fylgja sjølv er rekna medan du skriv, so konflikten
-                     stend *fyre* du trykkjer og ikkje etter. */}}
-                <div class="setningsfot">
-                    <p class="fylgja" id="fylgja" role="status" data-plassar="{{t .Lang "admin.places"}}" data-sluttar="{{t .Lang "admin.ends"}}"></p>
-                    <button type="submit" class="btn-primary">{{t .Lang "admin.create_class"}}</button>
-                </div>
+                {{/* Fylgja: kva det vert. Ho er rekna medan du skriv, so
+                     konflikten stend *fyre* du trykkjer og ikkje etter. */}}
+                <p class="fylgja" id="fylgja" role="status" data-plassar="{{t .Lang "admin.places"}}" data-sluttar="{{t .Lang "admin.ends"}}"></p>
             </form>
 
-<h3 class="undertittel">{{t .Lang "admin.upcoming_classes"}}</h3>
+{{/* ---- to spaltor ----
+     Reglane til venstre, dagane til høgre.
 
-{{/* Ein klasse er ikkje ein dato — han er ein regel: «yoga med Leon,
-     maandag 18:00». Skjemaet ovanfor lagar reglar, og lista her er
-     reglane, ikkje utslagi deira: femti rader var aatte reglar. Rada
-     opnar seg der ho stend (same grepet som folkelista), og det ein
-     endrar der inne er *regelen* — lærar og klokkeslett gjeld alle
-     komande timar. Det einaste ein gjer med éin einskild dato er aa
-     avlysa honom, naar nokon er sjuk. */}}
-{{if .Timereglar}}
-<ul class="regel-liste" id="timereglar">
-    {{range .Timereglar}}
-    <li class="regel-rad" data-regel-id="{{.RegelID}}"
-        data-vekedag="{{t $.Lang .VekedagNykel}}" data-rom="{{.Rom}}">
-        <button type="button" class="regel-hovud" aria-expanded="false">
-            <span class="regel-namn">{{.Tittel}}</span>
-            <span class="regel-kven">{{.Laerar}}{{if .Rom}} · {{.Rom}}{{end}}</span>
-            <span class="regel-naar">{{t $.Lang .VekedagNykel}} {{.Klokke}}</span>
-            <span class="regel-tal">{{len .Timar}} ×</span>
-        </button>
-        <div class="regel-meir" hidden>
-            {{/* Regelen, skriven som setningi han er — same forma som
-                 skjemaet yver. Merkelappane sa det same som felti og
-                 stod berre i vegen. Det som stend her gjeld alle
-                 komande timar.
+     Det stod som éi lang liste fyrr, der kvar rad opna seg der ho stod
+     og bar baade regelen og dagane inni seg. Tvo ting var gale med det.
+     Rekkjeviddone — «alle komande timar» og «denne eine dagen» — laag
+     oppaa kvarandre i den same trekkspelrada, og du laut opna ei rad for
+     aa sjaa noko i det heile, so lista sjølv sa ingen ting. No er ho ei
+     liste du kann sikta i, og arbeidsbenken stend attmed henne.
 
-                 Ein time som ikkje ber nokon regel — lagd inn gjenom
-                 /api/events, eller frå fyre reglane fanst — hev inkje
-                 regelnamn å endra på. Felti står stengde og seier
-                 kvifor. Fyrr stod dei opne, sende `rule_id=0`, fekk 200
-                 attende av di ingi rad vart råka, og synte det nye
-                 verdet til sida vart lasta på nytt. */}}
-            {{$utanregel := eq .RegelID 0}}
+     `minmax(0, …)` og ikkje `auto`: eit lærarnamn i ei setning skal
+     bryta, ikkje skuva spalta ut or vindauga (§4). */}}
+<div class="timestyring">
+
+    <section class="timestyring-reglar">
+        {{/* Sikti stend paa tittellina, ikkje under henne — same
+             komponenten som timeplanen og belastningane ber (§9). */}}
+        <div class="bolkhovud">
+            <h2 class="section-title">{{t .Lang "admin.classes"}}</h2>
+            <div class="sikt">
+                {{/* Ein veljar med eitt val siktar ingen ting. Han kjem
+                     fyrst naar det finst noko aa velja millom.
+
+                     Rommet stod her og. Tri veljarar pluss eit søkjefelt
+                     braut lina i ei halv spalta, og rommet var det ingen
+                     som sikta paa: studioet hev tvo, og du leitar etter
+                     ein time — ikkje etter eit rom. */}}
+                {{with .Siktval}}
+                {{if gt (len .Dagar) 1}}
+                <select id="sikt-dag" aria-label="{{t $.Lang "timeplan.vel_dag"}}">
+                    <option value="">{{t $.Lang "timeplan.alle_dagar"}}</option>
+                    {{range .Dagar}}
+                    <option value="{{.Tal}}">{{t $.Lang .Nykel}}</option>
+                    {{end}}
+                </select>
+                {{end}}
+                {{if gt (len .Laerarar) 1}}
+                <select id="sikt-laerar" aria-label="{{t $.Lang "timeplan.teacher_filter"}}">
+                    <option value="">{{t $.Lang "timeplan.all_teachers"}}</option>
+                    {{range .Laerarar}}<option value="{{.}}">{{.}}</option>{{end}}
+                </select>
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+
+        {{/* Søkjefeltet stend under lina og ikkje paa henne. Det er ikkje
+             ei innstilling paa eit ord — det er vegen inn i lista, og det
+             treng breidd for aa vera det. Paa lina braut det henne i tvo. */}}
+        <input type="search" id="regel-sok" class="siktsok"
+               placeholder="{{t .Lang "admin.search_classes"}}"
+               aria-label="{{t .Lang "admin.search_classes"}}"
+               autocomplete="off" spellcheck="false">
+
+        {{/* Ein klasse er ikkje ein dato — han er ein regel: «yoga med
+             Leon, maandag 18:00». Lista her er reglane, ikkje utslagi
+             deira: femti rader var aatte reglar. */}}
+        {{if .Timereglar}}
+        <ul class="regel-liste" id="timereglar">
+            {{range $nr, $r := .Timereglar}}
+            {{/* `data-nr` og ikkje regel-id-en: ein time som ikkje ber
+                 nokon regel hev id 0, og fleire av deim hev det same
+                 talet. Nummeret i lista er det einaste som er eitt. */}}
+            <li class="regel-rad" data-nr="{{$nr}}" data-vekedag="{{t $.Lang $r.VekedagNykel}}"
+                data-vekedag-tal="{{printf "%d" $r.Vekedag}}"
+                data-laerar="{{$r.Laerar}}" data-rom="{{$r.Rom}}">
+                <button type="button" class="regel-hovud" aria-pressed="false"
+                        aria-controls="regel-{{$nr}}">
+                    <span class="regel-namn">{{$r.Tittel}}</span>
+                    <span class="regel-kven">{{$r.Laerar}}{{if $r.Rom}} · {{$r.Rom}}{{end}}</span>
+                    <span class="regel-naar">{{t $.Lang $r.VekedagNykel}} {{$r.Klokke}}</span>
+                    {{/* Ordet og ikkje teiknet. Det stod «8 ×» her, som skulde
+                         lesast «aatte gonger» — men eit kryss i hyrna av ei
+                         rad er det teiknet heile verdi brukar for «tak denne
+                         burt», og det same krysset *er* sletteknappen tvo
+                         faner herifraa (`.slettmerke` i prisane). Same teikn,
+                         tvo tydingar, same skjerm: §1 forbyd det for farge, og
+                         grunnen gjeld like fullt for eit teikn. Verre var det
+                         at krysset ikkje var daudt — det ligg inni knappen som
+                         vel rada, so det lova «slett» og gjorde «vel».
+
+                         «gonger» er ordet serielina alt brukar um det same
+                         talet, og eit grensesnitt lyt kalla den same tingen
+                         det same kvar gong. */}}
+                    <span class="regel-tal">{{len $r.Timar}} {{gonger $.Lang (len $r.Timar)}}</span>
+                </button>
+            </li>
+            {{end}}
+        </ul>
+        {{/* Ei tom liste av di du siktar er ikkje det same som ei tom
+             liste av di det ikkje finst timar (§9). */}}
+        <p class="tomt" id="ingen-treff" hidden>{{t .Lang "admin.no_match"}}</p>
+        {{else}}
+        <p class="tomt">{{t .Lang "admin.no_upcoming_classes"}}</p>
+        {{end}}
+    </section>
+
+    <section class="timestyring-timar">
+        {{/* Overskrifti segjer kva du gjer her, ikkje kva timen heiter.
+             Namnet stod her fyrr, og daa sa sida det same tvo gonger —
+             ein gong som overskrift og ein gong i fyrste feltet under,
+             der det ogso er det du kann *endra*. Ei overskrift som
+             skifter kvar gong du klikkar er dessutan ikkje ei overskrift,
+             ho er ein etikett. */}}
+        <div class="bolkhovud">
+            <h2 class="section-title">{{t .Lang "admin.edit_class"}}</h2>
+            <span class="valt-naar" id="valt-naar"></span>
+        </div>
+
+        <p class="tomt" id="valt-tomt">{{t .Lang "admin.pick_class_hint"}}</p>
+
+        {{range $nr, $r := .Timereglar}}
+        {{$utanregel := eq $r.RegelID 0}}
+        {{$dag := printf "%d" $r.Vekedag}}
+        {{/* Eitt skjema per regel, alle i dokumentet, `hidden` avgjer kva
+             ein ser (§3).
+
+             Skjemaet lagrar ikkje av seg sjølv. Det gjorde det fyrr — eit
+             kall per felt, sendt i det du forlét feltet — og daa fanst
+             ikkje «eg ombestemte meg», og ei endring som heng saman kunde
+             verta halvvegs teki imot. Profilen og prisane gjer det rett:
+             feltet merkjer seg sjølv, dokka nedst ber handlingi, og det
+             ugjenkallege er å lagra (ARKET §9). */}}
+        <form class="regel-meir" id="regel-{{$nr}}" data-nr="{{$nr}}"
+              data-regel-id="{{$r.RegelID}}"
+              data-naar="{{t $.Lang $r.VekedagNykel}} {{$r.Klokke}}{{if $r.Rom}} · {{$r.Rom}}{{end}}"
+              method="post" action="/api/admin/rule/lagra"
+              data-endringar data-dokk="timedokk-{{$nr}}" hidden>
+            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+            <input type="hidden" name="rule_id" value="{{$r.RegelID}}">
+
             <p class="setning regel-setning">
+                <input type="text" class="felt regel-tittel" name="tittel" value="{{$r.Tittel}}"
+                       aria-label="{{t $.Lang "admin.class_title"}}"{{if $utanregel}} disabled{{end}}>
                 {{t $.Lang "admin.with"}}
-                <input type="text" class="felt regel-laerar" list="laerarar" value="{{.Laerar}}"
+                <input type="text" class="felt" name="laerar" list="laerarar" value="{{$r.Laerar}}"
                        aria-label="{{t $.Lang "admin.teacher_name"}}"{{if $utanregel}} disabled{{end}}>
+                {{t $.Lang "admin.in_room"}}
+                <select class="felt" name="room_id" aria-label="{{t $.Lang "admin.location"}}"{{if $utanregel}} disabled{{end}}>
+                    <option value="0" disabled {{if eq $r.RomID 0}}selected{{end}}>{{t $.Lang "admin.select_location"}}</option>
+                    {{range $.Rooms}}
+                    <option value="{{.ID}}" {{if eq .ID $r.RomID}}selected{{end}}>{{.Name}}</option>
+                    {{end}}
+                </select>,
+                <select class="felt" name="vekedag" aria-label="{{t $.Lang "admin.weekday"}}"{{if $utanregel}} disabled{{end}}>
+                    <option value="1" {{if eq $dag "1"}}selected{{end}}>{{t $.Lang "timeplan.monday"}}</option>
+                    <option value="2" {{if eq $dag "2"}}selected{{end}}>{{t $.Lang "timeplan.tuesday"}}</option>
+                    <option value="3" {{if eq $dag "3"}}selected{{end}}>{{t $.Lang "timeplan.wednesday"}}</option>
+                    <option value="4" {{if eq $dag "4"}}selected{{end}}>{{t $.Lang "timeplan.thursday"}}</option>
+                    <option value="5" {{if eq $dag "5"}}selected{{end}}>{{t $.Lang "timeplan.friday"}}</option>
+                    <option value="6" {{if eq $dag "6"}}selected{{end}}>{{t $.Lang "timeplan.saturday"}}</option>
+                    <option value="0" {{if eq $dag "0"}}selected{{end}}>{{t $.Lang "timeplan.sunday"}}</option>
+                </select>
                 {{t $.Lang "admin.from_time"}}
-                <input type="time" class="felt regel-klokke" value="{{.Klokke}}"
+                <input type="time" class="felt" name="klokke" value="{{$r.Klokke}}"
                        aria-label="{{t $.Lang "admin.rule_time"}}"{{if $utanregel}} disabled{{end}}>
                 {{t $.Lang "admin.for_duration"}}
-                <input type="number" class="felt felt-tal regel-lengd" value="{{.Lengd}}"
+                <input type="number" class="felt felt-tal" name="minutt" value="{{$r.Lengd}}"
                        min="15" max="240" step="5"
                        aria-label="{{t $.Lang "admin.length_minutes"}}"{{if $utanregel}} disabled{{end}}>
                 {{t $.Lang "admin.minutes"}}
-                <span class="regel-vink">— {{if $utanregel}}{{t $.Lang "admin.rule_none_hint"}}{{else}}{{t $.Lang "admin.rule_edit_hint"}}{{end}}</span>
+                {{/* Rommet sitt tal stend som verd. Det var eit tomt felt
+                     med rommet sitt tal i grått fyrr, so ein kunde sjaa
+                     skilnaden paa «arva» og «valt» — men det kravde ei
+                     hjelpeline for aa forklara seg, og eit felt som lyt
+                     forklarast er eit felt som er for lurt. Talet stend
+                     der; skriv du eit anna, gjeld det. */}}
+                {{t $.Lang "admin.room_for"}}
+                <input type="number" class="felt felt-tal" name="plassar"
+                       value="{{if $r.Plassar}}{{$r.Plassar}}{{else}}{{$r.RomPlassar}}{{end}}"
+                       min="0" max="500"
+                       aria-label="{{t $.Lang "admin.capacity"}}"{{if $utanregel}} disabled{{end}}>.
             </p>
 
-            <textarea class="regel-skildring" rows="2"
+            {{/* `.merknad` og ikkje `.regel-vink`: dette er ikkje eit vink,
+                 det er grunnen til at seks felt ovanfor stend stengde. Det
+                 stod i den veikaste skrifti paa sida — .78rem,
+                 `--blekk-svakt` — medan det forklara heile ruta. Huset hev
+                 komponenten alt: `.merknad` ber aatvaringslina i margen og
+                 stend fyre handlingi (10-kortet.css). */}}
+            {{if $utanregel}}<p class="merknad opplysing">{{t $.Lang "admin.rule_none_hint"}}</p>{{end}}
+
+            <textarea class="regel-skildring" name="skildring" rows="2"
                       placeholder="{{t $.Lang "admin.description"}}"
-                      aria-label="{{t $.Lang "admin.description"}}"{{if $utanregel}} disabled{{end}}>{{.Beskriving}}</textarea>
+                      aria-label="{{t $.Lang "admin.description"}}"{{if $utanregel}} disabled{{end}}>{{$r.Beskriving}}</textarea>
 
-            {{/* Den einskilde timen — tannlækjardagen. Vel dagen, set
-                 vikar eller avlys. Femtiotvo rader var ikkje eit
-                 oversyn; ein veljar er det. */}}
-            <p class="setning time-setning">
-                <select class="felt time-veljar" aria-label="{{t $.Lang "admin.pick_day"}}">
-                    {{range .Timar}}
-                    <option value="{{.ID}}" data-laerar="{{.TeacherName}}"
-                            data-plassar="{{.CurrentEnrolment}}/{{.Capacity}}">{{.StartTime.Format "2.1."}}</option>
-                    {{end}}
-                </select>
-                <span class="time-plassar"></span>
-                {{t $.Lang "admin.with_vikar"}}
-                <input type="text" class="felt time-vikar" list="laerarar"
-                       aria-label="{{t $.Lang "admin.with_vikar"}}">
-                <button type="button" class="time-avlys">{{t $.Lang "admin.cancel_class"}}</button>
+            {{if not $utanregel}}
+            <p class="setning seriesetning">
+                {{t $.Lang "admin.series_runs"}}
+                <span class="serietal">{{len $r.Timar}} {{gonger $.Lang (len $r.Timar)}}</span>
+                {{t $.Lang "admin.series_until"}} {{$r.Sluttar.Format "2.1.2006"}}.
+                {{t $.Lang "admin.add_weeks"}}
+                <input type="number" class="felt felt-tal" name="veker" value=""
+                       placeholder="0" min="0" max="52"
+                       aria-label="{{t $.Lang "admin.add_weeks_unit"}}">
+                {{t $.Lang "admin.add_weeks_unit"}}.
             </p>
-        </div>
-    </li>
-    {{end}}
-</ul>
-{{else}}
-<p class="tomt">{{t .Lang "admin.no_upcoming_classes"}}</p>
-{{end}}
+            {{end}}
+
+            <div class="bolkhovud daghovud">
+                <h3 class="undertittel">{{t $.Lang "admin.the_days"}}</h3>
+                <label class="velalle"><input type="checkbox" class="vel-alle" data-ikkje-endring>
+                    {{t $.Lang "admin.select_all"}}</label>
+            </div>
+
+            {{/* Raden som verkar paa dei merkte stend *yver* lista og
+                 ikkje under henne. Ein serie kann vera femti dagar lang,
+                 og ein knapp som ligg under femti rader er ein knapp du
+                 lyt rulla for aa finna — etter at du alt hev merkt det du
+                 vil gjera noko med, so du rullar burt fraa det du ser paa.
+
+                 Felti her er reiskap og ikkje endringar: dei ber
+                 `data-ikkje-endring`, so dokka ikkje tel det du skriv i
+                 verktyet som noko som skal lagrast. Det som vert lagra er
+                 merket dei set paa rada. */}}
+            <p class="merknad">{{t $.Lang "admin.cancel_warning"}}</p>
+
+            <p class="setning valsetning">
+                <span class="valde">0</span> {{t $.Lang "admin.selected_count"}}:
+                <input type="date" class="felt val-dato" disabled data-ikkje-endring
+                       aria-label="{{t $.Lang "admin.class_date"}}">
+                {{t $.Lang "admin.at_clock"}}
+                <input type="time" class="felt val-klokke" step="300" disabled data-ikkje-endring
+                       aria-label="{{t $.Lang "admin.start_time"}}">
+                {{t $.Lang "admin.with"}}
+                <input type="text" class="felt val-vikar" list="laerarar" disabled data-ikkje-endring
+                       placeholder="{{t $.Lang "admin.eg_teacher"}}"
+                       aria-label="{{t $.Lang "admin.with_vikar"}}">
+                <button type="button" class="btn-danger val-avlys" disabled>{{t $.Lang "admin.cancel_class"}}</button>
+            </p>
+
+            {{/* Dagen ser ut som regelen i lista til venstre: namnet
+                 øvst, kven under, klokka og talet til høgre. Same forma i
+                 baae spaltone, so auga les den eine som det les den
+                 andre. */}}
+            <ul class="daglista">
+                {{range $r.Timar}}
+                <li>
+                    <label class="dagrad" data-time-id="{{.ID}}"
+                           data-dato="{{.StartTime.Format "2006-01-02"}}"
+                           data-klokke="{{.StartTime.Format "15:04"}}"
+                           data-laerar="{{.TeacherName}}"
+                           data-lengd="{{.LengdMin}}">
+                        <input type="checkbox" class="time-val" data-ikkje-endring
+                               aria-label="{{.StartTime.Format "2.1."}}">
+                        <span class="dagnamn">{{t $.Lang (vekedagnykel .StartTime)}} {{.StartTime.Format "2.1."}}</span>
+                        <span class="daglaerar">{{.TeacherName}}</span>
+                        <span class="dagklokke">{{.StartTime.Format "15:04"}}</span>
+                        <span class="dagplassar">{{.CurrentEnrolment}} {{t $.Lang "timeplan.of"}} {{.Capacity}}</span>
+                        <span class="dagord">{{t $.Lang "admin.mark_cancelled"}}</span>
+                    </label>
+                </li>
+                {{end}}
+            </ul>
+
+            <p class="fylgja dagfylgja" role="status"></p>
+
+            {{/* Dokka. Ho kjem fyrst naar noko er endra, og ho ber baade
+                 vegen fram og vegen attende. */}}
+            <aside class="dokk endringsdokk" id="timedokk-{{$nr}}" hidden>
+                <div class="dokkinnhald">
+                    <span class="endringstal" aria-live="polite"
+                          data-ein="{{t $.Lang "profile.changed_one"}}"
+                          data-fleire="{{t $.Lang "profile.changed_many"}}"></span>
+                    <div class="dokkhandling">
+                        <button type="button" class="btn" data-angra>{{t $.Lang "profile.discard"}}</button>
+                        <button type="submit" class="btn-primary">{{t $.Lang "profile.save"}}</button>
+                    </div>
+                </div>
+            </aside>
+        </form>
+        {{end}}
+    </section>
+</div>
 
 <script>
-// Enable/disable recurring weeks input based on checkbox
-document.getElementById('is-recurring').addEventListener('change', function() {
-    const recurringWeeks = document.getElementById('recurring-weeks');
-    recurringWeeks.disabled = !this.checked;
-    if (!this.checked) {
-        recurringWeeks.value = 4;
-    }
-});
-
-// Auto-fill end time based on start time (add 1 hour)
-document.getElementById('class-start-time').addEventListener('change', function() {
-    const startTime = this.value;
-    if (startTime) {
-        const [hours, minutes] = startTime.split(':');
-        const endHour = (parseInt(hours) + 1) % 24;
-        const endTime = endHour.toString().padStart(2, '0') + ':' + minutes;
-        document.getElementById('class-end-time').value = endTime;
-    }
-});
-
+// ---- skjemaet for ein ny time ----
 // Det avleidde. Kapasitet av rommet, slutttid av lengdi, og konflikt
 // fraa tenaren — alt medan du skriv.
+//
 // Neste dato vekedagen kjem, som YYYY-MM-DD — i dag, um klokka ikkje
 // alt er gjengi. Konfliktprøva treng ein konkret dato aa spyrja um.
 function nesteDato(vekedag, klokke) {
@@ -196,6 +363,7 @@ function nesteDato(vekedag, klokke) {
     var start = document.getElementById('class-start-time');
     var lengd = document.getElementById('class-length');
     var gjentak = document.getElementById('is-recurring');
+    var veker = document.getElementById('recurring-weeks');
     var vekerBolk = document.getElementById('veker-bolk');
     var ut = document.getElementById('fylgja');
     if (!rom || !ut) return;
@@ -215,7 +383,7 @@ function nesteDato(vekedag, klokke) {
         if (val && val.dataset.plassar) bitar.push(val.dataset.plassar + ' ' + ut.dataset.plassar);
         var s = slutt();
         if (s) bitar.push(ut.dataset.sluttar + ' ' + s);
-        ut.textContent = bitar.join(' \u00b7 ');
+        ut.textContent = bitar.join(' · ');
         ut.classList.remove('gale');
 
         if (!(val && val.dataset.rom && dag.value && start.value && s)) return;
@@ -231,7 +399,7 @@ function nesteDato(vekedag, klokke) {
                 if (!svar.ok) return;
                 var d = await svar.json();
                 if (d.conflict) {
-                    ut.textContent = bitar.join(' \u00b7 ') + ' \u00b7 ' + d.message;
+                    ut.textContent = bitar.join(' · ') + ' · ' + d.message;
                     ut.classList.add('gale');
                 }
             } catch (e) { /* konflikten er ei hjelp, ikkje eit vilkor */ }
@@ -242,7 +410,15 @@ function nesteDato(vekedag, klokke) {
         f.addEventListener('input', teikn);
         f.addEventListener('change', teikn);
     });
-    gjentak.addEventListener('change', function () { vekerBolk.hidden = !gjentak.checked; });
+
+    // Éin lyttar paa avkryssingi og ikkje tvo. Det stod ein til lenger
+    // nede som sette talet attende til 4 medan feltet stend paa 8, so
+    // kva du fekk kom an paa kva for ein av dei som kom sist.
+    gjentak.addEventListener('change', function () {
+        vekerBolk.hidden = !gjentak.checked;
+        veker.disabled = !gjentak.checked;
+    });
+    veker.disabled = !gjentak.checked;
 
     // Fyrste gongen: dagen i dag, so det vanlegaste tilfellet — «denne
     // timen, fraa no av» — ikkje krev noko val.
@@ -291,163 +467,279 @@ function createClass(event) {
     });
 }
 
-// Regel-lista. Rada opnar seg der ho stend — same grepet som
-// folkelista. Fyrste setningi er regelen (gjeld alle komande timar),
-// andre setningi er den einskilde timen: dagveljaren styrer kva
-// vikarfeltet og avlysingi gjeld. Feltet sjølv er sanninga: eit
-// vellukka byte treng ingi melding, eit mislukka set feltet attende
-// og segjer fraa.
+// ---- lista, sikti og benken ----
+//
+// Til venstre reglane, til høgre den eine du hev vald. Skjemaet lagrar
+// ikkje av seg sjølv: felti merkjer seg, dokka nedst ber handlingi, og
+// det ugjenkallege er å lagra (ARKET §9). Skriptet her set merki og
+// held lista; `endringar.js` tel deim og eig dokka.
 (function () {
     var liste = document.getElementById('timereglar');
-    if (!liste) return;
+    var benk = document.querySelector('.timestyring-timar');
+    if (!liste || !benk) return;
 
-    // Synk time-setningi mot den valde dagen.
-    function synkTime(meir) {
-        var veljar = meir.querySelector('.time-veljar');
-        var val = veljar.selectedOptions[0];
-        var vikar = meir.querySelector('.time-vikar');
-        var avlys = meir.querySelector('.time-avlys');
-        var daud = !val || val.disabled;
-        vikar.disabled = daud;
-        avlys.disabled = daud;
-        if (val) {
-            vikar.value = val.dataset.laerar;
-            vikar.defaultValue = val.dataset.laerar;
-            meir.querySelector('.time-plassar').textContent = val.dataset.plassar;
+    var rader = [].slice.call(liste.querySelectorAll('.regel-rad'));
+    var skjema = {};
+    [].forEach.call(benk.querySelectorAll('.regel-meir'), function (f) { skjema[f.dataset.nr] = f; });
+
+    var naar = document.getElementById('valt-naar');
+    var tomt = document.getElementById('valt-tomt');
+    var ingenTreff = document.getElementById('ingen-treff');
+
+    function seg(form, ord) {
+        var f = form.querySelector('.dagfylgja');
+        f.textContent = ord || '';
+        f.classList.toggle('gale', !!ord);
+    }
+    function dokkaTil(form) { return document.getElementById(form.dataset.dokk); }
+    function ulagra(form) {
+        var d = dokkaTil(form);
+        return d && !d.hidden;
+    }
+
+    // ---- valet ----
+    function skrivAdresse(nr) {
+        if (!(window.history && window.history.replaceState)) return;
+        var u = new URL(window.location.href);
+        u.searchParams.set('time', nr);
+        window.history.replaceState(null, '', u.pathname + u.search + u.hash);
+    }
+
+    var opa = null;
+    function vel(rad, skriv) {
+        // Ein regel med ulagra endringar slepper deg ikkje fyrr du hev
+        // svara dokka. Skjemaet ligg inni det som vert gøymt, so eit byte
+        // hadde teke med seg baade endringane og dokka som fortalde um
+        // deim — utan eit ord. Dokka stend alt paa skjermen og segjer kva
+        // som manglar; me byter berre ikkje burt fraa henne.
+        if (opa && opa !== rad && ulagra(skjema[opa.dataset.nr])) {
+            var d = dokkaTil(skjema[opa.dataset.nr]);
+            d.classList.remove('ropar');
+            void d.offsetWidth;
+            d.classList.add('ropar');
+            return;
         }
+        rader.forEach(function (r) {
+            var paa = r === rad;
+            r.classList.toggle('valt', paa);
+            r.querySelector('.regel-hovud').setAttribute('aria-pressed', paa ? 'true' : 'false');
+        });
+        Object.keys(skjema).forEach(function (nr) { skjema[nr].hidden = nr !== rad.dataset.nr; });
+        naar.textContent = skjema[rad.dataset.nr].dataset.naar;
+        tomt.hidden = true;
+        opa = rad;
+        if (skriv !== false) skrivAdresse(rad.dataset.nr);
     }
 
     liste.addEventListener('click', function (e) {
         var hovud = e.target.closest('.regel-hovud');
-        if (hovud) {
-            var open = hovud.getAttribute('aria-expanded') === 'true';
-            hovud.setAttribute('aria-expanded', open ? 'false' : 'true');
-            hovud.nextElementSibling.hidden = open;
-            if (!open) synkTime(hovud.nextElementSibling);
+        if (hovud) vel(hovud.closest('.regel-rad'));
+    });
+
+    // ---- sikti ----
+    // Ho gøymer rader; ho rører ikkje valet. Siktar du burt den timen du
+    // held paa med, stend han framleis paa benken.
+    var sok = document.getElementById('regel-sok');
+    var siktDag = document.getElementById('sikt-dag');
+    var siktLaerar = document.getElementById('sikt-laerar');
+
+    function sikt() {
+        var ord = (sok.value || '').trim().toLowerCase();
+        var synlege = 0;
+        rader.forEach(function (r) {
+            var ute = false;
+            if (ord && r.textContent.toLowerCase().indexOf(ord) === -1) ute = true;
+            if (siktDag && siktDag.value && r.dataset.vekedagTal !== siktDag.value) ute = true;
+            if (siktLaerar && siktLaerar.value && r.dataset.laerar !== siktLaerar.value) ute = true;
+            r.hidden = ute;
+            if (!ute) synlege++;
+        });
+        ingenTreff.hidden = synlege > 0;
+    }
+    sok.addEventListener('input', sikt);
+    [siktDag, siktLaerar].forEach(function (v) { if (v) v.addEventListener('change', sikt); });
+
+    // ---- merki ----
+    // Ei handling paa dei merkte dagane skriv ikkje til tenaren. Ho set
+    // eit løynt felt i rada og let rada syna det, og so er det dokka som
+    // utfører alt saman naar du lagrar. Same grepet som slettemerket i
+    // prisane, og av same grunnen: det som ikkje kann gjerast um att er
+    // *lagringi*, so det er ho som skal krevja eit trykk.
+    function levande(form) {
+        return [].slice.call(form.querySelectorAll('.dagrad:not(.avlyst)'));
+    }
+    function merkte(form) {
+        return levande(form).filter(function (rad) { return rad.querySelector('.time-val').checked; });
+    }
+
+    // Eitt løynt felt per rad og namn. Skriv ein det same to gonger, skal
+    // det ikkje verta to felt og to endringar.
+    function merk(rad, namn, verd) {
+        var f = rad.querySelector('input[name="' + namn + '"]');
+        if (!f) {
+            f = document.createElement('input');
+            f.type = 'hidden';
+            f.name = namn;
+            // `data-tel` er det `endringar.js` tel løynde felt paa, og
+            // det er ogso det ho tek burt att naar du angrar.
+            f.setAttribute('data-tel', '');
+            rad.appendChild(f);
+        }
+        f.value = verd;
+    }
+    function nyeFelt(form) {
+        form.dispatchEvent(new CustomEvent('endringar:nye', { bubbles: true }));
+    }
+
+    function synkVal(form) {
+        var valde = merkte(form);
+        var alle = levande(form);
+        form.querySelector('.valde').textContent = valde.length;
+
+        var vikar = form.querySelector('.val-vikar');
+        var avlys = form.querySelector('.val-avlys');
+        vikar.disabled = valde.length === 0;
+        avlys.disabled = valde.length === 0;
+
+        // Dato og klokke gjeld nettupp éin dag. Fem dagar flutte til den
+        // same datoen er ikkje ei flytting, det er ein kollisjon.
+        var dato = form.querySelector('.val-dato');
+        var klokke = form.querySelector('.val-klokke');
+        var ein = valde.length === 1;
+        dato.disabled = !ein;
+        klokke.disabled = !ein;
+        dato.value = ein ? valde[0].dataset.dato : '';
+        klokke.value = ein ? valde[0].dataset.klokke : '';
+
+        var velAlle = form.querySelector('.vel-alle');
+        velAlle.checked = alle.length > 0 && valde.length === alle.length;
+        velAlle.indeterminate = valde.length > 0 && valde.length < alle.length;
+    }
+
+    benk.addEventListener('change', function (e) {
+        var form = e.target.closest('.regel-meir');
+        if (!form) return;
+        var mal = e.target;
+
+        if (mal.classList.contains('time-val')) { synkVal(form); return; }
+        if (mal.classList.contains('vel-alle')) {
+            levande(form).forEach(function (r) { r.querySelector('.time-val').checked = mal.checked; });
+            synkVal(form);
             return;
         }
 
-        var avlys = e.target.closest('.time-avlys');
-        if (avlys) {
-            var meir = avlys.closest('.regel-meir');
-            var veljar = meir.querySelector('.time-veljar');
-            var val = veljar.selectedOptions[0];
-            if (!val || val.disabled) return;
-            if (!confirm('{{t .Lang "admin.confirm_delete_class"}}')) return;
-            fetch('/api/admin/class/' + val.value, { method: 'DELETE' })
-                .then(function (svar) {
-                    if (!svar.ok) throw new Error();
-                    // §6: dagen stend att i veljaren, merkt som avlyst,
-                    // og veljaren gjeng til neste dag som finst.
-                    val.disabled = true;
-                    val.textContent += ' — {{t .Lang "admin.cancelled_class"}}';
-                    var tal = meir.closest('.regel-rad').querySelector('.regel-tal');
-                    tal.textContent = (parseInt(tal.textContent, 10) - 1) + ' ×';
-                    var neste = veljar.querySelector('option:not(:disabled)');
-                    if (neste) veljar.value = neste.value;
-                    synkTime(meir);
-                })
-                .catch(function () { alert('{{t .Lang "admin.error_deleting_class"}}'); });
+        // Vikaren paa dei merkte. Feltet er reiskapen; merket i rada er
+        // endringi.
+        if (mal.classList.contains('val-vikar')) {
+            var namn = mal.value.trim();
+            if (!namn) return;
+            merkte(form).forEach(function (rad) {
+                merk(rad, 'vikar-' + rad.dataset.timeId, namn);
+                rad.querySelector('.daglaerar').textContent = namn;
+            });
+            mal.value = '';
+            nyeFelt(form);
+            return;
+        }
+
+        // Dagen og klokka gjeld den eine merkte dagen.
+        if (mal.classList.contains('val-dato') || mal.classList.contains('val-klokke')) {
+            var valde = merkte(form);
+            if (valde.length !== 1) return;
+            var rad = valde[0];
+            var dato = form.querySelector('.val-dato').value;
+            var klokke = form.querySelector('.val-klokke').value;
+            if (!dato || !klokke) return;
+            merk(rad, 'flytt-' + rad.dataset.timeId, dato + ' ' + klokke);
+            var d = new Date(dato + 'T00:00:00');
+            rad.querySelector('.dagnamn').textContent = vekedagsord(d) + ' ' + d.getDate() + '.' + (d.getMonth() + 1) + '.';
+            rad.querySelector('.dagklokke').textContent = klokke;
+            nyeFelt(form);
         }
     });
 
-    liste.addEventListener('change', function (e) {
-        var rad = e.target.closest('.regel-rad');
-        if (!rad) return;
-        var meir = rad.querySelector('.regel-meir');
+    var vekedagar = [
+        '{{t .Lang "timeplan.sunday"}}', '{{t .Lang "timeplan.monday"}}',
+        '{{t .Lang "timeplan.tuesday"}}', '{{t .Lang "timeplan.wednesday"}}',
+        '{{t .Lang "timeplan.thursday"}}', '{{t .Lang "timeplan.friday"}}',
+        '{{t .Lang "timeplan.saturday"}}'
+    ];
+    function vekedagsord(d) { return vekedagar[d.getDay()]; }
 
-        // Dagveljaren: berre synk, ingen ting vert lagra.
-        if (e.target.classList.contains('time-veljar')) {
-            synkTime(meir);
-            return;
+    benk.addEventListener('click', function (e) {
+        var form = e.target.closest('.regel-meir');
+        if (!form) return;
+
+        // Avlysing merkjer; ho slettar ikkje. Rada stend att, merkt, til
+        // du lagrar — eller til du angrar.
+        var avlys = e.target.closest('.val-avlys');
+        if (avlys && !avlys.disabled) {
+            merkte(form).forEach(function (rad) {
+                // Avlysing tek yver dei hine merki paa rada: ein dag som
+                // gjeng burt treng korkje vikar eller ny klokke.
+                [].forEach.call(rad.querySelectorAll('input[data-tel]'), function (f) { f.remove(); });
+                merk(rad, 'avlys', rad.dataset.timeId);
+                rad.classList.add('avlyst');
+                rad.querySelector('.time-val').checked = false;
+                rad.querySelector('.time-val').disabled = true;
+            });
+            synkVal(form);
+            nyeFelt(form);
         }
+    });
 
-        // Vikaren gjeld nett den valde dagen — tannlækjardagen.
-        if (e.target.classList.contains('time-vikar')) {
-            var vfelt = e.target;
-            var vikarnamn = vfelt.value.trim();
-            var dag = meir.querySelector('.time-veljar').selectedOptions[0];
-            if (!vikarnamn || !dag) { vfelt.value = vfelt.defaultValue; return; }
-            fetch('/api/admin/class/vikar?event_id=' + dag.value
-                + '&teacher_name=' + encodeURIComponent(vikarnamn), { method: 'POST' })
-                .then(function (svar) {
-                    if (!svar.ok) throw new Error();
-                    vfelt.defaultValue = vikarnamn;
-                    dag.dataset.laerar = vikarnamn;
-                })
-                .catch(function () { vfelt.value = vfelt.defaultValue; alert('{{t .Lang "admin.could_not_save"}}'); });
-        }
+    // Angre. `endringar.js` tek dei løynde felti og merkeklassone; teksti
+    // i rada er vaar, og ho lyt attende til det som stend lagra.
+    benk.addEventListener('click', function (e) {
+        if (!e.target.closest('[data-angra]')) return;
+        var form = e.target.closest('.regel-meir');
+        if (!form) return;
+        setTimeout(function () {
+            [].forEach.call(form.querySelectorAll('.dagrad'), function (rad) {
+                var d = new Date(rad.dataset.dato + 'T00:00:00');
+                rad.querySelector('.dagnamn').textContent =
+                    vekedagsord(d) + ' ' + d.getDate() + '.' + (d.getMonth() + 1) + '.';
+                rad.querySelector('.dagklokke').textContent = rad.dataset.klokke;
+                rad.querySelector('.daglaerar').textContent = rad.dataset.laerar;
+                rad.querySelector('.time-val').disabled = false;
+                rad.querySelector('.time-val').checked = false;
+            });
+            synkVal(form);
+            seg(form, '');
+        }, 0);
+    });
 
-        // Lærarbyte gjeld regelen: alle komande timar. Hovudlina og
-        // dagane fær det nye namnet med ein gong — dei er berre
-        // spegelbilete av felti.
-        if (e.target.classList.contains('regel-laerar')) {
-            var lfelt = e.target;
-            var namn = lfelt.value.trim();
-            if (!namn) { lfelt.value = lfelt.defaultValue; return; }
-            fetch('/api/admin/rule/teacher?rule_id=' + rad.dataset.regelId
-                + '&teacher_name=' + encodeURIComponent(namn), { method: 'POST' })
-                .then(function (svar) {
-                    if (!svar.ok) throw new Error();
-                    lfelt.defaultValue = namn;
-                    rad.querySelector('.regel-kven').textContent =
-                        namn + (rad.dataset.rom ? ' · ' + rad.dataset.rom : '');
-                    meir.querySelectorAll('.time-veljar option:not(:disabled)').forEach(function (o) {
-                        o.dataset.laerar = namn;
-                    });
-                    synkTime(meir);
-                })
-                .catch(function () { lfelt.value = lfelt.defaultValue; alert('{{t .Lang "admin.could_not_save"}}'); });
-        }
-
-        // Skildringi gjeld regelen. Ho gjeng i kroppen: lang tekst med
-        // linebrot høyrer ikkje heime i ei adressa.
-        if (e.target.classList.contains('regel-skildring')) {
-            var sfelt = e.target;
-            fetch('/api/admin/rule/beskriving', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rule_id: parseInt(rad.dataset.regelId, 10), description: sfelt.value })
+    // ---- lagringi ----
+    // Eitt kall med heile regelen. Gjeng noko gale, stend dokka att og
+    // segjer kvifor — ho hadde alt gøymt seg av di `endringar.js` reknar
+    // eit trykk paa «Lagre» som slutten paa saka.
+    benk.addEventListener('submit', function (e) {
+        var form = e.target.closest('.regel-meir');
+        if (!form) return;
+        e.preventDefault();
+        seg(form, '');
+        // `URLSearchParams` og ikkje `FormData`: den siste gjeng som
+        // `multipart`, og det er ei drakt eit skjema utan filer ikkje
+        // treng. Urlkoda er det same ein vanleg skjemapost sender, so
+        // tenaren les det same anten skriptet grip inn eller ikkje.
+        fetch(form.action, { method: 'POST', body: new URLSearchParams(new FormData(form)) })
+            .then(function (svar) {
+                if (!svar.ok) return svar.text().then(function (t) { throw new Error(t); });
+                window.location.reload();
             })
-                .then(function (svar) {
-                    if (!svar.ok) throw new Error();
-                    sfelt.defaultValue = sfelt.value;
-                })
-                .catch(function () { sfelt.value = sfelt.defaultValue; alert('{{t .Lang "admin.could_not_save"}}'); });
-        }
-
-        // Klokkeslettet gjeld ogso regelen: kvar komande time held
-        // dagen sin og lengdi si, berre klokka skifter.
-        if (e.target.classList.contains('regel-klokke')) {
-            var kfelt = e.target;
-            if (!kfelt.value) { kfelt.value = kfelt.defaultValue; return; }
-            fetch('/api/admin/rule/klokke?rule_id=' + rad.dataset.regelId
-                + '&klokke=' + encodeURIComponent(kfelt.value), { method: 'POST' })
-                .then(function (svar) {
-                    if (!svar.ok) throw new Error();
-                    kfelt.defaultValue = kfelt.value;
-                    rad.querySelector('.regel-naar').textContent =
-                        rad.dataset.vekedag + ' ' + kfelt.value;
-                })
-                .catch(function () { kfelt.value = kfelt.defaultValue; alert('{{t .Lang "admin.could_not_save"}}'); });
-        }
-
-        // Lengdi gjeld regelen: kvar komande time held starten sin og
-        // fær ny slutt.
-        if (e.target.classList.contains('regel-lengd')) {
-            var gfelt = e.target;
-            var minutt = parseInt(gfelt.value, 10);
-            if (!minutt || minutt < 15) { gfelt.value = gfelt.defaultValue; return; }
-            fetch('/api/admin/rule/lengd?rule_id=' + rad.dataset.regelId
-                + '&minutt=' + minutt, { method: 'POST' })
-                .then(function (svar) {
-                    if (!svar.ok) throw new Error();
-                    gfelt.defaultValue = gfelt.value;
-                })
-                .catch(function () { gfelt.value = gfelt.defaultValue; alert('{{t .Lang "admin.could_not_save"}}'); });
-        }
+            .catch(function (feil) {
+                var d = dokkaTil(form);
+                if (d) d.hidden = false;
+                seg(form, feil.message);
+            });
     });
-})();
 
+    // Fyrste regelen stend framme med ein gong — eller den du stod i fyre
+    // sida lasta seg paa nytt.
+    var fraaAdressa = new URL(window.location.href).searchParams.get('time');
+    var start = rader.filter(function (r) { return r.dataset.nr === fraaAdressa; })[0] || rader[0];
+    if (start) vel(start, false);
+    Object.keys(skjema).forEach(function (nr) { synkVal(skjema[nr]); });
+})();
 </script>
 {{end}}

@@ -1,0 +1,37 @@
+/* ===================================================================
+   tabellar
+   Ingen rammor kring cellone. Ei lina under kvar rad, og ei sterkare
+   under yverskrifti. Fyrste kolonna og yverskrifti fylgja med naar ein
+   rullar sidelengs — same grepet som matrisa i slaaupp.
+   =================================================================== */
+
+
+/* Tabellar rulla ikkje. Ei celle som er for smal bryt teksti si; ei
+   spalta som ikkje er verd plassen gjeng ut paa smale glas i staden
+   for aa skuva alt anna ut or glaset. */
+table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+th, td { overflow-wrap: break-word; hyphens: auto; }
+thead th {
+  font-family: var(--skrift-yver);
+  font-size: .8rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .09em; text-transform: uppercase;
+  color: var(--blekk-lys);
+  text-align: left;
+  padding: var(--rom-3) var(--rom-4);
+  border-bottom: 1px solid var(--kant);
+  background: var(--flate);
+  /* Under hovudlina og ikkje under skjermkanten: hovudlina er klistra
+     ho òg, og med `top: 0` rulla yverskriftsrada inn *bak* henne og
+     vart burte. `--sidehovud-hogd` kjem fraa klistrelag.js. */
+  position: sticky; top: var(--sidehovud-hogd, 0px); z-index: 2;
+  white-space: nowrap;
+}
+tbody td {
+  padding: var(--rom-3) var(--rom-4);
+  border-bottom: 1px solid var(--haarlina);
+  vertical-align: top;
+  font-size: .94rem;
+}
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: var(--ark-djup); }

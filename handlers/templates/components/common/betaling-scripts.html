@@ -1,103 +1,87 @@
 {{define "betaling_scripts"}}
 <script>
-async function loadPaymentMethods() {
-    try {
-        const response = await fetch('/api/payment-methods');
-        if (response.ok) {
-            const html = await response.text();
-            document.getElementById('payment-methods-container').innerHTML = html;
-        } else {
-            document.getElementById('payment-methods-container').innerHTML = '<div class="no-data">Kunne ikke laste betalingsmetoder</div>';
+// Betalingssida.
+//
+// Ingen alert, ingen confirm. Kvart einaste ord her stod paa bokmaal
+// inne i skriptet — «Feil ved fjerning av betalingsmetode» — paa ei
+// sida som elles kann lesast paa tri maal, og ingen saag det fyrr nokon
+// bytte maal. No kjem dei fraa `locales/` som alt anna (§7).
+//
+// Det som gjekk gale stend i lina under lista, der ein alt les. Ei rute
+// som spring upp og lyt lukkast stoggar heile sida for aa fortelja deg
+// noko ho kunde ha skrive der du saag.
+(function () {
+    "use strict";
+
+    var svar = document.getElementById("betalingssvar");
+
+    var ord = {
+        kortGale: {{t .Lang "payments.could_not_load_payment_methods" | toJS}},
+        ladningGale: {{t .Lang "charges.could_not_load" | toJS}},
+        handlingGale: {{t .Lang "payments.action_failed" | toJS}}
+    };
+
+    function syn(bod) {
+        if (!svar) return;
+        svar.textContent = bod || "";
+        svar.classList.toggle("gale", Boolean(bod));
+    }
+
+    function hent(url, id, gale) {
+        return fetch(url)
+            .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+            .then(function (h) { document.getElementById(id).innerHTML = h; })
+            .catch(function () {
+                var rom = document.getElementById(id);
+                rom.textContent = "";
+                var p = document.createElement("p");
+                p.className = "no-data";
+                p.textContent = gale;
+                rom.appendChild(p);
+            });
+    }
+
+    function lastKort() {
+        return hent("/api/payment-methods", "payment-methods-container", ord.kortGale);
+    }
+
+    function lastLadningar(type) {
+        var url = "/api/charges";
+        if (type) url += "?type=" + encodeURIComponent(type);
+        return hent(url, "charges-container", ord.ladningGale);
+    }
+
+    // Filteret paa ladningane er ein `onchange` i malen; han lyt naa
+    // hit, og difor stend han paa window.
+    window.filterCharges = function (type) { lastLadningar(type); };
+
+    function send(url, id) {
+        syn("");
+        var kropp = new FormData();
+        kropp.append("payment_method_id", id);
+
+        fetch(url, { method: "POST", body: kropp })
+            .then(function (r) {
+                if (!r.ok) return r.text().then(function (t) { throw new Error(t); });
+                return lastKort();
+            })
+            .catch(function (feil) { syn(feil.message || ord.handlingGale); });
+    }
+
+    // Éin lyttar for heile lista. Korti vert teikna paa nytt etter kvar
+    // handling, so ein lyttar per knapp hadde vore burte att og fram.
+    document.addEventListener("click", function (e) {
+        var knapp = e.target.closest("[data-kort]");
+        if (!knapp) return;
+        if (knapp.dataset.handling === "standard") {
+            send("/api/payment-methods/set-default", knapp.dataset.kort);
+        } else if (knapp.dataset.handling === "fjern") {
+            send("/api/payment-methods/remove", knapp.dataset.kort);
         }
-    } catch (error) {
-        console.error('Error loading payment methods:', error);
-        document.getElementById('payment-methods-container').innerHTML = '<div class="no-data">Feil ved lasting av betalingsmetoder</div>';
-    }
-}
+    });
 
-async function loadCharges(typeFilter = '') {
-    try {
-        let url = '/api/charges';
-        if (typeFilter) {
-            url += '?type=' + encodeURIComponent(typeFilter);
-        }
-        
-        const response = await fetch(url);
-        if (response.ok) {
-            const html = await response.text();
-            document.getElementById('charges-container').innerHTML = html;
-        } else {
-            document.getElementById('charges-container').innerHTML = '<div class="no-data">Kunne ikke laste belastninger</div>';
-        }
-    } catch (error) {
-        console.error('Error loading charges:', error);
-        document.getElementById('charges-container').innerHTML = '<div class="no-data">Feil ved lasting av belastninger</div>';
-    }
-}
-
-function filterCharges(type) {
-    loadCharges(type);
-}
-
-function addPaymentMethod() {
-    // TODO: Implement Stripe payment method addition
-    alert('Legg til betalingsmetode-funksjonalitet kommer snart!');
-}
-
-async function setDefaultPaymentMethod(paymentMethodId) {
-    if (!confirm('Er du sikker på at du vil sette denne som standard betalingsmetode?')) {
-        return;
-    }
-    
-    try {
-        const formData = new FormData();
-        formData.append('payment_method_id', paymentMethodId);
-        
-        const response = await fetch('/api/payment-methods/set-default', {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (response.ok) {
-            loadPaymentMethods(); // Reload the list
-        } else {
-            alert('Feil ved setting av standard betalingsmetode');
-        }
-    } catch (error) {
-        console.error('Error setting default payment method:', error);
-        alert('Feil ved setting av standard betalingsmetode');
-    }
-}
-
-async function removePaymentMethod(paymentMethodId) {
-    if (!confirm('Er du sikker på at du vil fjerne denne betalingsmetoden?')) {
-        return;
-    }
-    
-    try {
-        const formData = new FormData();
-        formData.append('payment_method_id', paymentMethodId);
-        
-        const response = await fetch('/api/payment-methods/remove', {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (response.ok) {
-            loadPaymentMethods(); // Reload the list
-        } else {
-            alert('Feil ved fjerning av betalingsmetode');
-        }
-    } catch (error) {
-        console.error('Error removing payment method:', error);
-        alert('Feil ved fjerning av betalingsmetode');
-    }
-}
-
-// Load data when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    loadPaymentMethods();
-    loadCharges();
-});
+    lastKort();
+    lastLadningar();
+})();
 </script>
 {{end}}

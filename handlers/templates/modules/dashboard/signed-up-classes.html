@@ -21,10 +21,10 @@
 {{end}}
 
 {{define "signed_up_classes_module"}}
-{{if .PaameldeFramsyningar}}
+{{if .EnrolledSessions}}
 <div class="content-section">
     <h2 class="section-title">{{t .Lang "dashboard.signed_up"}}</h2>
-    {{template "timeliste" (dict "Lang" .Lang "Rader" .PaameldeFramsyningar)}}
+    {{template "timeliste" (dict "Lang" .Lang "Rader" .EnrolledSessions)}}
 </div>
 {{end}}
 {{end}}

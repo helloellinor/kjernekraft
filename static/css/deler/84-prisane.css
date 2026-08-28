@@ -1,0 +1,100 @@
+/* ===================================================================
+   prisane (administrasjonen)
+   Same form som profilen: kvart felt er skrivbart der det står, det
+   endra feltet ber merket sjølv, og dokka nedst ber handlinga.
+
+   Før hadde kvar rad tre knappar — «Rediger pris», «Lagre», «Avbryt» —
+   der dei to siste stod gøymde til du trykte den første. Tre knappar per
+   rad, ganga med talet på medlemskap, for å endre eitt tal.
+   =================================================================== */
+.prisliste { display: flex; flex-direction: column; gap: var(--rom-6); }
+
+/* Eitt medlemskap er ei setning: kva det heiter, kva det kostar, kor
+   lenge du bind deg. Lufta mellom dei er det som skil dei — same grepet
+   som mellom bolkane i profilen, og utan ei einaste overskrift. */
+.prislapp { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2); }
+.prislapp .lapprad { align-items: baseline; flex-wrap: wrap; }
+
+/* Namnet er det største i lappen, av di det er det ein leitar etter når
+   ein skal finne rett medlemskap. */
+.prisnamn {
+  font-family: var(--skrift-yver); font-size: 1.25rem;
+  font-stretch: var(--vidd-yver); font-weight: 500;
+  min-width: 10rem;
+}
+
+/* Tal skal stå i talskrifta og vere så breie som talet, ikkje som
+   spalta. `field-sizing: content` på .lappfelt gjer resten. */
+.talfelt {
+  font-family: var(--skrift-tal);
+  min-width: 4rem;
+  text-align: right;
+}
+/* Nettlesaren sine opp/ned-pilar tek plass og gjer feltet breiare enn
+   talet. Ein skriv talet; ein klikkar det ikkje opp tjue gonger. */
+.talfelt::-webkit-outer-spin-button,
+.talfelt::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.talfelt { -moz-appearance: textfield; appearance: textfield; }
+
+.priseining { color: var(--blekk-lys); font-size: .92rem; }
+
+/* Knappen som legg til ein rad. Han står nedst i lista og ikkje attmed
+   fanene: det er der raden kjem, og det er den plasseringa som verkar
+   like godt på ein telefon som på ein skjerm. */
+.nyrad { margin-top: var(--rom-5); }
+
+/* Veljaren i setninga ber den same fordjupinga som felta rundt seg —
+   `.lappfelt` set flate og skugge, og select-regelen ovanfor held pila
+   og breidda. Utan `padding-right` legg teksten seg under pila. */
+select.lappfelt { padding-right: var(--rom-6); }
+
+/* Ein rad som ikkje er lagra enno ber det same merket som eit endra
+   felt — heile raden, av di det er heile raden som er ny. */
+.prislapp.ny { border-left: 3px solid var(--togu); padding-left: var(--rom-4); }
+
+/* Slettemerket. Det er ikkje ein handling som skjer med det same: raden
+   vert merkt, og dokka utfører det når du lagrar. Difor er han eit lite
+   kryss og ikkje ein raud knapp — det som er ugjenkalleg, er å lagre. */
+.slettmerke {
+  font-family: var(--skrift-tal); font-size: 1rem; line-height: 1;
+  padding: var(--rom-1) var(--rom-2);
+  border: 0; background: none; color: var(--blekk-svakt);
+  cursor: pointer;
+}
+.slettmerke:hover { color: var(--aatvaring); background: none; border: 0; }
+
+/* Ein merkt rad står att så du ser kva du har gjort — gjennomstroken og
+   veik, med åtvaringsfargen i margen. Angre tek han attende. */
+.prislapp.slettast { opacity: .55; border-left: 3px solid var(--aatvaring); padding-left: var(--rom-4); }
+.prislapp.slettast .prisnamn { text-decoration: line-through; }
+.slettord {
+  display: none;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--aatvaring);
+}
+.prislapp.slettast .slettord { display: inline; }
+
+/* Reglane. Kvar regel er ei setning med valet i seg — ikkje ei
+   avkryssing med ei merkelapp attmed og ei skildring under, som var tre
+   tekstar om det same. */
+.reglar { display: flex; flex-direction: column; gap: var(--rom-5); align-items: flex-start; }
+.regel {
+  font-size: 1.05rem; line-height: 2.2; margin: 0;
+  max-width: 62ch; color: var(--blekk);
+}
+.regel select.lappfelt { margin: 0 .15rem; }
+
+/* Det rekna talet. Prisen per klipp er prisen delt på talet på klipp —
+   han står attmed og er ikkje skrivbar, av di eit felt ein kan skrive
+   noko galt i, er eit felt som kan lyge. */
+.rekna { font-family: var(--skrift-tal); font-size: .88rem; color: var(--blekk-svakt); }
+
+/* «generert» attmed eit namn: dette ordet er skrive av systemet, og du
+   kan skrive over det. Det står i det veike blekket av di det ikkje er
+   noko du treng gjere noko med. */
+.generert {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .66rem; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--blekk-svakt); margin-left: var(--rom-2);
+}

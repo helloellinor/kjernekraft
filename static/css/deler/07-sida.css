@@ -1,0 +1,176 @@
+/* ===================================================================
+   sida
+   =================================================================== */
+main {
+  /* Innhaldet tek plassen som er att, so botnlina vert skuva nedst.
+     `width: 100%` lyt stå: auto-margin på sidene i ei flex-spalte slår av
+     strekkinga, og då krympar <main> til innhaldet sitt og legg seg midt
+     i glaset. Sida såg sentrert ut. */
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-6) var(--sidefyll) var(--rom-7);
+}
+
+.page-title {
+  /* Klassa ber heile utsjaanaden sjølv (§15), so verkstaden kann syna
+     honom paa ein div utan aa laana elementstilen fraa h1. */
+  font-family: var(--skrift-yver);
+  line-height: 1.02;
+  text-wrap: balance;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  overflow-wrap: break-word; hyphens: auto;
+  font-stretch: var(--vidd-tittel);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  /* Bolkeoverskrifta under er ei overskrift no og ikkje ei merkelapp.
+     To overskrifter med rom-3 imellom les seg som éin blokk. */
+  margin: 0 0 var(--rom-6);
+  padding: 0;
+  border: 0;
+  text-align: left;
+}
+.page-description { color: var(--blekk-lys); margin-bottom: var(--rom-6); max-width: 62ch; }
+
+.content-section { margin-bottom: var(--rom-7); }
+
+/* ---- rangstigen ----
+   Fire steg, og kvart steg er *smalare* enn det yver seg. Breiddi ber
+   rangen, ikkje storleiken: difor kann tvo yverskrifter vera mest like
+   store og endaa segja klaart kva som ligg under kva.
+
+     .page-title    125%  kvar du er
+     .section-title  68%  ein bolk paa sida, med lina under
+     .undertittel    68%  ei gruppa inne i bolken, utan lina
+     dt / .held      68%  eit einskilt felt
+
+   Steg tvo og tri hadde same forma fyrr — ein h4 inne i ein h3 fekk
+   ingi ny tyding, berre ein litt mindre bokstav. Lina er skiljet: ein
+   bolk deler sida, ei gruppa deler berre bolken. */
+/* Ei bolkeoverskrift er ei overskrift, ikkje ei merkelapp.
+
+   Ho stod på merkelapp-trinnet: 1,05 rem, 68 % breidd, versalar og
+   sperra. Det er forma til noko som *namngjev* eit felt — og då les ein
+   henne som ein liten lapp og ikkje som ei overskrift ein tek i. Ho var
+   tung å lese attpåtil: versalar tek bort ordbiletet, og sperringa gjer
+   at auga må lese bokstav for bokstav.
+
+   No står ho på trinnet under sidetittelen: 105 % i staden for 125 % i
+   breidd, og godt under han i storleik. Breidda ber rangen, som elles i
+   huset — ein ser kva som er kva før ein har lese eit ord. */
+.section-title {
+  font-family: var(--skrift-yver);
+  font-size: 1.65rem; font-weight: 500;
+  font-stretch: var(--vidd-yver);
+  letter-spacing: -.005em;
+  line-height: 1.15;
+  color: var(--blekk);
+  margin: 0 0 var(--rom-4);
+  padding-bottom: var(--rom-2);
+  border-bottom: 1px solid var(--haarlina);
+  text-align: left;
+  text-wrap: balance;
+}
+
+.undertittel {
+  font-family: var(--skrift-yver);
+  font-size: .78rem; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+  margin: var(--rom-6) 0 var(--rom-3);
+  padding: 0;
+  border: 0;
+  text-align: left;
+}
+.undertittel:first-child { margin-top: 0; }
+
+.two-column-grid {
+  display: grid; gap: var(--rom-5);
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+}
+
+/* ---- bolkhovudet ----
+   Ein bolk som lyt siktast i ber sikti si paa *tittellina*: overskrifti
+   til venstre, kontrollane til høgre, paa den same grunnlina.
+
+   Ho stod som ei rad for seg under overskrifti fyrr, med ein rama
+   veljar og ein synleg merkelapp. Det er tri liner aa lesa — tittel,
+   spursmaal, svar — fyre ein kjem til det ein kom for. Sikti er ikkje
+   eit skjema ein fyller ut; ho er ei innstilling paa noko ein alt ser,
+   og ho høyrer difor til overskrifti av det ein ser.
+
+   `justify-content: space-between` og ikkje `margin-left: auto`:
+   skilnaden syner seg fyrst naar lina bryt paa ein smal skjerm. Ein
+   auto-marg held sikti til høgre jamvel naar ho stend aaleine, og daa
+   flyt ho i lause lufti; med `space-between` gjeng ho til venstre
+   kanten, under tittelen, som alt anna som byrjar ei lina (§4). */
+.bolkhovud {
+  /* `center` og ikkje `baseline`: ein `<select>` fær ikkje grunnlina si
+     fraa skrifti si i Chrome, han fær henne fraa nedkanten av kassen.
+     Baseline-still rada, og ho skuvar overskrifti ned for aa naa den
+     falske grunnlina. Med `center` stend veljaren midt paa tittellina,
+     som er det ein ser etter, og tittelen stend still. */
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: var(--rom-2) var(--rom-5);
+  margin: 0 0 var(--rom-4);
+  padding-bottom: var(--rom-2);
+  border-bottom: 1px solid var(--haarlina);
+}
+
+/* Lina under høyrer til hovudet, ikkje til tittelen.
+   `.section-title` ber henne sjølv naar han stend aaleine. Let ein
+   honom ha henne her og, rekk ho berre so langt som ordet — og ei
+   bolkelina som stoggar midt paa sida er ikkje ei bolkelina. */
+/* Lina under høyrer til hovudet, ikkje til tittelen.
+   `.section-title` ber henne sjølv naar han stend aaleine. Let ein
+   honom ha henne her og, rekk ho berre so langt som ordet — og ei
+   bolkelina som stoggar midt paa sida er ikkje ei bolkelina. */
+.bolkhovud .section-title { padding: 0; border-bottom: 0; }
+
+/* Ingen flytmargar inne i hovudet. `gap` set avstanden her.
+
+   Dette er ikkje pynt. `:where(h2,h3,h4) + *` i token-blokka gjev alt
+   som kjem *etter* ei overskrift tolv piksel luft yver seg — rett i
+   vanleg flyt, men sikti stend ikkje etter tittelen her, ho stend
+   attmed honom. Margen gjorde rada 40 px høg der overskrifti er 30, og
+   daa fylgde tvo ting: tittelen datt ned i rada, og haarlina under
+   hovudet hamna ti piksel lenger nede enn lina under nabobolken. Tvo
+   like store overskrifter attmed kvarandre stod paa kvar si høgd og
+   las seg som tvo ulike rangar. */
+.bolkhovud > * { margin: 0; }
+
+
+/* ---- sikti ----
+   Veljarane er nakne: skrift og ein pil, ingi ramme og ingi flate. Ein
+   veljar som stend attmed ei overskrift skal ikkje sjaa ut som eit
+   skjema — han er ei innstilling paa det ein alt ser.
+
+   Ingen synleg merkelapp. Det fyrste valet *er* merkelappen — «Alle
+   typar», «Alle klassar» — so ein lapp attaat hadde sagt det same ein
+   gong til. Namnet bur i `aria-label` for dei som ikkje ser det.
+
+   Ingi breiddegrense: ein veljar er so brei som det breidaste valet
+   sitt (§9), og han fær vera det. Eit lærarnamn eller ei klassa paa
+   bokmaal vart klipt av lenge fyrr det var lese den gongen han hadde
+   ei.
+
+   Vald sikt syner seg som ljos og ikkje som ei ramme: `--merke-svak` i
+   flata, og blekket upp fraa `--blekk-lys` til `--blekk`. */
+.sikt { display: flex; flex-wrap: wrap; align-items: center; gap: var(--rom-2); }
+
+.sikt select {
+  width: auto; max-width: 100%; min-width: 0;
+  font: inherit; font-size: .82rem;
+  border: 0; background-color: transparent; border-radius: 2px;
+  padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
+  background-position: right .55rem top 50%, right .35rem top 50%;
+  color: var(--blekk-lys);
+}
+.sikt select:hover { color: var(--blekk); background-color: var(--ark-djup); }
+/* `:has` av di det ikkje finst nokon annan veg: kva som er valt i ein
+   veljar veit berre nettlesaren, og me vil ikkje ha eit skript til for
+   aa setja ei klassa paa noko han alt veit. */
+.sikt select:has(option:checked:not([value=""])) {
+  color: var(--blekk); background-color: var(--merke-svak);
+}

@@ -8,13 +8,13 @@
      ordet smalt attmed. Det er den same regelen som elles i huset —
      breidd tyder rang — berre nytta i ei linja i staden for i eit
      hierarki av yverskrifter. */}}
-<p class="tal-setning">
+<p class="briefing">
     {{t .Lang "admin.stats_lead"}}
     <b class="tal">{{.TotalUsers}}</b> <span class="ord">{{t .Lang "admin.stats_members"}}</span>.
     {{t .Lang "admin.stats_middle"}}
     <b class="tal">{{.TotalEvents}}</b> <span class="ord">{{t .Lang "admin.stats_classes"}}</span>{{if .PendingFreezeRequests}},
     {{t .Lang "admin.stats_and"}}
-    <a href="#meldingar" class="tal-lenkje"><b class="tal">{{.PendingFreezeRequests}}</b>
+    <a href="#meldingar" class="briefing-lenkje"><b class="tal">{{.PendingFreezeRequests}}</b>
     <span class="ord">{{if eq .PendingFreezeRequests 1}}{{t .Lang "admin.stats_waiting_one"}}{{else}}{{t .Lang "admin.stats_waiting_many"}}{{end}}</span></a>{{end}}.
 </p>
 {{end}}

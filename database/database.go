@@ -319,6 +319,10 @@ func Migrate(db *sql.DB) error {
 		log.Println("La til rule_id paa events og kopla timane til reglane sine.")
 	}
 
+	// Frammøtet. Sjaa frammote.go.
+	if err := MigrerFrammote(db); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -456,6 +460,51 @@ func (db *Database) RoomConflictUtanRegel(romID, ruleID int64, start, slutt time
 		return nil, err
 	}
 	return &e, nil
+}
+
+// RoomConflictUtanTime er den same prøva, blind for éin einskild time.
+//
+// Ho er syskenet til RoomConflictUtanRegel, og skilnaden er rekkjevidda.
+// Flytter ein *heile* regelen, lyt prøva vera blind for alle timane hans.
+// Flytter ein éin einskild time — Leon er sjuk den eine tysdagen, og
+// timen gjeng ein time seinare — lyt ho vera blind berre for den eine:
+// dei andre utslagi av regelen stend framleis, og eit av dei er nett det
+// ein kann koma til aa flytta seg oppi. Var ho blind for heile regelen
+// her, kunde tvo utslag av den same regelen leggja seg oppaa kvarandre i
+// det same rommet utan at nokon sa fraa.
+func (db *Database) RoomConflictUtanTime(romID, eventID int64, start, slutt time.Time) (*models.Event, error) {
+	var e models.Event
+	err := db.Conn.QueryRow(`
+		SELECT id, title, COALESCE(teacher_name, ''), start_time, end_time
+		FROM events
+		WHERE room_id = ? AND id <> ?
+		  AND start_time < ? AND end_time > ?
+		ORDER BY start_time LIMIT 1`,
+		romID, eventID, veggtekst(slutt), veggtekst(start)).
+		Scan(&e.ID, &e.Title, &e.TeacherName, &e.StartTime, &e.EndTime)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &e, nil
+}
+
+// TimeRom gjev rommet timen gjeng i. Null tyder ikkje noko rom — timane
+// som vart lagde inn fyre rommi vart ein ressurs hev det, og dei kann
+// ikkje kollidera med noko.
+//
+// GetEventByID hentar han ikkje: ho les ni kolonnor og room_id er ikkje
+// ei av deim. Ei spurning som hentar ein heil time for aa lesa eitt tal
+// er dessutan meir enn flyttinga treng.
+func (db *Database) TimeRom(eventID int64) (int64, error) {
+	var romID sql.NullInt64
+	err := db.Conn.QueryRow("SELECT room_id FROM events WHERE id = ?", eventID).Scan(&romID)
+	if err != nil {
+		return 0, err
+	}
+	return romID.Int64, nil
 }
 
 // GetRooms gjev romi studioet hev, med kapasiteten deira.
@@ -807,6 +856,176 @@ func (db *Database) UpdateRuleDescription(ruleID int64, tekst string, fraa time.
 	return err
 }
 
+// UpdateRuleTitle byter namn paa alle komande timar i regelen.
+//
+// Namnet er det du leitar etter i lista, og til no laut ein leggja
+// regelen ned og laga honom paa nytt for aa retta ein skrivefeil i
+// honom — som tok med seg paameldingane.
+func (db *Database) UpdateRuleTitle(ruleID int64, tittel string, fraa time.Time) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET title = ? WHERE rule_id = ? AND end_time > ?",
+		tittel, ruleID, veggtekst(fraa),
+	)
+	return err
+}
+
+// UpdateRuleRoom flytter alle komande timar i regelen til eit anna rom.
+//
+// `location` fylgjer med. Han er namnet paa rommet skrive inn i rada, og
+// er det gamle namnet naar rommet er eit anna — timeplanen les rom-namnet
+// gjenom join-en, men fleire eldre stader les framleis `location`.
+func (db *Database) UpdateRuleRoom(ruleID, romID int64, namn string, fraa time.Time) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET room_id = NULLIF(?, 0), location = ? WHERE rule_id = ? AND end_time > ?",
+		romID, namn, ruleID, veggtekst(fraa),
+	)
+	return err
+}
+
+// UtvidRegel legg fleire timar til ein regel som alt finst.
+//
+// LagRegel tek eit nytt regelnamn kvar gong; ho kann ikkje brukast til
+// aa forlengja ein serie, av di dei nye timane daa hadde vorte ein
+// *annan* regel med det same namnet, og lista hadde synt tvo rader der
+// det er éin time.
+func (db *Database) UtvidRegel(ruleID int64, timar []models.Event) ([]int64, error) {
+	if len(timar) == 0 {
+		return nil, nil
+	}
+	tx, err := db.Conn.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	var ider []int64
+	for _, e := range timar {
+		res, err := tx.Exec(
+			`INSERT INTO events (title, description, start_time, end_time, location, room_id,
+				organizer, class_type, teacher_name, capacity, current_enrolment, color, rule_id)
+			 VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?, ?)`,
+			e.Title, e.Description, veggtekst(e.StartTime), veggtekst(e.EndTime), e.Location, e.RoomID,
+			e.Organizer, e.ClassType, e.TeacherName, e.Capacity, 0, e.Color, ruleID,
+		)
+		if err != nil {
+			return nil, err
+		}
+		id, err := res.LastInsertId()
+		if err != nil {
+			return nil, err
+		}
+		ider = append(ider, id)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return ider, nil
+}
+
+// SisteITimeregel gjev den siste komande timen i regelen, heil.
+//
+// GetFutureEventsByRule les fire kolonnor — nok til aa flytta ei rad,
+// for lite til aa laga ei ny. Forlengjer ein serien, lyt den nye timen
+// arva alt det den gamle bar: namn, lærar, rom, plassar, skildring.
+func (db *Database) SisteITimeregel(ruleID int64, fraa time.Time) (*models.Event, error) {
+	var e models.Event
+	err := db.Conn.QueryRow(`
+		SELECT id, title, COALESCE(description, ''), start_time, end_time,
+		       COALESCE(location, ''), COALESCE(organizer, ''), COALESCE(class_type, ''),
+		       COALESCE(teacher_name, ''), COALESCE(capacity, 0), COALESCE(color, ''),
+		       COALESCE(room_id, 0)
+		FROM events WHERE rule_id = ? AND end_time > ?
+		ORDER BY start_time DESC LIMIT 1`, ruleID, veggtekst(fraa)).
+		Scan(&e.ID, &e.Title, &e.Description, &e.StartTime, &e.EndTime,
+			&e.Location, &e.Organizer, &e.ClassType, &e.TeacherName, &e.Capacity,
+			&e.Color, &e.RoomID)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &e, nil
+}
+
+// UpdateRuleCapacity set plassane paa alle komande timar i regelen.
+//
+// Null tyder «ingi eigi» og gjev rommet ordet attende — difor NULLIF.
+// Skreiv me 0 raatt, hadde timen havt null plassar, og COALESCE-en som
+// hentar rommet sitt tal hadde aldri sett noko aa henta.
+func (db *Database) UpdateRuleCapacity(ruleID int64, plassar int, fraa time.Time) error {
+	_, err := db.Conn.Exec(
+		"UPDATE events SET capacity = NULLIF(?, 0) WHERE rule_id = ? AND end_time > ?",
+		plassar, ruleID, veggtekst(fraa),
+	)
+	return err
+}
+
+// PaameldeYver gjev den fyrste komande timen i regelen som hev fleire
+// paamelde enn `plassar`, um nokon hev det.
+//
+// Set ein plassane ned under det som alt er selt, er ikkje spursmaalet
+// kva basen toler — det er kven som misser plassen sin. Difor vert det
+// spurt fyre, og svaret ber datoen og talet med seg.
+func (db *Database) PaameldeYver(ruleID int64, plassar int, fraa time.Time) (*models.Event, error) {
+	var e models.Event
+	err := db.Conn.QueryRow(`
+		SELECT id, title, start_time, current_enrolment
+		FROM events
+		WHERE rule_id = ? AND end_time > ? AND current_enrolment > ?
+		ORDER BY start_time LIMIT 1`, ruleID, veggtekst(fraa), plassar).
+		Scan(&e.ID, &e.Title, &e.StartTime, &e.CurrentEnrolment)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &e, nil
+}
+
+// SettVikarFleire set same vikaren paa eit knippe timar i éi økt.
+func (db *Database) SettVikarFleire(ider []int64, laerar string) error {
+	if len(ider) == 0 {
+		return nil
+	}
+	tx, err := db.Conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	for _, id := range ider {
+		if _, err := tx.Exec("UPDATE events SET teacher_name = ? WHERE id = ?", laerar, id); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+// AvlysFleire avlyser eit knippe timar i éi økt.
+//
+// Same grunnen som FlyttFleire: gjekk dei kvar for seg og den fjerde
+// feila, var tri avlyste og resten ikkje, medan flata sa «kunde ikkje».
+// Anten gjeng heile knippet, eller ingen ting gjer det.
+func (db *Database) AvlysFleire(ider []int64) error {
+	if len(ider) == 0 {
+		return nil
+	}
+	tx, err := db.Conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	for _, id := range ider {
+		if _, err := tx.Exec("DELETE FROM events WHERE id = ?", id); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
 // GetFutureEventsByRule gjev dei komande timane i ein regel, etter dato.
 func (db *Database) GetFutureEventsByRule(ruleID int64, fraa time.Time) ([]models.Event, error) {
 	rows, err := db.Conn.Query(
@@ -876,7 +1095,7 @@ func (db *Database) FlyttFleire(flyttingar []Flytting) error {
 
 // GetAllEvents fetches all events from the database
 func (db *Database) GetAllEvents() ([]models.Event, error) {
-	rows, err := db.Conn.Query("SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, ''), COALESCE(e.rule_id, 0) FROM events e LEFT JOIN rooms r ON r.id = e.room_id")
+	rows, err := db.Conn.Query("SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, ''), COALESCE(e.rule_id, 0), COALESCE(e.room_id, 0), COALESCE(e.capacity, 0), COALESCE(r.capacity, 0) FROM events e LEFT JOIN rooms r ON r.id = e.room_id")
 	if err != nil {
 		return nil, err
 	}
@@ -885,7 +1104,7 @@ func (db *Database) GetAllEvents() ([]models.Event, error) {
 	var events []models.Event
 	for rows.Next() {
 		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName, &event.RuleID); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName, &event.RuleID, &event.RoomID, &event.EigenPlassar, &event.RoomCapacity); err != nil {
 			return nil, err
 		}
 		events = append(events, event)

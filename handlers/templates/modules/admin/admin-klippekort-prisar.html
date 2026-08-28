@@ -15,7 +15,7 @@
   <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
   <div class="prisliste" id="klippeliste">
-    {{range .Pakkar}}
+    {{range .Packages}}
     <div class="prislapp" data-pakke="{{.ID}}">
       <input class="lappfelt prisnamn" type="text" name="namn-{{.ID}}"
              value="{{.Namn}}" aria-label="{{t $.Lang "admin.membership_name"}}">

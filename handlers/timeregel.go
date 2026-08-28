@@ -22,7 +22,25 @@ type Timeregel struct {
 	Klokke     string // «18:00»
 	Lengd      int    // minutt
 	Beskriving string
+	// Rommet regelen gjeng i. Romveljaren i regelsetningi lyt vita kva
+	// han stend paa no, og namnet aaleine held ikkje — tvo rom kann ha
+	// same namnet, og veljaren sender id-en.
+	RomID int
+	// Plassar er timen si eigi kapasitet (0 = ingi eigi), RomPlassar er
+	// rommet sitt tal. Feltet syner det eine som verdi og det andre som
+	// framlegg, so ein ser um talet er valt eller arva.
+	Plassar    int
+	RomPlassar int
 	Timar      []models.Event
+}
+
+// Sluttar er den siste komande timen i regelen. «Serien gjeng aatte
+// gonger» segjer ikkje naar han er ute; datoen gjer det.
+func (r Timeregel) Sluttar() time.Time {
+	if len(r.Timar) == 0 {
+		return time.Time{}
+	}
+	return r.Timar[len(r.Timar)-1].StartTime
 }
 
 // VekedagNykel gjev umsetjingsnykelen for vekedagen, so malen kann
@@ -88,6 +106,9 @@ func GrupperTimar(timar []models.Event, no time.Time) []Timeregel {
 		g.Klokke = st.Format("15:04")
 		g.Lengd = int(fyrste.EndTime.Sub(fyrste.StartTime).Minutes())
 		g.Beskriving = fyrste.Description
+		g.RomID = fyrste.RoomID
+		g.Plassar = fyrste.EigenPlassar
+		g.RomPlassar = fyrste.RoomCapacity
 		reglar = append(reglar, *g)
 	}
 
@@ -104,4 +125,61 @@ func GrupperTimar(timar []models.Event, no time.Time) []Timeregel {
 		return reglar[i].Tittel < reglar[j].Tittel
 	})
 	return reglar
+}
+
+// Siktdag er ein vekedag sikti kann velja. Talet er `time.Weekday`, so
+// rada og veljaren samanliknar det same.
+type Siktdag struct {
+	Tal   int
+	Nykel string
+}
+
+// Siktval er vali sikti yver regellista tilbyd.
+//
+// Dei vert rekna av reglane som *finst*, og ikkje av alle lærarane og
+// alle romi huset hev. Ein veljar med tjuge lærarar der tri held time er
+// ikkje eit sikt, han er ein katalog: kvart val du kann gjera skal gjeva
+// deg noko å sjå på. Er det berre eitt val å velja millom, siktar det
+// ingen ting, og malen let veljaren vera.
+type Siktval struct {
+	Dagar    []Siktdag
+	Laerarar []string
+}
+
+// SiktvalFor plukkar dei ulike dagane, lærarane og romi ut or reglane.
+// Dagane stend i timeplanen si rekkjefylgd — maandag fyrst — og hine
+// alfabetisk, av di ein leitar etter eit namn ein alt veit.
+func SiktvalFor(reglar []Timeregel) Siktval {
+	var val Siktval
+
+	dagsett := map[time.Weekday]bool{}
+	for _, r := range reglar {
+		dagsett[r.Vekedag] = true
+	}
+	// Maandag fyrst, som i timeplanen og som i GrupperTimar.
+	for i := 0; i < 7; i++ {
+		d := time.Weekday((i + 1) % 7)
+		if dagsett[d] {
+			val.Dagar = append(val.Dagar, Siktdag{Tal: int(d), Nykel: Timeregel{Vekedag: d}.VekedagNykel()})
+		}
+	}
+
+	val.Laerarar = ulike(reglar, func(r Timeregel) string { return r.Laerar })
+	return val
+}
+
+// ulike gjev dei ulike ikkje-tome verdi, sorterte.
+func ulike(reglar []Timeregel, av func(Timeregel) string) []string {
+	sett := map[string]bool{}
+	for _, r := range reglar {
+		if v := av(r); v != "" {
+			sett[v] = true
+		}
+	}
+	ut := make([]string, 0, len(sett))
+	for v := range sett {
+		ut = append(ut, v)
+	}
+	sort.Strings(ut)
+	return ut
 }

@@ -1,0 +1,314 @@
+/* ===================================================================
+   aktiviteten
+   Ei mengd, ikkje ein identitet. Difor *ein* farge i fire trinn og ikkje
+   fire fargar: ein les mengdi av kor mykje blekk som ligg der, og
+   fargekanalen er brukt ein gong til noko han faktisk ber.
+
+   Trinni er color-mix mot arket, so dei snur med temaet av seg sjølv: i
+   det ljose gjeng dei fraa nesten-arket til full farge, i det myrke fraa
+   nesten-grunnen upp til full farge. Lysstyrken fell jamt i baae —
+   det er den eine prøva ein trinnskala lyt bestaa.
+
+   Ingi fargeforklaring med namn: det finst ingen namn her. Skalaen under
+   kartet segjer kva veg mørkare gjeng, og talet stend i klartekst i
+   samandraget yver — for trinni ligg under 3:1 mot grunnen, og daa lyt
+   tali kunna lesast ein annan stad enn i fargen.
+   =================================================================== */
+/* Bolken er ein stabel, og éin gap set all lufta i honom. Fyrr bar
+   kvart stykke sin eigen marg — samandraget `--rom-4`, brettet
+   `--rom-3`/`--rom-4`, skalaen `--rom-3`/`--rom-6` — og daa var ingen
+   tvo mellomrom like. §6: foreldret set lufta, ikkje borni.
+
+   Gruppone held yverskriftene saman med figurane sine, so ei yverskrift
+   aldri stend like langt fraa det ho namngjev som fraa det ho ikkje
+   namngjev. */
+.aktivitet { display: flex; flex-direction: column; gap: var(--rom-5); }
+.aktivitet > * { margin: 0; }
+.aktivitet-gruppe { display: flex; flex-direction: column; gap: var(--rom-3); }
+.aktivitet-gruppe > * { margin: 0; }
+
+.aktivitet-samandrag {
+  font-size: .95rem; color: var(--blekk-lys);
+}
+
+/* ---- brettet ----
+   Bordet i vestibylen med hol bora i. Det er ikkje ei ny form: hòlet er
+   `--skraakant-djup`, den same djupna som den tome dagen i vika og det
+   klipte hakket i klippekortet — myrk yverleppe, ljos underleppe,
+   ljoset ovanfraa (§2). Pinnen er ein kuppel som ligg i hòlet, same
+   ljoset som ein knapp.
+
+   Difor er dette HTML og ikkje SVG som fyrr: djupna bur i
+   `box-shadow: inset`, og han finst ikkje i SVG. Kartet var 52 prikkar
+   paa ei rad, og i ei sidespalta vart kvar prikk fem pikslar — ein
+   storleik der ingen ting kann lesast. 13 × 4 gjev det same aaret fire
+   gonger so mykje rom, og kvar rad er eit kvartal. */
+.brett {
+  display: grid;
+  grid-template-columns: repeat(var(--kolonnar, 13), 1fr);
+  gap: var(--rom-2);
+  /* Brettet er like breidt som bjelkeraden under. Dei tvo er bilete av
+     det same aaret og skal liggja i same spalta — stod dei paa ulik
+     breidd, las dei seg som tvo ting som hende aa hamna attmed
+     kvarandre. */
+}
+
+/* Hòlet ber tvo ting, og dei stend i kvar sin kanal so dei ikkje gjeng i
+   vegen for kvarandre (§1: farge segjer *kva*, form segjer *korleis* —
+   her segjer styrken *kor mykje*).
+
+     --slagfarge   kva slag trening det var mest av den vika
+     lysstyrken    kor mange gonger: 1 er tend, 3 er full
+
+   Grunnfargen er turkisen, den same som elles tyder «i live».
+
+   Eit tomt hol er ikkje ingen ting. Ei vika ein ikkje var her stend som
+   eit bora hol i bordet — som den tome dagen i vika, og det er den same
+   tingen sagd paa den same maaten. */
+.hol {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--ark);
+  box-shadow: var(--skraakant-djup);
+}
+
+/* Pinnen fyller hòlet og stikk upp or det.
+
+   Han bar `--knappedjup` fyrr, og det var feil form paa rett ting. Den
+   skuggen er bygd for ein kapsel: `inset 0 1px 0` er ei rett lina skuva
+   ein piksel ned, og paa ein flat topp legg ho seg langs kanten som ein
+   lippe. Paa ein sirkel rører ho berre toppbogen, og botnlippa berre
+   botnbogen — tvo laust hengjande kvite bogar som ikkje møtest paa
+   sidone. Det les seg ikkje som ein kuppel, det les seg som eit umriss
+   som er teikna eit hakk ved sida av forma.
+
+   Ei kule fangar ljoset i eit *punkt*, ikkje langs ei lina. So:
+   speglingi er radial og ligg høgt og litt til venstre, der ljoset kjem
+   fraa (§2); foten mørknar; og heilt nedst ligg ein tunn ljos bogn — det
+   er arket som kastar att, og det er han som gjer at ho ser vaat ut.
+
+   Alt ligg i `background-image` og ikkje i `box-shadow`, av di
+   gradient-stoppi er i *prosent*: pinnen er 11 px i skalaen under
+   brettet og 20 px paa brettet, og ljoset lyt sitja likt paa baae. Ein
+   `box-shadow` i px hadde vore dobbelt so brei paa den vesle. Berre
+   skuggen mot arket stend att der — han skal *ikkje* skalera, av di
+   arket ligg like langt under uansett kor stor pinnen er. */
+.hol.pinne {
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ned) 18%, transparent);
+  /* Ljoset er det same for alle tri styrkane; berre kroppen skiftar.
+     `--lippe-ljos` og `--glans` er alt ulike i dei tvo temai (55 % kvitt
+     i ljost, 26 % i mørkt), so det trengst ingen eigen mørk regel —
+     freistar ein aa skriva ljoset med `#fff` beinveges, vert det tri
+     gonger for sterkt i ljost tema. */
+  background-image:
+    /* Speglingi. Brei og mjuk, og ikkje sterkare enn dette.
+       Eit lite kvast punkt gjer ein ting *flatare* og ikkje rundare: det
+       les seg som ein blank klistrelapp paa ei skive. Rundleiken kjem
+       ikkje herifraa. */
+    radial-gradient(ellipse 62% 50% at 36% 22%,
+      color-mix(in srgb, var(--glans) 72%, transparent) 0%,
+      color-mix(in srgb, var(--glans) 40%, transparent) 36%,
+      color-mix(in srgb, var(--glans) 11%, transparent) 64%,
+      transparent 84%),
+    /* Kroppen, og det er *han* som gjer kula rund.
+
+       Her stod eit attkast fraa arket ei stund — fyrst som ei rett
+       stripa tvers yver botnen, so som ein ljos sigd langs den
+       burtvende kanten. Baae er burte. Ei kule teikna slik ein teiknar
+       ei kule hev ikkje ljost nedst: ho hev eit ljospunkt, so ein jamn
+       yvergang, og so vert ho berre mørkare heilt ut til den kanten som
+       vender fraa ljoset. Attkast er noko blank lakk gjer mot ei kvit
+       flate, og det er ikkje det denne er.
+
+       Ljoset kjem ovanfraa til venstre. Det er ikkje eit val her: det
+       er bjelkane som avgjer det, med glimet sitt paa 34 % av breiddi,
+       og tvo ting i same biletet kann ikkje ha kvar si sol. Difor ligg
+       midpunktet paa 34 % 22 %, det same som speglingi.
+
+       Vidddi er sett (`82% 82%`) og ikkje reikna av seg sjølv: med
+       `farthest-corner` hadde 100 % lege i hyrna paa kassen, langt
+       utanfor sirkelen, og den mørkaste tonen aldri vorte synleg. No
+       ligg 100 % nett paa den kanten som er lengst burte. */
+    radial-gradient(ellipse 82% 82% at 34% 22%,
+      transparent 20%,
+      color-mix(in srgb, var(--ned) 7%, transparent) 54%,
+      color-mix(in srgb, var(--ned) 19%, transparent) 78%,
+      color-mix(in srgb, var(--ned) 32%, transparent) 100%);
+}
+/* Eit slag ingen hev teikna laanar ingen produktfarge; han er berre
+   blekk — og reserven stend inne i `var()`, ikkje som ei eigi
+   utsegn paa `.hol`.
+
+   Det stod som `--slagfarge: var(--blekk-lys)` paa `.hol` fyrr, og daa
+   `.slag-*` flutte til `00-token.css` gjekk heile brettet graatt:
+   `.hol` og `.slag-yoga` hev *same* vekt (éin klasse kvar), so det er
+   rekkjefylgda i arket som avgjer — og 90 kjem etter 00. Reserven vann
+   yver farga kvar einaste gong.
+
+   Ein reserve skal aldri kappast med det han er reserve for. Inne i
+   `var()` gjeld han berre naar ingen hev sagt noko, og daa kann
+   `.slag-*` bu kvar som helst. `.bjelke` hev alltid gjort det slik. */
+.hol.pinne.niv-1 { background-color: color-mix(in srgb, var(--slagfarge, var(--blekk-lys)) 38%, var(--ark)); }
+.hol.pinne.niv-2 { background-color: color-mix(in srgb, var(--slagfarge, var(--blekk-lys)) 66%, var(--ark)); }
+.hol.pinne.niv-3 { background-color: var(--slagfarge, var(--blekk-lys)); }
+
+/* Slagfargane stend i 00-token.css no. Dei var her medan brettet var
+   den einaste staden eit slag hadde ein farge; timekorti paa heimesida
+   ber den same fargen, og daa kann kartet ikkje bu i den eine av dei
+   tvo filene som les det. */
+
+.varmeskala {
+  display: flex; align-items: center; gap: var(--rom-2);
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+}
+.varmeskala .hol { width: 11px; height: 11px; flex: none; }
+
+/* Bjelkane ber alle same fargen. Lengdi er talet; aa fargeleggja dei
+   etter verdien hadde sagt det same ein gong til, med ein kanal som daa
+   ikkje kann segja noko anna. */
+.bjelkerad { display: block; width: 100%; height: auto; overflow: visible; }
+/* Bjelken tek fargen av slaget, som hòlet paa brettet. `--slagfarge`
+   stend paa `.slag-*` lenger uppe og gjeld baae stader; ein turkis mars
+   i raden er den same marsen som det turkise hòlet yver. */
+.bjelke { fill: var(--slagfarge, var(--blekk-lys)); }
+
+/* Glimet. Same trappa som paa knappen — `--glans` paa toppen, fallande
+   til ingen ting ved 72 % — av di det er den same tingen: noko som
+   stikk upp or arket og fangar ljos ovanfraa (§2).
+
+   Gradienten aaleine er ikkje nok. Det som gjer knappen *vaat* er ikkje
+   skinet i flata, det er den tunne ljose lippa langs kanten:
+   `inset 0 1px 0 var(--glans)` og `inset 0 -1px 1px` i `--knappedjup`.
+   Ein SVG hev ingen `inset`, so lippa lyt vera ein `stroke`.
+
+   Tvo ting gjorde han til ei ramme i staden for ljos.
+
+   Fyrst breiddi. `stroke-width: 1` er 1 *brukareining*, ikkje 1 piksel,
+   og bjelkeraden er 80 einingar strekt yver heile spalta — soleis vart
+   lippa fire-fem pikslar brei, ein kvit kant kring kvar bjelke.
+   `vector-effect: non-scaling-stroke` bind honom til ein skjermpiksel,
+   som knappen sin.
+
+   So farga. Knappen sin lippe fylgjer ikkje umrisset heile vegen: han
+   er ljos paa toppen, ingen ting paa sidone, og ein svakare attglans
+   nedst. Ein `stroke` i éin farge gjeng heile vegen rundt, og det er
+   skilnaden paa ei kant som fangar ljos og ei kant som er teikna paa.
+   Difor er `stroke` ein gradient og ikkje ein farge.
+
+   `pointer-events: none` so det er bjelken under som svarar paa
+   peikaren og ikkje glaset yver honom. */
+.bjelkeglim {
+  fill: url(#bjelkeglim);
+  stroke: url(#bjelkekant);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+/* Runningi. Knappen klarar seg med ljos ovanfraa aaleine av di han er
+   ein tumme høg — heile han er «toppen». Bjelken er ein *stav som stend
+   upp*, og den same trappa strekt yver to hundrad pikslar vert ein lang
+   vask og ikkje eit glim: flate fargeband med ein ljos strek paa toppen.
+   Det var det som gjorde deim matte.
+
+   Ein stav treng runningi si med. Dette er ikkje eit ljos til ovanfraa
+   (§2 stend): det er den same ljoskjelda som fell paa ei krum flate, so
+   ho er ljosast der ho vender mot henne og mørknar mot baae kantar.
+   Utan honom er bjelken eit flatt band; med honom er han rund, og daa
+   fyrst ser han ut som noko ein kunde taka i.
+
+   Han ligg *under* glimet: fyrst form, so ljos. */
+.bjelkerunding {
+  fill: url(#bjelkerunding);
+  pointer-events: none;
+}
+.rund-0 { stop-color: var(--lippe-djup); }
+.rund-1 { stop-color: color-mix(in srgb, var(--lippe-djup) 38%, transparent); }
+.rund-2 { stop-color: color-mix(in srgb, var(--glans) 28%, transparent); }
+.rund-3 { stop-color: color-mix(in srgb, var(--glans) 46%, transparent); }
+.rund-4 { stop-color: color-mix(in srgb, var(--glans) 17%, transparent); }
+.rund-5 { stop-color: transparent; }
+.rund-6 { stop-color: color-mix(in srgb, var(--lippe-djup) 30%, transparent); }
+.rund-7 { stop-color: var(--lippe-djup); }
+
+/* Kanten: ljos paa toppen, burte paa sidone, og *mørk* langs foten.
+   Knappen hev ein ljos lippe nedst — arket kastar att under honom. Ein
+   bjelke stend paa ei grunnlina og hev ingi slik undersida; ein ljos
+   strek der er berre ein strek. Same avgjerdi som paa kula. */
+.kant-0 { stop-color: var(--glans); }
+.kant-1 { stop-color: color-mix(in srgb, var(--glans) 45%, transparent); }
+.kant-2 { stop-color: transparent; }
+.kant-3 { stop-color: transparent; }
+.kant-4 { stop-color: color-mix(in srgb, var(--ned) 18%, transparent); }
+.glim-0 { stop-color: var(--glans); }
+.glim-1 { stop-color: color-mix(in srgb, var(--glans) 62%, transparent); }
+.glim-2 { stop-color: color-mix(in srgb, var(--glans) 24%, transparent); }
+.glim-3 { stop-color: color-mix(in srgb, var(--glans) 6%, transparent); }
+.glim-4 { stop-color: transparent; }
+/* Og so *nedyver*. Ein stav som stend upp fangar mindre ljos di lenger
+   ned ein kjem, som kula som mørknar mot den burtvende kanten. Utan
+   dette stogga ljoset ved 72 % og resten var flat farge — det var ein
+   del av kvi dei ikkje las seg som runde ting. */
+.glim-5 { stop-color: color-mix(in srgb, var(--ned) 6%, transparent); }
+.glim-6 { stop-color: color-mix(in srgb, var(--ned) 16%, transparent); }
+.bjelkegruppe:hover .bjelke { fill: color-mix(in srgb, var(--slagfarge, var(--blekk-lys)) 72%, var(--ark)); }
+.bjelketal {
+  font-family: var(--skrift-tal); font-size: 9px;
+  fill: var(--blekk); text-anchor: middle;
+}
+.bjelkenamn {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: 7.5px; font-weight: 500; letter-spacing: .08em;
+  text-transform: uppercase; fill: var(--blekk-svakt); text-anchor: middle;
+}
+
+/* Kva tali *er*. Frammøtet finst ikkje enno, og eit kart som ser ut som
+   frammøte utan aa vera det, er verre enn ikkje noko kart. */
+.aktivitet-grunnlag {
+  font-size: .8rem; color: var(--blekk-svakt);
+  margin: var(--rom-4) 0 0; max-width: 34ch;
+}
+
+/* ---- medlemskapet i det smaa ----
+   Heile medlemskapet stod paa heimesida fyrr: pris, fornying, binding,
+   knappar for aa frysa og seia upp. Det er ei *forvaltning*, og ho
+   høyrer heime paa medlemskapssida. Her skal det berre staa om det er i
+   live — resten er eitt klikk unna.
+
+   Eit merke med namnet og ei lenkja attmed stod her etter det. Lenkja
+   var det som var for mykje: ho bed um aa verta klikka, og medlemskapet
+   stend alt i leidingi. Att stend eit ljos og fire ord — det ein
+   faktisk kom for aa vita.
+
+   Ljoset er det same ljoset som i lina under hovudet: kjernen er
+   --glodkjerne, glødi ligg kring han, og det er merkefargen som lyser.
+   Eit slokt ljos er ikkje graatt — det er ei *fordjuping*, som ei tom
+   rute i timeplanen. Ei lampa som ikkje lyser hev framleis eit glas. */
+.stodalinje {
+  display: flex; align-items: center; gap: var(--rom-2);
+  margin: 0; font-size: .95rem; color: var(--blekk-lys);
+}
+.ljos {
+  flex: none; width: .55rem; height: .55rem; border-radius: 50%;
+}
+.ljos-paa {
+  background: radial-gradient(circle at 34% 30%,
+    var(--glodkjerne) 0%, var(--merke) 62%);
+  box-shadow:
+    0 0 3px 0 color-mix(in srgb, var(--merke) 70%, transparent),
+    0 0 9px 1px color-mix(in srgb, var(--merke) 38%, transparent),
+    0 0 18px 4px color-mix(in srgb, var(--merke) 14%, transparent);
+}
+/* Frosi: lampa stend, men ho brenn ikkje. Ingen halo — det er nettupp
+   halloen som segjer at noko gjeng. */
+.ljos-kvild {
+  background: radial-gradient(circle at 34% 30%,
+    color-mix(in srgb, var(--blekk-lys) 60%, var(--ark)) 0%,
+    var(--blekk-svakt) 70%);
+}
+.ljos-av {
+  background: var(--faneflate);
+  box-shadow: var(--skraakant);
+}

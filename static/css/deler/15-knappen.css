@@ -1,0 +1,146 @@
+/* ===================================================================
+   knappen
+   Tri ting var gale, og dei var det same gale: knappen bar ei røyst som
+   ikkje var hans.
+
+   1. Han stod i merkelappskrifta — 68 % smal, store bokstavar,
+      sperra. Det er språket til bolkoverskrifter, faner, dt og merke:
+      ting som *namngjev* ein kategori. Ein knapp namngjev ingen ting.
+      Han er eit verb, og eit verb skriv seg som eit ord i ei setning.
+
+   2. Hovudknappen var ei fylt flate i merkefargen — den tyngste
+      tingen på kvar side, tyngre enn overskrifta, i eit hus som elles
+      byggjer alt av hårliner. Grunngjevinga stod alt skriven, tvo
+      reglar lenger nede, om åtvaringsknappen: «ein raud klump dreg auga
+      fraa alt anna». Det gjeld ein turkis klump like fullt.
+
+   3. Flata var `--ark` — same fargen som sida. Ein knapp ligg *på*
+      arket; er han malt i arkfargen, er han eit hol med ei line rundt.
+
+   No: reading-skrifta, vanleg setningsform, `--flate` som på kort, og
+   fargen i lina og i ordet — aldri i flata. Åtvaringsknappen hadde rett
+   heile tida; dei hine fylgjer honom.
+
+   Grunnstilen gjeld `.btn`-familien og ikkje kvar `<button>`. Tjue
+   stader i huset laut skrella honom av att — eit merke, ei fane, ei rad
+   som opnar seg — og daa er han ikkje ein grunnstil, han er eit unnatak
+   som stend fyrst.
+   =================================================================== */
+.btn, .btn-primary, .btn-danger, .plettmerke, a.byteveg {
+  font-family: var(--skrift);
+  font-size: .95rem; font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+  /* Kapselen treng luft i endane. Er teksti klemd mot kurva, les forma
+     seg som eit avrunda rektangel og ikkje som ein knapp.
+
+     Lufta i endane, ikkje over og under. Loddrett stod det like mykje
+     som vassrett stod på ein tredel av vegen, og då vart knappen høg
+     som eit felt: han såg ut som noko ein skriv i. Ein knapp er ei
+     linje med tekst og eit grep rundt henne — han skal vera brei og
+     låg, ikkje kvadratisk. */
+  padding: var(--knapp-loddrett) var(--rom-5);
+  line-height: var(--knapp-linehogd);
+  border: 1px solid var(--kant);
+  border-radius: var(--rund-knapp);
+  /* Tvo lag: glimet paa den øvre halvdelen, og kroppen som mørknar mot
+     foten. Glimet stoggar brått paa midten — det er slik ljos oppfører
+     seg paa ei kvelv, og det er den kanten som gjer at forma les seg som
+     runda og ikkje som flat. */
+  /* Glimet stoggar ikkje brått. Ein hard kant paa midten er signaturen
+     aat den tidlege telefonknappen — plast med ei bobla i. Aqua let
+     glimet døy ut yver ein lengre veg, og legg til eit svakt attkast
+     langs foten: ljos som hev gjenge gjenom kroppen og kjem attende.
+     Det er skilnaden paa ei kvelv og ei bobla. */
+  background:
+    linear-gradient(to bottom,
+      var(--glans) 0%,
+      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
+      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
+      color-mix(in srgb, var(--glans) 6%, transparent) 58%,
+      transparent 72%),
+    linear-gradient(to bottom,
+      var(--flate) 0%,
+      color-mix(in srgb, var(--blekk) 7%, var(--flate)) 62%,
+      color-mix(in srgb, var(--blekk) 3%, var(--flate)) 100%);
+  box-shadow: var(--knappedjup);
+  color: var(--blekk);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+.btn:hover {
+  border-color: var(--merke); color: var(--merke);
+}
+
+/* Trykt snur ljoset: glimet gjeng ut, skuggen fell inn ovanfraa, og
+   knappen sig ein piksel. Det er heile gleda ved desse knappane, og
+   det er ogso det einaste stader i huset der noko *flyttar* seg — han
+   flyttar seg av di han er ein ting ein trykkjer paa. */
+.btn:active, .btn-primary:active, .btn-danger:active {
+  background-image: none;
+  box-shadow: var(--knappedjup-inn);
+  transform: translateY(1px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn, .btn-primary, .btn-danger { transition: box-shadow .08s ease-out, transform .08s ease-out; }
+}
+
+/* Hovudhandlingi. Fargen i lina og i ordet, og ei svak tone i flata —
+   nok til aa skilja henne fraa dei hine utan aa verta ein klump. Det er
+   berre éi per skjerm. */
+.btn-primary {
+  border-color: color-mix(in srgb, var(--merke) 70%, var(--blekk));
+  color: var(--flate);
+  background:
+    linear-gradient(to bottom, var(--glans) 0%,
+      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
+      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
+      color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--merke-lys) 84%, #fff) 0%,
+      var(--merke-lys) 46%, var(--merke) 100%);
+}
+.btn-primary:hover {
+  color: var(--flate);
+  background:
+    linear-gradient(to bottom, var(--glans) 0%, var(--glans-svak) 46%, transparent 50%),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--merke-lys) 70%, #fff) 0%, var(--merke-lys) 100%);
+}
+
+/* Ein knapp som tek heile breiddi. Han stod som `.login-btn` og bar
+   ein margin attaat — ein komponent som veit kvar han stend, og som
+   difor ikkje kann flytta seg (§6). Breiddi er det einaste som er
+   ulikt; lufta yver honom set skjemaet. */
+.brei { width: 100%; }
+
+/* Det som ikkje kann gjerast um att. Same forma, annan farge. */
+.btn-danger {
+  border-color: var(--aatvaring); color: var(--aatvaring);
+  background:
+    linear-gradient(to bottom, var(--glans) 0%,
+      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
+      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
+      color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%),
+    linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--aatvaring) 9%, var(--flate)) 100%);
+}
+.btn-danger:hover {
+  background: var(--aatvaring-svak); border-color: var(--aatvaring); color: var(--aatvaring);
+}
+
+/* Avslegen: ingen glans, ingen skugge, ingen djupn. Han er ikkje ein
+   ting ein kann trykkja paa lenger, og daa skal han ikkje sjaa ut som ein. */
+button:disabled, .btn:disabled, .btn-primary:disabled, .btn-danger:disabled {
+  color: var(--blekk-svakt); border-color: var(--haarlina);
+  background: none; background-image: none;
+  box-shadow: none; transform: none; cursor: not-allowed;
+}
+
+/* Ein naken `<button>` er ingen ting: han ber skrifta rundt seg og
+   ventar paa ei klasse. Det er dei fleste knappane i huset — merke,
+   faner, rader som opnar seg — og dei slepp aa taka noko av att. */
+button:not([class]) {
+  font: inherit; color: inherit; background: none; border: 0;
+  padding: 0; cursor: pointer; text-align: inherit;
+}

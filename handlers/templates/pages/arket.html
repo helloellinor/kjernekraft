@@ -122,10 +122,14 @@
     <section class="verkstad-bolk" id="klippekortet">
         <h2 class="section-title">Klippekortet</h2>
         <p class="verkstad-regel">
-            Ljosbandet kutta i klipp. Eit tent klipp er ljos, ikkje ei
-            rute: lina er tunn og glødi ligg kring henne. Nærmar kortet
-            seg utlaupet, byter maalaren til aatvaringsfargen — heile
-            bandet, ikkje eit merke attmed.
+            Tale ber lesingi; hòli ber sanningi. Ein prosentstripe segjer
+            «tri fjerdedelar att»; det du kom for er «sju», so tale er
+            det største paa kortet. Hakki er kvitteringi: alltid ti
+            plassar, same kor stor pakka var, og eit uklipt hakk teiknar
+            ingen ting so vengen stend heil. Nærmar kortet seg utlaupet,
+            er det <em>tale</em> og utlaupslina som byter farge —
+            hakkrekkja stend uendra, av di eit hòl er ei hending som hev
+            hendt.
         </p>
         <div class="verkstad-par">
             <div class="verkstad-prova" data-tema="ljos" data-theme="light">{{template "prov_klippekortet" .}}</div>
@@ -193,9 +197,13 @@
     <section class="verkstad-bolk" id="fanone">
         <h2 class="section-title">Fanone</h2>
         <p class="verkstad-regel">
-            Ei fana er eit blad i ei mappa: lina gjeng attum dei lukka og
-            er broti under den opne. Det er brotet som gjer at rekkja les
-            seg som fanor — ikkje fargen, ikkje skuggen.
+            Ein skyvar med posisjonar, ikkje ei mappa. Sporet er ei renne
+            — same ljoset som eit felt — og den valde posisjonen er ein
+            kuppel som ligg i henne, same ljoset som ein knapp. Ordet
+            stend i lesetekst: versalar og sperring er språket til noko
+            som namngjev ein kategori (§5), og ei fane er ein knapp.
+            Rommet under er arket sjølv; mappa hadde ein kasse der, og
+            korti inni han vart kasse i kasse (§6).
         </p>
         <div class="verkstad-par">
             <div class="verkstad-prova" data-tema="ljos" data-theme="light">{{template "prov_fanone" .}}</div>
@@ -348,51 +356,82 @@
 {{define "prov_klippekortet"}}
 <div class="verkstad-stabel">
     <div class="kort klippekort-card">
+        <div class="klippehakka" aria-hidden="true">
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk"></i>
+            <i class="klipphakk"></i>
+            <i class="klipphakk"></i>
+            <i class="klipphakk"></i>
+            <i class="klipphakk"></i>
+            <i class="klipphakk"></i>
+            <i class="klipphakk"></i>
+        </div>
         <div class="card-header">
             <h3 class="card-title">Reformer</h3>
             <span class="card-expiry">gjeng ut um 121 dagar</span>
         </div>
         <div class="klipprad">
-            <span class="klipp-count"><span class="remaining">7</span> <span class="total">av 10 klipp att</span></span>
-            <div class="progress-bar">
-                <div class="progress-segments" style="--tende: 7; --alle: 10">
-                    <div class="progress-segment filled"></div>
-                    <div class="progress-segment filled"></div>
-                    <div class="progress-segment filled"></div>
-                    <div class="progress-segment filled"></div>
-                    <div class="progress-segment filled"></div>
-                    <div class="progress-segment filled"></div>
-                    <div class="progress-segment filled"></div>
-                    <div class="progress-segment"></div>
-                    <div class="progress-segment"></div>
-                    <div class="progress-segment"></div>
-                </div>
-            </div>
+            <p class="klipptal">
+                <b class="att">7</b>
+                <span>klipp att <span class="av">av 10</span></span>
+            </p>
             <button type="button" class="btn">Fyll upp</button>
         </div>
     </div>
 
     <div class="kort klippekort-card expiring">
+        <div class="klippehakka" aria-hidden="true">
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk"></i>
+        </div>
         <div class="card-header">
             <h3 class="card-title">Yoga</h3>
             <span class="card-expiry">gjeng ut i morgon</span>
         </div>
         <div class="klipprad">
-            <span class="klipp-count"><span class="remaining">1</span> <span class="total">av 10 klipp att</span></span>
-            <div class="progress-bar">
-                <div class="progress-segments" style="--tende: 1; --alle: 10">
-                    <div class="progress-segment filled"></div>
-                    <div class="progress-segment"></div>
-                    <div class="progress-segment"></div>
-                    <div class="progress-segment"></div>
-                    <div class="progress-segment"></div>
-                    <div class="progress-segment"></div>
-                    <div class="progress-segment"></div>
-                    <div class="progress-segment"></div>
-                    <div class="progress-segment"></div>
-                    <div class="progress-segment"></div>
-                </div>
-            </div>
+            <p class="klipptal">
+                <b class="att">1</b>
+                <span>klipp att <span class="av">av 10</span></span>
+            </p>
+            <button type="button" class="btn">Fyll upp</button>
+        </div>
+    </div>
+
+    {{/* Tjuge klipp, aatte att: tolv brukte av tjuge er seks hòl av ti.
+         Rekkja tel ikkje klipp, ho segjer at kortet er godt brukt. */}}
+    <div class="kort klippekort-card">
+        <div class="klippehakka" aria-hidden="true">
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk"></i>
+            <i class="klipphakk"></i>
+            <i class="klipphakk"></i>
+            <i class="klipphakk"></i>
+        </div>
+        <div class="card-header">
+            <h3 class="card-title">Gruppetimar</h3>
+            <span class="card-expiry">gjeng ut um 54 dagar</span>
+        </div>
+        <div class="klipprad">
+            <p class="klipptal">
+                <b class="att">8</b>
+                <span>klipp att <span class="av">av 20</span></span>
+            </p>
+            <button type="button" class="btn">Fyll upp</button>
         </div>
     </div>
 </div>
@@ -500,10 +539,10 @@
 {{end}}
 
 {{define "prov_talet"}}
-<p class="tal-setning">
+<p class="briefing">
     <span class="tal">6</span> <span class="ord">medlemer</span> kjem paa
     <span class="tal">3</span> <span class="ord">timar</span> denne veka, og
-    <a class="tal-lenkje" href="#talet"><span class="tal">2</span> <span class="ord">ventar</span></a> paa svar.
+    <a class="briefing-lenkje" href="#talet"><span class="tal">2</span> <span class="ord">ventar</span></a> paa svar.
 </p>
 {{end}}
 
@@ -511,7 +550,7 @@
 <div class="verkstad-stabel">
     <div class="no-data">Ingen timar denne veka</div>
     <div class="loading-placeholder">Hentar klippekorti …</div>
-    <div class="no-klippekort">
+    <div class="kort no-klippekort">
         <p>Du hev ingen klippekort.</p>
         <a href="#tomrommet" class="btn-primary">Kjøp klippekort</a>
     </div>
@@ -536,12 +575,14 @@
 <div class="merkerad">
     {{range .Merkeprovor}}{{template "dagmerke" .}}{{end}}
     <span class="dagmerke daud" aria-hidden="true">
-        <svg class="merkeform" viewBox="{{merkeViewBox}}"
-             width="{{merkeBreidd}}" height="{{merkeHogd}}" aria-hidden="true" focusable="false">
-            <path class="daudflate" d="{{merkeDaud}}"/>
-                    <path class="dauddjup"  d="{{merkeDaud}}" filter="url(#merkedjup)"/>
-                    <path class="daudljos"  d="{{merkeDaud}}" filter="url(#merkeljos)"/>
+        <svg class="merkeform" viewBox="{{markViewBox}}"
+             width="{{markWidth}}" height="{{markHeight}}" aria-hidden="true" focusable="false">
+            <path class="daudflate" d="{{markDead}}"/>
+                    <path class="dauddjup"  d="{{markDead}}" filter="url(#merkedjup)"/>
+                    <path class="daudljos"  d="{{markDead}}" filter="url(#merkeljos)"/>
         </svg>
     </span>
 </div>
+
+
 {{end}}

@@ -7,14 +7,14 @@ import (
 	"testing"
 )
 
-// Knappen som lagar timen laag som eit tridje jamstelt barn i spalta —
-// same luft kring seg som fylgja, og heilt til vinstre under ei setning
-// paa femti teikn. Han er slutten paa setningi no, og stend paa rad med
-// det systemet reknar ut.
+// Knappen som lagar timen har lege paa ei lina for seg sjølv tvo gonger:
+// fyrst som eit tridje jamstelt barn i spalta, so i ein eigen fot med ei
+// haarlina yver. Baae gongene saag han paalimd ut, av di ei lina for seg
+// sjølv er ei ny setning — og han er ikkje det. Han er punktumet i den
+// setningi som alt stend der.
 //
-// Prøva held dei tvo saman. Skil dei lag att, er knappen attende i det
-// tome feltet.
-func TestKnappenStendIFotenSamanMedFylgja(t *testing.T) {
+// Prøva held honom inne i setningi. Fell han ut att, stend han aaleine.
+func TestKnappenSlutterSetningiOgStendIkkjeAaleine(t *testing.T) {
 	tm := &TemplateManager{templates: make(map[string]*template.Template), basePath: "templates"}
 	tm.loadTemplates()
 	mal, ok := tm.GetTemplate("pages/admin")
@@ -30,25 +30,33 @@ func TestKnappenStendIFotenSamanMedFylgja(t *testing.T) {
 	}
 	html := ut.String()
 
-	i := strings.Index(html, `class="setningsfot"`)
+	if strings.Contains(html, `class="setningsfot"`) {
+		t.Error("foten er attende; knappen skal slutta setningi, ikkje staa i eit rom for seg")
+	}
+
+	i := strings.Index(html, `<p class="setning"`)
 	if i < 0 {
-		t.Fatal("foten fanst ikkje")
+		t.Fatal("setningi fanst ikkje")
 	}
-	slutt := strings.Index(html[i:], "</div>")
+	slutt := strings.Index(html[i:], "</p>")
 	if slutt < 0 {
-		t.Fatal("foten vart aldri stengd")
+		t.Fatal("setningi vart aldri stengd")
 	}
-	fot := html[i : i+slutt]
+	setning := html[i : i+slutt]
 
-	if !strings.Contains(fot, `class="fylgja"`) {
-		t.Error("fylgja stend ikkje i foten")
-	}
-	if !strings.Contains(fot, `type="submit"`) {
-		t.Error("knappen stend ikkje i foten")
+	if !strings.Contains(setning, `type="submit"`) {
+		t.Error("knappen stend utanfor setningi")
 	}
 
-	// Og han skal koma etter fylgja: grunnlaget fyrst, handlingi sist.
-	if strings.Index(fot, `class="fylgja"`) > strings.Index(fot, `type="submit"`) {
-		t.Error("knappen stend fyre fylgja; grunnlaget skal koma fyrst")
+	// Fylgja er ikkje ein del av setningi — du skreiv henne ikkje. Ho
+	// stend under, og ho stend framleis *fyre* du trykkjer.
+	if strings.Contains(setning, `class="fylgja"`) {
+		t.Error("fylgja stend inni setningi; ho er rekna, ikkje skriven")
+	}
+	if !strings.Contains(html, `class="fylgja"`) {
+		t.Error("fylgja fanst ikkje i det heile")
+	}
+	if strings.Index(html, `class="fylgja"`) < strings.Index(html, `type="submit"`) {
+		t.Error("fylgja stend fyre knappen i kjelda; ho skal koma etter setningi")
 	}
 }
