@@ -102,7 +102,15 @@
 
      Merket ber dagen, klokkeslettet og plassane. Difor står ingen av
      dei i teksten — det ville vore det same to gonger. */
-  --merkestorleik: 4.4rem;
+  /* Merket er den høgste tingen i rada, og difor er det *han* som set
+     høgdi hennar — ikkje teksten. I 4,4 rem vart merket 103 pikslar
+     høgt mot dei 47 som namnet og læraren tek, og resten var luft yver
+     og under teksten. Det var ikkje ro; det var eit hol. I 3,4 rem er
+     merket framleis lesbart — klokkeslettet og plasstalet stend i
+     skrifta si — og rada gjekk fraa 137 til 105 pikslar. Lista med ti
+     timar gjekk fraa 1362 til 1047, og fær difor plass paa ein
+     skjerm. */
+  --merkestorleik: 3.4rem;
   /* Vengen ber slaget, ikkje produktet.
      Kortet ligg i vinstre spalta og medlemskortet i høgre, so dei tvo
      vengene stend på same skjermen — sjå åtvaringi i 00-token.css.
@@ -143,5 +151,17 @@
    på rada, og daa held korkje toppen eller botnen på kassen kanten
    lenger. Med fyll på `--rom-3` var ho 86 px mot kassen sine 73. */
 .timerad.heimerad .timekva { padding: 0; align-self: center; }
-.timerad.heimerad .timetittel { font-size: 1.35rem; }
+/* Namnet er ikkje ei yverskrift her — det er ei line i ei liste.
+
+   Det stod i 1,35 rem, og det er nesten so stort som «Ledig plass»
+   yver lista. Daa ropar kvar einskild time like høgt som bolken dei
+   alle ligg i, og ein les ti rop etter kvarandre i staden for ei liste.
+   Lengre namn broytte ogso i tvo liner utan grunn: «Self Practice
+   Pilates Apparatus» tok tvo liner i ei spalte som er brei nok til
+   heile namnet.
+
+   1,1 rem er framleis det største og feitaste i rada — namnet er det
+   ein leitar etter — men no ser ein at det er tale um éin time og ikkje
+   um ein ny bolk. */
+.timerad.heimerad .timetittel { font-size: 1.1rem; line-height: 1.2; }
 .timerad.heimerad.umme { opacity: .5; }
