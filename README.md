@@ -106,8 +106,10 @@ docs/                  teikningane og stilboka
 Skiljet mellom `components/` og `modules/`: ein **komponent** er ein bit
 fleire sider treng (navigasjonen, språkveljaren, dagmerket). Ein **modul**
 høyrer til eitt forretningsområde (klippekortbolken, folkelista). All stil
-ligg i `static/css/kjernekraft.css` — det finst ikkje stilmalar per
-komponent.
+ligg under `static/css/deler/` — ein bolk per fil, med eit tal framfor
+namnet som set rekkjefylgda (`00-token` før alt som les tokena). Dei blir
+sette saman til éi adresse, `/static/css/kjernekraft.css`, av
+`handlers/stilark.go`. Det finst ikkje stilmalar per komponent.
 
 Nokre delar det er verd å vite om:
 
@@ -177,6 +179,24 @@ ut kvar gong tenaren startar. Han er **berre** til dette.
 
 ### Prøvebrukar
 
+Til å sjå på — grafar, medlemskort, klippekort — er `scripts/testbrukar`
+betre enn eit tomt oppsett:
+
+```sh
+go run ./scripts/testbrukar          # lagar Solfrid
+go run ./scripts/testbrukar -slett   # tek henne bort att
+```
+
+`solfrid@test.local` / `password123`. Ho har rolla `user` og ikkje meir,
+så `/admin` svarar 403 for henne — det er heile poenget med henne.
+
+Ho er ikkje tilfeldig. Eit varmekart med jamn støy i ser ut som ein feil;
+ei rekkje ein kjenner att les ein med ein gong. Difor har ho ei soge —
+varsam i mars, tre i veka i mai, topp i juni, to veker borte i juli, og
+attende i august heilt fram til den veka du står i. Timane er verkelege
+timar frå basen, så aktivitetsbolken har noko å teikne.
+
+Det minimale oppsettet finst framleis:
 `POST /api/setup-test-data` (eller `/elev/testdata` i nettlesaren) lagar
 `anna@example.com` / `password123`.
 
