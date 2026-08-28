@@ -1,0 +1,138 @@
+/* ===================================================================
+   innsjekkskjermen
+   Ein skjerm paa veggen i vestibylen, ikkje ei side ein les. Folk stend
+   framfor honom med jakka i handi og treffer med tommelen — so maalet er
+   heile rada og ikkje ein knapp inni henne, og skrifti er stor nok til
+   aa lesast paa ein meters avstand.
+
+   Han ligg utanfor innloggingi, so han ber ingi leiding og ingi botnlina
+   (`base` teiknar dei berre naar det stend ein brukar i data-en).
+   =================================================================== */
+.innsjekktime + .innsjekktime { margin-top: var(--rom-6); }
+.innsjekktime .card-header { align-items: baseline; }
+
+/* Streket under namnet ber slaget sin farge (§1) — kva slags trening,
+   fyre ein hev lese ordet. Ukjent slag fell til haarlina: graatt segjer
+   «ingen farge», og det maa aldri falla til --merke. */
+.innsjekktittel {
+  text-decoration: underline;
+  text-decoration-color: var(--slagfarge, var(--haarlina));
+  text-decoration-thickness: 3px;
+  text-underline-offset: .25em;
+}
+.innsjekkklokke {
+  font-family: var(--skrift-tal); font-size: 1.1rem;
+  color: var(--blekk-lys); white-space: nowrap;
+}
+
+.innsjekkliste {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: var(--rom-2);
+}
+
+/* Rada er knappen. Han ber `.kort` si form — flate og haarlina — av di
+   det er ein ting ein tek paa, og ikkje ei lina i ei lista. */
+.innsjekkrad {
+  width: 100%;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--rom-4);
+  padding: var(--rom-4) var(--rom-5);
+  font: inherit; font-size: 1.5rem;
+  text-align: left; cursor: pointer;
+  color: var(--blekk);
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: var(--rund);
+  border-left: 3px solid transparent;
+}
+.innsjekkrad:hover:not(:disabled) { border-left-color: var(--merke); }
+.innsjekkrad:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
+
+.innsjekknamn { min-width: 0; overflow-wrap: break-word; }
+.innsjekksvar {
+  flex: none;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .9rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-lys); white-space: nowrap;
+}
+
+/* Kryssa av. Vengen ber det, som paa kvart anna kort i huset — og rada
+   dempar seg, av di ho er ferdig og ikkje lenger eit *maal*. Ho er
+   framleis ein knapp: eit trykk spør um aa fjerna krysset, so peikaren
+   stend. */
+.innsjekkrad.her {
+  border-left-color: var(--klas);
+  color: var(--blekk-lys);
+}
+.innsjekkrad.her .innsjekksvar { color: var(--klas); }
+
+/* Rada som spør «Fjern krysset?». Blekket kjem upp att — det er eit
+   ord som ventar paa svar, ikkje ei ferdig rad. Ikkje --aatvaring:
+   aa fjerna eit kryss kann gjerast um att. */
+.innsjekkrad.angrar .innsjekksvar { color: var(--blekk); }
+.innsjekkkryss { font-family: var(--skrift); }
+
+.innsjekktald {
+  margin: var(--rom-3) 0 0;
+  font-family: var(--skrift-tal); font-size: .9rem;
+  color: var(--blekk-svakt);
+}
+
+/* Drop-in over disken: ikkje paa lista, men det er plass. Setningi og
+   feltet stend paa ei lina; feltet hev fast breidd so det ikkje skubbar
+   noko medan ein skriv (§3, §9). */
+.dropinn {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--rom-3);
+  margin-top: var(--rom-4);
+}
+.dropinn > * { margin: 0; }
+.dropinnspor { color: var(--blekk-lys); }
+.dropinnfelt { position: relative; }
+.dropinnsok { width: 16rem; max-width: 100%; font-size: 1.25rem; }
+
+/* Svari flyt yver sida og skubbar ingenting — det er det som skil eit
+   søkjeresultat fraa ei liste: det er ikkje kome enno. */
+.dropinnresultat {
+  list-style: none; margin: 0; padding: var(--rom-1);
+  position: absolute; top: calc(100% + var(--rom-1)); left: 0;
+  min-width: 100%; z-index: 10;
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: var(--rund);
+  box-shadow: var(--skugge-flytande);
+}
+.dropinnval {
+  width: 100%;
+  padding: var(--rom-3) var(--rom-4);
+  font: inherit; font-size: 1.25rem;
+  text-align: left; cursor: pointer;
+  color: var(--blekk);
+  background: none; border: none; border-radius: var(--rund);
+  white-space: nowrap;
+}
+/* Ljos, aldri veng: «denne» er ljoset sitt aerend i huset (§9). */
+.dropinnval:hover:not(:disabled),
+.dropinnval:focus-visible { background: var(--merke-svak); }
+
+/* Lina hev høgdi si fyre ho hev ord, so eit svar ikkje flytter noko
+   naar det kjem (§3). */
+.dropinnstatus {
+  flex-basis: 100%;
+  min-height: 1.5em;
+  font-size: .9rem; color: var(--blekk-lys);
+}
+
+/* Døri: fire siffer paa ein iPad. Feltet er stort og midtstilt av same
+   grunn som radene er store — det vert skrive med ein tommel. */
+.laasfelt {
+  width: 9rem;
+  font-family: var(--skrift-tal); font-size: 2rem;
+  text-align: center; letter-spacing: .35em;
+}
+
+/* Paa ein liten skjerm i vestibylen — ein gamal nettbrett paa ein
+   vegg — er det namnet som tel. Klokka og svaret fell under. */
+@media (max-width: 34rem) {
+  .innsjekkrad { font-size: 1.25rem; padding: var(--rom-3) var(--rom-4); }
+}

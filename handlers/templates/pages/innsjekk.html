@@ -1,0 +1,298 @@
+{{define "content"}}
+{{/* Skjermen i vestibylen.
+
+     Han er ikkje ei side ein *les*, han er ein ting ein *tek paa* medan
+     ein hev jakka i handi. Difor er alt stort: namnet er lesetekst i
+     halvanna rem, og flata ein trykkjer paa er heile rada og ikkje ein
+     knapp inni henne.
+
+     Ingi innlogging, og difor ingi liste yver folk: berre timane som
+     byrjar snart eller gjeng no. Sida kann ikkje svara paa «kven trenar
+     her» — berre paa «kven er her no», og det ser ein med augo likevel
+     naar ein stend i rommet.
+
+     Unnataket er drop-in-søket nedst i kvar bolk: nokon stend her utan
+     aa ha tinga, og det er plass att. Det søket er den eine staden sida
+     kann segja noko um folk som ikkje er i rommet, og verjet ligg i
+     handsamaren — minst tri teikn, aldri meir enn seks namn. */}}
+<h1 class="page-title">{{t .Lang "innsjekk.title"}}</h1>
+<meta name="csrf-token" content="{{.CSRFToken}}">
+
+{{if .Timar}}
+<p class="briefing">{{t .Lang "innsjekk.leiing"}}</p>
+
+{{range .Timar}}
+<section class="content-section innsjekktime">
+    <div class="card-header">
+        {{/* Streket under namnet ber slaget sin farge (§1): kva slags
+             trening dette er, fyre ein hev lese ordet. Ukjent slag fell
+             til haarlina — graatt segjer «ingen farge», og det er sant. */}}
+        <h2 class="section-title innsjekktittel {{slagklasse .Event.ClassType}}">{{.Event.Title}}</h2>
+        <span class="innsjekkklokke">{{.Klokke}}{{if .Event.RoomName}} · {{.Event.RoomName}}{{end}}</span>
+    </div>
+
+    {{/* Lista stend her ogso naar ho er tom: drop-in-søket under kann
+         leggja den fyrste rada i henne. `hidden` byter mellom lista og
+         tomlina, so ingenting vert bytt ut (§3). */}}
+    <ul class="innsjekkliste" data-event="{{.Event.ID}}"
+        data-t-her="{{t $.Lang "innsjekk.her"}}"
+        data-t-angre="{{t $.Lang "innsjekk.angre"}}"
+        {{if not .Paamelde}}hidden{{end}}>
+        {{range .Paamelde}}
+        {{/* Heile rada er knappen. Ein liten knapp i enden av ei rad er
+             eit maal ein bommar paa naar ein stend og held ei veska.
+             Ei kryssa rad er framleis ein knapp: fyrste trykket spør
+             «Fjern krysset?», det andre gjer det — same tvo-stegs
+             mynster som stadfestingi elles i huset (§7). */}}
+        <li>
+            <button type="button" class="innsjekkrad{{if .Frammott}} her{{end}}"
+                    data-user="{{.UserID}}">
+                <span class="innsjekknamn">{{.Namn}}</span>
+                <span class="innsjekksvar">
+                    {{- if .Frammott}}<span class="innsjekkkryss" aria-hidden="true">✓</span> {{.Klokke}}
+                    {{- else}}{{t $.Lang "innsjekk.her"}}{{end -}}
+                </span>
+            </button>
+        </li>
+        {{end}}
+    </ul>
+    <p class="innsjekktald" {{if not .Paamelde}}hidden{{end}}>{{.Talde}}/{{len .Paamelde}}</p>
+    <p class="no-data" {{if .Paamelde}}hidden{{end}}>{{t $.Lang "innsjekk.ingen_paamelde"}}</p>
+
+    {{/* Drop-in: ikkje paa lista, men det er plass. Blokki stend i
+         dokumentet ogso naar timen er full — vert han full medan sida
+         stend, er det `hidden` som gøymer henne, ikkje ei umteikning. */}}
+    <div class="dropinn" data-event="{{.Event.ID}}" data-ledige="{{.Ledige}}"
+         data-t-ingen="{{t $.Lang "innsjekk.dropinn_ingen"}}"
+         data-t-fullt="{{t $.Lang "innsjekk.dropinn_fullt"}}"
+         data-t-feil="{{t $.Lang "innsjekk.dropinn_feil"}}"
+         {{if le .Ledige 0}}hidden{{end}}>
+        <p class="dropinnspor">{{t $.Lang "innsjekk.dropinn_spor"}}</p>
+        <span class="dropinnfelt">
+            <input type="search" class="dropinnsok" autocomplete="off"
+                   placeholder="{{t $.Lang "innsjekk.dropinn_sok"}}"
+                   aria-label="{{t $.Lang "innsjekk.dropinn_sok"}}">
+            <ul class="dropinnresultat" hidden></ul>
+        </span>
+        <p class="dropinnstatus" role="status"></p>
+    </div>
+</section>
+{{end}}
+
+{{else}}
+{{/* Tomrommet som *ikkje* hev ein veg ut av seg: det er ingen time no,
+     og det er ikkje noko ein kann gjera med (§9). */}}
+<p class="briefing">{{t .Lang "innsjekk.ingen_timar"}}</p>
+{{end}}
+
+<script>
+// Kiosken svarar med ein gong og spør tenaren etterpaa. Han stend paa ein
+// vegg i eit rom med tjukke murar; ventar rada paa svaret, trykkjer folk
+// tvo gonger og gjeng vidare.
+//
+// Ei kryssa rad kann angrast, men aldri i eitt trykk: fyrste trykket
+// byter ordet til «Fjern krysset?» paa staden, det andre gjer det.
+// Trykkjer ein kvar som helst elles — eller ingen stad paa fem sekund —
+// fell spurningen bort att. Slik kann eit uhelds-dobbeltrykk aldri
+// stryka nokon.
+var vaapna = null; // {rad, fyrr, klokke}
+function avvaapna() {
+    if (!vaapna) return;
+    vaapna.rad.classList.remove("angrar");
+    vaapna.rad.querySelector(".innsjekksvar").innerHTML = vaapna.fyrr;
+    clearTimeout(vaapna.klokke);
+    vaapna = null;
+}
+
+function kioskPost(rute, lista, userID) {
+    return fetch(rute, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: "event=" + encodeURIComponent(lista.dataset.event) +
+              "&user=" + encodeURIComponent(userID)
+    }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+    });
+}
+
+document.addEventListener("click", function (e) {
+    var rad = e.target.closest(".innsjekkrad");
+    if (!rad || rad.disabled) { avvaapna(); return; }
+    var lista = rad.closest(".innsjekkliste");
+    var svar = rad.querySelector(".innsjekksvar");
+
+    // Kryssa rad: fyrste trykket spør, det andre fjernar.
+    if (rad.classList.contains("her")) {
+        if (vaapna && vaapna.rad === rad) {
+            var fyrr = vaapna.fyrr;
+            clearTimeout(vaapna.klokke);
+            vaapna = null;
+            rad.disabled = true;
+            kioskPost("/api/innsjekk/angre", lista, rad.dataset.user)
+            .then(function () {
+                rad.classList.remove("her", "angrar");
+                svar.textContent = lista.dataset.tHer;
+                talDei(lista.closest(".innsjekktime"), -1, 0);
+                rad.disabled = false;
+            }).catch(function () {
+                rad.classList.remove("angrar");
+                svar.innerHTML = fyrr;
+                rad.disabled = false;
+            });
+        } else {
+            avvaapna();
+            vaapna = {
+                rad: rad,
+                fyrr: svar.innerHTML,
+                klokke: setTimeout(avvaapna, 5000)
+            };
+            rad.classList.add("angrar");
+            svar.textContent = lista.dataset.tAngre;
+        }
+        return;
+    }
+
+    // Ukryssa rad: kryss av.
+    avvaapna();
+    var fyrrSvar = svar.textContent;
+    rad.disabled = true;
+    rad.classList.add("her");
+    kioskPost("/api/innsjekk", lista, rad.dataset.user)
+    .then(function (d) {
+        svar.innerHTML = '<span class="innsjekkkryss" aria-hidden="true">✓</span> ' + d.klokke;
+        talDei(lista.closest(".innsjekktime"), 1, 0);
+        rad.disabled = false;
+    }).catch(function () {
+        // Gjekk det ikkje, skal rada kunna trykkjast att. Ein kross som
+        // stend att utan at noko er lagra er verre enn ingen kross.
+        rad.disabled = false;
+        rad.classList.remove("her");
+        svar.textContent = fyrrSvar;
+    });
+});
+
+// Teljaren under lista. `kryssa` og `nye` er kor mykje kvar side av
+// braaket veks: eit kryss er +1/+0, ein drop-in er +1/+1.
+function talDei(bolk, kryssa, nye) {
+    var tald = bolk.querySelector(".innsjekktald");
+    var t = tald.textContent.split("/");
+    tald.textContent = (parseInt(t[0], 10) + kryssa) + "/" + (parseInt(t[1], 10) + nye);
+    tald.hidden = false;
+    bolk.querySelector(".no-data").hidden = true;
+}
+
+// Drop-in-søket. Eitt felt per time; spurningi gjeng fyrst naar det er
+// skrive minst tri teikn, og ho ventar til fingeren hev stogga.
+var sokTimar = new WeakMap();
+document.addEventListener("input", function (e) {
+    var felt = e.target.closest(".dropinnsok");
+    if (!felt) return;
+    var blokk = felt.closest(".dropinn");
+    var resultat = blokk.querySelector(".dropinnresultat");
+    clearTimeout(sokTimar.get(felt));
+
+    var q = felt.value.trim();
+    if (q.length < 3) {
+        resultat.hidden = true;
+        resultat.textContent = "";
+        blokk.querySelector(".dropinnstatus").textContent = "";
+        return;
+    }
+    sokTimar.set(felt, setTimeout(function () {
+        fetch("/api/innsjekk/sok?event=" + encodeURIComponent(blokk.dataset.event) +
+              "&q=" + encodeURIComponent(q))
+        .then(function (r) {
+            if (!r.ok) throw new Error(r.status);
+            return r.json();
+        }).then(function (d) {
+            resultat.textContent = "";
+            var status = blokk.querySelector(".dropinnstatus");
+            if (!d.folk.length) {
+                resultat.hidden = true;
+                status.textContent = blokk.dataset.tIngen;
+                return;
+            }
+            status.textContent = "";
+            d.folk.forEach(function (p) {
+                var li = document.createElement("li");
+                var knapp = document.createElement("button");
+                knapp.type = "button";
+                knapp.className = "dropinnval";
+                knapp.dataset.user = p.id;
+                knapp.textContent = p.namn;
+                li.appendChild(knapp);
+                resultat.appendChild(li);
+            });
+            resultat.hidden = false;
+        }).catch(function () {
+            resultat.hidden = true;
+            blokk.querySelector(".dropinnstatus").textContent = blokk.dataset.tFeil;
+        });
+    }, 250));
+});
+
+// Eit namn i søket vert trykt: meld paa og kryss av, i eitt. Personen
+// stend jo her.
+document.addEventListener("click", function (e) {
+    var val = e.target.closest(".dropinnval");
+    if (!val || val.disabled) return;
+    var blokk = val.closest(".dropinn");
+    var status = blokk.querySelector(".dropinnstatus");
+    val.disabled = true;
+
+    fetch("/api/innsjekk/dropin", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: "event=" + encodeURIComponent(blokk.dataset.event) +
+              "&user=" + encodeURIComponent(val.dataset.user)
+    }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+    }).then(function (d) {
+        var bolk = blokk.closest(".innsjekktime");
+        var lista = bolk.querySelector(".innsjekkliste");
+
+        // Rada kjem nedst og ikkje i alfabetet: den som nett trykte
+        // skal sjaa namnet sitt landa der auga alt er.
+        var li = document.createElement("li");
+        var rad = document.createElement("button");
+        rad.type = "button";
+        rad.className = "innsjekkrad her";
+        rad.dataset.user = val.dataset.user;
+        var namn = document.createElement("span");
+        namn.className = "innsjekknamn";
+        namn.textContent = val.textContent;
+        var svar = document.createElement("span");
+        svar.className = "innsjekksvar";
+        svar.innerHTML = '<span class="innsjekkkryss" aria-hidden="true">✓</span> ' + d.klokke;
+        rad.appendChild(namn);
+        rad.appendChild(svar);
+        li.appendChild(rad);
+        lista.appendChild(li);
+        lista.hidden = false;
+        talDei(bolk, 1, 1);
+
+        blokk.querySelector(".dropinnsok").value = "";
+        var resultat = blokk.querySelector(".dropinnresultat");
+        resultat.hidden = true;
+        resultat.textContent = "";
+        status.textContent = "";
+
+        var ledige = parseInt(blokk.dataset.ledige, 10) - 1;
+        blokk.dataset.ledige = ledige;
+        if (ledige <= 0) blokk.hidden = true;
+    }).catch(function (feil) {
+        val.disabled = false;
+        status.textContent = String(feil.message) === "409"
+            ? blokk.dataset.tFullt : blokk.dataset.tFeil;
+    });
+});
+</script>
+{{end}}
