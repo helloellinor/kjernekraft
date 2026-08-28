@@ -56,6 +56,7 @@ Selectors take `[data-theme]` on **any** element, not just the root, because
 | `--togu` pink | klippekort — the thing that is counted |
 | `--tuneup` purple | courses, PT, guidance — the thing that happens once |
 | `--student` yellow | the student/senior rate — not a product, a *rate*. Only the membership card wears it. |
+| `--svartkort` | Black — the membership that follows a role. Not a product, so it wears no product colour. Black ink on light paper, foil on dark; it must differ per theme, because true black on a dark sheet has no edge at all. |
 | `--aatvaring` | went wrong, or cannot be undone. **Never** a product colour. |
 
 **Colour says *what*; form says *how*.** Filled mark = active, open ring =

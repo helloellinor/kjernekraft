@@ -257,6 +257,10 @@
    same leiet som dei hine produktfargane. */
 .medlemskort { --produkt: var(--klas); max-width: 30rem; gap: var(--rom-3); }
 .medlemskort.student { --produkt: var(--student); }
+/* Black. Slaget er svart, ikkje turkis: det tildelte medlemskapet er
+   ikkje eit produkt i lista, og det skal ikkje bera fargen til eit
+   produkt. Sjaa --svartkort i 00-token.css. */
+.medlemskort.tildelt { --produkt: var(--svartkort); }
 
 /* Namnet og stoda paa same lina, som paa framsida av eit kort. */
 .medlemskort .card-header { margin-bottom: 0; align-items: center; }

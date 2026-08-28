@@ -115,11 +115,38 @@ func (db *Database) PaameldeTil(eventID int64) ([]Paameld, error) {
 // tvo gonger, stend det fyrste tidspunktet — kiosken er ein skjerm mange
 // tek paa, og det andre trykket er som oftast eit uhell.
 func (db *Database) MerkFrammote(eventID, userID int64, naa time.Time) error {
-	_, err := db.Conn.Exec(`
+	tx, err := db.Conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	res, err := tx.Exec(`
 		UPDATE event_signups SET attended_at = ?
 		WHERE event_id = ? AND user_id = ? AND attended_at IS NULL`,
 		veggtekst(naa), eventID, userID)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// `attended_at IS NULL` gjer krysset eingongs. Rørde me ingi rad, var
+	// ho alt kryssa av — og daa skal klippet *ikkje* takast ein gong til.
+	// Tvo trykk paa den same knappen i kiosken er ein ting som hender.
+	rørde, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rørde == 0 {
+		return tx.Commit()
+	}
+
+	// Klippet gjeng i den same transaksjonen som krysset. Fell det eine,
+	// fell det andre: eit kryss utan klipp er ein gratis time, og eit
+	// klipp utan kryss er eit klipp ingen fekk noko for.
+	if err := brukKlipp(tx, eventID, userID, naa); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // NettFrammott gjev timen brukaren *var paa* og som slutta for mindre
@@ -153,11 +180,33 @@ func (db *Database) NettFrammott(userID int64, naa time.Time, innan time.Duratio
 // nokon same personen paa nytt, fær rada eit nytt tidspunkt, og det er
 // rett: det gamle var jo aldri sant.
 func (db *Database) FjernFrammote(eventID, userID int64) error {
-	_, err := db.Conn.Exec(`
+	tx, err := db.Conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	res, err := tx.Exec(`
 		UPDATE event_signups SET attended_at = NULL
-		WHERE event_id = ? AND user_id = ?`,
+		WHERE event_id = ? AND user_id = ? AND attended_at IS NOT NULL`,
 		eventID, userID)
-	return err
+	if err != nil {
+		return err
+	}
+	rørde, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rørde == 0 {
+		return tx.Commit()
+	}
+
+	// Var krysset feil, var klippet det ogso. Det kjem attende paa det
+	// kortet det vart teke fraa — difor stend kort-id-et paa paameldingi.
+	if err := gjevAttKlipp(tx, eventID, userID); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // SokTilInnsjekk finn folk etter namn, til drop-in i kiosken: nokon

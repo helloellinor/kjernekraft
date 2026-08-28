@@ -132,7 +132,7 @@
     "membership_details": "Se medlemskapet",
     "medlemskap_aktivt": "Aktivt medlemskap",
     "medlemskap_frose": "Medlemskapet er fryst",
-    "medlemskap_ingen": "Ingen medlemskap"
+    "medlemskap_ingen": "Intet medlemskap"
   },
   "charges": {
     "title": "Belastninger",
@@ -465,7 +465,9 @@
     "room_for": "med plass til",
     "seats_taken": "Allerede påmeldt",
     "enrolled": "påmeldte",
-    "mark_cancelled": "Blir avlyst"
+    "mark_cancelled": "Blir avlyst",
+    "only_for": "bare for",
+    "open_to_all": "åpen for alle"
   },
   "terms": {
     "title": "Handelsbetingelser"
@@ -539,7 +541,7 @@
     "title": "Medlemskapet mitt",
     "tab_medlemskapet": "Medlemskapet",
     "tab_byt": "Bytt",
-    "tab_belastningar": "Belastninger",
+    "tab_belastningar": "Avgifter",
     "per_month": "%d kr/md",
     "binding_months": "%d måneders binding",
     "no_binding": "ingen binding",
@@ -576,7 +578,10 @@
     "cancel_confirm": "Ja, si opp",
     "medlemskortet": "Medlemskortet",
     "pris": "Pris",
-    "gjeld_til": "Gjelder til"
+    "gjeld_til": "Gjelder til",
+    "fylgjer_rolla": "Karma",
+    "black_eig": "Tilgangen følger rollen din, og kan ikke kjøpes.",
+    "medlem_sidan": "Medlem siden"
   },
   "produkt": {
     "manadskort": "Månedskort",
@@ -585,7 +590,8 @@
     "binding_md": "%d måneders binding",
     "student_suffix": "%s, student og senior",
     "klipp": "%d klipp",
-    "generert": "generert"
+    "generert": "generert",
+    "medlemskap_black": "Svart"
   },
   "maanad": {
     "kort_1": "jan",

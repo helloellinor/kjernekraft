@@ -116,6 +116,17 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// overstyrt gjeld baae stader. Raanamnet i basen er «Basis» der
 	// sida syner «Årskort», og tvo namn paa den same tingen er verre
 	// enn ikkje aa syna namnet i det heile.
+	// «Medlem sidan» kjem fraa kontoen, ikkje fraa avtalen. Sjaa
+	// MedlemSidan i database/svartmedlem.go.
+	var medlemSidan *time.Time
+	if medlemskap != nil {
+		if d, feil := DB.MedlemSidan(int64(user.ID)); feil != nil {
+			log.Printf("medlem sidan for %d: %v", user.ID, feil)
+		} else if !d.IsZero() {
+			medlemSidan = &d
+		}
+	}
+
 	medlemsnamn := ""
 	if medlemskap != nil {
 		overstyrte, feil := DB.Produktnamn("medlemskap")
@@ -130,6 +141,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Activity":          NewActivity(lang, perDag, perType, now, aktivitetVekor),
 		"Medlemskap":        medlemskap,
+		"MedlemSidan":       medlemSidan,
 		"MedlemskapNamn":    medlemsnamn,
 		"HelsingTittel":     HelsingTittel(lang, user.Name, naar, now, ferdig != nil),
 		"Briefing":          NyBriefing(lang, neste, now, iVeka, klippAtt),

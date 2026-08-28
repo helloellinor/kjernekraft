@@ -13,6 +13,15 @@ type Membership struct {
 	Description      string `json:"description"`
 	Features         string `json:"features"` // JSON string of features array
 	Active           bool   `json:"active"`
+	// Skjult = medlemskapet stend *ikkje* i lista der folk vel. Black er
+	// skjult; alt anna er ikkje.
+	//
+	// Flagget er skrive som «skjult» og ikkje «synleg» med vilje. Eit
+	// bool i Go er false naar ingen sa noko, og eit medlemskap som ingen
+	// hev sagt noko om skal vera *synleg*. Med «synleg» var kvart
+	// Membership{} som vart bygd i kode usynleg og ukjøpeleg utan at
+	// nokon bad um det. Sjaa database/svartmedlem.go.
+	Skjult bool `json:"skjult"`
 }
 
 // UserMembership represents a user's active membership
@@ -37,4 +46,8 @@ type MembershipWithDetails struct {
 	MonthsUntilBindingEnd int  `json:"months_until_binding_end"`
 	CanCancel             bool `json:"can_cancel"`
 	CanPause              bool `json:"can_pause"`
+	// Tildelt = medlemskapet fylgjer ei rolla og er ikkje kjøpt. Det
+	// finst ingi rad aa frysa eller seia upp, so malen skal gøyma dei
+	// knappane. Sjaa database/svartmedlem.go.
+	Tildelt bool `json:"tildelt"`
 }

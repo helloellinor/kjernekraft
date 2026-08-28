@@ -54,3 +54,35 @@ func TestOverstyringGjeldEittSpraak(t *testing.T) {
 		t.Errorf("tomt namn skulle falla attende, fekk %q", fekk)
 	}
 }
+
+// Black heiter Black. Namnet vart fyrr rekna ut or bindingi, og med
+// null maanader binding kom han ut som «Månadskort» — namnet paa eit
+// produkt han ikkje er.
+func TestUsynlegMedlemskapHeldNamnetSitt(t *testing.T) {
+	// `t()` gjeng gjenom singletonen, som leitar etter «locales»
+	// relativt til arbeidskatalogen — pakkekatalogen under prøvor.
+	// lastMaali peikar honom mot rota, som i localization_test.go.
+	lastMaali(t)
+
+	svart := models.Membership{Name: "Black", CommitmentMonths: 0, Skjult: true}
+	for _, p := range []struct{ maal, vil string }{
+		{"nn", "Svart"}, {"nb", "Svart"}, {"en", "Black Card"},
+	} {
+		if got := MedlemskapNamn(p.maal, svart); got != p.vil {
+			t.Errorf("%s: venta «%s», fekk «%s»", p.maal, p.vil, got)
+		}
+	}
+
+	// Eit usynleg medlemskap utan nykel fell attende paa raanamnet, so
+	// det syner seg med ein gong i staden for aa teikna ein nykel.
+	nytt := models.Membership{Name: "Platinum", Skjult: true}
+	if got := MedlemskapNamn("nn", nytt); got != "Platinum" {
+		t.Errorf("venta raanamnet «Platinum», fekk «%s»", got)
+	}
+
+	// Eit vanleg medlemskap skal framleis fylgja bindingi.
+	vanleg := models.Membership{Name: "Basis", CommitmentMonths: 12, Skjult: false}
+	if got := MedlemskapNamn("nn", vanleg); got == "Basis" {
+		t.Errorf("eit synleg medlemskap skal namngjevast or bindingi, fekk raanamnet «%s»", got)
+	}
+}

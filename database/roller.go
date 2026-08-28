@@ -14,6 +14,13 @@ const (
 // RollaFinst seier um namnet er ei rolla systemet kjenner. Utan denne
 // kunde eit kall skriva kva som helst inn i roles-tabellen, og daa er
 // rollelista ikkje lenger ei lista yver noko.
+// Utviklarrolla stend *ikkje* her, og det er med vilje.
+//
+// Ho vert ikkje gjevi ut av nokon: ho vert lesi or ei fil paa tenaren
+// (sjaa utviklar.go). RollaFinst er porten administrasjonsflata skriv
+// gjenom, so ei rolla som stend her, er ei rolla ein administrator kann
+// gjeva seg sjølv. Utviklarrolla gjev fri tilgang til huset; ho skal
+// koma fraa den som eig maskini, ikkje fraa den som eig ein knapp.
 func RollaFinst(rolla string) bool {
 	return rolla == RollaAdmin || rolla == RollaLaerar
 }
@@ -37,9 +44,15 @@ func (db *Database) SettRolla(userID int64, rolla string, paa bool) error {
 	if err != nil {
 		return err
 	}
-	_, err = db.Conn.Exec(
+	if _, err := db.Conn.Exec(
 		"INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES (?, ?)",
-		userID, roleID)
+		userID, roleID); err != nil {
+		return err
+	}
+
+	// Forfremjingi skal gjelda med ein gong, og ho skal gjelda pengane
+	// med. Sjaa SynkFriMedlemskap i svartmedlem.go.
+	_, err = db.SynkFriMedlemskap(userID)
 	return err
 }
 

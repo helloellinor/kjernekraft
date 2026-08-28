@@ -465,7 +465,9 @@
     "room_for": "with room for",
     "seats_taken": "Already signed up",
     "enrolled": "signed up",
-    "mark_cancelled": "Will be cancelled"
+    "mark_cancelled": "Will be cancelled",
+    "only_for": "only for",
+    "open_to_all": "open to all"
   },
   "terms": {
     "title": "Terms and conditions"
@@ -576,7 +578,10 @@
     "cancel_confirm": "Yes, cancel",
     "medlemskortet": "Membership card",
     "pris": "Price",
-    "gjeld_til": "Valid until"
+    "gjeld_til": "Valid until",
+    "fylgjer_rolla": "Karma",
+    "black_eig": "Access follows your role, and cannot be bought.",
+    "medlem_sidan": "Member since"
   },
   "produkt": {
     "manadskort": "Monthly",
@@ -585,7 +590,8 @@
     "binding_md": "%d months' binding",
     "student_suffix": "%s, students and seniors",
     "klipp": "%d clips",
-    "generert": "generated"
+    "generert": "generated",
+    "medlemskap_black": "Black Card"
   },
   "maanad": {
     "kort_1": "Jan",

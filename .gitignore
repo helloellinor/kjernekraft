@@ -35,6 +35,9 @@ go.work.sum
 server
 kjernekraft
 *.db
+# WAL-modus (sjaa database.Connect) legg tvo filer attaat basen.
+*.db-wal
+*.db-shm
 
 # Umgjevnad
 .env
@@ -57,3 +60,6 @@ build.feil
 # Maskinstøv og agent-arbeidskatalogar
 .DS_Store
 .claude/
+
+# Utviklarlista er lokal og skal ikkje fylgja repoet.
+utviklarar

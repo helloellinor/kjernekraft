@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kjernekraft/handlers/config"
 	"kjernekraft/models"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -33,6 +34,8 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		Description    string `json:"description"`
 		IsRecurring    bool   `json:"is_recurring"`
 		RecurringWeeks int    `json:"recurring_weeks"`
+		// Sett = ei privat økt for den eine. Sjaa database/privattime.go.
+		PrivateUserID int64 `json:"private_user_id"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&classData); err != nil {
@@ -43,6 +46,28 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	if classData.Weekday < 0 || classData.Weekday > 6 {
 		http.Error(w, "Invalid weekday", http.StatusBadRequest)
 		return
+	}
+
+	// Ei privat økt er sett av til ein *namngjeven* person. Finst han
+	// ikkje, er økta sett av til ingen, og ingen kann sjaa henne — ho
+	// hadde vorte ein time som ligg i basen og aldri kjem paa nokon
+	// skjerm. Betre aa segja fraa her.
+	if classData.PrivateUserID > 0 {
+		var finst int
+		if err := AdminDB.Conn.QueryRow(
+			`SELECT COUNT(*) FROM users WHERE id = ?`, classData.PrivateUserID).Scan(&finst); err != nil {
+			http.Error(w, "Could not check user", http.StatusInternalServerError)
+			return
+		}
+		if finst == 0 {
+			http.Error(w, "Ukjend brukar for privat time", http.StatusBadRequest)
+			return
+		}
+		// Personlig Trening er éin deltakar. Set ingen noko anna, er
+		// det talet me meiner.
+		if classData.Capacity == 0 {
+			classData.Capacity = 1
+		}
 	}
 
 	startTime, err := time.Parse("15:04", classData.StartTime)
@@ -130,6 +155,19 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Could not create event", http.StatusInternalServerError)
 		return
+	}
+
+	// Økta vert sett av etter at ho er laga. Alle utslagi av regelen
+	// høyrer den same personen til: eit PT-kjøp paa aatte vekor er aatte
+	// timar med same namnet paa.
+	if classData.PrivateUserID > 0 {
+		for _, id := range createdEventIDs {
+			if err := AdminDB.SettPrivatTime(id, classData.PrivateUserID); err != nil {
+				log.Printf("privat time %d: %v", id, err)
+				http.Error(w, "Could not mark class private", http.StatusInternalServerError)
+				return
+			}
+		}
 	}
 
 	response := map[string]interface{}{
