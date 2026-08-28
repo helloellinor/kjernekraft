@@ -23,30 +23,30 @@ import (
 // Difor er det éi side med tre faner: det du har, det du kan byte til, og
 // det du har betalt.
 
-// Fane er ei fane i ei fanerekkje.
-type Fane struct {
-	Bolk string
-	Namn string
+// Tab er ei fane i ei fanerekkje.
+type Tab struct {
+	Key  string
+	Name string
 }
 
-// Byteval er eit medlemskap du kan byte til, sett frå det du har.
-type Byteval struct {
+// SwitchOption er eit medlemskap du kan byte til, sett frå det du har.
+type SwitchOption struct {
 	ID       int
-	Namn     string
-	Pris     string // ferdig formatert, «590 kr/md»
-	Setning  string // kva som endrar seg
-	Mindre   string // den delen av setninga som er ei innsparing
-	Stengd   bool
-	Grunn    string
-	VegNamn  string
-	VegLenke string
+	Name     string
+	Price    string // ferdig formatert, «590 kr/md»
+	Summary  string // kva som endrar seg
+	Savings  string // den delen av setninga som er ei innsparing
+	Disabled bool
+	Reason   string
+	LinkText string
+	LinkHref string
 }
 
-// kroneTal gjer øre om til heile kroner.
-func kroneTal(ore int) int { return ore / 100 }
+// kronerFromOre gjer øre om til heile kroner.
+func kronerFromOre(ore int) int { return ore / 100 }
 
-// MedlemskapetHandler syner medlemskapet, byta og belastningane.
-func MedlemskapetHandler(w http.ResponseWriter, r *http.Request) {
+// MembershipPageHandler syner medlemskapet, byta og belastningane.
+func MembershipPageHandler(w http.ResponseWriter, r *http.Request) {
 	lang := GetLanguageFromRequest(r)
 	naa := time.Now()
 	user := GetUserFromSession(r)
@@ -71,7 +71,7 @@ func MedlemskapetHandler(w http.ResponseWriter, r *http.Request) {
 		overstyrte = nil
 	}
 
-	byte := byteval(lang, alle, noverande, kvalifisert, overstyrte)
+	byte := switchOptions(lang, alle, noverande, kvalifisert, overstyrte)
 
 	// Bindinga.
 	//
@@ -108,9 +108,9 @@ func MedlemskapetHandler(w http.ResponseWriter, r *http.Request) {
 			MedlemskapNamn(lang, noverande.Membership))
 	}
 
-	faner := []Fane{
-		{Bolk: "medlemskapet", Namn: t(lang, "medlemskapet.tab_medlemskapet")},
-		{Bolk: "byt", Namn: t(lang, "medlemskapet.tab_byt")},
+	faner := []Tab{
+		{Key: "medlemskapet", Name: t(lang, "medlemskapet.tab_medlemskapet")},
+		{Key: "byt", Name: t(lang, "medlemskapet.tab_byt")},
 	}
 
 	renderPage(w, r, "pages/medlemskapet", map[string]interface{}{
@@ -120,32 +120,41 @@ func MedlemskapetHandler(w http.ResponseWriter, r *http.Request) {
 		"CSRFToken":     CSRFToken(r),
 		"IsAdmin":       sessionIsAdmin(r),
 		"UserName":      sessionUserName(r),
-		"Faner":         faner,
-		"Merkelapp":     t(lang, "medlemskapet.title"),
+		"Tabs":          faner,
+		"Label":         t(lang, "medlemskapet.title"),
 		"Noverande":     noverande,
 		"NoverandeNamn": noverandeNamn,
 		"Bunden":        bunden,
 		"MaanaderAtt":   maanaderAtt,
-		"Byteval":       byte,
+		// Kann du seia upp? `CanCancel` paa modellen vart aldri sett av
+		// nokon — feltet stod som `false` for alle, og difor teikna sida
+		// aldri uppseiingsknappen. Ingen saag at adressa han gjekk til
+		// heller ikkje fanst.
+		//
+		// Regelen er den same som bindingi elles: er du bunden, kann du
+		// ikkje seia upp; er bindingi ute, kann du. Og noko som alt er
+		// sagt upp kann ikkje seiast upp ein gong til.
+		"KannSeiaUpp":   noverande != nil && !bunden && noverande.Status != "cancelled",
+		"SwitchOptions": byte,
 	})
 }
 
-// byteval set kvart medlemskap opp mot det brukaren har.
+// switchOptions set kvart medlemskap opp mot det brukaren har.
 //
 // Prisen aleine seier lite når du alt betaler for noko. Det som tel er
 // skilnaden: «100 kr mindre i månaden, mot 12 månaders binding».
-func byteval(lang string, alle []models.Membership, noverande *models.MembershipWithDetails,
-	kvalifisert bool, overstyrte map[int]map[string]string) []Byteval {
-	var ut []Byteval
+func switchOptions(lang string, alle []models.Membership, noverande *models.MembershipWithDetails,
+	kvalifisert bool, overstyrte map[int]map[string]string) []SwitchOption {
+	var ut []SwitchOption
 	for _, m := range alle {
 		if noverande != nil && m.ID == noverande.Membership.ID {
 			continue // det du alt har, er ikkje eit byte
 		}
 
-		v := Byteval{
-			ID:   m.ID,
-			Namn: Namn(overstyrte[m.ID], lang, MedlemskapNamn(lang, m)),
-			Pris: fmt.Sprintf(t(lang, "medlemskapet.per_month"), kroneTal(m.Price)),
+		v := SwitchOption{
+			ID:    m.ID,
+			Name:  Namn(overstyrte[m.ID], lang, MedlemskapNamn(lang, m)),
+			Price: fmt.Sprintf(t(lang, "medlemskapet.per_month"), kronerFromOre(m.Price)),
 		}
 
 		// Bindinga er halve svaret på om eit byte er verdt det.
@@ -155,28 +164,28 @@ func byteval(lang string, alle []models.Membership, noverande *models.Membership
 		}
 
 		if noverande != nil {
-			skilnad := kroneTal(m.Price) - kroneTal(noverande.Membership.Price)
+			skilnad := kronerFromOre(m.Price) - kronerFromOre(noverande.Membership.Price)
 			switch {
 			case skilnad < 0:
-				v.Mindre = fmt.Sprintf(t(lang, "medlemskapet.less_per_month"), -skilnad)
-				v.Setning = ", " + binding
+				v.Savings = fmt.Sprintf(t(lang, "medlemskapet.less_per_month"), -skilnad)
+				v.Summary = ", " + binding
 			case skilnad > 0:
-				v.Setning = fmt.Sprintf(t(lang, "medlemskapet.more_per_month"), skilnad) + ", " + binding
+				v.Summary = fmt.Sprintf(t(lang, "medlemskapet.more_per_month"), skilnad) + ", " + binding
 			default:
-				v.Setning = fmt.Sprintf(t(lang, "medlemskapet.same_price"), binding)
+				v.Summary = fmt.Sprintf(t(lang, "medlemskapet.same_price"), binding)
 			}
 		} else {
-			v.Setning = binding
+			v.Summary = binding
 		}
 
 		// Studentprisen står der, men stengd, og grunnen er ikkje ei
 		// feilmelding: ho er ei lenkje til staden der du kan gjere noko
 		// med det. Ei rad som berre er borte, lærer deg ingenting.
 		if m.IsStudentSenior && !kvalifisert {
-			v.Stengd = true
-			v.Grunn = t(lang, "medlemskapet.student_locked")
-			v.VegNamn = t(lang, "medlemskapet.set_student_status")
-			v.VegLenke = "/elev/min-profil"
+			v.Disabled = true
+			v.Reason = t(lang, "medlemskapet.student_locked")
+			v.LinkText = t(lang, "medlemskapet.set_student_status")
+			v.LinkHref = "/elev/min-profil"
 		}
 
 		ut = append(ut, v)

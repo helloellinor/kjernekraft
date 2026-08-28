@@ -10,12 +10,20 @@
      Namnet står til venstre av di det er det ein leitar etter. Merket
      står til høgre og ber dagen, klokkeslettet og kor mange plassar som
      er att — difor står ikkje klokkeslettet i teksten. Det ville vore
-     det same to gonger. */}}
+     det same to gonger.
+
+     Kvar rad er eit `.kort` — den same boksen som medlemskortet og
+     klippekortet, ikkje ein åttande handteikna boks (§9). Vengen langs
+     venstre kanten ber slagfargen, so ein ser kva slag trening timen er
+     før ein har lese namnet. `slagklasse` vaskar `class_type` til
+     `.slag-yoga` og liknande; kartet frå klasse til farge står i
+     00-token.css, saman med åtvaringa om at tre av dei fire slagfargane
+     òg er produktfargar. */}}
 <div class="timeliste">
   {{range .Rader}}
-  <div class="timerad heimerad{{if .ErUmme}} umme{{end}}">
+  <div class="timerad heimerad kort {{slagklasse .Event.ClassType}}{{if .IsPast}} umme{{end}}">
     <div class="timekva">
-      <h3 class="timetittel">{{.Event.Title}} <span class="lengd">{{.Minutt}} min</span></h3>
+      <h3 class="timetittel">{{.Event.Title}} <span class="lengd">{{.Minute}} min</span></h3>
       <p class="timekven">{{.Event.TeacherName}}{{if .Event.RoomName}} <span class="timerom">{{.Event.RoomName}}</span>{{end}}</p>
     </div>
     {{template "dagmerke" .}}

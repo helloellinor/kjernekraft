@@ -1,0 +1,28 @@
+{{/* Ei umsett setning med eitt hol i, og det som stend i holet fær si
+     eigi skrift.
+
+     Forma stod skriven ut ni gonger i tri filer fyrr — «del strengen ved
+     %s, sett verdet i midten, gjev det ein merkelapp» — og kvar utgaava
+     var eit høve til aa gjera det litt annleis enn dei hine. Ei av deim
+     hadde alt gjort det: heimesida sette mellomromet med `{{" "}}`,
+     medlemskapssida med eit linjeskift, og dei ser ulike ut.
+
+     Ho tek:
+       Lang   maalet
+       Nykel  umsetjingsnykelen; strengen hev eitt «%s»
+       Verd   det som skal staa i holet
+       Slag   «tal» eller «ord» — sjaa Arket §5 og §7
+
+     Tale er vidt og feitt (`--vidd-tittel`, taldskrift); ordet er berre
+     mørkare enn resten. Dei tvo er dei einaste slagi som finst: er det
+     korkje eit tal eller eit namn, høyrer det ikkje heime i eit hol. */}}
+{{define "setning"}}
+{{- $d := deling (t .Lang .Nykel) -}}
+{{- index $d 0 -}}
+{{- if eq .Slag "tal" -}}
+<b class="tal">{{.Verd}}</b>
+{{- else -}}
+<span class="ord">{{.Verd}}</span>
+{{- end -}}
+{{- index $d 1 -}}
+{{end}}

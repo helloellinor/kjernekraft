@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"html/template"
+	"kjernekraft/handlers/config"
 	"kjernekraft/models"
 	"log"
 	"net/http"
@@ -26,8 +27,47 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("klippekortpakkar: %v", err)
 	}
 
+	// Briefingen. Sida hev same forma som medlemskapssida no — tittel,
+	// ei lina som seier kva som stend til, og so fanone — og lina her
+	// svarar paa det ei lista med kort ikkje svarar paa av seg sjølv:
+	// kva gjeng ut fyrst, og kor mykje er att i det heile.
+	//
+	// Ho stod som ein eigen komponent (`.klippfyrst`) inni kort-lista
+	// fyrr. Same setningi, men no der dei hine sidone hev henne.
+	kort, err := DB.GetUserKlippekort(int64(user.ID))
+	if err != nil {
+		log.Printf("klippekort for %d: %v", user.ID, err)
+	}
+	settings := config.GetInstance()
+	naa := settings.GetCurrentTime()
+	klippAtt := 0
+	for i := range kort {
+		k := &kort[i]
+		k.DaysUntilExpiry = int(k.ExpiryDate.Sub(naa).Hours() / 24)
+		k.IsExpiring = k.DaysUntilExpiry <= 30 && k.DaysUntilExpiry > 0
+		if k.RemainingKlipp > 0 && k.ExpiryDate.After(naa) {
+			klippAtt += k.RemainingKlipp
+		}
+	}
+
+	// Tvo faner, dei same tvo som medlemskapssida: det du hev, og det du
+	// kan faa. Avgiftene stend attmed korti og ikkje i ei eigi fane —
+	// dei svarar paa det same spursmaalet, og ein les dei saman.
+	//
+	// Nykelen «kjop-klipp» er den same som lenkja fraa heimesida alt
+	// peikar paa (`?fill=…#kjop-klipp`): valet bur i adressa, so den
+	// lenkja opnar rett fane utan at noko javascript veit um det.
+	faner := []Tab{
+		{Key: "korta", Name: t(lang, "dashboard.my_punch_cards")},
+		{Key: "kjop-klipp", Name: t(lang, "klippekort.buy")},
+	}
+
 	data := map[string]interface{}{
-		"Kategoriar":  Kategoriar(pakkar),
+		"Categories":  Categories(pakkar),
+		"Tabs":        faner,
+		"Label":       t(lang, "navigation.punch_cards"),
+		"Naermast":    models.NaermastUtlop(kort),
+		"KlippAtt":    klippAtt,
 		"Title":       "Klippekort",
 		"CurrentPage": "klippekort",
 		"UserName":    user.Name,
@@ -40,75 +80,6 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Use the new template system
 	tm := GetTemplateManager()
 	if tmpl, exists := tm.GetTemplate("pages/klippekort"); exists {
-		w.Header().Set("Content-Type", "text/html")
-		if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
-			http.Error(w, "Template execution error", http.StatusInternalServerError)
-		}
-		return
-	}
-
-	// If template doesn't exist, return error
-	http.Error(w, "Template not found", http.StatusInternalServerError)
-}
-
-// MembershipSelectorHandler serves the interactive membership selector page
-func MembershipSelectorHandler(w http.ResponseWriter, r *http.Request) {
-	// Check if user is logged in
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
-		return
-	}
-
-	kvalifisert := Kvalifisert(user)
-	valbare, err := DB.MedlemskapFor(kvalifisert)
-	if err != nil {
-		log.Printf("medlemskap for brukar %d: %v", user.ID, err)
-	}
-
-	// Check if user has a membership
-	membership, err := DB.GetUserMembership(int64(user.ID))
-	hasCurrentMembership := membership != nil && err == nil
-
-	// Check if user has ever had a membership (for hiding offers)
-	// For now, we'll just use the current membership check
-	hasHadMembership := hasCurrentMembership
-
-	// Determine page title and show special offer
-	pageTitle := "Finn ditt perfekte medlemskap"
-	showSpecialOffer := true
-
-	if hasCurrentMembership {
-		pageTitle = "Bytt medlemskapet mitt"
-	}
-
-	if hasHadMembership {
-		showSpecialOffer = false
-	}
-
-	// Get language from cookies/request (using new system)
-	lang := GetLanguageFromRequest(r)
-
-	data := map[string]interface{}{
-		"Title":                "Medlemskap",
-		"CurrentPage":          "medlemskap",
-		"PageTitle":            pageTitle,
-		"HasCurrentMembership": hasCurrentMembership,
-		"Kvalifisert":          kvalifisert,
-		"Valbare":              valbare,
-		"HasHadMembership":     hasHadMembership,
-		"ShowSpecialOffer":     showSpecialOffer,
-		"UserMembership":       membership,
-		"UserName":             user.Name,
-		"User":                 user,
-		"Lang":                 lang,
-		"CSRFToken":            CSRFToken(r),
-		"IsAdmin":              sessionIsAdmin(r),
-	}
-
-	// Use the new template system
-	tm := GetTemplateManager()
-	if tmpl, exists := tm.GetTemplate("pages/membership"); exists {
 		w.Header().Set("Content-Type", "text/html")
 		if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
 			http.Error(w, "Template execution error", http.StatusInternalServerError)

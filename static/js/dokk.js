@@ -145,6 +145,21 @@
         // .daud er hol og ikkje knappar. [disabled] fangar deim ikkje:
         // dei er <span>, og attributtet gjeld berre skjemaelement.
         var merke = e.target.closest(".dagmerke:not(.daud):not([disabled])");
+
+        // Rada er òg ein knapp. Merket er sekstifem piksel breidt i ei rad
+        // som er heile sida brei, og resten av henne — namnet, læraren,
+        // rommet — sa ingen ting naar ein trykte paa det. No vel eit trykk
+        // kvar som helst i rada den fyrste timen som er att i henne, som
+        // er den ein leitar etter i ni av ti tilfelle.
+        //
+        // `:not(.utanfor-dagen)` av di ein vald dag gøymer dei hine: det
+        // fyrste *synlege* merket er det rada tilbyd no.
+        if (!merke) {
+            var rad = e.target.closest(".timerad");
+            if (rad && !e.target.closest("button, a, input, select, label")) {
+                merke = rad.querySelector(".dagmerke:not(.daud):not([disabled]):not(.utanfor-dagen)");
+            }
+        }
         if (merke) { opna(merke); return; }
         if (e.target.closest("#dokk-lukk")) { lukk(); return; }
 

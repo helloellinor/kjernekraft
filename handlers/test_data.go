@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"kjernekraft/handlers/config"
 	"kjernekraft/models"
 	"log"
 	"math/rand"
@@ -291,6 +292,13 @@ func ShuffleAllTestDataHandler(w http.ResponseWriter, r *http.Request) {
 		// Continue even if this fails
 	}
 
+	// Eit aar med fortid, so aktivitetsbrettet hev noko aa syna.
+	err = seedFortid()
+	if err != nil {
+		log.Printf("Error seeding past activity: %v", err)
+		// Continue even if this fails
+	}
+
 	response := map[string]interface{}{
 		"success": true,
 		"message": "All test data successfully shuffled!",
@@ -358,4 +366,94 @@ func shuffleUserKlippekortData() error {
 
 	log.Println("Successfully shuffled user klippekort data")
 	return nil
+}
+
+// seedFortid lagar eit aar med *gjengne* timar og melder testbrukaren
+// paa deim.
+//
+// Aktivitetsbrettet tel berre dagar som hev vore. Testdataa var alle
+// framover i tid, so brettet stod tomt same kor mykje ein la inn — ein
+// kunde ikkje sjaa om fargane verka, av di det ikkje var noko aa farga.
+//
+// Rytmen er med vilje ujamn: nokre vikor med tri timar, nokre med ein,
+// og nokre heilt utan. Eit brett der kvar veke er lik syner ikkje om
+// trinni verkar, og eit brett utan hol syner ikkje kva eit hol er.
+func seedFortid() error {
+	// Testbrukaren. Slaar honom upp direkte: det finst ingen
+	// oppslagsfunksjon paa e-post, og seedaren treng berre id-en.
+	var brukarID int64
+	if err := DB.Conn.QueryRow(
+		`SELECT id FROM users WHERE email = ?`, "anna@example.com").Scan(&brukarID); err != nil {
+		return err
+	}
+
+	// Slaget skiftar gjenom aaret, so alle tri fargane kjem fram.
+	slag := []struct {
+		typ, tittel, laerar, rom string
+	}{
+		{"yoga", "Yin Yoga", "Gry", "Salen"},
+		{"fascia", "Fascia Flyt", "Leon", "Salen"},
+		{"pilates", "Classical Pilates", "Ida", "Salen"},
+		{"reformer", "Reformer Flow", "Veronica", "Reformer"},
+	}
+
+	// Kor mange timar kvar av dei siste 52 vikone. Null er ei vika ein
+	// ikkje var her: brettet skal ha hol i seg.
+	rytme := []int{0, 1, 2, 3, 3, 0, 1, 3, 2, 0, 0, 1, 3, 3, 2, 1, 0, 2, 3, 1,
+		0, 0, 3, 2, 1, 3, 0, 1, 2, 3, 3, 0, 2, 1, 0, 3, 1, 2, 3, 0,
+		1, 3, 2, 0, 3, 1, 0, 2, 3, 1, 2, 3}
+
+	naa := config.GetInstance().GetCurrentTime()
+	maandag := VikeMaandag(naa, 0)
+
+	tx, err := DB.Conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Reint bord fyrst, so gjentekne kall ikkje hopar seg upp.
+	if _, err := tx.Exec(`DELETE FROM event_signups WHERE user_id = ?
+		AND event_id IN (SELECT id FROM events WHERE title LIKE 'Fortid:%')`, brukarID); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(`DELETE FROM events WHERE title LIKE 'Fortid:%'`); err != nil {
+		return err
+	}
+
+	for v, tal := range rytme {
+		if tal == 0 {
+			continue
+		}
+		vikestart := maandag.AddDate(0, 0, -7*(len(rytme)-1-v))
+		sl := slag[v%len(slag)]
+		for i := 0; i < tal; i++ {
+			// Spreidde utyver vika, og alltid fyre no.
+			start := vikestart.AddDate(0, 0, i*2).Add(time.Duration(9+i) * time.Hour)
+			if !start.Before(naa) {
+				continue
+			}
+			res, err := tx.Exec(`
+				INSERT INTO events (title, start_time, end_time, class_type, teacher_name,
+				                    location, capacity, current_enrolment)
+				VALUES (?, ?, ?, ?, ?, ?, 12, 1)`,
+				"Fortid: "+sl.tittel,
+				start.Format("2006-01-02 15:04:05"),
+				start.Add(time.Hour).Format("2006-01-02 15:04:05"),
+				sl.typ, sl.laerar, sl.rom)
+			if err != nil {
+				return err
+			}
+			id, err := res.LastInsertId()
+			if err != nil {
+				return err
+			}
+			if _, err := tx.Exec(
+				`INSERT INTO event_signups (user_id, event_id, signup_date) VALUES (?, ?, ?)`,
+				brukarID, id, start.Add(-24*time.Hour).Format("2006-01-02 15:04:05")); err != nil {
+				return err
+			}
+		}
+	}
+	return tx.Commit()
 }

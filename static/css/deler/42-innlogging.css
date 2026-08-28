@@ -1,0 +1,13 @@
+/* ===================================================================
+   innloggingi — den eine sida utan leiding
+   =================================================================== */
+.login-container {
+  max-width: 26rem; margin: var(--rom-7) auto; padding: var(--rom-6);
+  background: var(--flate);
+  border: 1px solid var(--haarlina);
+  border-radius: 2px;
+  box-shadow: var(--skugge-kort);
+}
+.login-subtitle { color: var(--blekk-lys); font-size: .95rem; margin-bottom: var(--rom-5); }
+.forgot-password, .signup-link { font-size: .9rem; margin-top: var(--rom-4); color: var(--blekk-lys); }
+.signup-link { border-top: 1px solid var(--haarlina); padding-top: var(--rom-4); }

@@ -1,0 +1,14 @@
+/* ===================================================================
+   botnlina
+   Det ein vel ein gong høyrer heime nedst. Maalveljaren var det
+   breidaste i heile hovudet, og ein vel ikkje maal kvar gong ein opnar
+   ei sida.
+   =================================================================== */
+.botnlina { border-top: 1px solid var(--haarlina); margin-top: var(--rom-7); flex: none; }
+.botninnhald {
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-4) var(--rom-5);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--rom-4); flex-wrap: wrap;
+}
+.botnmerke { font-size: .78rem; color: var(--blekk-svakt); }

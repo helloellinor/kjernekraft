@@ -60,7 +60,7 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 			namn := Namn(overstyrte[m.ID], lang, generert)
 			rader = append(rader, Prisrad{
 				ID: m.ID, Namn: namn, Generert: namn == generert,
-				Pris: kroneTal(m.Price), Binding: m.CommitmentMonths,
+				Pris: kronerFromOre(m.Price), Binding: m.CommitmentMonths,
 				Student: m.IsStudentSenior,
 			})
 		}

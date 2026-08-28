@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="nn" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Fanone og briefingen — framlegg</title>
+<link rel="stylesheet" href="/static/css/kjernekraft.css">
+<!-- Denne sida lyt opnast gjenom appen — http://localhost:8080/... — av di
+     ho lener seg paa det verkelege stilarket og dei verkelege skriftene.
+     Ho er eit framlegg og ikkje noko som ship: alle nye reglar stend i
+     <style> nedanfor, ingen av deim i kjernekraft.css. -->
+<style>
+/* ─── berre for denne sida ─────────────────────────────────────────── */
+body { background: var(--ark); color: var(--blekk); }
+.ark { max-width: 68rem; margin: 0 auto; padding: var(--rom-6) var(--rom-5) var(--rom-7); }
+.pr { display: flex; flex-direction: column; gap: var(--rom-6); margin-bottom: var(--rom-7); }
+.pr > h2 { margin: 0; }
+.boks {
+  border: 1px solid var(--haarlina); background: var(--flate);
+  padding: var(--rom-5); display: flex; flex-direction: column; gap: var(--rom-4);
+}
+.merk {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--blekk-svakt); margin: 0;
+}
+.merk.no { color: var(--aatvaring); }
+.maal { font-family: var(--skrift-tal); font-size: .78rem; color: var(--blekk-svakt); }
+.note { color: var(--blekk-lys); font-size: .95rem; max-width: 62ch; margin: 0; }
+
+/* ─── FRAMLEGG 1: briefingen utan 40ch-taket ───────────────────────── */
+.briefing.vid  { max-width: 62ch; }
+.briefing.tett {
+  max-width: none;
+  font-size: 1.15rem;
+  line-height: 1.45;
+  margin: var(--rom-3) 0 var(--rom-5);
+}
+
+/* ─── FRAMLEGG 2: fanone som ein skyvar, ikkje ei mappe ────────────── */
+/* Sporet er ei renne (--skraakant, som eit felt), og den valde posisjonen
+   er ein kuppel som ligg i henne (--knappedjup, som ein knapp). Same
+   ljosmodellen som resten av huset — ingi nye token. */
+.skyvar {
+  display: inline-flex; gap: 0;
+  align-self: start;      /* elles vert han strekt av foreldre-flexen */
+  padding: 3px;
+  border-radius: var(--rund-knapp);
+  background: var(--ark-djup, var(--ark));
+  box-shadow: var(--skraakant);
+  border: 1px solid var(--haarlina);
+}
+.skyvar button {
+  font-family: var(--skrift); font-size: .95rem; font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+  padding: var(--knapp-loddrett) var(--rom-5);
+  border: 1px solid transparent; border-radius: var(--rund-knapp);
+  background: none; color: var(--blekk-lys); cursor: pointer;
+  white-space: nowrap; line-height: 1.25;
+}
+.skyvar button:hover { color: var(--blekk); }
+.skyvar button[aria-selected="true"] {
+  color: var(--blekk);
+  border-color: var(--kant);
+  background:
+    linear-gradient(to bottom, var(--glans) 0%,
+      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
+      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
+      transparent 72%),
+    linear-gradient(to bottom, var(--flate) 0%,
+      color-mix(in srgb, var(--blekk) 7%, var(--flate)) 100%);
+  box-shadow: var(--knappedjup);
+}
+/* Rommet under skyvaren er berre sida — ingen kasse. */
+.skyvarrom { padding-top: var(--rom-5); }
+</style>
+</head>
+<body>
+<main class="ark">
+
+<h1 class="page-title">Fanone og briefingen</h1>
+<p class="page-description">
+  Kvar dei to står i dag, kva dei kostar, og tri framlegg. Alt er teikna
+  av det same stilarket som appen — berre reglane i framlegga er nye.
+</p>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section class="pr">
+  <h2 class="section-title">1 · Briefingen tek høgd han ikkje treng</h2>
+  <p class="note">
+    Ho har <code class="maal">max-width: 40ch</code>. Det er smalare enn
+    lesemålet elles i huset (<code class="maal">.page-description</code>
+    står på 62ch), so ho bryt tidleg og blir tri liner høg — medan den
+    høgre halvdelen av bandet står tom. Same setninga, tri breidder:
+  </p>
+
+  <div class="boks">
+    <p class="merk no">no — 40ch</p>
+    <p class="briefing">
+      Du har <span class="ord">Årskort</span>. Det kostar <b class="tal">1119</b> kr i
+      månaden. Bindinga har <b class="tal">12</b> månader att. Neste betaling er
+      27. september 2026.
+    </p>
+  </div>
+
+  <div class="boks">
+    <p class="merk">framlegg A — 62ch, same skriftgrad</p>
+    <p class="briefing vid">
+      Du har <span class="ord">Årskort</span>. Det kostar <b class="tal">1119</b> kr i
+      månaden. Bindinga har <b class="tal">12</b> månader att. Neste betaling er
+      27. september 2026.
+    </p>
+  </div>
+
+  <div class="boks">
+    <p class="merk">framlegg B — full breidd, 1,15 rem, line-height 1,45</p>
+    <p class="briefing tett">
+      Du har <span class="ord">Årskort</span>. Det kostar <b class="tal">1119</b> kr i
+      månaden. Bindinga har <b class="tal">12</b> månader att. Neste betaling er
+      27. september 2026.
+    </p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section class="pr">
+  <h2 class="section-title">2 · Fana som mappe, og fana som skyvar</h2>
+  <p class="note">
+    Stilboka §9 seier at ei fane er eit blad i ei mappe. Men §5 seier at
+    versalar + sperring + 68 % breidd er språket til noko som
+    <em>namngjev ein kategori</em> — «aldri ein knapp». Ei fane
+    <em>er</em> ein knapp (<code class="maal">&lt;button role="tab"&gt;</code>).
+    Dei to reglane står mot kvarandre, og mappa taper.
+  </p>
+
+  <div class="boks">
+    <p class="merk no">no — mappe, versalar, og eit rom med kasse rundt</p>
+    <div class="faneark">
+      <div class="faner" role="tablist" aria-label="Døme">
+        <button type="button" class="fane" role="tab" aria-selected="true">Korta mine</button>
+        <button type="button" class="fane" role="tab" aria-selected="false">Kjøp klipp</button>
+      </div>
+      <div class="fanerom">
+        <p class="note" style="margin:0">Innhaldet står i ein kasse, inne i sida som alt er ein kasse.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="boks">
+    <p class="merk">framlegg C — skyvar med posisjonar, og ingen kasse under</p>
+    <div class="skyvar" role="tablist" aria-label="Døme">
+      <button type="button" role="tab" aria-selected="true">Korta mine</button>
+      <button type="button" role="tab" aria-selected="false">Kjøp klipp</button>
+    </div>
+    <div class="skyvarrom">
+      <p class="note" style="margin:0">
+        Sporet er ei renne (<code class="maal">--skraakant</code>), den valde
+        posisjonen ein kuppel i henne (<code class="maal">--knappedjup</code>).
+        Same ljoset som felt og knappar — ingen nye token, ingen ny farge.
+      </p>
+    </div>
+  </div>
+  <div class="boks" data-theme="light" style="color:var(--blekk)">
+    <p class="merk">framlegg C i ljost tema</p>
+    <div class="skyvar" role="tablist" aria-label="Døme ljost">
+      <button type="button" role="tab" aria-selected="true">Korta mine</button>
+      <button type="button" role="tab" aria-selected="false">Kjøp klipp</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section class="pr">
+  <h2 class="section-title">3 · Klippekortsida med skyvar og tett briefing</h2>
+  <p class="note">
+    Dette er det du ikkje kunne sjå: korta i éin posisjon, kjøpet i ein
+    annan. Medlemskapssida har alt denne forma — klippekortsida stablar
+    det same innhaldet i staden.
+  </p>
+
+  <div class="boks" style="padding: var(--rom-6)">
+    <h1 class="page-title" style="font-size:2.6rem; margin-bottom: var(--rom-3)">Klippekort</h1>
+    <p class="briefing tett" style="margin-top:0">
+      <span class="ord">Personleg Trening</span> går ut om <b class="tal">179</b> dagar,
+      og du har <b class="tal">17</b> klipp att.
+    </p>
+
+    <div class="skyvar" role="tablist" aria-label="Klippekort">
+      <button type="button" role="tab" aria-selected="true">Korta mine</button>
+      <button type="button" role="tab" aria-selected="false">Kjøp klipp</button>
+      <button type="button" role="tab" aria-selected="false">Avgifter</button>
+    </div>
+
+    <div class="skyvarrom">
+      <div class="klippekort-cards">
+        <div class="kort klippekort-card">
+          <div class="klippehakka" aria-hidden="true">
+            <i class="klipphakk klipt"></i><i class="klipphakk klipt"></i>
+            <i class="klipphakk"></i><i class="klipphakk"></i><i class="klipphakk"></i>
+            <i class="klipphakk"></i><i class="klipphakk"></i><i class="klipphakk"></i>
+            <i class="klipphakk"></i><i class="klipphakk"></i>
+          </div>
+          <div class="card-header">
+            <h3 class="card-title">Personleg Trening</h3>
+            <span class="card-expiry">går ut om 179 dagar</span>
+          </div>
+          <div class="klipprad">
+            <p class="klipptal"><b class="att">17</b><span>klipp att <span class="av">av 20</span></span></p>
+            <button type="button" class="btn">Fyll på</button>
+          </div>
+        </div>
+
+        <div class="kort klippekort-card">
+          <div class="klippehakka" aria-hidden="true">
+            <i class="klipphakk klipt"></i>
+            <i class="klipphakk"></i><i class="klipphakk"></i><i class="klipphakk"></i>
+            <i class="klipphakk"></i><i class="klipphakk"></i><i class="klipphakk"></i>
+            <i class="klipphakk"></i><i class="klipphakk"></i><i class="klipphakk"></i>
+          </div>
+          <div class="card-header">
+            <h3 class="card-title">Reformer</h3>
+            <span class="card-expiry">går ut om 179 dagar</span>
+          </div>
+          <div class="klipprad">
+            <p class="klipptal"><b class="att">13</b><span>klipp att <span class="av">av 15</span></span></p>
+            <button type="button" class="btn">Fyll på</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</body>
+</html>

@@ -143,7 +143,8 @@ Legg du til ein nykel, legg han i alle tre filene. Prøvene i
 Stilboka er `docs/DESIGN_GUIDELINES.md`, og ho er reglar med grunngjeving:
 held ikkje grunngjevinga i eit høve, er det regelen som skal skrivast om.
 `docs/FASETTEN.md` skildrar den eine djupna i systemet — to pikslar, på
-felt ein kan skrive i. `docs/KORREKTUREN.md` skildrar redigeringsforma:
+felt ein kan skrive i — og `docs/SKRAAKANTEN.md` kanten kring henne: tvo
+lippor i staden for ei, og kvifor dei ikkje snur når temaet gjer det. `docs/KORREKTUREN.md` skildrar redigeringsforma:
 du skriv rett på teksten, og det du har endra får eit merke i margen.
 
 `/arket` er verkstaden — heile stilarket på éi side, i begge tema. Han
@@ -200,6 +201,7 @@ Etter det kan resten delast ut frå `/admin`.
 | `docs/BLUEPRINT.md` | grunnteikninga — heile huset, skjerm for skjerm. Ei teikning, ikkje ein byggjeplass |
 | `docs/DESIGN_GUIDELINES.md` | stilboka: reglar med grunngjeving |
 | `docs/FASETTEN.md` | den eine djupna i systemet |
+| `docs/SKRAAKANTEN.md` | kanten kring djupna — tvo lippor, og retningi som ikkje snur |
 | `docs/KORREKTUREN.md` | redigeringsforma — retting i margen |
 | `docs/LOCALIZATION.md` | språk: legge til, omsetje, halde ved lag |
 | `docs/STRUCTURE_AUDIT.md` | ettersynet av dokumentstrukturen, med funn som står att |

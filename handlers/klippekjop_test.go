@@ -18,7 +18,7 @@ func pakke(id int, kategori string, klipp, pris int, populaer bool) models.Klipp
 }
 
 func TestKategoriarGrupperarIRekkja(t *testing.T) {
-	k := Kategoriar([]models.KlippekortPackage{
+	k := Categories([]models.KlippekortPackage{
 		pakke(1, "Gruppetimer Sal", 5, 49900, false),
 		pakke(2, "Gruppetimer Sal", 10, 89900, true),
 		pakke(3, "Reformer/Apparatus", 5, 74900, false),
@@ -26,8 +26,8 @@ func TestKategoriarGrupperarIRekkja(t *testing.T) {
 	if len(k) != 2 {
 		t.Fatalf("%d kategoriar, venta tvo", len(k))
 	}
-	if len(k[0].Pakkar) != 2 || len(k[1].Pakkar) != 1 {
-		t.Errorf("pakkane fordelte seg gale: %d og %d", len(k[0].Pakkar), len(k[1].Pakkar))
+	if len(k[0].Packages) != 2 || len(k[1].Packages) != 1 {
+		t.Errorf("pakkane fordelte seg gale: %d og %d", len(k[0].Packages), len(k[1].Packages))
 	}
 }
 
@@ -39,11 +39,11 @@ func TestNykelenTolerAaStaaIEiAdressa(t *testing.T) {
 		"Gruppetimer Sal":     "gruppetimer-sal",
 		"Sjølvøving på Måtte": "sjoelvoeving-paa-maatte",
 	} {
-		if fekk := nykel(inn); fekk != ut {
+		if fekk := slugify(inn); fekk != ut {
 			t.Errorf("nykel(%q) = %q, venta %q", inn, fekk, ut)
 		}
 	}
-	if strings.ContainsAny(nykel("A/B C"), "/ ") {
+	if strings.ContainsAny(slugify("A/B C"), "/ ") {
 		t.Error("nykelen slepp gjenom teikn som ikkje toler ei adressa")
 	}
 }
@@ -67,7 +67,7 @@ func TestSidaSeierBerreDetBasenSeier(t *testing.T) {
 
 	var ut bytes.Buffer
 	if err := mal.ExecuteTemplate(&ut, "content", map[string]interface{}{
-		"Lang": "nn", "Kategoriar": Kategoriar(pakkar),
+		"Lang": "nn", "Categories": Categories(pakkar),
 	}); err != nil {
 		t.Fatalf("teikning: %v", err)
 	}

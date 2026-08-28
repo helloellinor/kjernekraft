@@ -38,7 +38,7 @@ func AdminKlippeprisarHandler(w http.ResponseWriter, r *http.Request) {
 		teiknFragment(w, "admin_klippekort_prisar", map[string]interface{}{
 			"Lang":      lang,
 			"CSRFToken": CSRFToken(r),
-			"Pakkar":    rader,
+			"Packages":  rader,
 		})
 		return
 	}

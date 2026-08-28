@@ -12,6 +12,13 @@ Ho er verd eit eige skriv av tvo grunnar. Ho er det einaste draget som
 gjeng att i heile systemet utan aa vera ein farge, og ho er den lettaste
 tingen i verdi aa gjera gal.
 
+> **Sidan 27. august 2026 er ho ikkje åleine.** Skrivefelti ber no
+> [skråkanten](SKRAAKANTEN.md) — tvo lippor i staden for ei — og han
+> rettar §7 her nedanfor. Fasetten er framleis djupna, og alt i dette
+> skrivet um *kvar* ho høyrer heime, kvifor ho stend på alt heile tidi,
+> og kva ho tyder, gjeld uendra. Det som er skift, er kanten kring henne.
+> §5, §7 og §8 hev fenge rettingar attmed seg der dei gjeld.
+
 ---
 
 ## 1. Tokeni
@@ -176,6 +183,14 @@ til vika og til ingen ting anna.** Kjem det ein tredje stad som ikkje er
 timeplanen, er regelen brote — ein fasett som stend paa alt, tyder ikkje
 noko paa noko.
 
+> **Retting.** Denne regelen er skriven om i
+> [SKRAAKANTEN.md §1](SKRAAKANTEN.md). Hovdinga stend no på alle
+> skrivefelt, og skiljet gjeng ikkje lenger millom å *ha* henne og å
+> ikkje ha henne — det gjeng på kor djupt ho ligg. Vika hev framleis si
+> eigi form (`--skraakant-djup`); ho er berre ikkje åleine um formi
+> lenger. Grunnen er at den gamle regelen verna um feil ting: det vika
+> er noko for seg i, er storleiken og tittelrolla, ikkje kanten.
+
 ### Bobla
 
 Vekefeltet er den fyrste av ei form som har fått namn: **bobla**,
@@ -265,6 +280,17 @@ Prøva er ei linja i ein nettlesar: set temaet til myrkt, sjaa paa
 søkjefeltet i **Folk**, og spør um det ser ut som eit hol eller som ein
 kant. Er svaret «kant», er det val 2 som gjeld.
 
+> **Svara, 27. august 2026.** Spursmaalet er teke, og korkje val 1 eller
+> val 2 vann: skuggen er korkje blekket eller svart-i-baae, han er
+> `--ned`, som er ei *retning* og ikkje ein farge. Sjaa
+> [SKRAAKANTEN.md §3](SKRAAKANTEN.md).
+>
+> Det var ikkje eit tenkt problem. Den tome dagen i vika hadde alt tvo
+> lippor, og i det myrke temaet var dei snudde: øvre lippa L=0.101 mot
+> nedre L=0.014. Ho las seg som ein **knott** og hadde gjort det heile
+> tidi. Ei einsleg lippa — som denne bolken handlar um — er tvitydig nok
+> til at auga les henne velviljug. Eit par er det ikkje.
+
 ---
 
 ## 8. Regelen
@@ -286,7 +312,11 @@ grep -rn 'box-shadow' static/css/kjernekraft.css \
 `box-shadow: none` er ikkje ein ny skugge, det er ein som vert teken
 burt, so han tel ikkje med.
 
-I dag gjev prøva **fire** treff, og alle fire er meinte:
+I dag gjev prøva **tvo** treff, og baae er meinte. (Ho gav fire til
+skråkanten kom; `.vekefelt` stod med hovdingi skriven ut for hand i baae
+tilstandane, og er no `var(--skraakant-djup)`. Punkt 2–3 nedanfor er
+difor historie, og dei stend att av di grunngjevingi deira framleis
+gjeld — ho er berre flytt inn i eit token.)
 
 1. Fana i administrasjonen kastar ein skugge upp og ut, av di ei fana
    faktisk ligg yver arket.

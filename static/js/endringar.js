@@ -28,14 +28,24 @@
 
     var tal = dokk.querySelector(".endringstal");
     var angra = dokk.querySelector("[data-angra]");
-    var felt = [].slice.call(skjema.querySelectorAll("input:not([type=hidden]), select, textarea"));
+    // `data-ikkje-endring` held eit felt utanfor teljingi.
+    //
+    // Ikkje kvart felt i eit skjema er ei endring. Timestyringa hev ein
+    // rad som *verkar* paa dei merkte dagane — ein dato, eit vikarnamn —
+    // og det du skriv der er ikkje noko som skal lagrast i seg sjølv;
+    // det er reiskapen som set merket. Utan unntaket sa dokka «2
+    // endringar» av at du hadde skrive eit namn i verktyet.
+    var utan = ":not([data-ikkje-endring])";
+    var felt = [].slice.call(skjema.querySelectorAll(
+        "input:not([type=hidden])" + utan + ", select" + utan + ", textarea" + utan));
 
     // Felt som kjem til etter at sida er lasta — ein ny prisrad, til
     // dømes — lyt takast med. Utan dette kunne ein fylle ut ein ny rad
     // og dokka sa framleis ingenting.
     skjema.addEventListener("endringar:nye", function () {
         [].slice.call(skjema.querySelectorAll(
-            "input:not([type=hidden]), input[data-tel], select, textarea"))
+            "input:not([type=hidden])" + utan + ", input[data-tel], select" + utan
+            + ", textarea" + utan))
             .forEach(function (f) {
                 if (felt.indexOf(f) !== -1) return;
                 // Ein ny rad er ei endring i seg sjølv, so det lagra
@@ -152,8 +162,12 @@
 
         // Slettemerke er òg noko som skal takast attende.
         [].slice.call(skjema.querySelectorAll("input[data-tel]")).forEach(function (m) {
-            var rad = m.closest(".prislapp");
-            if (rad) rad.classList.remove("slettast");
+            // Rada merket sit i. Ho var `.prislapp` og ingen ting anna
+            // her — skriptet kunde berre prisane. Timestyringa merkjer
+            // ein dag paa same vis, og eit merke som ikkje let seg
+            // angra er verre enn ikkje noko merke.
+            var rad = m.closest(".prislapp, .dagrad");
+            if (rad) rad.classList.remove("slettast", "avlyst");
             m.remove();
         });
         felt = felt.filter(function (f) { return f.isConnected; });

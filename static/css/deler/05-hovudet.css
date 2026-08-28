@@ -1,0 +1,235 @@
+/* ===================================================================
+   hovudet
+   Éi lina. Merket, sidone og namnet høyrer til den same tingen, og tvo
+   bjelkar tok dobbelt so mykje høgd for aa segja det.
+
+   Alt stend midt paa lina: `align-items: center` paa rada, og kvar bit
+   sentrert i seg sjølv. Det var dette som ikkje stemde — merket laag
+   paa grunnlina si eiga, teksti paa si, og bjelken kring deim visste
+   ikkje um nokon av deim.
+   =================================================================== */
+/* ---- hovudet og lina under det ----
+   Lina er den same som under hovudet i ordboka: ikkje ein kant, men tvo
+   strekar med ei renne imellom, måla som flate. Ein kant kan ikkje bera
+   ljos. Renna er ikkje gjennomsynleg — ho ligg i bakgrunnen åt hovudet,
+   under glødi, so ljoset lyser *gjennom* henne medan dei to strekane
+   står som ribbene i lista. Sjå .hovud::after i slaaupp. */
+/* Hovudlina fylgjer med nedyver.
+   Ho rulla burt fyrr, og daa var vegen til ei onnor sida aa rulla heilt
+   upp att fyrst — ei rekkje ein ikkje bad um millom «eg vil til
+   klippekortet» og klippekortet. Ho er sida sitt eige hovud og høyrer
+   like mykje til botnen av sida som toppen.
+
+   `--sidehovud-hogd` er høgdi hennar som eit tal andre kann rekna med:
+   sider som legg sine eigne klistra linor under henne stablar seg fraa
+   denne. Maalt til 56 px (32 px innhald + fyllet i `.header-content`);
+   endrar hovudet seg, lyt talet fylgja med — det finst ingen veg for
+   CSS aa lesa høgdi av eit element.
+
+   `z-index: 20`: yver innhaldet, under dokka (30), som skal liggja yver
+   alt. */
+.header {
+  position: sticky; top: 0; z-index: 20;
+  background:
+    linear-gradient(to top,
+      transparent 0 1px, var(--faneflate) 1px 2px, transparent 2px),
+    var(--ark);
+}
+.header::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 3px; z-index: 2; pointer-events: none;
+  background: linear-gradient(to bottom,
+    var(--haarlina) 0 1px, transparent 1px 2px, var(--haarlina) 2px 3px);
+}
+
+/* ---- ljosbandet: LED-stripa i lina ----
+   Glødi høyrer til den valde sida, men ho ligg i *hovudet* si lina og
+   ikkje i lenkja si eiga kasse — difor er ho eit lag her, og det er
+   ljosband.js som seier kvar ho står (--glodmidt) og kor brei ho er
+   (--glodvidd), måla på den valde lenkja. Står dei ikkje, er vidda null
+   og laget usynleg; ingi glød på feil stad medan sida lastar.
+
+   Fire lag, som i ordboka: utbrend kjerne, fargen tett kring han, ein
+   vid veik halo, og bloomen under. Lina sjølv ligg over (z-index 2) og
+   skjer glødi i to. */
+.header::before {
+  content: ""; position: absolute; left: 0; right: 0;
+  bottom: -9px; height: 21px; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 0.34) 9% at var(--glodmidt, 50%) 50%,
+      var(--glodkjerne) 0%,
+      transparent 100%),
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 0.8) 14% at var(--glodmidt, 50%) 50%,
+      color-mix(in srgb, var(--merke) 96%, transparent) 0%,
+      color-mix(in srgb, var(--merke) 62%, transparent) 30%,
+      transparent 72%),
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 2.6) 30% at var(--glodmidt, 50%) 50%,
+      color-mix(in srgb, var(--merke) 26%, transparent) 0%,
+      color-mix(in srgb, var(--merke) 8%, transparent) 45%,
+      transparent 85%),
+    radial-gradient(ellipse calc(var(--glodvidd, 0px) * 1.2) 62% at var(--glodmidt, 50%) 46%,
+      color-mix(in srgb, var(--merke) 26%, transparent) 0%,
+      transparent 76%);
+}
+.header-content {
+  max-width: var(--breidd); margin: 0 auto;
+  padding: var(--rom-3) var(--rom-5);
+  display: flex; align-items: center;
+  gap: var(--rom-5); flex-wrap: wrap;
+}
+
+/* ---- merket og namnet ----
+   Ringen er nett so høg som ein stor bokstav og stend paa den same
+   grunnlina. `1cap` er kapitélhøgdi i skrifti som gjeld.
+
+   Ingen yverskyting: blekket i merket naar heilt ut i kanten av ruta
+   si — det er aatte K-ar som strekkjer seg ut i hyrnone, ikkje ein
+   glatt sirkel — so ei rute som er høgre enn kapitélhøgdi set toppen
+   aat ringen yver toppen aat K-en. Ein glatt sirkel hadde trengt
+   yverskyting; denne treng henne ikkje. */
+.merkeord {
+  /* Skrifti stend her og ikkje paa namnet, av di `cap` vert løyst mot
+     den skrifti elementet sjølv hev. Laag ho lenger inn, rekna ringen
+     kapitélhøgdi si ut fraa brødteksti og vart ein tridjedel for liten. */
+  font-family: var(--skrift-yver);
+  font-size: 1.45rem;
+  font-stretch: var(--vidd-leiding);
+  font-weight: 700;
+  line-height: 1;
+
+  display: inline-flex; align-items: baseline; gap: .34em;
+  /* Merkeordet er ei lenkja, men det skal ikkje sjaa ut som ei: det er
+     namnet paa staden, ikkje eit utgangspunkt. Utan denne tok det
+     lenkjefargen. */
+  text-decoration: none; color: var(--blekk);
+  flex: none;
+}
+/* Er du heime, stend merket i merkefargen. Det er den same meldingi som
+   streken under ei vald sida, sagd med det som alt er der. */
+.merkeord.paa-heim .merke { color: var(--klas); }
+
+/* Peikar du på det, tek heile merkeordet fargen — ringen og namnet.
+   Det stod `color: var(--blekk)` her, som *låste* fargen: merket var
+   ei lenkje som ikkje fekk lov til å svare. Grunngjevinga var at det
+   ikkje skulle sjå ut som ei lenkje, men det er ikkje lenkjefargen som
+   er problemet — det er understreken, og han er alt av.
+
+   Heime og peika-på seier ikkje det same: heime står berre ringen i
+   fargen, medan eit peik tek heile lockupen. Difor kjem denne regelen
+   etter, so han vinn medan peikaren står der. */
+.merkeord:hover,
+.merkeord:focus-visible { color: var(--merke); }
+.merkeord:hover .merke,
+.merkeord:focus-visible .merke { color: var(--merke); }
+.merkeord .merke {
+  /* 0,72em — kapitélhøgdi i Union Gothic, teki beinveges or fila
+     (sCapHeight 720 av 1000, og K-glyfen maaler nett 720).
+
+     `1cap` skulde gjeve det same, men gav 20,1 px der kapitélhøgdi er
+     17,3: eininga vert løyst mot metrikken nettlesaren finn, og han
+     kjem ikkje ut med det fila segjer. Maalt er maalt — talet stend
+     her, med kvar det kjem fraa. */
+  --merkestorleik: .72em;
+  align-self: baseline;
+}
+.merkenamn { letter-spacing: 0; }
+
+/* Ordmerket stend i flatt blekk.
+   Eit metall-forsøk stod her: ein klipt gradient og ei ekstrudering i
+   `text-shadow`. Det er teke ut att, av di det ikkje vart metall — ein
+   gradient yver *heile* tekstkassen gjev éi ljosstripe tvers yver ordet,
+   medan eit rør hev si eigi stripe langs kvar strek. CSS kann ikkje
+   skilja strekane fraa kvarandre i ein tekstnode; til det trengst eit
+   SVG-filter med `feSpecularLighting`, som teiknar ljoset ut fraa forma
+   sjølv. Sjaa samtalen 28.8.2026 — det er ikkje avgjort enno. */
+
+/* ---- sidone ----
+   Dei stend i midten av lina og tek plassen som er att. */
+.nav { flex: 1 1 auto; min-width: 0; border: 0; background: none; }
+.nav-list {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--rom-2) var(--rom-4);
+  position: relative;
+  /* Midtlina gjennom merket skal gå gjennom lenkjene med. Rada sentrerer
+     *kassane*, og kassen åt ei skrift er ikkje symmetrisk kring
+     kapitélbandet: over- og underlengdene deler seg ulikt. Måla på ei
+     bilete i firedobbel storleik stod kapitélmidten åt lenkjene 1,4 px
+     over kapitélmidten åt K-en i merket. Difor dette dyttet — det er ei
+     måling, ikkje ein smak. */
+  transform: translateY(.09em);
+}
+
+.nav-item a {
+  display: block;
+  /* Symmetrisk. Kassen er teksten og like mykje luft over som under, so
+     midtlina hans er midtlina åt teksten. */
+  padding: var(--rom-1) 0;
+  position: relative;
+  font-family: var(--skrift-yver); font-size: .95rem;
+  font-stretch: var(--vidd-merkelapp); font-weight: 500;
+  letter-spacing: .07em; text-transform: uppercase;
+  color: var(--blekk-lys); text-decoration: none;
+}
+.nav-item a:hover { color: var(--blekk); }
+
+/* ---- den valde sida ----
+   Ho tek berre fargen. Ljoset hennar ligg i lina under hovudet, ikkje på
+   henne: sjå .header::before. */
+.nav-item.active a, .nav-item a[aria-current="page"] { color: var(--blekk); }
+
+.nav-item.nav-admin a { color: var(--blekk-svakt); }
+.nav-item.nav-admin a:hover { color: var(--blekk-lys); }
+
+/* ---- namnet og utloggingi ---- */
+/* ---- namnet ----
+   Det er *ditt* namn og det einaste i bjelken som høyrer til deg, so
+   det skal lesast som eit namn og ikkje som ein merkelapp. Difor litt
+   større og tyngre enn sidone attmed.
+
+   Og det er ein veljar: tvo utgangar ligg attum — profilen og
+   utloggingi — som ikkje tek plass fyre ein spør etter deim. Same
+   grepet som vikenummeret. */
+.auth-controls { position: relative; display: flex; align-items: center; flex: none; }
+
+.user-name {
+  background: none; border: 0; padding: var(--rom-1) 0; cursor: pointer;
+  font-family: var(--skrift); font-size: 1rem; font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+  color: var(--blekk-lys);
+  border-bottom: 2px solid transparent;
+  /* Same midtlina, same grunnen — og her kjem ein piksel til av at
+     kanten under gjer kassen usymmetrisk. Måla: 1,9 px. */
+  transform: translateY(.12em);
+}
+.user-name:hover { color: var(--blekk); background: none; border-bottom-color: var(--haarlina); }
+.user-name.active { color: var(--blekk); border-bottom-color: var(--klas); }
+.user-name[aria-expanded="true"] { color: var(--blekk); border-bottom-color: var(--klas); }
+
+.namnemeny {
+  position: absolute; z-index: 30;
+  top: 100%; right: 0; margin-top: var(--rom-2);
+  display: flex; flex-direction: column; align-items: stretch;
+  min-width: 10rem;
+  background: var(--flate);
+  border: 1px solid var(--kant);
+  border-radius: 2px;
+  box-shadow: var(--skugge-flytande);
+  overflow: hidden;
+}
+.auth-form { margin: 0; display: flex; }
+
+.namneval {
+  display: block; width: 100%; text-align: left;
+  padding: var(--rom-3) var(--rom-4);
+  background: none; border: 0; border-radius: 0;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .84rem; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--blekk); text-decoration: none; cursor: pointer;
+}
+.namneval:hover { background: var(--ark-djup); color: var(--blekk); border: 0; }
+
+/* Utloggingi er utgangen. Ho ber aatvaringsfargen, av di ho er den eine
+   handlingi i menyen som tek noko fraa deg. */
+.namneval-ut { color: var(--aatvaring); }
+.namneval-ut:hover { background: var(--aatvaring-svak); color: var(--aatvaring); }

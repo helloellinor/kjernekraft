@@ -6,9 +6,16 @@
         <div class="loading-placeholder">{{t .Lang "payments.loading_payment_methods"}}</div>
     </div>
 
-    {{/* Luft mellom det siste kortet og knappen. Han låg klistra inntil. */}}
-    <button type="button" class="btn nyrad" onclick="addPaymentMethod()">
-        + {{t .Lang "payments.add_payment_method"}}
-    </button>
+    {{/* Aa fjerna eit kort er noko ein ikkje kann gjera um att, og det
+         stend her — ein gong, under lista — og ikkje som ein `confirm()`
+         etter kvart trykk (§7). Ein merknad per kort hadde sagt det same
+         tri gonger paa rad.
+
+         «Legg til kort» stod her under fyrr, med si eigi grunngjeving
+         hengande under seg att. Det er ei eigi handling, og ho hev si
+         eigi fana no. */}}
+    <p class="merknad">{{t .Lang "payments.remove_note"}}</p>
+
+    <p class="svar" id="betalingssvar" role="status"></p>
 </section>
 {{end}}

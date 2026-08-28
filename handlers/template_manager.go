@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/fs"
 	"kjernekraft/handlers/config"
+	"kjernekraft/models"
 	"log"
 	"os"
 	"path/filepath"
@@ -43,14 +44,31 @@ func GetTemplateManager() *TemplateManager {
 func getTemplateFuncs() template.FuncMap {
 	settings := config.GetInstance()
 	return template.FuncMap{
+		// Klassetypen som ein CSS-krok. Verdet kjem raatt fraa
+		// `events.class_type`, der administrasjonen skriv fritt, so det
+		// vert vaska: smaa bokstavar og ingen ting utanum a-z. Er det
+		// tomt eller ukjent, fell `.slag-*` burt og vengen tek
+		// standardfargen sin.
+		"slagklasse": func(slag string) string {
+			reint := strings.Map(func(r rune) rune {
+				if r >= 'a' && r <= 'z' {
+					return r
+				}
+				return -1
+			}, strings.ToLower(slag))
+			if reint == "" {
+				return ""
+			}
+			return "slag-" + reint
+		},
 		// Ruta utan time. Ho er den same figuren for alle, so han vert
 		// rekna ein gong og ikkje per rute.
-		"merkeDaud": DaudSilhuett,
-		"merkeViewBox": func() string {
-			return fmt.Sprintf("%.2f 0 %.2f %.2f", MerkeVenstre, MerkeBreidd, MerkeHogd)
+		"markDead": DeadSilhouette,
+		"markViewBox": func() string {
+			return fmt.Sprintf("%.2f 0 %.2f %.2f", MarkLeft, MarkWidth, MarkHeight)
 		},
-		"merkeBreidd": func() float64 { return MerkeBreidd },
-		"merkeHogd":   func() float64 { return MerkeHogd },
+		"markWidth":  func() float64 { return MarkWidth },
+		"markHeight": func() float64 { return MarkHeight },
 		"sub": func(a, b int) int {
 			return a - b
 		},
@@ -209,6 +227,27 @@ func getTemplateFuncs() template.FuncMap {
 			loc := GetLocalization()
 			return loc.T(lang, key)
 		},
+		// Eitt eller fleire. «1 gonger» stod i regelrada av di talet og
+		// ordet var skrivne kvar for seg og ordet aldri saag talet.
+		// Huset hev nykelparet fraa fyrr (`stats_waiting_one`), men
+		// ingen stad aa gjera valet ein gong — so det gjekk paa nytt i
+		// kvar mal, eller det gjekk ikkje.
+		// Vekedagen ein dato fell paa, som umsetjingsnykel. Regelen hev
+		// `VekedagNykel` sjølv, men ein einskild dag kann vera flutt burt
+		// fraa regelen sin dag, og daa er det datoen som veit.
+		"vekedagnykel": func(t time.Time) string {
+			return [...]string{
+				"timeplan.sunday", "timeplan.monday", "timeplan.tuesday",
+				"timeplan.wednesday", "timeplan.thursday", "timeplan.friday",
+				"timeplan.saturday",
+			}[t.Weekday()]
+		},
+		"gonger": func(lang string, n int) string {
+			if n == 1 {
+				return t(lang, "admin.times_one")
+			}
+			return t(lang, "admin.times")
+		},
 		"translate": func(lang, key string) string {
 			loc := GetLocalization()
 			return loc.T(lang, key)
@@ -242,6 +281,13 @@ func getTemplateFuncs() template.FuncMap {
 			return []string{s[:i], s[i+2:]}
 		},
 		"add": func(a, b int) int { return a + b },
+		// Ti hòl, alltid. Talet bur i `models.HolPerKort` av di rekninga
+		// og malen lyt telja likt: stod det ein tiar i malen, kunde
+		// konstanten skifta utan at rekkja fylgde med.
+		"holPerKort": func() int { return models.HolPerKort },
+		// Kor mange rader i vika som er heilt gjengne. Malen treng talet
+		// til knappen som hentar dei fram att.
+		"pastRowCount": PastRowCount,
 		// `list` saman med `dict` er det som skal til for å gje ein
 		// komponent ei liste med ting frå ein mal — fanerekkja tek ei.
 		"list": func(values ...interface{}) []interface{} { return values },

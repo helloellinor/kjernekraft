@@ -1,0 +1,53 @@
+/* ===================================================================
+   smale glas
+   Éin brotstad, skriven éin gong. Han stod fyrr i kvart einskilt
+   stilark, med litt ulike verd.
+
+   Her stod ein 62 rem-brotstad til som stakk sju dagar under kvarandre
+   gjenom `.week-grid`/`.day-column`. Dei klassane var fraa den gamle
+   timeplanen og ingen mal skreiv deim; vika i dag fell saman paa
+   60 rem lenger nede, i `.timeplan`. Stilboki §9 segjer 62 — koden
+   segjer 60, og koden er det som gjeld. Drygt aa retta i boki.
+   =================================================================== */
+
+@media (max-width: 48rem) {
+  :root { --rom-5: 1rem; --rom-6: 1.5rem; --rom-7: 2rem; }
+  /* Fyllet krympar, og alt som dekkjer det fylgjer med av seg sjølv. */
+  :root { --sidefyll: var(--rom-4); }
+
+  .header-content, .botninnhald, main { padding-left: var(--sidefyll); padding-right: var(--sidefyll); }
+  .header-content { gap: var(--rom-3); }
+  .nav-list { gap: var(--rom-2) var(--rom-3); }
+  .nav-item a { white-space: nowrap; }
+
+  /* Namnet fylgjer merket, ikkje lenkjene.
+     I kjelda stend namnet sist — etter leidingi — av di det er den
+     rekkjefylgda ein les og tabbar i. Naar rada bryt, fylgjer det med
+     ned og hamnar *under* lenkjene, heilt til vinstre. Tvo ting gjeng i
+     stykke av det: hovudet vert tri rader høgt, og ljoslina under
+     hovudet ligg daa under namnerada i staden for under lenkjene ho
+     skal lysa opp — bandet peikar paa feil ting.
+     `order` byter synet utan aa byta kjelda, so tabbrekkjefylgda stend.
+     Leidingi tek heile den andre rada; namnet vert skuva heilt ut til
+     høgre paa den fyrste. */
+  .auth-controls { order: 1; margin-left: auto; }
+  .nav { order: 2; flex-basis: 100%; }
+
+  h1, .page-title { font-size: 1.7rem; }
+
+  .two-column-grid,
+  .packages-grid, .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* Skriv ikkje ut leidingi. */
+@media print {
+  .nav, .header, .auth-controls, button, .btn { display: none !important; }
+  body { background: #fff; color: #000; }
+}

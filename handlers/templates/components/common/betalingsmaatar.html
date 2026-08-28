@@ -18,18 +18,21 @@
     <div class="kortkva">
       <span class="kortmerke">{{.Merke}}</span>
       <span class="korttal">•••• {{.Last4}}</span>
-      {{if .IsDefault}}<span class="status status-active">{{t $.Lang "payments.standard"}}</span>{{end}}
+      {{/* Kortet som er i bruk ber den same lampa som medlemskortet og
+           heimesida: ho seier «dette gjeng», og ho seier det med ljos og
+           ikkje med eit ord til i ei rad som alt hev tri. Vengen seier
+           det same i den andre kanalen (§1). */}}
+      {{if .IsDefault}}<span class="stodalinje">{{template "ljos" (dict "Status" "active")}}{{t $.Lang "payments.standard"}}</span>{{end}}
     </div>
     <p class="kortdato">{{t $.Lang "payments.expires"}} {{.ExpiryMonth}}/{{.ExpiryYear}}</p>
     <div class="korthandling">
       {{if not .IsDefault}}
-      <button type="button" class="btn" onclick="setDefaultPaymentMethod({{.ID}})">
+      <button type="button" class="btn" data-kort="{{.ID}}" data-handling="standard">
         {{t $.Lang "payments.set_standard"}}
       </button>
       {{end}}
-      <button type="button" class="btn-danger" onclick="removePaymentMethod({{.ID}})">
-        {{t $.Lang "payments.remove"}}
-      </button>
+      <button type="button" class="btn-danger" data-kort="{{.ID}}" data-handling="fjern"
+              data-stadfest="{{t $.Lang "payments.remove_confirm"}}">{{t $.Lang "payments.remove"}}</button>
     </div>
   </li>
   {{end}}

@@ -16,7 +16,21 @@ func BetalingHandler(w http.ResponseWriter, r *http.Request) {
 	// Get language from cookies/request (using new system)
 	lang := GetLanguageFromRequest(r)
 
+	// Same forma som klippekort- og medlemskapssida: tittel, ei lina som
+	// seier kva som stend til, og so fanone. Korta kjem fraa den same
+	// funksjonen som brotstykket teiknar, so talet og lista ikkje kann
+	// segja kvar sitt.
+	kort := betalingskorta(user)
+
+	faner := []Tab{
+		{Key: "korta", Name: t(lang, "payments.payment_methods")},
+		{Key: "nytt-kort", Name: t(lang, "payments.add_payment_method")},
+	}
+
 	data := map[string]interface{}{
+		"Tabs":        faner,
+		"Label":       t(lang, "payments.title"),
+		"KortTal":     len(kort),
 		"Title":       "Betaling",
 		"CurrentPage": "betaling",
 		"UserName":    user.Name,

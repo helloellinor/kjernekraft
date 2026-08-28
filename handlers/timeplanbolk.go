@@ -25,72 +25,89 @@ import (
 // kring femten radar. Det er ikkje pynt; det er den same
 // opplysningi paa ein tridjedel av rullingi.
 
-// Framsyning er ein time slik han gjeng ein einskild dag.
-type Framsyning struct {
+// Session er ein time slik han gjeng ein einskild dag.
+type Session struct {
 	Event   models.Event
-	Dag     time.Weekday
-	Dato    time.Time
-	DagNamn string
-	ErIDag  bool
-	ErUmme  bool
+	Day     time.Weekday
+	Date    time.Time
+	DayName string
+	IsToday bool
+	IsPast  bool
 	Full    bool
-	Prosent int
-	Kolonne int // 1 = maandag … 7 = sundag
+	Percent int
+	Column  int // 1 = maandag … 7 = sundag
 
 	// Klokka som vinklar, so merket kann teikna ei urskiva. Timevisaren
 	// gjeng 30 grader i timen og ein halv grad i minuttet; minuttvisaren
 	// seks grader i minuttet.
-	Klokke       string
-	TimeVinkel   float64
-	MinuttVinkel float64
+	Clock       string
+	HourAngle   float64
+	MinuteAngle float64
 
 	// Lengdi paa timen, i minutt. Ho høyrer til namnet — ho er den same
 	// kva dag timen gjeng — og ho stend attmed honom i lista, som i
 	// timeplanen.
-	Minutt int
+	Minute int
 
 	// Dagen som tvo bokstavar. Han stend øvst i merket, av di det er
 	// det ein spør um fyrst.
-	DagKort2 string
+	DayAbbrev string
 
 	// Sjølve figuren, ferdig rekna. Sjaa merkeform.go.
-	Form Merke
+	Form Mark
 
 	// Merkelappen for skjermlesaren, ferdig umsett. Merket vert nytta
 	// tvo stader, og korkje av deim skal trenga aa naa rota for aa
 	// finna maalet.
-	Merkelapp string
+	Label string
 }
 
-// Timebolk er ein time med alle dagarne han gjeng i vika.
-type Timebolk struct {
-	Tittel     string
-	Laerar     string
-	Rom        string
-	Klasse     string
-	Minutt     int
-	Plassar    int
-	Framsyning []Framsyning
-	Rutor      [7]Ruta // alle sju dagarne, tome med
+// ClassRow er ein time med alle dagarne han gjeng i vika.
+type ClassRow struct {
+	Title    string
+	Teacher  string
+	Room     string
+	Class    string
+	Minute   int
+	Capacity int
+	Sessions []Session
+	Days     [7]DayCell // alle sju dagarne, tome med
 	// Urskiva for rada: den fyrste framsyningi i vika.
-	TimeVinkel   float64
-	MinuttVinkel float64
-	sortering    int // minutt etter midnatt, til rekkjefylgdi
+	HourAngle   float64
+	MinuteAngle float64
+	sortKey     int // minutt etter midnatt, til rekkjefylgdi
+
+	// AllPast segjer at kvar einaste gong denne rada gjeng i vika, er
+	// gjengi. Rada er då ikkje eit tilbod lenger — ho er ei kvittering,
+	// og ho skal ikkje stå i vegen for den fyrste timen ein *kan* gå på.
+	AllPast bool
 }
 
-// Ruta er ein dag i rada — anten ein time som gjeng, eller eit tomt hol.
+// PastRowCount tel radene som er heilt gjengne. Malen treng talet til
+// knappen som hentar dei fram att.
+func PastRowCount(bolkar []ClassRow) int {
+	n := 0
+	for _, b := range bolkar {
+		if b.AllPast {
+			n++
+		}
+	}
+	return n
+}
+
+// DayCell er ein dag i rada — anten ein time som gjeng, eller eit tomt hol.
 //
 // Dei tome er med av ein grunn: ei rad med *sju* rutor der tvo er fylte
 // syner kva som ikkje gjeng, ikkje berre kva som gjeng. Det er
 // spursmaalet Ida stiller — kvar er holet — og det svaret finst ikkje
 // naar dei tome dagarne er tome piksel.
-type Ruta struct {
-	Har        bool
-	Framsyning Framsyning
-	Dato       time.Time
-	Kolonne    int
-	ErIDag     bool
-	ErUmme     bool
+type DayCell struct {
+	Has     bool
+	Session Session
+	Date    time.Time
+	Column  int
+	IsToday bool
+	IsPast  bool
 }
 
 // dagKort er dei norske stuttformene. time.Weekday.String() gjev
@@ -109,162 +126,184 @@ var dagKort2 = map[time.Weekday]string{
 	time.Sunday: "SU",
 }
 
-// rutor legg framsyningarne ut paa dei sju dagarne, og fyller resten
+// dayCells legg framsyningarne ut paa dei sju dagarne, og fyller resten
 // med tome.
-func rutor(b Timebolk, maandag time.Time) [7]Ruta {
-	var ut [7]Ruta
+func dayCells(b ClassRow, maandag time.Time) [7]DayCell {
+	var ut [7]DayCell
 	for i := 0; i < 7; i++ {
 		d := maandag.AddDate(0, 0, i)
-		ut[i] = Ruta{Dato: d, Kolonne: i + 1}
+		ut[i] = DayCell{Date: d, Column: i + 1}
 	}
-	for _, f := range b.Framsyning {
-		i := f.Kolonne - 1
+	for _, f := range b.Sessions {
+		i := f.Column - 1
 		if i >= 0 && i < 7 {
-			ut[i].Har = true
-			ut[i].Framsyning = f
-			ut[i].ErIDag = f.ErIDag
-			ut[i].ErUmme = f.ErUmme
+			ut[i].Has = true
+			ut[i].Session = f
+			ut[i].IsToday = f.IsToday
+			ut[i].IsPast = f.IsPast
 		}
 	}
 	return ut
 }
 
-// kolonne gjev vekedagen som 1–7 med maandag fyrst. Go sin Weekday
+// columnOf gjev vekedagen som 1–7 med maandag fyrst. Go sin Weekday
 // byrjar paa sundag; ei norsk vika gjer ikkje det.
-func kolonne(d time.Weekday) int {
+func columnOf(d time.Weekday) int {
 	if d == time.Sunday {
 		return 7
 	}
 	return int(d)
 }
 
-// NyFramsyning lagar framsyningi av ein time ein einskild dag.
+// NewSession lagar framsyningi av ein time ein einskild dag.
 //
 // Han stend for seg sjølv av di merket vert nytta tvo stader — i vika og
 // paa heimesida — og daa skal det vera *éin* stad som avgjer kva som
 // stend i det.
-func NyFramsyning(lang string, e models.Event, iDagDato string, naa time.Time) Framsyning {
+func NewSession(lang string, e models.Event, iDagDato string, naa time.Time) Session {
 	prosent := 0
 	if e.Capacity > 0 {
 		prosent = e.CurrentEnrolment * 100 / e.Capacity
 	}
 	dag := dagKort[e.StartTime.Weekday()]
-	return Framsyning{
-		Event:        e,
-		Dag:          e.StartTime.Weekday(),
-		Dato:         e.StartTime,
-		DagNamn:      dag,
-		ErIDag:       e.StartTime.Format("2006-01-02") == iDagDato,
-		ErUmme:       fyre(e.EndTime, naa),
-		Full:         e.Full(),
-		Prosent:      prosent,
-		Kolonne:      kolonne(e.StartTime.Weekday()),
-		Klokke:       e.StartTime.Format("15:04"),
-		DagKort2:     dagKort2[e.StartTime.Weekday()],
-		Minutt:       int(e.EndTime.Sub(e.StartTime).Minutes()),
-		TimeVinkel:   float64(e.StartTime.Hour()%12)*30 + float64(e.StartTime.Minute())*0.5,
-		MinuttVinkel: float64(e.StartTime.Minute()) * 6,
-		Form: NyttMerke(fmt.Sprintf("%d-%s", e.ID, e.StartTime.Format("0102")),
+	return Session{
+		Event:       e,
+		Day:         e.StartTime.Weekday(),
+		Date:        e.StartTime,
+		DayName:     dag,
+		IsToday:     e.StartTime.Format("2006-01-02") == iDagDato,
+		IsPast:      fyre(e.EndTime, naa),
+		Full:        e.Full(),
+		Percent:     prosent,
+		Column:      columnOf(e.StartTime.Weekday()),
+		Clock:       e.StartTime.Format("15:04"),
+		DayAbbrev:   dagKort2[e.StartTime.Weekday()],
+		Minute:      int(e.EndTime.Sub(e.StartTime).Minutes()),
+		HourAngle:   float64(e.StartTime.Hour()%12)*30 + float64(e.StartTime.Minute())*0.5,
+		MinuteAngle: float64(e.StartTime.Minute()) * 6,
+		Form: NewMark(fmt.Sprintf("%d-%s", e.ID, e.StartTime.Format("0102")),
 			e.StartTime, e.EndTime, e.CurrentEnrolment, e.Capacity),
-		Merkelapp: fmt.Sprintf("%s %s — %d %s %d",
+		Label: fmt.Sprintf("%s %s — %d %s %d",
 			dag, e.StartTime.Format("15:04"),
 			e.CurrentEnrolment, t(lang, "timeplan.of"), e.Capacity),
 	}
 }
 
-// Framsyningar gjer ei liste med timar om til merke.
-func Framsyningar(lang string, events []models.Event, naa time.Time) []Framsyning {
+// BuildSessions gjer ei liste med timar om til merke.
+func BuildSessions(lang string, events []models.Event, naa time.Time) []Session {
 	iDagDato := naa.Format("2006-01-02")
-	ut := make([]Framsyning, 0, len(events))
+	ut := make([]Session, 0, len(events))
 	for _, e := range events {
-		ut = append(ut, NyFramsyning(lang, e, iDagDato, naa))
+		ut = append(ut, NewSession(lang, e, iDagDato, naa))
 	}
 	return ut
 }
 
-// KlemVika slær saman like timar i vika.
+// BuildWeekRows slær saman like timar i vika.
 //
 // Nykelen er alt som gjer ein time til *den same* timen: kva han heiter,
 // kven som held honom, kvar han er, og kva klokkeslett han byrjar.
 // Skifter noko av det, er det ein annan time.
-func KlemVika(lang string, events []models.Event, iDag time.Time, maandag time.Time) []Timebolk {
+func BuildWeekRows(lang string, events []models.Event, iDag time.Time, maandag time.Time) []ClassRow {
 	iDagDato := iDag.Format("2006-01-02")
 
-	bolkar := map[string]*Timebolk{}
+	bolkar := map[string]*ClassRow{}
 	for _, e := range events {
+		// Ein time som er gjengen er ikkje eit tilbod, og vika er ei
+		// lista ein skannar etter det ein *kann* gaa paa. Han vart dimd
+		// fyrr — halv styrke, men framleis ein plass i rada og framleis
+		// noko auga lyt sortera burt. No vert han ikkje teikna.
+		//
+		// Dette skjer her og ikkje i malen: er han ikkje eit tilbod,
+		// skal han korkje telja med i rada, i dagruta eller i tale.
+		f := NewSession(lang, e, iDagDato, iDag)
+		if f.IsPast {
+			continue
+		}
+
 		nykel := fmt.Sprintf("%s|%s|%s", e.Title, e.TeacherName, e.RoomName)
 
 		b, finst := bolkar[nykel]
 		if !finst {
-			b = &Timebolk{
-				Tittel:    e.Title,
-				Laerar:    e.TeacherName,
-				Rom:       e.RoomName,
-				Klasse:    e.ClassType,
-				Minutt:    int(e.EndTime.Sub(e.StartTime).Minutes()),
-				Plassar:   e.Capacity,
-				sortering: e.StartTime.Hour()*60 + e.StartTime.Minute(),
+			b = &ClassRow{
+				Title:    e.Title,
+				Teacher:  e.TeacherName,
+				Room:     e.RoomName,
+				Class:    e.ClassType,
+				Minute:   int(e.EndTime.Sub(e.StartTime).Minutes()),
+				Capacity: e.Capacity,
+				sortKey:  e.StartTime.Hour()*60 + e.StartTime.Minute(),
 			}
 			bolkar[nykel] = b
 		}
 
-		b.Framsyning = append(b.Framsyning, NyFramsyning(lang, e, iDagDato, iDag))
+		b.Sessions = append(b.Sessions, f)
 	}
 
-	ut := make([]Timebolk, 0, len(bolkar))
+	ut := make([]ClassRow, 0, len(bolkar))
 	for _, b := range bolkar {
-		sort.Slice(b.Framsyning, func(i, j int) bool {
-			return b.Framsyning[i].Dato.Before(b.Framsyning[j].Dato)
+		sort.Slice(b.Sessions, func(i, j int) bool {
+			return b.Sessions[i].Date.Before(b.Sessions[j].Date)
 		})
-		if len(b.Framsyning) > 0 {
-			b.TimeVinkel = b.Framsyning[0].TimeVinkel
-			b.MinuttVinkel = b.Framsyning[0].MinuttVinkel
+		if len(b.Sessions) > 0 {
+			b.HourAngle = b.Sessions[0].HourAngle
+			b.MinuteAngle = b.Sessions[0].MinuteAngle
+			// Heilt gjengi berre naar *alle* gongene er det. Ei rad med
+			// måndag attum seg og fredag framfyre er framleis eit
+			// tilbod, og ho skal stå.
+			b.AllPast = true
+			for _, f := range b.Sessions {
+				if !f.IsPast {
+					b.AllPast = false
+					break
+				}
+			}
 		}
-		b.Rutor = rutor(*b, maandag)
+		b.Days = dayCells(*b, maandag)
 		ut = append(ut, *b)
 	}
 
 	// Etter klokka fyrst — ein timeplan vert lesen nedyver dagen — og so
 	// etter namn, so rekkjefylgdi ikkje skiftar fraa lasting til lasting.
 	sort.Slice(ut, func(i, j int) bool {
-		if ut[i].sortering != ut[j].sortering {
-			return ut[i].sortering < ut[j].sortering
+		if ut[i].sortKey != ut[j].sortKey {
+			return ut[i].sortKey < ut[j].sortKey
 		}
-		return ut[i].Tittel < ut[j].Tittel
+		return ut[i].Title < ut[j].Title
 	})
 	return ut
 }
 
-// Veke er eitt val i vikeveljaren.
-type Veke struct {
-	Nummer int
-	Offset int
-	Tittel string
-	ErNo   bool
+// Week er eitt val i vikeveljaren.
+type Week struct {
+	Number    int
+	Offset    int
+	Title     string
+	IsCurrent bool
 }
 
-// vekeval gjev vikone kring den ein ser paa.
+// weekOptions gjev vikone kring den ein ser paa.
 //
 // Ein veljar med sju vikor og ikkje eit talfelt: ein veit kva veke det
 // er i dag og kva veke ein vil til, men ein reknar ikkje ut vikenummer
 // i hovudet. «Denne» og «neste» er dei tvo ein spør etter i praksis;
 // resten er der for den som planlegg lenger fram.
-func vekeval(lang string, naaVeke, naaOffset int) []Veke {
-	var ut []Veke
+func weekOptions(lang string, naaVeke, naaOffset int) []Week {
+	var ut []Week
 	for d := -1; d <= 5; d++ {
 		off := naaOffset + d
 		if off < 0 {
 			// Studioet syner ikkje vikor som er gjengne.
 			continue
 		}
-		v := Veke{Nummer: naaVeke + d, Offset: off, ErNo: d == 0}
+		v := Week{Number: naaVeke + d, Offset: off, IsCurrent: d == 0}
 		switch off {
 		case 0:
-			v.Tittel = t(lang, "timeplan.this_week")
+			v.Title = t(lang, "timeplan.this_week")
 		case 1:
-			v.Tittel = t(lang, "timeplan.next_week")
+			v.Title = t(lang, "timeplan.next_week")
 		default:
-			v.Tittel = t(lang, "timeplan.week") + " " + strconv.Itoa(v.Nummer)
+			v.Title = t(lang, "timeplan.week") + " " + strconv.Itoa(v.Number)
 		}
 		ut = append(ut, v)
 	}
@@ -277,10 +316,10 @@ func vekeval(lang string, naaVeke, naaOffset int) []Veke {
 // listone. Dei stod i sidehandsamaren fyrr; her stend dei ein gong, so
 // eit brotstykke aldri kann syna noko anna enn sida gjorde.
 
-// PaameldeFramsyningar er timane du hev meldt deg paa og som ikkje er
+// EnrolledSessions er timane du hev meldt deg paa og som ikkje er
 // gjengne. Dei er paamelde per definisjon, so merket veit det og dokka
 // kann tilby avmelding med det same.
-func PaameldeFramsyningar(userID int64, lang string, naa time.Time) ([]Framsyning, error) {
+func EnrolledSessions(userID int64, lang string, naa time.Time) ([]Session, error) {
 	komande, err := DB.GetUserUpcomingSignups(userID)
 	if err != nil {
 		return nil, err
@@ -288,15 +327,15 @@ func PaameldeFramsyningar(userID int64, lang string, naa time.Time) ([]Framsynin
 	for i := range komande {
 		komande[i].IsUserSignedUp = true
 	}
-	return Framsyningar(lang, komande, naa), nil
+	return BuildSessions(lang, komande, naa), nil
 }
 
-// LedigeFramsyningar er timane med ledig plass i dag og i morgon.
+// AvailableSessions er timane med ledig plass i dag og i morgon.
 //
 // Dei ber om du er paameld fraa fyrr. Utan det sa merket «meld deg paa»
 // um ein time du alt stod paa, og dokka hadde bode deg det same ein
 // gong til.
-func LedigeFramsyningar(userID int64, lang string, naa time.Time) ([]Framsyning, error) {
+func AvailableSessions(userID int64, lang string, naa time.Time) ([]Session, error) {
 	ledige, err := DB.LedigeTimar()
 	if err != nil {
 		return nil, err
@@ -332,5 +371,5 @@ func LedigeFramsyningar(userID int64, lang string, naa time.Time) ([]Framsyning,
 		komande = att
 	}
 
-	return Framsyningar(lang, komande, naa), nil
+	return BuildSessions(lang, komande, naa), nil
 }

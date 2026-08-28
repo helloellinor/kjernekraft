@@ -9,13 +9,13 @@
      Fyrste bolken er open; dei andre står `hidden` til faner.js seier
      noko anna. Utan det ville alle stå opne i det augneblinket sida er
      teikna og JS-en ikkje har kome til enno. */}}
-<div class="faner" role="tablist" aria-label="{{.Merkelapp}}">
-  {{range $i, $f := .Faner}}
+<div class="faner" role="tablist" aria-label="{{.Label}}">
+  {{range $i, $f := .Tabs}}
   <button type="button" class="fane" role="tab"
-          data-bolk="{{$f.Bolk}}"
+          data-bolk="{{$f.Key}}"
           aria-selected="{{if eq $i 0}}true{{else}}false{{end}}"
           tabindex="{{if eq $i 0}}0{{else}}-1{{end}}"
-          aria-controls="bolk-{{$f.Bolk}}">{{$f.Namn}}</button>
+          aria-controls="bolk-{{$f.Key}}">{{$f.Name}}</button>
   {{end}}
 </div>
 {{end}}

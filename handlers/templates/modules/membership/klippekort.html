@@ -2,29 +2,26 @@
 
 {{if .HasKlippekort}}
 
-{{/* Kva som hastar, sagt fyrst. Ei lista yver kort svarar ikkje paa
-     dette av seg sjølv: eit kort med tjue klipp att og fire dagar til
-     utløp ser rikare ut enn eit med tvo klipp og eit halvt aar, av di
-     talet ein ser er klippa og ikkje dagane.
-
-     Lina er ogso den eine staden dei tvo bolkane paa sida møtest:
-     herifraa gjeng ein rett til aa fylla paa nettupp det kortet, i
-     staden for aa byrja paa «Steg 1» langt nede med seks flisor ein
-     lyt velja millom paa nytt. */}}
-{{if .Naermast}}
-<p class="klippfyrst{{if .Naermast.IsExpiring}} hastar{{end}}">
-    <span class="klippfyrst-kva">{{tf .Lang "klippekort.soonest" .Naermast.Category .Naermast.DaysUntilExpiry}}</span>
-    <span class="klippfyrst-att">{{tf .Lang "klippekort.soonest_left" .Naermast.RemainingKlipp}}</span>
-    <button type="button" class="lenkjeknapp" onclick="fillUpKlippekort('{{.Naermast.Category}}')">{{t .Lang "klippekort.fill_up"}}</button>
-</p>
-{{end}}
-
 <div class="klippekort-cards">
     {{range .Klippekort}}
     <div class="kort klippekort-card {{if .IsExpiring}}expiring{{end}}">
+
+        {{/* Hòli. Alltid ti plassar, same kor stor pakka var — rekkja er
+             ei form og ikkje ein maalar, so `KlipteHol` er dei brukte
+             klippi rekna um til den skalaen (`models.HolPerKort`). Dei
+             klipte stend fyrst, ovanfraa: eit kort vert klipt i den
+             rekkjefylgda det vert brukt.
+
+             Rekkja er kvitteringi og svarar paa «kva hev eg brukt». Ho
+             krev ingen ting av lesaren og skal difor ikkje lesast upp. */}}
+        <div class="klippehakka" aria-hidden="true">
+            {{range $i := seq .KlipteHol}}<i class="klipphakk klipt"></i>{{end}}
+            {{range $i := seq (sub (holPerKort) .KlipteHol)}}<i class="klipphakk"></i>{{end}}
+        </div>
+
         {{/* Utgangsstoda stod her tri gonger: eit merke, teksti og
-             fargen paa bandet. Teksti og bandet ber henne aaleine no —
-             det er den same regelen som tok isbiten (§14). */}}
+             fargen paa bandet. Teksti ber henne aaleine no — det er den
+             same regelen som tok isbiten (§14). */}}
         <div class="card-header">
             <h3 class="card-title">{{.Category}}</h3>
             {{/* «utløper om 121 dager til utløp» — baade «expires» og
@@ -38,27 +35,28 @@
             </span>
         </div>
 
-        {{/* Éi lina: talet, bandet og knappen deler rada, so kortet er
-             tvo rader høgt og ikkje fire. Paa smale kort bryt rada seg
-             sjølv. */}}
+        {{/* Tale er det ein hev kome for, og difor det største paa
+             kortet. Ordi stend attmed og ikkje under: «7 klipp att av
+             10» er ei setning, ikkje tri flisor med tal i. */}}
         <div class="klipprad">
-            <span class="klipp-count">
-                <span class="remaining">{{.RemainingKlipp}}</span>
-                <span class="total">{{tf $.Lang "klippekort.clips_left_of" .TotalKlipp}}</span>
-            </span>
+            <p class="klipptal">
+                <b class="att">{{.RemainingKlipp}}</b>
+                <span>{{t $.Lang "klippekort.clips_left"}}
+                    <span class="av">{{tf $.Lang "klippekort.clips_left_of" .TotalKlipp}}</span></span>
+            </p>
 
-            <div class="progress-bar">
-                <div class="progress-segments" style="--tende: {{.RemainingKlipp}}; --alle: {{.TotalKlipp}}">
-                    {{range $i := seq .RemainingKlipp}}
-                    <div class="progress-segment filled"></div>
-                    {{end}}
-                    {{range $i := seq (sub .TotalKlipp .RemainingKlipp)}}
-                    <div class="progress-segment"></div>
-                    {{end}}
-                </div>
-            </div>
+            {{/* Handlingi er ein kapsel og ikkje eit ord. Ho stod som ei
+                 lenkja ei stund — grunnen var at ein kapsel attmed eit
+                 tal paa fire og ein halv rem drog auga bort fraa tale —
+                 men det er ein knapp som gjer noko, og ein knapp ser ut
+                 som ein knapp.
 
-            <button class="fill-up-btn" onclick="fillUpKlippekort('{{.Category}}')">
+                 Han stend paa taltlina no og ikkje under henne: rada
+                 under bar berre honom, medan det stod fem rem tomt til
+                 høgre for tale. `.klipprad` set dei tvo paa same
+                 grunnlina; `align-self` trengst ikkje lenger, av di han
+                 ikkje er eit barn av spalteflexen i `.kort`. */}}
+            <button type="button" class="btn" onclick="fillUpKlippekort('{{.Category}}')">
                 {{t $.Lang "klippekort.fill_up"}}
             </button>
         </div>
@@ -66,9 +64,14 @@
     {{end}}
 </div>
 {{else}}
-<div class="no-klippekort">
+<div class="kort no-klippekort">
     <p>{{t .Lang "klippekort.no_klippekort"}}</p>
-    <a href="/elev/klippekort#kjop-klipp" class="buy-klippekort-btn">Kjøp klippekort</a>
+    {{/* Dette er det tomrommet som *hev* ein veg ut av seg — du hev
+         ikkje kjøpt noko enno (§9). Difor ein primærknapp her og ingen
+         annan stad paa sida. Han bar klassa `buy-klippekort-btn` fyrr,
+         og den klassa fanst ikkje i stilarket: lenkja stod som ei naki
+         lenkja midt i eit tomrom. */}}
+    <a href="/elev/klippekort#kjop-klipp" class="btn btn-primary">{{t .Lang "klippekort.buy_button"}}</a>
 </div>
 {{end}}
 
@@ -80,4 +83,3 @@ function fillUpKlippekort(category) {
 }
 </script>
 {{end}}
-

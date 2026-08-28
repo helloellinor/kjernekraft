@@ -1,0 +1,104 @@
+/* ===================================================================
+   setningsskjemaet
+   Timen skriven som ei setning i staden for tolv felt under kvarandre.
+   Rekkjefylgdi er arbeidet — kva, kven, kvar, naar, kor lenge — og
+   ikkje rekkjefylgdi paa spaltone i tabellen.
+
+   Felti veks etter innhaldet (`field-sizing`), so linja les seg som ei
+   linja og ikkje som eit skjema med hol i. Der nettlesaren ikkje kann
+   det, stend dei paa ei rimeleg fast breidd; setningi held.
+   =================================================================== */
+.setningsskjema { display: flex; flex-direction: column; gap: var(--rom-4); align-items: start; }
+
+/* Ingi lesebreidd. 54ch er maalet for *tekst* — so mange teikn auga
+   fylgjer utan aa mista lina — og ei setning av felt er ikkje tekst; ho
+   er ein rad kontrollar skrivi som ei setning. Kappa stod der, og daa
+   braut skjemaet midt paa ein brei skjerm medan halve rada laag tom
+   attmed. Spalta set breiddi her: i administrasjonen er ho heile arket,
+   i benken til høgre er ho halve, og setningi bryt naar spalta krev det
+   og ikkje fyrr. */
+.setning {
+  font-size: 1.15rem; line-height: 2.4;
+  margin: 0; color: var(--blekk-lys);
+}
+
+/* Feltet i setninga er eit lappfelt som står i ei line — same djupna,
+   same fokus, same innhaldsbreidd. Det hadde ein turkis understrek før
+   og inga djupn i det heile, og det var gale på to måtar.
+
+   Det var den einaste skrivbare tingen i huset utan fasetten, så
+   «her kan du skrive» sa noko anna her enn på Min profil og i Prising
+   (FASETTEN §2). Og streken var --klas, som er fargen på medlemskapet:
+   ein farge som tyder eitt produkt kan ikkje samstundes tyde
+   «skrivefelt», elles tyder han ingen ting.
+
+   Djupna ber det no, slik ho gjer overalt elles. */
+.setning .felt {
+  /* Same forma som kvart anna felt; berre maalet er setningi sitt.
+     Han hadde ein turkis understrek i ei stund, og ei hårline etter det
+     — men ei hårline inne i ei line brødtekst les seg som ein boks lagd
+     oppå setningi. Djupna åleine ligg *i* henne. */
+  width: auto; min-width: 4.5rem; max-width: 16rem;
+  field-sizing: content;
+  padding: .1rem .4rem;
+  font-weight: 500; font-size: 1rem;
+}
+.setning .felt:hover { background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate)); }
+.setning .felt:focus { outline: none; box-shadow: var(--skraakant-fasett); }
+.setning .felt::placeholder { color: var(--blekk-svakt); font-weight: 400; }
+.setning .felt-tal { min-width: 3.2rem; text-align: center; font-family: var(--skrift-tal); }
+
+/* Ein veljar plukkar; han skriv ikkje. Difor inga fordjuping på han,
+   men hårlina han har overalt elles (FASETTEN §3). Det er skilnaden
+   mellom å skrive og å velje, og han skal vere synleg i setninga òg. */
+.setning select.felt {
+  background-color: var(--flate);
+  border: 1px solid var(--kant);
+  box-shadow: none;
+  padding-right: var(--rom-5); background-position: right .4rem top 50%;
+}
+.setning select.felt:hover { background-color: var(--flate); }
+.setning select.felt:focus { border-color: var(--merke); box-shadow: var(--skraakant-fasett); }
+
+.setning .innelabel { color: var(--blekk-lys); font-size: 1rem; }
+.setning input[type="checkbox"] { accent-color: var(--klas); width: 1rem; height: 1rem; }
+
+/* Det systemet reknar ut. Det stend under setningi og ikkje inni
+   henne: du skreiv det ikkje, og du kann ikkje endra det. */
+.fylgja {
+  font-family: var(--skrift-tal); font-size: .88rem;
+  color: var(--blekk-svakt); margin: 0; min-height: 1.4em;
+}
+.fylgja.gale { color: var(--aatvaring); }
+
+/* ---- knappen som sluttar setningi ----
+   Han stod fyrst som eit tridje jamstelt barn i spalta, so i ein eigen
+   fot med ei haarlina yver. Baae gongene laag han paa ei lina for seg
+   sjølv, og ei lina for seg sjølv er ei ny setning — men han er ikkje
+   det, han er punktumet i den som stend der.
+
+   No stend han inne i `<p class="setning">`, etter siste punktumet, og
+   fylgjer teksti naar ho bryt. Ingi haarlina, ingen fot, ingen kasse:
+   §6 segjer at rommet utanfor ein ting er større enn rommet inni, og
+   ein fot kring éin knapp er ein kasse kring ingen ting. */
+/* Heile knappefamilien og ikkje berre hovudknappen. Regelen stod paa
+   `.btn-primary` aaleine av di det var den einaste knappen i ei setning
+   den gongen; ein `.btn-danger` i den same lina arva line-høgdi 1,9 og
+   vart dobbelt so høg som ordi rundt seg. */
+.setning :is(.btn, .btn-primary, .btn-danger) {
+  /* Lina i setningi er 2,4 — ein knapp som arvar henne vert dobbelt so
+     høg som han skal. */
+  line-height: 1.25;
+  vertical-align: baseline;
+  margin-left: var(--rom-2);
+  /* Og han lyt ha luft yver og under.
+     
+     Ei setning set lina si etter *teksti*, men ein knapp er høgre enn
+     teksti: han ber si eigi loddrette fyll og ei ramme attaat. Med berre
+     leidingi fraa line-height 2,4 att, skrapa han undersida av feltet paa
+     lina yver kvar gong setningi braut. Det er ikkje ein knapp-feil og
+     ikkje ein felt-feil — det er at lina aldri vart bedi um aa gjera plass
+     til det høgste ho ber. Margen her er den plassen, teken av det same
+     stiget som alt anna (§6). */
+  margin-block: var(--rom-1);
+}

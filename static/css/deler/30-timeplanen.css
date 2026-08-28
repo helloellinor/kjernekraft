@@ -1,0 +1,644 @@
+/* ===================================================================
+   timeplanen
+   =================================================================== */
+/* Tittelen og styringi paa same lina, so lista byrjar der auga alt er.
+   Fyrr stod det ei bolkeyverskrift, tvo merkelappa felt og ei
+   vikerekkja imillom — kring 150 pikslar fyre fyrste timen. */
+/* Tittellina fylgjer med og. Ho ber vikeveljaren, og han er ein
+   kontroll ein nyttar medan ein les — ikkje ei overskrift ein les ein
+   gong og so er ferdig med. Ho stablar seg rett under hovudlina.
+
+   Ho *treng* ei flate: timane rullar under henne, og ei overskrift ein
+   ser tvers gjenom er ikkje ei overskrift. `--ark` er papiret sida er
+   skoren av, so flata legg ingen ny farge paa sida — ho gøymer berre
+   det som gjeng under. */
+.timehovudlinje {
+  position: sticky; top: var(--sidehovud-hogd); z-index: 11;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--rom-4) var(--rom-5); flex-wrap: wrap;
+  background: var(--ark);
+  /* Lufta yver og under lina stend i *henne*, ikkje kring henne.
+     Ein marg er gjenomsynleg: eit kort som rullar forbi ville synast i
+     sprekken. Fyllet er flata hennar, og der kann ingen ting syna seg. */
+  /* Fyllet er knapt her, og det er med vilje.
+     Alt i den frosne stabelen er pikslar eit kort kverv attum: stabelen
+     sluttar der han sluttar, og kvar piksel luft i honom er ein piksel
+     timen din vert eten tidlegare. Under tittelen trengst ingen: under
+     honom stend skyvaren, og skyvaren ber si eigi renne og sin eigen
+     kant — han er alt skild fraa tittelen utan at nokon legg luft til.
+     Yver er `--rom-2` nok til aa skilja tittelen fraa hovudlina.
+
+     Rekneskapen: 12 px yver og 16 under gjorde stabelen 179,8 høg og
+     lina var midt paa skyvaren. Med 8 og 0 sluttar han paa 159,8 — nett
+     der midten laag. */
+  padding-block: var(--rom-2) 0;
+  margin-block: calc(var(--rom-2) * -1) 0;
+  /* Flata lyt gaa heilt ut i sidefyllet aat <main>.
+     Ho stod i innhaldskassen fyrr, og daa var ho *smalare* enn det som
+     rullar under henne: skuggen aat merki og trogget — som stikk fire
+     piksel ut til kvar sida — kom fram i sprekken millom flata og
+     skjermkanten. Ei klistra flate lyt vera minst so brei som alt ho
+     skal gøyma. */
+  padding-inline: var(--sidefyll);
+  margin-inline: calc(var(--sidefyll) * -1);
+}
+.timehovudlinje .page-title { margin-bottom: 0; }
+
+/* ---- vikeveljaren ----
+   Vika i tittelen *er* kontrollen. Ho stod som tri element i ei eiga
+   eska under tittelen og sa det same ein gong til. No flankerer pilene
+   henne, og eit klikk paa henne opnar dei sju næraste vikone.
+
+   Pilene endrar ingi breidd naar dei vert avslegne, og korgi ligg
+   absolutt — so tittelen stend still same kva ein gjer med han. */
+.vekeveljar {
+  position: relative;
+  display: inline-flex; align-items: baseline; gap: .1em;
+  margin-left: .45em; vertical-align: baseline;
+}
+
+/* ---- bobla ----
+   Ei bobla er eit skrivefelt som ligg *i* noko anna — i ein tittel, i ei
+   line — og ikkje på eit ark. Ho er mjølkete: --flate på 62 % med ei
+   uskarpleik bak, så det som ligg under skin gjennom. Kanten er det
+   tveegga sporet frå den tomme dagen i rutenettet (FASETTEN §5): mørk
+   overleppe, lys underleppe.
+
+   **Ei bobla tek aldri ringen i merkefargen.** Ein ring legg ei hard
+   line tvert over den gjennomsynlege kanten, og då er det ikkje ei bobla
+   lenger — det er ein boks. Han kjempar dessutan med innhaldet om å bli
+   lesen, og innhaldet her er eitt stort tal.
+
+   Difor står `box-shadow` skriven ut i *begge* tilstandane. Sløyfer ein
+   henne i fokus, tek grunnstilen over — `input:focus` set
+   `box-shadow: var(--skraakant-fasett)`, og fasetten har ringen i seg. Det hende
+   ein gong: ringen vart teken bort her og kom rett tilbake derifrå.
+
+   At bobla er der, er heile hintet om at ein kan skrive i henne. Fokus
+   seier frå ved at flata blir eit hakk mindre gjennomsynleg, og ved at
+   markøren blinkar i --klas. */
+.bobla {
+  border: 0;
+  border-radius: var(--rund);
+  background-color: color-mix(in srgb, var(--flate) 62%, transparent);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  box-shadow: var(--skraakant-djup);
+  color: var(--blekk);
+  caret-color: var(--klas);
+}
+.bobla:focus {
+  outline: none;
+  border: 0;
+  background-color: color-mix(in srgb, var(--flate) 82%, transparent);
+  box-shadow: var(--skraakant-djup);
+}
+
+/* Framlegget. Talet i bobla er ikkje det som står der — det er det som
+   *ville* stått der om du ikkje skreiv noko. Difor er det ein
+   placeholder og ikkje ein verdi: markøren blinkar frå fyrste stund, og
+   fyrste tasten du slår skriv talet ditt i staden for å leggje seg
+   attmed eit tal som alt var der.
+
+   Feltet valde seg sjølv før — `felt.select()` — og då låg det eit
+   turkist drag over talet i staden for ein markør. Eit merkt tal ser
+   ikkje ut som noko som ventar på deg; det ser ut som noko du nettopp
+   gjorde. */
+.bobla::placeholder { color: var(--blekk-lys); opacity: 1; }
+
+/* Eit avvist tal — ei vike som er gjengi. Bobla fer ein augneblink i
+   åtvaringsfargen. Ikkje ein ring: ein ring er nettopp det ei bobla
+   aldri tek, og eit avvist tal er ikkje ein grunn til å bryte det. */
+.bobla.nekta { background-color: color-mix(in srgb, var(--aatvaring) 22%, transparent); }
+@media (prefers-reduced-motion: no-preference) {
+  .bobla { transition: background-color .18s ease-out; }
+}
+
+/* Vikefeltet er ei bobla med tittelskrifta si. Alt som gjer henne til
+   ei bobla står over; her står berre det som gjer henne til ein tittel. */
+.vekefelt {
+  font-family: var(--skrift-yver);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-stretch: var(--vidd-tittel); font-weight: 700;
+  letter-spacing: inherit; line-height: 1;
+  width: 2.6ch; min-width: 2.6ch; field-sizing: content;
+  padding: 0 .1em; margin: 0;
+  text-align: center;
+}
+.vekefelt::selection { background: color-mix(in srgb, var(--klas) 35%, transparent); }
+
+/* Ordet er knappen. «Timeplan denne uka» les seg som ei setning; eit
+   vikenummer i tittelen gjer det ikkje. Talet ligg i menyen under, for
+   den som veit kva veke han vil til. */
+.vekeord {
+  font-family: inherit;
+  font-stretch: var(--vidd-yver); font-weight: 400;
+  font-size: .52em; letter-spacing: .01em; text-transform: none;
+  color: var(--blekk-lys); background: none; border: 0;
+  border-bottom: 2px solid var(--haarlina);
+  padding: 0 .12em; line-height: 1.1; cursor: pointer; white-space: nowrap;
+}
+.vekeord:hover { color: var(--blekk); border-color: var(--klas); background: none; }
+.vekeord[aria-expanded="true"] { color: var(--blekk); border-color: var(--klas); }
+
+/* ---- vikemenyen ----
+   Ingi flata. Talet ligg berre der, i tittelskrifta, og tek ljosstyrken
+   sin fraa det som ligg bak. Ei rute kring hadde gjort det til eit
+   skjema; utan rute er det framleis tittelen, berre skrivbar. */
+/* Menyen heng under ordet han høyrer til, ikkje under heile lina.
+   Ordet og menyen er *eitt* — ein nedfallsveljar — og daa lyt dei møtast
+   paa lina under ordet. */
+.vekemeny {
+  position: absolute; z-index: 20;
+  top: 100%; left: 0;
+  display: flex; align-items: baseline;
+  padding: var(--rom-3) 0 0;
+  background: none; border: 0; box-shadow: none;
+}
+
+.vekepil {
+  font-family: inherit; font-stretch: var(--vidd-yver); font-weight: 400;
+  font-size: .52em; letter-spacing: .01em;
+  color: var(--blekk-lys); background: none; border: 0;
+  padding: 0 .12em; text-transform: none; line-height: 1.1;
+  cursor: pointer; white-space: nowrap;
+}
+
+.vekepil:hover:not(:disabled) { color: var(--blekk); background: none; border-color: var(--klas); }
+
+.vekepil { color: var(--blekk-svakt); }
+.vekepil:disabled { opacity: .3; cursor: default; }
+.vekeval {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .8rem; letter-spacing: .06em; text-transform: uppercase;
+  padding: var(--rom-2) var(--rom-3);
+  color: var(--blekk-lys); text-decoration: none;
+  border: 1px solid transparent; border-radius: 2px;
+}
+.vekeval:hover { color: var(--blekk); border-color: var(--haarlina); }
+.vekeval.no { color: var(--klas); border-color: var(--klas); }
+
+/* Korgi flyt. Laag ho i flyten, skuva ho heile timeplanen ein tomme
+   ned kvar gong nokon opna henne — og det er nettupp det ein ikkje skal
+   gjera med noko ein opnar for aa *sjaa* paa noko anna.
+   Ho flyt verkeleg, og difor er ho ein av dei faa tingi som fær skugge. */
+
+
+/* `.filters` og `.filter-group` stod her fyrr, med `max-width: 11rem` paa
+   veljarane. Sikti i timeplanen var den einaste som nytta deim, og ho
+   budde i vikehovudet ei stund og er heilt burte no. Taket var det som
+   klipte lange lærarnamn av. */
+
+/* `.week-navigation`, `.week-nav-btn`, `.week-input` og `.week-controls`
+   stod her og. Dei var vikeveljaren fyre han flytte inn i tittelen; no
+   er han `.vekeveljar` med `.vekepil`, `.vekeord` og `.vekefelt`, og dei
+   gamle namni stod att utan ein einaste brukar. */
+
+/* ---- den klemde vika ----
+   Éi rad per time, eitt merke per dag. Radi ber det ein skannar etter —
+   naar, kva, kven, kvar — og ikkje meir. Detaljen bur i dokka.
+
+   Fyrr bar kvart kort heile detaljen sin, og vika vart eit tårn ein
+   laut rulla gjenom. Ei rad er 3,2 rem; eit kort var 11. */
+/* Ingen kasse kring vika.
+   Nettet stod i ein ramma boks med eiga flate, og skyvaren laag inni
+   honom som eit hovud i ein tabell. Daa er det tvo ting aa lesa: fyrst
+   kassen, so det som er i honom. §6 gjev høgst éin maala kasse millom
+   arket og innhaldet, og her treng me ingen: dagane er ein skyvar som
+   flyt yver timane, og timane hev sine eigne haarlinor. */
+/* Ingi flate under nettet heller.
+   Ho stod her av di den daude dagcella er teikna som eit *hol*, og eit
+   hol treng noko aa vera eit hol i — utan flata snudde ho seg til ein
+   ljos klump paa arket.
+
+   Kortet gjev henne det no. Kvar rad ber si eigi flate, og hòlet er eit
+   hol i kortet. Flata under *lista* vart daa den andre av tvo flatar
+   paa rad, og det er henne ein saag som ein ljos kasse kring vika. */
+
+/* Rada og hovudet deler den same trappa, so merki stend i spaltone
+   sine og dagarne kann lesast nedyver. */
+/* Spaltestigen bur paa vika og ikkje paa lista: skyvaren yver lista
+   fylgjer den same stigen, so kvar dag stend yver spalta si. Stod han
+   paa lista, saag skyvaren honom ikkje. */
+.vika { --timetrapp: minmax(8rem, 1fr) repeat(7, minmax(0, var(--merkestorleik))); }
+
+/* Lista rullar ikkje i seg sjølv lenger. Ho gjorde det for at dagnamni
+   skulle stå att medan timane gjekk forbi, og det var rett så lenge
+   hovudet låg inni kassen — men ein kasse som rullar inni ei side som
+   òg rullar seier ingen stad at han gjer det. Rullesteng er tynne, og
+   på ein styreflate kjem ho ikkje til syne før ein alt har prøvd å
+   rulla. Timane under kanten fanst ikkje for den som ikkje gissa.
+
+   No ligg dei i sida. Hovudet held seg sjølv oppe med `sticky`, so det
+   som var poenget med kassen står att utan kassen. */
+.timeplan {
+  display: flex; flex-direction: column; gap: var(--rom-2);
+  /* Lufta ned fraa skyvaren stend her og ikkje i botnfyllet hans: han
+     hev ingi flate, so eit fyll i honom er berre tome pikslar eit kort
+     kann rulla inn i. I lista er det ein marg fyrste kortet ber sjølv. */
+  margin-block-start: var(--rom-3);
+}
+
+.timerad {
+  display: grid;
+  grid-template-columns: var(--timetrapp);
+  gap: var(--rom-3);
+  align-items: center;
+  padding: var(--rom-3) var(--rom-4);
+}
+
+/* Hovudet var eit rutenett med den same spaltestigen som radene, av di
+   det bar eit dagnamn yver kvar spalta. Det gjer det ikkje lenger —
+   dagane er ein skyvar no, og kvart merke ber dagen sin sjølv — so
+   hovudet er ei linja med tvo ting i: sikti til venstre, dagane til
+   høgre.
+
+   Han *laut* slutta aa vera eit rutenett: med ein dag vald fell stigen
+   til tvo spaltor, og skyvaren vart pressa ned i den 5,4 rem breide
+   dagspalta og broten i aatte liner nedyver. */
+/* Hovudet held seg sjølv oppe.
+   Det var `sticky` inni rullekassen ein gong, og daa fylgde tri plagor
+   med: rullefeltet la seg yver skyvaren, flata las seg som ein kasse,
+   og kassen klypte kanten hans. Daa kassen gjekk, gjekk `sticky` med.
+
+   No er han attende — men mot *sida* og ikkje mot ein kasse. Det er
+   den skilnaden som gjer det: rullefeltet er sida sitt eige og ligg
+   heilt til høgre, ikkje inntil skyvaren, og der er ingen kassekant
+   aa verta klypt av.
+
+   Flata og z-index-en lyt fylgja med: timane rullar under hovudet no,
+   og eit hovud ein ser gjenom er ikkje eit hovud. `--ark` og ikkje
+   `--flate` — han er papiret sida er skoren av, ikkje eit kort.
+   Under dokka (z-index 30), som skal liggja yver alt. */
+.timehovud {
+  display: flex; flex-direction: column;
+  gap: var(--rom-3);
+  position: sticky; top: calc(var(--sidehovud-hogd) + var(--tittellinje-hogd));
+  z-index: 10;
+  /* Ingi flate, ingen fyll, ingen marg paa sjølve skyvaren.
+     Han er ikkje ei lina yver lista — han er sju bobblor som flyt paa
+     arket, og eit fyll paa noko gjenomsynleg er ikkje luft: det er
+     pikslar eit kort kann rulla inn i og syna seg gjenom. Lufta yver
+     stend i botnfyllet aat tittellina, som *hev* ei flate, og lufta
+     under i margen paa `.timeplan`. */
+}
+/* Ikkje lenger noko band attum sporet, og ingen strimlar i sidefylli.
+   Heile kapselen er glas no (sjaa `.dagfaner`): eit kort som rullar upp
+   syner seg som ein skugge gjenom mjølki i heile høgdi aat sporet, og
+   lina det kverv ved er *umrisset* aat kapselen — boga i endarne, der
+   kortet stend skarpt utanfor kurva og mjølkete innanfor, og
+   yverkanten der den tette tittellina tek yver.
+
+   Utanfor kapselen gjeld midtlina: yver henne er alt tett, under henne
+   er sida open. Det tette er borden paa `.dagfaner::before` i
+   88-betalingsmaatar.css — han fylgjer kurva og dekkjer sidefylli med,
+   so plassmerket som heng ut yver kortkanten kverv ved midten han og. */
+
+/* Ingi flate paa skyvaren sjølv.
+   Han treng ingi: `.faner` fyller honom heilt (maalt — baae 139,9–179,8),
+   og trogget ber si eigi flate. Ei flate til her hadde vore den andre av
+   tvo paa rad, og det var henne ein saag som eit band tvers yver sida.
+
+   Her stod det lenge at korti *ikkje* kunde kverva midt paa bobblone:
+   «eit spor er ei flate, og ei flate et det som gjeng under henne i
+   heile si høgd». Setningi var sann um eit tett spor, og det var difor
+   fem freistnader stranda — kvar av deim flutte bandet paa `::before`,
+   og ingen av deim flutte lina korti kvarv ved, for lina laag i
+   botnkanten aat det tette trogget heile tidi.
+
+   Løysingi var aa lata trogget sleppa ljos utan aa taka det burt:
+   fyllet er mjølkete no (sjaa `.dagfaner`), renna og kanten stend som
+   fyrr, og trogget et ikkje lenger det som gjeng under den nedre
+   helvti. Bandet yver den øvre helvti tek resten. */
+
+/* Sikti her er den same sikti som paa kvar annan bolk som lyt siktast
+   i: `.sikt` i 07-sida.css. Ho stod skriven ein gong til her under
+   namnet `.timesikt` — same reglar, same tal — og daa var det tvo
+   stader aa endra henne og ein sjanse til aa endra berre den eine. */
+
+/* Rada er eit kort, som paa heimesida — same boksen, same vengen, og
+   ingen aattande handteikna boks (§9/§10). Vengen ber slaget; fell
+   `.slag-*` burt av di typen er ukjend, vert han graa og lyg ikkje. */
+.timeplan .timerad {
+  border-left: var(--venge) solid var(--slagfarge, var(--haarlina));
+  /* `.timerad:last-child` slo botnkanten av medan raden var ei linje i
+     ei liste. No er kanten kortet sin eigen, og det siste kortet er
+     ikkje mindre eit kort enn dei andre. */
+  border-bottom: 1px solid var(--haarlina);
+}
+
+/* ---- radene som hev vore ----
+   Ei vika les ein nedyver, og det ein leitar etter er den fyrste timen
+   ein kan gaa paa. Ei rad der kvar einaste gong er gjengi svarar ikkje
+   paa det: ho stend og tek si fulle høgd, og den fyrste timen i dag
+   hamnar under skjermkanten. Difor ligg dei samanbrotne, med eitt tal
+   yver som segjer kor mange dei er.
+
+   Dei er ikkje burte. Ein knapp hentar dei fram att — daa stend dei der
+   dei høyrer heime i rekkja, berre bleikare, so ein ser med det same kva
+   som er historie og kva som er tilbod. */
+.timeplan .rad-umme { display: none; }
+.timeplan.syn-umme .rad-umme { display: grid; opacity: .45; }
+
+.ummeknapp {
+  display: flex; align-items: baseline; gap: var(--rom-2);
+  /* Same innrykk som radene, so talet stend i flukt med namni over og
+     under og ikkje som noko utanpaa lista. */
+  width: 100%; padding: var(--rom-2) var(--rom-4);
+  background: none; border: 0;
+  border-bottom: 1px solid var(--haarlina);
+  font-family: var(--skrift); font-size: .8rem;
+  color: var(--blekk-svakt); text-align: left; cursor: pointer;
+}
+.ummeknapp:hover .ummeord { color: var(--merke); }
+.ummeknapp:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
+.ummetal { font-family: var(--skrift-tal); }
+/* Ordet er det ein trykkjer paa; talet er berre ei upplysning. */
+.ummeord { text-decoration: underline; text-underline-offset: 2px; }
+.timeplan.syn-umme .ummeknapp .ummeord { color: var(--merke); }
+.timerad:hover { background: var(--ark-djup); }
+
+/* Lengdi høyrer til namnet — ho er den same kva dag timen gjeng. */
+.timetittel .lengd {
+  font-family: var(--skrift-tal); font-size: .78rem; font-weight: 400;
+  font-stretch: normal; letter-spacing: 0;
+  color: var(--blekk-svakt); white-space: nowrap;
+}
+
+/* Namnet paa timen er det ein leitar etter i lista, og difor det einaste
+   som skal lesast paa avstand. Det stod i 1,05 rem — same storleik som
+   læraren under — og daa maatte ein lesa båe for aa finna kva som var
+   kva. */
+.timetittel {
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
+  font-weight: 600; font-size: 1.55rem; line-height: 1.05; margin: 0;
+}
+.timekven { margin: .1rem 0 0; font-size: .92rem; color: var(--blekk-lys); }
+.timerom { color: var(--blekk); font-weight: 500; }
+
+/* ---- timemerket ----
+   Eit ur, og eit ur er teikna og ikkje sett saman av kassar. Difor er
+   heile merket éin SVG med eit fast viewBox, og punkti er rekna i
+   merkeform.go.
+
+   Figuren er tri former under éi samanhengande lina: skiltet med dagen
+   paa toppkanten, kroppen med skiva og vindauga, og maalaren i nedre
+   hyrna. Umrisset er ikkje rekna som ein union — det er silhuetten
+   utvida éin einheit med feMorphology. Prøvde ein aa teikna dei tri
+   formene ein gong til litt større, vandra dei innhole hyrno innyver i
+   staden for utyver, og lina slapp upp nettupp i skøyten.
+
+   Storleiken er éin skala og ingen ting anna. Det er difor merket
+   kjennest som den same tingen som kjem nærare, og ikkje som ei ny
+   teikning ved kvar storleik. */
+.timedagar { display: contents; }
+
+/* Storleiken er éin knapp og ingen ting anna. Alt i figuren er rekna i
+   eit viewBox, so skrift, strekar, hyrne og rom fylgjer med i det same
+   forholdet — det er den same tingen som kjem nærare, ikkje ei ny
+   teikning. Spaltone i vika er rekna av det same talet, so hovudet og
+   radene stend paa lina utan at nokon maaler. */
+:root { --merkestorleik: 5.4rem; }
+
+.dagmerke {
+  position: relative;
+  grid-column: calc(var(--dag) + 1);
+  display: block;
+  padding: 0; border: 0; background: none; border-radius: 0;
+  line-height: 0;
+  cursor: pointer;
+  justify-self: center;
+}
+.dagmerke:hover:not(:disabled) { background: none; border: 0; color: inherit; }
+.dagmerke:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
+
+/* Merket sa ingen ting naar du var borti det. Regelen over slår av
+   knappestilen som huset gjev alle knappar — og det var alt som stod
+   der, so peikaren skifta form og ingen ting anna hende.
+
+   No svarar merket med si eiga form: kanten tek merkefargen og flata
+   lysnar eit hakk. Ingen kasse rundt, ingen skugge — det er den same
+   silhuetten som ligg der, berre vaken. */
+.dagmerke:hover:not(:disabled) .form-kant,
+.dagmerke:hover:not(:disabled) .fanekant { fill: var(--merke-lys); }
+.dagmerke:hover:not(:disabled) .form-flate { fill: color-mix(in srgb, var(--merke) 7%, var(--flate)); }
+@media (prefers-reduced-motion: no-preference) {
+  .form-kant, .form-flate, .fanekant, .faneflate { transition: fill .12s ease-out; }
+}
+
+/* Paameld. Dette stod som `border-color` og `background` på sjølve
+   knappen — ein turkis kasse bak ein SVG som med vilje har `border: 0`
+   og `background: none`, og som difor synte seg som ein skugge rundt
+   merket i staden for som ein del av det. Regelen låg dessutan midt
+   inne i dokk-reglane, langt frå alt anna som gjeld merket.
+   Kanten seier det no, slik han seier «vald» to reglar lenger nede. */
+.dagmerke[data-paameld="true"] .form-kant { fill: var(--merke); }
+
+.merkeform { display: block; overflow: visible; width: var(--merkestorleik); height: auto; }
+.merke-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---- fasetten i det smaa ----
+   Den same fordjupingi som i skrivefelti: `inset 0 1px 2px` av blekket
+   ved 12%. Ei tunn, hard lina inne i yverkanten — ikkje ein mjuk glød,
+   og ikkje noko hovding i botnen. Feltet er grunnt; det er nettupp difor
+   det ser trykt ut og ikkje uppblaast. Sjaa docs/FASETTEN.md. */
+/* Filtri ber ingen farge; fargen stend her, paa elementi, og fylgjer
+   difor temaet der merket stend. */
+/* ---- fana ----
+   Ho er ei fane og ikkje ein kul paa umrisset, og difor ber ho fanone
+   sine fargar: den same lukka flata som ei ulesen fana i
+   administrasjonen. Dagen det er i dag er den valde fana — merkefargen,
+   og namnet i merkefargen — og dei hine trekkjer seg attende. */
+.faneflate { fill: var(--faneflate); }
+.fanekant  { fill: var(--kant); }
+.dagmerke.idag .faneflate { fill: var(--merke-svak); }
+.dagmerke.idag .fanekant  { fill: var(--merke); }
+
+/* Plassmerket: ei varselbobla i hyrna aat brikka.
+   Han tek grunnstilen aat `.btn` (sjaa regelen der oppe — `.plettmerke`
+   stend i han) og set berre storleik og stad her. Det er difor han er
+   *lik* ein knapp og ikkje berre liknar: skifter knappen, skifter han
+   med.
+
+   Midten ligg paa hyrna. `--hyrne-x/y` er prosent av SVG-kassen, rekna i
+   merkeform.go, so talet finst ein stad. */
+.plettmerke {
+  position: absolute;
+  left: var(--hyrne-x); top: var(--hyrne-y);
+  transform: translate(-50%, -50%);
+  padding: .1em .42em;
+  /* Storleiken fylgjer brikka, som alt anna i henne: «Storleiken er éin
+     knapp og ingen ting anna». Han stod fast paa .62 rem — rett ved
+     5,4 rem og feil ved alle andre, so bobla vart stor paa ei lita
+     brikka og lita paa ei stor. .115 av brikka *er* .62 rem naar ho er
+     5,4. */
+  font-size: calc(var(--merkestorleik) * .115); font-weight: 500;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap; pointer-events: none;
+  cursor: default;
+}
+/* Tale av eit anna, ikkje eit tal med eit mindre under seg: same
+   storleik, og berre eit hakk mindre blekk. */
+.plettmerke .av { color: var(--blekk-lys); }
+
+/* ---- glaset ----
+   Merket er ein klokke, og ein klokke hev eit glas. Ljoset fell ovanfraa
+   og døyr ut mot midten — same kurva som paa knappen, og av same grunn:
+   det er ei kvelv, ikkje ei bobla. Laget ligg yverst og fangar difor
+   visarane med, slik eit glas gjer. */
+.form-glas { pointer-events: none; }
+.glas-topp { stop-color: var(--glans); }
+.glas-midt { stop-color: color-mix(in srgb, var(--glans) 34%, transparent); }
+.glas-ut   { stop-color: transparent; }
+
+.form-ring  { fill: var(--merke); visibility: hidden; }
+.form-kant  { fill: var(--kant); }
+.form-flate { fill: var(--flate); }
+.form-djup, .rutedjup { fill: color-mix(in srgb, var(--blekk) 12%, transparent); }
+
+/* `.dagnamn` var alt namnet paa dagane i vikehovudet. Eit merke som tok
+   den klassa i bruk, sette 7,2 px paa yverskrifti yver rutenetet — ein
+   kollisjon som berre syner seg paa skjermen. */
+.merkedag {
+  font-family: var(--skrift-yver); font-size: 10.0px; font-weight: 500;
+  font-stretch: var(--vidd-merkelapp); letter-spacing: .06em;
+  fill: var(--blekk-svakt); text-anchor: middle;
+}
+
+/* ---- skiva ----
+   Indeksane ligg paa eit rektangulært spor og ikkje paa ein sirkel. Det
+   er sporet som gjer at ho ser firkanta ut. Tolv indeksar, tal paa 12, 3
+   og 9; sekstalet ligg under vindauga, som paa eit ur som er bygt slik. */
+.indeks { stroke: var(--blekk-svakt); stroke-width: 1.0; stroke-linecap: round; }
+.skivetal {
+  font-family: var(--skrift-tal); font-size: 5.7px;
+  fill: var(--blekk-svakt); text-anchor: middle; letter-spacing: -.04em;
+}
+
+/* Kakestykket heng i minuttvisaren — det er han som gjeng medan timen
+   gjeng — og maaler seg paa timevisaren si skala: ei runda er tolv
+   timar, so eit stykke er kor stor bit av dagen timen tek.
+
+   Det låg eit bleikt stykke attmed, tidi fram til timen byrja. Det er
+   burte: ingen kunde lesa kva det var, og skiva svarar paa naar timen
+   gjeng, ikkje kor lenge det er til. */
+.kake-timen { fill: color-mix(in srgb, var(--merke) 32%, transparent); }
+
+.visar { stroke-linecap: round; }
+.visar.time   { stroke: var(--blekk); stroke-width: 2.3; }
+.visar.minutt { stroke: var(--blekk-lys); stroke-width: 1.25; }
+/* Sluttvisaren *er* ein timevisar — same lengd, same tjukkleik — og
+   skil seg berre paa fargen: han syner kvar timen er ute. Han bar
+   minuttvisaren sine maal fyrr, og daa stod det tvo tunne peikarar paa
+   skiva som ikkje tydde det same. */
+.visar.slutt  { stroke: var(--merke); stroke-width: 2.3; }
+.pinne { fill: var(--blekk); }
+
+/* ---- vindauga ---- */
+.ruteflate { fill: color-mix(in srgb, var(--blekk) 9%, var(--flate)); filter: url(#rutedjup); }
+.rutetal {
+  font-family: var(--skrift-tal); font-size: 9.2px;
+  fill: var(--blekk); text-anchor: middle; letter-spacing: -.03em;
+}
+
+/* ---- talet i pletten ----
+   Kor mange plassar som er att, av kor mange.
+
+   Det var eit kakestykke ei stund — ein *del* av ein sirkel. Ein del kan
+   ikkje skiljast: to att av ti ser likt ut som fire att av tjue, og éin
+   att av fire ser ut som ein god sjanse når det i røynda er ein plass.
+   Ein Reformer-time har fire plassar; ein time i salen har atten. Det er
+   heile skilnaden, og han er borte i ein del. */
+/* Same storleik som tale fyre skiljeteiknet — det er éi lina, ikkje eit
+   tal med eit mindre tal hengande under seg. Styrken skil deim. */
+
+
+/* ---- stodene ---- */
+/* Vald er det same grepet som fokus i eit skrivefelt: lina tek
+   merkefargen, ein ring til legg seg utanpaa henne, og fordjupingi vert
+   djupare. Djupna segjer «dette kann du taka i», fargen «her er du no». */
+.dagmerke[aria-pressed="true"] .form-ring { visibility: visible; }
+.dagmerke[aria-pressed="true"] .form-kant { fill: var(--merke); }
+.dagmerke[aria-pressed="true"] .form-djup { fill: color-mix(in srgb, var(--blekk) 16%, transparent); }
+
+/* Umme: timen er gjenomgjengen. Han stend der av di rada skal ha sju
+   plassar, men han dreg ikkje auga. */
+.dagmerke.umme { opacity: .42; cursor: default; }
+.dagmerke:disabled { cursor: default; }
+
+/* I dag er ikkje merket sitt. Det er *kvar du er*, og det høyrer til
+   spalta — eit band nedyver heile rutenetet. Vald er kva du peikar paa,
+   og det høyrer til merket. Var baae sagde med den same streken, tydde
+   streken tvo ting. */
+.dagmerke.idag .merkedag { fill: var(--merke); }
+
+/* ---- ruta utan time ----
+   Ho var ein stipla kasse fyrr, og ein stipla kasse er eit *umriss* —
+   det ser ut som noko som skal koma. Her er det motsette som er sant:
+   det gjeng ingen time den dagen, og plassen er tom.
+
+   Difor er ho eit spor: ei fordjuping i arket i forma aat kroppen, med
+   den same fasetten som skrivefelti — berre djupare, av di ho er tom
+   heile vegen ned. Uret ligg ikkje i henne. Sjaa docs/FASETTEN.md.
+
+   Ho er eit hol og ikkje ein knapp: `pointer-events: none` gjer at ho
+   korkje tek klikk eller stel peikaren. */
+.dagmerke.daud { pointer-events: none; cursor: default; }
+.daudflate { fill: color-mix(in srgb, var(--blekk) 6%, transparent); }
+.dauddjup  { fill: var(--lippe-djup); }
+/* Den nedre lippa. Ho stod paa `--flate` fyrr, med den grunngjevingi at
+   `--flate` er den ljosaste flata i temaet og difor «lyser i baae».
+   Det er sant um *rangeringi* millom tokeni og usant um ljoset: aatti
+   prosent av ei mest svart flate er framleis mest svart. Maalt vart
+   lippone i det myrke temaet snudde — den øvre L=0.101 mot den nedre
+   L=0.014 — og eit hol med ljos yverkant og myrk fot er ein knott.
+   Difor `--upp` og `--ned`: dei er ei retning og ikkje ein farge, og
+   dei snur ikkje naar temaet gjer det. Sjaa docs/SKRAAKANTEN.md §3. */
+.daudljos  { fill: var(--lippe-ljos); }
+.dagmerke.daud.idag .daudflate { fill: color-mix(in srgb, var(--merke) 8%, transparent); }
+
+/* Merke som stend for seg sjølve — paa heimesida, utan rutenet. Dei
+   stend i spaltor av den same breiddi som i vika, so eit merke er like
+   stort kvar du ser det. */
+.merkerad {
+  display: grid; gap: var(--rom-3);
+  grid-template-columns: repeat(auto-fill, var(--merkestorleik));
+  justify-content: start;
+}
+.merkerad .dagmerke { grid-column: auto; }
+
+
+/* Berre for skjermlesaren. Dagen stend i hovudet for auga; merket
+   treng honom likevel, av di ein som høyrer sida ikkje ser spalta. */
+
+
+/* Under dette er sju spaltor for smalt til aa bera eit tal. Daa fell
+   rutenetet saman, merki flyt etter kvarandre, og dagen kjem attende i
+   merket sjølv — han kann ikkje lenger lesast av plasseringi. */
+@media (max-width: 60rem) {
+  .vika { --timetrapp: minmax(0, 1fr); }
+
+  /* Hovudet fall heilt burt her fyrr, av di det bar spalteoverskrifter
+     som ikkje kunde lesast naar stigen fall til éi spalta. Det ber ein
+     *kontroll* no — dagskyvaren — og ein kontroll skal ikkje kverva av
+     di rutenettet gjorde det. Han bryt til tvo rader i staden. */
+  .timedagar {
+    display: flex; flex-wrap: wrap; gap: var(--rom-2);
+    grid-column: 1 / -1;
+  }
+  /* Scopa til rutenettet: desse tri er bøter paa at spaltone fell burt
+     paa smale glas, og det er ein ting som *berre* hender i timeplanen.
+     Uskopa slo dei ogso paa merki i listone paa heimesida, der det ikkje
+     er noko rutenet aa mista — og der la fyllet ovanfraa kassen 12 px
+     ned, so han ikkje lenger stod paa lina. */
+  .timeplan .dagmerke { grid-column: auto; min-width: 3.6rem; padding-left: var(--rom-2); padding-right: var(--rom-2); }
+  /* Den daude ruta er eit hol i eit rutenet. Er rutenetet burte, er ho
+     berre ei tom eske ein lyt sjaa forbi. */
+  .timeplan .dagmerke.daud { display: none; }
+  /* Paa smale glas kann ikkje dagen lesast av plasseringi lenger, so
+     lappen kjem fram — men berre med dagen. Klokka stend alt paa
+     kanten, og ho skal ikkje seiast tvo gonger. */
+  
+  .timeplan .dagmerke { padding-top: var(--rom-3); }
+}

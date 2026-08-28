@@ -15,23 +15,17 @@ type KlippekortModuleData struct {
 	//
 	// Kort som er tome eller alt utgjengne tel ikkje med. Eit tomt kort
 	// som gjeng ut er ikkje ein frist, det er ei kvittering.
+	//
+	// Ingen mal les honom i dag: lina som synte honom
+	// (`.klippfyrst`) er teki ut. Rekninga stend att med vilje —
+	// ho er prøvd, og spursmaalet ho svarar paa er ikkje burte.
 	Naermast *models.KlippekortWithDetails
 }
 
-// naermastUtlop finn det kortet som gjeng ut fyrst av dei som framleis
-// hev klipp att.
+// naermastUtlop er regelen i models, naadd herifraa. Prøvone i denne
+// pakka held framleis paa honom.
 func naermastUtlop(kort []models.KlippekortWithDetails) *models.KlippekortWithDetails {
-	var naermast *models.KlippekortWithDetails
-	for i := range kort {
-		k := &kort[i]
-		if k.RemainingKlipp <= 0 || k.DaysUntilExpiry < 0 {
-			continue
-		}
-		if naermast == nil || k.DaysUntilExpiry < naermast.DaysUntilExpiry {
-			naermast = k
-		}
-	}
-	return naermast
+	return models.NaermastUtlop(kort)
 }
 
 // NewKlippekortModule creates a new klippekort module with the given data

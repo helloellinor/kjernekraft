@@ -3,14 +3,26 @@ package handlers
 import (
 	"bytes"
 	"html/template"
-	"os"
 	"regexp"
 	"sort"
 	"strings"
 	"testing"
 )
 
-const stiStilark = "../static/css/kjernekraft.css"
+// Prøva les det *samansette* arket, ikkje ei fil. Delane under
+// static/css/deler/ er det som stend paa disken; det nettlesaren fær er
+// summen av deim, og det er summen invariantane gjeld for.
+func lesStilarket(t *testing.T) string {
+	t.Helper()
+	gamal := stilarkMappe
+	stilarkMappe = "../static/css/deler"
+	defer func() { stilarkMappe = gamal }()
+	b, err := byggStilark()
+	if err != nil {
+		t.Fatalf("kunde ikkje setja saman stilarket: %v", err)
+	}
+	return string(b)
+}
 
 // Dei myrke tokeni stend tvo gonger i stilarket, og lyt gjera det: den
 // eine blokki svarar paa systemtemaet, den hine paa eit val brukaren
@@ -43,11 +55,7 @@ func lesBlokk(t *testing.T, css, veljar string) map[string]string {
 }
 
 func TestDeiTvoMyrkeBlokkaneErSamde(t *testing.T) {
-	rå, err := os.ReadFile(stiStilark)
-	if err != nil {
-		t.Fatalf("stilarket: %v", err)
-	}
-	css := string(rå)
+	css := lesStilarket(t)
 
 	ljos := lesBlokk(t, css, `:root, [data-theme="light"] {`)
 	systemet := lesBlokk(t, css, `:root:not([data-theme="light"]) {`)

@@ -1,0 +1,162 @@
+/* ===================================================================
+   skjema
+   =================================================================== */
+/* `align-items` stend paa `stretch` som standard, og daa vert kvart barn
+   so breidt som bolken same kva `width` segjer. Ein veljar som var sett
+   til aa vera so brei som innhaldet vart strekt likevel — reglane var
+   rette, men fyresetnaden var det ikkje. Her byrjar dei ved venstre
+   kanten og tek den breiddi dei sjølve bad um; eit skrivefelt hev
+   `width: 100%` og fyller framleis. */
+.form-group { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2); margin-bottom: var(--rom-4); }
+.form-row { display: grid; gap: var(--rom-4); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+
+label, .detail-label {
+  font-size: .88rem; color: var(--blekk-lys);
+}
+
+/* :where() gjev null i spesifisitet, so kvar klassa slær denne regelen.
+   Utan det er `input[type="text"]` (0,1,1) sterkare enn `.lappfelt`
+   (0,1,0), og eit felt som skulde vera nake fekk ramma og flata
+   attende. Det hende tvo gonger — fyrst med vikefeltet, so med
+   adresselappen — og det er den slags ein ikkje ser i koda, berre paa
+   skjermen. Grunnstilen skal vera lettast aa yverstyra av alle. */
+/* Eitt felt, og det er det som heitte `.lappfelt`: inga ramme, ein grunn
+   skraakant, og ei flate eit hakk mørkare enn arket.
+   
+   Fyrr gav grunnstilen kant *og* flate, medan `.lappfelt` tok kanten av
+   att — so kvart felt i huset laut velja side, og fem former for éi
+   meining vart resultatet. No er grunnstilen den rette forma, og
+   klassane som stend att er berre *maal*: kor breidt feltet er, ikkje
+   korleis det ser ut. */
+:where(input[type="text"], input[type="email"], input[type="password"],
+       input[type="date"], input[type="tel"], input[type="number"],
+       input[type="search"], input[type="time"], textarea) {
+  font: inherit;
+  padding: var(--rom-2) var(--rom-3);
+  background-color: color-mix(in srgb, var(--blekk) 3%, var(--flate));
+  color: var(--blekk);
+  border: 0;
+  border-radius: 2px;
+  width: 100%;
+}
+
+/* Veljaren hev kant og inga djupn. Han plukkar eitt av nokre faae — han
+   er ein knapp med ei liste attum, ikkje ei renna ein hell noko nedi
+   (FASETTEN §3). Det er den einaste skilnaden som er att, og han tyder
+   noko. */
+:where(select) {
+  font: inherit;
+  padding: var(--rom-2) var(--rom-3);
+  background: var(--flate);
+  color: var(--blekk);
+  border: 1px solid var(--kant);
+  border-radius: 2px;
+  width: 100%;
+}
+
+/* Fordjupingi segjer «her kann du skriva», og difor stend ho berre paa
+   det ein skriv i. Ein veljar plukkar ein or ei liste — han er ein knapp
+   med ei liste attum, ikkje ei renna. */
+:where(input:not([type="checkbox"]):not([type="radio"]), textarea) {
+  box-shadow: var(--skraakant);
+}
+/* ---- fasetten ----
+   Eit felt ligg *i* arket og ikkje paa det. Skuggen fell inn i det
+   ovanfraa, som i ei fasettsliping, og det er den vesle djupna som
+   segjer «her kann du skriva» — utan eit einaste ord, og utan ei ramma
+   som ropar.
+
+   Difor stend han paa *alle* felt heile tidi, ikkje berre paa det ein
+   held paa med. Var han berre i fokus, laut ein klikka rundt for aa
+   finna ut kva som let seg endra. Ved fokus kjem merkefargen attaat:
+   djupna segjer «skrivbar», fargen segjer «her er du no».
+
+   Han er skriven ein stad og nytta av alle, so kvar ny kontroll fell i
+   det same sporet utan at nokon tenkjer paa det. */
+:root {
+  --fordjuping: inset 0 1px 2px color-mix(in srgb, var(--blekk) 12%, transparent);
+  --fasett:
+    inset 0 1px 2px color-mix(in srgb, var(--blekk) 16%, transparent),
+    0 0 0 1px var(--merke);
+}
+/* Dei tvo ovanfor er ikkje nytta av noko lenger — skraakanten tok yver
+   den 27. august 2026. Dei stend att med vilje so lenge skraakanten er
+   ny: heile umbytet er `var(--skraakant)` → `var(--fordjuping)` og
+   `var(--skraakant-fasett)` → `var(--fasett)`, og det er ein sed unna aa
+   gjera um. Vert skraakanten verande, skal dei tvo ut, og FASETTEN §1
+   med deim. */
+
+/* ---- skraakanten ----
+   Fasetten er éi lippa. Skraakanten er tvo: den myrke uppe og ei ljos
+   nede. Tvo lippor er ikkje ein sterkare fasett — det er ei anna form.
+   Éi segjer «her byrjar noko»; tvo segjer «her er eit hol med ein botn
+   du ser ned i». Sjaa docs/SKRAAKANTEN.md.
+
+   Lippone og retningi deira stend i `:root` uppe med `--glans`, av di
+   dei skifter med temaet og lyt staa fyre `[data-theme="dark"]` i fila.
+   Her stend berre formene som er bygde av deim. */
+:root {
+  /* Den myrke lippa er ein skugge og skal vera mjuk; den ljose er
+     kanten sjølv som fangar ljoset, og er difor skarpare. */
+  --skraakant:
+    inset 0  1px 2px var(--lippe-djup),
+    inset 0 -1px 1px var(--lippe-ljos);
+
+  /* Vika og den tome dagen. Same lippone, berre lenger inn: tvo pikslar
+     i staden for éin, og eit spreidingstal som held draget smalt. Djupni
+     er *geometri* og ikkje farge — hadde ho vore farge med, hadde ho
+     trunge sitt eige tema-tal, og daa er det tvo ting aa halda i takt
+     der det held med eitt. */
+  --skraakant-djup:
+    inset 0  2px 2px -1px var(--lippe-djup),
+    inset 0 -2px 1px -1px var(--lippe-ljos);
+
+  /* Djupna vert ikkje djupare i fokus. Det grepet fanst av di ringen
+     aaleine var for lite; med tvo lippor er forma alt tydeleg i kvila,
+     og eit felt som ogso skifter djupn naar du tek i det, rører seg
+     meir enn det seier. */
+  --skraakant-fasett: var(--skraakant), 0 0 0 1px var(--merke);
+}
+
+input:hover:not([type="checkbox"]):not([type="radio"]), textarea:hover {
+  background-color: color-mix(in srgb, var(--blekk) 5%, var(--flate));
+}
+input:focus, textarea:focus { outline: none; box-shadow: var(--skraakant-fasett); }
+select:focus { outline: none; border-color: var(--merke); box-shadow: var(--skraakant-fasett); }
+select {
+  /* Eit skrivefelt strekkjer seg, av di ingen veit kor langt det ein
+     skriv vert. Ein veljar veit det: valdi stend der alt. Difor er han
+     so brei som det breidaste valet og ikkje ein piksel meir — ein
+     tidssoneveljar som tok heile spalta lova ei fridom som ikkje fanst.
+     `max-width: 100%` er taket, so eit langt val ikkje skuvar spalta. */
+  width: auto;
+  max-width: 100%;
+
+  /* Nedfallslista er den eine tingen som *faktisk* flyt. */
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 1.05rem top 50%, right .8rem top 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: var(--rom-7);
+}
+
+.error, .login-error {
+  color: var(--aatvaring);
+  background: var(--aatvaring-svak);
+  border: 1px solid var(--aatvaring);
+  border-radius: 2px;
+  padding: var(--rom-3) var(--rom-4);
+  font-size: .92rem;
+  margin-bottom: var(--rom-4);
+}
+.success {
+  color: var(--merke);
+  background: var(--merke-svak);
+  border: 1px solid var(--merke);
+  border-radius: 2px;
+  padding: var(--rom-3) var(--rom-4);
+  font-size: .92rem;
+  margin-bottom: var(--rom-4);
+}

@@ -75,7 +75,7 @@ func ArketHandler(w http.ResponseWriter, r *http.Request) {
 	lang := GetLanguageFromRequest(r)
 
 	maandag, naa, hendingar := merkeVika()
-	merkeprovor := Framsyningar(lang, hendingar, naa)
+	merkeprovor := BuildSessions(lang, hendingar, naa)
 	vikedagar := make([]time.Time, 7)
 	for i := range vikedagar {
 		vikedagar[i] = maandag.AddDate(0, 0, i)
@@ -91,7 +91,7 @@ func ArketHandler(w http.ResponseWriter, r *http.Request) {
 		"Merkeprovor": merkeprovor,
 		// Vika gjeng gjenom KlemVika som i timeplanen, so verkstaden
 		// syner rutenetet med den same koden — ikkje ei etterlikning.
-		"Timebolkar": KlemVika(lang, hendingar, naa, maandag),
+		"ClassRows": BuildWeekRows(lang, hendingar, naa, maandag),
 		"WeekDays": []string{
 			t(lang, "timeplan.monday"), t(lang, "timeplan.tuesday"),
 			t(lang, "timeplan.wednesday"), t(lang, "timeplan.thursday"),
