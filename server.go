@@ -94,6 +94,11 @@ func main() {
 	r.Handle("/static/*", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if strings.HasPrefix(req.URL.Path, "/static/fonts/") {
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		} else if !handlers.IsDevelopment() && req.URL.Query().Get("v") != "" &&
+			(strings.HasPrefix(req.URL.Path, "/static/css/") || strings.HasPrefix(req.URL.Path, "/static/js/")) {
+			// Malane legg eit innhaldsavtrykk på CSS- og JS-adressene. Ein
+			// ny utgåve får ny adresse, så denne kan trygt bufrast hardt.
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		} else if strings.HasPrefix(req.URL.Path, "/static/img/") {
 			// Bilete er ikkje skrifter — ein *kann* retta ein SVG medan
 			// ein arbeider — men dei skal ikkje hentast paa nytt for

@@ -138,16 +138,16 @@
     "medlemskap_ingen": "Intet medlemskap"
   },
   "charges": {
-    "title": "Belastninger",
-    "no_charges": "Ingen belastninger funnet.",
+    "title": "Avgifter",
+    "no_charges": "Ingen avgifter funnet.",
     "payment_method_removed": "Betalingsmetode fjernet",
     "status": {
       "succeeded": "Vellykket",
       "failed": "Mislykket",
       "pending": "Venter"
     },
-    "loading": "Laster belastninger…",
-    "could_not_load": "Kunne ikke laste belastningene."
+    "loading": "Laster avgifter…",
+    "could_not_load": "Kunne ikke laste avgiftene."
   },
   "payments": {
     "title": "Betalinger",
@@ -168,7 +168,7 @@
     "expires": "Utløper",
     "no_payment_methods": "Du har ikke lagt inn noe kort.",
     "card_ending": "kort som ender på %s",
-    "remove_note": "Et kort du fjerner blir borte fra kontoen med en gang.",
+    "remove_note": "Et kort du fjerner er borte fra kontoen med en gang.",
     "add_not_connected": "Å legge til kort er ikke koblet på ennå. Studioet legger inn kortet ditt for deg.",
     "could_not_load_payment_methods": "Kunne ikke laste kortene.",
     "action_failed": "Det gikk ikke. Prøv igjen.",
@@ -178,7 +178,7 @@
   },
   "membership": {
     "title": "Medlemskap",
-    "no_membership": "Ingen medlemskap funnet.",
+    "no_membership": "Intet medlemskap funnet.",
     "freeze": "Frys",
     "unfreeze": "Opphev frysing",
     "change": "Endre",
@@ -186,7 +186,7 @@
     "cancel_request": "Kanseller forespørsel",
     "price_per_month": "kr/mnd",
     "commitment_months": "måneders binding",
-    "frozen_until": "Frossent til",
+    "frozen_until": "Fryst til",
     "next_renewal": "Neste fornyelse",
     "in": "om",
     "days": "dager",
@@ -197,7 +197,7 @@
   },
   "klippekort": {
     "title": "Klippekort",
-    "no_klippekort": "Ingen klippekort funnet.",
+    "no_klippekort": "Intet klippekort funnet.",
     "remaining": "gjenstående",
     "days_until_expiry": "dager til utløp",
     "expires": "utløper",
@@ -359,10 +359,10 @@
       "actions": "Handlinger"
     },
     "alerts": {
-      "approve_freeze_confirm": "Er du sikker på at du vil godkjenne frysingsforespørselen?",
-      "reject_freeze_confirm": "Er du sikker på at du vil avvise frysingsforespørselen?",
-      "freeze_approved": "Frysingsforespørsel godkjent!",
-      "freeze_rejected": "Frysingsforespørsel avvist!",
+      "approve_freeze_confirm": "Er du sikker på at du vil godkjenne frysningsforespørselen?",
+      "reject_freeze_confirm": "Er du sikker på at du vil avvise frysningsforespørselen?",
+      "freeze_approved": "Frysningsforespørsel godkjent!",
+      "freeze_rejected": "Frysningsforespørsel avvist!",
       "event_updated": "Event tid oppdatert!",
       "time_fields_required": "Begge tidsfelt må fylles ut",
       "error_prefix": "Feil: "
@@ -472,8 +472,8 @@
     "only_for": "bare for",
     "open_to_all": "åpen for alle",
     "rabatt_title": "Studentrabatt",
-    "rabatt_none": "Ingen krav venter på svar.",
-    "rabatt_note": "En godkjenning gjelder i %d år. Etter det må beviset vises på nytt.",
+    "rabatt_none": "Intet krav venter på svar.",
+    "rabatt_note": "Ei godkjenning gjelder i %d år. Etter det må beviset vises på nytt.",
     "rabatt_godkjend": "Godkjent",
     "rabatt_avvist": "Avvist",
     "rabatt_borte": "Kravet er allerede avgjort.",

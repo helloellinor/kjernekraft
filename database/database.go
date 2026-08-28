@@ -447,7 +447,7 @@ func lagRegister(db *sql.DB) error {
 		`CREATE INDEX IF NOT EXISTS idx_user_memberships_status ON user_memberships(status)`,
 		`CREATE INDEX IF NOT EXISTS idx_brukarloyve_user ON brukarloyve(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_user_payment_methods_user ON user_payment_methods(user_id)`,
-		// Timeplanen hentar ei veke um gongen: BETWEEN paa start_time.
+		// Timeplanen hentar ei halvopen veke um gongen på start_time.
 		`CREATE INDEX IF NOT EXISTS idx_events_start ON events(start_time)`,
 		`CREATE INDEX IF NOT EXISTS idx_events_serie ON events(serie_id)`,
 		// Innloggingi slær upp e-post for kvar freistnad.
@@ -1308,8 +1308,10 @@ func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 // GetEventsForWeek gjev veka slik `sjaaarID` skal sjaa henne: alle opne
 // timar, og dei private som er hans eigne. Sjaa privattime.go.
 func (db *Database) GetEventsForWeek(mondayDate time.Time, sjaaarID int64) ([]models.Event, error) {
-	// Calculate the Sunday of the same week
-	sundayDate := mondayDate.AddDate(0, 0, 6)
+	// Halvopen veke: måndag 00:00 til neste måndag 00:00. Han let
+	// SQLite nytta idx_events_start; DATE(e.start_time) gjorde kvar
+	// time til ei funksjonsutrekning og tvinga fram tabellskann.
+	nesteMaandag := mondayDate.AddDate(0, 0, 7)
 
 	// Kapasiteten kjem av rommet. Timen kann setja henne lægre — ein
 	// workshop i salen med ti plassar — men han kann ikkje setja henne
@@ -1323,13 +1325,13 @@ func (db *Database) GetEventsForWeek(mondayDate time.Time, sjaaarID int64) ([]mo
 		       COALESCE(r.id, 0), COALESCE(r.name, e.location, ''), COALESCE(r.capacity, 0)
 		FROM events e
 		LEFT JOIN rooms r ON r.id = e.room_id
-		WHERE DATE(e.start_time) >= DATE(?)
-		AND DATE(e.start_time) <= DATE(?)
+		WHERE e.start_time >= ?
+		AND e.start_time < ?
 		AND ` + synlegFor + `
 		ORDER BY e.start_time ASC
 	`
 	rows, err := db.Conn.Query(query,
-		mondayDate.Format("2006-01-02"), sundayDate.Format("2006-01-02"), sjaaarID, sjaaarID)
+		veggtekst(mondayDate), veggtekst(nesteMaandag), sjaaarID, sjaaarID)
 	if err != nil {
 		return nil, err
 	}
@@ -1594,18 +1596,24 @@ func (db *Database) AuthenticateUser(email, password string) (*models.User, erro
 func (db *Database) GetUserByID(userID int64) (*models.User, error) {
 	var user models.User
 
-	query := `SELECT id, name, COALESCE(birthdate, ''), email, COALESCE(phone, ''),
-	                 COALESCE(address, ''), COALESCE(postal_code, ''), COALESCE(city, ''),
-	                 COALESCE(country, ''), newsletter_subscription, terms_accepted,
-	                 COALESCE(student_senior, 0), student_senior_gjeng_ut
-	          FROM users WHERE id = ?`
+	query := `SELECT u.id, u.name, COALESCE(u.birthdate, ''), u.email, COALESCE(u.phone, ''),
+	                 COALESCE(u.address, ''), COALESCE(u.postal_code, ''), COALESCE(u.city, ''),
+	                 COALESCE(u.country, ''), u.newsletter_subscription, u.terms_accepted,
+	                 COALESCE(u.student_senior, 0), u.student_senior_gjeng_ut,
+	                 COALESCE(GROUP_CONCAT(r.name), '')
+	          FROM users u
+	          LEFT JOIN brukarloyve ur ON ur.user_id = u.id
+	          LEFT JOIN loyve r ON r.id = ur.loyve_id
+	          WHERE u.id = ?
+	          GROUP BY u.id`
 
 	var gjengUt sql.NullTime
+	var loyveTekst string
 	err := db.Conn.QueryRow(query, userID).Scan(
 		&user.ID, &user.Name, &user.Birthdate, &user.Email, &user.Phone, &user.Address,
 		&user.PostalCode, &user.City, &user.Country,
 		&user.NewsletterSubscription, &user.TermsAccepted, &user.StudentSenior,
-		&gjengUt,
+		&gjengUt, &loyveTekst,
 	)
 
 	if err != nil {
@@ -1616,13 +1624,9 @@ func (db *Database) GetUserByID(userID int64) (*models.User, error) {
 	}
 
 	user.StudentSeniorGjengUt = gjengUt.Time
-
-	// Løyvi brukaren hev
-	loyve, err := db.LoyveFor(userID)
-	if err != nil {
-		return nil, err
+	if loyveTekst != "" {
+		user.Loyve = strings.Split(loyveTekst, ",")
 	}
-	user.Loyve = loyve
 
 	return &user, nil
 }
@@ -2376,24 +2380,44 @@ type Person struct {
 // vita kva som krev noko av henne.
 func (db *Database) FolkOversyn() ([]Person, error) {
 	rows, err := db.Conn.Query(`
+		WITH
+		loyve_per_brukar AS (
+			SELECT ur.user_id, GROUP_CONCAT(r.name, ', ') AS loyve
+			FROM brukarloyve ur
+			JOIN loyve r ON r.id = ur.loyve_id
+			GROUP BY ur.user_id
+		),
+		grupper_per_brukar AS (
+			SELECT user_id, GROUP_CONCAT(gruppe_id) AS grupper
+			FROM gruppemedlem
+			GROUP BY user_id
+		),
+		klipp_per_brukar AS (
+			SELECT user_id, SUM(remaining_klipp) AS att, SUM(total_klipp) AS totalt
+			FROM user_klippekort
+			GROUP BY user_id
+		),
+		aktivitet_per_brukar AS (
+			SELECT es.user_id,
+			       MAX(CASE WHEN e.start_time < CURRENT_TIMESTAMP THEN e.start_time END) AS sist_her,
+			       SUM(CASE WHEN e.start_time < CURRENT_TIMESTAMP
+			                 AND e.start_time > datetime('now', '-1 year') THEN 1 ELSE 0 END) AS timar_i_aar
+			FROM event_signups es
+			JOIN events e ON e.id = es.event_id
+			GROUP BY es.user_id
+		)
 		SELECT u.id, u.name, u.email, COALESCE(u.phone, ''), COALESCE(u.birthdate, ''),
-		       COALESCE((SELECT GROUP_CONCAT(r.name, ', ') FROM brukarloyve ur
-		                 JOIN loyve r ON r.id = ur.loyve_id WHERE ur.user_id = u.id), ''),
-		       COALESCE((SELECT GROUP_CONCAT(gm.gruppe_id) FROM gruppemedlem gm
-		                 WHERE gm.user_id = u.id), ''),
+		       COALESCE(lp.loyve, ''), COALESCE(gp.grupper, ''),
 		       COALESCE(m.name, ''), COALESCE(um.status, ''), COALESCE(m.price, 0),
-		       COALESCE((SELECT SUM(uk.remaining_klipp) FROM user_klippekort uk WHERE uk.user_id = u.id), 0),
-		       COALESCE((SELECT SUM(uk.total_klipp) FROM user_klippekort uk WHERE uk.user_id = u.id), 0),
-		       (SELECT MAX(e.start_time) FROM event_signups es
-		        JOIN events e ON e.id = es.event_id
-		        WHERE es.user_id = u.id AND e.start_time < CURRENT_TIMESTAMP),
-		       COALESCE((SELECT COUNT(*) FROM event_signups es
-		                 JOIN events e ON e.id = es.event_id
-		                 WHERE es.user_id = u.id AND e.start_time < CURRENT_TIMESTAMP
-		                 AND e.start_time > datetime('now', '-1 year')), 0)
+		       COALESCE(kp.att, 0), COALESCE(kp.totalt, 0),
+		       ap.sist_her, COALESCE(ap.timar_i_aar, 0)
 		FROM users u
 		LEFT JOIN user_memberships um ON um.user_id = u.id AND um.status != 'cancelled'
 		LEFT JOIN memberships m ON m.id = um.membership_id
+		LEFT JOIN loyve_per_brukar lp ON lp.user_id = u.id
+		LEFT JOIN grupper_per_brukar gp ON gp.user_id = u.id
+		LEFT JOIN klipp_per_brukar kp ON kp.user_id = u.id
+		LEFT JOIN aktivitet_per_brukar ap ON ap.user_id = u.id
 		ORDER BY u.name COLLATE NOCASE`)
 	if err != nil {
 		return nil, err

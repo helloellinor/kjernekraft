@@ -8,7 +8,7 @@
 
     <!-- Eitt stilark for heile staden. Det stod i tjugofem <style>-blokkar
          fyrr, og seks av deim vart lasta inn i kvar einaste sida. -->
-    <link rel="icon" href="/static/img/kjernekraft.svg" type="image/svg+xml">
+    <link rel="icon" href="{{asset "img/kjernekraft.svg"}}" type="image/svg+xml">
 
     {{/* Skriftene vert henta fyrr stilarket bed um deim. Utan dette
          finn nettlesaren dei fyrst naar han hev lese ferdig CSS-en og
@@ -18,10 +18,10 @@
 
          `crossorigin` lyt staa. Skrifter vert alltid henta anonymt, og
          ein preload utan honom hentar fila ein gong til. */}}
-    <link rel="preload" href="/static/fonts/UnionGothic-Variable.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/static/fonts/Ubuntu-R.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{asset "fonts/UnionGothic-Variable.woff2"}}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{asset "fonts/Ubuntu-R.woff2"}}" as="font" type="font/woff2" crossorigin>
 
-    <link rel="stylesheet" href="/static/css/kjernekraft.css">
+    <link rel="stylesheet" href="{{asset "css/kjernekraft.css"}}">
 
     {{if .ExternalCSS}}{{range .ExternalCSS}}
     <link rel="stylesheet" href="{{.}}">
@@ -48,18 +48,37 @@
          einaste sida som gjeng gjenom denne malen, so `hx-get` paa
          paameldingslista henta aldri noko — ho stod og lasta i all
          æva. csrf.js hektar seg paa honom, og lyt difor koma etter. -->
-    <script src="/static/js/htmx.min.js"></script>
-    <script src="/static/js/csrf.js"></script>
-    <script src="/static/js/ljosband.js"></script>
-    <script src="/static/js/klistrelag.js"></script>
-    <script src="/static/js/faner.js"></script>
-    <script src="/static/js/dokk.js"></script>
-    <script src="/static/js/stadfest.js"></script>
-    <script src="/static/js/folk.js"></script>
-    <script src="/static/js/timeplan-veke.js"></script>
-    <script src="/static/js/dagfokus.js"></script>
-    <script src="/static/js/endringar.js"></script>
-    <script src="/static/js/prisar.js"></script>
+    {{/* Dei fire fyrste tener fleire sidone. `defer` let HTML-en verta
+         teikna fyrst og held rekkjefylgda (htmx før CSRF). */}}
+    <script defer src="{{asset "js/htmx.min.js"}}"></script>
+    <script defer src="{{asset "js/csrf.js"}}"></script>
+    <script defer src="{{asset "js/ljosband.js"}}"></script>
+    <script defer src="{{asset "js/klistrelag.js"}}"></script>
+
+    {{/* Resten høyrer til éi eller få sidone. Å senda alle til kvar
+         innlogging, vilkårsside og heimeside gav over 40 kB unødvendig
+         JavaScript i tillegg til htmx. */}}
+    {{if or (eq .CurrentPage "klippekort") (eq .CurrentPage "medlemskap") (eq .CurrentPage "betaling") (eq .CurrentPage "admin") (eq .CurrentPage "arket")}}
+    <script defer src="{{asset "js/faner.js"}}"></script>
+    {{end}}
+    {{if or (eq .CurrentPage "hjem") (eq .CurrentPage "timeplan")}}
+    <script defer src="{{asset "js/dokk.js"}}"></script>
+    {{end}}
+    {{if or (eq .CurrentPage "medlemskap") (eq .CurrentPage "betaling") (eq .CurrentPage "admin")}}
+    <script defer src="{{asset "js/stadfest.js"}}"></script>
+    {{end}}
+    {{if eq .CurrentPage "admin"}}
+    <script defer src="{{asset "js/folk.js"}}"></script>
+    <script defer src="{{asset "js/endringar.js"}}"></script>
+    <script defer src="{{asset "js/prisar.js"}}"></script>
+    {{end}}
+    {{if eq .CurrentPage "profil"}}
+    <script defer src="{{asset "js/endringar.js"}}"></script>
+    {{end}}
+    {{if eq .CurrentPage "timeplan"}}
+    <script defer src="{{asset "js/timeplan-veke.js"}}"></script>
+    <script defer src="{{asset "js/dagfokus.js"}}"></script>
+    {{end}}
 
     {{if .JS}}<script>{{.JS}}</script>{{end}}
     {{if .ExternalJS}}{{range .ExternalJS}}

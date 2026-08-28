@@ -134,6 +134,8 @@ func StilarkHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/css; charset=utf-8")
 	if IsDevelopment() {
 		w.Header().Set("Cache-Control", "no-store")
+	} else if r.URL.Query().Get("v") != "" {
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 	} else {
 		w.Header().Set("Cache-Control", "public, max-age=300")
 	}

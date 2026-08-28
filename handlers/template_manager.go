@@ -57,6 +57,7 @@ func GetTemplateManager() *TemplateManager {
 func getTemplateFuncs() template.FuncMap {
 	settings := config.GetInstance()
 	return template.FuncMap{
+		"asset": staticURL,
 		// Klassetypen som ein CSS-krok. Verdet kjem raatt fraa
 		// `events.class_type`, der administrasjonen skriv fritt, so det
 		// vert vaska: smaa bokstavar og ingen ting utanum a-z. Er det

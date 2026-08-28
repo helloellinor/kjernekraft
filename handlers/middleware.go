@@ -22,6 +22,14 @@ const (
 // basesoknader.
 func WithUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Statiske filer treng aldri brukaren. Nettlesaren sender likevel
+		// øktkaka med kvar CSS-, JS- og biletforespurnad, so utan dette
+		// vernet vart det ei basesøkning per fil for innlogga brukarar.
+		if strings.HasPrefix(r.URL.Path, "/static/") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		// I utvikling skal alt som ligg paa disken lesast paa nytt —
 		// malar, stilark og umsetjingar. Elles ser ein nykelen sjølv og
 		// trur ein hev skrive han gale.

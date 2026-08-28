@@ -79,7 +79,7 @@
                              lista so ingen vel eit namn naar dei meinte
                              ei gruppa. */}}
                         <optgroup label="{{t .Lang "admin.one_person"}}">
-                            {{range $.Users}}<option value="p{{.ID}}">{{.Name}}</option>{{end}}
+                            {{range $.Folk}}<option value="p{{.ID}}">{{.Namn}}</option>{{end}}
                         </optgroup>
                     </select>.
                     <button type="submit" class="btn-primary">{{t .Lang "admin.create_class"}}</button>

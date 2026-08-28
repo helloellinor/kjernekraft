@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"kjernekraft/handlers/config"
+	"kjernekraft/handlers/modules"
 	"kjernekraft/models"
 	"log"
 	"net/http"
@@ -67,15 +68,19 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Klipp ein *kann bruke*: utgjengne kort og tome kort er ikkje noko
 	// ein hev att, og eit tal som tel deim med lovar meir enn det finst.
+	var klippekortModul *modules.KlippekortModuleData
 	klippAtt := 0
 	if kort, err := DB.GetUserKlippekort(int64(user.ID)); err != nil {
 		log.Printf("klippekort for %d: %v", user.ID, err)
 	} else {
-		for _, k := range kort {
-			if k.RemainingKlipp > 0 && k.ExpiryDate.After(now) {
-				klippAtt += k.RemainingKlipp
-			}
+		klippAtt = klargjerKlippekort(kort, now)
+		klippekortModul, err = modules.NewKlippekortModule(kort, lang)
+		if err != nil {
+			log.Printf("klippekortmodul for %d: %v", user.ID, err)
 		}
+	}
+	if klippekortModul == nil {
+		klippekortModul, _ = modules.NewKlippekortModule([]models.KlippekortWithDetails{}, lang)
 	}
 
 	naar := HelsingNaar(lang, neste, now)
@@ -91,15 +96,16 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	// AktivitetFraa, so baae bileti fær tal for heile tidsrommet sitt.
 	const aktivitetVekor = 52 // eit heilt aar, ei vika per prikk
 	fraa := ActivityStart(now, aktivitetVekor)
-	perDag, err := DB.AktivitetPerDag(int64(user.ID), fraa, now)
-	perType, feil := DB.AktivitetPerDagType(int64(user.ID), fraa, now)
-	if feil != nil {
-		log.Printf("aktivitet per type for %d: %v", user.ID, feil)
+	perType, err := DB.AktivitetPerDagType(int64(user.ID), fraa, now)
+	if err != nil {
+		log.Printf("aktivitet per type for %d: %v", user.ID, err)
 		perType = map[string]map[string]int{}
 	}
-	if err != nil {
-		log.Printf("aktivitet for %d: %v", user.ID, err)
-		perDag = map[string]int{}
+	perDag := make(map[string]int, len(perType))
+	for dag, typar := range perType {
+		for _, tal := range typar {
+			perDag[dag] += tal
+		}
 	}
 
 	// Medlemskapet stend som eitt merke her; forvaltningi ligg paa
@@ -145,6 +151,7 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		"MedlemskapNamn":    medlemsnamn,
 		"HelsingTittel":     HelsingTittel(lang, user.Name, naar, now, ferdig != nil),
 		"Briefing":          NyBriefing(lang, neste, now, iVeka, klippAtt),
+		"KlippekortModul":   klippekortModul,
 		"Title":             "Elev Dashboard",
 		"AvailableSessions": ledige,
 		"EnrolledSessions":  paamelde,

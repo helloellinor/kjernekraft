@@ -341,7 +341,7 @@ func EnrolledSessions(userID int64, lang string, naa time.Time) ([]Session, erro
 // um ein time du alt stod paa, og dokka hadde bode deg det same ein
 // gong til.
 func AvailableSessions(userID int64, lang string, naa time.Time) ([]Session, error) {
-	ledige, err := DB.LedigeTimar(userID)
+	ledige, err := DB.LedigeTimar(userID, naa)
 	if err != nil {
 		return nil, err
 	}

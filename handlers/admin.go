@@ -15,12 +15,6 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Ligg denne handsamaren nokon gong utanfor den gruppa, er
 	// administrasjonen open att.
 
-	users, err := AdminDB.GetAllUsers()
-	if err != nil {
-		http.Error(w, "Kunne ikke hente brukere", http.StatusInternalServerError)
-		return
-	}
-
 	events, err := AdminDB.GetAllEvents()
 	if err != nil {
 		log.Printf("admin: kunde ikkje henta timar: %v", err)
@@ -46,17 +40,21 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// kunde koma på kvar sitt maal.
 	lang := GetLanguageFromRequest(r)
 
-	// Create admin stats module
-	statsModule, err := modules.NewAdminStatsModule(len(users), len(events), len(freezeRequests), lang)
+	folk, err := AdminDB.FolkOversyn()
+	if err != nil {
+		log.Printf("folkeoversyn: %v", err)
+		http.Error(w, "Kunne ikke hente brukere", http.StatusInternalServerError)
+		return
+	}
+
+	// FolkOversyn er både medlemslista og kjelda til PT-veljaren. Før
+	// vart alle brukarar henta ein gong til berre for den vesle veljaren;
+	// GetAllUsers slo dessutan opp løyve éin gong per brukar.
+	statsModule, err := modules.NewAdminStatsModule(len(folk), len(events), len(freezeRequests), lang)
 	if err != nil {
 		log.Printf("Error creating admin stats module: %v", err)
 		http.Error(w, "Error creating admin module", http.StatusInternalServerError)
 		return
-	}
-
-	folk, err := AdminDB.FolkOversyn()
-	if err != nil {
-		log.Printf("folkeoversyn: %v", err)
 	}
 
 	rooms, err := AdminDB.GetRooms()
@@ -95,7 +93,6 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		"Folk":           folk,
 		"Teachers":       laerarar,
 		"Title":          t(lang, "admin.title"),
-		"Users":          users,
 		"Events":         events,
 		"Grupper":        grupper,
 		"Rabattkrav":     rabattkrav,
