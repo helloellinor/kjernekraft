@@ -25,7 +25,8 @@
     "no_account": "Har du ikke konto ennå?",
     "create_account": "Opprett konto",
     "error_invalid": "Feil e-post eller passord.",
-    "error_blocked": "For mange forsøk. Prøv igjen om et kvarter."
+    "error_blocked": "For mange forsøk. Prøv igjen om et kvarter.",
+    "error_technical": "Noe gikk galt hos oss. Prøv igjen om et øyeblikk."
   },
   "profile": {
     "title": "Min profil",

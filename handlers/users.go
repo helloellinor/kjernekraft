@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"html"
 	"kjernekraft/database"
 	"kjernekraft/models"
@@ -62,7 +63,7 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 		// mange adressor mot den same kontoen vert stogga av den hine.
 		ipKey := "ip:" + clientKey(r)
 		userKey := "e-post:" + email
-		if loginAttempts.Blocked(ipKey) || loginAttempts.Blocked(userKey) {
+		if bremsaPaa() && (loginAttempts.Blocked(ipKey) || loginAttempts.Blocked(userKey)) {
 			http.Redirect(w, r, "/innlogging?error=blocked", http.StatusSeeOther)
 			return
 		}
@@ -70,6 +71,17 @@ func InnloggingHandler(w http.ResponseWriter, r *http.Request) {
 		// Validate credentials
 		user, err := DB.AuthenticateUser(email, password)
 		if err != nil {
+			// Eit gale passord og ein feil i basen er tvo ulike ting, og
+			// dei var det same her fyrr: kvar feil vart til «ugyldig
+			// e-post eller passord». Ein brukar som ikkje kunde logga inn
+			// av di eit felt i basen var NULL fekk vita at han hugsa
+			// gale, og han hugsa rett. Ingen ting nokon stad sa kva som
+			// verkeleg hende — korkje til honom eller til oss.
+			if !errors.Is(err, database.ErrUgyldigInnlogging) {
+				log.Printf("innlogging for %q: %v", email, err)
+				http.Redirect(w, r, "/innlogging?error=teknisk", http.StatusSeeOther)
+				return
+			}
 			loginAttempts.Fail(ipKey)
 			loginAttempts.Fail(userKey)
 			http.Redirect(w, r, "/innlogging?error=invalid", http.StatusSeeOther)
@@ -115,6 +127,8 @@ func loginError(code string) string {
 		return "login.error_invalid"
 	case "blocked":
 		return "login.error_blocked"
+	case "teknisk":
+		return "login.error_technical"
 	default:
 		return ""
 	}

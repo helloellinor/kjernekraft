@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"kjernekraft/models"
 	"log"
@@ -1638,11 +1639,33 @@ func (db *Database) GetUserKlippekort(userID int64) ([]models.KlippekortWithDeta
 // Authentication methods
 
 // AuthenticateUser verifies user credentials and returns user info if valid
+// ErrUgyldigInnlogging tyder at e-posten ikkje finst eller passordet er
+// gale — og ingen ting anna. Alle andre feil er feil i huset, og dei
+// skal ikkje kled seg ut som dette.
+var ErrUgyldigInnlogging = errors.New("ugyldig e-post eller passord")
+
 func (db *Database) AuthenticateUser(email, password string) (*models.User, error) {
 	var user models.User
 	var hashedPassword string
 
-	query := `SELECT id, name, email, phone, address, postal_code, city, country, password, newsletter_subscription, terms_accepted
+	// COALESCE paa dei fire som kann vera NULL i skjemaet — adresse,
+	// postnummer, by og land. Dei stod nakne her, og daa fall `Scan`
+	// med «converting NULL to string is unsupported» for kvar brukar som
+	// ikkje hadde fylt ut adressa si.
+	//
+	// Det aaleine hadde vore ein feil ein fann med ein gong. Det som
+	// gjorde honom farleg var at han kom ut som *feil passord*: kvar
+	// feil herifraa vart til «ugyldig e-post eller passord» i
+	// handsamaren. Brukaren fekk vita at han hugsa gale, og det gjorde
+	// han ikkje — han kunde ikkje logga inn i det heile, og ingen ting
+	// nokon stad sa kvifor. Seks av aatte brukarar i basen var i den
+	// stoda daa dette vart funne.
+	//
+	// `GetUserByID` hadde COALESCE paa dei same fire fraa fyrr. Denne
+	// var berre gløymd.
+	query := `SELECT id, name, email, COALESCE(phone, ''), COALESCE(address, ''),
+	                 COALESCE(postal_code, ''), COALESCE(city, ''), COALESCE(country, ''),
+	                 password, newsletter_subscription, terms_accepted
 	          FROM users WHERE email = ?`
 
 	err := db.Conn.QueryRow(query, email).Scan(
@@ -1653,15 +1676,17 @@ func (db *Database) AuthenticateUser(email, password string) (*models.User, erro
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("ugyldig e-post eller passord")
+			return nil, ErrUgyldigInnlogging
 		}
-		return nil, err
+		// Ein feil i basen er ikkje eit gale passord, og skal ikkje
+		// segjast som um han var det.
+		return nil, fmt.Errorf("uppslag av brukar: %w", err)
 	}
 
 	// Verify password
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
-		return nil, fmt.Errorf("ugyldig e-post eller passord")
+		return nil, ErrUgyldigInnlogging
 	}
 
 	// Løyvi brukaren hev

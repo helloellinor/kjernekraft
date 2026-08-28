@@ -25,7 +25,8 @@
     "no_account": "Har du ikkje konto enno?",
     "create_account": "Opprett konto",
     "error_invalid": "Feil e-post eller passord.",
-    "error_blocked": "For mange freistnader. Prøv att um eit kvarter."
+    "error_blocked": "For mange freistnader. Prøv att um eit kvarter.",
+    "error_technical": "Noko gjekk gale hjaa oss. Prøv att om eit augneblink."
   },
   "profile": {
     "title": "Min profil",

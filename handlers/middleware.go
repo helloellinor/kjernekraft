@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -201,7 +202,31 @@ func withCSRFToken(r *http.Request, token string) *http.Request {
 const (
 	maxLoginAttempts = 10
 	loginWindow      = 15 * time.Minute
+
+	// Bremsa er av til vanleg, og ho vert slegi paa med
+	// KJERNEKRAFT_INNLOGGINGSBREMS=paa.
+	//
+	// AVGJORD 2026-08-28: ho skal ikkje staa paa medan huset er nytt.
+	// Ei bremsa som stengjer feil folk ute er eit verre problem enn ei
+	// som ikkje stengjer nokon: den fyrste ser ut som at sida er nede,
+	// og han som vert ramma er ein kunde som gjorde alt rett. Me veit
+	// ikkje enno korleis ho ter seg mot verkeleg trafikk, og eit hus
+	// som ikkje er ope er ikkje trygt — det er berre stengt.
+	//
+	// Det som *var* farleg er retta same dagen og uavhengig av dette:
+	// nykelen var den same for alle bak tunnelen, so ti bomma passord
+	// stengde heile huset. Sjaa `clientKey`. Den lyten kjem ikkje att
+	// naar bremsa vert slegi paa.
+	//
+	// Slaa henne paa naar det er verkelege kundar her. Utan henne kann
+	// eit passord gissast so fort maskini orkar.
+	bremsEnv = "KJERNEKRAFT_INNLOGGINGSBREMS"
 )
+
+// bremsaPaa segjer um innloggingsbremsa er slegi paa.
+func bremsaPaa() bool {
+	return os.Getenv(bremsEnv) == "paa"
+}
 
 type attemptCounter struct {
 	mu       sync.Mutex
@@ -254,16 +279,63 @@ func (c *attemptCounter) sweep() {
 	}
 }
 
-// clientKey er kjelda soknaden kjem fraa. Bak ein umvend mellomtenar er
-// RemoteAddr adressa aat mellomtenaren, og daa bremsar me heile verdi
-// under eitt. X-Forwarded-For er ikkje lesen med vilje: han er ei
-// hovudlina kven som helst kann dikta upp, og daa bremsar me ingen.
+// clientKey er kjelda soknaden kjem fraa.
+//
+// Han las berre `RemoteAddr` fyrr, og kommentaren her sa sjølv kva det
+// tydde: «bak ein umvend mellomtenar er RemoteAddr adressa aat
+// mellomtenaren, og daa bremsar me heile verdi under eitt». Det var
+// ikkje ein teoretisk lyte — det var stoda i drift. Tunnelen kjem inn
+// paa 127.0.0.1, so *kvar* brukar hadde den same nykelen, og ti bomma
+// passord fraa kven som helst stengde heile huset ute i femtan minutt.
+// Prøvt: Solfrid kom inn, ein framand bomma ti gonger, og Solfrid kom
+// ikkje inn meir med rett passord.
+//
+// Den gamle grunngjevingi var likevel rett so langt ho rakk:
+// `X-Forwarded-For` er ei hovudlina kven som helst kann dikta upp, og
+// trur me paa henne fraa kven som helst, bremsar me ingen — ein
+// motstandar skriv berre ei ny adressa for kvart forsøk.
+//
+// Baae er sanne, og svaret er det same som alle andre stader i huset:
+// tru paa den som hev rett til aa segja det. Kjem soknaden fraa
+// loopback, er han komen gjenom vaar eigen mellomtenar — tunnelen,
+// vidaresendingi, ein nginx paa same maskini — og daa er hovudlina hans
+// noko me sjølve hev sett dit. Kjem han utanfraa, er `RemoteAddr` den
+// verkelege avsendaren, og daa er det han som gjeld. Ein motstandar
+// som naar tenaren beinveges fær ikkje sin eigen hovudlina trudd, og
+// ein som gjeng gjenom tunnelen kann ikkje skriva henne sjølv:
+// Cloudflare set `CF-Connecting-IP` og skriv yver det klienten sende.
 func clientKey(r *http.Request) string {
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		return r.RemoteAddr
+		host = r.RemoteAddr
 	}
+	if !eigenMellomtenar(host) {
+		return host
+	}
+	if v := strings.TrimSpace(r.Header.Get("CF-Connecting-IP")); v != "" {
+		return v
+	}
+	if v := r.Header.Get("X-Forwarded-For"); v != "" {
+		// Den fyrste er klienten; resten er mellomtenarane han gjekk
+		// gjenom.
+		if i := strings.IndexByte(v, ','); i >= 0 {
+			v = v[:i]
+		}
+		if v = strings.TrimSpace(v); v != "" {
+			return v
+		}
+	}
+	// Ingen hovudlina aa lita paa. Daa er me der me var, og det er
+	// betre enn aa sleppa bremsa heilt: e-postnykelen stend framleis,
+	// og han er den som stoggar gissing mot éin konto.
 	return host
+}
+
+// eigenMellomtenar segjer um soknaden kom gjenom noko me sjølve sette
+// upp paa den same maskini. Berre daa er hovudlinone hans verde noko.
+func eigenMellomtenar(vert string) bool {
+	ip := net.ParseIP(vert)
+	return ip != nil && ip.IsLoopback()
 }
 
 // sessionUserName gjev namnet aat den innlogga brukaren, eller tomt.

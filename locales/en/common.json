@@ -25,7 +25,8 @@
     "no_account": "Don't have an account yet?",
     "create_account": "Create account",
     "error_invalid": "Wrong email or password.",
-    "error_blocked": "Too many attempts. Try again in fifteen minutes."
+    "error_blocked": "Too many attempts. Try again in fifteen minutes.",
+    "error_technical": "Something went wrong on our end. Please try again in a moment."
   },
   "profile": {
     "title": "My profile",
