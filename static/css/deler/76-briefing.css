@@ -77,3 +77,19 @@
    naar noko *ikkje* gjekk at ein vil vita det. */
 .charge-status { color: var(--aatvaring); }
 .charge-status.pending { color: var(--blekk-lys); }
+
+/* Den feila belastningi. Aatvaringi ligg paa talet og ordet, som paa
+   klippekortet som gjeng ut (§1) — vengen og flata rører me ikkje, for
+   raudt paa heile kortet drog auga fraa alt anna paa sida. Summen fær
+   òg strek gjenom seg: pengane gjekk aldri, og forma seier det same som
+   fargen, so rada les rett ogso i graatt. */
+.charge-item.status-failed .charge-amount {
+  color: var(--aatvaring);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.charge-item.status-failed .charge-what { color: var(--blekk-lys); }
+
+/* Grunnen, med vanleg blekk: han er opplysning, ikkje alarm — alarmen
+   stend alt paa talet og ordet attmed. */
+.charge-failure { color: var(--blekk-lys); }

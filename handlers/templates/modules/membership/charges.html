@@ -8,7 +8,11 @@
          so kortet, og til slutt tale. Men naar ein ser gjenom
          belastningarne sine er det summen ein leitar etter; teksti
          segjer berre kva han var for. */}}
-    <div class="charge-item">
+    {{/* Ei feila belastning ber aatvaringi paa *talet* og ordet — same
+         regelen som klippekortet som gjeng ut (§1): aldri paa vengen,
+         aldri paa heile kortet. Summen er pengar som ikkje gjekk, og
+         det er talet som lyg um ein ikkje merkjer det. */}}
+    <div class="charge-item{{if eq .Status "failed"}} status-failed{{end}}">
         <p class="charge-line">
             <b class="charge-amount">{{kroner .Amount}}</b>,
             <span class="charge-card">{{if and .PaymentMethodBrand .PaymentMethodLast4}}{{.PaymentMethodBrand | title}} ••{{.PaymentMethodLast4}}{{else}}{{t $.Lang "charges.payment_method_removed"}}{{end}}</span>,
@@ -19,6 +23,9 @@
             {{if ne .Status "succeeded"}}
             <span class="charge-status {{.Status}}">{{if eq .Status "failed"}}{{t $.Lang "charges.status.failed"}}{{else if eq .Status "pending"}}{{t $.Lang "charges.status.pending"}}{{else}}{{.Status}}{{end}}</span>
             {{end}}
+            {{/* Grunnen stend i klartekst attmed ordet (§7): «Mislukka»
+                 aaleine let folk gissa, og dei gissar paa seg sjølve. */}}
+            {{if .FailureReason}}<span class="charge-failure">{{.FailureReason}}</span>{{end}}
         </p>
     </div>
     {{end}}
