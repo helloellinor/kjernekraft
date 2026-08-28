@@ -147,7 +147,7 @@ den einaste ein aldri bryt:
 | Ting | Kva ljoset gjer |
 |---|---|
 | felt | fell ned i ei grøft — mørk overkant (FASETTEN) |
-| knapp | fell på ei kvelv — glim øvst, mørkare mot foten (§18) |
+| knapp | fell på glas — dropa øvst, tjukk vegg i endane, attkast i foten (§18) |
 | tom dag i vika | fell ned i eit hòl — mørk overleppe, ljos underleppe |
 | ljosbandet | er sjølv kjelda |
 | kort | fell på flatt papir — ingen ting hender |
@@ -554,32 +554,130 @@ tydingar:
 
 Finn du eit tredje rundingsverd i stilarket, er det drift.
 
-### Han er glossy, og det er meininga
+### Han er glas, ikkje plast
 
 Pilleforma er henta frå gamle knappar, og **glansen med henne**. Ein
-knapp er ein gjenstand (§4): ljoset fell på han ovanfrå, kvelver seg
-over den øvre halvdelen og døyr mot foten.
+knapp er ein gjenstand (§4): ljoset fell på han ovanfrå.
 
-Tre lag, og alle tre kjem frå tokens så dei fylgjer temaet:
+Han var ei kvelv ei stund — eit glim som stogga brått på midten. Det er
+rett fysikk for eit stykke plast, og det er den harde kanten som gjer at
+gamle nettknappar ser billige ut. Ei dropa glas oppfører seg annleis, og
+skilnaden er tre ting:
+
+| Lag | Kva det er |
+|---|---|
+| **dropa** | ljoset som legg seg oppå, ein brei flat oval der sola står |
+| **glasveggen** | endane er mørkare av di ein ser gjennom meir glas der |
+| **foten** | kroppen mørknar mot grunnlina |
+
+Ingen av dei tre har ein hard kant nokon stad. Det er heile skilnaden på
+malt og teikna: ein målar set ljoset ned vått og lèt det renne ut, ein
+teiknar dreg ei line og fyller innanfor.
+
+Alle tre står i **eitt** token — `--glim-kapsel` — og ikkje i
+pseudoelement. Det er med vilje: eit token kan leggjast under kva flate
+som helst, så ein farga knapp byter berre kroppen under og teiknar ikkje
+glaset på nytt. Kula i brettet og plassmålaren les den same tanken i
+`--glim-rund`; skilnaden på dei to er forma, ikkje fysikken. Båe står på
+`var(--sol)`, så sola står éin stad i huset.
+
+Kroppen sjølv ber ikkje ljos — han er ein rein farge som mørknar mot
+foten. Rimet, den tunne ljose lina langs toppen, bur i `--knappedjup`.
+Det er *han* som gjer tingen våt.
 
 ```css
 --glans:      color-mix(in srgb, #fff 55%, transparent);  /* 20 % i mørkt */
 --glans-svak: color-mix(in srgb, #fff 14%, transparent);
---knappedjup: inset 0 1px 0 var(--glans),                 /* overkanten */
-              inset 0 -2px 3px -1px …blekk 14 %…,         /* foten */
-              0 1px 2px …blekk 16 %…;                     /* fallet */
+--knappedjup: inset 0 1px 0 var(--glans),      /* kanten som fangar ljoset */
+              inset 0 -1px 1px …,              /* attkastet i foten */
+              inset 0 -4px 6px -3px …blekk 14 %…,
+              0 1px 1px …blekk 11 %…,          /* kontaktskuggen */
+              0 4px 9px -3px …blekk 18 %…;     /* fallet, mjukt */
 ```
 
-Glimet stoggar brått på midten. Det er slik ljos oppfører seg på ei
-kvelv, og det er den kanten som gjer at forma les seg som runda i staden
-for flat. Tala er låge med vilje: 55 % er ei kvelv, 90 % er plast.
+Tala er låge med vilje: 55 % er ei dropa, 90 % er plast. Fallet er to
+skuggar og ikkje ein — den tette seier at han ligg på noko, den vide og
+veike seier kor høgt.
 
-**Trykt snur ljoset.** Glimet går ut, skuggen fell inn ovanfrå, og
+### Ei rolle byter kroppen, ikkje glaset
+
+Glaset er `--glim-kapsel` og står **éin** stad. Ei rolle legg sin eigen
+kropp under det og rører ikkje laga oppå:
+
+```css
+background: var(--glim-kapsel), <kroppen til rolla>;
+```
+
+Fyrr stod den same gradienten skriven tre gonger, ein gong for kvar
+rolle, og tre stader er tre stader å gløyme. Ein tilstand — hover,
+trykt — er ein ny kropp eller ei ny line, aldri eit nytt glas.
+
+**Hover byter lina og ikkje ordet.** Merkefargen flytte seg inn i skrifta
+ei stund òg, og det var to lyte i eitt: turkis på ljos flate er under
+4,5:1, og `:hover` er framleis på i det ein trykkjer — så den uleselege
+fargen låg nett der flata er mørkast. Merkefargen er ei **linefarge**.
+Han er rekna for å halde éin piksel mot arket, ikkje for å bere ei
+setning.
+
+### Éin storleik, og lufta er halve høgda
+
+Det stod tre storleikar her ei stund — `.btn-liten`, ingen klasse,
+`.btn-stor` — av di førebiletet synte tre. Det er ein dårleg grunn: eit
+førebilete syner kva ei form *kan*, ikkje kva eit hus *treng*. Ingen av
+dei tre vart nokon gong brukte utanfor verkstaden, og eit steg ingen tek
+er ikkje eit steg — det er drift som ventar på nokon som skal gisse.
+Regelen som skulle styre dei («storleiken seier kor ofte handlinga
+hender») var skriven etter at klassane fanst, som forsvar for dei, og
+det er alltid feil veg.
+
+Att står den minste. Knappen har éin storleik, og då treng ingen vite
+når dei andre gjeld.
+
+**Lufta i endane er ikkje eit steg i romskalaen.** Ho er ei fylgje av
+forma, og difor står ho i `em`:
+
+```css
+--knapp-vassrett: 1.1em;   /* = halve høgda */
+```
+
+Kapselen endar i ein halvsirkel, og radien hans er halve høgda. Skal
+kurva ta til nett der ordet slepper, må lufta i enden vere nøyaktig den
+radien. Er ho større, ligg det eit stykke **rett kant** mellom ordet og
+kurva, og knappen blir brei utan at noko fyller breidda — `--rom-5` mot
+ein radius på seksten var sju pikslar daudt i kvar ende.
+
+Prøva er ei linje i konsollen: `padding-left` skal vere lik
+`height / 2`. I dag er avviket under ein tjuandedels piksel.
+
+**Trykt snur ljoset.** Dropa går ut — glas som er trykt inn har ikkje
+noko ljos oppå seg — attkastet vert veikt, skuggen fell inn ovanfrå, og
 knappen sig éin piksel. Det er den einaste staden i huset der noko
 flyttar seg — og han flyttar seg av di han er ein ting ein trykkjer på.
 
-**Avslegen har ingen djupn i det heile.** Han er ikkje ein ting ein kan
-trykkje på lenger, og skal ikkje sjå ut som ein.
+Skuggen som fell inn ovanfrå er difor ei **line** og ikkje eit slør. Låg
+han som ei vaske over den øvre halvdelen, låg han rett over ordet, og
+teksta vart tung å lese i nett det augneblinket ein braut henne.
+
+### Ordet er rispa ned i glaset
+
+`--ordet-inn` er eit glim på éin piksel under bokstaven og ingen ting
+over han. Ljoset kjem ovanfrå, så den nedre lippa i ei rispe er den
+einaste kanten som fangar det — same fysikken som fordjupinga i eit
+felt, berre på ein bokstav.
+
+Han står **i kvila**, ikkje berre i trykket. Ei rispe er noko som er
+*skore* i ei flate, og eit snitt går ikkje att av di ingen held fingeren
+nede: knappen flyttar seg når ein trykkjer, bokstaven gjer ikkje det.
+Attpå får ordet ein ljos kant å lesast mot nett i det augneblinket flata
+under det er mørkast.
+
+Avslegen har han ikkje. Ingen djupn tyder ingen djupn — `text-shadow`
+går ut saman med skuggen og glaset.
+
+**Avslegen har ingen djupn i det heile.** Ingen glans, ingen skugge,
+ingen rispe: `background`, `box-shadow` og `text-shadow` går ut i lag.
+Han er ikkje ein ting ein kan trykkje på lenger, og skal ikkje sjå ut
+som ein.
 
 ### Røysta
 
@@ -601,11 +699,22 @@ raud klump dreg auga fraa alt anna*. Ein turkis klump gjer det same.
 | | Line | Ord | Flate |
 |---|---|---|---|
 | vanleg | `--kant` | `--blekk` | `--flate` |
-| hovudhandling | `--merke` | `--merke` | `--merke-svak` |
-| uatterkalleleg | `--aatvaring` | `--aatvaring` | inga |
+| hovudhandling | `--merke` | `--merke` | `--flate` |
+| uatterkalleleg | `--aatvaring` | `--aatvaring` | `--flate` |
 
 Flata er `--flate` og ikkje `--ark`. Ein knapp malt i sidefargen er eit
 hòl med ei line rundt.
+
+**AVGJORD (ARKET §10.1, 28.8.2026): fargen bur i lina og i ordet, aldri
+i flata.** Hovudhandlinga var ei fylt flate i merkefargen ei stund, og
+grunngjevinga for å ta henne bort stod alt skriven om
+åtvaringsknappen — *ein raud klump dreg auga frå alt anna*. Ein turkis
+klump gjer det same, i eit hus som elles byggjer alt av hårliner.
+
+Hovudhandlinga er difor ikkje tyngre enn dei andre; ho er den einaste
+med farge i seg. Det held. Hover legg ei svak tone i flata
+(`--merke-svak`) i staden for ei sterkare line, så kanten ikkje flyttar
+seg (§3).
 
 ### Grunnstilen gjeld `.btn`-familien, ikkje `<button>`
 
