@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strings"
 
 	"kjernekraft/models"
 )
@@ -22,6 +23,25 @@ import (
 
 // MedlemskapNamn gjev det genererte namnet på eit medlemskap.
 func MedlemskapNamn(lang string, m models.Membership) string {
+	// Eit usynleg medlemskap er ikkje eit bindingsprodukt, og namnet
+	// vert difor ikkje rekna ut or bindingi. Black hev null maanader
+	// binding — som «Månadskort» — so den utrekningi gav honom namnet
+	// til eit produkt han ikkje er.
+	//
+	// Namnet i basen er kjennemerket, ikkje det synlege ordet: han heiter
+	// «Black» der, «Svart» paa norsk og «Black Card» paa engelsk. Difor
+	// eit uppslag og ikkje ein fast streng — og eit uppslag som fell
+	// attende paa raanamnet, so eit nytt usynleg medlemskap syner seg
+	// med ein gong og fær sitt eige ord naar nokon skriv nykelen.
+	// Sjaa database/svartmedlem.go.
+	if m.Skjult {
+		nykel := "produkt.medlemskap_" + strings.ToLower(strings.ReplaceAll(m.Name, " ", "_"))
+		if namn := t(lang, nykel); namn != nykel {
+			return namn
+		}
+		return m.Name
+	}
+
 	var grunn string
 	switch m.CommitmentMonths {
 	case 0:

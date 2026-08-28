@@ -1,0 +1,96 @@
+{{define "medlemskort"}}
+{{/* Medlemskortet. Éin definisjon, tvo stader.
+
+     Kortet stod skrive tvo gonger — ein gong paa heimeskjermen og ein
+     gong paa medlemskapssida — og den eine bar ein merknad um at dei
+     laut haldast i takt. Det gjorde dei ikkje: Svart fekk slaget sitt,
+     Karma-prisen og det rette namnet paa heimeskjermen, og
+     medlemskapssida heldt fram med turkis veng, «0 kr/mnd» og knappar
+     for aa frysa noko som ikkje kann frysast. Ein merknad um aa halda
+     tvo ting i takt er ikkje ein mekanisme; dette er mekanismen.
+
+     Dei tvo skil seg berre i eitt: medlemskapssida gjer noko med
+     kortet, heimeskjermen syner det. Difor `Handlingar`.
+
+     Ventar:
+       Medlemskap   MembershipWithDetails
+       Namn         det synlege namnet (gjenom Namn/MedlemskapNamn)
+       UserName     kven kortet høyrer til
+       Lang         maalet
+       MedlemSidan  dagen kontoen vart oppretta (kann vera nil)
+       Bunden       syn bindingsdatoen
+       Handlingar   syn frys/sei-upp-raden
+       KannSeiaUpp  … og sei-upp-knappen i henne */}}
+<div class="kort medlemskort {{.Medlemskap.Status}}{{if .Medlemskap.IsStudentSenior}} student{{end}}{{if .Medlemskap.Tildelt}} tildelt{{end}}">
+    <div class="card-header">
+        <h3 class="card-title">
+            <span class="merke" aria-hidden="true"></span>{{.Namn}}
+        </h3>
+        <p class="stodalinje">
+            {{template "ljos" (dict "Status" .Medlemskap.Status)}}
+            {{- if eq .Medlemskap.Status "active"}}{{t .Lang "medlemskapet.status_active"}}
+            {{- else if eq .Medlemskap.Status "paused"}}{{t .Lang "medlemskapet.status_paused"}}
+            {{- else if eq .Medlemskap.Status "freeze_requested"}}{{t .Lang "medlemskapet.status_freeze_requested"}}
+            {{- else}}{{t .Lang "medlemskapet.status_cancelled"}}{{end}}
+        </p>
+    </div>
+
+    {{/* Namnet paa den som eig kortet. Det er dette som gjer det til
+         *ditt* kort og ikkje eit prisskilt. */}}
+    <p class="medlemskort-eigar">{{.UserName}}</p>
+
+    {{/* Kor lenge du hev vore her. Han stend fyrst av detaljane av di
+         han høyrer til kortet og ikkje til avtalen: han skifter ikkje
+         naar du byter medlemskap, og han er det einaste kortet kann
+         segja um eit tildelt medlemskap som ikkje er ei rolla.
+         Sjaa MedlemSidan i database/svartmedlem.go. */}}
+    {{if .MedlemSidan}}
+    <div class="detail-row">
+        <span class="detail-label">{{t .Lang "medlemskapet.medlem_sidan"}}</span>
+        {{/* Berre aaret. «28. august 2026» er ein dato — han svarar paa
+             «kva dag», og det er ikkje spursmaalet. «2026» svarar paa
+             det som stend i merkelappen. */}}
+        <span class="detail-value">{{.MedlemSidan.Year}}</span>
+    </div>
+    {{end}}
+
+    {{if and .Bunden .Medlemskap.BindingEnd}}
+    <div class="detail-row">
+        <span class="detail-label">{{t .Lang "medlemskapet.gjeld_til"}}</span>
+        <span class="detail-value">{{norskDatoAar .Medlemskap.BindingEnd}}</span>
+    </div>
+    {{end}}
+
+    {{/* Eit tildelt medlemskap hev ingen pris — det er betalt med Karma.
+         «0 kr per maanad» er ikkje det same: det les som ein avtale som
+         tilfeldigvis er gratis no. Sjaa database/svartmedlem.go. */}}
+    <div class="detail-row">
+        <span class="detail-label">{{t .Lang "medlemskapet.pris"}}</span>
+        <span class="detail-value">
+            {{- if .Medlemskap.Tildelt}}{{t .Lang "medlemskapet.fylgjer_rolla"}}
+            {{- else}}{{printf "%.0f" (divf .Medlemskap.Price 100)}} {{t .Lang "membership.price_per_month"}}{{end}}
+        </span>
+    </div>
+
+    {{/* Handlingane fylgjer stoda — og eit tildelt medlemskap hev ingi
+         stoda aa endra. Det finst ingi rad i user_memberships aa frysa
+         eller seia upp; knappane hadde peika paa ingen ting, og «Sei
+         opp» paa noko som fylgjer rolla di er eit tilbod huset ikkje
+         kann halda. */}}
+    {{if and .Handlingar (not .Medlemskap.Tildelt)}}
+    <div class="medlemsknappar">
+        {{if eq .Medlemskap.Status "active"}}
+        <button type="button" class="btn" data-handling="freeze">{{t .Lang "medlemskapet.freeze"}}</button>
+        {{else if eq .Medlemskap.Status "freeze_requested"}}
+        <button type="button" class="btn" data-handling="cancel-freeze">{{t .Lang "membership.cancel_request"}}</button>
+        {{else if eq .Medlemskap.Status "paused"}}
+        <button type="button" class="btn" data-handling="unfreeze">{{t .Lang "membership.unfreeze"}}</button>
+        {{end}}
+        {{if .KannSeiaUpp}}
+        <button type="button" class="btn-danger" data-handling="remove"
+                data-stadfest="{{t .Lang "medlemskapet.cancel_confirm"}}">{{t .Lang "medlemskapet.cancel"}}</button>
+        {{end}}
+    </div>
+    {{end}}
+</div>
+{{end}}

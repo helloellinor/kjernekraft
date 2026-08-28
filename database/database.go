@@ -31,12 +31,44 @@ func Connect() (*sql.DB, error) {
 		path = "./kjernekraft.db"
 	}
 
-	db, err := sql.Open("sqlite3", path)
+	// Innstillingarne fylgjer med stigen. SQLite stend som standard i
+	// «rollback journal» med ein lesar *eller* ein skrivar um gongen, og
+	// utan tolmod: kjem tvo soknader samstundes, fell den eine med
+	// «database is locked» med ein gong. Det gjeng so lenge ein er aaleine
+	// paa maskini, og det er nett difor ein ikkje uppdagar det fyrr i drift.
+	//
+	//   _journal_mode=WAL   lesarar stengjer ikkje skrivaren ute, og
+	//                       umvendt. Ein som les timeplanen stoggar ikkje
+	//                       ei innmelding.
+	//   _busy_timeout=5000  ventar i inntil fem sekund paa laasen i staden
+	//                       for aa falla med ein gong.
+	//   _foreign_keys=on    SQLite handhevar *ikkje* framandnyklar utan at
+	//                       ein bed um det. Tabellane hev deim skrivne; utan
+	//                       dette er dei berre kommentarar.
+	//   _synchronous=NORMAL trygt saman med WAL, og mykje raskare enn FULL.
+	dsn := path + "?_journal_mode=WAL&_busy_timeout=5000&_foreign_keys=on&_synchronous=NORMAL"
+
+	db, err := sql.Open("sqlite3", dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("Kopla til SQLite-databasen (%s).", path)
+	// SQLite toler mange lesarar samstundes naar WAL er paa, men berre
+	// éin skrivar. Difor eit tak — ikkje paa éin, som hadde sett alle
+	// lesingar i kø etter kvarandre og gjort kvar soknad tregare, men
+	// lagom høgt: lesarane gjeng jamsides, og skrivarane ventar paa
+	// laasen gjenom _busy_timeout i staden for aa falla.
+	db.SetMaxOpenConns(8)
+	db.SetMaxIdleConns(8)
+	db.SetConnMaxLifetime(0)
+
+	// sql.Open opnar ingi tilkopling. Utan dette ser ein ikkje at
+	// stigen er ubrukande fyrr fyrste soknaden.
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("fekk ikkje kontakt med basen (%s): %w", path, err)
+	}
+
+	log.Printf("Kopla til SQLite-databasen (%s), WAL paa.", path)
 	return db, nil
 }
 
@@ -322,6 +354,58 @@ func Migrate(db *sql.DB) error {
 	// Frammøtet. Sjaa frammote.go.
 	if err := MigrerFrammote(db); err != nil {
 		return err
+	}
+
+	// Klippet som vert brukt av krysset. Sjaa klippbruk.go.
+	if err := MigrerKlippbruk(db); err != nil {
+		return err
+	}
+
+	// Den private timen. Sjaa privattime.go.
+	if err := MigrerPrivatTime(db); err != nil {
+		return err
+	}
+
+	// Det usynlege medlemskapet. Sjaa svartmedlem.go.
+	if err := MigrerSvartMedlemskap(db); err != nil {
+		return err
+	}
+
+	if err := lagRegister(db); err != nil {
+		return err
+	}
+	return nil
+}
+
+// lagRegister set upp registeri.
+//
+// Basen hadde ingi — utanum dei SQLite lagar sjølv for primærnyklar og
+// UNIQUE. Kvart uppslag paa «alt som høyrer denne brukaren til» las difor
+// heile tabellen. Med tjuge testbrukarar merkar ein det ikkje; det er
+// nett difor det ikkje vert uppdaga fyrr talet paa medlemer hev vakse.
+//
+// Kolonnorne her er dei ein faktisk søkjer paa: user_id i alle
+// kopletabellane, event_id naar ein tel plassar paa ein time, og
+// start_time naar timeplanen hentar ei veke um gongen.
+func lagRegister(db *sql.DB) error {
+	register := []string{
+		`CREATE INDEX IF NOT EXISTS idx_event_signups_user ON event_signups(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_event_signups_event ON event_signups(event_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_klippekort_user ON user_klippekort(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_memberships_user ON user_memberships(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_memberships_status ON user_memberships(status)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_roles_user ON user_roles(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_payment_methods_user ON user_payment_methods(user_id)`,
+		// Timeplanen hentar ei veke um gongen: BETWEEN paa start_time.
+		`CREATE INDEX IF NOT EXISTS idx_events_start ON events(start_time)`,
+		`CREATE INDEX IF NOT EXISTS idx_events_rule ON events(rule_id)`,
+		// Innloggingi slær upp e-post for kvar freistnad.
+		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
+	}
+	for _, s := range register {
+		if _, err := db.Exec(s); err != nil {
+			return fmt.Errorf("register: %s: %w", s, err)
+		}
 	}
 	return nil
 }
@@ -1164,7 +1248,9 @@ func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
 }
 
 // GetEventsForWeek fetches events for a specific week starting from the given Monday
-func (db *Database) GetEventsForWeek(mondayDate time.Time) ([]models.Event, error) {
+// GetEventsForWeek gjev veka slik `sjaaarID` skal sjaa henne: alle opne
+// timar, og dei private som er hans eigne. Sjaa privattime.go.
+func (db *Database) GetEventsForWeek(mondayDate time.Time, sjaaarID int64) ([]models.Event, error) {
 	// Calculate the Sunday of the same week
 	sundayDate := mondayDate.AddDate(0, 0, 6)
 
@@ -1177,14 +1263,16 @@ func (db *Database) GetEventsForWeek(mondayDate time.Time) ([]models.Event, erro
 		       COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''),
 		       COALESCE(NULLIF(e.capacity, 0), r.capacity, 0) AS plassar,
 		       e.current_enrolment, e.color,
-		       COALESCE(r.id, 0), COALESCE(r.name, e.location), COALESCE(r.capacity, 0)
+		       COALESCE(r.id, 0), COALESCE(r.name, e.location, ''), COALESCE(r.capacity, 0)
 		FROM events e
 		LEFT JOIN rooms r ON r.id = e.room_id
 		WHERE DATE(e.start_time) >= DATE(?)
 		AND DATE(e.start_time) <= DATE(?)
+		AND ` + synlegFor + `
 		ORDER BY e.start_time ASC
 	`
-	rows, err := db.Conn.Query(query, mondayDate.Format("2006-01-02"), sundayDate.Format("2006-01-02"))
+	rows, err := db.Conn.Query(query,
+		mondayDate.Format("2006-01-02"), sundayDate.Format("2006-01-02"), sjaaarID)
 	if err != nil {
 		return nil, err
 	}
@@ -1262,6 +1350,12 @@ func (db *Database) MedlemskapFor(kvalifisert bool) ([]models.Membership, error)
 		if m.IsStudentSenior && !kvalifisert {
 			continue
 		}
+		// Black kann ikkje kjøpast. Han fylgjer ei rolla, og ein pris
+		// paa 0 kr i lista hadde vore ei innbjoding til aa klikka paa
+		// honom. Sjaa svartmedlem.go.
+		if m.Skjult {
+			continue
+		}
 		ut = append(ut, m)
 	}
 	return ut, nil
@@ -1269,7 +1363,7 @@ func (db *Database) MedlemskapFor(kvalifisert bool) ([]models.Membership, error)
 
 // GetAllMemberships fetches all active memberships
 func (db *Database) GetAllMemberships() ([]models.Membership, error) {
-	rows, err := db.Conn.Query("SELECT id, name, price, commitment_months, is_student_senior, is_special_offer, description, features, active FROM memberships WHERE active = TRUE")
+	rows, err := db.Conn.Query("SELECT id, name, price, commitment_months, is_student_senior, is_special_offer, description, features, active, skjult FROM memberships WHERE active = TRUE")
 	if err != nil {
 		return nil, err
 	}
@@ -1278,7 +1372,7 @@ func (db *Database) GetAllMemberships() ([]models.Membership, error) {
 	var memberships []models.Membership
 	for rows.Next() {
 		var m models.Membership
-		if err := rows.Scan(&m.ID, &m.Name, &m.Price, &m.CommitmentMonths, &m.IsStudentSenior, &m.IsSpecialOffer, &m.Description, &m.Features, &m.Active); err != nil {
+		if err := rows.Scan(&m.ID, &m.Name, &m.Price, &m.CommitmentMonths, &m.IsStudentSenior, &m.IsSpecialOffer, &m.Description, &m.Features, &m.Active, &m.Skjult); err != nil {
 			return nil, err
 		}
 		memberships = append(memberships, m)
@@ -1297,6 +1391,13 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 		ORDER BY um.created_at DESC
 		LIMIT 1
 	`
+
+	// Rolla gjeng fyre. Ein lærar hev Black so lenge han er lærar, og
+	// det skal ikkje spela nokor rolla kva som elles ligg i basen paa
+	// honom. Sjaa svartmedlem.go.
+	if fri, err := db.HarFriMedlemskap(userID); err == nil && fri {
+		return db.svartMedlemskapFor(userID)
+	}
 
 	var membership models.MembershipWithDetails
 	err := db.Conn.QueryRow(query, userID).Scan(
@@ -1346,14 +1447,26 @@ func (db *Database) GetAllKlippekortPackages() ([]models.KlippekortPackage, erro
 	return packages, nil
 }
 
-// GetUserKlippekort fetches all active klippekort for a user
+// GetUserKlippekort hentar dei klippekorti ein brukar *kann bruka*.
+//
+// Eit kort med null klipp att er brukt upp. Det stod likevel paa
+// heimeskjermen med alle ti hòli klipte, av di spurningi berre spurde
+// etter is_active og utlaupsdag — og ingen stad i koden set is_active
+// til FALSE, so eit oppbrukt kort kunde aldri gaa burt av seg sjølv.
+// Det laag der til det gjekk ut paa dato, kanskje eit halvt aar seinare.
+//
+// Talet paa heimeskjermen kunde regelen fraa fyrr (sjaa dashboard.go:
+// «tome kort er ikkje noko ein hev att»), men *kortlista* kunde honom
+// ikkje, so dei sa tvo ulike ting um det same kortet: null att i talet,
+// og eit kort paa skjermen.
 func (db *Database) GetUserKlippekort(userID int64) ([]models.KlippekortWithDetails, error) {
 	query := `
 		SELECT uk.id, uk.user_id, uk.package_id, uk.total_klipp, uk.remaining_klipp, uk.expiry_date, uk.purchase_date, uk.is_active,
 		       kp.name, kp.category, kp.klipp_count, kp.price, kp.price_per_session, kp.description, kp.valid_days, kp.active, kp.is_popular
 		FROM user_klippekort uk
 		JOIN klippekort_packages kp ON uk.package_id = kp.id
-		WHERE uk.user_id = ? AND uk.is_active = TRUE AND uk.expiry_date > datetime('now')
+		WHERE uk.user_id = ? AND uk.is_active = TRUE AND uk.remaining_klipp > 0
+		      AND uk.expiry_date > datetime('now')
 		ORDER BY uk.expiry_date ASC
 	`
 
@@ -1819,6 +1932,20 @@ func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 		return err
 	}
 	defer tx.Rollback()
+
+	// Ein privat time høyrer éin person til. Sjekken lyt liggja her og
+	// ikkje berre i timeplanen: synlegheit er ikkje tryggleik. Ein som
+	// gissar eit id kann POSta seg paa ein time han aldri saag, og
+	// kiosken melder folk paa utanum timeplanen med — baae vegar gjeng
+	// gjenom denne funksjonen.
+	var eigar sql.NullInt64
+	if err := tx.QueryRow(
+		`SELECT private_user_id FROM events WHERE id = ?`, eventID).Scan(&eigar); err != nil {
+		return err
+	}
+	if eigar.Valid && eigar.Int64 != userID {
+		return fmt.Errorf("timen er sett av til ein annan")
+	}
 
 	var exists int
 	if err := tx.QueryRow(

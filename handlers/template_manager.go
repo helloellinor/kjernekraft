@@ -22,6 +22,19 @@ type TemplateManager struct {
 	mu        sync.RWMutex
 	templates map[string]*template.Template
 	basePath  string
+
+	// Fingeravtrykket av malmappa slik ho saag ut sist me las henne.
+	// I utvikling vart *alle* malarne lesne og tolka paa nytt for kvar
+	// einaste soknad — og av di kvar sida fær med seg grunnmuren, alle
+	// komponentane og alle modulane, er det hundrevis av filopningar
+	// per sidevisning. Det kosta 53 ms per soknad mot 0,4 ms i drift.
+	//
+	// No stat-ar me filene i staden. Er ingi fil endra, er malarne me
+	// hev alt rette, og me tolkar ikkje noko paa nytt. Ei endring i ei
+	// .html-fil syner seg framleis ved neste oppdatering — det var
+	// heile poenget med aa lesa paa nytt — men prisen fell fraa
+	// tolking til eit knippe stat-kall.
+	fingeravtrykk string
 }
 
 var templateManager *TemplateManager
@@ -308,6 +321,43 @@ func getTemplateFuncs() template.FuncMap {
 	}
 }
 
+// malfingeravtrykk gjeng gjenom malmappa og lagar ein streng av
+// filnamn, storleik og endringstid. Skil han seg fraa den fyrre, er
+// noko endra og malarne lyt lesast paa nytt.
+func (tm *TemplateManager) malfingeravtrykk() string {
+	var b strings.Builder
+	filepath.WalkDir(tm.basePath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".html") {
+			return nil
+		}
+		info, err := d.Info()
+		if err != nil {
+			return nil
+		}
+		fmt.Fprintf(&b, "%s|%d|%d\n", path, info.Size(), info.ModTime().UnixNano())
+		return nil
+	})
+	return b.String()
+}
+
+// lesPaaNyttOmEndra les malarne att berre naar ei fil faktisk er endra.
+func (tm *TemplateManager) lesPaaNyttOmEndra() {
+	nytt := tm.malfingeravtrykk()
+
+	tm.mu.RLock()
+	uendra := nytt == tm.fingeravtrykk
+	tm.mu.RUnlock()
+	if uendra {
+		return
+	}
+
+	tm.loadTemplates()
+
+	tm.mu.Lock()
+	tm.fingeravtrykk = nytt
+	tm.mu.Unlock()
+}
+
 // loadTemplates loads all templates from the templates directory
 func (tm *TemplateManager) loadTemplates() {
 	tm.mu.Lock()
@@ -439,7 +489,7 @@ func (tm *TemplateManager) loadComponentTemplate(name, path string) {
 // aa lura paa um ein ser det nye eller det gamle.
 func (tm *TemplateManager) GetTemplate(name string) (*template.Template, bool) {
 	if IsDevelopment() {
-		tm.loadTemplates()
+		tm.lesPaaNyttOmEndra()
 	}
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()

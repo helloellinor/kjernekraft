@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -108,9 +109,29 @@ func MembershipPageHandler(w http.ResponseWriter, r *http.Request) {
 			MedlemskapNamn(lang, noverande.Membership))
 	}
 
+	// Eit tildelt medlemskap er ikkje noko ein byter fraa.
+	//
+	// Black fylgjer rolla og hev ingi rad i user_memberships; «byt til»
+	// hadde peika paa ein avtale som ikkje finst, og det ein *kunde*
+	// byta til er alt saman ringare og kostar pengar. Fana stod der og
+	// baud ein lærar aa nedgradera seg sjølv til noko han maatte betala
+	// for. Ho gjeng burt i staden.
+	tildelt := noverande != nil && noverande.Tildelt
+
+	var medlemSidan *time.Time
+	if noverande != nil {
+		if d, feil := DB.MedlemSidan(int64(user.ID)); feil != nil {
+			log.Printf("medlem sidan for %d: %v", user.ID, feil)
+		} else if !d.IsZero() {
+			medlemSidan = &d
+		}
+	}
+
 	faner := []Tab{
 		{Key: "medlemskapet", Name: t(lang, "medlemskapet.tab_medlemskapet")},
-		{Key: "byt", Name: t(lang, "medlemskapet.tab_byt")},
+	}
+	if !tildelt {
+		faner = append(faner, Tab{Key: "byt", Name: t(lang, "medlemskapet.tab_byt")})
 	}
 
 	renderPage(w, r, "pages/medlemskapet", map[string]interface{}{
@@ -125,6 +146,7 @@ func MembershipPageHandler(w http.ResponseWriter, r *http.Request) {
 		"Noverande":     noverande,
 		"NoverandeNamn": noverandeNamn,
 		"Bunden":        bunden,
+		"MedlemSidan":   medlemSidan,
 		"MaanaderAtt":   maanaderAtt,
 		// Kann du seia upp? `CanCancel` paa modellen vart aldri sett av
 		// nokon — feltet stod som `false` for alle, og difor teikna sida
@@ -134,7 +156,11 @@ func MembershipPageHandler(w http.ResponseWriter, r *http.Request) {
 		// Regelen er den same som bindingi elles: er du bunden, kann du
 		// ikkje seia upp; er bindingi ute, kann du. Og noko som alt er
 		// sagt upp kann ikkje seiast upp ein gong til.
-		"KannSeiaUpp":   noverande != nil && !bunden && noverande.Status != "cancelled",
+		// … og noko som fylgjer ei rolla kann ikkje seiast upp i det
+		// heile: det finst ingi rad aa seia upp, og knappen hadde bode
+		// deg noko huset ikkje kann halda.
+		"KannSeiaUpp":   noverande != nil && !bunden && noverande.Status != "cancelled" && !tildelt,
+		"Tildelt":       tildelt,
 		"SwitchOptions": byte,
 	})
 }

@@ -52,8 +52,16 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetAllEventsHandler returns all events as JSON
+//
+// Ruta er innlogga, so ho svarar den som spør — og ei privat PT-økt er
+// ikkje hans um ho ikkje er sett av til honom. Fyrr gav ho alt til alle.
 func GetAllEventsHandler(w http.ResponseWriter, r *http.Request) {
-	events, err := DB.GetAllEvents()
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	events, err := DB.EventsSynlegeFor(int64(user.ID))
 	if err != nil {
 		http.Error(w, "Could not fetch events", http.StatusInternalServerError)
 		return

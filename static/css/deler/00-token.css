@@ -106,6 +106,20 @@
   --fjellraeven: #c8901a;
   --student:    #8a6a00;
 
+  /* Det tildelte medlemskapet — Black. Han er ikkje eit produkt ein
+     kjøper, so han deler ikkje farge med dei tri: han *er* svart, og
+     namnet er heile identiteten.
+
+     Han kann ikkje vera den same verdien i baae tema. Ekte svart paa
+     mørkt ark er ingen ting — kortet hadde mist kanten sin og vorte
+     eit kort utan slag. So: svart blekk paa ljost ark, og folie paa
+     mørkt. Det er den same tingen sedd i tvo ljos, og i baae les han
+     som det djupaste kortet i huset.
+
+     Ljosare enn `--blekk` i mørkt tema med vilje: er han lik brødteksti,
+     les kanten som tekst og ikkje som eit slag. */
+  --svartkort:  #0b0d0a;
+
   --merke:      var(--klas);
   --merke-lys:  #00a8a2;
   --merke-svak: color-mix(in srgb, var(--klas) 12%, var(--ark));
@@ -278,6 +292,7 @@
     --tuneup:     #b085f5;
     --fjellraeven: #f0c04a;
     --student:    #e8bf4d;
+    --svartkort:  #f2f4ee;
     --merke:      var(--klas);
     --merke-lys:  #6ae4d8;
     --merke-svak: color-mix(in srgb, var(--klas) 18%, var(--ark));
@@ -313,6 +328,7 @@
   --tuneup:   #b085f5;
   --fjellraeven: #f0c04a;
   --student:  #e8bf4d;
+  --svartkort:  #f2f4ee;
   --merke:    var(--klas);
   --merke-lys:  #6ae4d8;
   --merke-svak: color-mix(in srgb, var(--klas) 18%, var(--ark));

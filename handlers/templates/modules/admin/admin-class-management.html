@@ -54,7 +54,19 @@
                        class="gjentak-bolk">, <label class="innelabel"><input type="checkbox" id="is-recurring">
                         {{t .Lang "admin.every_week"}}</label> <span id="veker-bolk" hidden>{{t .Lang "admin.for_weeks"}}
                         <input type="number" id="recurring-weeks" class="felt felt-tal" value="8" min="2" max="52"
-                               aria-label="{{t .Lang "admin.weeks"}}"> {{t .Lang "admin.weeks"}}</span></span>.
+                               aria-label="{{t .Lang "admin.weeks"}}"> {{t .Lang "admin.weeks"}}</span></span>{{/*
+                    */}}, {{t .Lang "admin.only_for"}}
+                    {{/* Den private timen. Fyrste valet er merkelappen —
+                         «opa for alle» er det ein time er naar ingen er
+                         vald, so setningi les rett fyre du rører henne.
+                         Vel du eit namn, er timen berre synleg for den
+                         eine, og berre den eine kann melda seg paa.
+                         Sjaa database/privattime.go. */}}
+                    <select id="class-private-user" class="felt"
+                            aria-label="{{t .Lang "admin.only_for"}}">
+                        <option value="">{{t .Lang "admin.open_to_all"}}</option>
+                        {{range $.Users}}<option value="{{.ID}}">{{.Name}}</option>{{end}}
+                    </select>.
                     <button type="submit" class="btn-primary">{{t .Lang "admin.create_class"}}</button>
                 </p>
 
@@ -451,6 +463,9 @@ function createClass(event) {
             start_time: start,
             end_time: slutt,
             capacity: 0,
+            // Tomt = opa time. Tenaren set kapasiteten til 1 for ein
+            // privat time naar ingen anna er sagt.
+            private_user_id: parseInt(document.getElementById('class-private-user').value, 10) || 0,
             description: '',
             is_recurring: gjentak,
             recurring_weeks: gjentak ? parseInt(document.getElementById('recurring-weeks').value, 10) : 1

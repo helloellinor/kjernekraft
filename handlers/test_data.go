@@ -349,18 +349,37 @@ func shuffleMembershipData() error {
 
 // shuffleUserKlippekortData shuffles user's klippekort remaining amounts
 func shuffleUserKlippekortData() error {
-	// Random remaining klipp between 0 and total_klipp
-	userKlippekort, err := DB.GetUserKlippekort(1)
+	// Beint paa tabellen, ikkje gjenom GetUserKlippekort. Den spurningi
+	// syner berre kort ein kann bruka, og eit kort som stokkinga sette
+	// til null hadde daa vorte usynleg for stokkinga sjølv — det kunde
+	// aldri faa klipp att, og sat fast paa null for alltid.
+	rows, err := DB.Conn.Query(
+		`SELECT id, total_klipp FROM user_klippekort WHERE user_id = ?`, 1)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
-	for _, klipp := range userKlippekort {
-		newRemaining := rand.Intn(klipp.TotalKlipp + 1)
-		_, err := DB.Conn.Exec(`UPDATE user_klippekort SET remaining_klipp = ? WHERE id = ?`,
-			newRemaining, klipp.UserKlippekort.ID)
-		if err != nil {
-			log.Printf("Error updating user klippekort %d: %v", klipp.UserKlippekort.ID, err)
+	type kort struct{ id, total int }
+	var kortet []kort
+	for rows.Next() {
+		var k kort
+		if err := rows.Scan(&k.id, &k.total); err != nil {
+			return err
+		}
+		kortet = append(kortet, k)
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	for _, k := range kortet {
+		// Minst eitt klipp att. Stokkinga skal gjeva noko ein kann sjaa
+		// paa, og eit kort paa null er eit kort som ikkje syner seg.
+		newRemaining := rand.Intn(k.total) + 1
+		if _, err := DB.Conn.Exec(`UPDATE user_klippekort SET remaining_klipp = ? WHERE id = ?`,
+			newRemaining, k.id); err != nil {
+			log.Printf("Error updating user klippekort %d: %v", k.id, err)
 		}
 	}
 
