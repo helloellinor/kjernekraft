@@ -56,6 +56,10 @@ const (
 	epost   = "solfrid@test.local"
 	loyord  = "password123"
 	telefon = "90000042"
+
+	// Ida finst fraa fyrr og vert ikkje laga her; ho skal berre
+	// meldast paa timar so bolken hennar ikkje stend tom.
+	idaEpost = "ida@kj.no"
 )
 
 // vike er ei vika i soga: kor mange timar, og kva slag dei var.
@@ -73,7 +77,7 @@ type vike struct {
 // Slagi stend i den rekkjefylgda dei skal veljast i. Er `tal` større
 // enn lista, gjeng ho rundt paa nytt — so «pilates, yoga» og fire timar
 // er tvo pilates og tvo yoga.
-var soga = []vike{
+var solfridSoga = []vike{
 	// mars — ho byrjar, og ho er varsam
 	{1, []string{"pilates"}},
 	{1, []string{"pilates"}},
@@ -108,13 +112,77 @@ var soga = []vike{
 	{2, []string{"pilates", "yoga"}},
 }
 
+// Ida si soga er ei onnor form, og det er heile grunnen til at ho stend
+// her i staden for at me gjev henne den same.
+//
+// Ho driv huset. Ho er her likevel, og difor trenar ho *jamt* og ikkje i
+// bylgjor: tvo i vika, aar ut og aar inn, med ei glipe naar det stend
+// paa som verst og ikkje naar ho reiser burt. Ingen stigning, ingen
+// topp — og det er nettupp det som gjer at dei tvo brettene ikkje ser
+// ut som det same brettet tvo gonger. Set ein tvo like rekkjor attmed
+// kvarandre, les ein deim som ei feilkopiering og ikkje som tvo folk.
+//
+// Slagi hennar heller mot yoga og fascia. Ho lærer pilates sjølv, og det
+// ein gjer heile dagen er sjeldan det ein melder seg paa om kvelden.
+var idaSoga = []vike{
+	// mars
+	{2, []string{"yoga", "fascia"}},
+	{2, []string{"yoga", "pilates"}},
+	{1, []string{"yoga"}},
+	{2, []string{"fascia", "yoga"}},
+	// april
+	{2, []string{"yoga", "fascia"}},
+	{2, []string{"yoga", "yoga"}},
+	{1, []string{"fascia"}},
+	{2, []string{"yoga", "pilates"}},
+	// mai — ei glipe: det er her aaret er tyngst i eit studio
+	{1, []string{"yoga"}},
+	{0, nil},
+	{2, []string{"yoga", "fascia"}},
+	{2, []string{"yoga", "pilates"}},
+	// juni
+	{2, []string{"yoga", "fascia"}},
+	{3, []string{"yoga", "reformer", "fascia"}},
+	{2, []string{"yoga", "pilates"}},
+	{2, []string{"fascia", "yoga"}},
+	// juli
+	{1, []string{"yoga"}},
+	{2, []string{"yoga", "pilates"}},
+	{2, []string{"yoga", "fascia"}},
+	{1, []string{"yoga"}},
+	// august
+	{2, []string{"yoga", "fascia"}},
+	{2, []string{"yoga", "pilates"}},
+	{2, []string{"fascia", "yoga"}},
+	{2, []string{"yoga", "pilates"}},
+	{1, []string{"yoga"}},
+	{2, []string{"yoga", "fascia"}},
+}
+
 func main() {
-	slett := flag.Bool("slett", false, "tak brukaren burt att")
+	slett := flag.Bool("slett", false, "tak Solfrid burt att")
+	ida := flag.Bool("ida", false, "meld Ida paa timar ogso — ho finst fraa fyrr")
+	settEpost := flag.String("epost", "", "kven som skal faa nytt loyord")
+	settLoyord := flag.String("loyord", "", "det nye loyordet; krev -epost")
 	flag.Parse()
 
 	db, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Nytt loyord paa ein brukar som finst. Det er ikkje seiing av
+	// prøvedata, men det høyrer til den same jobben: ein prøvekonto ein
+	// ikkje kjem inn paa er ikkje ein prøvekonto.
+	if *settLoyord != "" {
+		if *settEpost == "" {
+			log.Fatal("-loyord krev -epost")
+		}
+		if err := settNyttLoyord(db, *settEpost, *settLoyord); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%s hev fenge nytt loyord.\n", *settEpost)
+		return
 	}
 
 	if *slett {
@@ -125,12 +193,27 @@ func main() {
 		return
 	}
 
+	if *ida {
+		id, err := finnBrukar(db, idaEpost)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tal, err := meldPaa(db, id, idaSoga, 43)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Ida (id %d)\n", id)
+		fmt.Printf("  %d timar yver %d vikor\n", tal, len(idaSoga))
+		fmt.Println("  jamn rekkje, ikkje ei bylgja — so dei tvo brettene ikkje les seg like")
+		return
+	}
+
 	id, err := lagBrukar(db)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	tal, err := meldPaa(db, id)
+	tal, err := meldPaa(db, id, solfridSoga, 17)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -143,9 +226,45 @@ func main() {
 
 	fmt.Printf("%s (id %d)\n", namn, id)
 	fmt.Printf("  %s / %s\n", epost, loyord)
-	fmt.Printf("  %d timar yver %d vikor\n", tal, len(soga))
+	fmt.Printf("  %d timar yver %d vikor\n", tal, len(solfridSoga))
 	fmt.Println("  medlemskap: aktivt   klippekort: tvo, det eine mest brukt upp")
 	fmt.Println("  ikkje administrator — /admin svarar 403")
+}
+
+// finnBrukar hentar ein brukar som skal finnast fraa fyrr.
+func finnBrukar(conn *sql.DB, epost string) (int64, error) {
+	var id int64
+	err := conn.QueryRow(`SELECT id FROM users WHERE email = ?`, epost).Scan(&id)
+	if err == sql.ErrNoRows {
+		return 0, fmt.Errorf("fann ingen brukar med eposten %s", epost)
+	}
+	return id, err
+}
+
+// settNyttLoyord skriv eit nytt bcrypt-hash paa ein brukar.
+//
+// Det gjeng gjenom bcrypt og ikkje rett i basen med SQL: seks av
+// prøvebrukarane i denne basen ber strengen «x» i loyordfeltet av di
+// nokon ein gong skreiv verdet beint inn, og dei kann difor ikkje logga
+// inn i det heile. `bcrypt.CompareHashAndPassword` godtek ingen ting som
+// ikkje er eit hash, og han segjer det ikkje høgt — han berre nektar.
+func settNyttLoyord(conn *sql.DB, epost, nytt string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(nytt), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	res, err := conn.Exec(`UPDATE users SET password = ? WHERE email = ?`, string(hash), epost)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return fmt.Errorf("fann ingen brukar med eposten %s", epost)
+	}
+	return nil
 }
 
 // lagBrukar lagar henne, eller finn henne att um ho alt stend der.
@@ -195,11 +314,12 @@ func byrjinga() time.Time {
 }
 
 // meldPaa gjeng soga vika for vika og melder henne paa verkelege timar.
-func meldPaa(conn *sql.DB, brukar int64) (int, error) {
+func meldPaa(conn *sql.DB, brukar int64, soga []vike, fro int64) (int, error) {
 	// Fast frø. Skriptet skal gjeva den same brukaren kvar gong det
 	// gjeng — elles er det ikkje eit prøveoppsett, det er ei ny sak aa
-	// setja seg inn i kvar gong.
-	tilf := rand.New(rand.NewSource(17))
+	// setja seg inn i kvar gong. Kvar person hev sitt eige frø, so dei
+	// ikkje endar paa dei same timane.
+	tilf := rand.New(rand.NewSource(fro))
 
 	naa := time.Now()
 	sett := 0
