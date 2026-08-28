@@ -5,6 +5,7 @@ import (
 	"log"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"kjernekraft/models"
@@ -52,6 +53,11 @@ type Session struct {
 	// Dagen som tvo bokstavar. Han stend øvst i merket, av di det er
 	// det ein spør um fyrst.
 	DayAbbrev string
+	// Dagen og datoen i klartekst — «fredag 28. august» — til dokka.
+	// Malen bad um `norskDato` fyrr, og det namnet var ærlegt: han var
+	// norsk, og berre det. Merket ber ikkje `.Lang` med seg, so
+	// umsetjingi lyt gjerast der `lang` finst, som er her.
+	DatoTekst string
 
 	// Sjølve figuren, ferdig rekna. Sjaa merkeform.go.
 	Form Mark
@@ -118,6 +124,28 @@ var dagKort = map[time.Weekday]string{
 	time.Sunday: "sun",
 }
 
+// vekedagNykel og maanadNykel gjev umsetjingsnykelen for ein dag og ein
+// maanad. Dei same nyklane som malfunksjonane `vekedagnykel` og
+// `maanadnykel` nyttar — det er den same sanningi, og ho skal ikkje
+// standa tvo stader med kvar sitt sett namn.
+func vekedagNykel(d time.Weekday) string {
+	return [...]string{
+		"timeplan.sunday", "timeplan.monday", "timeplan.tuesday",
+		"timeplan.wednesday", "timeplan.thursday", "timeplan.friday",
+		"timeplan.saturday",
+	}[d]
+}
+
+func maanadNykel(m time.Month) string {
+	return [...]string{
+		"", "timeplan.month_january", "timeplan.month_february",
+		"timeplan.month_march", "timeplan.month_april", "timeplan.month_may",
+		"timeplan.month_june", "timeplan.month_july", "timeplan.month_august",
+		"timeplan.month_september", "timeplan.month_october",
+		"timeplan.month_november", "timeplan.month_december",
+	}[int(m)]
+}
+
 // Heile dagen paa skiltet.
 //
 // Her stod tvo bokstavar — «MÅ», «TY» — av di fana var 44 av 56 einingar
@@ -125,10 +153,24 @@ var dagKort = map[time.Weekday]string{
 // lyt læra, og eit merke som lyt lærast er eit merke som ikkje segjer
 // noko. Fana spenner yver toppen no (52 av 56, sjaa merkeform.go), og
 // daa stend dagen heil.
-var dagKort2 = map[time.Weekday]string{
-	time.Monday: "MÅNDAG", time.Tuesday: "TYSDAG", time.Wednesday: "ONSDAG",
-	time.Thursday: "TORSDAG", time.Friday: "FREDAG", time.Saturday: "LAURDAG",
-	time.Sunday: "SUNDAG",
+//
+// Han stod som eit fast kart yver nynorske ord her. Det tydde at klokka
+// sa «MÅNDAG» ogso naar resten av sida stod paa bokmaal eller engelsk —
+// og merket er den tingen som stend flest gonger paa ei side, so det var
+// den mest synlege staden i heile huset aa gløyma umsetjingi. All synleg
+// tekst gjeng gjenom `t`; eit kart med ord i er ikkje eit unnatak fraa
+// det, det er berre ein stad regelen ikkje naadde.
+//
+// Versalane vert lagde paa her og ikkje i stilarket: `.merkedag` ber
+// ingen `text-transform`, og ordet skal vera stort i alle tri maali.
+// datoIKlartekst gjev «fredag 28. august» paa det maalet sida stend i.
+func datoIKlartekst(lang string, tid time.Time) string {
+	return fmt.Sprintf("%s %d. %s",
+		t(lang, vekedagNykel(tid.Weekday())), tid.Day(), t(lang, maanadNykel(tid.Month())))
+}
+
+func dagPaaSkiltet(lang string, d time.Weekday) string {
+	return strings.ToUpper(t(lang, vekedagNykel(d)))
 }
 
 // dayCells legg framsyningarne ut paa dei sju dagarne, og fyller resten
@@ -182,7 +224,8 @@ func NewSession(lang string, e models.Event, iDagDato string, naa time.Time) Ses
 		Percent:     prosent,
 		Column:      columnOf(e.StartTime.Weekday()),
 		Clock:       e.StartTime.Format("15:04"),
-		DayAbbrev:   dagKort2[e.StartTime.Weekday()],
+		DayAbbrev:   dagPaaSkiltet(lang, e.StartTime.Weekday()),
+		DatoTekst:   datoIKlartekst(lang, e.StartTime),
 		Minute:      int(e.EndTime.Sub(e.StartTime).Minutes()),
 		HourAngle:   float64(e.StartTime.Hour()%12)*30 + float64(e.StartTime.Minute())*0.5,
 		MinuteAngle: float64(e.StartTime.Minute()) * 6,

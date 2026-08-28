@@ -29,9 +29,16 @@
         {{/* Tittelen og briefingen er éin blokk: `gap` i spalta gjeld likt
              mellom alle barna, og desse to skal stå tettare enn bolkane
              under. Sjå `.heimehovud` i stilarket. */}}
-        <div class="heimehovud">
-            <h1 class="page-title">{{.HelsingTittel}}</h1>
-            {{template "briefing" .}}
+        {{/* Helsingi og briefingen hentar seg sjølve att naar du melder
+             deg paa — same hendingi som listone under lyder paa. Baae
+             tvo *segjer* noko om paameldingane dine: «Sest i morgon
+             tidleg» og «du stend paa tri timar denne veka». Stod dei
+             att med det dei sa daa sida kom, laug dei i det augneblinket
+             du trykte, og det er den einaste staden paa sida der ein
+             ser svaret paa handlingi si med ein gong. */}}
+        <div id="heimehovud" hx-get="/api/user/helsing"
+             hx-trigger="paamelding from:body" hx-swap="innerHTML">
+            {{template "heimehovud_module" .}}
         </div>
         {{template "signed_up_classes_container" .}}
         {{template "todays_classes_container" .}}
@@ -52,4 +59,11 @@
      som i timeplanen — same knapp, same stad, same svar. */}}
 {{template "timedokk" .}}
 
+{{end}}
+{{/* Bolken for seg sjølv, so oppfriskingsruta kann teikna nett honom. */}}
+{{define "heimehovud_module"}}
+<div class="heimehovud">
+    <h1 class="page-title">{{.HelsingTittel}}</h1>
+    {{template "briefing" .}}
+</div>
 {{end}}

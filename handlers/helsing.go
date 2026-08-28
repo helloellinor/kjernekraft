@@ -310,3 +310,44 @@ func Kvalifisert(u *models.User) bool {
 	}
 	return u.KvalifisertFor(config.GetInstance().GetCurrentTime())
 }
+
+// Heimehovudet reknar dei tvo lekkane i toppen av heimesida: helsingi og
+// briefingen.
+//
+// Han stend for seg sjølv av di dei vert teikna tvo stader — ein gong
+// naar sida kjem, og ein gong til naar du melder deg paa ein time og
+// bolken hentar seg sjølv att. Var reknestykket skrive tvo gonger, vilde
+// helsingi og oppfriskingi hennar kunna segja kvar sitt, og den feilen
+// syner seg ikkje fyre nokon melder seg paa.
+//
+// Han hentar ingen ting. Det som skal til — paameldingarne, klippi,
+// krysset i vestibylen — er alt henta av den som kallar, og ein
+// oppfriskingsrute som spurde basen ein gong til for det same svaret
+// hadde vore den same lyten som «sida spør databasen so mange gonger som
+// ho hev spursmaal» retta.
+func Heimehovudet(lang, namn string, paamelde []Session, klippAtt int, nettFerdig bool, naa time.Time) (string, Briefing) {
+	// Den fyrste timen han hev meldt seg paa. Han ber helsingi.
+	var neste *models.Event
+	if len(paamelde) > 0 {
+		neste = &paamelde[0].Event
+	}
+
+	// Kor mange timar ein stend paa *denne veka*. Lista gjev alt som
+	// kjem, so ho lyt klyppast ved vekeskiftet: «paameld 4 timar denne
+	// veka» um tri av deim gjeng neste maanad er ikkje sant.
+	//
+	// Veggklokka, ikkje umrekning — same grunnen som i helsinga.
+	maandag := VikeMaandag(naa, 0)
+	nesteMaandag := maandag.AddDate(0, 0, 7)
+	iVeka := 0
+	for _, s := range paamelde {
+		d := veggklokka(s.Event.StartTime)
+		if !d.Before(maandag) && d.Before(nesteMaandag) {
+			iVeka++
+		}
+	}
+
+	naar := HelsingNaar(lang, neste, naa)
+	return HelsingTittel(lang, namn, naar, naa, nettFerdig),
+		NyBriefing(lang, neste, naa, iVeka, klippAtt)
+}

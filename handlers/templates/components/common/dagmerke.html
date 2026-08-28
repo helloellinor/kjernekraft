@@ -16,7 +16,7 @@
         data-tittel="{{.Event.Title}}"
         data-laerar="{{.Event.TeacherName}}"
         data-rom="{{.Event.RoomName}}"
-        data-dag="{{norskDato .Date}}"
+        data-dag="{{.DatoTekst}}"
         data-klokke="{{.Event.StartTime.Format "15:04"}}–{{.Event.EndTime.Format "15:04"}}"
         data-teke="{{.Event.CurrentEnrolment}}"
         data-plassar="{{.Event.Capacity}}"

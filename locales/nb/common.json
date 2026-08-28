@@ -121,7 +121,19 @@
     "alle_dagar": "Alle dager",
     "vel_dag": "Velg dag",
     "ingen_denne_dagen": "Ingen timer denne dagen.",
-    "alle_stutt": "Alle"
+    "alle_stutt": "Alle",
+    "month_january": "januar",
+    "month_february": "februar",
+    "month_march": "mars",
+    "month_april": "april",
+    "month_may": "mai",
+    "month_june": "juni",
+    "month_july": "juli",
+    "month_august": "august",
+    "month_september": "september",
+    "month_october": "oktober",
+    "month_november": "november",
+    "month_december": "desember"
   },
   "dashboard": {
     "welcome_user": "Velkommen, {{.UserName}}!",

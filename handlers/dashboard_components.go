@@ -128,3 +128,52 @@ func LedigPlassHandler(w http.ResponseWriter, r *http.Request) {
 		"UserName":          sessionUserName(r),
 	})
 }
+
+// HeimehovudHandler teiknar helsingi og briefingen om att.
+//
+// Han finst av di dei tvo er dei einaste tingi paa heimesida som segjer
+// noko om paameldingane *i ord* — «Sest i morgon tidleg, Solfrid» og «du
+// stend paa tri timar denne veka». Listone under dei hev alltid henta seg
+// sjølve att; desse tvo stod att med det dei sa daa sida kom, og laug
+// difor i nett det augneblinket du melde deg paa.
+//
+// Reknestykket bur i `Heimehovudet` og ikkje her, so sida og
+// oppfriskingi ikkje kann segja kvar sitt.
+func HeimehovudHandler(w http.ResponseWriter, r *http.Request) {
+	user := GetUserFromSession(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	lang := GetLanguageFromRequest(r)
+	naa := config.GetInstance().GetCurrentTime()
+
+	paamelde, err := EnrolledSessions(int64(user.ID), lang, naa)
+	if err != nil {
+		log.Printf("paameldingar for %d: %v", user.ID, err)
+	}
+
+	klippAtt := 0
+	if kort, feil := DB.GetUserKlippekort(int64(user.ID)); feil != nil {
+		log.Printf("klippekort for %d: %v", user.ID, feil)
+	} else {
+		klippAtt = klargjerKlippekort(kort, naa)
+	}
+
+	ferdig, feil := DB.NettFrammott(int64(user.ID), naa, 30*time.Minute)
+	if feil != nil {
+		log.Printf("nett frammøtt for %d: %v", user.ID, feil)
+	}
+
+	helsingTittel, briefing := Heimehovudet(lang, user.Name, paamelde, klippAtt, ferdig != nil, naa)
+
+	teiknFragmentFraa(w, "pages/dashboard", "heimehovud_module", map[string]interface{}{
+		"HelsingTittel": helsingTittel,
+		"Briefing":      briefing,
+		"Lang":          lang,
+		"CSRFToken":     CSRFToken(r),
+		"IsAdmin":       sessionIsAdmin(r),
+		"UserName":      user.Name,
+	})
+}

@@ -175,6 +175,7 @@ func main() {
 		// Dashboard component routes (HTMX endpoints)
 		r.Get("/api/user/klippekort", handlers.UserKlippekortHandler)
 		r.Get("/api/user/signups", handlers.UserSignupsHandler)
+		r.Get("/api/user/helsing", handlers.HeimehovudHandler)
 		r.Get("/api/user/ledig-plass", handlers.LedigPlassHandler)
 
 		// Payment API routes

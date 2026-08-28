@@ -45,27 +45,6 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("paameldingar for %d: %v", user.ID, err)
 	}
 
-	// Den fyrste timen han hev meldt seg paa. Han ber helsingi.
-	var neste *models.Event
-	if len(paamelde) > 0 {
-		neste = &paamelde[0].Event
-	}
-
-	// Kor mange timar ein stend paa *denne veka*. Lista gjev alt som
-	// kjem, so ho lyt klyppast ved vekeskiftet: «paameld 4 timar denne
-	// veka» um tri av deim gjeng neste maanad er ikkje sant.
-	//
-	// Veggklokka, ikkje umrekning — same grunnen som i helsinga.
-	maandag := VikeMaandag(now, 0)
-	nesteMaandag := maandag.AddDate(0, 0, 7)
-	iVeka := 0
-	for _, s := range paamelde {
-		d := veggklokka(s.Event.StartTime)
-		if !d.Before(maandag) && d.Before(nesteMaandag) {
-			iVeka++
-		}
-	}
-
 	// Klipp ein *kann bruke*: utgjengne kort og tome kort er ikkje noko
 	// ein hev att, og eit tal som tel deim med lovar meir enn det finst.
 	var klippekortModul *modules.KlippekortModuleData
@@ -82,8 +61,6 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	if klippekortModul == nil {
 		klippekortModul, _ = modules.NewKlippekortModule([]models.KlippekortWithDetails{}, lang)
 	}
-
-	naar := HelsingNaar(lang, neste, now)
 
 	// Var ho nett paa ein time? Krev kryss i vestibylen — ei paamelding
 	// aaleine segjer berre at ho hadde tenkt seg dit.
@@ -144,13 +121,15 @@ func ElevDashboardHandler(w http.ResponseWriter, r *http.Request) {
 			MedlemskapNamn(lang, medlemskap.Membership))
 	}
 
+	helsingTittel, briefing := Heimehovudet(lang, user.Name, paamelde, klippAtt, ferdig != nil, now)
+
 	data := map[string]interface{}{
 		"Activity":          NewActivity(lang, perDag, perType, now, aktivitetVekor),
 		"Medlemskap":        medlemskap,
 		"MedlemSidan":       medlemSidan,
 		"MedlemskapNamn":    medlemsnamn,
-		"HelsingTittel":     HelsingTittel(lang, user.Name, naar, now, ferdig != nil),
-		"Briefing":          NyBriefing(lang, neste, now, iVeka, klippAtt),
+		"HelsingTittel":     helsingTittel,
+		"Briefing":          briefing,
 		"KlippekortModul":   klippekortModul,
 		"Title":             "Elev Dashboard",
 		"AvailableSessions": ledige,
