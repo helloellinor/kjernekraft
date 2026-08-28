@@ -46,8 +46,15 @@
 
            SVG kann ikkje lesa `--glim-rund` — ein gradient er eit element
            her og ikkje ein verdi — so trappa er skrivi ut. Endrar du
-           `--glim-rund`, endra denne med. */}}
-      <radialGradient id="glas-{{.Form.Ident}}" cx="0.34" cy="0.22" r="0.62">
+           `--glim-rund`, endra denne med.
+
+           `userSpaceOnUse` og ikkje prosent av omrisset: omrisset er
+           høgare enn det er breidt, og ein objectBoundingBox-gradient
+           vert strekt med det — daa er speglingi ein oval og ikkje eit
+           ljospunkt, og ho les seg som ei flekk. Midpunktet og radien
+           kjem fraa merkeform.go, som er autoriteten paa geometrien. */}}
+      <radialGradient id="glas-{{.Form.Ident}}" gradientUnits="userSpaceOnUse"
+                      cx="{{.Form.GlasX}}" cy="{{.Form.GlasY}}" r="{{.Form.GlasR}}">
         <stop offset="0"    class="glas-topp"/>
         <stop offset="0.36" class="glas-midt"/>
         <stop offset="0.64" class="glas-svak"/>

@@ -118,12 +118,17 @@ var dagKort = map[time.Weekday]string{
 	time.Sunday: "sun",
 }
 
-// Tvo bokstavar til skiltet paa merket. Tri fekk ikkje plass utan aa
-// gjera skiltet breidare enn kroppen.
+// Heile dagen paa skiltet.
+//
+// Her stod tvo bokstavar — «MÅ», «TY» — av di fana var 44 av 56 einingar
+// og tri ikkje fekk plass. Men «TY» er ikkje eit ord; det er ein kode ein
+// lyt læra, og eit merke som lyt lærast er eit merke som ikkje segjer
+// noko. Fana spenner yver toppen no (52 av 56, sjaa merkeform.go), og
+// daa stend dagen heil.
 var dagKort2 = map[time.Weekday]string{
-	time.Monday: "MÅ", time.Tuesday: "TY", time.Wednesday: "ON",
-	time.Thursday: "TO", time.Friday: "FR", time.Saturday: "LA",
-	time.Sunday: "SU",
+	time.Monday: "MÅNDAG", time.Tuesday: "TYSDAG", time.Wednesday: "ONSDAG",
+	time.Thursday: "TORSDAG", time.Friday: "FREDAG", time.Saturday: "LAURDAG",
+	time.Sunday: "SUNDAG",
 }
 
 // dayCells legg framsyningarne ut paa dei sju dagarne, og fyller resten

@@ -32,10 +32,15 @@ const (
 	// honom — botnstripa, plassmerket og skiva flytter seg med.
 	kroppB, kroppH = 56.0, 60.0
 	kroppR         = 4.0 // rektangel med so vidt broti hyrna
-	faneB, faneH   = 44.0, 13.0
-	faneR          = 3.0
-	faneLoft       = 11.0
-	merkeKant      = 1.0
+	// Fana spenner yver toppen, so dagen stend *heil*. Ho var 44 av 56
+	// og laut forkortast til tvo bokstavar — «TY» er ikkje eit ord, det
+	// er ein kode ein lyt læra. Med 52 av 56 stend «TYSDAG», og tvo
+	// einingar skulder paa kvar sida syner framleis at fana ligg attum
+	// kroppen.
+	faneB, faneH = 52.0, 13.0
+	faneR        = 3.0
+	faneLoft     = 11.0
+	merkeKant    = 1.0
 
 	kroppX = merkeKant
 	kroppY = faneLoft + merkeKant
@@ -175,23 +180,30 @@ type Mark struct {
 	Width, Height float64
 	Silhouette    template.HTMLAttr // umrisset: kant, ring og flate deler han
 	DayX, DayY    float64
-	Ticks         []Tick
-	Numerals      []Numeral
-	Slices        []Slice
-	DialX         float64
-	DialY         float64
-	HourHand      float64
-	MinuteHand    float64
-	HourAngle     float64
-	MinuteAngle   float64
-	EndAngle      float64
-	DayTab        template.HTMLAttr // dagfana, teikna for seg attum kroppen
-	Box           template.HTMLAttr
-	BoxTextX      float64
-	BoxTextY      float64
-	Full          bool
-	Remaining     int // plassar att
-	Capacity      int // av so mange
+	// Glaset. Sola stend paa 34 % 22 % av kroppen, som alt anna runda i
+	// huset (--sol). Tali er rekna i merket sitt *eige* rom og ikkje i
+	// prosent av omrisset: eit omriss som er høgare enn det er breidt
+	// strekkjer ein objectBoundingBox-gradient til ein oval, og daa vert
+	// speglingi ei flekk i staden for eit ljospunkt.
+	GlasX, GlasY float64
+	GlasR        float64
+	Ticks        []Tick
+	Numerals     []Numeral
+	Slices       []Slice
+	DialX        float64
+	DialY        float64
+	HourHand     float64
+	MinuteHand   float64
+	HourAngle    float64
+	MinuteAngle  float64
+	EndAngle     float64
+	DayTab       template.HTMLAttr // dagfana, teikna for seg attum kroppen
+	Box          template.HTMLAttr
+	BoxTextX     float64
+	BoxTextY     float64
+	Full         bool
+	Remaining    int // plassar att
+	Capacity     int // av so mange
 	// Hyrna merket skal sentrerast paa, i prosent av kassen.
 	HyrneX float64
 	HyrneY float64
@@ -354,6 +366,9 @@ func NewMark(ident string, start, slutt time.Time, teke, plassar int) Mark {
 		Width:   MarkWidth, Height: MarkHeight,
 		Silhouette:  template.HTMLAttr(silhouette()),
 		DayTab:      template.HTMLAttr(dayTabPath()),
+		GlasX:       kroppX + 0.34*kroppB,
+		GlasY:       kroppY + 0.22*kroppH,
+		GlasR:       0.62 * kroppB,
 		DayX:        faneX + faneB/2,
 		DayY:        faneY + 9.4,
 		DialX:       skiveX,
