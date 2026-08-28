@@ -20,9 +20,9 @@ func lastMalane(t *testing.T) *TemplateManager {
 	return tm
 }
 
-// Folkelista er den einaste staden ei rolla kann setjast. Prøva teiknar
+// Folkelista er den einaste staden eit løyve kann setjast. Prøva teiknar
 // henne og ser etter at baae merki stend der, og at det som er slege paa
-// ser slege paa ut — ei rolla som ligg i basen utan aa syna seg i flata
+// ser slege paa ut — eit løyve som ligg i basen utan aa syna seg i flata
 // er den same feilen som daa knappen ikkje fanst i det heile.
 func TestFolkelistaTeiknarRollemerki(t *testing.T) {
 	mal, ok := lastMalane(t).GetTemplate("pages/admin")
@@ -42,23 +42,23 @@ func TestFolkelistaTeiknarRollemerki(t *testing.T) {
 	}
 	html := ut.String()
 
-	// Kristina held lærarrolla; Bjørn held henne ikkje. Baae skal ha
-	// baae knappane — ei rolla ein ikkje hev er ikkje noko ein ser at
+	// Kristina held lærarløyvet; Bjørn held henne ikkje. Baae skal ha
+	// baae knappane — eit løyve ein ikkje hev er ikkje noko ein ser at
 	// nokon manglar, so lista lyt syna baae utfalli.
 	for _, vil := range []string{
 		`data-brukar="7"`, `data-brukar="8"`,
-		`data-rolla="teacher"`, `data-rolla="admin"`,
+		`data-loyve="teacher"`, `data-loyve="admin"`,
 	} {
 		if !strings.Contains(html, vil) {
 			t.Errorf("folkelista teikna ikkje %s", vil)
 		}
 	}
 
-	if n := strings.Count(html, `class="held rolla"`); n != 4 {
+	if n := strings.Count(html, `class="held loyvemerke"`); n != 4 {
 		t.Errorf("venta fire rollemerke paa tvo folk, fann %d", n)
 	}
 	if n := strings.Count(html, `aria-pressed="true"`); n != 1 {
-		t.Errorf("berre Kristina hev ei rolla; fann %d merke som var slegne paa", n)
+		t.Errorf("berre Kristina hev eit løyve; fann %d merke som var slegne paa", n)
 	}
 }
 

@@ -111,7 +111,7 @@ func MembershipPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Eit tildelt medlemskap er ikkje noko ein byter fraa.
 	//
-	// Black fylgjer rolla og hev ingi rad i user_memberships; «byt til»
+	// Black fylgjer løyvet og hev ingi rad i user_memberships; «byt til»
 	// hadde peika paa ein avtale som ikkje finst, og det ein *kunde*
 	// byta til er alt saman ringare og kostar pengar. Fana stod der og
 	// baud ein lærar aa nedgradera seg sjølv til noko han maatte betala
@@ -156,7 +156,7 @@ func MembershipPageHandler(w http.ResponseWriter, r *http.Request) {
 		// Regelen er den same som bindingi elles: er du bunden, kann du
 		// ikkje seia upp; er bindingi ute, kann du. Og noko som alt er
 		// sagt upp kann ikkje seiast upp ein gong til.
-		// … og noko som fylgjer ei rolla kann ikkje seiast upp i det
+		// … og noko som fylgjer eit løyve kann ikkje seiast upp i det
 		// heile: det finst ingi rad aa seia upp, og knappen hadde bode
 		// deg noko huset ikkje kann halda.
 		"KannSeiaUpp":   noverande != nil && !bunden && noverande.Status != "cancelled" && !tildelt,

@@ -67,15 +67,15 @@
     // Rollone. Merket skiftar med ein gong, og spring attende um tenaren
     // segjer nei — flata skal ikkje syna ei rolla basen ikkje hev.
     rot.addEventListener("click", function (e) {
-        var b = e.target.closest(".rolla");
+        var b = e.target.closest(".loyvemerke");
         if (!b) return;
 
         var paa = b.getAttribute("aria-pressed") !== "true";
         b.setAttribute("aria-pressed", paa ? "true" : "false");
         b.disabled = true;
 
-        fetch("/api/admin/rolla?brukar=" + encodeURIComponent(b.dataset.brukar)
-            + "&rolla=" + encodeURIComponent(b.dataset.rolla)
+        fetch("/api/admin/loyve?brukar=" + encodeURIComponent(b.dataset.brukar)
+            + "&loyve=" + encodeURIComponent(b.dataset.loyvemerke)
             + "&paa=" + (paa ? "1" : "0"), { method: "POST" })
             .then(function (svar) {
                 if (!svar.ok) throw new Error(svar.status);

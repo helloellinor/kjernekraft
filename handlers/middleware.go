@@ -50,7 +50,7 @@ func RequireAuth(next http.Handler) http.Handler {
 	})
 }
 
-// RequireAdmin krev rolla «admin», og rolla vert lesi or basen — ikkje or
+// RequireAdmin krev løyvet «admin», og løyvet vert lesi or basen — ikkje or
 // kaka lesaren sender.
 func RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -267,7 +267,7 @@ func sessionUserName(r *http.Request) string {
 	return ""
 }
 
-// sessionIsAdmin segjer um den innlogga brukaren hev admin-rolla, so
+// sessionIsAdmin segjer um den innlogga brukaren hev admin-løyvet, so
 // malen kann syna administrasjonslenkja for dei som faktisk kjem inn.
 func sessionIsAdmin(r *http.Request) bool {
 	return IsAdmin(GetUserFromSession(r))

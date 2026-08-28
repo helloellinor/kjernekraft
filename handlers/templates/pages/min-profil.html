@@ -70,7 +70,20 @@
             <input type="checkbox" name="student_senior" {{if .StudentSenior}}checked{{end}}>
             <span>
                 {{t .Lang "profile.student_senior"}}
+                {{/* Lina under segjer kva stoda er, og ikkje berre kva
+                     krysset tyder. Eit kryss som ser likt ut anten du hev
+                     rabatten, ventar paa han eller fekk nei, segjer ikkje
+                     kva som er sant — og det er nettupp det du kom for aa
+                     sjaa. */}}
+                {{if .RabattVentar}}
+                <small>{{t .Lang "profile.rabatt_ventar"}}</small>
+                {{else if .StudentSenior}}
+                <small>{{tf .Lang "profile.rabatt_til" (norskDatoAar .RabattTil)}}</small>
+                {{else if .RabattAvvist}}
+                <small>{{t .Lang "profile.rabatt_avvist"}}</small>
+                {{else}}
                 <small>{{t .Lang "profile.student_senior_hint"}}</small>
+                {{end}}
             </span>
         </label>
     </form>

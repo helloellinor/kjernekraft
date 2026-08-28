@@ -42,23 +42,23 @@ func lagBrukar(t *testing.T, db *Database, namn string) int64 {
 }
 
 // Knappen kann trykkjast tvo gonger paa rad utan at nokon ser det.
-// AssignRoleToUser fall paa ein nykelkrasj i det tilfellet.
+// GjevLoyve fall paa ein nykelkrasj i det tilfellet.
 func TestRollaTolerAtHoVertSettTvoGonger(t *testing.T) {
 	db := prøvebase(t)
 	id := lagBrukar(t, db, "Kristina")
 
 	for i := 0; i < 2; i++ {
-		if err := db.SettRolla(id, RollaLaerar, true); err != nil {
-			t.Fatalf("aa setja rolla gong %d: %v", i+1, err)
+		if err := db.SettLoyve(id, LoyveLaerar, true); err != nil {
+			t.Fatalf("aa setja løyvet gong %d: %v", i+1, err)
 		}
 	}
 
-	har, err := db.HarRolla(id, RollaLaerar)
+	har, err := db.HarLoyve(id, LoyveLaerar)
 	if err != nil {
-		t.Fatalf("HarRolla: %v", err)
+		t.Fatalf("HarLoyve: %v", err)
 	}
 	if !har {
-		t.Error("rolla vart sett tvo gonger og er ikkje der")
+		t.Error("løyvet vart sett tvo gonger og er ikkje der")
 	}
 }
 
@@ -66,25 +66,25 @@ func TestRollaLetSegTakaAvAtt(t *testing.T) {
 	db := prøvebase(t)
 	id := lagBrukar(t, db, "Kristina")
 
-	if err := db.SettRolla(id, RollaLaerar, true); err != nil {
+	if err := db.SettLoyve(id, LoyveLaerar, true); err != nil {
 		t.Fatalf("paa: %v", err)
 	}
-	if err := db.SettRolla(id, RollaLaerar, false); err != nil {
+	if err := db.SettLoyve(id, LoyveLaerar, false); err != nil {
 		t.Fatalf("av: %v", err)
 	}
 
-	har, err := db.HarRolla(id, RollaLaerar)
+	har, err := db.HarLoyve(id, LoyveLaerar)
 	if err != nil {
-		t.Fatalf("HarRolla: %v", err)
+		t.Fatalf("HarLoyve: %v", err)
 	}
 	if har {
-		t.Error("rolla vart teki av og er der endaa")
+		t.Error("løyvet vart teki av og er der endaa")
 	}
 
-	// Aa taka ei rolla som aldri vart sett skal ikkje vera ein feil:
+	// Aa taka eit løyve som aldri vart sett skal ikkje vera ein feil:
 	// knappen veit ikkje kva basen hadde fyrr han vart trykt.
-	if err := db.SettRolla(id, RollaAdmin, false); err != nil {
-		t.Errorf("aa taka ei rolla som ikkje var der: %v", err)
+	if err := db.SettLoyve(id, LoyveAdmin, false); err != nil {
+		t.Errorf("aa taka eit løyve som ikkje var der: %v", err)
 	}
 }
 
@@ -97,13 +97,13 @@ func TestLaerarNamnGjevBerreDeiMedRolla(t *testing.T) {
 	åse := lagBrukar(t, db, "Åse")
 	elev := lagBrukar(t, db, "Bjørn")
 
-	if err := db.SettRolla(kristina, RollaLaerar, true); err != nil {
+	if err := db.SettLoyve(kristina, LoyveLaerar, true); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.SettRolla(åse, RollaLaerar, true); err != nil {
+	if err := db.SettLoyve(åse, LoyveLaerar, true); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.SettRolla(elev, RollaAdmin, true); err != nil {
+	if err := db.SettLoyve(elev, LoyveAdmin, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -123,26 +123,26 @@ func TestLaerarNamnGjevBerreDeiMedRolla(t *testing.T) {
 	}
 }
 
-// FolkOversyn les rollone som ein samanslegen streng. «teacher» ligg
+// FolkOversyn les løyvi som ein samanslegen streng. «teacher» ligg
 // inni «teacher, admin», og ei rein delstrengsprøve hadde difor svara
-// ja paa rolla «ach» ogso.
+// ja paa løyvet «ach» ogso.
 func TestHarRollaLesHeileNamnetOgIkkjeEiDelAvDet(t *testing.T) {
 	prøvor := []struct {
-		roller string
-		rolla  string
+		løyve  string
+		løyvet string
 		vent   bool
 	}{
-		{"teacher, admin", RollaLaerar, true},
-		{"teacher, admin", RollaAdmin, true},
-		{"admin", RollaLaerar, false},
-		{"", RollaLaerar, false},
+		{"teacher, admin", LoyveLaerar, true},
+		{"teacher, admin", LoyveAdmin, true},
+		{"admin", LoyveLaerar, false},
+		{"", LoyveLaerar, false},
 		{"teacher", "ach", false},
 		{"teacher", "teach", false},
 	}
 
 	for _, p := range prøvor {
-		if fekk := harRolla(p.roller, p.rolla); fekk != p.vent {
-			t.Errorf("harRolla(%q, %q) = %v, venta %v", p.roller, p.rolla, fekk, p.vent)
+		if fekk := harLoyve(p.løyve, p.løyvet); fekk != p.vent {
+			t.Errorf("harLoyve(%q, %q) = %v, venta %v", p.løyve, p.løyvet, fekk, p.vent)
 		}
 	}
 }

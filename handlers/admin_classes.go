@@ -36,6 +36,8 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		RecurringWeeks int    `json:"recurring_weeks"`
 		// Sett = ei privat økt for den eine. Sjaa database/privattime.go.
 		PrivateUserID int64 `json:"private_user_id"`
+		// Gruppa timen er open for. Null er open for alle.
+		GruppeID int64 `json:"gruppe_id"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&classData); err != nil {
@@ -70,6 +72,16 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Gruppa lyt finnast. Ein time som peikar paa ei gruppe som ikkje er
+	// der, er ein time ingen kann sjaa — og ingen ting hadde sagt fraa.
+	if classData.GruppeID > 0 {
+		finst, err := AdminDB.GruppeFinst(classData.GruppeID)
+		if err != nil || !finst {
+			http.Error(w, "Ukjend gruppe", http.StatusBadRequest)
+			return
+		}
+	}
+
 	startTime, err := time.Parse("15:04", classData.StartTime)
 	if err != nil {
 		http.Error(w, "Invalid start time format", http.StatusBadRequest)
@@ -82,7 +94,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Regelen hev ein vekedag, ikkje ein dato. Fyrste utslaget er neste
+	// Serien hev ein vekedag, ikkje ein dato. Fyrste utslaget er neste
 	// gongen den dagen kjem — i dag, um klokka ikkje alt er gjengi.
 	// Tidene vert bygde i UTC av di den lagra tidi er veggklokka (sjaa
 	// GrupperTimar); klokka i innstillingane segjer kva ho er no.
@@ -104,8 +116,8 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		weeksToCreate = classData.RecurringWeeks
 	}
 
-	// Det som vert laga her er ein *regel*, ikkje ein time — timane er
-	// utslagi hans. Ein einskildtime er ein regel med eitt utslag.
+	// Det som vert laga her er ein *serie*, ikkje ein time — timane er
+	// utslagi hans. Ein einskildtime er ein serie med eitt utslag.
 	//
 	// Alle vekene vert bygde og prøvde fyrst, og skrivne etterpå. Fyrr
 	// gjekk prøva og skrivinga om kvarandre, so ein kollisjon i femte
@@ -151,13 +163,13 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		timar = append(timar, event)
 	}
 
-	_, createdEventIDs, err := AdminDB.LagRegel(timar)
+	_, createdEventIDs, err := AdminDB.LagSerie(timar)
 	if err != nil {
 		http.Error(w, "Could not create event", http.StatusInternalServerError)
 		return
 	}
 
-	// Økta vert sett av etter at ho er laga. Alle utslagi av regelen
+	// Økta vert sett av etter at ho er laga. Alle utslagi av serien
 	// høyrer den same personen til: eit PT-kjøp paa aatte vekor er aatte
 	// timar med same namnet paa.
 	if classData.PrivateUserID > 0 {
@@ -165,6 +177,18 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 			if err := AdminDB.SettPrivatTime(id, classData.PrivateUserID); err != nil {
 				log.Printf("privat time %d: %v", id, err)
 				http.Error(w, "Could not mark class private", http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	// Gruppa gjeld heile serien av same grunnen: er reformer-timen open
+	// for dei upplærde, er han det kvar veke og ikkje berre den fyrste.
+	if classData.GruppeID > 0 {
+		for _, id := range createdEventIDs {
+			if err := AdminDB.SettGruppePaaTime(id, classData.GruppeID); err != nil {
+				log.Printf("gruppetime %d: %v", id, err)
+				http.Error(w, "Could not set group", http.StatusInternalServerError)
 				return
 			}
 		}

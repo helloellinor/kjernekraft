@@ -9,6 +9,40 @@
      og resten kjem naar rada vert opna. Rada opnar seg paa staden; ein
      slær ikkje upp ein person ved aa forlata lista yver folk. */}}
 <div class="folk" id="folk">
+    {{/* Gruppone.
+         Ei gruppe er kven du høyrer til; ei rolla er kva du fær gjera.
+         Difor stend dei ikkje i den same lista: den dagen «gjev tilgang
+         til reformer» ser ut som «gjer til administrator», er dei tvo
+         det same for handi som gjer dei. */}}
+    <div class="bolkhovud">
+        <h3 class="undertittel">{{t .Lang "admin.group_admin"}}</h3>
+    </div>
+
+    {{if .Grupper}}
+    <ul class="gruppeliste" id="gruppeliste">
+        {{range .Grupper}}
+        <li class="grupperad" data-gruppe="{{.ID}}">
+            <span class="gruppenamn">{{.Namn}}</span>
+            <span class="gruppetal">{{.Medlem}} {{t $.Lang "admin.group_members"}}</span>
+            {{/* Aatvaringi stend paa sida fyre trykket, og knappen bed um
+                 trykk nummer tvo sjølv (§7). Timane gruppa heldt vert
+                 opne for alle att — dei kverv ikkje med henne. */}}
+            <button type="button" class="gruppeslett"
+                    data-stadfest="{{t $.Lang "admin.delete_group_confirm"}}">{{t $.Lang "admin.delete_group"}}</button>
+        </li>
+        {{end}}
+    </ul>
+    {{else}}
+    <p class="tomt">{{t .Lang "admin.no_groups"}}</p>
+    {{end}}
+
+    <p class="setning nygruppe">
+        <input type="text" class="felt" id="ny-gruppe"
+               placeholder="{{t .Lang "admin.group_name"}}"
+               aria-label="{{t .Lang "admin.group_name"}}">
+        <button type="button" class="btn" id="lag-gruppe">{{t .Lang "admin.new_group"}}</button>
+    </p>
+
     <div class="folk-sok">
         <input type="search" id="folk-sok" class="soke" autofocus
                placeholder="{{t .Lang "admin.search_people"}}"
@@ -60,16 +94,30 @@
 
                      Ingi yverskrift stend yver deim. «Roller» hadde
                      vore det same ordet som knappane alt segjer. */}}
-                <p class="rollor">
-                    <button type="button" class="held rolla" data-brukar="{{.ID}}"
-                            data-rolla="teacher" aria-pressed="{{if .ErLaerar}}true{{else}}false{{end}}">
-                        {{t $.Lang "admin.role_teacher"}}
+                {{/* Rollone er løyve. Gruppone under er noko anna, og
+                     difor ei anna line og eit anna merke. */}}
+                <p class="loyve">
+                    <button type="button" class="held loyvemerke" data-brukar="{{.ID}}"
+                            data-loyve="teacher" aria-pressed="{{if .ErLaerar}}true{{else}}false{{end}}">
+                        {{t $.Lang "admin.loyve_laerar"}}
                     </button>
-                    <button type="button" class="held rolla" data-brukar="{{.ID}}"
-                            data-rolla="admin" aria-pressed="{{if .ErAdmin}}true{{else}}false{{end}}">
-                        {{t $.Lang "admin.role_admin"}}
+                    <button type="button" class="held loyvemerke" data-brukar="{{.ID}}"
+                            data-loyve="admin" aria-pressed="{{if .ErAdmin}}true{{else}}false{{end}}">
+                        {{t $.Lang "admin.loyve_admin"}}
                     </button>
                 </p>
+
+                {{if $.Grupper}}
+                <p class="grupper" data-brukar="{{.ID}}">
+                    {{$sett := .GruppeSett}}
+                    {{range $.Grupper}}
+                    <button type="button" class="gruppemerke" data-gruppe="{{.ID}}"
+                            aria-pressed="{{if index $sett .ID}}true{{else}}false{{end}}">
+                        {{.Namn}}
+                    </button>
+                    {{end}}
+                </p>
+                {{end}}
             </div>
         </li>
         {{else}}
@@ -77,4 +125,63 @@
         {{end}}
     </ul>
 </div>
+
+<script>
+// Gruppone. Namnet er lagra i det du trykkjer — ingi dokka her, av di
+// det ikkje er eit skjema med fleire felt som heng saman: det er eitt
+// medlemskap av eller paa, og feltet sjølv er svaret.
+(function () {
+    var folk = document.getElementById('folk');
+    if (!folk) return;
+
+    function seg(el, ord) {
+        el.textContent = ord;
+        el.classList.add('gale');
+    }
+
+    folk.addEventListener('click', function (e) {
+        // Medlemskapet i ei gruppe.
+        var merke = e.target.closest('.gruppemerke');
+        if (merke) {
+            var paa = merke.getAttribute('aria-pressed') !== 'true';
+            var brukar = merke.closest('.grupper').dataset.brukar;
+            fetch('/api/admin/gruppemedlem?gruppe=' + merke.dataset.gruppe
+                + '&brukar=' + brukar + '&paa=' + (paa ? '1' : '0'), { method: 'POST' })
+                .then(function (svar) {
+                    if (!svar.ok) throw new Error();
+                    merke.setAttribute('aria-pressed', paa ? 'true' : 'false');
+                })
+                .catch(function () { merke.classList.add('gale'); });
+            return;
+        }
+
+        // Ny gruppe. Sida vert lasta paa nytt: gruppa skal stande i kvar
+        // person si rad og i veljaren paa timeplanfana, og dei er teikna
+        // av tenaren.
+        if (e.target.id === 'lag-gruppe') {
+            var felt = document.getElementById('ny-gruppe');
+            var namn = felt.value.trim();
+            if (!namn) { felt.focus(); return; }
+            fetch('/api/admin/gruppe?namn=' + encodeURIComponent(namn), { method: 'POST' })
+                .then(function (svar) {
+                    if (!svar.ok) throw new Error();
+                    window.location.reload();
+                })
+                .catch(function () { felt.classList.add('gale'); });
+            return;
+        }
+
+        var slett = e.target.closest('.gruppeslett');
+        if (slett) {
+            var rad = slett.closest('.grupperad');
+            fetch('/api/admin/gruppe/slett?gruppe=' + rad.dataset.gruppe, { method: 'POST' })
+                .then(function (svar) {
+                    if (!svar.ok) throw new Error();
+                    window.location.reload();
+                })
+                .catch(function () { seg(rad.querySelector('.gruppetal'), '—'); });
+        }
+    });
+})();
+</script>
 {{end}}

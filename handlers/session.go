@@ -86,7 +86,7 @@ func decodeKey(raw string) []byte {
 }
 
 // sessionUserID hentar berre kjennemerket or kaka. Alt anna um brukaren —
-// namn, roller — kjem or basen. Ei rolla som ligg i kaka er ei rolla
+// namn, løyve — kjem or basen. Eit løyve som ligg i kaka er eit løyve
 // lesaren kann skriva um att.
 func sessionUserID(r *http.Request) (int64, bool) {
 	session, err := sessionStore.Get(r, sessionName)
@@ -166,12 +166,12 @@ func IsLoggedIn(r *http.Request) bool {
 	return GetUserFromSession(r) != nil
 }
 
-// IsAdmin les rolla or brukaren basen gav oss.
+// IsAdmin les løyvet or brukaren basen gav oss.
 func IsAdmin(user *models.User) bool {
 	if user == nil {
 		return false
 	}
-	for _, role := range user.Roles {
+	for _, role := range user.Loyve {
 		if role == "admin" {
 			return true
 		}

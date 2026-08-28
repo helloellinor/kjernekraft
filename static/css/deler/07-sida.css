@@ -159,14 +159,31 @@ main {
    flata, og blekket upp fraa `--blekk-lys` til `--blekk`. */
 .sikt { display: flex; flex-wrap: wrap; align-items: center; gap: var(--rom-2); }
 
+/* UNNATAK, og eit medvite eit (28.8.2026).
+   Designsystemet gjorde veljaren til ein kapsel med kuppel og glans —
+   «ein knapp med ei liste attum» — og det er rett i eit skjema. Sikti er
+   ikkje eit skjema. Ho er ei innstilling paa noko du alt ser, og bolken
+   yver segjer kvifor: ein veljar som stend attmed ei overskrift skal
+   ikkje sjaa ut som eit skjema.
+
+   Difor lyt han taka baade kuppelen og glansen av att — ikkje berre
+   ramma. `box-shadow: none` og `background-image: var(--pil)` er dei tvo
+   som gjer det; utan dei hadde den nakne sikti fenge ein kuppelskugge og
+   tri glanslag ho ikkje bad um, og pila hadde stade paa feil stad av di
+   posisjonslista er rekna for fem lag og ikkje tvo. */
 .sikt select {
   width: auto; max-width: 100%; min-width: 0;
   font: inherit; font-size: .82rem;
   border: 0; background-color: transparent; border-radius: 2px;
+  box-shadow: none;
+  background-image: var(--pil);
   padding: var(--rom-1) var(--rom-5) var(--rom-1) var(--rom-2);
   background-position: right .55rem top 50%, right .35rem top 50%;
+  background-size: 5px 5px, 5px 5px;
   color: var(--blekk-lys);
 }
+.sikt select:hover { border-color: transparent; }
+.sikt select:active { box-shadow: none; }
 .sikt select:hover { color: var(--blekk); background-color: var(--ark-djup); }
 /* `:has` av di det ikkje finst nokon annan veg: kva som er valt i ein
    veljar veit berre nettlesaren, og me vil ikkje ha eit skript til for

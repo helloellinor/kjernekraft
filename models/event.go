@@ -19,11 +19,11 @@ type Event struct {
 	Capacity         int    `json:"capacity"`          // Maximum number of attendees
 	CurrentEnrolment int    `json:"current_enrolment"` // Current number of enrolled
 	Color            string `json:"color"`             // Color for the class type
-	// Regelen timen er laga av. Ein time *er* ikkje ein ting for seg —
-	// han er eitt utslag av ein regel («yoga med Leon, maandag 18:00»),
-	// og det er regelen administrasjonen endrar. Timane ber regel-id-en
+	// Serien timen er laga av. Ein time *er* ikkje ein ting for seg —
+	// han er eitt utslag av ein serie («yoga med Leon, maandag 18:00»),
+	// og det er serien administrasjonen endrar. Timane ber serie-id-en
 	// so dei kann finna kvarandre att.
-	RuleID int64 `json:"rule_id"`
+	SerieID int64 `json:"rule_id"`
 	// Timen si eigi kapasitet, raa som ho stend i rada — 0 tyder «ingi
 	// eigi», og daa gjeld rommet sitt tal.
 	//
@@ -34,6 +34,8 @@ type Event struct {
 	// framlegg og timen sitt som ein verdi.
 	EigenPlassar int `json:"eigen_plassar"`
 	// Rommet. Kapasiteten kjem herifraa naar timen ikkje set si eigi.
+	// Gruppa timen er open for. Null er open for alle.
+	GruppeID     int    `json:"gruppe_id"`
 	RoomID       int    `json:"room_id"`
 	RoomName     string `json:"room_name"`
 	RoomCapacity int    `json:"room_capacity"`

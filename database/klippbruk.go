@@ -27,14 +27,14 @@ import (
 
 // MigrerKlippbruk legg til kolonnorne krysset treng.
 //
-//   klipp_kort_id  kortet klippet vart teke fraa. NULL = ikkje klippa.
-//                  Det er *kva kort* som gjer at eit angra kryss kann
-//                  leggja klippet attende paa rett stad — utan dette
-//                  laut ein gissa, og eit kort som gjekk ut i
-//                  millomtidi hadde fenge klippet.
-//   skulda         1 naar nokon vart kryssa inn utan klipp aa taka av.
-//                  Timen er gjeven og skal ikkje gaa tapt or rekneskapen
-//                  berre av di kortet var tomt i døri.
+//	klipp_kort_id  kortet klippet vart teke fraa. NULL = ikkje klippa.
+//	               Det er *kva kort* som gjer at eit angra kryss kann
+//	               leggja klippet attende paa rett stad — utan dette
+//	               laut ein gissa, og eit kort som gjekk ut i
+//	               millomtidi hadde fenge klippet.
+//	skulda         1 naar nokon vart kryssa inn utan klipp aa taka av.
+//	               Timen er gjeven og skal ikkje gaa tapt or rekneskapen
+//	               berre av di kortet var tomt i døri.
 func MigrerKlippbruk(db *sql.DB) error {
 	for _, k := range []struct{ namn, def string }{
 		{"klipp_kort_id", "ALTER TABLE event_signups ADD COLUMN klipp_kort_id INTEGER"},

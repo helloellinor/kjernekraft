@@ -22,7 +22,7 @@ func (db *Database) LedigeTimar(sjaaarID int64) ([]models.Event, error) {
 		  AND ` + synlegFor + `
 		ORDER BY e.start_time ASC
 	`
-	rows, err := db.Conn.Query(query, sjaaarID)
+	rows, err := db.Conn.Query(query, sjaaarID, sjaaarID)
 	if err != nil {
 		return nil, err
 	}

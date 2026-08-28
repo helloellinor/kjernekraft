@@ -53,7 +53,21 @@ func MigrerPrivatTime(db *sql.DB) error {
 // Han stend som ein konstant og ikkje som tekst skriven for haand kvar
 // gong, av di ein timeplan-spurning som gløymer honom lek ei PT-økt ut
 // til heile huset — og det er ikkje noko ein ser ved aa lesa lista.
-const synlegFor = `(e.private_user_id IS NULL OR e.private_user_id = ?)`
+// Sidan gruppone kom, dekkjer han tvo ting: timen som høyrer éin
+// person til, og timen som høyrer ei gruppe til. Baae er «kven fær sjaa
+// dette», og dei stend saman av same grunnen som yver — ei spurning som
+// hugsar det eine og gløymer det andre lek like fullt.
+//
+// Han tek sjaaaren sitt id *tvo* gonger. Det er ikkje pent, men SQL kann
+// ikkje binda den same posisjonen tvo stader, og det er den trygge feilen
+// aa gjera: gløymer nokon det andre argumentet, fell spurningi med
+// «argument count mismatch» med ein gong. Hadde vilkaaret i staden vore
+// skrive for haand paa kvar stad, hadde ein gløymd stad ikkje sagt noko —
+// han hadde berre synt reformer-timane til heile huset.
+const synlegFor = `(e.private_user_id IS NULL OR e.private_user_id = ?)
+	AND (e.gruppe_id IS NULL OR EXISTS (
+		SELECT 1 FROM gruppemedlem gm
+		WHERE gm.gruppe_id = e.gruppe_id AND gm.user_id = ?))`
 
 // EigarAvPrivatTime gjev brukaren timen er sett av til, og false naar
 // timen er open for alle.
@@ -96,7 +110,7 @@ func (db *Database) EventsSynlegeFor(sjaaarID int64) ([]models.Event, error) {
 		       COALESCE(e.color, ''), COALESCE(r.name, e.location, '')
 		FROM events e LEFT JOIN rooms r ON r.id = e.room_id
 		WHERE `+synlegFor+`
-		ORDER BY e.start_time ASC`, sjaaarID)
+		ORDER BY e.start_time ASC`, sjaaarID, sjaaarID)
 	if err != nil {
 		return nil, err
 	}

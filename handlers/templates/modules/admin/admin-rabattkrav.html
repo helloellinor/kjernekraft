@@ -1,0 +1,71 @@
+{{define "admin_rabattkrav"}}
+<div class="content-section">
+    {{/* Studentrabatten er det einaste nokon *bed* um her. Honnør kjem av
+         fødselsdagen og treng ingen som seier ja, so denne køen held
+         berre studentane. */}}
+    <h2 class="section-title">{{t .Lang "admin.rabatt_title"}}</h2>
+
+    {{if .Rabattkrav}}
+    {{/* Aatvaringi stend fyre knappane og ikkje etter (§7): ei
+         godkjenning varer i tri aar, og det er verdt aa vita fyre du
+         trykkjer og ikkje naar det er gjort. */}}
+    <p class="merknad opplysing">{{tf .Lang "admin.rabatt_note" 3}}</p>
+
+    <ul class="folk-liste" id="rabattkrav">
+        {{range .Rabattkrav}}
+        <li class="folk-rad">
+            <div class="kravrad" data-krav="{{.ID}}">
+                <span class="kravnamn">{{.Namn}}</span>
+                <span class="kravepost">{{.Epost}}</span>
+                <span class="kravnaar">{{.BedeUm.Format "2.1.2006"}}</span>
+                <span class="kravhandling">
+                    {{/* Tvo verb, ingen farge. Å avvisa eit krav er ikkje
+                         ugjenkalleg — den som hev beviset kann be ein gong
+                         til — so `--aatvaring` hadde sagt noko som ikkje er
+                         sant (§1). Ordi skil dei tvo, ikkje kuløren. */}}
+                    <button type="button" class="btn krav-svar" data-svar="ja">{{t $.Lang "admin.approve"}}</button>
+                    <button type="button" class="btn krav-svar" data-svar="nei">{{t $.Lang "admin.reject"}}</button>
+                </span>
+                {{/* Svaret stend att i rada i staden for at ho kverv:
+                     lista hoppar ikkje, og du ser kva du nett gjorde (§3). */}}
+                <span class="kravord"></span>
+            </div>
+        </li>
+        {{end}}
+    </ul>
+    {{else}}
+    <p class="tomt">{{t .Lang "admin.rabatt_none"}}</p>
+    {{end}}
+</div>
+
+<script>
+// Kravet vert avgjort der det stend. Rada stend att med svaret i seg, so
+// du ser kva du gjorde utan at lista flyttar seg under handi di.
+(function () {
+    var liste = document.getElementById('rabattkrav');
+    if (!liste) return;
+
+    liste.addEventListener('click', function (e) {
+        var knapp = e.target.closest('.krav-svar');
+        if (!knapp || knapp.disabled) return;
+        var rad = knapp.closest('.kravrad');
+        var ja = knapp.dataset.svar === 'ja';
+
+        fetch('/api/admin/rabattkrav?krav_id=' + rad.dataset.krav + '&svar=' + knapp.dataset.svar,
+            { method: 'POST' })
+            .then(function (svar) {
+                if (!svar.ok) return svar.text().then(function (t) { throw new Error(t); });
+                rad.classList.add(ja ? 'godkjend' : 'avvist');
+                rad.querySelector('.kravord').textContent = ja
+                    ? '{{t .Lang "admin.rabatt_godkjend"}}'
+                    : '{{t .Lang "admin.rabatt_avvist"}}';
+                [].forEach.call(rad.querySelectorAll('button'), function (b) { b.disabled = true; });
+            })
+            .catch(function (feil) {
+                rad.querySelector('.kravord').textContent = feil.message;
+                rad.classList.add('gale');
+            });
+    });
+})();
+</script>
+{{end}}

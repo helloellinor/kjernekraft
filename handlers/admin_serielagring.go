@@ -13,24 +13,24 @@ import (
 	"kjernekraft/models"
 )
 
-// Lagringi av ein regel er *éi* handling.
+// Lagringi av ein serie er *éi* handling.
 //
 // Ho var ti: eit kall per felt, sendt i det du forlét feltet. Det gjorde
 // tri ting gale. Flata lagra utan at nokon bad om det, so «eg ombestemte
-// meg» fanst ikkje. Ei endring som heng saman — flytt regelen til eit
+// meg» fanst ikkje. Ei endring som heng saman — flytt serien til eit
 // anna rom *og* ein annan dag — gjekk som tvo kall, og det fyrste kunde
-// verta teke imot og det andre avvist, so regelen stod att halvvegs
+// verta teke imot og det andre avvist, so serien stod att halvvegs
 // flutt. Og huset gjer det ikkje slik nokon annan stad: profilen og
 // prisane merkjer feltet, dokka nedst ber handlingi, og det ugjenkallege
 // er *å lagra* (ARKET §9, `.dokk`).
 //
-// No er det eitt kall med heile regelen i seg. Alt vert prøvt fyrst og
+// No er det eitt kall med heile serien i seg. Alt vert prøvt fyrst og
 // skrive etterpaa: er rommet uppteke ein einaste av dei komande gongene,
 // vert ingen ting skrive.
 
-// regelskjema er det skjemaet sender.
-type regelskjema struct {
-	RegelID   int64
+// serieskjema er det skjemaet sender.
+type serieskjema struct {
+	SerieID   int64
 	Tittel    string
 	Laerar    string
 	RomID     int64
@@ -38,6 +38,7 @@ type regelskjema struct {
 	Klokke    time.Time
 	Minutt    int
 	Plassar   int
+	GruppeID  int64
 	Skildring string
 	Veker     int
 	Avlys     map[int64]bool
@@ -45,13 +46,13 @@ type regelskjema struct {
 	Flytt     map[int64]time.Time
 }
 
-func lesRegelskjema(r *http.Request) (*regelskjema, error) {
+func lesSerieskjema(r *http.Request) (*serieskjema, error) {
 	// Kroppen kann koma i tvo drakter, og `ParseForm` kann berre den eine.
 	//
 	// Ho les eit `x-www-form-urlencoded`-lik; er kroppen `multipart`,
 	// les ho berre spurjingi i adressa — og *set `r.Form`* likevel. Etter
 	// det gjer `FormValue` ingen ting, av di ho berre parsar naar
-	// `r.Form` er nil. Kvart felt kom attende tomt, `rule_id` med, og
+	// `r.Form` er nil. Kvart felt kom attende tomt, `serie_id` med, og
 	// lagringi svara 400 fyre ho hadde teke i noko.
 	//
 	// Det synte seg ikkje fyrr av di CSRF-vakti *ogso* les `FormValue` og
@@ -66,15 +67,15 @@ func lesRegelskjema(r *http.Request) (*regelskjema, error) {
 	} else if err := r.ParseForm(); err != nil {
 		return nil, fmt.Errorf("invalid form")
 	}
-	s := &regelskjema{
+	s := &serieskjema{
 		Avlys: map[int64]bool{},
 		Vikar: map[int64]string{},
 		Flytt: map[int64]time.Time{},
 	}
 
 	var err error
-	if s.RegelID, err = strconv.ParseInt(r.FormValue("rule_id"), 10, 64); err != nil || s.RegelID == 0 {
-		return nil, fmt.Errorf("invalid rule_id")
+	if s.SerieID, err = strconv.ParseInt(r.FormValue("serie_id"), 10, 64); err != nil || s.SerieID == 0 {
+		return nil, fmt.Errorf("invalid serie_id")
 	}
 	if s.Tittel = strings.TrimSpace(r.FormValue("tittel")); s.Tittel == "" {
 		return nil, fmt.Errorf("tittel is required")
@@ -98,6 +99,12 @@ func lesRegelskjema(r *http.Request) (*regelskjema, error) {
 	if v := strings.TrimSpace(r.FormValue("plassar")); v != "" {
 		if s.Plassar, err = strconv.Atoi(v); err != nil || s.Plassar < 0 || s.Plassar > 500 {
 			return nil, fmt.Errorf("invalid plassar")
+		}
+	}
+	// Null er «open for alle». Ei ukjend gruppa er ein time ingen ser.
+	if v := strings.TrimSpace(r.FormValue("gruppe_id")); v != "" {
+		if s.GruppeID, err = strconv.ParseInt(v, 10, 64); err != nil || s.GruppeID < 0 {
+			return nil, fmt.Errorf("invalid gruppe_id")
 		}
 	}
 	s.Skildring = r.FormValue("skildring")
@@ -136,8 +143,8 @@ func etterStreken(namn, prefiks string) (int64, bool) {
 	return id, err == nil
 }
 
-// SaveRuleHandler tek imot heile regelen og skriv honom i eitt.
-func SaveRuleHandler(w http.ResponseWriter, r *http.Request) {
+// LagraSerieHandler tek imot heile serien og skriv honom i eitt.
+func LagraSerieHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -146,14 +153,14 @@ func SaveRuleHandler(w http.ResponseWriter, r *http.Request) {
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	lang := GetLanguageFromRequest(r)
-	s, err := lesRegelskjema(r)
+	s, err := lesSerieskjema(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	no := config.GetInstance().GetCurrentTime()
-	timar, err := AdminDB.GetFutureEventsByRule(s.RegelID, no)
+	timar, err := AdminDB.GetFutureEventsBySerie(s.SerieID, no)
 	if err != nil {
 		http.Error(w, "Could not fetch classes", http.StatusInternalServerError)
 		return
@@ -167,7 +174,7 @@ func SaveRuleHandler(w http.ResponseWriter, r *http.Request) {
 
 	// ---- rekna ut kva kvar dag skal verta ----
 	//
-	// Regelen set dagen, klokka og lengdi paa alle; ei einskild flytting
+	// Serien set dagen, klokka og lengdi paa alle; ei einskild flytting
 	// yverstyrer for den eine dagen ho gjeld. Fyrst naar heile biletet
 	// er rekna ut, kann det provast — ein prøve per felt kunde ikkje
 	// sjaa at dagen som flytta seg burt fri sporet var den same dagen
@@ -177,7 +184,7 @@ func SaveRuleHandler(w http.ResponseWriter, r *http.Request) {
 		if s.Avlys[int64(e.ID)] {
 			continue
 		}
-		start := regeltid(e.StartTime, s.Vekedag, s.Klokke)
+		start := serietid(e.StartTime, s.Vekedag, s.Klokke)
 		if naar, ok := s.Flytt[int64(e.ID)]; ok {
 			start = time.Date(naar.Year(), naar.Month(), naar.Day(),
 				naar.Hour(), naar.Minute(), 0, 0, e.StartTime.Location())
@@ -190,12 +197,12 @@ func SaveRuleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ---- prøva ----
-	if melding, ok := regelKrasjarIRom(r, s.RegelID, s.RomID, flyttingar); !ok {
+	if melding, ok := serieKrasjarIRom(r, s.SerieID, s.RomID, flyttingar); !ok {
 		http.Error(w, melding, http.StatusConflict)
 		return
 	}
 	if s.Plassar > 0 {
-		full, err := AdminDB.PaameldeYver(s.RegelID, s.Plassar, no)
+		full, err := AdminDB.PaameldeYver(s.SerieID, s.Plassar, no)
 		if err == nil && full != nil {
 			http.Error(w, fmt.Sprintf("%s %s: %d %s",
 				t(lang, "admin.seats_taken"),
@@ -218,25 +225,38 @@ func SaveRuleHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := AdminDB.UpdateRuleTitle(s.RegelID, s.Tittel, no); err != nil {
+	if err := AdminDB.UpdateSerieTitle(s.SerieID, s.Tittel, no); err != nil {
 		http.Error(w, "Could not save title", http.StatusInternalServerError)
 		return
 	}
-	if err := AdminDB.UpdateRuleTeacher(s.RegelID, s.Laerar, no); err != nil {
+	if err := AdminDB.UpdateSerieTeacher(s.SerieID, s.Laerar, no); err != nil {
 		http.Error(w, "Could not save teacher", http.StatusInternalServerError)
 		return
 	}
 	if s.RomID > 0 {
-		if err := AdminDB.UpdateRuleRoom(s.RegelID, s.RomID, romnamn, no); err != nil {
+		if err := AdminDB.UpdateSerieRoom(s.SerieID, s.RomID, romnamn, no); err != nil {
 			http.Error(w, "Could not save room", http.StatusInternalServerError)
 			return
 		}
 	}
-	if err := AdminDB.UpdateRuleCapacity(s.RegelID, s.Plassar, no); err != nil {
+	if err := AdminDB.UpdateSerieCapacity(s.SerieID, s.Plassar, no); err != nil {
 		http.Error(w, "Could not save capacity", http.StatusInternalServerError)
 		return
 	}
-	if err := AdminDB.UpdateRuleDescription(s.RegelID, s.Skildring, no); err != nil {
+	// Gruppa gjeld heile serien: er reformer-timen open for dei
+	// upplærde, er han det kvar veke.
+	if s.GruppeID > 0 {
+		finst, err := AdminDB.GruppeFinst(s.GruppeID)
+		if err != nil || !finst {
+			http.Error(w, "Ukjend gruppe", http.StatusBadRequest)
+			return
+		}
+	}
+	if err := AdminDB.SetSerieGruppe(s.SerieID, s.GruppeID, no); err != nil {
+		http.Error(w, "Could not save group", http.StatusInternalServerError)
+		return
+	}
+	if err := AdminDB.UpdateSerieDescription(s.SerieID, s.Skildring, no); err != nil {
 		http.Error(w, "Could not save description", http.StatusInternalServerError)
 		return
 	}
@@ -245,7 +265,7 @@ func SaveRuleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Vikarane etter regelen: regelen set læraren paa alle, og so tek
+	// Vikarane etter serien: serien set læraren paa alle, og so tek
 	// den eine dagen sin eigen att.
 	for id, namn := range s.Vikar {
 		if s.Avlys[id] {
@@ -258,7 +278,7 @@ func SaveRuleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if s.Veker > 0 {
-		if melding, ok := forlengRegel(r, s.RegelID, s.Veker, no); !ok {
+		if melding, ok := forlengSerie(r, s.SerieID, s.Veker, no); !ok {
 			http.Error(w, melding, http.StatusConflict)
 			return
 		}
@@ -267,8 +287,8 @@ func SaveRuleHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// regeltid set dagen og klokka regelen segjer, og held datoen sin veke.
-func regeltid(gamal time.Time, vekedag int, klokke time.Time) time.Time {
+// serietid set dagen og klokka serien segjer, og held datoen sin veke.
+func serietid(gamal time.Time, vekedag int, klokke time.Time) time.Time {
 	steg := vekedagssteg(gamal.Weekday(), vekedag)
 	dag := gamal.AddDate(0, 0, steg)
 	return time.Date(dag.Year(), dag.Month(), dag.Day(),
@@ -293,13 +313,13 @@ func romNamn(romID int64) (string, error) {
 	return "", fmt.Errorf("unknown room_id")
 }
 
-// regelKrasjarIRom prøver dei nye tidene mot rommet regelen skal staa i.
-func regelKrasjarIRom(r *http.Request, ruleID, romID int64, flyttingar []database.Flytting) (string, bool) {
+// serieKrasjarIRom prøver dei nye tidene mot rommet serien skal staa i.
+func serieKrasjarIRom(r *http.Request, serieID, romID int64, flyttingar []database.Flytting) (string, bool) {
 	if romID == 0 {
 		return "", true
 	}
 	for _, f := range flyttingar {
-		kollisjon, err := AdminDB.RoomConflictUtanRegel(romID, ruleID, f.Start, f.Slutt)
+		kollisjon, err := AdminDB.RoomConflictUtanSerie(romID, serieID, f.Start, f.Slutt)
 		if err != nil || kollisjon == nil {
 			continue
 		}
@@ -312,11 +332,11 @@ func regelKrasjarIRom(r *http.Request, ruleID, romID int64, flyttingar []databas
 	return "", true
 }
 
-// forlengRegel legg fleire veker etter den siste komande timen.
-func forlengRegel(r *http.Request, ruleID int64, veker int, no time.Time) (string, bool) {
-	siste, err := AdminDB.SisteITimeregel(ruleID, no)
+// forlengSerie legg fleire veker etter den siste komande timen.
+func forlengSerie(r *http.Request, serieID int64, veker int, no time.Time) (string, bool) {
+	siste, err := AdminDB.SisteITimeserie(serieID, no)
 	if err != nil || siste == nil {
-		return t(GetLanguageFromRequest(r), "admin.rule_spent"), false
+		return t(GetLanguageFromRequest(r), "admin.serie_spent"), false
 	}
 
 	var nye []models.Event
@@ -324,7 +344,7 @@ func forlengRegel(r *http.Request, ruleID int64, veker int, no time.Time) (strin
 		start := siste.StartTime.AddDate(0, 0, 7*i)
 		slutt := siste.EndTime.AddDate(0, 0, 7*i)
 		if siste.RoomID > 0 {
-			kollisjon, err := AdminDB.RoomConflictUtanRegel(int64(siste.RoomID), ruleID, start, slutt)
+			kollisjon, err := AdminDB.RoomConflictUtanSerie(int64(siste.RoomID), serieID, start, slutt)
 			if err == nil && kollisjon != nil {
 				return fmt.Sprintf("%s %s–%s: %s",
 					t(GetLanguageFromRequest(r), "admin.room_busy"),
@@ -339,7 +359,7 @@ func forlengRegel(r *http.Request, ruleID int64, veker int, no time.Time) (strin
 		ny.CurrentEnrolment = 0
 		nye = append(nye, ny)
 	}
-	if _, err := AdminDB.UtvidRegel(ruleID, nye); err != nil {
+	if _, err := AdminDB.UtvidSerie(serieID, nye); err != nil {
 		return "could not extend", false
 	}
 	return "", true

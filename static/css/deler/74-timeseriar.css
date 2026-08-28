@@ -1,11 +1,11 @@
 /* ===================================================================
    timereglane
-   To spaltor: reglane til venstre, dagane i den valde regelen til
+   To spaltor: seriane til venstre, dagane i den valde serien til
    høgre. Tvo rekkjeviddor, og spalta segjer kva for ei du stend i —
    «alle komande timar» yver, «denne eine dagen» attmed.
 
    Det var éi lang liste fyrr, der kvar rad opna seg der ho stod og bar
-   baade regelen og dagane inni seg. Du laut opna ei rad for aa sjaa
+   baade serien og dagane inni seg. Du laut opna ei rad for aa sjaa
    noko i det heile, so lista sjølv sa ingen ting; og dei tvo
    rekkjeviddone laag oppaa kvarandre i det same trekkspelet, der den
    eine lett vart teki for den andre.
@@ -28,17 +28,17 @@
    Benken attmed er ikkje eit kort: han er arket sjølv, som skjemaet
    yver honom. Tvo kassar attmed kvarandre hadde sagt at det er tvo av
    det same, og det er det ikkje. */
-.regel-liste { list-style: none; margin: 0; padding: 0;
+.serieliste { list-style: none; margin: 0; padding: 0;
   border: 1px solid var(--haarlina); background: var(--flate);
   box-shadow: var(--skugge-kort); }
 
-.regel-rad { border-bottom: 1px solid var(--haarlina); }
-.regel-rad:last-child { border-bottom: 0; }
+.serierad { border-bottom: 1px solid var(--haarlina); }
+.serierad:last-child { border-bottom: 0; }
 
 /* Rada er tvo liner i ei smal spalta, ikkje fire spaltor i ei brei.
    Namnet og klokka øvst — det ein leitar etter — læraren og talet
    under. Same rada, halve breiddi. */
-.regel-hovud {
+.seriehovud {
   width: 100%; text-align: left;
   display: grid; grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas: "namn naar" "kven tal";
@@ -49,12 +49,12 @@
   font-family: var(--skrift); text-transform: none; letter-spacing: 0;
   cursor: pointer;
 }
-.regel-namn { grid-area: namn; font-size: 1.05rem; color: var(--blekk); font-weight: 500; }
-.regel-kven { grid-area: kven; color: var(--blekk-lys); font-size: .92rem; }
-.regel-naar { grid-area: naar; font-family: var(--skrift-tal); font-size: .92rem; white-space: nowrap; text-align: right; }
-.regel-tal  { grid-area: tal;  font-family: var(--skrift-tal); font-size: .8rem; color: var(--blekk-svakt); text-align: right; }
+.serienamn { grid-area: namn; font-size: 1.05rem; color: var(--blekk); font-weight: 500; }
+.seriekven { grid-area: kven; color: var(--blekk-lys); font-size: .92rem; }
+.serienaar { grid-area: naar; font-family: var(--skrift-tal); font-size: .92rem; white-space: nowrap; text-align: right; }
+.serietal  { grid-area: tal;  font-family: var(--skrift-tal); font-size: .8rem; color: var(--blekk-svakt); text-align: right; }
 
-.regel-hovud:hover { background: var(--ark-djup); color: inherit; border: 0; }
+.seriehovud:hover { background: var(--ark-djup); color: inherit; border: 0; }
 
 /* Den valde rada syner seg som *ljos*, ikkje som ei ramme — same
    maaten som ein vald veljar i sikti (§9).
@@ -64,9 +64,9 @@
    valet henne her, bar den same lina tvo tydingar paa den same sida,
    og §1 forbyd nettupp det. Ljoset er ledig, og det er alt det
    huset brukar for «denne er paa». */
-.regel-rad.valt .regel-hovud,
-.regel-rad.valt .regel-hovud:hover { background: var(--merke-svak); }
-.regel-rad.valt .regel-kven { color: var(--blekk); }
+.serierad.valt .seriehovud,
+.serierad.valt .seriehovud:hover { background: var(--merke-svak); }
+.serierad.valt .seriekven { color: var(--blekk); }
 
 /* ---- søkjefeltet i sikti ----
    Veljarane attmed er nakne, og det er rett: ein veljar syner alltid
@@ -124,13 +124,13 @@
   color: var(--blekk-lys); white-space: nowrap;
 }
 
-.regel-meir { padding: 0; }
+.seriebolk { padding: 0; }
 
-/* Fyrste setningi er regelen og gjeld alle komande timar. */
-.regel-setning { padding-bottom: var(--rom-2); }
-.regel-vink { font-size: .78rem; color: var(--blekk-svakt); }
+/* Fyrste setningi er serien og gjeld alle komande timar. */
+.seriesetning { padding-bottom: var(--rom-2); }
+.serievink { font-size: .78rem; color: var(--blekk-svakt); }
 
-.regel-meir .regel-skildring {
+.seriebolk .serieskildring {
   width: 100%; max-width: 54ch;
   font-size: .92rem;
   margin-bottom: var(--rom-3);
@@ -142,13 +142,13 @@
    seg, og det er den yverraskingi §7 forbyd. Ein legg til her, og
    kortar ned ved aa merkja dagane og avlysa deim.
 
-   Ho stend i den same setningsforma som regelen yver, berre mindre —
-   ho er ikkje ei ny setning um regelen, ho er slutten paa den same. */
-.seriesetning {
+   Ho stend i den same setningsforma som serien yver, berre mindre —
+   ho er ikkje ei ny setning um serien, ho er slutten paa den same. */
+.lengdsetning {
   font-size: 1rem; line-height: 1.9;
   margin-bottom: var(--rom-5);
 }
-.serietal { font-family: var(--skrift-tal); color: var(--blekk); }
+.lengdtal { font-family: var(--skrift-tal); color: var(--blekk); }
 
 /* ---- dagane ----
    Ei liste, ikkje eit skjema.
@@ -156,7 +156,7 @@
    Kvar dag bar sju kontrollar fyrr — dato, klokke, lengd, lærar,
    avlys — og yver deim stod ein knipperad med fem til. Aatte dagar vart
    seksti kontrollar, og verre: tvo av dei tri maatane aa gjera det same
-   paa laag under kvarandre paa den same skjermen. Regelsetningi endra
+   paa laag under kvarandre paa den same skjermen. Seriesetningi endra
    lærar og klokke for alle; dagrada for éin; knippet for nokre. Tvo
    vinkeliner stod der berre for aa fortelja deg kva for ein av dei du
    stod i, og ei flate som lyt forklara seg sjølv er ikkje ferdig.
@@ -175,7 +175,7 @@
    berre ruta. Spaltone er faste so datoane stend under kvarandre — eit
    tal som dansar frå rad til rad er ei liste ein ikkje kann lesa nedyver
    (§5). */
-/* Same forma som regelrada i lista til venstre: namnet øvst, kven under,
+/* Same forma som serierada i lista til venstre: namnet øvst, kven under,
    klokka og talet til høgre. Auga les den eine spalta som det les den
    andre, og ei rute framfyre er heile skilnaden. */
 .dagrad {
@@ -191,7 +191,7 @@
 .dagrad:hover { background: var(--ark-djup); }
 .dagrad .time-val { grid-area: kryss; align-self: center; }
 
-/* Merkt syner seg som ljos, som den valde regelen i lista attmed og som
+/* Merkt syner seg som ljos, som den valde serien i lista attmed og som
    ein vald veljar i sikti. `:has` av di berre nettlesaren veit kva som
    er krossa av. */
 .dagrad:has(.time-val:checked) { background: var(--merke-svak); }
@@ -222,7 +222,7 @@
 .dagrad.avlyst .dagord { display: inline; }
 .dagrad.avlyst .dagnamn { text-decoration: line-through; }
 
-/* Dokka som ropar. Prøver du aa byta regel medan noko er ulagra, byter
+/* Dokka som ropar. Prøver du aa byta serie medan noko er ulagra, byter
    me ikkje — dokka stend alt paa skjermen og segjer kva som manglar, so
    ho blinkar ein gong i staden for at ei ruta spring upp (§7). */
 @media (prefers-reduced-motion: no-preference) {
@@ -256,6 +256,6 @@
    og rada er alt tvo liner. Det einaste som lyt gjevast etter er
    høgrestillingi: paa ein telefon byrjar alt til venstre. */
 @media (max-width: 48rem) {
-  .regel-hovud { grid-template-columns: minmax(0, 1fr); grid-template-areas: "namn" "kven" "naar" "tal"; }
-  .regel-tal, .regel-naar { text-align: left; }
+  .seriehovud { grid-template-columns: minmax(0, 1fr); grid-template-areas: "namn" "kven" "naar" "tal"; }
+  .serietal, .serienaar { text-align: left; }
 }

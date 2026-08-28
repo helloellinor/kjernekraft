@@ -45,7 +45,7 @@ func setupTestData() error {
 		Password:               string(hashedPassword),
 		NewsletterSubscription: true,
 		TermsAccepted:          true,
-		Roles:                  []string{"user"},
+		Loyve:                  []string{"user"},
 	}
 
 	// Check if user already exists

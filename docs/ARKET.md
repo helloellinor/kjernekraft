@@ -37,8 +37,23 @@ Three theme states, and every token must be written in all three:
 | State | Selector |
 |---|---|
 | light | `:root, [data-theme="light"]` |
-| dark by system | `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }` |
-| dark by choice | `:root[data-theme="dark"]` |
+| dark by system | `@media (prefers-color-scheme: dark) { :root }` |
+| light by choice | `[data-theme="light"]` |
+| dark by choice | `[data-theme="dark"]` |
+
+Four blocks, not three, and **the order is the logic** (changed 2026-08-28).
+The system-dark block is plain `:root` now rather than
+`:root:not([data-theme="light"])`: the two `[data-theme]` blocks come *after*
+the media query and carry the same weight, so an explicit choice wins by source
+order. Same effect, and the tokens live in a selector you can look up instead of
+inside an expression nobody can grep for.
+
+Every flat colour is written **once**, as `--l-*` for light and `--m-*` for dark
+at the top of `00-token.css`; the four blocks only assign meaning to them. The
+*derived* tokens — `--merke`, `--merke-svak`, `--togu-svak`, `--tuneup-svak`,
+`--glodkjerne` — still appear in each block and must: the percentage differs in
+the dark (18 % against 12 %), and `--glodkjerne` inverts, because light on paper
+is saturation and light in the dark is blown out.
 
 A colour written only inside a media or `[data-theme]` block does not apply in the
 unmarked state — which is the state most people see. Derived tokens are written
@@ -189,6 +204,30 @@ bar standing on a baseline has no such underside.
 it — their highlight peaks at 34 % across the width — so every round or raised
 thing in the same picture takes its specular and its shading from the same
 place (`at 34% 22%`). Two objects side by side may not each have their own sun.
+
+### One sun, and two shapes (added 2026-08-28)
+
+**`--sol: 34% 22%` is the light, and it is the same for everything.** Two things
+side by side may not each have their own. The bars set it — their highlight peaks
+at 34 % across the width — so every round or raised thing in the same picture
+takes its specular from that point.
+
+There are therefore exactly **two** gloss tokens, not seven:
+
+- `--glim-rund` — the sphere. Light caught at a *point*: a broad soft specular,
+  a smooth falloff, then simply darker out to the rim facing away. Size the
+  gradient explicitly (`ellipse 82% 82%`); left to `farthest-corner` the darkest
+  tone sits in the corner of the box, outside the circle, and never appears.
+- `--glim-kapsel` — the lying cylinder. Light caught in a *line*, so the
+  specular is a wide flat oval, plus two short ends curving away from it. It
+  replaced a band straight across the full width, which was flat precisely
+  because it knew nothing about the shape beneath it.
+
+Buttons, selects, the selected tab and the seat mark read the capsule; the pegs
+on the board read the sphere. **Change the gloss and you change it everywhere at
+once** — which is the point. The rim (the thin bright line along the top) is not
+here: it lives in `--knappedjup`, and it is the rim, not the sheen, that makes a
+raised thing look wet.
 
 Build it in `background-image`, not `box-shadow`:
 gradient stops are in **percent** and so scale with the object, and the same peg
@@ -439,7 +478,7 @@ grows nowhere else: a mark standing large on every page is a background.
 | `.status-*` | class names are the values the database uses (`active`, `paused`, `cancelled`, `freeze_requested`). No translation table. |
 | `.faneark` / `.faner` / `.fane` / `.fanerom` | **a slider with positions, not a folder** (changed 2026-08-27). The track is a groove (`--skraakant`, the light of a field); the selected position is a dome sitting in it (`--knappedjup`, the light of a button). Same two-layer form as `.btn`, because it is the same thing — something raised out of the surface. The label is the reading font in sentence case: §5 reserves uppercase + tracking + 68 % for what *names a category* — «never a button» — and a tab is a `<button role="tab">`. `.fanerom` paints nothing: §6 allows one box between sheet and content, and the folder's room made it two. `.faneark` carries no rule at all and must stay — `faner.js` uses `closest('.faneark')` so two tab rows don't steal each other's tabs (admin has a row inside *Prising*). The choice lives in the URL. |
 | `.setning` (a sentence of controls) | **The line must make room for the tallest thing in it, and the sentence carries no reading measure.** Two failures, both recurring. (1) A sentence sets `line-height` for *text*, but a button is taller than text — it carries its own vertical padding and a border — so when the sentence wrapped, the button scraped the underside of the field on the line above. That is neither a button bug nor a field bug: the line was never asked to clear the tallest control it holds. Give controls in a sentence `margin-block: var(--rom-1)` off the space ladder rather than nudging one offender. (2) `max-width: 54ch` is the measure for *prose* — how far the eye tracks without losing the line — and a row of controls written as a sentence is not prose. The cap made the admin form wrap halfway across a wide screen with the other half standing empty. The column sets the width; the sentence breaks when the column makes it break and not before. |
-| fields | `:where(input…, textarea)` with no border, `--skraakant`, and `--rund`. Depth means "you can write here", so it is on every field at rest, not only on focus. A `select` has a border and no depth — it is a button with a list behind it — and is as wide as its widest option, `width: auto; max-width: 100%`. Base styling must be the easiest thing to override: use `:where()`. |
+| fields | `:where(input…, textarea)` with no border, `--skraakant`, and `--rund`. Depth means "you can write here", so it is on every field at rest, not only on focus. A `select` **is a button and now looks like one** (changed 2026-08-28): capsule (`--rund-knapp`), dome (`--knappedjup`) and the same gloss as `.btn` (`--glim-kapsel`). It stood as a flat box with a hairline before — neither groove like a field nor dome like a button, and so orphaned between the two in every form in the house. The rule already said what it is; the form now says it too, and the difference in a form is two shapes with two meanings rather than three half-ways: a groove says *you can write here*, a capsule says *you can press here*. It gets no `--skraakant` — that would say you can type into it. It is as wide as its widest option, `width: auto; max-width: 100%`. **`.sikt select` is the one exception, and it is deliberate:** a filter beside a heading is a setting on what you are already looking at, not a form, so it stays naked. Taking the frame off is not enough — it must also clear `box-shadow` and reset `background-image` to `var(--pil)` alone, or it inherits a dome it never asked for and the arrow lands wrong, because the position list is written for five layers and not two. Base styling must be the easiest thing to override: use `:where()`. |
 | tables | no grid lines. Hairline under each row, `--kant` under the head, sticky head at `var(--sidehovud-hogd)`, `table-layout: fixed`. |
 | sticky layers | The site header is sticky at `top: 0`, `z-index: 20` — a page you have scrolled must never make you scroll back up to navigate away. Anything else that sticks stacks *below* it, and the offsets are **measured, not written**: `klistrelag.js` writes `--sidehovud-hogd` and `--tittellinje-hogd` to the root from a `ResizeObserver`. They cannot be constants — the header is 56px wide and 96px narrow, where the nav wraps under the wordmark. Same move as `ljosband.js`: the browser knows, CSS cannot ask. Order is header (20) → page title (11) → controls (10) → dock (30, over everything). **A sticky bar must be opaque**, or the content passing under shows through it; if a bar should carry no surface of its own, it must carry no padding either — give the air to the opaque bar next to it, since padding on a transparent thing is just pixels a card can scroll into. |
 | empty states | three different things: what does not exist, what has not arrived yet, and what is empty because you have not bought anything. Only the last one gets a way out of it. |
@@ -453,11 +492,17 @@ grows nowhere else: a mark standing large on every page is a background.
 
 ## 10. Open questions — do not decide these alone
 
-1. **`.btn-primary`: line or fill.** `DESIGN_GUIDELINES.md` §18 says the colour
-   lives in the line and the word, never in the surface («a red lump pulls the
-   eye away from everything else» — a turquoise lump does the same).
-   `kjernekraft.css` ~line 1088 fills it with `--merke-lys` → `--merke`. The book
-   and the code disagree. One of them must give before the next button is written.
+1. ~~**`.btn-primary`: line or fill.**~~ **Decided — the line ships**
+   (2026-08-28, from the Arket design-system project). The colour lives in the
+   border and the word, never in the surface. The reasoning was already written
+   two rules below, about the warning button — «a red lump pulls the eye away
+   from everything else» — and it holds for a turquoise lump just as well, in a
+   house that builds everything else out of hairlines. The body is now identical
+   to `.btn`: same gloss, same dome, same shadow. The only thing that marks the
+   primary action is that its line and its word carry `--merke`. It is stronger
+   than the others because it is the only one with colour in it, not because it
+   is heavier.
+
 2. ~~**The klippekort readout.**~~ **Decided — the punch card ships.** The count
    is the hero (`.klipptal .att`, `--skrift-tal`, 4.482rem, tabular) and the spent
    clips are bites out of the wing (`.klipphakk.klipt`, `--skraakant-djup`, fill
@@ -497,10 +542,12 @@ grows nowhere else: a mark standing large on every page is a background.
    widths: pixel-identical. `grep`-able check below.
 
    **Still open:** `--fordjuping` and `--fasett` have been unused since
-   `--skraakant` took over. The dark block is written twice, word for word, in
-   the media query and in `[data-theme="dark"]`, and they have already drifted in
-   indentation — put the values in `:root` as `--m-ark`, `--m-blekk` … and let
-   both blocks read `--ark: var(--m-ark)`. And the box is still drawn by hand in
+   `--skraakant` took over. ~~The dark block is written twice, word for word…~~ **Done
+   (2026-08-28).** Every flat colour is a `--l-*` or `--m-*` value written once,
+   and the four theme blocks only read them. The two dark blocks are now
+   word-for-word identical — if they ever differ again it is a bug, not a
+   nuance — and `handlers/stilark_test.go` asserts it, plus the new invariant
+   that light-by-choice agrees with the light default. And the box is still drawn by hand in
    seven places besides `.kort` (`.timeplan`, `.login-container`, `.bolk`,
    `.folk-liste`, `.regel-liste`, …); folding those into `.kort` is the next
    cleanup, and it is the thing that keeps generating new one-off classes.

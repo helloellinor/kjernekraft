@@ -40,7 +40,7 @@ func (a *RegisterUserAction) Apply(state *UserState, db *database.Database) erro
 		Phone:     a.Phone,
 		Birthdate: a.Birthdate,
 		Password:  "defaultpassword",
-		Roles:     []string{"user"},
+		Loyve:     []string{"user"},
 	}
 
 	id, err := db.CreateUser(user)
@@ -211,7 +211,7 @@ func TestUserActionsPropertyBased(t *testing.T) {
 				Phone:     "12345678",
 				Birthdate: "1990-01-01",
 				Password:  "testpassword",
-				Roles:     []string{"user"},
+				Loyve:     []string{"user"},
 			}
 
 			id, err := db.CreateUser(user)
@@ -251,7 +251,7 @@ func TestUserActionsPropertyBased(t *testing.T) {
 				Phone:     "12345678",
 				Birthdate: "1990-01-01",
 				Password:  "testpassword",
-				Roles:     []string{"user"},
+				Loyve:     []string{"user"},
 			}
 
 			id, err := db.CreateUser(user)

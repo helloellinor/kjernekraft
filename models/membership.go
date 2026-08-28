@@ -46,7 +46,7 @@ type MembershipWithDetails struct {
 	MonthsUntilBindingEnd int  `json:"months_until_binding_end"`
 	CanCancel             bool `json:"can_cancel"`
 	CanPause              bool `json:"can_pause"`
-	// Tildelt = medlemskapet fylgjer ei rolla og er ikkje kjøpt. Det
+	// Tildelt = medlemskapet fylgjer eit løyve og er ikkje kjøpt. Det
 	// finst ingi rad aa frysa eller seia upp, so malen skal gøyma dei
 	// knappane. Sjaa database/svartmedlem.go.
 	Tildelt bool `json:"tildelt"`

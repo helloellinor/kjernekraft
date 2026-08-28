@@ -23,15 +23,25 @@
   /* Fyllet er knapt her, og det er med vilje.
      Alt i den frosne stabelen er pikslar eit kort kverv attum: stabelen
      sluttar der han sluttar, og kvar piksel luft i honom er ein piksel
-     timen din vert eten tidlegare. Under tittelen trengst ingen: under
-     honom stend skyvaren, og skyvaren ber si eigi renne og sin eigen
-     kant — han er alt skild fraa tittelen utan at nokon legg luft til.
+     timen din vert eten tidlegare.
      Yver er `--rom-2` nok til aa skilja tittelen fraa hovudlina.
 
      Rekneskapen: 12 px yver og 16 under gjorde stabelen 179,8 høg og
      lina var midt paa skyvaren. Med 8 og 0 sluttar han paa 159,8 — nett
-     der midten laag. */
-  padding-block: var(--rom-2) 0;
+     der midten laag.
+
+     Under stod 0, med den grunngjevingi at skyvaren ber si eigi renne og
+     sin eigen kant og difor er skild fraa tittelen utan hjelp. Det var
+     rett um *skiljet* og gale um *forma*: `.page-title` gjeng med
+     line-height 1,02, som er tettare enn skrifta sin nedgang, so
+     nedhalen paa ein «p» heng utanfor si eigi linekasse. «Timeplan» og
+     «Schedule» endar baae paa noko som heng ned, og halen la seg nedi
+     skyvaren. Eitt steg (`--rom-2`) er nok til aa taka honom.
+
+     Og det lyt vera *fyll* og ikkje marg: lina er klistra og ugjenomsynleg,
+     og ein marg er eit gjenomsynleg glas der korti under syner seg medan
+     dei rullar forbi (§9). Stabelen veks 8 px av dette, og det er prisen. */
+  padding-block: var(--rom-2) var(--rom-2);
   margin-block: calc(var(--rom-2) * -1) 0;
   /* Flata lyt gaa heilt ut i sidefyllet aat <main>.
      Ho stod i innhaldskassen fyrr, og daa var ho *smalare* enn det som

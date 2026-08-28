@@ -255,6 +255,18 @@ func getTemplateFuncs() template.FuncMap {
 				"timeplan.saturday",
 			}[t.Weekday()]
 		},
+		// `eq` i malen krev same typen. Gruppa si id er int64 fraa basen
+		// og timen si er int, og ei samanlikning av dei tvo er ein
+		// køyrefeil midt i teikningi.
+		"int64": func(n interface{}) int64 {
+			switch v := n.(type) {
+			case int:
+				return int64(v)
+			case int64:
+				return v
+			}
+			return 0
+		},
 		"gonger": func(lang string, n int) string {
 			if n == 1 {
 				return t(lang, "admin.times_one")

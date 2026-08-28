@@ -3,6 +3,8 @@ package handlers
 import (
 	"bytes"
 	"html/template"
+	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -58,8 +60,28 @@ func TestDeiTvoMyrkeBlokkaneErSamde(t *testing.T) {
 	css := lesStilarket(t)
 
 	ljos := lesBlokk(t, css, `:root, [data-theme="light"] {`)
-	systemet := lesBlokk(t, css, `:root:not([data-theme="light"]) {`)
+	// Systemblokki heiter `:root` no og ikkje `:root:not([data-theme="light"])`
+	// — eit uttrykkeleg val vinn i staden i blokki *etter* henne, som kjem
+	// seinare i arket og hev same vekt (ARKET §10.4, utført 28.8.2026).
+	// Difor lyt me søkja med media-spurnaden framfyre: `:root {` aaleine
+	// finst fleire stader i arket.
+	systemet := lesBlokk(t, css, "@media (prefers-color-scheme: dark) {\n  :root {")
 	valet := lesBlokk(t, css, `[data-theme="dark"] {`)
+	ljosvalet := lesBlokk(t, css, `[data-theme="light"] {`)
+
+	// Ljost av val lyt segja det same som ljost av standard. Same fella
+	// som dei tvo myrke: tvo lister med det same, og ein sjanse til aa
+	// retta berre den eine.
+	for nykel, verd := range ljosvalet {
+		hitt, finst := ljos[nykel]
+		if !finst {
+			t.Errorf("%s stend i det valde ljose temaet, men ikkje i standarden", nykel)
+			continue
+		}
+		if hitt != verd {
+			t.Errorf("%s er «%s» som standard og «%s» naar brukaren vel ljost", nykel, hitt, verd)
+		}
+	}
 
 	for nykel, verd := range systemet {
 		hitt, finst := valet[nykel]
@@ -125,5 +147,36 @@ func TestVerkstadenTeiknarSeg(t *testing.T) {
 	prova := regexp.MustCompile(`class="verkstad-prova"`)
 	if n := len(prova.FindAllString(html, -1)); n < 2 || n%2 != 0 {
 		t.Errorf("prøvone stend ikkje parvis: fann %d", n)
+	}
+}
+
+// Kvar del lyt lukka det ho opnar.
+//
+// Arket vert skøytt saman av 31 filer, og ein klamme for mykje i ei av
+// deim er ikkje ein feil du ser: nettlesaren rettar seg sjølv ved aa
+// kasta han, so alt ser rett ut — til den dagen nokon pakkar fila inn i
+// ein media-spurnad, og daa sluttar reglane etter honom aa gjelda.
+// `82-medlemskapet-mitt.css` bar ein slik i botnen.
+func TestKvarDelLukkarDetHoOpnar(t *testing.T) {
+	gamal := stilarkMappe
+	stilarkMappe = "../static/css/deler"
+	defer func() { stilarkMappe = gamal }()
+
+	oppf, err := os.ReadDir(stilarkMappe)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, o := range oppf {
+		if o.IsDir() || !strings.HasSuffix(o.Name(), ".css") {
+			continue
+		}
+		b, err := os.ReadFile(filepath.Join(stilarkMappe, o.Name()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		s := string(b)
+		if opne, stengde := strings.Count(s, "{"), strings.Count(s, "}"); opne != stengde {
+			t.Errorf("%s opnar %d og stengjer %d", o.Name(), opne, stengde)
+		}
 	}
 }

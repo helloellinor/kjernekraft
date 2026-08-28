@@ -81,24 +81,103 @@
 /* Rollone. Same merket som «kva han held», men trykkjande — og difor
    lyt knappestilen skrellast av: han kjem med arkfargen i ryggen og
    halvanna centimeter fyll, og eit merke hev korkje. */
-.rollor { display: flex; flex-wrap: wrap; gap: var(--rom-2); margin: var(--rom-4) 0 0; }
-.rolla {
+.loyve { display: flex; flex-wrap: wrap; gap: var(--rom-2); margin: var(--rom-4) 0 0; }
+.loyvemerke {
   background: none; padding: .15rem .45rem;
   color: var(--blekk-svakt); border-color: var(--haarlina);
 }
 /* Paa er merkefargen: rolla er i live. Av er den same veike lina som
    «held ingen ting» — merket stend der, men det ber ingen ting. */
-.rolla[aria-pressed="true"] {
+.loyvemerke[aria-pressed="true"] {
   color: var(--merke); background: var(--merke-svak);
   border-color: color-mix(in srgb, var(--merke) 45%, transparent);
 }
-.rolla:hover { border-color: var(--merke); color: var(--merke); }
+.loyvemerke:hover { border-color: var(--merke); color: var(--merke); }
 /* Ei rolla som ikkje let seg setja skal ikkje sjaa ut som um ho vart
    sett. Handsamaren svarar 409 naar ein administrator tek si eigi
    rolla, og daa spring merket attende og blenkjer i aatvaringsfargen. */
-.rolla.nekta { border-color: var(--aatvaring); color: var(--aatvaring); }
+.loyvemerke.nekta { border-color: var(--aatvaring); color: var(--aatvaring); }
 
 @media (max-width: 48rem) {
   .folk-hovud { grid-template-columns: minmax(0, 1fr); gap: var(--rom-1); }
   .folk-sist { text-align: left; }
 }
+
+/* ---- rabattkravet ----
+   Same lista som folk, av di det *er* folk: eit namn, ein e-post og noko
+   dei hev bede um. Difor `.folk-liste` og `.folk-rad` att, og berre rada
+   inni er ny — ho ber tvo knappar der folkerada ber ei opning. */
+.kravrad {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1.2fr) minmax(0, 1.4fr) auto auto;
+  gap: var(--rom-2) var(--rom-4); align-items: baseline;
+  padding: var(--rom-3) var(--rom-4);
+}
+.kravnamn { font-size: 1.05rem; color: var(--blekk); font-weight: 500; }
+.kravepost { color: var(--blekk-lys); font-size: .92rem; }
+.kravnaar { font-family: var(--skrift-tal); font-size: .92rem; color: var(--blekk-lys); }
+.kravhandling { display: flex; gap: var(--rom-2); }
+
+/* Svaret stend att i rada. Ho kverv ikkje: lista skal ikkje hoppa under
+   handi di, og du skal sjaa kva du nett gjorde (§3). */
+.kravord {
+  grid-column: 1 / -1;
+  font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
+  font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blekk-svakt);
+}
+.kravrad.godkjend, .kravrad.avvist { opacity: .55; }
+.kravrad.godkjend .kravord { color: var(--merke); }
+.kravrad.avvist .kravord { color: var(--blekk-svakt); }
+.kravrad.gale .kravord { color: var(--aatvaring); }
+
+@media (max-width: 48rem) {
+  .kravrad { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ===================================================================
+   gruppone
+   Ei gruppe er kven du høyrer til; ei rolla er kva du fær gjera. Dei
+   stend attmed kvarandre paa den same rada, og difor lyt dei sjaa
+   ulike ut — den dagen «gjev tilgang til reformer» ser ut som «gjer
+   til administrator», er dei tvo det same for handi som gjer dei.
+
+   Skilnaden er henta or §5 og ikkje funnen paa: store bokstavar,
+   sperring og 68 % breidd er maalet til det som *namngjev ein
+   kategori*, og eit løyve er ein kategori — LÆRAR, ADMINISTRATOR.
+   «Reformer» er eit namn. Namn stend i lesetypen, i vanleg setningsform,
+   og difor gjer gruppemerket det og.
+   =================================================================== */
+.gruppeliste { list-style: none; margin: 0 0 var(--rom-3); padding: 0; }
+.grupperad {
+  display: flex; align-items: baseline; gap: var(--rom-3);
+  padding: var(--rom-2) 0;
+  border-bottom: 1px solid var(--haarlina);
+}
+.gruppeliste li:last-child .grupperad { border-bottom: 0; }
+.gruppenamn { font-size: 1.05rem; color: var(--blekk); }
+.gruppetal { font-family: var(--skrift-tal); font-size: .82rem; color: var(--blekk-svakt); }
+.gruppeslett { margin-left: auto; font-size: .82rem; color: var(--blekk-svakt); }
+.gruppeslett:hover { color: var(--aatvaring); }
+.gruppetal.gale { color: var(--aatvaring); }
+
+.nygruppe { font-size: 1rem; line-height: 1.9; margin-bottom: var(--rom-5); }
+.nygruppe .felt.gale { box-shadow: 0 0 0 1px var(--aatvaring); }
+
+/* Merket per person. Ein kapsel og ikkje ei rute: han er noko ein
+   trykkjer paa, og han ber eit namn — ikkje ein kategori. */
+.grupper { display: flex; flex-wrap: wrap; gap: var(--rom-2); margin-top: var(--rom-2); }
+.gruppemerke {
+  font-family: var(--skrift); font-size: .82rem;
+  text-transform: none; letter-spacing: 0;
+  padding: .15rem var(--rom-3);
+  border: 1px solid var(--haarlina); border-radius: var(--rund-knapp);
+  background: none; color: var(--blekk-lys);
+  cursor: pointer;
+}
+.gruppemerke[aria-pressed="true"] {
+  color: var(--merke); background: var(--merke-svak);
+  border-color: color-mix(in srgb, var(--merke) 45%, transparent);
+}
+.gruppemerke:hover { border-color: var(--merke); color: var(--merke); }
+.gruppemerke.gale { border-color: var(--aatvaring); color: var(--aatvaring); }

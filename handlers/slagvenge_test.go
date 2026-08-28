@@ -98,10 +98,10 @@ func TestSlagfargekartetStendITokenfila(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Regel og ikkje understreng: filen *nemner* `--slagfarge` mange
+	// Serie og ikkje understreng: filen *nemner* `--slagfarge` mange
 	// gonger — ho les han — og eitt av dei er i ein kommentar som
 	// siterer ei gamal tilordning. Det som ikkje skal stå att er ein
-	// `.slag-*`-regel som set han.
+	// `.slag-*`-serie som set han.
 	if m := regexp.MustCompile(`(?m)^\.slag-\w+`).FindString(string(aktivitet)); m != "" {
 		t.Errorf("kartet stend framleis i 90-aktiviteten.css òg (%s) — daa er det tvo", m)
 	}

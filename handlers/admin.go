@@ -64,7 +64,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("kunde ikkje henta rom: %v", err)
 	}
 
-	// Veljarane paa denne sida — ny time, vikarfeltet — les rollone.
+	// Veljarane paa denne sida — ny time, vikarfeltet — les løyvi.
 	// Datalista `laerarar` stod tom fyrr: ho las $.Teachers, og den
 	// nykelen vart aldri sett paa administrasjonssida i det heile.
 	laerarar, err := AdminDB.LaerarNamn()
@@ -72,9 +72,23 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("kunde ikkje henta lærarane: %v", err)
 	}
 
-	// Reglane vert rekna ein gong: baade lista og vali sikti tilbyd
+	// Gruppone ein time kann vera open for.
+	grupper, err := AdminDB.Grupper()
+	if err != nil {
+		log.Printf("grupper: %v", err)
+	}
+
+	// Krav um studentrabatt som ventar paa svar. Dei høyrer heime i
+	// meldingsfana attmed frysingane: baae er noko nokon hev bede um og
+	// som ingen ting hender med fyrr studioet svarar.
+	rabattkrav, err := AdminDB.VentandeRabattkrav()
+	if err != nil {
+		log.Printf("rabattkrav: %v", err)
+	}
+
+	// Seriane vert rekna ein gong: baade lista og vali sikti tilbyd
 	// kjem av deim, og tvo utrekningar av det same kann skilja lag.
-	reglar := GrupperTimar(events, config.GetInstance().GetCurrentTime())
+	seriar := GrupperTimar(events, config.GetInstance().GetCurrentTime())
 
 	data := map[string]interface{}{
 		"Rooms":          rooms,
@@ -83,8 +97,10 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		"Title":          t(lang, "admin.title"),
 		"Users":          users,
 		"Events":         events,
-		"Timereglar":     reglar,
-		"Siktval":        SiktvalFor(reglar),
+		"Grupper":        grupper,
+		"Rabattkrav":     rabattkrav,
+		"Timereglar":     seriar,
+		"Siktval":        SiktvalFor(seriar),
 		"FreezeRequests": freezeRequests,
 		"Memberships":    memberships,
 		"Stats":          statsModule,

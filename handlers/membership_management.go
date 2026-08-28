@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"kjernekraft/handlers/config"
 	"net/http"
 	"strconv"
 )
@@ -69,7 +70,7 @@ func ChangeMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	userID := int64(user.ID)
 
 	// Check if membership change is allowed
-	canChange, reason := DB.CanChangeMembership(userID, membershipID)
+	canChange, reason := DB.CanChangeMembership(userID, membershipID, config.GetInstance().GetCurrentTime())
 	if !canChange {
 		http.Error(w, reason, http.StatusBadRequest)
 		return
@@ -143,7 +144,7 @@ func CanChangeMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := int64(user.ID)
-	canChange, reason := DB.CanChangeMembership(userID, membershipID)
+	canChange, reason := DB.CanChangeMembership(userID, membershipID, config.GetInstance().GetCurrentTime())
 	if !canChange {
 		http.Error(w, reason, http.StatusBadRequest)
 		return

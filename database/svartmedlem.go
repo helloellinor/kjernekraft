@@ -15,12 +15,12 @@ import (
 // vel — difor «usynleg»: han finst som medlemskap, men han er ikkje
 // noko ein kann velja.
 //
-// Han er *avleidd av rolla*, ikkje ei rad i user_memberships. Det er
-// den viktige avgjerdi her, og grunnen er kva som skjer naar rolla
+// Han er *avleidd av løyvet*, ikkje ei rad i user_memberships. Det er
+// den viktige avgjerdi her, og grunnen er kva som skjer naar løyvet
 // gjeng bort: ei lagra rad hadde vorte liggjande att og gjeve ein
-// tidlegare lærar fri tilgang til nokon rydda henne for haand. Ei rolla
+// tidlegare lærar fri tilgang til nokon rydda henne for haand. Eit løyve
 // som vert teki bort tek medlemskapet med seg i same augneblinken, av
-// di det aldri var noko anna enn rolla.
+// di det aldri var noko anna enn løyvet.
 //
 // Det tyder ogso at han ikkje kann frysast, seiast upp eller endrast:
 // det finst ingen ting aa endra. Malen skal gøyma dei knappane, og
@@ -56,8 +56,8 @@ func MigrerSvartMedlemskap(db *sql.DB) error {
 		INSERT INTO memberships (name, price, commitment_months, is_student_senior,
 		                         is_special_offer, description, features, active, skjult)
 		SELECT ?, 0, 0, FALSE, FALSE,
-		       'Full tilgang. Fylgjer rolla, og kann ikkje kjøpast.',
-		       '["Ubegrensa gruppetimar","Ubegrensa reformer","Fylgjer rolla"]',
+		       'Full tilgang. Fylgjer løyvet, og kann ikkje kjøpast.',
+		       '["Ubegrensa gruppetimar","Ubegrensa reformer","Fylgjer løyvet"]',
 		       TRUE, TRUE
 		WHERE NOT EXISTS (SELECT 1 FROM memberships WHERE name = ?)`,
 		SvartMedlemskap, SvartMedlemskap); err != nil {
@@ -77,17 +77,17 @@ func MigrerSvartMedlemskap(db *sql.DB) error {
 //
 // Tvo kjeldor, og dei er ulike med vilje:
 //
-//   - lærarrolla, som ein administrator gjev ut gjenom flata
+//   - lærarløyvet, som ein administrator gjev ut gjenom flata
 //   - utviklarlista, som stend i ei fil paa tenaren og ikkje kann
 //     skrivast gjenom nettet i det heile (sjaa utviklar.go)
 //
-// Ei rolla ein administrator kann gjeva seg sjølv, og ei han ikkje kann.
+// Eit løyve ein administrator kann gjeva seg sjølv, og ei han ikkje kann.
 func (db *Database) HarFriMedlemskap(userID int64) (bool, error) {
 	var tal int
 	if err := db.Conn.QueryRow(`
-		SELECT COUNT(*) FROM user_roles ur
-		JOIN roles r ON r.id = ur.role_id
-		WHERE ur.user_id = ? AND r.name = ?`, userID, RollaLaerar).Scan(&tal); err != nil {
+		SELECT COUNT(*) FROM brukarloyve ur
+		JOIN loyve r ON r.id = ur.loyve_id
+		WHERE ur.user_id = ? AND r.name = ?`, userID, LoyveLaerar).Scan(&tal); err != nil {
 		return false, err
 	}
 	if tal > 0 {
@@ -100,7 +100,7 @@ func (db *Database) HarFriMedlemskap(userID int64) (bool, error) {
 //
 // Datoane er ikkje dikta upp for aa sjaa ut som eit kjøp: han byrja den
 // dagen brukaren vart oppretta, og han vert ikkje fornya — han varer so
-// lenge rolla varer. RenewalDate eit aar fram er berre so sidor som
+// lenge løyvet varer. RenewalDate eit aar fram er berre so sidor som
 // reknar «dagar til fornying» ikkje viser noko rart.
 func (db *Database) svartMedlemskapFor(userID int64) (*models.MembershipWithDetails, error) {
 	var m models.Membership
@@ -146,14 +146,14 @@ func (db *Database) svartMedlemskapFor(userID int64) (*models.MembershipWithDeta
 //
 // Det held ikkje aa syna Black paa skjermen. Ligg det ein aktiv avtale i
 // user_memberships, er det han som vert fakturert — kortet er berre
-// biletet. Ein lærar som fekk rolla i gaar og eit trekk i dag hev
+// biletet. Ein lærar som fekk løyvet i gaar og eit trekk i dag hev
 // betalt for noko han fær gratis.
 //
-// Difor: rolla kjem, avtalen stend av. Han vert *avslutta*, ikkje
+// Difor: løyvet kjem, avtalen stend av. Han vert *avslutta*, ikkje
 // sletta, so det stend att i basen kva han var og naar han gjekk av —
 // ein rekneskap treng aa kunna svara for eit trekk som alt er gjort.
 //
-// Det er ein einvegs port med vilje. Gjeng rolla bort att, kjem ikkje
+// Det er ein einvegs port med vilje. Gjeng løyvet bort att, kjem ikkje
 // den gamle avtalen attende av seg sjølv: han vart avslutta, og det som
 // er avslutta lyt kjøpast paa nytt. Aa vekkja ein avtale til live og
 // taka til aa krevja pengar for honom att, utan at nokon bad um det, er

@@ -42,22 +42,14 @@
   line-height: var(--knapp-linehogd);
   border: 1px solid var(--kant);
   border-radius: var(--rund-knapp);
-  /* Tvo lag: glimet paa den øvre halvdelen, og kroppen som mørknar mot
-     foten. Glimet stoggar brått paa midten — det er slik ljos oppfører
-     seg paa ei kvelv, og det er den kanten som gjer at forma les seg som
-     runda og ikkje som flat. */
-  /* Glimet stoggar ikkje brått. Ein hard kant paa midten er signaturen
-     aat den tidlege telefonknappen — plast med ei bobla i. Aqua let
-     glimet døy ut yver ein lengre veg, og legg til eit svakt attkast
-     langs foten: ljos som hev gjenge gjenom kroppen og kjem attende.
-     Det er skilnaden paa ei kvelv og ei bobla. */
-  background:
-    linear-gradient(to bottom,
-      var(--glans) 0%,
-      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
-      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
-      color-mix(in srgb, var(--glans) 6%, transparent) 58%,
-      transparent 72%),
+  /* Glansen er den same som paa kulone i brettet, berre med kapselen si
+     form: `--glim-kapsel` i 00-token.css. Han stod som eit band tvers
+     yver heile breiddi fyrr — ein gradient som ikkje visste noko um
+     forma under seg, og difor flat. No er speglingi ein oval som sit
+     der sola stend, og endane bøygjer seg burt fraa henne.
+
+     Kroppen under er knappen sin eigen: han mørknar mot foten. */
+  background: var(--glim-kapsel),
     linear-gradient(to bottom,
       var(--flate) 0%,
       color-mix(in srgb, var(--blekk) 7%, var(--flate)) 62%,
@@ -86,27 +78,27 @@
   .btn, .btn-primary, .btn-danger { transition: box-shadow .08s ease-out, transform .08s ease-out; }
 }
 
-/* Hovudhandlingi. Fargen i lina og i ordet, og ei svak tone i flata —
-   nok til aa skilja henne fraa dei hine utan aa verta ein klump. Det er
-   berre éi per skjerm. */
+/* Hovudhandlingi. Éi per skjerm.
+
+   AVGJORD (ARKET §10.1, 28.8.2026): fargen bur i lina og i ordet, aldri
+   i flata. Stilboki vann yver koda. Grunngjevingi stod alt skriven um
+   aatvaringsknappen — «ein raud klump dreg auga fraa alt anna» — og ho
+   gjeld ein turkis klump like fullt, i eit hus som elles byggjer alt av
+   haarliner.
+
+   Kroppen er difor den same som paa `.btn` — glimet, kvelvi, skuggen —
+   og det einaste som skil hovudhandlingi er at lina og ordet ber
+   merkefargen. Ho er sterkare enn dei hine av di ho er den einaste med
+   farge i seg, ikkje av di ho er tyngre. */
 .btn-primary {
-  border-color: color-mix(in srgb, var(--merke) 70%, var(--blekk));
-  color: var(--flate);
-  background:
-    linear-gradient(to bottom, var(--glans) 0%,
-      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
-      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
-      color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%),
-    linear-gradient(to bottom,
-      color-mix(in srgb, var(--merke-lys) 84%, #fff) 0%,
-      var(--merke-lys) 46%, var(--merke) 100%);
+  border-color: var(--merke);
+  color: var(--merke);
 }
+/* Same grepet som `.btn-danger:hover`: ei svak tone i flata i staden for
+   ei sterkare lina, so kanten ikkje flyttar seg (§3). */
 .btn-primary:hover {
-  color: var(--flate);
-  background:
-    linear-gradient(to bottom, var(--glans) 0%, var(--glans-svak) 46%, transparent 50%),
-    linear-gradient(to bottom,
-      color-mix(in srgb, var(--merke-lys) 70%, #fff) 0%, var(--merke-lys) 100%);
+  background: var(--glim-kapsel), var(--merke-svak);
+  border-color: var(--merke); color: var(--merke);
 }
 
 /* Ein knapp som tek heile breiddi. Han stod som `.login-btn` og bar
@@ -118,15 +110,11 @@
 /* Det som ikkje kann gjerast um att. Same forma, annan farge. */
 .btn-danger {
   border-color: var(--aatvaring); color: var(--aatvaring);
-  background:
-    linear-gradient(to bottom, var(--glans) 0%,
-      color-mix(in srgb, var(--glans) 62%, transparent) 20%,
-      color-mix(in srgb, var(--glans) 24%, transparent) 42%,
-      color-mix(in srgb, var(--glans) 6%, transparent) 58%, transparent 72%),
+  background: var(--glim-kapsel),
     linear-gradient(to bottom, var(--flate) 0%, color-mix(in srgb, var(--aatvaring) 9%, var(--flate)) 100%);
 }
 .btn-danger:hover {
-  background: var(--aatvaring-svak); border-color: var(--aatvaring); color: var(--aatvaring);
+  background: var(--glim-kapsel), var(--aatvaring-svak); border-color: var(--aatvaring); color: var(--aatvaring);
 }
 
 /* Avslegen: ingen glans, ingen skugge, ingen djupn. Han er ikkje ein

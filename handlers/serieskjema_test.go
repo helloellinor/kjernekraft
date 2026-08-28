@@ -24,7 +24,7 @@ import (
 // hovudlinja for fetch, so i nettlesaren rørte vakti aldri kroppen.
 func TestSkjemaetLesestIBaaeDraktene(t *testing.T) {
 	verdi := map[string]string{
-		"rule_id": "10", "tittel": "Yoga", "laerar": "Leon",
+		"serie_id": "10", "tittel": "Yoga", "laerar": "Leon",
 		"room_id": "1", "vekedag": "3", "klokke": "18:00",
 		"minutt": "60", "plassar": "12", "skildring": "noko",
 	}
@@ -40,7 +40,7 @@ func TestSkjemaetLesestIBaaeDraktene(t *testing.T) {
 			}
 			f.Add("avlys", "2")
 			f.Set("vikar-3", "Kristina")
-			r := httptest.NewRequest("POST", "/api/admin/rule/lagra", strings.NewReader(f.Encode()))
+			r := httptest.NewRequest("POST", "/api/admin/serie/lagra", strings.NewReader(f.Encode()))
 			r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			return r
 		}},
@@ -53,18 +53,18 @@ func TestSkjemaetLesestIBaaeDraktene(t *testing.T) {
 			w.WriteField("avlys", "2")
 			w.WriteField("vikar-3", "Kristina")
 			w.Close()
-			r := httptest.NewRequest("POST", "/api/admin/rule/lagra", &b)
+			r := httptest.NewRequest("POST", "/api/admin/serie/lagra", &b)
 			r.Header.Set("Content-Type", w.FormDataContentType())
 			return r
 		}},
 	} {
 		t.Run(p.namn, func(t *testing.T) {
-			s, err := lesRegelskjema(p.lag())
+			s, err := lesSerieskjema(p.lag())
 			if err != nil {
 				t.Fatalf("skjemaet lét seg ikkje lesa: %v", err)
 			}
-			if s.RegelID != 10 || s.Tittel != "Yoga" || s.Laerar != "Leon" {
-				t.Errorf("regelen kom feil att: %+v", s)
+			if s.SerieID != 10 || s.Tittel != "Yoga" || s.Laerar != "Leon" {
+				t.Errorf("serien kom feil att: %+v", s)
 			}
 			if s.RomID != 1 || s.Vekedag != 3 || s.Minutt != 60 || s.Plassar != 12 {
 				t.Errorf("tali kom feil att: rom=%d dag=%d min=%d plassar=%d",
@@ -85,13 +85,13 @@ func TestSkjemaetLesestIBaaeDraktene(t *testing.T) {
 
 // Eit tomt plasstal tyder «rommet raar», ikkje null plassar.
 func TestTomtPlasstalErIkkjeNull(t *testing.T) {
-	f := url.Values{"rule_id": {"10"}, "tittel": {"Yoga"}, "laerar": {"Leon"},
+	f := url.Values{"serie_id": {"10"}, "tittel": {"Yoga"}, "laerar": {"Leon"},
 		"room_id": {"1"}, "vekedag": {"3"}, "klokke": {"18:00"}, "minutt": {"60"},
 		"plassar": {""}}
 	r := httptest.NewRequest("POST", "/x", strings.NewReader(f.Encode()))
 	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	s, err := lesRegelskjema(r)
+	s, err := lesSerieskjema(r)
 	if err != nil {
 		t.Fatal(err)
 	}
