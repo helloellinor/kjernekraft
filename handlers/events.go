@@ -2,35 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	"html/template"
-	"kjernekraft/database"
 	"kjernekraft/models"
 	"net/http"
 	"strconv"
 	"time"
 )
-
-type EventHandler struct {
-	DB       *database.Database
-	Template *template.Template
-}
-
-func NewEventHandler(db *database.Database) *EventHandler {
-	return &EventHandler{DB: db}
-}
-
-func (h *EventHandler) ListEvents(w http.ResponseWriter, r *http.Request) {
-	startDate := r.URL.Query().Get("start_date")
-	endDate := r.URL.Query().Get("end_date")
-	location := r.URL.Query().Get("location")
-
-	events, err := h.DB.GetFilteredEvents(startDate, endDate, location)
-	if err != nil {
-		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
-		return
-	}
-	h.Template.Execute(w, events)
-}
 
 // CreateEventHandler handles creating new events
 func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,11 +32,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 // Ruta er innlogga, so ho svarar den som spør — og ei privat PT-økt er
 // ikkje hans um ho ikkje er sett av til honom. Fyrr gav ho alt til alle.
 func GetAllEventsHandler(w http.ResponseWriter, r *http.Request) {
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 	events, err := DB.EventsSynlegeFor(int64(user.ID))
 	if err != nil {
 		http.Error(w, "Could not fetch events", http.StatusInternalServerError)
@@ -73,11 +45,7 @@ func GetAllEventsHandler(w http.ResponseWriter, r *http.Request) {
 
 // EventSignupHandler handles user signup for events
 func EventSignupHandler(w http.ResponseWriter, r *http.Request) {
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	eventIDStr := r.FormValue("event_id")
 	eventID, err := strconv.ParseInt(eventIDStr, 10, 64)
@@ -113,11 +81,7 @@ func EventSignupHandler(w http.ResponseWriter, r *http.Request) {
 
 // EventCancelSignupHandler handles user cancellation of event signup
 func EventCancelSignupHandler(w http.ResponseWriter, r *http.Request) {
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	eventIDStr := r.FormValue("event_id")
 	eventID, err := strconv.ParseInt(eventIDStr, 10, 64)

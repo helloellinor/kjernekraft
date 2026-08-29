@@ -116,6 +116,22 @@ func GetUserFromSession(r *http.Request) *models.User {
 	return user
 }
 
+// brukaren gjev den innlogga brukaren, og gjeng ut fraa at RequireAuth
+// eller RequireAdmin alt hev sagt ja — han er for handsamarar som stend
+// attum mellomvara, og berre for deim. Fyrr stod det ein «if user ==
+// nil»-kontroll i kvar einaste handsamar, tjuefire i alt, og ingen av
+// deim kunde slaa til: mellomvara hadde alt snutt den utan økt i døri.
+// Skulde ei rute nokon gong verta registrert utanfor gruppone, er
+// panikken rett svar — Recoverer i berging.go gjer honom til ein heil
+// 500, og feilen er vaar, ikkje brukaren sin.
+func brukaren(r *http.Request) *models.User {
+	user := GetUserFromSession(r)
+	if user == nil {
+		panic("brukaren() kalla utanfor RequireAuth/RequireAdmin")
+	}
+	return user
+}
+
 // SetUserInSession skriv ei ny økt for brukaren. Den gamle økti vert
 // kasta fyrst, so eit kjennemerke ein motstandar hev planta fyre
 // innloggingi ikkje fylgjer med inn.

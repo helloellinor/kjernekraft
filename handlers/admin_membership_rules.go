@@ -8,12 +8,7 @@ import (
 
 // GetMembershipRulesHandler returns the current membership rules configuration
 func GetMembershipRulesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	rules, err := AdminDB.GetMembershipRules()
+	rules, err := DB.GetMembershipRules()
 	if err != nil {
 		http.Error(w, "Could not retrieve membership rules", http.StatusInternalServerError)
 		return
@@ -25,11 +20,6 @@ func GetMembershipRulesHandler(w http.ResponseWriter, r *http.Request) {
 
 // SaveMembershipRulesHandler saves the membership rules configuration
 func SaveMembershipRulesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// TODO: Add admin authentication check here
 
 	var rules models.MembershipRules
@@ -38,7 +28,7 @@ func SaveMembershipRulesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := AdminDB.SaveMembershipRules(&rules); err != nil {
+	if err := DB.SaveMembershipRules(&rules); err != nil {
 		http.Error(w, "Could not save membership rules", http.StatusInternalServerError)
 		return
 	}

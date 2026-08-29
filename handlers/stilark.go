@@ -9,7 +9,6 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"time"
 )
 
 // Stilarket er *éi* fil for nettlesaren og mange filer paa disken.
@@ -36,7 +35,6 @@ var stilarkMappe = "static/css/deler"
 var (
 	stilarkLaas  sync.RWMutex
 	stilarkBytes []byte
-	stilarkTid   time.Time
 	// Avtrykket av delmappa slik ho saag ut sist arket vart sett saman.
 	stilarkAvtrykkSist string
 )
@@ -125,7 +123,6 @@ func StilarkHandler(w http.ResponseWriter, r *http.Request) {
 		avtrykk := stilarkAvtrykk()
 		stilarkLaas.Lock()
 		stilarkBytes = ny
-		stilarkTid = time.Now()
 		stilarkAvtrykkSist = avtrykk
 		stilarkLaas.Unlock()
 		bufra = ny

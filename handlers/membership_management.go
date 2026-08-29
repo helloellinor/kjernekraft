@@ -9,17 +9,7 @@ import (
 
 // AddMembershipHandler handles adding a membership to a user
 func AddMembershipHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	// Get membership ID from form
 	membershipIDStr := r.FormValue("membership_id")
@@ -47,17 +37,7 @@ func AddMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 // ChangeMembershipHandler handles changing a user's membership
 func ChangeMembershipHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	// Get new membership ID from form
 	membershipIDStr := r.FormValue("membership_id")
@@ -93,17 +73,7 @@ func ChangeMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 // RemoveMembershipHandler handles removing/cancelling a user's membership
 func RemoveMembershipHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	userID := int64(user.ID)
 	err := DB.RemoveUserMembership(userID)
@@ -123,17 +93,7 @@ func RemoveMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 // CanChangeMembershipHandler checks if a user can change to a specific membership
 func CanChangeMembershipHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	// Get membership ID from query parameter
 	membershipIDStr := r.URL.Query().Get("membership_id")
@@ -156,17 +116,7 @@ func CanChangeMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 // PurchaseKlippekortHandler handles purchasing klippekort packages
 func PurchaseKlippekortHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	// Get package ID from form
 	packageIDStr := r.FormValue("package_id")

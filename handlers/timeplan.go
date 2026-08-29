@@ -12,12 +12,7 @@ import (
 
 // ElevTimeplanHandler serves the Elev timeplan (schedule) page
 func ElevTimeplanHandler(w http.ResponseWriter, r *http.Request) {
-	// Check if user is logged in
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
-		return
-	}
+	user := brukaren(r)
 
 	settings := config.GetInstance()
 	now := settings.GetCurrentTime()

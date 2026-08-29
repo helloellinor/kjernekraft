@@ -139,11 +139,6 @@ func loginError(code string) string {
 // utløysa med eit bilete-merke, og daa er du logga ut utan aa ha bede um
 // det.
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	err := ClearUserSession(w, r)
 	if err != nil {
 		http.Error(w, "Logout error", http.StatusInternalServerError)
@@ -161,11 +156,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 // GetUserPaymentMethodsHandler gjev betalingsmaatarne aat den innlogga
 // brukaren, og berre deim.
 func GetUserPaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Ikkje innlogga", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 	methods, err := DB.GetUserPaymentMethods(int64(user.ID))
 	if err != nil {
 		http.Error(w, "Could not fetch payment methods", http.StatusInternalServerError)
@@ -179,11 +170,6 @@ func GetUserPaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
 // utan bcrypt. SignUpHandler er den einaste vegen inn no.
 
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Parse multipart form data
 	err := r.ParseMultipartForm(32 << 20) // 32 MB max memory
 	if err != nil {

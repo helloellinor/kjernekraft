@@ -16,11 +16,6 @@ import (
 
 // CreateClassHandler creates a new class/event
 func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	var classData struct {
@@ -66,7 +61,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	// han kom. Ho er den eine staden namnet vert til eit tal.
 	if strings.TrimSpace(classData.PrivateEmail) != "" {
 		var id int64
-		err := AdminDB.Conn.QueryRow(
+		err := DB.Conn.QueryRow(
 			`SELECT id FROM users WHERE lower(email) = lower(?)`,
 			strings.TrimSpace(classData.PrivateEmail)).Scan(&id)
 		if err == sql.ErrNoRows {
@@ -86,7 +81,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	// skjerm. Betre aa segja fraa her.
 	if classData.PrivateUserID > 0 {
 		var finst int
-		if err := AdminDB.Conn.QueryRow(
+		if err := DB.Conn.QueryRow(
 			`SELECT COUNT(*) FROM users WHERE id = ?`, classData.PrivateUserID).Scan(&finst); err != nil {
 			http.Error(w, "Could not check user", http.StatusInternalServerError)
 			return
@@ -114,7 +109,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	// Gruppa lyt finnast. Ein time som peikar paa ei gruppe som ikkje er
 	// der, er ein time ingen kann sjaa — og ingen ting hadde sagt fraa.
 	if classData.GruppeID > 0 {
-		finst, err := AdminDB.GruppeFinst(classData.GruppeID)
+		finst, err := DB.GruppeFinst(classData.GruppeID)
 		if err != nil || !finst {
 			http.Error(w, "Ukjend gruppe", http.StatusBadRequest)
 			return
@@ -204,7 +199,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		// noko, og ei kontroll som berre finst i lesaren er ikkje ei
 		// kontroll.
 		if classData.RoomID > 0 {
-			if kollisjon, err := AdminDB.RoomConflict(classData.RoomID, weekStartTime, weekEndTime); err == nil && kollisjon != nil {
+			if kollisjon, err := DB.RoomConflict(classData.RoomID, weekStartTime, weekEndTime); err == nil && kollisjon != nil {
 				http.Error(w, fmt.Sprintf("%s %s–%s: %s",
 					t(GetLanguageFromRequest(r), "admin.room_busy"),
 					veggklokka(kollisjon.StartTime).Format("2.1. 15:04"),
@@ -217,7 +212,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 		timar = append(timar, event)
 	}
 
-	_, createdEventIDs, err := AdminDB.LagSerie(timar)
+	_, createdEventIDs, err := DB.LagSerie(timar)
 	if err != nil {
 		http.Error(w, "Could not create event", http.StatusInternalServerError)
 		return
@@ -228,7 +223,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	// til naar nokon segjer fraa seg ei økt.
 	if uid, ok := sessionUserID(r); ok {
 		for _, id := range createdEventIDs {
-			if err := AdminDB.SettLagaAv(id, uid); err != nil {
+			if err := DB.SettLagaAv(id, uid); err != nil {
 				log.Printf("laga-av for time %d: %v", id, err)
 			}
 		}
@@ -239,7 +234,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	// timar med same namnet paa.
 	if classData.PrivateUserID > 0 {
 		for _, id := range createdEventIDs {
-			if err := AdminDB.SettPrivatTime(id, classData.PrivateUserID); err != nil {
+			if err := DB.SettPrivatTime(id, classData.PrivateUserID); err != nil {
 				log.Printf("privat time %d: %v", id, err)
 				http.Error(w, "Could not mark class private", http.StatusInternalServerError)
 				return
@@ -253,7 +248,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 			// som prøvde ein gong til — og daa ligg dei der tvo gonger.
 			// Det som kann skorta er klippet, og det er noko
 			// administrasjonen kann sjaa og retta.
-			if err := AdminDB.BokPrivatTime(id, classData.PrivateUserID, no); err != nil {
+			if err := DB.BokPrivatTime(id, classData.PrivateUserID, no); err != nil {
 				log.Printf("klipp for privat time %d: %v", id, err)
 			}
 		}
@@ -263,7 +258,7 @@ func CreateClassHandler(w http.ResponseWriter, r *http.Request) {
 	// for dei upplærde, er han det kvar veke og ikkje berre den fyrste.
 	if classData.GruppeID > 0 {
 		for _, id := range createdEventIDs {
-			if err := AdminDB.SettGruppePaaTime(id, classData.GruppeID); err != nil {
+			if err := DB.SettGruppePaaTime(id, classData.GruppeID); err != nil {
 				log.Printf("gruppetime %d: %v", id, err)
 				http.Error(w, "Could not set group", http.StatusInternalServerError)
 				return
@@ -295,11 +290,6 @@ func vekedagssteg(fraa time.Weekday, maal int) int {
 
 // DeleteClassHandler deletes a class/event
 func DeleteClassHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	// Extract class ID from URL path
@@ -313,7 +303,7 @@ func DeleteClassHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := AdminDB.DeleteEvent(classID); err != nil {
+	if err := DB.DeleteEvent(classID); err != nil {
 		http.Error(w, "Could not delete class", http.StatusInternalServerError)
 		return
 	}
@@ -329,11 +319,6 @@ func DeleteClassHandler(w http.ResponseWriter, r *http.Request) {
 
 // UpdateClassHandler updates a class/event
 func UpdateClassHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	// Extract class ID from URL path
@@ -401,7 +386,7 @@ func UpdateClassHandler(w http.ResponseWriter, r *http.Request) {
 		Color:       updateData.Color,
 	}
 
-	if err := AdminDB.UpdateEvent(event); err != nil {
+	if err := DB.UpdateEvent(event); err != nil {
 		http.Error(w, "Could not update class", http.StatusInternalServerError)
 		return
 	}

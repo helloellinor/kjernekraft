@@ -9,11 +9,6 @@ import (
 
 // UpdateMembershipPriceHandler updates the price of a membership
 func UpdateMembershipPriceHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// TODO: Add admin authentication check here
 
 	var requestData struct {
@@ -26,7 +21,7 @@ func UpdateMembershipPriceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := AdminDB.UpdateMembershipPrice(int64(requestData.MembershipID), requestData.Price); err != nil {
+	if err := DB.UpdateMembershipPrice(int64(requestData.MembershipID), requestData.Price); err != nil {
 		http.Error(w, "Could not update membership price", http.StatusInternalServerError)
 		return
 	}
@@ -42,11 +37,6 @@ func UpdateMembershipPriceHandler(w http.ResponseWriter, r *http.Request) {
 
 // CreateMembershipHandler creates a new membership
 func CreateMembershipHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// TODO: Add admin authentication check here
 
 	var membership models.Membership
@@ -58,7 +48,7 @@ func CreateMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	// Set default values
 	membership.Active = true
 
-	membershipID, err := AdminDB.CreateMembership(membership)
+	membershipID, err := DB.CreateMembership(membership)
 	if err != nil {
 		http.Error(w, "Could not create membership", http.StatusInternalServerError)
 		return
@@ -76,11 +66,6 @@ func CreateMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 // DeleteMembershipHandler deactivates a membership
 func DeleteMembershipHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// TODO: Add admin authentication check here
 
 	membershipIDStr := r.URL.Query().Get("id")
@@ -90,7 +75,7 @@ func DeleteMembershipHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := AdminDB.DeactivateMembership(membershipID); err != nil {
+	if err := DB.DeactivateMembership(membershipID); err != nil {
 		http.Error(w, "Could not deactivate membership", http.StatusInternalServerError)
 		return
 	}

@@ -46,11 +46,11 @@ func AdminPriserHandler(w http.ResponseWriter, r *http.Request) {
 	lang := GetLanguageFromRequest(r)
 
 	if r.Method == http.MethodGet {
-		alle, err := AdminDB.GetAllMemberships()
+		alle, err := DB.GetAllMemberships()
 		if err != nil {
 			alle = nil
 		}
-		overstyrte, err := AdminDB.Produktnamn("medlemskap")
+		overstyrte, err := DB.Produktnamn("medlemskap")
 		if err != nil {
 			overstyrte = nil
 		}

@@ -1,34 +1,31 @@
 package handlers
 
 import (
-	"kjernekraft/database"
 	"kjernekraft/handlers/config"
 	"kjernekraft/handlers/modules"
 	"log"
 	"net/http"
 )
 
-var AdminDB *database.Database
-
 func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 	// Ligg denne handsamaren nokon gong utanfor den gruppa, er
 	// administrasjonen open att.
 
-	events, err := AdminDB.GetAllEvents()
+	events, err := DB.GetAllEvents()
 	if err != nil {
 		log.Printf("admin: kunde ikkje henta timar: %v", err)
 		http.Error(w, "Kunne ikke hente events", http.StatusInternalServerError)
 		return
 	}
 
-	freezeRequests, err := AdminDB.GetPendingFreezeRequests()
+	freezeRequests, err := DB.GetPendingFreezeRequests()
 	if err != nil {
 		http.Error(w, "Kunne ikke hente frysingsforespørsler", http.StatusInternalServerError)
 		return
 	}
 
-	memberships, err := AdminDB.GetAllMemberships()
+	memberships, err := DB.GetAllMemberships()
 	if err != nil {
 		http.Error(w, "Kunne ikke hente medlemskap", http.StatusInternalServerError)
 		return
@@ -40,7 +37,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// kunde koma på kvar sitt maal.
 	lang := GetLanguageFromRequest(r)
 
-	folk, err := AdminDB.FolkOversyn()
+	folk, err := DB.FolkOversyn()
 	if err != nil {
 		log.Printf("folkeoversyn: %v", err)
 		http.Error(w, "Kunne ikke hente brukere", http.StatusInternalServerError)
@@ -57,7 +54,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rooms, err := AdminDB.GetRooms()
+	rooms, err := DB.GetRooms()
 	if err != nil {
 		log.Printf("kunde ikkje henta rom: %v", err)
 	}
@@ -65,7 +62,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Veljarane paa denne sida — ny time, vikarfeltet — les løyvi.
 	// Datalista `laerarar` stod tom fyrr: ho las $.Teachers, og den
 	// nykelen vart aldri sett paa administrasjonssida i det heile.
-	laerarar, err := AdminDB.LaerarNamn()
+	laerarar, err := DB.LaerarNamn()
 	if err != nil {
 		log.Printf("kunde ikkje henta lærarane: %v", err)
 	}
@@ -73,13 +70,13 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Slagi som alt er i bruk. Feltet er fritekst, so utan ei lista aa
 	// plukka fraa vert «Yoga» og «yoga» tvo sortar — og daa ber dei kvar
 	// sin venge i lista.
-	slagsortar, err := AdminDB.Slagsortar()
+	slagsortar, err := DB.Slagsortar()
 	if err != nil {
 		log.Printf("kunde ikkje henta slagi: %v", err)
 	}
 
 	// Gruppone ein time kann vera open for.
-	grupper, err := AdminDB.Grupper()
+	grupper, err := DB.Grupper()
 	if err != nil {
 		log.Printf("grupper: %v", err)
 	}
@@ -87,7 +84,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Krav um studentrabatt som ventar paa svar. Dei høyrer heime i
 	// meldingsfana attmed frysingane: baae er noko nokon hev bede um og
 	// som ingen ting hender med fyrr studioet svarar.
-	rabattkrav, err := AdminDB.VentandeRabattkrav()
+	rabattkrav, err := DB.VentandeRabattkrav()
 	if err != nil {
 		log.Printf("rabattkrav: %v", err)
 	}
@@ -98,7 +95,7 @@ func AdminPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Meldingane som ventar. Ein feil her skal ikkje taka heile
 	// administrasjonssida: fana stend tom, og resten verkar.
-	meldingar, err := AdminDB.VentandeMeldingar()
+	meldingar, err := DB.VentandeMeldingar()
 	if err != nil {
 		log.Printf("meldingar: %v", err)
 	}

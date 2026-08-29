@@ -16,11 +16,11 @@ import (
 func AdminKlippeprisarHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		lang := GetLanguageFromRequest(r)
-		pakkar, err := AdminDB.GetAllKlippekortPackages()
+		pakkar, err := DB.GetAllKlippekortPackages()
 		if err != nil {
 			pakkar = nil
 		}
-		overstyrte, err := AdminDB.Produktnamn("klippekort")
+		overstyrte, err := DB.Produktnamn("klippekort")
 		if err != nil {
 			overstyrte = nil
 		}

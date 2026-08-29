@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
-	"kjernekraft/models"
 )
 
 // RoomConflictHandler segjer um rommet alt er uppteke.
@@ -39,7 +37,7 @@ func RoomConflictHandler(w http.ResponseWriter, r *http.Request) {
 		slutt = slutt.AddDate(0, 0, 1)
 	}
 
-	kollisjon, err := AdminDB.RoomConflict(romID, start, slutt)
+	kollisjon, err := DB.RoomConflict(romID, start, slutt)
 	if err != nil {
 		http.Error(w, "kunde ikkje sjaa etter konflikt", http.StatusInternalServerError)
 		return
@@ -58,7 +56,3 @@ func RoomConflictHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(svar)
 }
-
-// Konfliktsvaret som type, so det ikkje er eit kart med strengnyklar
-// spreidd i tvo filer.
-var _ = models.Event{}

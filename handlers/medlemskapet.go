@@ -50,11 +50,7 @@ func kronerFromOre(ore int) int { return ore / 100 }
 func MembershipPageHandler(w http.ResponseWriter, r *http.Request) {
 	lang := GetLanguageFromRequest(r)
 	naa := time.Now()
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Redirect(w, r, "/innlogging", http.StatusSeeOther)
-		return
-	}
+	user := brukaren(r)
 
 	noverande, err := DB.GetUserMembership(int64(user.ID))
 	if err != nil {

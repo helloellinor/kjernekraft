@@ -166,10 +166,6 @@ func InnsjekkHandler(w http.ResponseWriter, r *http.Request) {
 
 // InnsjekkMerkHandler kryssar av éin person.
 func InnsjekkMerkHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	if !innsjekkLaastOpp(r) {
 		http.Error(w, "Skjermen er laast", http.StatusForbidden)
 		return
@@ -207,10 +203,6 @@ func InnsjekkMerkHandler(w http.ResponseWriter, r *http.Request) {
 // av. Ruta gjer ikkje meir enn det — paameldingi stend, og kva ho elles
 // skulde kosta eller telja er ikkje kiosken si sak.
 func InnsjekkAngreHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	if !innsjekkLaastOpp(r) {
 		http.Error(w, "Skjermen er laast", http.StatusForbidden)
 		return
@@ -305,10 +297,6 @@ func InnsjekkSokHandler(w http.ResponseWriter, r *http.Request) {
 // stend jo her. Paameldingi gjeng gjenom same vegen som all onnor
 // paamelding, so kapasiteten vert halden i same transaksjonen.
 func InnsjekkDropinHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	if !innsjekkLaastOpp(r) {
 		http.Error(w, "Skjermen er laast", http.StatusForbidden)
 		return

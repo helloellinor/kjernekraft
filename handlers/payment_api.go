@@ -51,11 +51,7 @@ func betalingskorta(user *models.User) []Betalingskort {
 
 // PaymentMethodsHandler provides HTMX endpoint for user's payment methods
 func PaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 	teiknFragment(w, "betalingsmaatar", map[string]interface{}{
 		"Lang": GetLanguageFromRequest(r),
 		"Kort": betalingskorta(user),
@@ -64,12 +60,7 @@ func PaymentMethodsHandler(w http.ResponseWriter, r *http.Request) {
 
 // ChargesHandler provides HTMX endpoint for user's charges/billing history
 func ChargesHandler(w http.ResponseWriter, r *http.Request) {
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	// Get filter type from query parameter
 	filterType := r.URL.Query().Get("type")
@@ -194,18 +185,6 @@ func ChargesHandler(w http.ResponseWriter, r *http.Request) {
 
 // SetDefaultPaymentMethodHandler handles setting a payment method as default
 func SetDefaultPaymentMethodHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
 	paymentMethodIDStr := r.FormValue("payment_method_id")
 	_, err := strconv.Atoi(paymentMethodIDStr)
 	if err != nil {
@@ -221,18 +200,6 @@ func SetDefaultPaymentMethodHandler(w http.ResponseWriter, r *http.Request) {
 
 // RemovePaymentMethodHandler handles removing a payment method
 func RemovePaymentMethodHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
 	paymentMethodIDStr := r.FormValue("payment_method_id")
 	_, err := strconv.Atoi(paymentMethodIDStr)
 	if err != nil {

@@ -31,12 +31,7 @@ func klargjerKlippekort(klippekort []models.KlippekortWithDetails, now time.Time
 
 // UserKlippekortHandler provides HTMX endpoint for user's klippekort display
 func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	userID := int64(user.ID)
 	klippekort, err := DB.GetUserKlippekort(userID)
@@ -75,11 +70,7 @@ func UserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 
 // UserSignupsHandler provides HTMX endpoint for the classes a user is signed up for
 func UserSignupsHandler(w http.ResponseWriter, r *http.Request) {
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	lang := GetLanguageFromRequest(r)
 	naa := config.GetInstance().GetCurrentTime()
@@ -104,11 +95,7 @@ func UserSignupsHandler(w http.ResponseWriter, r *http.Request) {
 // morgon. Ho hentar seg att naar du melder deg paa eller av, so timen
 // flyt yver i «Paameld» utan at sida lastar paa nytt.
 func LedigPlassHandler(w http.ResponseWriter, r *http.Request) {
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	lang := GetLanguageFromRequest(r)
 	naa := config.GetInstance().GetCurrentTime()
@@ -140,11 +127,7 @@ func LedigPlassHandler(w http.ResponseWriter, r *http.Request) {
 // Reknestykket bur i `Heimehovudet` og ikkje her, so sida og
 // oppfriskingi ikkje kann segja kvar sitt.
 func HeimehovudHandler(w http.ResponseWriter, r *http.Request) {
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	lang := GetLanguageFromRequest(r)
 	naa := config.GetInstance().GetCurrentTime()

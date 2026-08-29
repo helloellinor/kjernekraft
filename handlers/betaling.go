@@ -6,12 +6,7 @@ import (
 
 // BetalingHandler handles the payment methods page
 func BetalingHandler(w http.ResponseWriter, r *http.Request) {
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Redirect(w, r, "/innlogging", http.StatusSeeOther)
-		return
-	}
+	user := brukaren(r)
 
 	// Get language from cookies/request (using new system)
 	lang := GetLanguageFromRequest(r)

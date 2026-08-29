@@ -12,11 +12,6 @@ import (
 
 // ShuffleTestDataHandler provides an endpoint to shuffle test data
 func ShuffleTestDataHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	err := shuffleTestData()
 	if err != nil {
 		log.Printf("Error shuffling test data: %v", err)
@@ -219,11 +214,6 @@ func getStartOfWeek(t time.Time) time.Time {
 
 // ShuffleMembershipsHandler provides an endpoint to shuffle membership data
 func ShuffleMembershipsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	err := shuffleMembershipData()
 	if err != nil {
 		log.Printf("Error shuffling membership data: %v", err)
@@ -242,11 +232,6 @@ func ShuffleMembershipsHandler(w http.ResponseWriter, r *http.Request) {
 
 // ShuffleUserKlippekortHandler provides an endpoint to shuffle user klippekort
 func ShuffleUserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	err := shuffleUserKlippekortData()
 	if err != nil {
 		log.Printf("Error shuffling user klippekort: %v", err)
@@ -265,11 +250,6 @@ func ShuffleUserKlippekortHandler(w http.ResponseWriter, r *http.Request) {
 
 // ShuffleAllTestDataHandler provides an endpoint to shuffle all test data
 func ShuffleAllTestDataHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Shuffle events
 	err := shuffleTestData()
 	if err != nil {

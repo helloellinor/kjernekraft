@@ -155,11 +155,6 @@ func etterStreken(namn, prefiks string) (int64, bool) {
 
 // LagraSerieHandler tek imot heile serien og skriv honom i eitt.
 func LagraSerieHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	lang := GetLanguageFromRequest(r)
@@ -170,7 +165,7 @@ func LagraSerieHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	no := config.GetInstance().GetCurrentTime()
-	timar, err := AdminDB.GetFutureEventsBySerie(s.SerieID, no)
+	timar, err := DB.GetFutureEventsBySerie(s.SerieID, no)
 	if err != nil {
 		http.Error(w, "Could not fetch classes", http.StatusInternalServerError)
 		return
@@ -212,7 +207,7 @@ func LagraSerieHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if s.Plassar > 0 {
-		full, err := AdminDB.PaameldeYver(s.SerieID, s.Plassar, no)
+		full, err := DB.PaameldeYver(s.SerieID, s.Plassar, no)
 		if err == nil && full != nil {
 			http.Error(w, fmt.Sprintf("%s %s: %d %s",
 				t(lang, "admin.seats_taken"),
@@ -229,13 +224,13 @@ func LagraSerieHandler(w http.ResponseWriter, r *http.Request) {
 			ider = append(ider, id)
 		}
 		sort.Slice(ider, func(i, j int) bool { return ider[i] < ider[j] })
-		if err := AdminDB.AvlysFleire(ider); err != nil {
+		if err := DB.AvlysFleire(ider); err != nil {
 			http.Error(w, "Could not cancel classes", http.StatusInternalServerError)
 			return
 		}
 	}
 
-	if err := AdminDB.UpdateSerieTitle(s.SerieID, s.Tittel, no); err != nil {
+	if err := DB.UpdateSerieTitle(s.SerieID, s.Tittel, no); err != nil {
 		http.Error(w, "Could not save title", http.StatusInternalServerError)
 		return
 	}
@@ -254,43 +249,43 @@ func LagraSerieHandler(w http.ResponseWriter, r *http.Request) {
 	// skrivast. Same tanken som `data-lagra` i `endringar.js`: ei
 	// endring er skilnaden fraa det som var, ikkje det som stend.
 	if s.Laerar != s.LaerarFyrr {
-		if err := AdminDB.UpdateSerieTeacher(s.SerieID, s.Laerar, no); err != nil {
+		if err := DB.UpdateSerieTeacher(s.SerieID, s.Laerar, no); err != nil {
 			http.Error(w, "Could not save teacher", http.StatusInternalServerError)
 			return
 		}
 	}
-	if err := AdminDB.UpdateSerieClassType(s.SerieID, s.Slag, no); err != nil {
+	if err := DB.UpdateSerieClassType(s.SerieID, s.Slag, no); err != nil {
 		http.Error(w, "Could not save class type", http.StatusInternalServerError)
 		return
 	}
 	if s.RomID > 0 {
-		if err := AdminDB.UpdateSerieRoom(s.SerieID, s.RomID, romnamn, no); err != nil {
+		if err := DB.UpdateSerieRoom(s.SerieID, s.RomID, romnamn, no); err != nil {
 			http.Error(w, "Could not save room", http.StatusInternalServerError)
 			return
 		}
 	}
-	if err := AdminDB.UpdateSerieCapacity(s.SerieID, s.Plassar, no); err != nil {
+	if err := DB.UpdateSerieCapacity(s.SerieID, s.Plassar, no); err != nil {
 		http.Error(w, "Could not save capacity", http.StatusInternalServerError)
 		return
 	}
 	// Gruppa gjeld heile serien: er reformer-timen open for dei
 	// upplærde, er han det kvar veke.
 	if s.GruppeID > 0 {
-		finst, err := AdminDB.GruppeFinst(s.GruppeID)
+		finst, err := DB.GruppeFinst(s.GruppeID)
 		if err != nil || !finst {
 			http.Error(w, "Ukjend gruppe", http.StatusBadRequest)
 			return
 		}
 	}
-	if err := AdminDB.SetSerieGruppe(s.SerieID, s.GruppeID, no); err != nil {
+	if err := DB.SetSerieGruppe(s.SerieID, s.GruppeID, no); err != nil {
 		http.Error(w, "Could not save group", http.StatusInternalServerError)
 		return
 	}
-	if err := AdminDB.UpdateSerieDescription(s.SerieID, s.Skildring, no); err != nil {
+	if err := DB.UpdateSerieDescription(s.SerieID, s.Skildring, no); err != nil {
 		http.Error(w, "Could not save description", http.StatusInternalServerError)
 		return
 	}
-	if err := AdminDB.FlyttFleire(flyttingar); err != nil {
+	if err := DB.FlyttFleire(flyttingar); err != nil {
 		http.Error(w, "Could not save times", http.StatusInternalServerError)
 		return
 	}
@@ -301,7 +296,7 @@ func LagraSerieHandler(w http.ResponseWriter, r *http.Request) {
 		if s.Avlys[id] {
 			continue
 		}
-		if err := AdminDB.UpdateEventTeacher(id, namn); err != nil {
+		if err := DB.UpdateEventTeacher(id, namn); err != nil {
 			http.Error(w, "Could not save substitute", http.StatusInternalServerError)
 			return
 		}
@@ -331,7 +326,7 @@ func romNamn(romID int64) (string, error) {
 	if romID == 0 {
 		return "", nil
 	}
-	rom, err := AdminDB.GetRooms()
+	rom, err := DB.GetRooms()
 	if err != nil {
 		return "", fmt.Errorf("could not fetch rooms")
 	}
@@ -349,7 +344,7 @@ func serieKrasjarIRom(r *http.Request, serieID, romID int64, flyttingar []databa
 		return "", true
 	}
 	for _, f := range flyttingar {
-		kollisjon, err := AdminDB.RoomConflictUtanSerie(romID, serieID, f.Start, f.Slutt)
+		kollisjon, err := DB.RoomConflictUtanSerie(romID, serieID, f.Start, f.Slutt)
 		if err != nil || kollisjon == nil {
 			continue
 		}
@@ -364,7 +359,7 @@ func serieKrasjarIRom(r *http.Request, serieID, romID int64, flyttingar []databa
 
 // forlengSerie legg fleire veker etter den siste komande timen.
 func forlengSerie(r *http.Request, serieID int64, veker int, no time.Time) (string, bool) {
-	siste, err := AdminDB.SisteITimeserie(serieID, no)
+	siste, err := DB.SisteITimeserie(serieID, no)
 	if err != nil || siste == nil {
 		return t(GetLanguageFromRequest(r), "admin.serie_spent"), false
 	}
@@ -374,7 +369,7 @@ func forlengSerie(r *http.Request, serieID int64, veker int, no time.Time) (stri
 		start := siste.StartTime.AddDate(0, 0, 7*i)
 		slutt := siste.EndTime.AddDate(0, 0, 7*i)
 		if siste.RoomID > 0 {
-			kollisjon, err := AdminDB.RoomConflictUtanSerie(int64(siste.RoomID), serieID, start, slutt)
+			kollisjon, err := DB.RoomConflictUtanSerie(int64(siste.RoomID), serieID, start, slutt)
 			if err == nil && kollisjon != nil {
 				return fmt.Sprintf("%s %s–%s: %s",
 					t(GetLanguageFromRequest(r), "admin.room_busy"),
@@ -389,7 +384,7 @@ func forlengSerie(r *http.Request, serieID int64, veker int, no time.Time) (stri
 		ny.CurrentEnrolment = 0
 		nye = append(nye, ny)
 	}
-	if _, err := AdminDB.UtvidSerie(serieID, nye); err != nil {
+	if _, err := DB.UtvidSerie(serieID, nye); err != nil {
 		return "could not extend", false
 	}
 	return "", true

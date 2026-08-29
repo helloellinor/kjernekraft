@@ -15,11 +15,6 @@ import (
 
 // LagGruppeHandler lagar ei gruppe.
 func LagGruppeHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	namn := strings.TrimSpace(r.URL.Query().Get("namn"))
@@ -27,7 +22,7 @@ func LagGruppeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "namn is required", http.StatusBadRequest)
 		return
 	}
-	if _, err := AdminDB.LagGruppe(namn); err != nil {
+	if _, err := DB.LagGruppe(namn); err != nil {
 		http.Error(w, "Could not create group", http.StatusInternalServerError)
 		return
 	}
@@ -36,11 +31,6 @@ func LagGruppeHandler(w http.ResponseWriter, r *http.Request) {
 
 // SlettGruppeHandler tek gruppa burt og opnar timane hennar att.
 func SlettGruppeHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	id, err := strconv.ParseInt(r.URL.Query().Get("gruppe"), 10, 64)
@@ -48,7 +38,7 @@ func SlettGruppeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid gruppe", http.StatusBadRequest)
 		return
 	}
-	if err := AdminDB.SlettGruppe(id); err != nil {
+	if err := DB.SlettGruppe(id); err != nil {
 		http.Error(w, "Could not delete group", http.StatusInternalServerError)
 		return
 	}
@@ -57,11 +47,6 @@ func SlettGruppeHandler(w http.ResponseWriter, r *http.Request) {
 
 // GruppemedlemHandler slær medlemskapet av eller paa.
 func GruppemedlemHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Tilgangen vert avgjord av RequireAdmin i rutaren, ikkje her.
 
 	gruppe, err := strconv.ParseInt(r.URL.Query().Get("gruppe"), 10, 64)
@@ -74,7 +59,7 @@ func GruppemedlemHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid brukar", http.StatusBadRequest)
 		return
 	}
-	if err := AdminDB.SettGruppemedlem(gruppe, brukar, r.URL.Query().Get("paa") == "1"); err != nil {
+	if err := DB.SettGruppemedlem(gruppe, brukar, r.URL.Query().Get("paa") == "1"); err != nil {
 		http.Error(w, "Could not change membership", http.StatusInternalServerError)
 		return
 	}

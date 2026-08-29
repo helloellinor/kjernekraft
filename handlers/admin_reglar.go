@@ -67,7 +67,7 @@ func AdminReglarHandler(w http.ResponseWriter, r *http.Request) {
 				reglar.DefaultMembershipID = &id
 			}
 		}
-		if err := AdminDB.SaveMembershipRules(&reglar); err != nil {
+		if err := DB.SaveMembershipRules(&reglar); err != nil {
 			http.Error(w, "kunne ikkje lagre reglane", http.StatusInternalServerError)
 			return
 		}
@@ -75,11 +75,11 @@ func AdminReglarHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reglar, err := AdminDB.GetMembershipRules()
+	reglar, err := DB.GetMembershipRules()
 	if err != nil || reglar == nil {
 		reglar = &models.MembershipRules{}
 	}
-	medlemskap, err := AdminDB.GetAllMemberships()
+	medlemskap, err := DB.GetAllMemberships()
 	if err != nil {
 		medlemskap = nil
 	}

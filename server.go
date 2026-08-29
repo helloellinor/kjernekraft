@@ -70,7 +70,6 @@ func main() {
 		log.Fatal(err)
 	}
 	handlers.DB = db
-	handlers.AdminDB = db
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

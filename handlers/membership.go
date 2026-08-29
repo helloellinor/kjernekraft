@@ -12,12 +12,7 @@ import (
 
 // KlippekortPageHandler serves the klippekort two-step selection page
 func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
-	// Check if user is logged in
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
-		return
-	}
+	user := brukaren(r)
 
 	// Get language from cookies/request (using new system)
 	lang := GetLanguageFromRequest(r)
@@ -94,11 +89,6 @@ func KlippekortPageHandler(w http.ResponseWriter, r *http.Request) {
 
 // MembershipRecommendationsHandler provides endpoint for membership filtering
 func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Parse form data
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Invalid form data", http.StatusBadRequest)
@@ -393,12 +383,7 @@ func MembershipRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 
 // MinProfilHandler serves the user profile page and handles profile updates
 func MinProfilHandler(w http.ResponseWriter, r *http.Request) {
-	// Check if user is logged in
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Redirect(w, r, "/innlogging", http.StatusTemporaryRedirect)
-		return
-	}
+	user := brukaren(r)
 
 	// Handle POST request for profile updates
 	if r.Method == http.MethodPost {

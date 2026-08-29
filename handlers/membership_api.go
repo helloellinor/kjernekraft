@@ -7,17 +7,7 @@ import (
 
 // FreezeMembershipHandler handles membership freeze requests
 func FreezeMembershipHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	userID := int64(user.ID)
 	err := DB.UpdateMembershipStatus(userID, "freeze_requested")
@@ -37,17 +27,7 @@ func FreezeMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 // CancelFreezeRequestHandler handles cancellation of freeze requests
 func CancelFreezeRequestHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	userID := int64(user.ID)
 	err := DB.UpdateMembershipStatus(userID, "active")
@@ -67,17 +47,7 @@ func CancelFreezeRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 // UnfreezeMembershipHandler handles membership unfreeze requests
 func UnfreezeMembershipHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Get user from session
-	user := GetUserFromSession(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := brukaren(r)
 
 	// UnfreezeMembership og ikkje UpdateMembershipStatus: det er han som
 	// skuver utlaupet fram med den tidi medlemskapet stod frose. Sjaa

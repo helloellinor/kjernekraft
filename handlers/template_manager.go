@@ -86,16 +86,6 @@ func getTemplateFuncs() template.FuncMap {
 		"sub": func(a, b int) int {
 			return a - b
 		},
-		"substr": func(s string, start int, length int) string {
-			if start >= len(s) {
-				return ""
-			}
-			end := start + length
-			if end > len(s) {
-				end = len(s)
-			}
-			return s[start:end]
-		},
 		// Pengar er lagra i øre og skal lesast i kronor. Tabellen synte
 		// «104000 øre» — paa den skjermen Ida redigerer prisar paa.
 		// Tusenskiljet er eit hardt mellomrom, so talet ikkje bryt
@@ -158,9 +148,6 @@ func getTemplateFuncs() template.FuncMap {
 			}
 			return aFloat / bFloat
 		},
-		"formatTime": func(t time.Time, format string) string {
-			return t.In(settings.GetLocation()).Format(format)
-		},
 		// Go sitt Format gjev engelske dag- og maanadsnamn, og det finst
 		// ingen maate aa be honom um noko anna. Difor stend namni her.
 		// «Thursday 27. August» stod i dokka paa ei norsk sida.
@@ -201,9 +188,6 @@ func getTemplateFuncs() template.FuncMap {
 		"tf": func(lang, key string, a ...interface{}) string {
 			return fmt.Sprintf(t(lang, key), a...)
 		},
-		"norskDag": func(t time.Time) string {
-			return norskeDagar[t.Weekday()]
-		},
 		"norskDato": func(t time.Time) string {
 			return fmt.Sprintf("%s %d. %s", norskeDagar[t.Weekday()], t.Day(), norskeMaanader[t.Month()])
 		},
@@ -220,17 +204,8 @@ func getTemplateFuncs() template.FuncMap {
 		"norskDatoAar": func(t time.Time) string {
 			return fmt.Sprintf("%d. %s %d", t.Day(), norskeMaanader[t.Month()], t.Year())
 		},
-		"formatTimeShort": func(t time.Time) string {
-			return t.In(settings.GetLocation()).Format("15:04")
-		},
-		"formatDateShort": func(t time.Time) string {
-			return t.In(settings.GetLocation()).Format("02.01")
-		},
 		"formatDateTime": func(t time.Time) string {
 			return t.In(settings.GetLocation()).Format("2006-01-02 15:04")
-		},
-		"formatDateTimeLocal": func(t time.Time) string {
-			return t.In(settings.GetLocation()).Format("2006-01-02T15:04")
 		},
 		"currentTime": func() time.Time {
 			return settings.GetCurrentTime()
@@ -317,10 +292,6 @@ func getTemplateFuncs() template.FuncMap {
 				return t(lang, "admin.times_one")
 			}
 			return t(lang, "admin.times")
-		},
-		"translate": func(lang, key string) string {
-			loc := GetLocalization()
-			return loc.T(lang, key)
 		},
 		"toJS": func(s string) template.JS {
 			// Escape string for JavaScript use

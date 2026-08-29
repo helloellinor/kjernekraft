@@ -719,11 +719,6 @@ func (db *Database) GetRooms() ([]models.Room, error) {
 	return romi, rows.Err()
 }
 
-// isColumnExistsError checks if the error is due to column already existing
-func isColumnExistsError(err error) bool {
-	return err != nil && strings.Contains(err.Error(), "duplicate column name")
-}
-
 // GjevLoyve gjev eit løyve til ein brukar.
 func (db *Database) GjevLoyve(userID, loyveID int64) error {
 	_, err := db.Conn.Exec("INSERT INTO brukarloyve (user_id, loyve_id) VALUES (?, ?)", userID, loyveID)

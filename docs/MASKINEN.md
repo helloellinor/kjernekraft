@@ -277,10 +277,17 @@ the specimen sheet). The problems are structural.
 In order. Each step ships alone and the tests stay green after it. Steps
 1–4 are mechanical; 5–7 need judgement.
 
-1. **Delete the dead.** F1 + F2 guards (~170 lines), F10 leftovers,
-   `profile-scripts.html`, `database/events.go`, `isColumnExistsError`, the
-   7 dead func-map helpers incl. `translate`. Nothing observable changes;
-   `daude-klassar.sh` has proven the genre.
+1. ~~**Delete the dead.**~~ **Done 2026-08-29.** The 24 auth guards are
+   `brukaren(r)` now — an accessor in `session.go` that assumes the
+   middleware ran and panics if it did not (Recoverer turns that into a
+   real 500). The ~34 unreachable method guards, the `EventHandler`
+   trio, `handlers.AdminDB` (same object as `DB`, assigned twice),
+   `profile-scripts.html`, `database/events.go`, `isColumnExistsError`,
+   `stilarkTid`, the dead `var _ = models.Event{}` in `romkonflikt.go`,
+   and the 7 dead func-map helpers incl. `translate` are gone. The dual
+   GET/POST handlers (`InnloggingHandler`, `AdminSettingsHandler`,
+   `MinProfilHandler`, `InnsjekkLaasHandler`) keep their method
+   branches — those are reachable.
 2. **One error channel, end to end.** Write `svarFeil` (localized,
    htmx-aware, `berging.go`'s div shape); migrate the 248 `http.Error`
    sites file by file; widen `feil.js` to ≥ 400; collapse the nine client
