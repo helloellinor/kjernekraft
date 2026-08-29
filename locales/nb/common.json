@@ -757,6 +757,14 @@
     "laas_feil": "Feil kode."
   },
   "feil": {
-    "krasj": "Noe gikk galt hos oss. Prøv igjen om et øyeblikk."
+    "krasj": "Noe gikk galt hos oss. Prøv igjen om et øyeblikk.",
+    "innlogging": "Du er ikke logget inn. Logg inn og prøv igjen.",
+    "tilgang": "Du har ikke tilgang til dette.",
+    "kjennemerke": "Økten er utløpt. Last siden på nytt og prøv igjen.",
+    "skjemadata": "Skjemaet kunne ikke leses. Prøv igjen.",
+    "pakravde": "Fyll ut alle påkrevde felt.",
+    "vilkaar": "Du må godta vilkårene først.",
+    "epost_i_bruk": "E-posten er allerede i bruk.",
+    "telefon_i_bruk": "Telefonnummeret er allerede i bruk."
   }
 }

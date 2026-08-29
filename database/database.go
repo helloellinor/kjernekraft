@@ -257,8 +257,32 @@ func Migrate(db *sql.DB) error {
 	);
 	`
 
+	// Kvitteringane. Tabellen mangla heilt fram til 29.8.2026, endaa
+	// SimulateBilling hev skrive til honom heile tidi: kvar INSERT fall,
+	// vart logga og sloppen — so ingen kjøp hev sett spor etter seg.
+	// Kolonnone er nett dei den INSERT-en set.
+	chargesTableSQL := `
+	CREATE TABLE IF NOT EXISTS charges (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		payment_method_id INTEGER NOT NULL,
+		amount INTEGER NOT NULL,
+		currency TEXT NOT NULL DEFAULT 'NOK',
+		status TEXT NOT NULL,
+		description TEXT,
+		type TEXT,
+		charge_date TIMESTAMP,
+		created_at TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id)
+	);
+	`
+
 	log.Println("Kjører migrering (setter opp databasetabeller)...")
 	if _, err := db.Exec(eventsTableSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(chargesTableSQL); err != nil {
 		return err
 	}
 	if _, err := db.Exec(usersTableSQL); err != nil {
@@ -758,18 +782,26 @@ func (db *Database) GetUserPaymentMethods(userID int64) ([]struct{ Provider, Pro
 }
 
 // CreateUser inserts a new user into the users table
+// Dei tvo maatane CreateUser kann segja nei paa. Merkte feil, so
+// handsamaren kann kjenna deim att med errors.Is og svara i brukaren
+// sitt maal — teksten her er for loggen, ikkje for skjermen.
+var (
+	ErrEpostIBruk   = errors.New("e-posten er alt i bruk")
+	ErrTelefonIBruk = errors.New("telefonnummeret er alt i bruk")
+)
+
 func (db *Database) CreateUser(u models.User) (int64, error) {
 	// Check if email already exists
 	var existingID int
 	err := db.Conn.QueryRow("SELECT id FROM users WHERE email = ?", u.Email).Scan(&existingID)
 	if err == nil {
-		return 0, fmt.Errorf("e-post er allerede i bruk")
+		return 0, ErrEpostIBruk
 	}
 
 	// Check if phone already exists
 	err = db.Conn.QueryRow("SELECT id FROM users WHERE phone = ?", u.Phone).Scan(&existingID)
 	if err == nil {
-		return 0, fmt.Errorf("telefonnummer er allerede i bruk")
+		return 0, ErrTelefonIBruk
 	}
 
 	res, err := db.Conn.Exec(
@@ -837,7 +869,9 @@ func (db *Database) SimulateBilling(userID int64, amount int, description, charg
 	chargeQuery := `INSERT INTO charges (user_id, payment_method_id, amount, currency, status, description, type, charge_date, created_at)
 	                VALUES (?, ?, ?, 'NOK', 'succeeded', ?, ?, ?, ?)`
 
-	now := time.Now()
+	// veggtekst, som alle andre skriv tidspunkt: ein raa time.Time fraa
+	// drivaren ber tidssone-suffiks, og daa held kolonna tvo format.
+	now := veggtekst(time.Now())
 
 	_, err = db.Conn.Exec(chargeQuery, userID, paymentMethodID, amount, description, chargeType, now, now)
 	return err
@@ -2256,31 +2290,38 @@ func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 	return tx.Commit()
 }
 
-// CancelUserSignupForEvent cancels a user's signup for an event
+// CancelUserSignupForEvent tek ein brukar av ein time att.
+//
+// Same disiplinen som SignupUserForEvent ovanfor, og av same grunn: han
+// las fyrst og skreiv etterpaa, paa tri einskilde samband. Tvo som melder
+// seg av samstundes kom baae gjenom kontrollen, og teljaren gjekk ned
+// tvo gonger for eitt avhopp. Slettingi sjølv er kontrollen no: raakar
+// ho ingi rad, var brukaren ikkje paameld. Og MAX(…, 0) i UPDATE-en, so
+// ein teljar som alt var i utakt ikkje kann verta negativ.
 func (db *Database) CancelUserSignupForEvent(userID, eventID int64) error {
-	// Check if user is signed up
-	var exists int
-	checkQuery := `SELECT COUNT(*) FROM event_signups WHERE user_id = ? AND event_id = ?`
-	err := db.Conn.QueryRow(checkQuery, userID, eventID).Scan(&exists)
+	tx, err := db.Conn.Begin()
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
-	if exists == 0 {
-		return fmt.Errorf("user is not signed up for this event")
-	}
-
-	// Remove signup record
-	deleteQuery := `DELETE FROM event_signups WHERE user_id = ? AND event_id = ?`
-	_, err = db.Conn.Exec(deleteQuery, userID, eventID)
+	res, err := tx.Exec(
+		`DELETE FROM event_signups WHERE user_id = ? AND event_id = ?`,
+		userID, eventID)
 	if err != nil {
 		return err
 	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return fmt.Errorf("brukaren er ikkje paameld denne timen")
+	}
 
-	// Update event enrolment count
-	updateQuery := `UPDATE events SET current_enrolment = current_enrolment - 1 WHERE id = ?`
-	_, err = db.Conn.Exec(updateQuery, eventID)
-	return err
+	if _, err := tx.Exec(
+		`UPDATE events SET current_enrolment = MAX(current_enrolment - 1, 0) WHERE id = ?`,
+		eventID); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 // GetUserSignupsForEvents returns a map of event IDs that the user is signed up for

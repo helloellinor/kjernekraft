@@ -757,6 +757,14 @@
     "laas_feil": "Feil kode."
   },
   "feil": {
-    "krasj": "Noko gjekk gale hjaa oss. Prøv att om eit augneblink."
+    "krasj": "Noko gjekk gale hjaa oss. Prøv att om eit augneblink.",
+    "innlogging": "Du er ikkje innlogga. Logg inn og prøv att.",
+    "tilgang": "Du hev ikkje tilgang til dette.",
+    "kjennemerke": "Økti hev gjenge ut. Last sida på nytt og prøv att.",
+    "skjemadata": "Skjemaet kunde ikkje lesast. Prøv att.",
+    "pakravde": "Fyll ut alle felti som er kravde.",
+    "vilkaar": "Du lyt godtaka vilkåri fyrst.",
+    "epost_i_bruk": "E-posten er alt i bruk.",
+    "telefon_i_bruk": "Telefonnummeret er alt i bruk."
   }
 }

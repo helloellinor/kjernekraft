@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"html"
 	"kjernekraft/database"
 	"kjernekraft/models"
 	"log"
@@ -191,8 +190,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		// Fallback to regular form parsing
 		err = r.ParseForm()
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(`<div class="error">Ugyldig skjemadata</div>`))
+			svarFeil(w, r, http.StatusBadRequest, "feil.skjemadata")
 			return
 		}
 	}
@@ -212,22 +210,19 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate required fields
 	if name == "" || birthdate == "" || email == "" || phone == "" || password == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`<div class="error">Alle påkrevde felt må fylles ut</div>`))
+		svarFeil(w, r, http.StatusBadRequest, "feil.pakravde")
 		return
 	}
 
 	if !termsAccepted {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`<div class="error">Du må akseptere handelsbetingelsene</div>`))
+		svarFeil(w, r, http.StatusBadRequest, "feil.vilkaar")
 		return
 	}
 
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`<div class="error">Feil ved behandling av passord</div>`))
+		svarFeil(w, r, http.StatusInternalServerError, "feil.krasj")
 		return
 	}
 
@@ -250,9 +245,17 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	// Create user in database
 	userID, err := DB.CreateUser(user)
 	if err != nil {
-		w.WriteHeader(http.StatusConflict)
-		errorMsg := html.EscapeString(err.Error())
-		w.Write([]byte(`<div class="error">` + errorMsg + `</div>`))
+		// Dei tvo avslagi brukaren kann gjera noko med fær kvar sitt
+		// ord; alt anna er vaart problem og skal ikkje ut paa skjermen.
+		switch {
+		case errors.Is(err, database.ErrEpostIBruk):
+			svarFeil(w, r, http.StatusConflict, "feil.epost_i_bruk")
+		case errors.Is(err, database.ErrTelefonIBruk):
+			svarFeil(w, r, http.StatusConflict, "feil.telefon_i_bruk")
+		default:
+			log.Printf("CreateUser: %v", err)
+			svarFeil(w, r, http.StatusInternalServerError, "feil.krasj")
+		}
 		return
 	}
 

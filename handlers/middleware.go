@@ -69,7 +69,7 @@ func RequireAdmin(next http.Handler) http.Handler {
 			return
 		}
 		if !IsAdmin(user) {
-			http.Error(w, "Ingen tilgang", http.StatusForbidden)
+			svarFeil(w, r, http.StatusForbidden, "feil.tilgang")
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -90,7 +90,7 @@ func RequireDevelopment(next http.Handler) http.Handler {
 
 func denyUnauthenticated(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/api/") || r.Header.Get("HX-Request") == "true" {
-		http.Error(w, "Ikkje innlogga", http.StatusUnauthorized)
+		svarFeil(w, r, http.StatusUnauthorized, "feil.innlogging")
 		return
 	}
 	http.Redirect(w, r, "/innlogging", http.StatusSeeOther)
@@ -126,7 +126,7 @@ func CSRF(next http.Handler) http.Handler {
 			sent = r.FormValue(csrfFormField)
 		}
 		if !tokensEqual(token, sent) {
-			http.Error(w, "Ugyldig eller manglande CSRF-kjennemerke", http.StatusForbidden)
+			svarFeil(w, r, http.StatusForbidden, "feil.kjennemerke")
 			return
 		}
 		next.ServeHTTP(w, r)

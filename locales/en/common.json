@@ -757,6 +757,14 @@
     "laas_feil": "Wrong code."
   },
   "feil": {
-    "krasj": "Something went wrong on our end. Please try again in a moment."
+    "krasj": "Something went wrong on our end. Please try again in a moment.",
+    "innlogging": "You are not signed in. Sign in and try again.",
+    "tilgang": "You do not have access to this.",
+    "kjennemerke": "Your session has expired. Reload the page and try again.",
+    "skjemadata": "The form could not be read. Please try again.",
+    "pakravde": "Fill in all required fields.",
+    "vilkaar": "You must accept the terms first.",
+    "epost_i_bruk": "That email address is already in use.",
+    "telefon_i_bruk": "That phone number is already in use."
   }
 }
