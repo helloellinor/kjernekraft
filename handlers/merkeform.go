@@ -30,7 +30,11 @@ const (
 	//
 	// Vil ein stilla på dette, er kroppH talet. Alt anna er rekna ut or
 	// honom — botnstripa, plassmerket og skiva flytter seg med.
-	kroppB, kroppH = 56.0, 60.0
+	//
+	// 62 sidan 29.8.2026, upp fraa 60: skjermen (vindauga) botna nesten
+	// i falsen — ein halv einheit klaring — og lufta laut koma ein
+	// stad. Litt smalare aspekt er godteke, sagt beint ut av brukaren.
+	kroppB, kroppH = 56.0, 62.0
 	kroppR         = 4.0 // rektangel med so vidt broti hyrna
 	// Fana spenner yver toppen, so dagen stend *heil*. Ho var 44 av 56
 	// og laut forkortast til tvo bokstavar — «TY» er ikkje eit ord, det
@@ -52,7 +56,10 @@ const (
 	// daa laut kassen vera so mykje breidare enn kroppen paa baae sidor —
 	// dei einingane merket ikkje fekk bruka. Ingen ting heng utanfor
 	// lenger, og kroppen fyller difor 96,6 % av kassen mot 70,6 % fyrr.
-	botnRom = 3.5
+	// 5 sidan 29.8.2026, upp fraa 3,5: med skiveflata senka (skiveMarg 3)
+	// stod skjermbotnen ein halv einheit fraa falsen hennar. No stend
+	// han 2 innanfor — ein synleg gong golv millom skjerm og kant.
+	botnRom = 5.0
 
 	// Vindauga stend midt i botnen. Det hekk i vinstre kanten fyrr —
 	// `kroppX + botnRom` — av di plassmerket laag nede til høgre og

@@ -272,7 +272,7 @@
    ---- toppen er maald fraa fana, ikkje fraa kassen ----
 
    Fana byrjar *éi einheit inne i* kassen: `faneY = merkeKant = 1` i
-   merkeform.go, av 73 einheiter i høgdi. Toppfyllet stod til kassen,
+   merkeform.go, av 75 einheiter i høgdi. Toppfyllet stod til kassen,
    og daa var lufta yver merket éi einheit mindre enn lufta under det.
    Maalt paa heimesida: 8,00 px yver mot 8,99 under og 10,16 til høgre —
    og det var toppen som stakk seg ut, av di merket der stend inntil tri
@@ -458,7 +458,7 @@
    forholdet — det er den same tingen som kjem nærare, ikkje ei ny
    teikning. Spaltone i vika er rekna av det same talet, so hovudet og
    radene stend paa lina utan at nokon maaler. */
-:root { --merkestorleik: 7rem; }
+:root { --merkestorleik: 5.4rem; }
 
 .dagmerke {
   position: relative;
@@ -530,9 +530,10 @@
   /* Storleiken fylgjer brikka, som alt anna i henne: «Storleiken er éin
      knapp og ingen ting anna». Han stod fast paa .62 rem — rett ved
      5,4 rem og feil ved alle andre, so bobla vart stor paa ei lita
-     brikka og lita paa ei stor. .115 av brikka *er* .62 rem naar ho er
-     5,4. */
-  font-size: calc(var(--merkestorleik) * .115); font-weight: 500;
+     brikka og lita paa ei stor. .135 av brikka er .73 rem naar ho er
+     5,4 — eit hakk upp fraa .115 (29.8.2026), for talet i bobla er det
+     eldre augo spør etter fyrst. */
+  font-size: calc(var(--merkestorleik) * .135); font-weight: 500;
   letter-spacing: -.01em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap; pointer-events: none;
