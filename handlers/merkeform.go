@@ -133,9 +133,15 @@ const (
 	// Symmetrisk, av di skiva stend midt i kassen. Det var skeivt (18
 	// upp, 30 ned) so lenge midten hennar laag høgt — ei bot paa at ho
 	// stod feil, ikkje ei form.
-	sporB   = 24.0 // halvbreidd
-	sporOpp = 27.0 // upp fraa midten
-	sporNed = 27.0 // ned fraa midten
+	//
+	// Og 3,5 *innanfor skiveflata*, ikkje ut til kanten hennar. Sporet
+	// gjekk til 24/27 daa flata kom (29.8.2026), og daa stod indeksane
+	// beint paa saumen millom fals og skiva — «12» drukna i skuggen
+	// fraa yverkanten, og «9» og «3» stod halvt paa kvar si flata.
+	// Prenten paa eit ur stend paa skiva, med marg til kanten.
+	sporB   = 21.5 // halvbreidd
+	sporOpp = 23.5 // upp fraa midten
+	sporNed = 23.5 // ned fraa midten
 	spor    = sporOpp
 	// Stykket naar nettupp so langt som timevisaren det stend for —
 	// ikkje eit hakk kortare, og aldri lenger.

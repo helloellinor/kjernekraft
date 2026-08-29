@@ -88,9 +88,6 @@
          hakk ned i plata. Ei carva rute attmed ei flat skiva las seg
          som tvo ulike ting (29.8.2026). */}}
     <path class="skiveflate"  d="{{.Form.Skive}}"/>
-    <path class="skiveskugge" d="{{.Form.Skive}}" filter="url(#merkedjup-mjuk)"/>
-    <path class="skivedjup"   d="{{.Form.Skive}}" filter="url(#merkedjup)"/>
-    <path class="skiveljos"   d="{{.Form.Skive}}" filter="url(#merkeljos)"/>
 
     {{/* Skiva. Kakestykket er timen lagd ut paa døgeret: der visarane
          ville staa fraa han byrjar til han er ute. Det er det ein ser
@@ -118,6 +115,18 @@
       {{range .Form.Ticks}}<line class="indeks" x1="{{.X1}}" y1="{{.Y1}}" x2="{{.X2}}" y2="{{.Y2}}"/>{{end}}
       {{range .Form.Numerals}}<text class="skivetal" x="{{.X}}" y="{{.Y}}">{{.Text}}</text>{{end}}
     </g>
+
+    {{/* Lippone og skuggen aat skiveflata — ETTER prenten, med vilje.
+         Skuggen fell ned i brunnen og legg seg yver alt som ligg der,
+         prenten med; og ein indeks som naar kanten skal ganga *under*
+         falsen, ikkje liggja uppaa saumen som eit klistremerke. Fyrst
+         laag dei fyre skiva-gruppa, og daa stod «12» og hyrneindeksane
+         maala uppaa skuggen og kanten (29.8.2026). Visarane er det
+         motsette: dei svingar *yver* skiva og stend difor seint i
+         dokumentet, saman med glaset. */}}
+    <path class="skiveskugge" d="{{.Form.Skive}}" filter="url(#merkedjup-mjuk)"/>
+    <path class="skivedjup"   d="{{.Form.Skive}}" filter="url(#merkedjup)"/>
+    <path class="skiveljos"   d="{{.Form.Skive}}" filter="url(#merkeljos)"/>
 
     {{/* Botnstripa. Klokkeslettet i klartekst nede til vinstre, med den
          same fordjupingi i det smaa; plassmerket nede til høgre. Baae
