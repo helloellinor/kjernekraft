@@ -28,13 +28,17 @@ const (
 	// 60 no: framleis høgare enn brei, av di han *er* ein kasse med tri
 	// bolkar, men ikkje så høg at rada bøygjer seg etter honom.
 	//
-	// Vil ein stilla på dette, er kroppH talet. Alt anna er rekna ut or
-	// honom — botnstripa, plassmerket og skiva flytter seg med.
-	//
-	// 62 sidan 29.8.2026, upp fraa 60: skjermen (vindauga) botna nesten
-	// i falsen — ein halv einheit klaring — og lufta laut koma ein
-	// stad. Litt smalare aspekt er godteke, sagt beint ut av brukaren.
-	kroppB, kroppH = 56.0, 62.0
+	// Aspekten paa heile merket er ikkje eit val — han er eit steg paa
+	// e-stigen (29.8.2026, sagt beint ut av brukaren): høgdi paa kassen
+	// er breiddi gonger e^(1/4). Difor er kroppH *rekna*, ikkje vald:
+	// han var 60, so 62, og baae skygde talet stigen gjev (61,47) utan
+	// aa vera det. Vil ein ha eit større eller mindre merke, er det
+	// breiddi ein rører — høgdi fylgjer steget av seg sjølv, og
+	// botnstripa, plassmerket og skiva flytter seg med.
+	stegFjerdedel = 1.2840254 // e^(1/4)
+
+	kroppB = 56.0
+	kroppH = MarkWidth*stegFjerdedel - kroppY - merkeKant
 	kroppR         = 4.0 // rektangel med so vidt broti hyrna
 	// Fana spenner yver toppen, so dagen stend *heil*. Ho var 44 av 56
 	// og laut forkortast til tvo bokstavar — «TY» er ikkje eit ord, det

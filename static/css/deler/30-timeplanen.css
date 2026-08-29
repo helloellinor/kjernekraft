@@ -420,7 +420,7 @@
 
 /* Lengdi høyrer til namnet — ho er den same kva dag timen gjeng. */
 .timetittel .lengd {
-  font-family: var(--skrift-tal); font-size: .7788rem; font-weight: 400;
+  font-family: var(--skrift-tal); font-size: calc(var(--merkestorleik) * .1353); font-weight: 400;
   font-stretch: normal; letter-spacing: 0;
   color: var(--blekk-svakt); white-space: nowrap;
 }
@@ -431,9 +431,9 @@
    kva. */
 .timetittel {
   font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
-  font-weight: 600; font-size: 1.649rem; line-height: 1.05; margin: 0;
+  font-weight: 600; font-size: calc(var(--merkestorleik) * .2865); line-height: 1.05; margin: 0;
 }
-.timekven { margin: .1rem 0 0; font-size: 1rem; color: var(--blekk-lys); }
+.timekven { margin: .1rem 0 0; font-size: calc(var(--merkestorleik) * .1738); color: var(--blekk-lys); }
 .timerom { color: var(--blekk); font-weight: 500; }
 
 /* ---- timemerket ----
@@ -458,19 +458,21 @@
    forholdet — det er den same tingen som kjem nærare, ikkje ei ny
    teikning. Spaltone i vika er rekna av det same talet, so hovudet og
    radene stend paa lina utan at nokon maaler. */
-/* Alle maali i og kring merket stend paa e-stigen (00-token.css §10.3),
-   og tilhøvi imillom deim er difor *eksakte* steg (sidan 29.8.2026 —
-   dei gamle tali skygde alt stigen: 3,4 ≈ e^(5/4), 4,4 ≈ e^(3/2),
-   .78 ≈ e^(-1/4), .135 ≈ e^(-2); no er dei det, og ikkje nesten):
+/* Merket er kjelda, og alt kring det er *rekna* av det i eksakte steg
+   paa e-stigen (00-token.css §10.3; sidan 29.8.2026 — dei gamle tali
+   skygde alt stigen: 3,4 ≈ e^(5/4), 4,4 ≈ e^(3/2), .78 ≈ e^(-1/4),
+   .135 ≈ e^(-2); no ER dei stigen, som calc av merket):
 
      merket        e^(7/4) = 5.7546 rem   (vika og heimesida)
-     .timetittel   e^(1/2) = 1.649  rem   → merke:tittel = e^(5/4)
-     .timekven     e^0     = 1      rem   → tittel:kven  = e^(1/2)
-     .lengd        e^(-1/4)= .7788  rem   → kven:lengd   = e^(1/4)
-     .plettmerke   merket · e^(-2)        → plett:merke  = e^(-2)
+     aspekten      høgd = breidd·e^(1/4)  (rekna i merkeform.go)
+     .timetittel   merket · e^(-5/4) = .2865  (= e^(1/2) rem i dag)
+     .timekven     merket · e^(-7/4) = .1738  (= 1 rem)
+     .lengd        merket · e^(-2)   = .1353  (= e^(-1/4) rem)
+     .plettmerke   merket · e^(-2)   = .1353
 
-   Byter du eitt av deim, byt paa stigen — eit tal utanfor henne bryt
-   heile rekkja av tilhøve, ikkje berre sitt eige. */
+   Byt storleiken paa merket, og heile fylgjet skalerer med — det er
+   *tilhøvi* som er lova, ikkje tali. Eit tal utanfor stigen bryt heile
+   rekkja, ikkje berre sitt eige. */
 :root { --merkestorleik: 5.7546rem; }
 
 .dagmerke {
