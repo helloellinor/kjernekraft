@@ -111,7 +111,9 @@
      timar gjekk fraa 1362 til 1047, og fær difor plass paa ein
      skjerm.
 
-     5,4 sidan 29.8.2026 — same storleiken som i vika, og det er ei
+     e^(7/4) = 5,7546 sidan 29.8.2026 — same storleiken som i vika,
+     og eit eksakt steg paa e-stigen (sjaa tavla ved :root i
+     30-timeplanen.css), og det er ei
      medviti umgjerd av domen ovanfyre: skiva vart senka i kassen og
      fekk skugge, fals og prent aa lesa, og dei eldre lesarane vaare
      las ikkje uret paa 3,4 (sagt av augo, fleire gonger — 4,4 vart
@@ -119,7 +121,7 @@
      godteki: eit ur ingen kann lesa sparar ingi høgd som er verd noko.
      Lista med ti timar fyller meir enn ein skjerm att; det er prisen,
      og han er vald. */
-  --merkestorleik: 5.4rem;
+  --merkestorleik: 5.7546rem;
   /* Vengen ber slaget, ikkje produktet.
      Kortet ligg i vinstre spalta og medlemskortet i høgre, so dei tvo
      vengene stend på same skjermen — sjå åtvaringi i 00-token.css.
