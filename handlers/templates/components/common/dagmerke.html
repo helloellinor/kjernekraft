@@ -81,6 +81,17 @@
     <path class="form-flate" d="{{.Form.Silhouette}}"/>
     <path class="form-djup"  d="{{.Form.Silhouette}}" filter="url(#merkedjup)"/>
 
+    {{/* Skiveflata: den senka plata som fyller andlitet. Same tri lag
+         som vindauga og holet — flata, skuggen fraa yverkanten (tvo
+         lag: lina og det mjuke), den ljose foten — for det er same
+         fysikken: kasse, senka skiva, og vindauga stansa endaa eit
+         hakk ned i plata. Ei carva rute attmed ei flat skiva las seg
+         som tvo ulike ting (29.8.2026). */}}
+    <path class="skiveflate"  d="{{.Form.Skive}}"/>
+    <path class="skiveskugge" d="{{.Form.Skive}}" filter="url(#merkedjup-mjuk)"/>
+    <path class="skivedjup"   d="{{.Form.Skive}}" filter="url(#merkedjup)"/>
+    <path class="skiveljos"   d="{{.Form.Skive}}" filter="url(#merkeljos)"/>
+
     {{/* Skiva. Kakestykket er timen lagd ut paa døgeret: der visarane
          ville staa fraa han byrjar til han er ute. Det er det ein ser
          fyrst, og det er det som gjer at ein slepp aa lesa klokkeslettet

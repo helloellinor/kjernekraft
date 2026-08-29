@@ -87,6 +87,12 @@ const (
 	// Midten vert rekna ut og ikkje skriven inn. Han stod som 38 —
 	// eit tal som høvde til den kroppshøgdi som var — og skiva hadde
 	// vorte hangande for lågt med ein gong kassen skifte høgd.
+	// Margen fraa kroppkanten inn til skiveflata — det som stend att av
+	// kroppen kring den senka plata, kassen sin fals. Sporet byrjar 4
+	// inne fraa kroppen, so lippa paa plata (kring 1–2 einingar) møter
+	// ikkje indeksane.
+	skiveMarg = 3.0
+
 	skiveX = kroppX + kroppB/2
 	// Skiva stend midt i kroppen — baade i breidd og i høgd.
 	//
@@ -198,6 +204,10 @@ type Mark struct {
 	MinuteAngle  float64
 	EndAngle     float64
 	DayTab       template.HTMLAttr // dagfana, teikna for seg attum kroppen
+	// Skiveflata: den senka plata som fyller andlitet, med jamn marg
+	// mot kanten av kroppen. Vindauga er stansa ned i *henne* — kasse,
+	// senka skiva, og eit djupare datovindauga, som paa eit ur.
+	Skive        template.HTMLAttr
 	Box          template.HTMLAttr
 	BoxTextX     float64
 	BoxTextY     float64
@@ -390,6 +400,7 @@ func NewMark(ident string, start, slutt time.Time, teke, plassar int) Mark {
 		// millom dei *er* timen — same maaten eit ur syner at klokka
 		// hev gjenge.
 		EndAngle: hourAngle(start) + durationFraction(start, slutt),
+		Skive:    template.HTMLAttr(boxPath(kroppX+skiveMarg, kroppY+skiveMarg, kroppB-2*skiveMarg, kroppH-2*skiveMarg, kroppR-1)),
 		Box:      template.HTMLAttr(boxPath(ruteX, ruteY, ruteB, ruteH, ruteR)),
 		BoxTextX: ruteX + ruteB/2,
 		BoxTextY: ruteY + ruteH/2,

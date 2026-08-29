@@ -632,6 +632,15 @@
    (sagt av augo 29.8.2026). Same fyllet som lina, so temaet
    kalibrerer baae; det er breiddi og mjukleiken som er skilnaden. */
 .ruteskugge { fill: var(--lippe-djup); }
+
+/* Skiveflata — same tri lag som vindauga, sjaa dagmerke.html. Tinten
+   er den same som holet sitt golv (6 %): plata er senka, men grunt;
+   vindauga stansa ned i henne stakkar seg til kring 14 % og les seg
+   difor djupare av seg sjølv. */
+.skiveflate  { fill: color-mix(in srgb, var(--blekk) 6%, transparent); }
+.skiveskugge { fill: var(--lippe-djup); }
+.skivedjup   { fill: var(--lippe-djup); }
+.skiveljos   { fill: var(--lippe-ljos); }
 .ruteljos  { fill: var(--lippe-ljos); }
 .rutetal {
   font-family: var(--skrift-tal); font-size: 9.2px;
