@@ -458,7 +458,7 @@
    forholdet — det er den same tingen som kjem nærare, ikkje ei ny
    teikning. Spaltone i vika er rekna av det same talet, so hovudet og
    radene stend paa lina utan at nokon maaler. */
-:root { --merkestorleik: 6.2rem; }
+:root { --merkestorleik: 7rem; }
 
 .dagmerke {
   position: relative;
