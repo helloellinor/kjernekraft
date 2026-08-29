@@ -637,7 +637,12 @@
    og las seg difor flatt: ei lina er ein strek, ikkje ein skugge
    (sagt av augo 29.8.2026). Same fyllet som lina, so temaet
    kalibrerer baae; det er breiddi og mjukleiken som er skilnaden. */
-.ruteskugge { fill: var(--lippe-djup); }
+/* 60 % av lippa, ikkje heile: med fullt fyll stakk lina og det mjuke
+   laget seg saman til kring 40 % svart i yverkanten, og det var eit
+   knip for starkt (sagt av augo 29.8.2026). Maalestokken er klippi
+   paa klippekortet — dei les seg stansa utan aa ropa. Lina yver ber
+   framleis full lippa; det er ho som teiknar kanten. */
+.ruteskugge { fill: color-mix(in srgb, var(--lippe-djup) 60%, transparent); }
 
 /* Skiveflata — same tri lag som vindauga, sjaa dagmerke.html. Tinten
    er den same som holet sitt golv (6 %): plata er senka, men grunt;
