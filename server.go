@@ -1,7 +1,9 @@
 package main
 
 import (
+	"cmp"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -32,14 +34,6 @@ import (
 // Talet er 108, som er talet paa perlor i ei mala og paa solhelsingar i
 // ei heil rekkja. Ein port ein hugsar er ein port ein ikkje gissar paa.
 const standardPort = "18108"
-
-// cmpOr gjev det fyrste som ikkje er tomt.
-func cmpOr(a, b string) string {
-	if a != "" {
-		return a
-	}
-	return b
-}
 
 func main() {
 	// Initialize global settings (this will set up Oslo timezone by default)
@@ -81,11 +75,15 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	// Ein panikk i ein handsamar skal gjeva 500 og ikkje eit samband som
-	// berre dett. Utan denne skriv net/http stakken til stderr og stengjer
+	// berre dett. Utan dette skriv net/http stakken til stderr og stengjer
 	// sambandet — nettlesaren ser «tilkoplinga vart broti», som ser ut som
 	// eit nettverksproblem og ikkje som ein feil i huset. Tenaren stend
 	// like fullt; det er kva *brukaren* ser som er skilnaden.
-	r.Use(middleware.Recoverer)
+	//
+	// Det er vaar eigen og ikkje chi sin: chi skreiv 500 utan kropp, og
+	// berre naar panikken kom fyre fyrste byten — handsamarane strøymer
+	// malarne beint ut, so det gjorde han sjeldan. Sjaa handlers/berging.go.
+	r.Use(handlers.Recoverer)
 
 	// I utvikling skal ingen ting bufrast — korkje sidone eller bitane
 	// htmx hentar. Statiske filer fekk `no-store` fyrr, men sjølve
@@ -300,20 +298,26 @@ func main() {
 	// anna, og dei var det ikkje den dagen nokon gjorde det: paa heim
 	// stend det alt noko paa 8080, og tenaren fall med «address already
 	// in use» etter aa ha meldt at han lydde.
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = standardPort
-	}
-	// Kven som fær naa tenaren. Tom tyder alle grensesnitt, som fyrr.
+	port := cmp.Or(os.Getenv("PORT"), standardPort)
+	// Kven som fær naa tenaren. Tom tyder 127.0.0.1 — den som vil hava
+	// honom naaeleg utanfraa, lyt segja det sjølv, med
+	// KJERNEKRAFT_BIND=0.0.0.0.
 	//
-	// Stend han bak ein tunnel, skal han lyda paa 127.0.0.1 og ingen
-	// annan stad: elles svarar han ogso beinveges paa porten sin, utan
-	// TLS, og heile arbeidet med aa fœra folk gjenom https er umsonst
-	// for den som skriv adressa sjølv. Paa heim var han naaeleg utanfraa
-	// paa 18108 medan tunnelen stod ved sida av.
-	bind := os.Getenv("KJERNEKRAFT_BIND")
-	log.Printf("Serving on http://%s:%s", cmpOr(bind, "localhost"), port)
-	err = http.ListenAndServe(bind+":"+port, r)
+	// Det stod motsett fyrr: tomt tydde alle grensesnitt, og ingen ting i
+	// repoet sette variabelen — so tryggjingi fanst berre for den som
+	// visste um henne, og paa heim var tenaren framleis naaeleg utanfraa
+	// paa 18108, utan TLS, medan tunnelen stod ved sida av og heile
+	// arbeidet med aa fœra folk gjenom https var umsonst for den som
+	// skreiv adressa sjølv. Ei tryggjing som lyt skruvast paa er ei som
+	// stend av.
+	bind := cmp.Or(os.Getenv("KJERNEKRAFT_BIND"), "127.0.0.1")
+	// Ei adressa, bygd ein gong, til baade loggen og lyttaren.
+	// Merknaden ovanfor um PORT fortel kva som hender elles: dei tvo
+	// er samde til den dagen nokon endrar den eine. JoinHostPort og
+	// ikkje pluss, so «::1» vert «[::1]» og ikkje «for mange kolon».
+	addr := net.JoinHostPort(bind, port)
+	log.Printf("Lyder paa http://%s", addr)
+	err = http.ListenAndServe(addr, r)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -165,6 +165,12 @@ stend i `standardPort` i `server.go`, og `PORT` byter honom: 8080 er den
 porten flest ting tek fyrst, og ein tenar som svarar utan å vera din er
 verre enn ein som ikkje svarar.
 
+Tenaren lyder berre på 127.0.0.1 om ingen seier noko anna.
+`KJERNEKRAFT_BIND` byter adressa: `0.0.0.0` opnar for alle grensesnitt —
+det vil du berre bak din eigen brannmur, eller når du testar frå ein
+telefon på same nett. Står tenaren bak ein https-tunnel, skal han stå på
+127.0.0.1, elles svarar han òg beint på porten sin, utan TLS.
+
 | Du endrar | Kva som skjer |
 |---|---|
 | `.go` | vaktaren byggjer og startar på nytt, kring eitt sekund |

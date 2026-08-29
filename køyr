@@ -94,7 +94,11 @@ start() {
     echo $! > "$PID_FIL"
     sleep 0.6
     if kill -0 "$(cat "$PID_FIL")" 2>/dev/null; then
-        echo "  ✓ http://localhost:$PORT"
+        # Adressa fylgjer KJERNEKRAFT_BIND, som tenaren sjølv. «localhost»
+        # stod skrive inn her ein gong — same lyten som PORT ovanfor: den
+        # som batt tenaren til noko anna, fekk ei helsing um ei adressa
+        # ingen lydde paa.
+        echo "  ✓ http://${KJERNEKRAFT_BIND:-localhost}:$PORT"
     else
         echo "  ✗ tenaren stogga med ein gong — sjaa $LOGG"
         tail -5 "$LOGG" | sed 's/^/    /'

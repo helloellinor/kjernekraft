@@ -755,5 +755,8 @@
     "laas_leiing": "Skriv koden for skjermen.",
     "laas_knapp": "Lås opp",
     "laas_feil": "Feil kode."
+  },
+  "feil": {
+    "krasj": "Noe gikk galt hos oss. Prøv igjen om et øyeblikk."
   }
 }

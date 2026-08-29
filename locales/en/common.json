@@ -755,5 +755,8 @@
     "laas_leiing": "Enter the screen code.",
     "laas_knapp": "Unlock",
     "laas_feil": "Wrong code."
+  },
+  "feil": {
+    "krasj": "Something went wrong on our end. Please try again in a moment."
   }
 }
