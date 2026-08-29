@@ -274,6 +274,18 @@ the specimen sheet). The problems are structural.
 
 ## 7b. Fraa attersynet av f50e471 (2026-08-29) — det som stend att
 
+*Later addition, same day:* the user's eye found what no reviewer did —
+the lips **never rendered as lips on any mark**. The band filters
+subtract the shape from a shifted copy of its own alpha, which assumes
+an opaque fill; the lips are 22–40 % translucent, so the subtraction
+never cancelled the interior and every "band" rendered as a uniform
+film. Fixed by saturating alpha (`feComponentTransfer`, slope 255)
+before the band is built, plus a second soft shadow layer for the time
+window (`#merkedjup-mjuk`, the two-layer shadow idiom). Verified by
+rendering with headless Chrome and looking, both themes. The lesson for
+§8 step 7's checks: reviewers read code and confirmed intent; only
+rendered pixels showed the truth.
+
 The multi-agent review of the window-lip commit confirmed a handful of
 findings beyond this audit. Fixed same day: the filter test's blind
 spots (ids were harvested from raw files, so dropping `merke_defs` from

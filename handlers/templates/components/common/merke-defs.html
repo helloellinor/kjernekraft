@@ -11,7 +11,17 @@
      No arbeider filtri paa SourceGraphic i staden: dei flyttar og
      klypper det elementet sjølv teiknar, so fargen kjem fraa CSS paa
      merket og fylgjer temaet der det stend. Filteret veit ingen ting um
-     farge, og kann difor delast av alle. */}}
+     farge, og kann difor delast av alle.
+
+     Og so det eine steget ingen maa «rydda burt»: feComponentTransfer
+     med slope 255 mettar alfaen fyre bandet vert rekna. Utan det gjeng
+     heile konstruksjonen sund for alt som ikkje er ugjenomsynlegt —
+     lippone er fylte med 22–40 % svart, so SourceAlpha var 0.22, den
+     skuvne kopien sletta aldri innmaten, og «bandet» vart ein jamn
+     daam yver heile flata i staden for ei stripa i kanten. Slik stod
+     kvar lippa paa kvart merke fraa fyrste dag: ikkje veik, men aldri
+     teikna som lippa i det heile. Augo sae det (29.8.2026); rekninga
+     fann det. */}}
 <svg class="merke-defs" width="0" height="0" aria-hidden="true" focusable="false">
   <defs>
     {{/* Umrisset: silhuetten utvida éin einheit. feMorphology arbeider
@@ -32,16 +42,33 @@
          inne i yverkanten. So vert elementet sjølv klypt til det bandet.
          Det er `inset 0 1px 2px` skrive i eit filter. */}}
     <filter id="merkedjup" x="-25%" y="-25%" width="150%" height="150%">
-      <feOffset in="SourceAlpha" dy="1" result="ned"/>
+      <feComponentTransfer in="SourceAlpha" result="hel"><feFuncA type="linear" slope="255"/></feComponentTransfer>
+      <feOffset in="hel" dy="1" result="ned"/>
       <feGaussianBlur in="ned" stdDeviation=".85" result="mjuk"/>
-      <feComposite in="SourceAlpha" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="hel" in2="mjuk" operator="out" result="band"/>
       <feComposite in="SourceGraphic" in2="band" operator="in"/>
     </filter>
-    {{/* Same grepet i det smaa, til vindauga. */}}
+    {{/* Same grepet i det smaa, til vindauga: den tronge lina som
+         teiknar kanten. Ho er berre halve skuggen — resten ber
+         #merkedjup-mjuk nedanfyre. */}}
     <filter id="merkedjup-lite" x="-40%" y="-40%" width="180%" height="180%">
-      <feOffset in="SourceAlpha" dy=".9" result="ned"/>
+      <feComponentTransfer in="SourceAlpha" result="hel"><feFuncA type="linear" slope="255"/></feComponentTransfer>
+      <feOffset in="hel" dy=".9" result="ned"/>
       <feGaussianBlur in="ned" stdDeviation=".5" result="mjuk"/>
-      <feComposite in="SourceAlpha" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="hel" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+
+    {{/* Det mjuke laget av same skuggen: djupare inn og mykje mjukare,
+         so det fell av som ein skugge og ikkje sluttar som ein strek.
+         Ein skugge er tvo lag i dette huset (jf. --skugge-kort): lina
+         teiknar kanten, dette ber resten. Vindauga hadde berre lina og
+         saag difor aldri senka ut (29.8.2026). */}}
+    <filter id="merkedjup-mjuk" x="-40%" y="-40%" width="180%" height="180%">
+      <feComponentTransfer in="SourceAlpha" result="hel"><feFuncA type="linear" slope="255"/></feComponentTransfer>
+      <feOffset in="hel" dy="2.2" result="ned"/>
+      <feGaussianBlur in="ned" stdDeviation="1.5" result="mjuk"/>
+      <feComposite in="hel" in2="mjuk" operator="out" result="band"/>
       <feComposite in="SourceGraphic" in2="band" operator="in"/>
     </filter>
 
@@ -52,9 +79,10 @@
          avgjort 29.8.2026). Eit skrivefelt er ei grunn fordjuping i
          arket og hev ingen slik botn. */}}
     <filter id="merkeljos" x="-25%" y="-25%" width="150%" height="150%">
-      <feOffset in="SourceAlpha" dy="-1" result="upp"/>
+      <feComponentTransfer in="SourceAlpha" result="hel"><feFuncA type="linear" slope="255"/></feComponentTransfer>
+      <feOffset in="hel" dy="-1" result="upp"/>
       <feGaussianBlur in="upp" stdDeviation=".8" result="mjuk"/>
-      <feComposite in="SourceAlpha" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="hel" in2="mjuk" operator="out" result="band"/>
       <feComposite in="SourceGraphic" in2="band" operator="in"/>
     </filter>
     {{/* Same grepet i det smaa, til vindauga — og skarpare enn den
@@ -63,9 +91,10 @@
          den store #merkeljos ei stund, og daa var den ljose lippa
          baade større og mjukare enn den myrke — snudd um. */}}
     <filter id="merkeljos-lite" x="-40%" y="-40%" width="180%" height="180%">
-      <feOffset in="SourceAlpha" dy="-.9" result="upp"/>
+      <feComponentTransfer in="SourceAlpha" result="hel"><feFuncA type="linear" slope="255"/></feComponentTransfer>
+      <feOffset in="hel" dy="-.9" result="upp"/>
       <feGaussianBlur in="upp" stdDeviation=".45" result="mjuk"/>
-      <feComposite in="SourceAlpha" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="hel" in2="mjuk" operator="out" result="band"/>
       <feComposite in="SourceGraphic" in2="band" operator="in"/>
     </filter>
 

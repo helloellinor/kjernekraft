@@ -617,10 +617,21 @@
    ikkje saag senka ut: det var ingen botn aa sjaa ned i.
    Ho treng ikkje noko filter. Djupni bur i dei tvo lippone yver henne,
    som paa merkekroppen (`.form-flate` + `.form-djup`). */
+/* 9 %, og ikkje meir: eit myrkare golv vart prøvt (15 %) og tok
+   kontrasten fraa tali utan aa gjeva djupn att — golvet er ikkje det
+   som gjer eit hol til eit hol. Det gjer skuggen fraa yverkanten,
+   sjaa .ruteskugge. */
 .ruteflate { fill: color-mix(in srgb, var(--blekk) 9%, var(--flate)); }
 /* Dei tvo lippone, i dei same tokeni som holet i vika og skraakanten
    elles i huset — so vindauga snur med temaet av seg sjølv. */
 .rutedjup  { fill: var(--lippe-djup); }
+/* Skuggen som fell ned i vindauga. Ein skugge er tvo lag i dette huset
+   (jf. --skugge-kort): den tronge lina som teiknar kanten — .rutedjup
+   yver — og eit mjukt lag som ber resten. Vindauga hadde berre lina,
+   og las seg difor flatt: ei lina er ein strek, ikkje ein skugge
+   (sagt av augo 29.8.2026). Same fyllet som lina, so temaet
+   kalibrerer baae; det er breiddi og mjukleiken som er skilnaden. */
+.ruteskugge { fill: var(--lippe-djup); }
 .ruteljos  { fill: var(--lippe-ljos); }
 .rutetal {
   font-family: var(--skrift-tal); font-size: 9.2px;
