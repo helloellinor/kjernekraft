@@ -173,6 +173,15 @@
 
    1,1 rem er framleis det største og feitaste i rada — namnet er det
    ein leitar etter — men no ser ein at det er tale um éin time og ikkje
-   um ein ny bolk. */
-.timerad.heimerad .timetittel { font-size: 1.1rem; line-height: 1.2; }
+   um ein ny bolk.
+
+   Regelen som stod her — font-size: 1.1rem — er teken burt 29.8.2026,
+   og det er ei medviti umgjerd av domen ovanfyre. Han var skriven daa
+   merket her var 3,4 rem; no er merket det same paa baae sidone, og
+   teksten er lov, ikkje tal: tittelen er merket·e^(-5/4) (tavla ved
+   :root i 30-timeplanen.css), og eit fast tal her braut heile rekkja
+   utan at nokon saag kvar. Det var nettupp slik brukaren fann det:
+   «detaljane um timen hev mindre skrift paa heimesida». Ropar radene
+   mot bolkyverskrifti no, er retta aa gjera noko med yverskrifti —
+   ikkje aa setja eit tal utanfor stigen. */
 .timerad.heimerad.umme { opacity: .5; }
