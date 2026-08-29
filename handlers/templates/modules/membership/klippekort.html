@@ -56,7 +56,12 @@
                  høgre for tale. `.klipprad` set dei tvo paa same
                  grunnlina; `align-self` trengst ikkje lenger, av di han
                  ikkje er eit barn av spalteflexen i `.kort`. */}}
-            <button type="button" class="btn" onclick="fillUpKlippekort('{{.Category}}')">
+            {{/* `data-fyll-kategori` og ikkje `onclick`: denne bolken vert
+                 sett inn med `innerHTML` paa klippekortsida, og daa køyrer
+                 `<script>` aldri — funksjonen fanst ikkje der. Lyttaren bur
+                 i `static/js/klippfyll.js` og fangar trykket paa `document`,
+                 so han bryr seg ikkje um naar knappen kom. */}}
+            <button type="button" class="btn" data-fyll-kategori="{{.Category}}">
                 {{t $.Lang "klippekort.fill_up"}}
             </button>
         </div>
@@ -75,11 +80,6 @@
 </div>
 {{end}}
 
-<script>
-function fillUpKlippekort(category) {
-    // Spyrjedelen lyt staa fyre emneknaggen — «#kjop-klipp?category=»
-    // la spyrjinga inni knaggen, og sida saag henne aldri.
-    window.location.href = '/elev/klippekort?fill=' + encodeURIComponent(category) + '#kjop-klipp';
-}
-</script>
+{{/* Skriptet stod her fyrr. Det ligg i `static/js/klippfyll.js` no —
+     sjaa grunngjevingi der. */}}
 {{end}}

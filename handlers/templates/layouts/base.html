@@ -59,6 +59,11 @@
          sidone som hev ei fanerekkje — og paa heimesida og timeplanen
          fanst difor knappen utan at noko lydde paa honom. */}}
     <script defer src="{{asset "js/namnemeny.js"}}"></script>
+    {{/* «Fyll på» paa eit klippekort. Bolken med knappane vert sett inn
+         med `innerHTML` paa klippekortsida, so lyttaren lyt bu utanfor
+         honom — og utanfor kvart sidevilkaar, av same grunn som
+         namnemenyen. */}}
+    <script defer src="{{asset "js/klippfyll.js"}}"></script>
 
     {{/* Resten høyrer til éi eller få sidone. Å senda alle til kvar
          innlogging, vilkårsside og heimeside gav over 40 kB unødvendig
