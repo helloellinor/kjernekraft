@@ -6,34 +6,37 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 )
 
 var (
-	visingRe = regexp.MustCompile(`url\(#([A-Za-z0-9_-]+)\)`)
-	idRe     = regexp.MustCompile(`id="([A-Za-z0-9_-]+)"`)
-	komm     = regexp.MustCompile(`(?s)/\*.*?\*/`)
+	// Ogso dei siterte formene: `url("#id")` og `url( #id )` er like
+	// gyldig CSS, og ein formaterar som set hermeteikn hadde elles gjort
+	// visingi usynleg for prøva utan aa gjera henne usynleg for
+	// nettlesaren.
+	visingRe = regexp.MustCompile(`url\(\s*["']?#([A-Za-z0-9_-]+)["']?\s*\)`)
+	// Blank fyre, so `data-time-id="7"` ikkje vert lese som `id="7"` —
+	// eit attributnamn som *endar* paa id hadde elles registrert falske
+	// ankerfeste som ei dinglande vising kunde gøyma seg attum.
+	idRe    = regexp.MustCompile(`\sid="([A-Za-z0-9_-]+)"`)
+	komm    = regexp.MustCompile(`(?s)/\*.*?\*/`)
+	malkomm = regexp.MustCompile(`(?s)\{\{/\*.*?\*/\}\}|<!--.*?-->`)
 )
 
-// stilarkFraaProva peikar arksamlaren eit hakk opp, slik dei hine
-// arkprøvone gjer: dei gjeng med `handlers/` som arbeidsmappa.
+// stilarkFraaProva er lesStilarket (stilark_test.go) utan
+// CSS-kommentarane: ei forklaring som nemner ei gamal vising er ikkje
+// ei vising.
 func stilarkFraaProva(t *testing.T) string {
 	t.Helper()
-	gamal := stilarkMappe
-	stilarkMappe = "../static/css/deler"
-	defer func() { stilarkMappe = gamal }()
-	ark, err := byggStilark()
-	if err != nil {
-		t.Fatalf("stilarket lét seg ikkje setja saman: %v", err)
-	}
-	return komm.ReplaceAllString(string(ark), " ")
+	return komm.ReplaceAllString(lesStilarket(t), " ")
 }
 
-// alleMalar les alle malfilone som éin streng, so id-ar som stend
-// bokstavleg i ein mal me ikkje teiknar her, likevel tel som «finst».
+// alleMalar les alle malfilone som éin streng, med kommentarane tekne
+// burt: ein id som berre stend i ein kommentar finst ikkje, og ei
+// vising som berre stend i ein kommentar viser ingen stad.
 func alleMalar(t *testing.T) string {
 	t.Helper()
 	var b strings.Builder
@@ -55,7 +58,7 @@ func alleMalar(t *testing.T) string {
 	if err != nil {
 		t.Fatalf("las ikkje malane: %v", err)
 	}
-	return b.String()
+	return malkomm.ReplaceAllString(b.String(), " ")
 }
 
 // Ei vising til eit filter som ikkje finst tek elementet med seg.
@@ -72,8 +75,14 @@ func alleMalar(t *testing.T) string {
 // ned i. Han saag ut som han var *nesten* rett, som er den verste
 // slags feil aa leita etter.
 //
-// Prøva tek kvar `url(#…)` i stilarket og i det merket teiknar, og
-// krev at ho peikar paa noko som verkeleg stend i dokumentet.
+// Prøva tek kvar `url(#…)` og krev at ho peikar paa noko som verkeleg
+// finst — og kva «finst» tyder, kjem an paa kvar visingi stend. Den
+// teikna sida lyt finna id-en *paa sida*: eit filter som stend i ei
+// malfil denne sida ikkje teiknar, hjelper ikkje nettlesaren som
+// teiknar henne. (Fall merke-defs ut or base.html, skulde prøva raudna
+// — fyrr talde raafila som «finst», og det hadde ho ikkje merkt.) For
+// raatekst og stilark er unionen rett: stilarket er delt yver alle
+// sidone, og ein raa mal kann høyra til ei onnor sida enn denne.
 func TestKvarFiltervisingPeikarPaaNokoSomFinst(t *testing.T) {
 	tm := lastMalane(t)
 	mal, ok := tm.GetTemplate("pages/timeplan")
@@ -95,37 +104,47 @@ func TestKvarFiltervisingPeikarPaaNokoSomFinst(t *testing.T) {
 	}
 	html := ut.String()
 
-	// Alt som *finst*. Tvo kjelder, av di stilarket er delt yver alle
-	// sidone medan denne prøva berre teiknar éi: id-ar som stend
-	// bokstavleg i ein mal (gradientane i aktivitetsbolken, til dømes)
-	// vert lesne beint or malfilone, og dei som fyrst vert til naar ein
-	// mal er teikna (`glas-{{.Form.Ident}}`) kjem fraa den teikna sida.
-	finst := map[string]bool{}
-	for _, m := range idRe.FindAllStringSubmatch(html, -1) {
-		finst[m[1]] = true
+	idar := func(tekst string) map[string]bool {
+		ut := map[string]bool{}
+		for _, m := range idRe.FindAllStringSubmatch(tekst, -1) {
+			ut[m[1]] = true
+		}
+		return ut
 	}
-	for _, m := range idRe.FindAllStringSubmatch(alleMalar(t), -1) {
-		finst[m[1]] = true
+	sideIDar := idar(html)
+	malane := alleMalar(t)
+	alleIDar := idar(malane)
+	for id := range sideIDar {
+		alleIDar[id] = true
 	}
 
-	// Alt som vert *vist til* — baade fraa malen og fraa stilarket.
-	// Kommentarane i CSS-en er tekne burt fyrst: ei forklaring som
-	// nemner ei gamal vising er ikkje ei vising.
-	kjelder := map[string]string{
-		"malen":     html,
-		"stilarket": stilarkFraaProva(t),
+	kjelder := []struct {
+		namn  string
+		tekst string
+		finst map[string]bool
+	}{
+		{"den teikna sida", html, sideIDar},
+		{"raamalane", malane, alleIDar},
+		{"stilarket", stilarkFraaProva(t), alleIDar},
 	}
 
 	var manglar []string
-	for namn, tekst := range kjelder {
-		for _, m := range visingRe.FindAllStringSubmatch(tekst, -1) {
-			if !finst[m[1]] {
-				manglar = append(manglar, namn+": url(#"+m[1]+")")
+	for _, k := range kjelder {
+		visingar := visingRe.FindAllStringSubmatch(k.tekst, -1)
+		// Vaktene i sjølve prøva: ei kjelda utan ei einaste vising er
+		// ikkje prøvd — daa hev nokon skrive um korleis merket vert
+		// teikna, og prøva stod elles grøn utan aa prøva noko.
+		if len(visingar) == 0 {
+			t.Errorf("%s hev ingi url(#…) — prøva ser ingen ting der og provar ingen ting", k.namn)
+		}
+		for _, m := range visingar {
+			if !k.finst[m[1]] {
+				manglar = append(manglar, k.namn+": url(#"+m[1]+")")
 			}
 		}
 	}
-	sort.Strings(manglar)
-	manglar = unike(manglar)
+	slices.Sort(manglar)
+	manglar = slices.Compact(manglar)
 
 	for _, m := range manglar {
 		t.Errorf("%s peikar paa noko som ikkje stend i dokumentet — "+
@@ -133,26 +152,11 @@ func TestKvarFiltervisingPeikarPaaNokoSomFinst(t *testing.T) {
 	}
 }
 
-func unike(s []string) []string {
-	var ut []string
-	for i, v := range s {
-		if i == 0 || v != s[i-1] {
-			ut = append(ut, v)
-		}
-	}
-	return ut
-}
-
-// Og ein tryggleik: prøva yver er berre verd noko um ho *ser* visingar.
-// Finn ho ingen, hev nokon skrive um korleis merket vert teikna, og daa
-// stend ho grøn utan aa prøva noko.
-func TestFiltervisingsprovaSerNokoILDetHeile(t *testing.T) {
-	ark := stilarkFraaProva(t)
-	tal := len(visingRe.FindAllString(ark, -1))
-	if tal == 0 {
-		t.Error("fann ingi url(#…) i stilarket — prøva yver prøver ingen ting")
-	}
-	if !strings.Contains(ark, "ruteljos") {
+// Og ein tryggleik til: sjølve den ljose underleppa i vindauga — det
+// rettingi i f50e471 la til — skal standa i stilarket. At kvar kjelda i
+// det heile *ser* visingar, vaktar hovudprøva sjølv no, per kjelda.
+func TestFiltervisingsprovaSerNokoIDetHeile(t *testing.T) {
+	if !strings.Contains(stilarkFraaProva(t), "ruteljos") {
 		t.Error("den ljose underleppa i vindauga er burte or stilarket")
 	}
 }

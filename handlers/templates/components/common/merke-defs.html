@@ -46,13 +46,25 @@
     </filter>
 
     {{/* Same grepet snutt: bandet inne i *nedkanten*. Det er ljoset som
-         slær i botnen av eit hol og kastar att upp — og det er berre
-         hol som hev det. Eit skrivefelt er ei grunn fordjuping i arket
-         og hev ingen slik botn; ei tom rute i vika er eit hol tvers
-         igjenom, og daa syner den nedre lippa seg. */}}
+         slær i botnen av eit hol og kastar att upp — og det er hol som
+         hev det: den tome ruta i vika, og vindauga paa merket, som er
+         skore tvers ned i kroppen (tri lag, sjaa dagmerke.html,
+         avgjort 29.8.2026). Eit skrivefelt er ei grunn fordjuping i
+         arket og hev ingen slik botn. */}}
     <filter id="merkeljos" x="-25%" y="-25%" width="150%" height="150%">
       <feOffset in="SourceAlpha" dy="-1" result="upp"/>
       <feGaussianBlur in="upp" stdDeviation=".8" result="mjuk"/>
+      <feComposite in="SourceAlpha" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+    {{/* Same grepet i det smaa, til vindauga — og skarpare enn den
+         myrke lippa yver honom, som paa holet: den ljose er kanten
+         sjølv og ikkje noko han kastar (SKRAAKANTEN §2). Vindauga tok
+         den store #merkeljos ei stund, og daa var den ljose lippa
+         baade større og mjukare enn den myrke — snudd um. */}}
+    <filter id="merkeljos-lite" x="-40%" y="-40%" width="180%" height="180%">
+      <feOffset in="SourceAlpha" dy="-.9" result="upp"/>
+      <feGaussianBlur in="upp" stdDeviation=".45" result="mjuk"/>
       <feComposite in="SourceAlpha" in2="mjuk" operator="out" result="band"/>
       <feComposite in="SourceGraphic" in2="band" operator="in"/>
     </filter>

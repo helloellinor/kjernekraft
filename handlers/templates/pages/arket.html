@@ -579,14 +579,7 @@
      prøvone ikkje skifter medan ein ser paa deim. */}}
 <div class="merkerad">
     {{range .Merkeprovor}}{{template "dagmerke" .}}{{end}}
-    <span class="dagmerke daud" aria-hidden="true">
-        <svg class="merkeform" viewBox="{{markViewBox}}"
-             width="{{markWidth}}" height="{{markHeight}}" aria-hidden="true" focusable="false">
-            <path class="daudflate" d="{{markDead}}"/>
-                    <path class="dauddjup"  d="{{markDead}}" filter="url(#merkedjup)"/>
-                    <path class="daudljos"  d="{{markDead}}" filter="url(#merkeljos)"/>
-        </svg>
-    </span>
+    {{template "daudmerke" (dict)}}
 </div>
 
 

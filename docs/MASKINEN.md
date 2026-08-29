@@ -272,6 +272,40 @@ the specimen sheet). The problems are structural.
   (`events.go:97,137`) escapes the injected clock the rest of the house
   uses — untestable and wrong under simulated time.
 
+## 7b. Fraa attersynet av f50e471 (2026-08-29) — det som stend att
+
+The multi-agent review of the window-lip commit confirmed a handful of
+findings beyond this audit. Fixed same day: the filter test's blind
+spots (ids were harvested from raw files, so dropping `merke_defs` from
+`base.html` stayed green — proven caught now; quoted `url("#…")` forms;
+the `id=` regex's missing left boundary; the `ILDetHeile` typo),
+`.form-djup`'s hand-mixed lip (inverted in dark; now 55 %/73 % of
+`--lippe-djup`), the missing `#merkeljos-lite` (the window's light lip
+was bigger *and* softer than its dark one), the three contradicting
+lip-doctrine comments, and the dead cell pasted in two files (now
+`{{template "daudmerke"}}`).
+
+Still open, needs a decision or its own pass:
+
+- **`models/klippekort.go:34` + `membership.go:47`**: embedded structs
+  both promote `json:"id"` at equal depth, so `encoding/json` silently
+  drops the field — the two standing `go vet` warnings. Which id the
+  wrapper means is a semantic choice, not a mechanical fix.
+- **ARKET §9's «filters never in a shared defs»** contradicts
+  `merke-defs.html`, which legitimately solved the theming trap by
+  making the filters colorless. The rule needs splitting (proposed to
+  the user 2026-08-29): colour-bearing defs stay in-figure; colourless
+  filters may be shared.
+- **Dev-mode efficiency set**: `WithUser` re-reads all three locale
+  files per request; CSRF middleware runs on `/static/` (token-mint
+  race on a cookie-less first load); template loading is
+  O(pages × components) and the test suite does ~34 full reloads.
+- **`base.html:76-100`'s script matrix** string-matches `CurrentPage`,
+  with a second hand-kept copy in `hovudskript_test.go` — folds into
+  the typed `PageData` work in §8 step 3.
+- **`design_handoff_arket/Arket.dc.html`** still specs the pre-fix
+  two-layer window.
+
 ## 8. Arbeidslista
 
 In order. Each step ships alone and the tests stay green after it. Steps

@@ -112,8 +112,9 @@
          same fordjupingi i det smaa; plassmerket nede til høgre. Baae
          laag annleis fyrr — vindauga midt uppaa skiva, merket hengande
          utanfor hyrna — og baae stend inne i kroppen no. */}}
-    {{/* Tri lag, som det tome holet i vika og som merkekroppen sjølv:
-         flata, den myrke yverleppa, den ljose underleppa. Ho hadde
+    {{/* Tri lag, som det tome holet i vika: flata, den myrke
+         yverleppa, den ljose underleppa. (Merkekroppen sjølv hev ingi
+         underleppa — han er ei grunn fasett, ikkje eit hol.) Ho hadde
          berre tvo av dei — flata og yverleppa — og flata vart ikkje
          teikna i det heile (sjaa nedanfyre). Att stod ei myrk stripa og
          eit tal som flaut paa kroppen, og det les seg ikkje som noko som
@@ -125,7 +126,7 @@
          lippa stend øvst og den ljose nedst. */}}
     <path class="ruteflate" d="{{.Form.Box}}"/>
     <path class="rutedjup"  d="{{.Form.Box}}" filter="url(#merkedjup-lite)"/>
-    <path class="ruteljos"  d="{{.Form.Box}}" filter="url(#merkeljos)"/>
+    <path class="ruteljos"  d="{{.Form.Box}}" filter="url(#merkeljos-lite)"/>
     <text class="rutetal" x="{{.Form.BoxTextX}}" y="{{.Form.BoxTextY}}" dominant-baseline="central">{{.Clock}}</text>
 
     {{/* Visarane til slutt, yver vindauga.
@@ -133,10 +134,11 @@
          Dei laag inni `.skiva`, og vindauga vart maala etter henne — so
          den lange minuttvisaren gjekk *under* ruta og vart klypt av
          henne. Det er feil fysikk for det denne tingen skal vera: ruta
-         er senka ned i kroppen (ho ber `--merkedjup-lite`, den same
-         fordjupingi som eit skrivefelt), og visarane ligg uppaa han og
-         svingar fritt yver alt. Noko som er skore *ned* i ei flate kann
-         ikkje liggja yver noko som stikk upp or henne.
+         er skori ned i kroppen (filtri url(#merkedjup-lite) og
+         url(#merkeljos-lite) — hola si fordjuping, sjaa
+         merke-defs.html), og visarane ligg uppaa han og svingar fritt
+         yver alt. Noko som er skore *ned* i ei flate kann ikkje liggja
+         yver noko som stikk upp or henne.
 
          SVG hev ingen z-index: rekkjefylgda i dokumentet *er*
          rekkjefylgda i djupni. Difor stend dei her nede og ikkje der dei
@@ -184,4 +186,26 @@
     {{- if .Form.Full}}FULL{{else}}{{.Form.Remaining}}{{end -}}
   </span>
 </button>
+{{end}}
+
+{{define "daudmerke"}}
+{{/* Den daude ruta: dagen utan time. Ho gjer at rada hev sju plassar
+     og ikkje tvo — ein ser kva som *ikkje* gjeng, og det er halve
+     spursmaalet naar ein set upp ei vika. Eit hol tvers igjenom, so ho
+     ber baae lippone i full storleik.
+
+     Ho stod handskrivi tvo stader — rutenetet og verkstaden — og
+     ljoslippa vart alt lappa inn i kvar kopi for seg. Verkstaden sitt
+     eige ord er at provi *er* komponenten, ikkje ei teikning av honom;
+     daa lyt han og rutenetet lesa same malen. Kallast med dict:
+     "Idag"/"Umme" for tilstandsklassone, "Column" for plassen i rada —
+     alle valfrie. */}}
+<span class="dagmerke daud{{if .Idag}} idag{{end}}{{if .Umme}} umme{{end}}"{{if .Column}} style="--dag: {{.Column}}"{{end}} aria-hidden="true">
+    <svg class="merkeform" viewBox="{{markViewBox}}"
+         width="{{markWidth}}" height="{{markHeight}}" aria-hidden="true" focusable="false">
+        <path class="daudflate" d="{{markDead}}"/>
+        <path class="dauddjup"  d="{{markDead}}" filter="url(#merkedjup)"/>
+        <path class="daudljos"  d="{{markDead}}" filter="url(#merkeljos)"/>
+    </svg>
+</span>
 {{end}}

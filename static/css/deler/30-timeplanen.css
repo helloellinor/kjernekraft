@@ -563,7 +563,12 @@
 .form-ring  { fill: var(--merke); visibility: hidden; }
 .form-kant  { fill: var(--kant); }
 .form-flate { fill: var(--flate); }
-.form-djup { fill: color-mix(in srgb, var(--blekk) 12%, transparent); }
+/* Fasetten i kroppen: same lippa som holi og vindauga, berre grunnare —
+   55 % av --lippe-djup gjev dei same 12 % i det ljose temaet som fyrr,
+   og fylgjer no kalibreringi i det myrke (22 mot 40 %, SKRAAKANTEN)
+   i staden for aa snu: 12 % av eit *ljost* blekk var ei ljos stripa i
+   yverkanten, og ei fordjuping med ljos yverkant er ein knott. */
+.form-djup { fill: color-mix(in srgb, var(--lippe-djup) 55%, transparent); }
 
 /* `.dagnamn` var alt namnet paa dagane i vikehovudet. Eit merke som tok
    den klassa i bruk, sette 7,2 px paa yverskrifti yver rutenetet — ein
@@ -656,7 +661,8 @@
    fila, so han vinn. */
 .dagmerke[aria-pressed="true"] .form-ring { visibility: visible; }
 .dagmerke[aria-pressed="true"] .form-kant { fill: var(--merke); }
-.dagmerke[aria-pressed="true"] .form-djup { fill: color-mix(in srgb, var(--blekk) 16%, transparent); }
+/* Same tilhøvet som 16 mot 12 fyrr: eit hakk djupare naar han er valt. */
+.dagmerke[aria-pressed="true"] .form-djup { fill: color-mix(in srgb, var(--lippe-djup) 73%, transparent); }
 .dagmerke[aria-pressed="true"]:not(:disabled) .form-flate {
   fill: color-mix(in srgb, var(--merke) 12%, var(--flate));
 }

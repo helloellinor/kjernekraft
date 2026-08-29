@@ -198,18 +198,7 @@
                 {{range .Days}}
                 {{if .Has}}{{template "dagmerke" .Session}}
                 {{else}}
-                {{/* Den daude ruta. Ho gjer at rada hev sju plassar og ikkje
-                     tvo — ein ser kva som *ikkje* gjeng, og det er halve
-                     spursmaalet naar ein set upp ei vika. */}}
-                <span class="dagmerke daud{{if .IsToday}} idag{{end}}{{if .IsPast}} umme{{end}}"
-                      style="--dag: {{.Column}}" aria-hidden="true">
-                    <svg class="merkeform" viewBox="{{markViewBox}}"
-                         width="{{markWidth}}" height="{{markHeight}}" aria-hidden="true" focusable="false">
-                        <path class="daudflate" d="{{markDead}}"/>
-                        <path class="dauddjup"  d="{{markDead}}" filter="url(#merkedjup)"/>
-                        <path class="daudljos"  d="{{markDead}}" filter="url(#merkeljos)"/>
-                    </svg>
-                </span>
+                {{template "daudmerke" (dict "Idag" .IsToday "Umme" .IsPast "Column" .Column)}}
                 {{end}}
                 {{end}}
             </div>
