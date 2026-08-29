@@ -180,8 +180,13 @@
           transform="rotate({{.Form.MinuteAngle}} {{.Form.DialX}} {{.Form.DialY}})"/>
     <circle class="pinne" cx="{{.Form.DialX}}" cy="{{.Form.DialY}}" r="1.5"/>
 
-    {{/* Glaset til slutt: yver skiva, yver visarane, yver alt. */}}
-    <path class="form-glas" d="{{.Form.Silhouette}}" fill="url(#glas-{{.Form.Ident}})"/>
+    {{/* Glaset til slutt: yver skiva, yver visarane — men *innanfor*
+         falsen. Det laag paa heile silhuetten fyrr, og daa laag glansen
+         uppaa sjølve kanten av kassen med — eit glas som dekkjer si
+         eigi ramma finst ikkje, og det saag ut deretter (sagt av augo
+         29.8.2026). Krystallet sit i kassen; glansen sluttar der
+         skiveflata sluttar. */}}
+    <path class="form-glas" d="{{.Form.Skive}}" fill="url(#glas-{{.Form.Ident}})"/>
   </svg>
 
   {{/* Plassmerket. Det er eit HTML-element og ikkje ein figur i SVG-en,
