@@ -563,7 +563,7 @@
 .form-ring  { fill: var(--merke); visibility: hidden; }
 .form-kant  { fill: var(--kant); }
 .form-flate { fill: var(--flate); }
-.form-djup, .rutedjup { fill: color-mix(in srgb, var(--blekk) 12%, transparent); }
+.form-djup { fill: color-mix(in srgb, var(--blekk) 12%, transparent); }
 
 /* `.dagnamn` var alt namnet paa dagane i vikehovudet. Eit merke som tok
    den klassa i bruk, sette 7,2 px paa yverskrifti yver rutenetet — ein
@@ -604,7 +604,19 @@
 .pinne { fill: var(--blekk); }
 
 /* ---- vindauga ---- */
-.ruteflate { fill: color-mix(in srgb, var(--blekk) 9%, var(--flate)); filter: url(#rutedjup); }
+/* Flata i vindauga.
+   Ho bar `filter: url(#rutedjup)`, og det filteret finst ikkje. Ei
+   vising til eit filter som ikkje finst er ein feil, og daa teiknar
+   nettlesaren ikkje elementet i det heile — so sjølve flata i skjermen
+   vart aldri maala. Att stod yverleppa og talet, og det er difor han
+   ikkje saag senka ut: det var ingen botn aa sjaa ned i.
+   Ho treng ikkje noko filter. Djupni bur i dei tvo lippone yver henne,
+   som paa merkekroppen (`.form-flate` + `.form-djup`). */
+.ruteflate { fill: color-mix(in srgb, var(--blekk) 9%, var(--flate)); }
+/* Dei tvo lippone, i dei same tokeni som holet i vika og skraakanten
+   elles i huset — so vindauga snur med temaet av seg sjølv. */
+.rutedjup  { fill: var(--lippe-djup); }
+.ruteljos  { fill: var(--lippe-ljos); }
 .rutetal {
   font-family: var(--skrift-tal); font-size: 9.2px;
   fill: var(--blekk); text-anchor: middle; letter-spacing: -.03em;
