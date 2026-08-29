@@ -458,7 +458,7 @@
    forholdet — det er den same tingen som kjem nærare, ikkje ei ny
    teikning. Spaltone i vika er rekna av det same talet, so hovudet og
    radene stend paa lina utan at nokon maaler. */
-:root { --merkestorleik: 5.4rem; }
+:root { --merkestorleik: 6.2rem; }
 
 .dagmerke {
   position: relative;
@@ -583,9 +583,14 @@
    Indeksane ligg paa eit rektangulært spor og ikkje paa ein sirkel. Det
    er sporet som gjer at ho ser firkanta ut. Tolv indeksar, tal paa 12, 3
    og 9; sekstalet ligg under vindauga, som paa eit ur som er bygt slik. */
-.indeks { stroke: var(--blekk-svakt); stroke-width: 1.0; stroke-linecap: round; }
+.indeks { stroke: var(--blekk-svakt); stroke-width: 1.2; stroke-linecap: round; }
+/* 6.4, upp fraa 5.7: paa den minste storleiken (3,9 rem paa
+   heimesida) var tali kring fem skjermpiksel — ikkje smaa, ulesande
+   (sagt av augo 29.8.2026). Talet er i figureiningar og fylgjer
+   skalaen, so det som er leseleg paa den minste storleiken er det
+   yveralt. */
 .skivetal {
-  font-family: var(--skrift-tal); font-size: 5.7px;
+  font-family: var(--skrift-tal); font-size: 6.4px;
   fill: var(--blekk-svakt); text-anchor: middle; letter-spacing: -.04em;
 }
 
