@@ -91,8 +91,8 @@
          med same sirkelen skriven ein gong til med faste tal — og daa
          skiva flutte seg, vart stykket klypt mot der ho *hadde* vore. */}}
     <g class="skiva">
-      {{/* Kakestykket ligg nedst i skiva — under indeksane, tali og alle
-           tri visarane.
+      {{/* Kakestykket ligg nedst — under indeksane, tali og visarane
+           (som no stend nedanfyre vindauga, sjaa der).
 
            Det laag yverst fyrr, med den grunngjevingi at det var «eit
            gjenomsynleg drag lagt uppaa uret». Men eit drag yver visaren
@@ -106,17 +106,6 @@
       {{range .Form.Slices}}<path class="{{.Class}}" d="{{.D}}"/>{{end}}
       {{range .Form.Ticks}}<line class="indeks" x1="{{.X1}}" y1="{{.Y1}}" x2="{{.X2}}" y2="{{.Y2}}"/>{{end}}
       {{range .Form.Numerals}}<text class="skivetal" x="{{.X}}" y="{{.Y}}">{{.Text}}</text>{{end}}
-      {{/* Sluttvisaren er ein timevisar: same lengd, same tjukkleik.
-           Berre fargen skil deim, og han seier kva han er — kvar timen
-           er ute. Han var like lang som minuttvisaren fyrr, og daa las
-           han seg som ein minuttvisar til. */}}
-      <line class="visar slutt"  x1="{{.Form.DialX}}" y1="{{.Form.DialY}}" x2="{{.Form.DialX}}" y2="{{.Form.HourHand}}"
-            transform="rotate({{.Form.EndAngle}} {{.Form.DialX}} {{.Form.DialY}})"/>
-      <line class="visar time"   x1="{{.Form.DialX}}" y1="{{.Form.DialY}}" x2="{{.Form.DialX}}" y2="{{.Form.HourHand}}"
-            transform="rotate({{.Form.HourAngle}} {{.Form.DialX}} {{.Form.DialY}})"/>
-      <line class="visar minutt" x1="{{.Form.DialX}}" y1="{{.Form.DialY}}" x2="{{.Form.DialX}}" y2="{{.Form.MinuteHand}}"
-            transform="rotate({{.Form.MinuteAngle}} {{.Form.DialX}} {{.Form.DialY}})"/>
-      <circle class="pinne" cx="{{.Form.DialX}}" cy="{{.Form.DialY}}" r="1.5"/>
     </g>
 
     {{/* Botnstripa. Klokkeslettet i klartekst nede til vinstre, med den
@@ -126,6 +115,35 @@
     <path class="ruteflate" d="{{.Form.Box}}"/>
     <path class="rutedjup"  d="{{.Form.Box}}" filter="url(#merkedjup-lite)"/>
     <text class="rutetal" x="{{.Form.BoxTextX}}" y="{{.Form.BoxTextY}}" dominant-baseline="central">{{.Clock}}</text>
+
+    {{/* Visarane til slutt, yver vindauga.
+
+         Dei laag inni `.skiva`, og vindauga vart maala etter henne — so
+         den lange minuttvisaren gjekk *under* ruta og vart klypt av
+         henne. Det er feil fysikk for det denne tingen skal vera: ruta
+         er senka ned i kroppen (ho ber `--merkedjup-lite`, den same
+         fordjupingi som eit skrivefelt), og visarane ligg uppaa han og
+         svingar fritt yver alt. Noko som er skore *ned* i ei flate kann
+         ikkje liggja yver noko som stikk upp or henne.
+
+         SVG hev ingen z-index: rekkjefylgda i dokumentet *er*
+         rekkjefylgda i djupni. Difor stend dei her nede og ikkje der dei
+         høyrer til logisk. Glaset kjem etter deim, som fyrr — det ligg
+         yver alt.
+
+         Pinnen fylgjer med. Han er navet visarane svingar kring, og eit
+         nav som ligg under sine eigne visarar er ikkje eit nav. */}}
+    {{/* Sluttvisaren er ein timevisar: same lengd, same tjukkleik.
+         Berre fargen skil deim, og han seier kva han er — kvar timen er
+         ute. Han var like lang som minuttvisaren fyrr, og daa las han
+         seg som ein minuttvisar til. */}}
+    <line class="visar slutt"  x1="{{.Form.DialX}}" y1="{{.Form.DialY}}" x2="{{.Form.DialX}}" y2="{{.Form.HourHand}}"
+          transform="rotate({{.Form.EndAngle}} {{.Form.DialX}} {{.Form.DialY}})"/>
+    <line class="visar time"   x1="{{.Form.DialX}}" y1="{{.Form.DialY}}" x2="{{.Form.DialX}}" y2="{{.Form.HourHand}}"
+          transform="rotate({{.Form.HourAngle}} {{.Form.DialX}} {{.Form.DialY}})"/>
+    <line class="visar minutt" x1="{{.Form.DialX}}" y1="{{.Form.DialY}}" x2="{{.Form.DialX}}" y2="{{.Form.MinuteHand}}"
+          transform="rotate({{.Form.MinuteAngle}} {{.Form.DialX}} {{.Form.DialY}})"/>
+    <circle class="pinne" cx="{{.Form.DialX}}" cy="{{.Form.DialY}}" r="1.5"/>
 
     {{/* Glaset til slutt: yver skiva, yver visarane, yver alt. */}}
     <path class="form-glas" d="{{.Form.Silhouette}}" fill="url(#glas-{{.Form.Ident}})"/>
