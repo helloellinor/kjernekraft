@@ -135,7 +135,11 @@
   font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
   color: var(--blekk-svakt);
 }
-.varmeskala .hol { width: 11px; height: 11px; flex: none; }
+/* .6875rem = dei utstelte 11 px — men i rem, so skalaen under brettet
+   veks med maalestokken som brettet sjølv. I px stod ho att paa 11
+   medan pinnane paa brettet voks, og skalaen laug um sin eigen
+   maalestokk (30.8.2026). */
+.varmeskala .hol { width: .6875rem; height: .6875rem; flex: none; }
 
 /* Bjelkane ber alle same fargen. Lengdi er talet; aa fargeleggja dei
    etter verdien hadde sagt det same ein gong til, med ein kanal som daa
@@ -272,10 +276,15 @@
 .ljos-paa {
   background: radial-gradient(circle at 34% 30%,
     var(--glodkjerne) 0%, var(--merke) 62%);
+  /* Haloen i rem, ikkje px (30.8.2026): han er ljos FRAA lampa, og
+     ljoset lyt veksa med kjelda si naar maalestokken veks — lampa
+     sjølv stend i rem. (Skuggen ein ting kastar PAA arket er det
+     motsette og stend i px, sjaa --skugge-kule.) Tali er dei utstelte
+     3/9/18 px delte paa 16. */
   box-shadow:
-    0 0 3px 0 color-mix(in srgb, var(--merke) 70%, transparent),
-    0 0 9px 1px color-mix(in srgb, var(--merke) 38%, transparent),
-    0 0 18px 4px color-mix(in srgb, var(--merke) 14%, transparent);
+    0 0 .1875rem 0 color-mix(in srgb, var(--merke) 70%, transparent),
+    0 0 .5625rem .0625rem color-mix(in srgb, var(--merke) 38%, transparent),
+    0 0 1.125rem .25rem color-mix(in srgb, var(--merke) 14%, transparent);
 }
 /* Frosi: lampa stend, men ho brenn ikkje. Ingen halo — det er nettupp
    halloen som segjer at noko gjeng. */
