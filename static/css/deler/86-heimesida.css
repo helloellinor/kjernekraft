@@ -177,14 +177,10 @@
    Pilates Apparatus» tok tvo liner i ei spalte som er brei nok til
    heile namnet.
 
-   1,1 rem er framleis det største og feitaste i rada — namnet er det
-   ein leitar etter — men no ser ein at det er tale um éin time og ikkje
-   um ein ny bolk.
-
-   1,1 rem er framleis det største og feitaste i rada — namnet er det
-   ein leitar etter — men no ser ein at det er tale um éin time og ikkje
-   um ein ny bolk. (Regelen var burte eitt døger kring 29.8.2026, daa
-   all radtekst vart rekna av merket; utan honom vart namni «bigger so
-   it looks off», og han kom att med resten av dei utstelte tali.) */
-.timerad.heimerad .timetittel { font-size: 1.1331rem; line-height: 1.2; } /* e^(1/8) */
+   Den domen stod medan uret her var mindre enn i vika. 30.8.2026 vart
+   uret eitt (rota si e^(7/4), kvar det stend), og daa fall denne
+   yverstyringi med same spursmaalet som tok uret sin: «why is the
+   class name text also not the same css?» Namnet les no grunnregelen
+   i 30-timeplanen.css — e^(3/8), same line-height — kvar det stend.
+   Attmed det fullvaksne uret ropar det ikkje; det svarar. */
 .timerad.heimerad.umme { opacity: .5; }
