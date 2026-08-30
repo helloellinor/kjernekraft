@@ -222,8 +222,15 @@
 
    Denne blokki lyt staa *etter* grunnregelen ovanfor. Ho stod fyre, og
    daa vann den seinare regelen same kva breidd glaset hadde — media-
-   spurnaden aukar ikkje spesifisiteten. */
-@media (max-width: 62rem) {
+   spurnaden aukar ikkje spesifisiteten.
+
+   90em og ikkje 62rem (30.8.2026): grensa her lyt vera DEN SAME som
+   stakkar rutenetet (30-timeplanen.css) — det er same hendingi.
+   Skyvaren speglar vikespaltone (--timetrapp); fell dei til éi, fell
+   han med, og daa lyt denne blokki taka yver. Med kvar sin terskel
+   stod det eit vindauga (62–90em) der netet var stakka men skyvaren
+   framleis spegla den eine spalta: éin dag per line i eit kjempespor. */
+@media (max-width: 90em) {
   /* Gapet lyt ned med. `--rom-3` millom aatte celler er 84 av dei 352
      pikslane ei telefonlina hev — daa vert kvar celle 33 px, og «Alle»
      og «Mån» vart klypte til «A…» og «M…». Med `--rom-1` er dei 40, og

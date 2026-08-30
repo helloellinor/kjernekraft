@@ -764,15 +764,16 @@
    rutenetet saman, merki flyt etter kvarandre, og dagen kjem attende i
    merket sjølv — han kann ikkje lenger lesast av plasseringi.
 
-   66em og ikkje 60rem (30.8.2026): grensa vaktar *innhaldsrom*, og
+   90em og ikkje 60rem (30.8.2026): grensa vaktar *innhaldsrom*, og
    maalestokken (00-token.css) gjer innhaldet større medan media-em
-   stend fast paa 16 px. Rekninga: netet treng kring 51 effektive rem;
-   fraa 66em og upp gjeld kvartsteget (51·e^(1/4) ≈ 65.5em, so det
-   fær rom), fraa 91em gjeld halvsteget (51·e^(1/2) ≈ 84em ✓). Under
-   66em fell netet saman — der er skalaen og eit steg lægre, men 51em
-   fær likevel ikkje rom. Utan denne rekninga stod netet ved 1400 px
-   med ei namnespalte so svolten at «Hatha Yoga» braut midt i ordet. */
-@media (max-width: 66em) {
+   stend fast paa 16 px. Rekninga er den same som gjev --breidd:
+   netet med rom til namni (namnespalta e^3) treng ≈70.11rem, og ved
+   kvartsteget er det 70.11·e^(1/4) ≈ 90em glas — ein MacBook. Difor
+   er dette OG punktet der margane kjem: netet finst nett der sida hev
+   marg, og fell saman nett der ho fyller glaset — same talet, av same
+   rekning. Tvo rekningar braut ord midt i: fyrst utan maalestokk i
+   grensa, so med netet sitt minimum i staden for netet med rom. */
+@media (max-width: 90em) {
   .vika { --timetrapp: minmax(0, 1fr); }
 
   /* Hovudet fall heilt burt her fyrr, av di det bar spalteoverskrifter

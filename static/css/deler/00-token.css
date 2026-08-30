@@ -471,7 +471,19 @@
   --skugge-flytande: var(--l-skugge-flytande);
   --skugge-kort: var(--l-skugge-kort);
 
-  --breidd: 68rem;
+  /* Breiddi er REKNA, ikkje vald (30.8.2026; ho stod som 68): taket er
+     det breidaste tinget i huset — vikerutenetet med ROM til namni.
+     Fyrste rekninga tok netet sitt minimum (namnespalta paa 8rem-
+     golvet sitt), og daa braut «Hatha Yoga» midt i ordet att: utstelt
+     fekk namnespalta all strekken, kring 20.5rem — som skygde eit
+     steg. No er ho steget: e^3 = 20.086rem. Rekninga: e^3 + sju merke
+     à e^(7/4) + sju gap à --rom-3 + radfyllet 2·--rom-4 + sidefyllet
+     2·--sidefyll ≈ 70.11rem — nett der den kjære 68-aren stod. Som
+     calc, so ho reknar seg sjølv um att um uret byter steg. Margane
+     kjem fraa 90em glas (70.11·e^(1/4) — ein MacBook er nett 90em) og
+     kverv heilt paa staaande iPad (48em: 70rem ved skala 1 er breidare
+     enn glaset). Same talet stakkar netet (30-timeplanen.css). */
+  --breidd: calc(20.086rem + 7*var(--merkestorleik) + 7*var(--rom-3) + 2*var(--rom-4) + 2*var(--sidefyll));
 
   /* ---- det myrke temaet, éin gong ----
      Berre dei *flate* verdi stend her; dei avleidde fylgjer temaet av
@@ -716,20 +728,20 @@ h1, h2, h3, h4 {
    e^(5/4)·e^(1/2) = e^(7/4), nett den gamle timeplan-storleiken:
    maalet, naadd med eitt tal. Attende til utstelt storleik er
    --maalestokk: 1. */
-:root { --maalestokk: 1.6487; } /* e^(1/2) */
+:root { --maalestokk: 1.284; } /* e^(1/4) */
 html { font-size: calc(100% * var(--maalestokk)); }
 
-/* Maalestokken stig NED stigen naar glaset smalnar — i steg av e, som
-   alt anna. Full skala paa 26 px grunnskrift er praktfull paa ein brei
-   skjerm og ubrukeleg paa ein telefon (15 teikn per line). Grensone er
-   i em (media-em er alltid 16 px, dei fylgjer ikkje html-skrifti) og
-   REKNA, ikkje valde: vikerutenetet treng kring 51 effektive rem
-   (namnespalta + sju merke + gap), so full skala krev 51·e^(1/2) ≈ 84em
-   med litt monn → 91em; eitt kvartsteg klarar seg fraa 66em (51·e^(1/4)
-   ≈ 65.5); under 48em er det telefon, og der er den utstelte skalaen
-   den rette — det var breie skjermar dei eldre augo sleit paa. */
-@media (max-width: 91em) { :root { --maalestokk: 1.284; } } /* e^(1/4) */
-@media (max-width: 48em) { :root { --maalestokk: 1; } }    /* e^0 */
+/* Kvifor e^(1/4) og ikkje e^(1/2): halvsteget var «too big at 100%
+   zoom» (30.8.2026), og «near 75%» av det ER eit steg — e^(-1/4) =
+   .7788. Uret vert daa 118 px mot dei 86 det utstelte gav: framleis
+   eit røynleg lyft for dei eldre augo, utan at arket sprengjer glaset.
+
+   Maalestokken stig NED til utstelt skala naar glaset smalnar, og
+   grensa er REKNA, ikkje vald: ho er 48em = 768 px — ståande iPad, og
+   nett breiddi der --breidd (sjaa nedanfor) fyller glaset utan marg
+   ved skala 1. Telefonen og brettet fær sida som ho var utstelt;
+   det var breie skjermar dei eldre augo sleit paa. */
+@media (max-width: 48em) { :root { --maalestokk: 1; } } /* e^0 */
 
 /* Den stramme stigen: steg e^¼ ≈ 1.284, med taket paa e rem.
      1 → 1.284 → 1.649 → 2.118 → 2.718
