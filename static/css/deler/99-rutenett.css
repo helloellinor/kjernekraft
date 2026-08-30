@@ -1,0 +1,19 @@
+/* ===================================================================
+   rutenettet — utviklarverkty (sjaa static/js/rutenett.js)
+   =================================================================== */
+/* Taktnettet: ei tunn line kvar rem og ei tydelegare kvar fjerde, lagt
+   yver heile sida utan aa taka klikk. Det maalar ingen ting for
+   brukaren — klassa vert berre sett av rutenett.js, paa spurnad.
+   Fargane er produktfargar av di dei alt ber kontrast i baae temai;
+   her *tyder* dei ingen ting (§1 gjeld det brukaren ser). */
+.rutenett body::after {
+  content: ""; position: fixed; inset: 0;
+  pointer-events: none; z-index: 9999;
+  background:
+    repeating-linear-gradient(to bottom,
+      color-mix(in srgb, var(--togu) 45%, transparent) 0 1px,
+      transparent 1px 4rem),
+    repeating-linear-gradient(to bottom,
+      color-mix(in srgb, var(--merke) 22%, transparent) 0 1px,
+      transparent 1px 1rem);
+}
