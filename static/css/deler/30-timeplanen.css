@@ -420,7 +420,7 @@
 
 /* Lengdi høyrer til namnet — ho er den same kva dag timen gjeng. */
 .timetittel .lengd {
-  font-family: var(--skrift-tal); font-size: calc(var(--merkestorleik) * .1353); font-weight: 400;
+  font-family: var(--skrift-tal); font-size: .78rem; font-weight: 400;
   font-stretch: normal; letter-spacing: 0;
   color: var(--blekk-svakt); white-space: nowrap;
 }
@@ -431,9 +431,9 @@
    kva. */
 .timetittel {
   font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
-  font-weight: 600; font-size: calc(var(--merkestorleik) * .2865); line-height: 1.05; margin: 0;
+  font-weight: 600; font-size: 1.55rem; line-height: 1.05; margin: 0;
 }
-.timekven { margin: .1rem 0 0; font-size: calc(var(--merkestorleik) * .1738); color: var(--blekk-lys); }
+.timekven { margin: .1rem 0 0; font-size: .92rem; color: var(--blekk-lys); }
 .timerom { color: var(--blekk); font-weight: 500; }
 
 /* ---- timemerket ----
@@ -458,22 +458,18 @@
    forholdet — det er den same tingen som kjem nærare, ikkje ei ny
    teikning. Spaltone i vika er rekna av det same talet, so hovudet og
    radene stend paa lina utan at nokon maaler. */
-/* Merket er kjelda, og alt kring det er *rekna* av det i eksakte steg
-   paa e-stigen (00-token.css §10.3; sidan 29.8.2026 — dei gamle tali
-   skygde alt stigen: 3,4 ≈ e^(5/4), 4,4 ≈ e^(3/2), .78 ≈ e^(-1/4),
-   .135 ≈ e^(-2); no ER dei stigen, som calc av merket):
-
-     merket        e^(7/4) = 5.7546 rem   (vika og heimesida)
-     aspekten      høgd = breidd·e^(1/4)  (rekna i merkeform.go)
-     .timetittel   merket · e^(-5/4) = .2865  (= e^(1/2) rem i dag)
-     .timekven     merket · e^(-7/4) = .1738  (= 1 rem)
-     .lengd        merket · e^(-2)   = .1353  (= e^(-1/4) rem)
-     .plettmerke   merket · e^(-2)   = .1353
-
-   Byt storleiken paa merket, og heile fylgjet skalerer med — det er
-   *tilhøvi* som er lova, ikkje tali. Eit tal utanfor stigen bryt heile
-   rekkja, ikkje berre sitt eige. */
-:root { --merkestorleik: 5.7546rem; }
+/* 5,4 att — dei utstelte tali fraa 29.8.2026 er attende der dei stod.
+   Den kvelden vart merket og radteksten skalerte og e-festa i ni
+   umgangar, kvar for seg godkjend, og heilskapen fall sund medan kvar
+   bit saag rett ut i sitt eige utsnitt: «eg likar sida slik ho er
+   utlagd» var domen. Lærdomen stend: *tilhøvi* var problemet, ikkje
+   tali — og tilhøve prøver ein paa heile sida, ikkje i eit utsnitt.
+   Det som VART verande er teikningi inne i merket (lippone som no
+   finst, den senka skiva, glaset innanfor falsen, lufta under
+   skjermen) — dei gjeld paa kvar storleik. Rutenett-eksperimentet
+   (static/js/rutenett.js) er neste freistnad paa aa faa ting til aa
+   *liggja* rett i staden for aa rekna seg rette. */
+:root { --merkestorleik: 5.4rem; }
 
 .dagmerke {
   position: relative;
@@ -545,11 +541,10 @@
   /* Storleiken fylgjer brikka, som alt anna i henne: «Storleiken er éin
      knapp og ingen ting anna». Han stod fast paa .62 rem — rett ved
      5,4 rem og feil ved alle andre, so bobla vart stor paa ei lita
-     brikka og lita paa ei stor. Eit hakk upp fraa .115 (29.8.2026),
-     for talet i bobla er det eldre augo spør etter fyrst — og hakket
-     landa paa stigen: .1353 = e^(-2), so bobla stend tvo steg under
-     merket, eksakt (kring .78 rem naar merket er e^(7/4)). */
-  font-size: calc(var(--merkestorleik) * .1353); font-weight: 500;
+     brikka og lita paa ei stor. .115 av brikka *er* .62 rem naar ho er
+     5,4 — den utstelte storleiken, attende 30.8.2026 saman med resten
+     av tali fraa den kvelden proporsjonane rakna. */
+  font-size: calc(var(--merkestorleik) * .115); font-weight: 500;
   letter-spacing: -.01em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap; pointer-events: none;
