@@ -92,7 +92,7 @@
      den skrifti elementet sjølv hev. Laag ho lenger inn, rekna ringen
      kapitélhøgdi si ut fraa brødteksti og vart ein tridjedel for liten. */
   font-family: var(--skrift-yver);
-  font-size: 1.45rem;
+  font-size: 1.455rem; /* e^(3/8) */
   font-stretch: var(--vidd-leiding);
   font-weight: 700;
   line-height: 1;
@@ -224,7 +224,7 @@
   padding: var(--rom-3) var(--rom-4);
   background: none; border: 0; border-radius: 0;
   font-family: var(--skrift-yver); font-stretch: var(--vidd-merkelapp);
-  font-size: .84rem; letter-spacing: .07em; text-transform: uppercase;
+  font-size: .8825rem; letter-spacing: .07em; text-transform: uppercase; /* e^(-1/8) */
   color: var(--blekk); text-decoration: none; cursor: pointer;
 }
 .namneval:hover { background: var(--ark-djup); color: var(--blekk); border: 0; }

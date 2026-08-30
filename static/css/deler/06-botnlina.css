@@ -11,4 +11,4 @@
   display: flex; align-items: center; justify-content: space-between;
   gap: var(--rom-4); flex-wrap: wrap;
 }
-.botnmerke { font-size: .78rem; color: var(--blekk-svakt); }
+.botnmerke { font-size: .7788rem; /* e^(-1/4) */ color: var(--blekk-svakt); }

@@ -684,6 +684,50 @@ h1, h2, h3, h4 {
   margin: 0;
   text-wrap: balance;
 }
+/* MAALESTOKKEN (30.8.2026). Framgangsmaaten er brukaren sin, ord for
+   ord: mæl dei relative storleikane (h1, h2, h3, meny, logo, ur, rad),
+   finn tilhøvi deira som potensar av e, og auk so heile maalestokken
+   til uret paa heimesida stend der timeplan-uret stod — daa fylgjer
+   alt anna med i same tilhøvet, og sida ER den same sida, berre
+   nærare. Det var dette som mangla dei tvo kveldane fyre: uret voks
+   aaleine, og tilhøvi rakna.
+
+   Uppmaalingi synte at yverskriftstigen ALT var eksakt (h1 clamp
+   e^(3/4)–e, h2 e^(3/4), h3 e^(1/2), h4 e^(1/4), brødtekst e^0), og
+   resten skygde kvar sitt steg — no stend dei PAA det:
+
+     ordmerket   1.45 → e^(3/8) 1.4550   menylekkja  .84 → e^(-1/8) .8825
+     merket vika 5.4  → e^(7/4) 5.7546   merket heime 3.4 → e^(5/4) 3.4903
+     radtittel   1.55 → e^(3/8) 1.4550   heimetittel 1.1 → e^(1/8) 1.1331
+     læraren     .92  → e^(-1/8) .8825   lengdi/botn .78 → e^(-1/4) .7788
+     plassbobla  .62  → e^(-1/2) .6065   (som faktor: e^(-9/4) av uret)
+
+   Aattandedelssteg er lov der designet aldri stod paa eit kvartsteg —
+   det er framleis potensar av e. Logoen (.72em) er unnateken: han er
+   alt eit tilhøve, og talet er optisk MAALT mot kapitélhøgdi
+   (05-hovudet.css); eit steg hadde flutt ringen av lina.
+
+   Sjølve maalestokken: e^(1/2) gjenom rot-skrifti. Alt i rem veks i
+   same tilhøvet; hairlinor og skuggar stend i px og fylgjer ikkje
+   med — ein strek er ein strek. Uret paa heimesida landar paa
+   e^(5/4)·e^(1/2) = e^(7/4), nett den gamle timeplan-storleiken:
+   maalet, naadd med eitt tal. Attende til utstelt storleik er
+   --maalestokk: 1. */
+:root { --maalestokk: 1.6487; } /* e^(1/2) */
+html { font-size: calc(100% * var(--maalestokk)); }
+
+/* Maalestokken stig NED stigen naar glaset smalnar — i steg av e, som
+   alt anna. Full skala paa 26 px grunnskrift er praktfull paa ein brei
+   skjerm og ubrukeleg paa ein telefon (15 teikn per line). Grensone er
+   i em (media-em er alltid 16 px, dei fylgjer ikkje html-skrifti) og
+   REKNA, ikkje valde: vikerutenetet treng kring 51 effektive rem
+   (namnespalta + sju merke + gap), so full skala krev 51·e^(1/2) ≈ 84em
+   med litt monn → 91em; eitt kvartsteg klarar seg fraa 66em (51·e^(1/4)
+   ≈ 65.5); under 48em er det telefon, og der er den utstelte skalaen
+   den rette — det var breie skjermar dei eldre augo sleit paa. */
+@media (max-width: 91em) { :root { --maalestokk: 1.284; } } /* e^(1/4) */
+@media (max-width: 48em) { :root { --maalestokk: 1; } }    /* e^0 */
+
 /* Den stramme stigen: steg e^¼ ≈ 1.284, med taket paa e rem.
      1 → 1.284 → 1.649 → 2.118 → 2.718
    Fire steg som er mest like store, og breiddi ber rangen (§5) — difor

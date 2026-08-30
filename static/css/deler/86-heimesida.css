@@ -117,9 +117,12 @@
      sida slik ho er utlagd, endaa ho er ulesande for dei eldre».
      Storleiken her er difor den utstelte att, og lesaranes løysing
      skal koma som ei *innstilling* (stor skrift for den som vel det),
-     ikkje som ei umskriving av sida alle ser. Rutenett-eksperimentet
-     (static/js/rutenett.js) er neste steget. */
-  --merkestorleik: 3.4rem;
+     ikkje som ei umskriving av sida alle ser. — Og so kom svaret som
+     løyser baae (00-token.css, MAALESTOKKEN): heile arket veks eitt
+     halvsteg gjenom rot-skrifti, so uret her landar paa gamal
+     timeplan-storleik med alle tilhøvi urørde. Talet nedanfor er
+     berre snappa til sitt steg; det VEKS gjenom rota. */
+  --merkestorleik: 3.4903rem; /* e^(5/4) */
   /* Vengen ber slaget, ikkje produktet.
      Kortet ligg i vinstre spalta og medlemskortet i høgre, so dei tvo
      vengene stend på same skjermen — sjå åtvaringi i 00-token.css.
@@ -178,5 +181,5 @@
    um ein ny bolk. (Regelen var burte eitt døger kring 29.8.2026, daa
    all radtekst vart rekna av merket; utan honom vart namni «bigger so
    it looks off», og han kom att med resten av dei utstelte tali.) */
-.timerad.heimerad .timetittel { font-size: 1.1rem; line-height: 1.2; }
+.timerad.heimerad .timetittel { font-size: 1.1331rem; line-height: 1.2; } /* e^(1/8) */
 .timerad.heimerad.umme { opacity: .5; }

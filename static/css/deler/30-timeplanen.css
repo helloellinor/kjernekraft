@@ -129,7 +129,7 @@
    ei bobla står over; her står berre det som gjer henne til ein tittel. */
 .vekefelt {
   font-family: var(--skrift-yver);
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-size: clamp(2.118rem, 5vw, 3.4903rem);
   font-stretch: var(--vidd-tittel); font-weight: 700;
   letter-spacing: inherit; line-height: 1;
   width: 2.6ch; min-width: 2.6ch; field-sizing: content;
@@ -420,7 +420,7 @@
 
 /* Lengdi høyrer til namnet — ho er den same kva dag timen gjeng. */
 .timetittel .lengd {
-  font-family: var(--skrift-tal); font-size: .78rem; font-weight: 400;
+  font-family: var(--skrift-tal); font-size: .7788rem; font-weight: 400; /* e^(-1/4) */
   font-stretch: normal; letter-spacing: 0;
   color: var(--blekk-svakt); white-space: nowrap;
 }
@@ -431,9 +431,9 @@
    kva. */
 .timetittel {
   font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
-  font-weight: 600; font-size: 1.55rem; line-height: 1.05; margin: 0;
+  font-weight: 600; font-size: 1.455rem; line-height: 1.05; margin: 0; /* e^(3/8) */
 }
-.timekven { margin: .1rem 0 0; font-size: .92rem; color: var(--blekk-lys); }
+.timekven { margin: .1rem 0 0; font-size: .8825rem; /* e^(-1/8) */ color: var(--blekk-lys); }
 .timerom { color: var(--blekk); font-weight: 500; }
 
 /* ---- timemerket ----
@@ -469,7 +469,7 @@
    skjermen) — dei gjeld paa kvar storleik. Rutenett-eksperimentet
    (static/js/rutenett.js) er neste freistnad paa aa faa ting til aa
    *liggja* rett i staden for aa rekna seg rette. */
-:root { --merkestorleik: 5.4rem; }
+:root { --merkestorleik: 5.7546rem; } /* e^(7/4) */
 
 .dagmerke {
   position: relative;
@@ -544,7 +544,7 @@
      brikka og lita paa ei stor. .115 av brikka *er* .62 rem naar ho er
      5,4 — den utstelte storleiken, attende 30.8.2026 saman med resten
      av tali fraa den kvelden proporsjonane rakna. */
-  font-size: calc(var(--merkestorleik) * .115); font-weight: 500;
+  font-size: calc(var(--merkestorleik) * .1054); font-weight: 500; /* e^(-9/4) */
   letter-spacing: -.01em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap; pointer-events: none;
@@ -762,8 +762,17 @@
 
 /* Under dette er sju spaltor for smalt til aa bera eit tal. Daa fell
    rutenetet saman, merki flyt etter kvarandre, og dagen kjem attende i
-   merket sjølv — han kann ikkje lenger lesast av plasseringi. */
-@media (max-width: 60rem) {
+   merket sjølv — han kann ikkje lenger lesast av plasseringi.
+
+   66em og ikkje 60rem (30.8.2026): grensa vaktar *innhaldsrom*, og
+   maalestokken (00-token.css) gjer innhaldet større medan media-em
+   stend fast paa 16 px. Rekninga: netet treng kring 51 effektive rem;
+   fraa 66em og upp gjeld kvartsteget (51·e^(1/4) ≈ 65.5em, so det
+   fær rom), fraa 91em gjeld halvsteget (51·e^(1/2) ≈ 84em ✓). Under
+   66em fell netet saman — der er skalaen og eit steg lægre, men 51em
+   fær likevel ikkje rom. Utan denne rekninga stod netet ved 1400 px
+   med ei namnespalte so svolten at «Hatha Yoga» braut midt i ordet. */
+@media (max-width: 66em) {
   .vika { --timetrapp: minmax(0, 1fr); }
 
   /* Hovudet fall heilt burt her fyrr, av di det bar spalteoverskrifter
