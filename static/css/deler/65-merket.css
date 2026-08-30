@@ -78,14 +78,17 @@
      dokk-spalta gav fem piksel kvar, og ei kula paa fem piksel er ein
      prikk. Dei bryt til ei rad til i staden — og daa les rekkja seg som
      eit sitjekart, som er kva ho er. */
-  display: flex; flex-wrap: wrap; gap: 3px;
+  /* .1875rem = dei utstelte 3 px, men i rem so maalaren veks med dokka
+     naar maalestokken veks (30.8.2026). Det faste var eit val MOT
+     spaltor som deler breiddi — det valet ber rem like godt som px. */
+  display: flex; flex-wrap: wrap; gap: .1875rem;
   margin: var(--rom-2) 0 var(--rom-1);
 }
 /* Holet. Same forma som paa brettet, den tome dagen i vika og det klipte
    hakket: `--skraakant-djup`, myrk yverleppe og ljos underleppe, av di
    ljoset kjem ovanfraa (§2). */
 .plass {
-  flex: none; width: 9px; height: 9px;
+  flex: none; width: .5625rem; height: .5625rem; /* 9 px utstelt */
   border: 0; border-radius: 50%;
   background: var(--ark);
   box-shadow: var(--skraakant-djup);
