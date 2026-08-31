@@ -11,25 +11,49 @@
 (function () {
     "use strict";
 
-    var dokk = document.getElementById("timedokk");
-    if (!dokk) return;
-
-    var felt = {
-        tittel: document.getElementById("dokk-tittel"),
-        laerar: document.getElementById("dokk-laerar"),
-        rom: document.getElementById("dokk-rom"),
-        dag: document.getElementById("dokk-dag"),
-        klokke: document.getElementById("dokk-klokke"),
-        maalar: document.getElementById("dokk-maalar"),
-        melding: document.getElementById("dokk-melding"),
-        teke: document.getElementById("dokk-teke"),
-        av: document.getElementById("dokk-av"),
-        knapp: document.getElementById("dokk-knapp")
-    };
-
+    // Dokka vert slegi upp paa nytt for kvart sidebyte, ikkje ein gong.
+    //
+    // Her stod uppslagi ytst, med eit `if (!dokk) return` under — same
+    // formi som dagfokus.js hadde, og med dei same tvo fylgjone:
+    //
+    //   * Lasta du ei sida utan timeplan, gav uppslaget null og skriptet
+    //     gav seg for godt. Gjekk du so til timeplanen gjenom leidingi,
+    //     var dokka daud heile økti — og dokka er vegen inn i ei
+    //     paamelding.
+    //   * Naar vikebladingi vart eit byte, vart heile dokka bytt ut, og
+    //     dei elleve fanga elementi peika paa noko utanfor dokumentet.
+    //
+    // Lyttarane heng paa `document` og vert bundne éin gong; det er
+    // berre uppslagi som lyt gjerast um att.
+    var dokk = null;
+    var felt = {};
     var valdMerke = null;
 
+    function start() {
+        dokk = document.getElementById("timedokk");
+        felt = dokk ? {
+            tittel: document.getElementById("dokk-tittel"),
+            laerar: document.getElementById("dokk-laerar"),
+            rom: document.getElementById("dokk-rom"),
+            dag: document.getElementById("dokk-dag"),
+            klokke: document.getElementById("dokk-klokke"),
+            maalar: document.getElementById("dokk-maalar"),
+            melding: document.getElementById("dokk-melding"),
+            teke: document.getElementById("dokk-teke"),
+            av: document.getElementById("dokk-av"),
+            knapp: document.getElementById("dokk-knapp")
+        } : {};
+        // Merket ein hadde valt stod i det gamle netet. Det finst ikkje
+        // lenger, so valet gjer det ikkje heller.
+        valdMerke = null;
+        maalDokka();
+    }
+
     function maalDokka() {
+        if (!dokk) {
+            document.documentElement.style.setProperty("--dokkhogd", "0px");
+            return;
+        }
         document.documentElement.style.setProperty(
             "--dokkhogd", dokk.hidden ? "0px" : dokk.offsetHeight + "px");
     }
@@ -46,6 +70,7 @@
     }
 
     function opna(merke) {
+        if (!dokk) return;
         var d = merke.dataset;
 
         felt.tittel.textContent = d.tittel;
@@ -135,6 +160,7 @@
     }
 
     function lukk() {
+        if (!dokk) return;
         dokk.hidden = true;
         if (valdMerke) valdMerke.setAttribute("aria-pressed", "false");
         valdMerke = null;
@@ -189,9 +215,19 @@
     // Escape lukkar. Ei dokk som ikkje lèt seg lukka med tastaturet er
     // ei dokk som stend i vegen.
     document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && !dokk.hidden) lukk();
+        if (e.key === "Escape" && dokk && !dokk.hidden) lukk();
     });
 
-    window.addEventListener("resize", maalDokka);
-    maalDokka();
+    // Ein gong per bilete, ikkje ein gong per hending. Sjaa ljosband.js.
+    var ventar = false;
+    window.addEventListener("resize", function () {
+        if (ventar) return;
+        ventar = true;
+        requestAnimationFrame(function () { ventar = false; maalDokka(); });
+    });
+
+    start();
+    // Timeplanen kjem inn med eit sidebyte, og dokka vert bytt ut naar
+    // ein bladar ei vike. Sjaa sideskift.js.
+    (window.__sideskift = window.__sideskift || []).push(start);
 })();

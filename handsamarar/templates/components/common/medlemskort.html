@@ -1,0 +1,134 @@
+{{define "medlemskort"}}
+{{/* The membership card. One definition, two places.
+
+     The card was written out twice — once on the home screen and once on
+     the membership page — and one of them carried a note saying they had
+     to be kept in step. They were not: Black got its kind, the Karma price
+     and the right name on the home screen, while the membership page kept
+     a turquoise wing, "0 kr/mnd" and buttons for freezing something that
+     cannot be frozen. A note about keeping two things in step is not a
+     mechanism; this is the mechanism.
+
+     The two differ in one thing only: the membership page does something
+     with the card, the home screen shows it. Hence Handlingar.
+
+     Expects:
+       Medlemskap   MembershipWithDetails
+       Namn         the visible name (through Namn/MedlemskapNamn)
+       UserName     who the card belongs to
+       Lang         the language
+       MedlemSidan  the day the account was created (may be nil)
+       Handlingar   show the freeze/cancel row
+       KannSeiaUpp  … and the cancel button in it */}}
+{{/* `.kortplass` er containeren kortet vert maalt mot. Han lyt vera eit
+     steg *utanfor* kortet: `cqi` slær upp den næraste containeren
+     ovanfor seg, so eit kort som er sin eigen container fær ingen for
+     sine eigne eigenskapar og fell attende på glaset. Sjå
+     50-medlemskap-klippekort.css. Klippekorti stend alt i
+     `.klippekort-cards`, som gjer det same der. */}}
+<div class="kortplass">
+<div class="kort medlemskort {{.Medlemskap.Status}}{{if .Medlemskap.IsStudentSenior}} student{{end}}{{if .Medlemskap.Tildelt}} tildelt{{end}}">
+    <div class="card-header">
+        <h3 class="card-title">
+            <span class="merke" aria-hidden="true"></span>{{.Namn}}
+        </h3>
+        <p class="stodalinje">
+            {{template "ljos" (dict "Status" .Medlemskap.Status)}}
+            {{- if eq .Medlemskap.Status "active"}}{{t .Lang "medlemskapet.status_active"}}
+            {{- else if eq .Medlemskap.Status "paused"}}{{t .Lang "medlemskapet.status_paused"}}
+            {{- else if eq .Medlemskap.Status "freeze_requested"}}{{t .Lang "medlemskapet.status_freeze_requested"}}
+            {{- else}}{{t .Lang "medlemskapet.status_cancelled"}}{{end}}
+        </p>
+    </div>
+
+    {{/* Namnet på den som eig kortet. Det er dette som gjer det til
+         *ditt* kort og ikkje eit prisskilt. */}}
+    <p class="medlemskort-eigar">{{.UserName}}</p>
+
+    {{/* How long you have been here. It stands first among the details
+             because it belongs to the card and not to the agreement: it does
+             not change when you switch membership, and it is the only thing
+             the card can say about an assigned membership that is not a role.
+             See MedlemSidan in database/svartmedlem.go. */}}
+    {{if .MedlemSidan}}
+    <div class="detail-row">
+        <span class="detail-label">{{t .Lang "medlemskapet.medlem_sidan"}}</span>
+        {{/* Berre aaret. «28. august 2026» er ein dato — han svarar på
+             «kva dag», og det er ikkje spursmaalet. «2026» svarar på
+             det som stend i merkelappen. */}}
+        <span class="detail-value">{{.MedlemSidan.Year}}</span>
+    </div>
+    {{end}}
+
+    {{/* How long the card is valid. It stood on the binding and showed only
+             when there was one — so a monthly card had no "valid until" at
+             all, and a card that does not say how long it lasts does not say
+             the most important thing about itself.
+    
+             Now it is *the term you have bought*, and it falls out of the
+             membership itself:
+    
+               assigned      ∞ (no date — the role decides)
+               cancelled     next renewal — what you have paid for
+               binding > 0   the end of the binding — a yearly card lasts twelve months
+               otherwise     next renewal — a monthly card lasts a month
+    
+             And if the card is frozen, the clock stops: the expiry is pushed
+             forward by the time the freeze has lasted, so twelve months is
+             twelve months of *use*.
+    
+             The rules used to stand here in the template. They live in
+             GjeldTil on the model now — they are rules and not drawing, they
+             have a clock in them (a freeze stops the expiry), and there they
+             can be tested. The template only asks.
+    
+             ∞ is a typographic glyph in the reading face and not an emoji —
+             same reason as ✓ in innsjekk.html (ARKET §7). But it *carries*
+             the value here rather than decorating one, so the screen reader
+             gets the word beside it: what a reader does with U+221E is not
+             something the template can know. */}}
+    <div class="detail-row">
+        <span class="detail-label">{{t .Lang "medlemskapet.gjeld_til"}}</span>
+        <span class="detail-value">
+            {{- with gjeldTil .Medlemskap -}}
+            {{norskDatoÅr .}}
+            {{- else -}}
+            <span aria-hidden="true">∞</span><span class="skjermlesar">{{t $.Lang "medlemskapet.utan_utlaup"}}</span>
+            {{- end -}}
+        </span>
+    </div>
+
+    {{/* An assigned membership has no price — it is paid with Karma. "0 kr per
+             month" is not the same: that reads as an agreement which happens
+             to be free right now. See database/svartmedlem.go. */}}
+    <div class="detail-row">
+        <span class="detail-label">{{t .Lang "medlemskapet.pris"}}</span>
+        <span class="detail-value">
+            {{- if .Medlemskap.Tildelt}}{{t .Lang "medlemskapet.fylgjer_rolla"}}
+            {{- else}}{{printf "%.0f" (divf .Medlemskap.Price 100)}} {{t .Lang "membership.price_per_month"}}{{end}}
+        </span>
+    </div>
+
+    {{/* The actions follow the state — and an assigned membership has no state
+             to change. There is no row in user_memberships to freeze or
+             cancel; the buttons would point at nothing, and "Cancel" on
+             something that follows your role is an offer the house cannot
+             keep. */}}
+    {{if and .Handlingar (not .Medlemskap.Tildelt)}}
+    <div class="medlemsknappar">
+        {{if eq .Medlemskap.Status "active"}}
+        <button type="button" class="btn" data-handling="freeze">{{t .Lang "medlemskapet.freeze"}}</button>
+        {{else if eq .Medlemskap.Status "freeze_requested"}}
+        <button type="button" class="btn" data-handling="cancel-freeze">{{t .Lang "membership.cancel_request"}}</button>
+        {{else if eq .Medlemskap.Status "paused"}}
+        <button type="button" class="btn" data-handling="unfreeze">{{t .Lang "membership.unfreeze"}}</button>
+        {{end}}
+        {{if .KannSeiaUpp}}
+        <button type="button" class="btn-danger" data-handling="remove"
+                data-stadfest="{{t .Lang "medlemskapet.cancel_confirm"}}">{{t .Lang "medlemskapet.cancel"}}</button>
+        {{end}}
+    </div>
+    {{end}}
+</div>
+</div>
+{{end}}

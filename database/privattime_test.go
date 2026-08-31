@@ -5,12 +5,12 @@ import (
 	"time"
 )
 
-func lagTime(t *testing.T, db *Database, tittel string, naar time.Time, plassar int) int64 {
+func lagTime(t *testing.T, db *Database, tittel string, når time.Time, plassar int) int64 {
 	t.Helper()
 	res, err := db.Conn.Exec(`
 		INSERT INTO events (title, start_time, end_time, class_type, capacity)
 		VALUES (?, ?, ?, 'reformer', ?)`,
-		tittel, veggtekst(naar), veggtekst(naar.Add(time.Hour)), plassar)
+		tittel, veggtekst(når), veggtekst(når.Add(time.Hour)), plassar)
 	if err != nil {
 		t.Fatalf("timen %s: %v", tittel, err)
 	}
@@ -24,9 +24,9 @@ func TestPrivatTimeSynestBerreForEigaren(t *testing.T) {
 	anna := lagBrukar(t, db, "Anna")
 	bjørn := lagBrukar(t, db, "Bjørn")
 
-	naa := time.Now()
-	lagTime(t, db, "Opa reformer", naa, 4)
-	privat := lagTime(t, db, "PT Anna", naa, 1)
+	nå := time.Now()
+	lagTime(t, db, "Opa reformer", nå, 4)
+	privat := lagTime(t, db, "PT Anna", nå, 1)
 	if err := db.SettPrivatTime(privat, anna); err != nil {
 		t.Fatalf("SettPrivatTime: %v", err)
 	}
@@ -57,19 +57,19 @@ func TestPrivatTimeErUteAvVikaTilAndre(t *testing.T) {
 	anna := lagBrukar(t, db, "Anna")
 	bjørn := lagBrukar(t, db, "Bjørn")
 
-	// Maandagen i denne vika. handlers.VikeMaandag kann ikkje nyttast
+	// Maandagen i denne vika. handsamarar.VikeMåndag kann ikkje nyttast
 	// her — det hadde vorte ein importring.
-	naa := time.Now()
-	maandag := time.Date(naa.Year(), naa.Month(), naa.Day(), 0, 0, 0, 0, naa.Location())
-	for maandag.Weekday() != time.Monday {
-		maandag = maandag.AddDate(0, 0, -1)
+	nå := time.Now()
+	måndag := time.Date(nå.Year(), nå.Month(), nå.Day(), 0, 0, 0, 0, nå.Location())
+	for måndag.Weekday() != time.Monday {
+		måndag = måndag.AddDate(0, 0, -1)
 	}
-	privat := lagTime(t, db, "PT Anna", maandag.Add(10*time.Hour), 1)
+	privat := lagTime(t, db, "PT Anna", måndag.Add(10*time.Hour), 1)
 	if err := db.SettPrivatTime(privat, anna); err != nil {
 		t.Fatalf("SettPrivatTime: %v", err)
 	}
 
-	vekaTilAnna, err := db.GetEventsForWeek(maandag, anna)
+	vekaTilAnna, err := db.GetEventsForWeek(måndag, anna)
 	if err != nil {
 		t.Fatalf("veka til Anna: %v", err)
 	}
@@ -77,7 +77,7 @@ func TestPrivatTimeErUteAvVikaTilAndre(t *testing.T) {
 		t.Errorf("Anna skal sjaa PT-økti si i vika, saag %d", len(vekaTilAnna))
 	}
 
-	vekaTilBjørn, err := db.GetEventsForWeek(maandag, bjørn)
+	vekaTilBjørn, err := db.GetEventsForWeek(måndag, bjørn)
 	if err != nil {
 		t.Fatalf("veka til Bjørn: %v", err)
 	}
@@ -87,8 +87,8 @@ func TestPrivatTimeErUteAvVikaTilAndre(t *testing.T) {
 }
 
 // Synlegheit er ikkje tryggleik. Bjørn ser ikkje timen, men han kann
-// gissa id-et — og daa lyt paameldingi seia nei.
-func TestPrivatTimeAvviserPaameldingFraaAndre(t *testing.T) {
+// gissa id-et — og då lyt paameldingi seia nei.
+func TestPrivatTimeAvviserPaameldingFråAndre(t *testing.T) {
 	db := prøvebase(t)
 	anna := lagBrukar(t, db, "Anna")
 	bjørn := lagBrukar(t, db, "Bjørn")

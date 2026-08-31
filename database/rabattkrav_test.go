@@ -32,17 +32,17 @@ func rabattDB(t *testing.T) *Database {
 	return &Database{Conn: conn}
 }
 
-var naa = time.Date(2026, 9, 1, 12, 0, 0, 0, time.UTC)
+var nå = time.Date(2026, 9, 1, 12, 0, 0, 0, time.UTC)
 
 // Å krysse av gjev eit krav, ikkje ein rabatt.
 //
 // Fyrr sette krysset rabatten beinveges — eller rettare: det sette ingen
-// ting, av di profilhandsamaren aldri las feltet. Baae delar er gale paa
+// ting, av di profilhandsamaren aldri las feltet. Båe delar er gale på
 // same viset: flata avgjorde noko ho ikkje hadde grunnlag for.
 func TestKrysetGjevEitKravOgIkkjeEinRabatt(t *testing.T) {
 	db := rabattDB(t)
 
-	if err := db.LagRabattkrav(1, naa); err != nil {
+	if err := db.LagRabattkrav(1, nå); err != nil {
 		t.Fatal(err)
 	}
 
@@ -67,7 +67,7 @@ func TestKrysetGjevEitKravOgIkkjeEinRabatt(t *testing.T) {
 func TestToKryssErIkkjeToKrav(t *testing.T) {
 	db := rabattDB(t)
 	for i := 0; i < 3; i++ {
-		if err := db.LagRabattkrav(1, naa); err != nil {
+		if err := db.LagRabattkrav(1, nå); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -77,15 +77,15 @@ func TestToKryssErIkkjeToKrav(t *testing.T) {
 	}
 }
 
-// Godkjenning gjev rabatten, og han gjeng ut etter tri aar.
+// Godkjenning gjev rabatten, og han gjeng ut etter tri år.
 func TestGodkjenningGjevRabattSomGjengUt(t *testing.T) {
 	db := rabattDB(t)
-	if err := db.LagRabattkrav(1, naa); err != nil {
+	if err := db.LagRabattkrav(1, nå); err != nil {
 		t.Fatal(err)
 	}
 	ventande, _ := db.VentandeRabattkrav()
 
-	if err := db.AvgjerRabattkrav(ventande[0].ID, true, naa); err != nil {
+	if err := db.AvgjerRabattkrav(ventande[0].ID, true, nå); err != nil {
 		t.Fatal(err)
 	}
 
@@ -96,7 +96,7 @@ func TestGodkjenningGjevRabattSomGjengUt(t *testing.T) {
 	if !har {
 		t.Fatal("rabatten gjeld ikkje etter godkjenning")
 	}
-	vil := naa.AddDate(RabattAar, 0, 0)
+	vil := nå.AddDate(RabattÅr, 0, 0)
 	if til.Year() != vil.Year() || til.Month() != vil.Month() || til.Day() != vil.Day() {
 		t.Errorf("utgangsdatoen er %s, venta %s", til.Format("2006-01-02"), vil.Format("2006-01-02"))
 	}
@@ -110,10 +110,10 @@ func TestGodkjenningGjevRabattSomGjengUt(t *testing.T) {
 // Eit avvist krav gjev ingen rabatt, og det står som avvist.
 func TestAvvistKravGjevIngenRabatt(t *testing.T) {
 	db := rabattDB(t)
-	db.LagRabattkrav(1, naa)
+	db.LagRabattkrav(1, nå)
 	ventande, _ := db.VentandeRabattkrav()
 
-	if err := db.AvgjerRabattkrav(ventande[0].ID, false, naa); err != nil {
+	if err := db.AvgjerRabattkrav(ventande[0].ID, false, nå); err != nil {
 		t.Fatal(err)
 	}
 	if har, _, _ := db.StudentrabattFor(1); har {
@@ -131,13 +131,13 @@ func TestAvvistKravGjevIngenRabatt(t *testing.T) {
 // Eit krav vert berre avgjort ein gong.
 func TestKravetVertAvgjortBerreEinGong(t *testing.T) {
 	db := rabattDB(t)
-	db.LagRabattkrav(1, naa)
+	db.LagRabattkrav(1, nå)
 	ventande, _ := db.VentandeRabattkrav()
 
-	if err := db.AvgjerRabattkrav(ventande[0].ID, true, naa); err != nil {
+	if err := db.AvgjerRabattkrav(ventande[0].ID, true, nå); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.AvgjerRabattkrav(ventande[0].ID, false, naa); err == nil {
+	if err := db.AvgjerRabattkrav(ventande[0].ID, false, nå); err == nil {
 		t.Error("kravet lét seg avgjera ein gong til")
 	}
 	// Og det fyrste svaret stend.
@@ -146,12 +146,12 @@ func TestKravetVertAvgjortBerreEinGong(t *testing.T) {
 	}
 }
 
-// Å ta krysset attende tek baade kravet og rabatten.
-func TestKrysetAvTekBaadeKravOgRabatt(t *testing.T) {
+// Å ta krysset attende tek båe kravet og rabatten.
+func TestKrysetAvTekBåeKravOgRabatt(t *testing.T) {
 	db := rabattDB(t)
-	db.LagRabattkrav(1, naa)
+	db.LagRabattkrav(1, nå)
 	ventande, _ := db.VentandeRabattkrav()
-	db.AvgjerRabattkrav(ventande[0].ID, true, naa)
+	db.AvgjerRabattkrav(ventande[0].ID, true, nå)
 
 	if err := db.TrekkRabattkrav(1); err != nil {
 		t.Fatal(err)

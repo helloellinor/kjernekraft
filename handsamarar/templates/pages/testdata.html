@@ -1,0 +1,85 @@
+{{/* Testdata — verkty, ikkje ei side folk ser.
+
+     Ho stod som 280 liner HTML i ein Go-streng inni membership.go, med
+     eit eige stilark på 133 liner: Segoe UI, tolv hardkoda hex-fargar,
+     gradientar og 12px hjørne. Eit anna hus, med andre ord, teikna inne
+     i dette.
+
+     No er ho ein mal som alle andre og ber husets eigne klassar, so ho
+     fylgjer temaet og maalestokken utan aa vita um deim.
+
+     Ingen umsetjingsnyklar: sida er berre open når
+     KJERNEKRAFT_ENV=development, og verkstaden på /arket gjer det same.
+     Nyklar for tolv strengar ingen elev ser er tri filer aa halda i takt
+     for ingen ting. */}}
+
+{{define "content"}}
+<h1 class="page-title">Testdata</h1>
+<p class="page-description">
+  Kvar knapp skriv i basen med ein gong. Det finst ingi angring —
+  bruk henne berre paa ei base du eig sjølv.
+</p>
+
+{{/* Rekkja er ikkje tilfeldig: kalenderen fyrst, av di medlemskap og
+     klipp heng på timane som alt stend der. */}}
+<section class="content-section">
+  <h2 class="section-title">Kalenderdata</h2>
+  <p>Timar, seriar og påmeldingar for vikone kring i dag.</p>
+  <button type="button" class="btn" data-endepunkt="/api/shuffle-test-data">Generer kalenderdata</button>
+  <p class="svarlina" role="status" aria-live="polite">&nbsp;</p>
+</section>
+
+<section class="content-section">
+  <h2 class="section-title">Medlemskapsdata</h2>
+  <p>Medlemskap, frysingar og avgifter.</p>
+  <button type="button" class="btn" data-endepunkt="/api/shuffle-memberships">Generer medlemskapsdata</button>
+  <p class="svarlina" role="status" aria-live="polite">&nbsp;</p>
+</section>
+
+<section class="content-section">
+  <h2 class="section-title">Klippekort</h2>
+  <p>Kort, klipp og utløp for brukarane som finst.</p>
+  <button type="button" class="btn" data-endepunkt="/api/shuffle-user-klippekort">Generer klippekort</button>
+  <p class="svarlina" role="status" aria-live="polite">&nbsp;</p>
+</section>
+
+<section class="content-section">
+  <h2 class="section-title">Alt saman</h2>
+  <p>Dei tri ovanfor, i rett rekkjefylgd.</p>
+  <button type="button" class="btn btn-primary" data-endepunkt="/api/shuffle-all-test-data">Generer alt</button>
+  <p class="svarlina" role="status" aria-live="polite">&nbsp;</p>
+</section>
+{{end}}
+
+{{define "scripts"}}
+<script>
+// Éin lyttar for alle knappane. Det stod fire funksjonar fyrr, ord for
+// ord like, som kvar sette sin eigen knapp og si eigi lina.
+//
+// Svarlina ber eit hardt mellomrom fraa fyrste teikning, so ho tek
+// plassen sin med ein gong og ingen ting flyttar seg naar svaret kjem
+// (ARKET §3). csrf.js heng nykelen paa fetch-kallet.
+document.addEventListener('click', function (e) {
+    var knapp = e.target.closest('button[data-endepunkt]');
+    if (!knapp) return;
+
+    var lina = knapp.parentElement.querySelector('.svarlina');
+    var ord = knapp.textContent;
+    knapp.disabled = true;
+    knapp.textContent = 'Arbeider …';
+    lina.textContent = ' ';
+
+    fetch(knapp.dataset.endepunkt, { method: 'POST' })
+        .then(function (svar) {
+            if (!svar.ok) throw new Error('tenaren svara ' + svar.status);
+            return svar.json();
+        })
+        .then(function (d) { lina.textContent = d.message || 'Ferdig.'; })
+        .catch(function (feil) { lina.textContent = 'Gjekk gale: ' + feil.message; })
+        .finally(function () {
+            knapp.disabled = false;
+            knapp.textContent = ord;
+        });
+});
+</script>
+{{end}}

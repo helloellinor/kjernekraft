@@ -12,11 +12,11 @@ import (
 	"kjernekraft/models"
 )
 
-// Prøvone gjeng ikkje ut paa nettet. Fixturen er eit ekte svar fraa
-// api.yogo.dk, klipt ned til fire timar — ein vanleg, ein med
-// mellomrom i namnet, ein utan lærar og ein avlyst. Ei prøva som ringjer
-// ein tenar me ikkje raar yver er ikkje ei prøva; ho er eit varsel um at
-// nokon andre hev endra noko.
+// The tests do not go out on the network. The fixture is a real response
+// from api.yogo.dk, cut down to four classes — an ordinary one, one with
+// spaces in the name, one without a teacher and one cancelled. A test that
+// calls a server we do not control is not a test; it is a notification that
+// somebody else changed something.
 func fixtur(t *testing.T) []byte {
 	t.Helper()
 	b, err := os.ReadFile("testdata/veke.json")
@@ -26,7 +26,7 @@ func fixtur(t *testing.T) []byte {
 	return b
 }
 
-// tenar gjev ein Yogo som svarar med fixturen, og fortel kva som vart spurt um.
+// tenar gives a Yogo that answers with the fixture, and reports what was asked.
 func tenar(t *testing.T, kropp []byte) (*Klient, *string) {
 	t.Helper()
 	var spurd string
@@ -45,7 +45,7 @@ func tenar(t *testing.T, kropp []byte) (*Klient, *string) {
 	return k, &spurd
 }
 
-// Det som kjem ut er timar huset kann bruka: namn, lærar, rom, klokke.
+// What comes out are classes the house can use: name, teacher, room, time.
 func TestTimaneKjemUtSomHusetKjennerDeim(t *testing.T) {
 	k, _ := tenar(t, fixtur(t))
 
@@ -60,7 +60,7 @@ func TestTimaneKjemUtSomHusetKjennerDeim(t *testing.T) {
 		t.Fatalf("venta tri timar utan den avlyste, fann %d", len(timar))
 	}
 
-	// Sortert paa tid: 10:00 fyre 17:30 same dagen, og dagen etter sist.
+	// Sortert på tid: 10:00 fyre 17:30 same dagen, og dagen etter sist.
 	for i := 1; i < len(timar); i++ {
 		if timar[i].StartTime.Before(timar[i-1].StartTime) {
 			t.Errorf("timane stend ikkje i tidsrekkjefylgd: %v fyre %v",
@@ -85,10 +85,10 @@ func TestTimaneKjemUtSomHusetKjennerDeim(t *testing.T) {
 	}
 }
 
-// Klokka er klokka paa veggen i Oslo. Yogo gjev «2026-08-31» og «17:30»
+// Klokka er klokka på veggen i Oslo. Yogo gjev «2026-08-31» og «17:30»
 // kvar for seg, og dei tali skal koma uendra ut — flyt dei ein time, er
 // heile timeplanen ein time gale halve aaret.
-func TestKlokkaErKlokkaPaaVeggen(t *testing.T) {
+func TestKlokkaErKlokkaPåVeggen(t *testing.T) {
 	k, _ := tenar(t, fixtur(t))
 
 	timar, err := k.Timar(context.Background(), dag(2026, 8, 31), dag(2026, 9, 6), Val{})
@@ -118,7 +118,7 @@ func TestKlokkaErKlokkaPaaVeggen(t *testing.T) {
 
 // Ein time utan lærar er ikkje ein feil. Han er ein time me ikkje veit
 // kven held, og det skal han faa segja.
-func TestTimeUtanLaerarGjengGjenom(t *testing.T) {
+func TestTimeUtanLærarGjengGjenom(t *testing.T) {
 	k, _ := tenar(t, fixtur(t))
 
 	timar, err := k.Timar(context.Background(), dag(2026, 8, 31), dag(2026, 9, 6), Val{})
@@ -136,8 +136,8 @@ func TestTimeUtanLaerarGjengGjenom(t *testing.T) {
 	}
 }
 
-// Avlyste timar kjem med naar ein bed um deim.
-func TestAvlysteKjemMedNaarEinBedUmDeim(t *testing.T) {
+// Cancelled classes come along when you ask for them.
+func TestAvlysteKjemMedNårEinBedUmDeim(t *testing.T) {
 	k, spurd := tenar(t, fixtur(t))
 
 	timar, err := k.Timar(context.Background(), dag(2026, 8, 31), dag(2026, 9, 6),
@@ -153,8 +153,8 @@ func TestAvlysteKjemMedNaarEinBedUmDeim(t *testing.T) {
 	}
 }
 
-// Spurnaden ber det API-en treng for aa svara med namn og ikkje med
-// id-ar. Utan `populate[]` er svaret ei liste med tal.
+// The request carries what the API needs to answer with names rather than
+// ids. Without populate[] the response is a list of numbers.
 func TestSpurnadenBerDatoarOgPopulate(t *testing.T) {
 	k, spurd := tenar(t, fixtur(t))
 
@@ -171,9 +171,9 @@ func TestSpurnadenBerDatoarOgPopulate(t *testing.T) {
 	}
 }
 
-// «Neste tidsrom» er heile vikor fraa i dag: tri vikor er tjueein dagar,
-// ikkje tjuetvo. Ein av-ved-ein her gjev eit fjerde gjentak av kvar
-// serie, og daa ser ein etter eit unnatak som ikkje finst.
+// "The next stretch" is whole weeks from today: three weeks is twenty-one
+// days, not twenty-two. An off-by-one here gives a fourth repetition of each
+// series, and then you are looking for an exception that does not exist.
 func TestNesteVekerSpennerHeileVikor(t *testing.T) {
 	k, spurd := tenar(t, fixtur(t))
 
@@ -206,7 +206,7 @@ func TestBaklengsSpennErEinFeil(t *testing.T) {
 // Ein tenar som svarar noko anna enn 200 skal segja det, ikkje gjeva ei
 // tom liste. Ei tom liste er eit gyldig svar — «ingen timar den vika» —
 // og ein feil som ser ut som eit gyldig svar er den verste sorten.
-func TestFeilFraaTenarenVertEinFeil(t *testing.T) {
+func TestFeilFråTenarenVertEinFeil(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 	}))
@@ -228,7 +228,7 @@ func TestFeilFraaTenarenVertEinFeil(t *testing.T) {
 }
 
 // Fixturen er eit ekte svar. Ryk skjemaet hjaa Yogo — eit felt som
-// skiftar namn — er det denne som fyrst seier ifraa.
+// skiftar namn — er det denne som fyrst seier ifrå.
 func TestFixturenLiknarEitEkteSvar(t *testing.T) {
 	var kropp struct {
 		Klassar []map[string]any `json:"classes"`
@@ -246,8 +246,8 @@ func TestFixturenLiknarEitEkteSvar(t *testing.T) {
 	}
 }
 
-func dag(aar int, m time.Month, d int) time.Time {
-	return time.Date(aar, m, d, 0, 0, 0, 0, time.UTC)
+func dag(år int, m time.Month, d int) time.Time {
+	return time.Date(år, m, d, 0, 0, 0, 0, time.UTC)
 }
 
 func contains(s, del string) bool {

@@ -11,7 +11,7 @@ import (
 // Ein brukar utan adresse skal ikkje ta heile administrasjonssida.
 //
 // GetAllUsers las kolonnone raatt, og eit einaste NULL gav «converting
-// NULL to string is unsupported» — som vart 500 paa /admin, og daa kom
+// NULL to string is unsupported» — som vart 500 på /admin, og då kom
 // ingen inn nokon stad. Feilen laag der heile tidi; det trongst berre ein
 // brukar utan adresse fyre han synte seg.
 func TestBrukarUtanAdresseTekIkkjeLista(t *testing.T) {

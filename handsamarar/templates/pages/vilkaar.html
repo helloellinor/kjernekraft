@@ -1,0 +1,14 @@
+{{define "content"}}
+{{/* Tittelen stod ingen stad. Vilkaarsfila er markdown utan ei einaste
+     yverskrift — fyrste lina er ordet «Vilkår» som eit vanleg avsnitt —
+     so sida kom ut med null `h1`, den einaste i huset (§5). Nettlesaren
+     sa «Handelsbetingelser» i fana og sida sjølv sa ingen ting.
+
+     Han stend her og ikkje i fila, av di fila vert vist tvo stader: som
+     heil sida her, og som eit stykkje inne i vilkaarsskuffa på
+     registreringi — og skuffa hev alt si eigi yverskrift. */}}
+<div class="vilkaar">
+    <h1 class="page-title">{{t .Lang "terms.title"}}</h1>
+    {{.Terms}}
+</div>
+{{end}}

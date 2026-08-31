@@ -1,0 +1,20 @@
+{{define "timeplan_scripts"}}
+{{/* Timeplanen hev ikkje eit skript lenger.
+
+     Her laag `signupForClass` og `toggleEventCard` — sytti liner som las
+     `.event-card`, `.signup-button` og `data-event-id`. Ingen av dei tri
+     fanst i nokon mal, so dei tvo `confirm()`-ane og dei fire
+     `alert()`-ane deira kunde ingen faa sjaa. Dei gjekk fyrst.
+
+     So stod `navigateWeek` og `applyFilters` att, og dei gjorde det same
+     paa kvar sin maate: sette eit ledd i adressa og lasta *heile* sida um
+     att med `location.href`. Det var den siste staden paa staden som
+     bygde dokumentet upp fraa grunnen for ei endring som gjeld eitt
+     stykke av det — og difor den einaste som kjendest treg.
+
+     No er pilene lenkjor med `hx-boost`, og sikti er `hx-get` paa kassen
+     sin. Baae byter `#vekebolken` og ingen ting meir. Sjaa timeplan.html.
+
+     Fila stend att av di malen kallar henne, og av di det er verdt aa
+     kunna lesa kvifor ho er tom. */}}
+{{end}}

@@ -1,27 +1,26 @@
 /* ===================================================================
-   aktiviteten
-   Ei mengd, ikkje ein identitet. Difor *ein* farge i fire trinn og ikkje
-   fire fargar: ein les mengdi av kor mykje blekk som ligg der, og
-   fargekanalen er brukt ein gong til noko han faktisk ber.
-
-   Trinni er color-mix mot arket, so dei snur med temaet av seg sjølv: i
-   det ljose gjeng dei fraa nesten-arket til full farge, i det myrke fraa
-   nesten-grunnen upp til full farge. Lysstyrken fell jamt i baae —
-   det er den eine prøva ein trinnskala lyt bestaa.
-
-   Ingi fargeforklaring med namn: det finst ingen namn her. Skalaen under
-   kartet segjer kva veg mørkare gjeng, og talet stend i klartekst i
-   samandraget yver — for trinni ligg under 3:1 mot grunnen, og daa lyt
-   tali kunna lesast ein annan stad enn i fargen.
-   =================================================================== */
-/* Bolken er ein stabel, og éin gap set all lufta i honom. Fyrr bar
-   kvart stykke sin eigen marg — samandraget `--rom-4`, brettet
-   `--rom-3`/`--rom-4`, skalaen `--rom-3`/`--rom-6` — og daa var ingen
-   tvo mellomrom like. §6: foreldret set lufta, ikkje borni.
-
-   Gruppone held yverskriftene saman med figurane sine, so ei yverskrift
-   aldri stend like langt fraa det ho namngjev som fraa det ho ikkje
-   namngjev. */
+      activity
+      A quantity, not an identity. Hence *one* colour in four steps and not
+      four colours: you read the quantity from how much ink is there, and
+      the colour channel is used for something it actually carries.
+   
+      The steps are color-mix against the sheet, so they turn with the
+      theme by themselves. Lightness falls evenly in both — the one test a
+      stepped scale has to pass.
+   
+      No colour key with names: there are no names here. The scale under
+      the board says which way darker goes, and the number stands in plain
+      words in the summary above — because the steps fall below 3:1 against
+      the ground, and then the numbers have to be readable somewhere other
+      than in the colour.
+      =================================================================== */
+/* The section is a stack, and one gap sets all the air in it. Each piece
+      used to carry its own margin — the summary --rom-4, the board
+      --rom-3/--rom-4, the scale --rom-3/--rom-6 — and then no two gaps were
+      equal. §6: the parent sets the air, not the children.
+   
+      The groups hold the headings together with their figures, so a heading
+      never stands as far from what it names as from what it does not. */
 .aktivitet { display: flex; flex-direction: column; gap: var(--rom-5); }
 .aktivitet > * { margin: 0; }
 .aktivitet-gruppe { display: flex; flex-direction: column; gap: var(--rom-3); }
@@ -31,40 +30,41 @@
   font-size: .95rem; color: var(--blekk-lys);
 }
 
-/* ---- brettet ----
-   Bordet i vestibylen med hol bora i. Det er ikkje ei ny form: hòlet er
-   `--skraakant-djup`, den same djupna som den tome dagen i vika og det
-   klipte hakket i klippekortet — myrk yverleppe, ljos underleppe,
-   ljoset ovanfraa (§2). Pinnen er ein kuppel som ligg i hòlet, same
-   ljoset som ein knapp.
-
-   Difor er dette HTML og ikkje SVG som fyrr: djupna bur i
-   `box-shadow: inset`, og han finst ikkje i SVG. Kartet var 52 prikkar
-   paa ei rad, og i ei sidespalta vart kvar prikk fem pikslar — ein
-   storleik der ingen ting kann lesast. 13 × 4 gjev det same aaret fire
-   gonger so mykje rom, og kvar rad er eit kvartal. */
+/* ---- the board ----
+      The table in the lobby with holes drilled in it. Not a new form: the
+      hole is --skraakant-djup, the same depth as the empty day in the week
+      and the punched notch in the klippekort — dark upper lip, light lower
+      lip, light from above (§2). The peg is a dome lying in the hole, lit
+      like a button.
+   
+      This is why it is HTML and not SVG: the depth lives in box-shadow:
+      inset, which does not exist in SVG. The chart was 52 dots in a row,
+      and in a side column each dot was five pixels — a size at which
+      nothing can be read. 13 × 4 gives the same year four times the room,
+      and each row is a quarter. */
 .brett {
   display: grid;
   grid-template-columns: repeat(var(--kolonnar, 13), 1fr);
   gap: var(--rom-2);
-  /* Brettet er like breidt som bjelkeraden under. Dei tvo er bilete av
-     det same aaret og skal liggja i same spalta — stod dei paa ulik
-     breidd, las dei seg som tvo ting som hende aa hamna attmed
-     kvarandre. */
+  /* The board is as wide as the bar row under it. The two are pictures of
+          the same year and should lie in one column — at different widths
+          they read as two things that happened to end up next to each
+          other. */
 }
 
-/* Hòlet ber tvo ting, og dei stend i kvar sin kanal so dei ikkje gjeng i
-   vegen for kvarandre (§1: farge segjer *kva*, form segjer *korleis* —
-   her segjer styrken *kor mykje*).
-
-     --slagfarge   kva slag trening det var mest av den vika
-     lysstyrken    kor mange gonger: 1 er tend, 3 er full
-
-   Grunnfargen er turkisen, den same som elles tyder «i live».
-
-   Eit tomt hol er ikkje ingen ting. Ei vika ein ikkje var her stend som
-   eit bora hol i bordet — som den tome dagen i vika, og det er den same
-   tingen sagd paa den same maaten. */
+/* The hole carries two things, on separate channels so they do not get in
+      each other's way (§1: colour says *what*, form says *how* — here
+      strength says *how much*).
+   
+        --slagfarge   which kind of training there was most of that week
+        brightness    how many times: 1 is lit, 3 is full
+   
+      The base colour is the turquoise, the same one that elsewhere means
+      "alive".
+   
+      An empty hole is not nothing. A week you were not here stands as a
+      drilled hole in the table — like the empty day in the week, and it is
+      the same thing said the same way. */
 .hol {
   display: block;
   aspect-ratio: 1;
@@ -73,61 +73,60 @@
   box-shadow: var(--skraakant-djup);
 }
 
-/* Pinnen fyller hòlet og stikk upp or det.
-
-   Han bar `--knappedjup` fyrr, og det var feil form paa rett ting. Den
-   skuggen er bygd for ein kapsel: `inset 0 1px 0` er ei rett lina skuva
-   ein piksel ned, og paa ein flat topp legg ho seg langs kanten som ein
-   lippe. Paa ein sirkel rører ho berre toppbogen, og botnlippa berre
-   botnbogen — tvo laust hengjande kvite bogar som ikkje møtest paa
-   sidone. Det les seg ikkje som ein kuppel, det les seg som eit umriss
-   som er teikna eit hakk ved sida av forma.
-
-   Ei kule fangar ljoset i eit *punkt*, ikkje langs ei lina. So:
-   speglingi er radial og ligg høgt og litt til venstre, der ljoset kjem
-   fraa (§2); foten mørknar; og heilt nedst ligg ein tunn ljos bogn — det
-   er arket som kastar att, og det er han som gjer at ho ser vaat ut.
-
-   Alt ligg i `background-image` og ikkje i `box-shadow`, av di
-   gradient-stoppi er i *prosent*: pinnen er 11 px i skalaen under
-   brettet og 20 px paa brettet, og ljoset lyt sitja likt paa baae. Ein
-   `box-shadow` i px hadde vore dobbelt so brei paa den vesle. Berre
-   skuggen mot arket stend att der — han skal *ikkje* skalera, av di
-   arket ligg like langt under uansett kor stor pinnen er. */
+/* The peg fills the hole and stands up out of it.
+   
+      It carried --knappedjup, and that was the wrong form on the right
+      thing. That shadow is built for a capsule: inset 0 1px 0 is a straight
+      line pushed one pixel down, and on a flat top it lies along the edge
+      as a lip. On a circle it touches only the top arc, and the bottom lip
+      only the bottom arc — two loose white arcs that do not meet at the
+      sides. That does not read as a dome, it reads as an outline drawn a
+      notch beside the shape.
+   
+      A ball catches light at a *point*, not along a line. So: the specular
+      is radial and sits high and a little left, where the light comes from
+      (§2); the foot darkens; and right at the bottom lies a thin bright
+      curve — the sheet throwing back, and that is what makes it look wet.
+   
+      Everything is in background-image and not box-shadow, because gradient
+      stops are in *percent*: the peg is 11 px in the scale under the board
+      and 20 px on the board, and the light has to sit the same on both. A
+      box-shadow in px would be twice as wide on the small one. Only the
+      shadow cast on the sheet stays there — that must *not* scale, because
+      the sheet lies the same distance below whatever size the peg is. */
 .hol.pinne {
   /* Skuggen mot arket stend i px og skalerer ikkje — arket ligg like
      langt under uansett kor stor pinnen er. */
   box-shadow: var(--skugge-kule);
-  /* Glansen er `--glim-rund` i 00-token.css, delt med kula i
-     plassmaalaren og skiva paa ein plakett.
+  /* The gloss is --glim-rund in 00-token.css, shared with the ball in the
+          place gauge and the dial on a plaque.
      
-     Han stod skriven ut her, og dei tvo laga hadde drive fraa kvarandre:
-     speglingi laag paa `36% 22%` og kroppen paa `34% 22%` — tvo solar
-     paa den same kula, medan kommentaren attmed sa at dei var like.
-     Det er nettupp det `--sol` finst for aa hindra. */
+          It was written out here, and the two layers had drifted apart: the
+          specular lay at 36% 22% and the body at 34% 22% — two suns on the
+          same ball, while the comment beside them said they were the same.
+          That is exactly what --sol exists to prevent. */
   background-image: var(--glim-rund);
 }
-/* Eit slag ingen hev teikna laanar ingen produktfarge; han er berre
-   blekk — og reserven stend inne i `var()`, ikkje som ei eigi
-   utsegn paa `.hol`.
-
-   Det stod som `--slagfarge: var(--blekk-lys)` paa `.hol` fyrr, og daa
-   `.slag-*` flutte til `00-token.css` gjekk heile brettet graatt:
-   `.hol` og `.slag-yoga` hev *same* vekt (éin klasse kvar), so det er
-   rekkjefylgda i arket som avgjer — og 90 kjem etter 00. Reserven vann
-   yver farga kvar einaste gong.
-
-   Ein reserve skal aldri kappast med det han er reserve for. Inne i
-   `var()` gjeld han berre naar ingen hev sagt noko, og daa kann
-   `.slag-*` bu kvar som helst. `.bjelke` hev alltid gjort det slik. */
+/* A kind nobody has drawn borrows no product colour; it is just ink — and
+      the fallback lives inside var(), not as a declaration of its own on
+      .hol.
+   
+      It stood as --slagfarge: var(--blekk-lys) on .hol, and when .slag-*
+      moved to the token file the whole board went grey: .hol and .slag-yoga
+      carry the *same* weight (one class each), so source order decides —
+      and 90 comes after 00. The fallback won over the colour every time.
+   
+      A fallback must never compete with what it is a fallback for. Inside
+      var() it applies only when nobody has said anything, and then .slag-*
+      can live anywhere. */
 .hol.pinne.niv-1 { background-color: color-mix(in srgb, var(--slagfarge, var(--blekk-lys)) 38%, var(--ark)); }
 .hol.pinne.niv-2 { background-color: color-mix(in srgb, var(--slagfarge, var(--blekk-lys)) 66%, var(--ark)); }
 .hol.pinne.niv-3 { background-color: var(--slagfarge, var(--blekk-lys)); }
 
-/* Slagfargane stend i 00-token.css no. Dei var her medan brettet var
-   den einaste staden eit slag hadde ein farge; timekorti paa heimesida
-   ber den same fargen, og daa kann kartet ikkje bu i den eine av dei
-   tvo filene som les det. */
+/* The kind colours live in 00-palett.css now. They were here while the
+      board was the only place a kind had a colour; the class cards on the
+      home page carry the same colour, and then the map cannot live in one
+      of the two files that read it. */
 
 .varmeskala {
   display: flex; align-items: center; gap: var(--rom-2);
@@ -135,46 +134,46 @@
   font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
   color: var(--blekk-svakt);
 }
-/* .6875rem = dei utstelte 11 px — men i rem, so skalaen under brettet
-   veks med maalestokken som brettet sjølv. I px stod ho att paa 11
-   medan pinnane paa brettet voks, og skalaen laug um sin eigen
-   maalestokk (30.8.2026). */
+/* .6875rem = the styled 11 px — but in rem, so the scale under the board
+      grows with the same measure the board does. In px it stayed at 11 while
+      the pegs on the board grew, and the scale lied about its own scale. */
 .varmeskala .hol { width: .6875rem; height: .6875rem; flex: none; }
 
-/* Bjelkane ber alle same fargen. Lengdi er talet; aa fargeleggja dei
-   etter verdien hadde sagt det same ein gong til, med ein kanal som daa
-   ikkje kann segja noko anna. */
+/* The bars all carry the same colour. The length is the number; colouring
+      them by value would say the same thing again on a channel that then
+      cannot say anything else. */
 .bjelkerad { display: block; width: 100%; height: auto; overflow: visible; }
-/* Bjelken tek fargen av slaget, som hòlet paa brettet. `--slagfarge`
-   stend paa `.slag-*` lenger uppe og gjeld baae stader; ein turkis mars
-   i raden er den same marsen som det turkise hòlet yver. */
+/* The bar takes the kind's colour, like the hole on the board.
+      --slagfarge stands on .slag-* above and applies in both places; a
+      turquoise March in the row is the same March as the turquoise hole
+      above. */
 .bjelke { fill: var(--slagfarge, var(--blekk-lys)); }
 
-/* Glimet. Same trappa som paa knappen — glansen paa toppen, fallande
-   til ingen ting ved 72 % — av di det er den same tingen: noko som
-   stikk upp or arket og fangar ljos ovanfraa (§2).
-
-   Gradienten aaleine er ikkje nok. Det som gjer knappen *vaat* er ikkje
-   skinet i flata, det er den tunne ljose lippa langs kanten:
-   `inset 0 1px 0 var(--glans)` og `inset 0 -1px 1px` i `--knappedjup`.
-   Ein SVG hev ingen `inset`, so lippa lyt vera ein `stroke`.
-
-   Tvo ting gjorde han til ei ramme i staden for ljos.
-
-   Fyrst breiddi. `stroke-width: 1` er 1 *brukareining*, ikkje 1 piksel,
-   og bjelkeraden er 80 einingar strekt yver heile spalta — soleis vart
-   lippa fire-fem pikslar brei, ein kvit kant kring kvar bjelke.
-   `vector-effect: non-scaling-stroke` bind honom til ein skjermpiksel,
-   som knappen sin.
-
-   So farga. Knappen sin lippe fylgjer ikkje umrisset heile vegen: han
-   er ljos paa toppen, ingen ting paa sidone, og ein svakare attglans
-   nedst. Ein `stroke` i éin farge gjeng heile vegen rundt, og det er
-   skilnaden paa ei kant som fangar ljos og ei kant som er teikna paa.
-   Difor er `stroke` ein gradient og ikkje ein farge.
-
-   `pointer-events: none` so det er bjelken under som svarar paa
-   peikaren og ikkje glaset yver honom. */
+/* The highlight. Same falloff as on the button — the gloss at the top,
+      falling to nothing at 72 % — because it is the same thing: something
+      standing up out of the sheet catching light from above (§2).
+   
+      The gradient alone is not enough. What makes the button look *wet* is
+      not the sheen on the surface, it is the thin bright lip along the edge:
+      inset 0 1px 0 var(--glans) and inset 0 -1px 1px in --knappedjup. An SVG
+      has no inset, so the lip has to be a stroke.
+   
+      Two things made it a frame instead of light.
+   
+      First the width. stroke-width: 1 is 1 *user unit*, not 1 pixel, and the
+      bar row is 80 units stretched across the whole column — so the lip came
+      out four or five pixels wide, a white border around every bar.
+      vector-effect: non-scaling-stroke binds it to one screen pixel, like the
+      button's.
+   
+      Then the colour. The button's lip does not follow the outline all the
+      way round: it is bright on top, nothing on the sides, and a weaker
+      reflection at the foot. A stroke in one colour goes all the way round,
+      and that is the difference between an edge that catches light and an
+      edge that is drawn on. Hence a gradient stroke and not a colour.
+   
+      pointer-events: none so the bar underneath answers the pointer and not
+      the glass over it. */
 .bjelkeglim {
   fill: url(#bjelkeglim);
   stroke: url(#bjelkekant);

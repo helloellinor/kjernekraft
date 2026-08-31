@@ -72,7 +72,7 @@ func TestGruppetimenSynerSegBerreForGruppa(t *testing.T) {
 
 // Synlegheit er ikkje tryggleik: den som gissar eit id skal ikkje koma
 // inn heller.
-func TestUtanforGruppaKannIkkjeMeldaSegPaa(t *testing.T) {
+func TestUtanforGruppaKannIkkjeMeldaSegPå(t *testing.T) {
 	db := gruppeDB(t)
 	reformer, _ := db.LagGruppe("Reformer")
 	db.SettGruppemedlem(reformer, 1, true)
@@ -87,7 +87,7 @@ func TestUtanforGruppaKannIkkjeMeldaSegPaa(t *testing.T) {
 }
 
 // Det same spursmaalet, spurt av flata fyre ho teiknar knappen.
-func TestKannSjaaTimenFylgjerGruppa(t *testing.T) {
+func TestKannSjåTimenFylgjerGruppa(t *testing.T) {
 	db := gruppeDB(t)
 	reformer, _ := db.LagGruppe("Reformer")
 	db.SettGruppemedlem(reformer, 1, true)
@@ -99,7 +99,7 @@ func TestKannSjaaTimenFylgjerGruppa(t *testing.T) {
 		brukar int64
 		vil    bool
 	}{{open, 1, true}, {open, 2, true}, {stengd, 1, true}, {stengd, 2, false}} {
-		fekk, err := db.KannSjaaTimen(p.time, p.brukar)
+		fekk, err := db.KannSjåTimen(p.time, p.brukar)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -111,8 +111,8 @@ func TestKannSjaaTimenFylgjerGruppa(t *testing.T) {
 
 // Ei sletta gruppe opnar timane sine att.
 //
-// Stod dei att og peika paa ei gruppe som ikkje finst, var dei timar
-// ingen kunde sjaa — burte, utan at nokon hadde sagt at dei skulde burt.
+// Stod dei att og peika på ei gruppe som ikkje finst, var dei timar
+// ingen kunde sjå — burte, utan at nokon hadde sagt at dei skulde burt.
 func TestSlettaGruppeOpnarTimaneAtt(t *testing.T) {
 	db := gruppeDB(t)
 	reformer, _ := db.LagGruppe("Reformer")
@@ -167,11 +167,11 @@ func TestPrivatTimeOgGruppeLeverAttmedKvarandre(t *testing.T) {
 	}
 	pt, _ := res.LastInsertId()
 
-	if kann, _ := db.KannSjaaTimen(pt, 1); !kann {
+	if kann, _ := db.KannSjåTimen(pt, 1); !kann {
 		t.Error("eigaren saag ikkje sin eigen PT-time")
 	}
 	// Brukar 2 er med i gruppa, men PT-timen er ikkje hennar.
-	if kann, _ := db.KannSjaaTimen(pt, 2); kann {
+	if kann, _ := db.KannSjåTimen(pt, 2); kann {
 		t.Error("ein annan saag PT-timen")
 	}
 }

@@ -1,0 +1,221 @@
+{{define "week_grid"}}
+{{template "week_net" .}}
+{{template "timedokk" .}}
+{{end}}
+
+{{/* ---- the dock ----
+     It holds what you are looking at still while the rest scrolls. Pick
+     a day in a row and the class stands down here until you pick
+     another — you can keep scanning the week without anything moving,
+     and the signup button is always in the same place.
+
+     This is what made the schedule long before: every card carried its
+     whole detail, so the week became a tower. Now the row carries only
+     what you scan for, and the detail lives in the dock.
+
+     It used to sit inside week_grid. It is a name of its own now,
+     because the home page has the same marks in its lists and should be
+     able to sign up from them — same dock, same button, same place. */}}
+{{define "timedokk"}}
+<aside class="dokk" id="timedokk" hidden aria-live="polite">
+    <div class="dokkinnhald">
+        <div class="dokkkva">
+            <h3 class="dokktittel" id="dokk-tittel"></h3>
+            <p class="dokkkven"><span id="dokk-laerar"></span> <span class="timerom" id="dokk-rom"></span></p>
+        </div>
+        <div class="dokknaar">
+            <span class="dokkdag" id="dokk-dag"></span>
+            <span class="dokkklokke" id="dokk-klokke"></span>
+        </div>
+        <div class="dokkplassar">
+            <div class="plassmaalar" id="dokk-maalar"></div>
+            <span class="event-plassar"><b id="dokk-teke"></b><span class="av" id="dokk-av"></span></span>
+        </div>
+        <div class="dokkhandling">
+            {{/* The two buttons stand in the same row, and it is the row that
+                             gives the cross its height: align-items: stretch makes it
+                             exactly as tall as the action button beside it, whatever
+                             the button tokens say. The height used to be computed from
+                             those same tokens — the right answer, but two places to
+                             keep in step.
+            
+                             On narrow viewports they share the row rather than the
+                             cross dropping below: the action button takes what is
+                             left. A finger needs a wide surface, but not the whole
+                             line. */}}
+            <div class="dokkrad">
+                <button type="button" class="btn-primary" id="dokk-knapp"
+                        data-meld-paa="{{t .Lang "timeplan.signup"}}"
+                        data-venteliste="{{t .Lang "timeplan.waitlist"}}"
+                        data-meld-av="{{t .Lang "timeplan.cancel_signup"}}"></button>
+                <button type="button" class="btn dokklukk" id="dokk-lukk"
+                        aria-label="{{t .Lang "timeplan.close"}}">&times;</button>
+            </div>
+            <p class="dokkmelding" id="dokk-melding" role="status"></p>
+        </div>
+    </div>
+</aside>
+{{end}}
+
+{{/* The grid alone, without the dock. The workshop shows it on its own —
+     you do not need a dock to see whether the columns line up, and two
+     docks on one page would share an id. */}}
+{{define "week_net"}}
+{{/* The week folded. One row per class, one mark per day it runs. "Vinyasa
+     Flow with Kristina 07:15" is one class running Tuesday and Thursday —
+     not two. They used to stand as two identical cards in separate
+     columns, and the reader had to read the same line twice to see it was
+     the same one. */}}
+{{/* The filter above the week.
+
+     It lived in the first cell of the week header, over the column it
+     filters. The header is the day picker now, and two controls in the
+     same sticky line is one too many: the days are what you press often,
+     the filter what you set once.
+
+     So it stands above the grid, and it has no width limit: the eleven-rem
+     cap was what cut long teacher names off. A select is as wide as its
+     widest option (§9). */}}
+{{/* The week: the slider and the grid under it.
+
+     The box exists for one reason: --timetrapp — the column ladder — has
+     to be known to both. It lived on the grid, and when the slider moved
+     out of it the ladder fell away beneath it and the eight tabs became
+     eight rows. The ladder belongs to the week, not to the list. */}}
+<div class="vika">
+    {{/* The day slider stands *outside* the scroll box.
+    
+             It lay inside it and was sticky, and three things came with that
+             which nobody asked for: the box's scrollbar took the area behind
+             the slider and lay over it; the slider needed an opaque surface to
+             hide the classes scrolling under it, and that surface read as a box
+             over the classes; and the box clipped its edge.
+    
+             Outside, it is simply a control standing above the list. The
+             scrollbar belongs to the list alone and starts where it starts. */}}
+    <div class="timehovud">
+
+        {{/* The day picker, in the header where the days stood.
+        
+                     The day names stood here as seven buttons that *dimmed* the
+                     others and never filtered — the reasoning being that a filter
+                     takes from the grid the one thing it can do that a list
+                     cannot: show the whole week at once. That holds against a
+                     filter that is the default state; it does not hold against one
+                     you choose yourself. "All days" stands first and is selected
+                     when the page arrives.
+        
+                     The slider is the same .faner the membership, klippekort and
+                     payment pages carry — not a new control that resembles it. The
+                     column headings went with the seven buttons: each mark carries
+                     its own day, and the name stood twice.
+        
+                     It lives *inside* the header, so it comes along when you
+                     scroll — the header is sticky, and the question "what runs on
+                     Thursday" rarely arrives before you have scrolled a bit. */}}
+        {{/* Each tab carries the name twice: written out in full, and abbreviated.
+                     Which one shows is decided by the width — eight full names are
+                     fifty-five rem and will not fit on a phone. It is in one
+                     template and not two, because it is the same choice. */}}
+        <div class="faner dagfaner" role="tablist" aria-label="{{t .Lang "timeplan.vel_dag"}}">
+            <button type="button" class="fane" role="tab" data-dag=""
+                    aria-selected="true" aria-controls="veke-net">
+                <span class="dag-lang">{{t .Lang "timeplan.alle_dagar"}}</span><span class="dag-kort">{{t .Lang "timeplan.alle_stutt"}}</span>
+            </button>
+            {{range $i, $d := .WeekDays}}
+            <button type="button" role="tab" aria-controls="veke-net"
+                    class="fane{{if eq (index $.WeekDates $i | dagStreng) $.Today}} idag{{end}}"
+                    data-dag="{{add $i 1}}" aria-selected="false" aria-label="{{$d}}">
+                <span class="dag-lang">{{$d}}</span><span class="dag-kort">{{$d | dagKort3}}</span>
+            </button>
+            {{end}}
+        </div>
+    </div>
+
+    <div class="timeplan" id="veke-net">
+        {{/* The days are named once, at the top. Each mark lies in its column, so
+                     everything on Wednesday stands under everything else on
+                     Wednesday and you can read a day downward. The marks used to
+                     float right and never stood on the line. */}}
+
+        {{/* The classes that have been lie collapsed.
+        
+                     The week is a list you scan downward for the first class you
+                     *can* attend. A row where every occurrence has passed does not
+                     answer that question — it just stands there taking a hundred
+                     pixels, and today's first class ends up below the screen edge.
+                     It is still here for anyone looking for something that was;
+                     only not in the way of anyone looking for something coming. */}}
+        {{/* A selected day with no classes. The empty state for the whole week
+                     stands further down and is drawn by the server; this is the same
+                     question asked by a filter in the browser, so the answer has to
+                     come from there too.
+        
+                     It carried .no-data, and .no-data is one of the four names that
+                     get the card box (§9) — surface, hairline, radius, padding. That
+                     made the answer a *card*: a thing of the same kind as the
+                     classes, differing only in that there is no class in it. But an
+                     empty filter is not an object. It is a sentence about how things
+                     stand, and the briefing is that sentence in this house. */}}
+        <p class="briefing dagtom" hidden>{{t .Lang "timeplan.ingen_denne_dagen"}}</p>
+
+        {{$umme := pastRowCount .ClassRows}}
+        {{if $umme}}
+        <button type="button" class="ummeknapp" aria-expanded="false" aria-controls="veke-net">
+            <span class="ummetal">{{tf .Lang "timeplan.gjengne_timar" $umme}}</span>
+            <span class="ummeord">{{t .Lang "timeplan.syn_gjengne"}}</span>
+        </button>
+        <script>
+        (function () {
+            // Knappen stend inni nettet, so han fylgjer med kvar nettet er
+            // teikna — timeplanen og arket baae. Ein lyttar per knapp.
+            var k = document.currentScript.previousElementSibling;
+            if (!k || k.dataset.bunde) return;
+            k.dataset.bunde = "1";
+            k.addEventListener("click", function () {
+                var net = k.closest(".timeplan");
+                var open = k.getAttribute("aria-expanded") === "true";
+                k.setAttribute("aria-expanded", open ? "false" : "true");
+                net.classList.toggle("syn-umme", !open);
+            });
+        })();
+        </script>
+        {{end}}
+
+        {{range .ClassRows}}
+        {{/* Same kortet som på heimesida. Ei rad er éin time gjenom vika,
+             so slaget er det same kvar dag han gjeng, og vengen kan bera
+             det for heile rada. Kartet frå slag til farge står i
+             00-token.css. */}}
+        <div class="timerad kort {{slagklasse .Class}}{{if .AllPast}} rad-umme{{end}}">
+            <div class="timekva">
+                <h3 class="timetittel">{{.Title}} <span class="lengd">{{.Minute}} min</span></h3>
+                <p class="timekven">{{.Teacher}}{{if .Room}} <span class="timerom">{{.Room}}</span>{{end}}</p>
+            </div>
+
+            {{/* Eitt merke per dag. Merket ber si eigi fylling, so ein ser
+                 med det same at torsdagen er full og tysdagen ikkje. */}}
+            <div class="timedagar">
+                {{range .Days}}
+                {{if .Has}}{{template "dagmerke" .Session}}
+                {{else}}
+                {{template "daudmerke" (dict "Idag" .IsToday "Umme" .IsPast "Column" .Column)}}
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+        {{else}}
+        {{/* Ei heil vika utan timar. Same svaret som `.dagtom` over, berre
+             stelt av tenaren i staden for av eit filter — og difor same
+             forma: ei setning, ikkje ein kasse.
+
+             Ho stod som ein fjorten rem høg midtstilt blokk med eigen
+             yverskriftsgrad, og tok med det rommet timarne vilde hatt.
+             Det gjorde tomrommet til det største på sida. Ingen timar er
+             ikkje ei stor hending; det er ei kort setning. */}}
+        <p class="briefing">{{t .Lang "timeplan.no_classes"}}. {{t .Lang "timeplan.no_classes_sub"}}</p>
+        {{end}}
+    </div>
+</div>
+
+{{end}}

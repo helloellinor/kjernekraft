@@ -313,7 +313,7 @@ og verkar i baae temaom utan aa skrivast um.
 ## 11. Ord
 
 Kvar streng er ein umsetjingsnykel. `{{t .Lang "bolk.nykel"}}`, og
-nykelen finst i alle tri filone under `locales/`.
+nykelen finst i alle tri filone under `mål/`.
 
 Hardkodar du ein streng i ein mal, finst han berre paa eitt maal, og
 ingen oppdagar det fyrr nokon byter maal.

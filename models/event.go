@@ -20,20 +20,25 @@ type Event struct {
 	CurrentEnrolment int    `json:"current_enrolment"` // Current number of enrolled
 	Color            string `json:"color"`             // Color for the class type
 	// Serien timen er laga av. Ein time *er* ikkje ein ting for seg —
-	// han er eitt utslag av ein serie («yoga med Leon, maandag 18:00»),
+	// han er eitt utslag av ein serie («yoga med Leon, måndag 18:00»),
 	// og det er serien administrasjonen endrar. Timane ber serie-id-en
 	// so dei kann finna kvarandre att.
 	SerieID int64 `json:"rule_id"`
-	// Timen si eigi kapasitet, raa som ho stend i rada — 0 tyder «ingi
-	// eigi», og daa gjeld rommet sitt tal.
+	// Timen si eigi kapasitet. `nil` tyder at han ikkje set noko sjølv,
+	// og då gjeld rommet sitt tal.
 	//
-	// `Capacity` yver er det utrekna talet og kann ikkje svara paa um
-	// det *er* eit yverstyrt tal: eit rom med tolv plassar og ei
-	// yverstyring paa tolv gjev det same svaret. Administrasjonen lyt
-	// kunna skilja dei tvo, so feltet kann syna rommet sitt tal som eit
-	// framlegg og timen sitt som ein verdi.
-	EigenPlassar int `json:"eigen_plassar"`
-	// Rommet. Kapasiteten kjem herifraa naar timen ikkje set si eigi.
+	// `Capacity` yver er det utrekna talet og kann ikkje svara på um det
+	// *er* eit yverstyrt tal: eit rom med tolv plassar og ei yverstyring
+	// på tolv gjev det same svaret. Administrasjonen lyt kunna skilja dei
+	// tvo, so feltet kann syna rommet sitt tal som eit framlegg og timen
+	// sitt som ein verdi.
+	//
+	// Han var eit `int` der 0 tydde «ingi eigi». Det er den same feilen
+	// som gjer at ein spurning utan romkopling gjev 0 plassar og ser rett
+	// ut: talet 0 kann ikkje segja frå om det er eit svar eller eit
+	// fråver. Ein peikar kann.
+	EigenPlassar *int `json:"eigen_plassar"`
+	// Rommet. Kapasiteten kjem herifrå når timen ikkje set si eigi.
 	// Gruppa timen er open for. Null er open for alle.
 	GruppeID     int    `json:"gruppe_id"`
 	RoomID       int    `json:"room_id"`
@@ -54,8 +59,8 @@ func (e Event) Ledige() int {
 // Full segjer um timen er utseld.
 func (e Event) Full() bool { return e.Capacity > 0 && e.CurrentEnrolment >= e.Capacity }
 
-// LengdMin er lengdi paa timen i minutt. JS-en i administrasjonen
-// treng henne for aa rekna ny slutt naar starten vert flutt.
+// LengdMin er lengdi på timen i minutt. JS-en i administrasjonen
+// treng henne for aa rekna ny slutt når starten vert flutt.
 func (e Event) LengdMin() int { return int(e.EndTime.Sub(e.StartTime).Minutes()) }
 
 // Room er eit rom i studioet. Kapasiteten er ein eigenskap ved rommet og

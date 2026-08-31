@@ -1,0 +1,227 @@
+{{define "merke_defs"}}
+{{/* Filtri timemerket nyttar. Dei stend éin gong på sida, ikkje eitt
+     sett per merke — og for at det skal gaa, ber dei ingen farge.
+
+     Fyrste utgaava nytta feFlood med `flood-color: var(--kant)`. Det
+     verkar, men fargen vert løyst der *filteret* stend og ikkje der det
+     vert nytta, so eit sams sett gav alle merki fargane til rot-temaet.
+     Det synte seg med det same på /arket, der ein ljos bolk stend
+     attmed ein myrk på den same sida.
+
+     No arbeider filtri på SourceGraphic i staden: dei flyttar og
+     klypper det elementet sjølv teiknar, so fargen kjem frå CSS på
+     merket og fylgjer temaet der det stend. Filteret veit ingen ting um
+     farge, og kann difor delast av alle.
+
+     Og so det eine steget ingen maa «rydda burt»: feComponentTransfer
+     med slope 255 mettar alfaen fyre bandet vert rekna. Utan det gjeng
+     heile konstruksjonen sund for alt som ikkje er ugjenomsynlegt —
+     lippone er fylte med 22–40 % svart, so SourceAlpha var 0.22, den
+     skuvne kopien sletta aldri innmaten, og «bandet» vart ein jamn
+     daam yver heile flata i staden for ei stripa i kanten. Slik stod
+     kvar lippa på kvart merke frå fyrste dag: ikkje veik, men aldri
+     teikna som lippa i det heile. Augo sae det (29.8.2026); rekninga
+     fann det. */}}
+<svg class="merke-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    {{/* Filterromet er *rekna*, ikkje vald.
+
+         Nettlesaren rasteriserer heile filterromet, ikkje berre det
+         som vert synleg. Romi stod på 150–180 % i kvar leid, altso
+         2,25–3,24 gonger arealet av elementet — medan fem av desse
+         sju filtri endar på `feComposite operator="in"` mot
+         SourceGraphic og difor *ikkje kann* teikna utanfor kjelda i
+         det heile.
+
+         No er kvart rom sett til so langt verknaden rekk: skuvet pluss
+         tri standardavvik av uskarpleiken (som dekkjer meir enn 99 % av
+         ein gauss).
+
+         Merk at prosenti er av *elementet si eigi ramma* og ikkje av
+         viewBoxen. Same filteret ligg på ting av ulik storleik —
+         #lippe-djup ligg både på silhuetten (58 breid) og på skiva —
+         og romet lyt difor halda for det *minste* av dei. Difor er
+         #lippe-djup-fall framleis vid: han ligg på vindauga, som er
+         14,5 høgt, og 6,7 einingar uskarpleik er halve høgdi der.
+         Romi er ulike i x og y av same grunnen.
+
+         Timeplanen hev 668 filterbruk på ei sida. Dette tek det samla
+         rasterarealet ned 1,57 gonger. */}}
+    {{/* Umrisset: silhuetten utvida éin einheit. feMorphology arbeider
+         på silhuetten aat heile figuren, og det er grunnen til at han
+         er brukt: teikna ein dei tri formene ein gong til litt større,
+         vandra dei innhole hyrno innyver i staden for utyver, og lina
+         slapp upp nettupp i skøyten millom formene. */}}
+    <filter id="merkekant" x="-5%" y="-11%" width="110%" height="122%">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="1"/>
+    </filter>
+    {{/* Ringen utanpå lina, som `0 0 0 1px var(--merke)` på eit felt i fokus. */}}
+    <filter id="merkering" x="-6%" y="-6%" width="112%" height="112%">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="2"/>
+    </filter>
+
+    {{/* ---- lippa: eit par som gjer ei form innsokken ----
+
+         `lippe-djup` og `lippe-ljos` er *eitt* verkemiddel i tvo delar,
+         og dei gjeng alltid saman:
+
+           lippe-djup   skuv forma eitt hakk NED, mjuka henne, trekk
+                        henne frå seg sjølv. Att stend ei tunn myrk
+                        stripa inne i YVERkanten.
+           lippe-ljos   same grepet med skuvet UPP, so stripa hamnar
+                        inne i NEDkanten, i ljost.
+
+         Myrkt yver og ljost under les auga som «trykt inn». Byter ein
+         dei tvo, les det som «hevja upp». Det er heile illusjonen.
+
+         Namnet er det same som fargen dei vert måla med — sjå
+         `--lippe-djup` og `--lippe-ljos` i 00-palett.css. Dei heitte
+         `merkedjup` og `merkeljos` fyrr, so det same verkemiddelet bar
+         tvo namn i tvo lag og ingen kunde sjå at dei høyrde i hop.
+
+         `-smal` er den tronge utgåva, til vindauga, som berre er 14,5
+         einingar høgt. `-fall` er det mjuke laget under lina: ein skugge
+         er tvo lag i dette huset (jf. --skugge-kort), og utan fallet
+         sluttar skuggen som ein strek i staden for å døy ut.
+
+         Fasetten. Bandet er silhuetten minus den same silhuetten skuven
+         eitt hakk ned og mjuka upp — det som vert att, er ei tunn stripa
+         inne i yverkanten. So vert elementet sjølv klypt til det bandet.
+         Det er `inset 0 1px 2px` skrive i eit filter. */}}
+    <filter id="lippe-djup" x="-10%" y="-10%" width="120%" height="120%">
+      <feComponentTransfer in="SourceAlpha" result="hel"><feFuncA type="linear" slope="255"/></feComponentTransfer>
+      <feOffset in="hel" dy="1" result="ned"/>
+      <feGaussianBlur in="ned" stdDeviation=".85" result="mjuk"/>
+      <feComposite in="hel" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+    {{/* Same grepet i det smaa, til vindauga: den tronge lina som
+         teiknar kanten. Ho er berre halve skuggen — resten ber
+         #lippe-djup-fall nedanfyre. */}}
+    <filter id="lippe-djup-smal" x="-10%" y="-20%" width="120%" height="140%">
+      <feComponentTransfer in="SourceAlpha" result="hel"><feFuncA type="linear" slope="255"/></feComponentTransfer>
+      <feOffset in="hel" dy=".9" result="ned"/>
+      <feGaussianBlur in="ned" stdDeviation=".5" result="mjuk"/>
+      <feComposite in="hel" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+
+    {{/* Det mjuke laget av same skuggen: djupare inn og mykje mjukare,
+         so det fell av som ein skugge og ikkje sluttar som ein strek.
+         Ein skugge er tvo lag i dette huset (jf. --skugge-kort): lina
+         teiknar kanten, dette ber resten. Vindauga hadde berre lina og
+         såg difor aldri senka ut (29.8.2026). */}}
+    <filter id="lippe-djup-fall" x="-24%" y="-49%" width="148%" height="198%">
+      <feComponentTransfer in="SourceAlpha" result="hel"><feFuncA type="linear" slope="255"/></feComponentTransfer>
+      <feOffset in="hel" dy="2.2" result="ned"/>
+      <feGaussianBlur in="ned" stdDeviation="1.5" result="mjuk"/>
+      <feComposite in="hel" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+
+    {{/* Same grepet snutt: bandet inne i *nedkanten*. Det er ljoset som
+         slær i botnen av eit hol og kastar att upp — og det er hol som
+         hev det: den tome ruta i vika, og vindauga på merket, som er
+         skore tvers ned i kroppen (tri lag, sjå dagmerke.html,
+         avgjort 29.8.2026). Eit skrivefelt er ei grunn fordjuping i
+         arket og hev ingen slik botn. */}}
+
+    <filter id="lippe-ljos" x="-10%" y="-10%" width="120%" height="120%">
+      <feComponentTransfer in="SourceAlpha" result="hel"><feFuncA type="linear" slope="255"/></feComponentTransfer>
+      <feOffset in="hel" dy="-1" result="upp"/>
+      <feGaussianBlur in="upp" stdDeviation=".8" result="mjuk"/>
+      <feComposite in="hel" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+    {{/* Same grepet i det smaa, til vindauga — og skarpare enn den
+         myrke lippa yver honom, som på holet: den ljose er kanten
+         sjølv og ikkje noko han kastar (SKRAAKANTEN §2). Vindauga tok
+         den store #lippe-ljos ei stund, og då var den ljose lippa
+         båe større og mjukare enn den myrke — snudd um. */}}
+    <filter id="lippe-ljos-smal" x="-10%" y="-19%" width="120%" height="138%">
+      <feComponentTransfer in="SourceAlpha" result="hel"><feFuncA type="linear" slope="255"/></feComponentTransfer>
+      <feOffset in="hel" dy="-.9" result="upp"/>
+      <feGaussianBlur in="upp" stdDeviation=".45" result="mjuk"/>
+      <feComposite in="hel" in2="mjuk" operator="out" result="band"/>
+      <feComposite in="SourceGraphic" in2="band" operator="in"/>
+    </filter>
+
+  </defs>
+
+  {{/* Indeksane, teikna ein gong.
+
+       Kvart merke bar sine eigne: åtte strekar og tri tal, det same
+       talet og den same staden kvar gong. Ei vike på ein brei skjerm
+       hadde 418 slike element som alle var identiske. No stend dei her,
+       og merki hentar dei med <use>.
+
+       Stilen stend inline og ikkje i stilarket: innhaldet i eit <use>
+       ligg i eit skuggetre som veljarane i dokumentet ikkje når inn i.
+       Egenskapane (`--blekk-svakt`, `--skrift-tal`) *arvar* derimot inn,
+       so fargen fylgjer temaet som fyrr. */}}
+  {{/* Glaset, teikna tvo gonger og ikkje 38.
+
+       Kvart merke bar sin eigen `<defs>` med sin eigen radialGradient og
+       fire stopp — 228 element på ei vike. Grunngjevingi var rett: ein
+       `stop-color` vert løyst der gradienten *stend*, so ein delt
+       gradient hadde gjeve alle merke rotfargen, og på verkstadssida
+       stend det merke inni baade `data-theme="light"` og `="dark"`.
+
+       Men fargen treng ikkje fylgja gradienten — han kann fylgja
+       *veljaren*. Her stend tvo gradientar, kvar i si tema-ramma, og
+       stilarket peikar `fill` paa den rette. `fill` er ein CSS-eigenskap,
+       so `[data-theme="dark"] .form-glas` treffer kvart merke for seg —
+       ogso tvo merke attmed kvarandre i kvar sitt tema. */}}
+  {{$g := markGlas}}
+  <g data-theme="light">
+    <radialGradient id="glas-ljos" gradientUnits="userSpaceOnUse"
+                    cx="{{$g.X}}" cy="{{$g.Y}}" r="{{$g.R}}">
+      <stop offset="0"    class="glas-topp"/>
+      <stop offset="0.36" class="glas-midt"/>
+      <stop offset="0.64" class="glas-svak"/>
+      <stop offset="0.84" class="glas-ut"/>
+    </radialGradient>
+  </g>
+  <g data-theme="dark">
+    <radialGradient id="glas-myrk" gradientUnits="userSpaceOnUse"
+                    cx="{{$g.X}}" cy="{{$g.Y}}" r="{{$g.R}}">
+      <stop offset="0"    class="glas-topp"/>
+      <stop offset="0.36" class="glas-midt"/>
+      <stop offset="0.64" class="glas-svak"/>
+      <stop offset="0.84" class="glas-ut"/>
+    </radialGradient>
+  </g>
+
+  {{/* Kroppen og dagfana, teikna ein gong.
+
+       Seks stigar per merke: fana med kanten sin, og silhuetten med
+       ring, kant, flate og lippa. Alle er den same forma på kvart
+       merke — 228 element på ei vike.
+
+       Fyllet stend som `var(--…)` og ikkje som ein klasse: veljarane i
+       dokumentet når ikkje inn i eit <use>-skuggetre, men egenskapane
+       arvar inn. Verdi og tilstandane deira stend på `.dagmerke` i
+       30-timeplanen.css. */}}
+  <g id="merkekropp">
+    <path d="{{markDagfane}}" filter="url(#merkekant)"
+          style="fill: var(--fane-kant); transition: fill var(--fyllskift) ease-out"/>
+    <path d="{{markDagfane}}"
+          style="fill: var(--fane-flate); transition: fill var(--fyllskift) ease-out"/>
+    <path d="{{markSilhuett}}" filter="url(#merkering)"
+          style="fill: var(--merke); visibility: var(--ring-syn)"/>
+    <path d="{{markSilhuett}}" filter="url(#merkekant)"
+          style="fill: var(--kropp-kant); transition: fill var(--fyllskift) ease-out"/>
+    <path d="{{markSilhuett}}"
+          style="fill: var(--kropp-flate); transition: fill var(--fyllskift) ease-out"/>
+    <path d="{{markSilhuett}}" filter="url(#lippe-djup)"
+          style="fill: var(--kropp-djup)"/>
+  </g>
+
+  <g id="merkeindeks">
+    {{range markIndeks}}<line x1="{{.X1}}" y1="{{.Y1}}" x2="{{.X2}}" y2="{{.Y2}}"
+      style="stroke: var(--blekk-svakt); stroke-width: 1.2; stroke-linecap: round"/>{{end}}
+    {{range markSkivetal}}<text x="{{.X}}" y="{{.Y}}"
+      style="font-family: var(--skrift-tal); font-size: 6.4px; fill: var(--blekk-svakt); text-anchor: middle; letter-spacing: -.04em">{{.Text}}</text>{{end}}
+  </g>
+</svg>
+{{end}}

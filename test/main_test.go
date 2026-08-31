@@ -10,7 +10,7 @@ import (
 
 // TestMain gjev kvar prøvekøyring si eigi base i ei mellombils mappa.
 //
-// Prøvorne skreiv i test/kjernekraft.db fyrr, og fila laag att etterpaa.
+// Prøvorne skreiv i test/kjernekraft.db fyrr, og fila laag att etterpå.
 // Difor gjekk suiten fyrste gongen og fall den andre — «e-post er
 // allerede i bruk» — utan at noko i koda hadde endra seg. Ei prøva som
 // gjeng ein gong er ikkje ei prøva.

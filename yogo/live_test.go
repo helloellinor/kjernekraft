@@ -10,7 +10,7 @@ import (
 // Ei prøva som *verkeleg* ringjer Yogo.
 //
 // Ho stend av som standard. Prøvone i huset skal kunna køyra utan nett
-// og utan aa plaga ein tenar me ikkje raar yver — men naar skjemaet
+// og utan aa plaga ein tenar me ikkje rår yver — men når skjemaet
 // hjaa Yogo skiftar, er det berre eit ekte kall som ser det. Difor:
 //
 //	YOGO_LIVE=1 go test ./yogo/ -run Live -v
@@ -18,7 +18,7 @@ import (
 // Ho hentar éi vike og krev berre at svaret er timar med namn og klokke.
 // Ho seier ingen ting um *kva* timar det er — det er studioet sitt val,
 // ikkje ein paastand koden kann halda.
-func TestLiveHentingFraaYogo(t *testing.T) {
+func TestLiveHentingFråYogo(t *testing.T) {
 	if os.Getenv("YOGO_LIVE") == "" {
 		t.Skip("set YOGO_LIVE=1 for aa ringja api.yogo.dk")
 	}

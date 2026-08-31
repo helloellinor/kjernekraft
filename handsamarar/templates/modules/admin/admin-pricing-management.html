@@ -1,0 +1,47 @@
+{{define "admin_pricing_management"}}
+{{/* Prising.
+
+     Ingen overskrift her. Fana heiter «Prising», og då veit ein at alt
+     under henne handlar om pris — ei overskrift som seier det ein gong
+     til, er eit ord som ikkje arbeider.
+
+     Tri faner inne i ei fana. Rekkja hev sitt eige namn i adressa
+     (`prisfane`) av di ho stend inne i «Prisar»: skreiv dei tvo same
+     namnet, tok eit klikk her den ytre rekkja med seg. Sjaa admin.go. */}}
+<div class="faneark" id="{{.Prisfaner.ID}}">
+  {{template "faner" .Prisfaner}}
+
+  <div class="fanerom">
+    {{/* Alle tri hentar seg sjølve. Dei treng data admin-sida ikkje
+         sender — namni paa produkti vert skrivne av systemet i det
+         maalet ein les i — og eit fragment er billegare enn aa senda
+         alt til alle fanone uansett kva ein ser paa.
+
+         No vert berre den valde teikna, so det er ogso berre éi
+         henting og ikkje tri. */}}
+    {{if eq .Prisfaner.Vald "medlemskap"}}
+    <div class="bolk" id="bolk-medlemskap">
+      <div hx-get="/api/admin/medlemskapsprisar" hx-trigger="load" hx-swap="innerHTML">
+        <div class="loading-placeholder">…</div>
+      </div>
+    </div>
+    {{end}}
+
+    {{if eq .Prisfaner.Vald "klippekort"}}
+    <div class="bolk" id="bolk-klippekort">
+      <div hx-get="/api/admin/klippeprisar" hx-trigger="load" hx-swap="innerHTML">
+        <div class="loading-placeholder">…</div>
+      </div>
+    </div>
+    {{end}}
+
+    {{if eq .Prisfaner.Vald "reglar"}}
+    <div class="bolk" id="bolk-reglar">
+      <div hx-get="/api/admin/reglar" hx-trigger="load" hx-swap="innerHTML">
+        <div class="loading-placeholder">…</div>
+      </div>
+    </div>
+    {{end}}
+  </div>
+</div>
+{{end}}

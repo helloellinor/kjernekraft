@@ -7,35 +7,35 @@ import (
 	"kjernekraft/models"
 )
 
-// Det usynlege medlemskapet.
+// The invisible membership.
 //
-// Eit medlemskap kunde til no berre vera tvo ting: aktivt av di nokon
-// hadde kjøpt det, eller ikkje der. Lærarane og utviklarane skal hava
-// full tilgang utan aa kjøpa noko, og utan aa staa i prislista der folk
-// vel — difor «usynleg»: han finst som medlemskap, men han er ikkje
-// noko ein kann velja.
+// A membership could only be two things: active because someone bought
+// it, or absent. Teachers and developers get full access without buying
+// anything and without standing in the price list where people choose —
+// hence "invisible": it exists as a membership, but is not something you
+// can pick.
 //
-// Han er *avleidd av løyvet*, ikkje ei rad i user_memberships. Det er
-// den viktige avgjerdi her, og grunnen er kva som skjer naar løyvet
-// gjeng bort: ei lagra rad hadde vorte liggjande att og gjeve ein
-// tidlegare lærar fri tilgang til nokon rydda henne for haand. Eit løyve
-// som vert teki bort tek medlemskapet med seg i same augneblinken, av
-// di det aldri var noko anna enn løyvet.
+// It is *derived from the permission*, not a row in user_memberships.
+// That is the decision here, and the reason is what happens when the
+// permission goes: a stored row would sit there giving a former teacher
+// free access until someone cleared it by hand. A permission taken away
+// takes the membership with it in the same moment, because it never was
+// anything but the permission.
 //
-// Det tyder ogso at han ikkje kann frysast, seiast upp eller endrast:
-// det finst ingen ting aa endra. Malen skal gøyma dei knappane, og
-// `Tildelt` er flagget ho ser paa.
+// It also means it cannot be frozen, cancelled or changed — there is
+// nothing to change. The template hides those buttons, and Tildelt is the
+// flag it looks at.
 
 // SvartMedlemskap er namnet i basen.
 const SvartMedlemskap = "Black"
 
-// MigrerSvartMedlemskap legg til skjult-flagget og set upp Black.
+// MigrerSvartMedlemskap adds the hidden flag and sets up Black.
 //
-//	skjult = TRUE   medlemskapet er ikkje noko ein kann velja. Det held
-//	                honom ute or prislista og or veljarane, men han er
-//	                framleis eit fullgodt medlemskap for den som hev han.
-//	                Flagget er «skjult» og ikkje «synleg» so standarden —
-//	                det ingen hev sagt noko om — er synleg.
+//	skjult = TRUE   the membership is not something you can pick. It stays
+//	                out of the price list and the selectors, but is still a
+//	                full membership for whoever has it. The flag is
+//	                "hidden" and not "visible" so that the default — what
+//	                nobody has said anything about — is visible.
 func MigrerSvartMedlemskap(db *sql.DB) error {
 	var finst bool
 	if err := db.QueryRow(
@@ -64,30 +64,30 @@ func MigrerSvartMedlemskap(db *sql.DB) error {
 		return err
 	}
 
-	// Fanst Black alt — han gjorde det i basar som hadde flagget fyre
-	// det skifte namn — vart han ikkje sett inn paa nytt, og daa hadde
-	// han stade i prislista med standardverdien til den nye kolonna.
-	// Han skal vera skjult, uansett kva veg han kom inn.
+	// If Black already existed — as it did in databases that had the flag
+	// before it was renamed — it was not reinserted, and would have stood in
+	// the price list with the new column's default. It must be hidden
+	// whichever way it got in.
 	_, err := db.Exec(
 		`UPDATE memberships SET skjult = TRUE WHERE name = ?`, SvartMedlemskap)
 	return err
 }
 
-// HarFriMedlemskap segjer um brukaren fær Black.
+// HarFriMedlemskap says whether the user gets Black.
 //
-// Tvo kjeldor, og dei er ulike med vilje:
+// Two sources, different on purpose:
 //
-//   - lærarløyvet, som ein administrator gjev ut gjenom flata
-//   - utviklarlista, som stend i ei fil paa tenaren og ikkje kann
-//     skrivast gjenom nettet i det heile (sjaa utviklar.go)
+//   - the teacher permission, which an admin grants through the interface
+//   - the developer list, which lives in a file on the server and cannot
+//     be written over the network at all (see utviklar.go)
 //
-// Eit løyve ein administrator kann gjeva seg sjølv, og ei han ikkje kann.
+// A permission an admin can give themselves, and one they cannot.
 func (db *Database) HarFriMedlemskap(userID int64) (bool, error) {
 	var tal int
 	if err := db.Conn.QueryRow(`
 		SELECT COUNT(*) FROM brukarloyve ur
 		JOIN loyve r ON r.id = ur.loyve_id
-		WHERE ur.user_id = ? AND r.name = ?`, userID, LoyveLaerar).Scan(&tal); err != nil {
+		WHERE ur.user_id = ? AND r.name = ?`, userID, LøyveLærar).Scan(&tal); err != nil {
 		return false, err
 	}
 	if tal > 0 {
@@ -96,19 +96,19 @@ func (db *Database) HarFriMedlemskap(userID int64) (bool, error) {
 	return db.ErUtviklarID(userID)
 }
 
-// svartMedlemskapFor byggjer det avleidde medlemskapet.
+// svartMedlemskapFor builds the derived membership.
 //
-// Datoane er ikkje dikta upp for aa sjaa ut som eit kjøp: han byrja den
-// dagen brukaren vart oppretta, og han vert ikkje fornya — han varer so
-// lenge løyvet varer. RenewalDate eit aar fram er berre so sidor som
-// reknar «dagar til fornying» ikkje viser noko rart.
+// The dates are not invented to look like a purchase: it starts the day
+// the user was created, and it does not renew — it lasts as long as the
+// permission. RenewalDate a year out is only so that pages computing
+// "days until renewal" do not show something odd.
 func (db *Database) svartMedlemskapFor(userID int64) (*models.MembershipWithDetails, error) {
 	var m models.Membership
-	// `skjult` lyt vera med. Utan henne kom Black attende med flagget
-	// usett, og MedlemskapNamn — som nyttar nett det flagget til aa sjaa
-	// at eit medlemskap ikkje er eit bindingsprodukt — rekna namnet hans
-	// ut or bindingi i staden. Med null maanader binding vart «Black»
-	// til «Månadskort» paa skjermen, medan basen heile tidi sa Black.
+	// skjult has to be here. Without it Black came back with the flag unset,
+	// and MedlemskapNamn — which uses that very flag to see that a membership
+	// is not a binding product — computed its name from the binding instead.
+	// With zero months of binding, "Black" became "Månadskort" on screen
+	// while the database said Black all along.
 	err := db.Conn.QueryRow(`
 		SELECT id, name, price, commitment_months, is_student_senior,
 		       is_special_offer, description, features, active, skjult
@@ -135,29 +135,28 @@ func (db *Database) svartMedlemskapFor(userID int64) (*models.MembershipWithDeta
 		LastBilled:   start,
 		CreatedAt:    start,
 	}
-	// Ingen ting aa seia upp eller frysa: det finst ingi rad aa endra.
+	// Nothing to cancel or freeze: there is no row to change.
 	ut.CanCancel = false
 	ut.CanPause = false
 	ut.Tildelt = true
 	return ut, nil
 }
 
-// SynkFriMedlemskap stoggar faktureringi naar nokon vert forfremja.
+// SynkFriMedlemskap stops the billing when someone is promoted.
 //
-// Det held ikkje aa syna Black paa skjermen. Ligg det ein aktiv avtale i
-// user_memberships, er det han som vert fakturert — kortet er berre
-// biletet. Ein lærar som fekk løyvet i gaar og eit trekk i dag hev
-// betalt for noko han fær gratis.
+// Showing Black on screen is not enough. If an active agreement sits in
+// user_memberships, that is what gets billed — the card is only the
+// picture. A teacher who got the permission yesterday and a charge today
+// has paid for something they get free.
 //
-// Difor: løyvet kjem, avtalen stend av. Han vert *avslutta*, ikkje
-// sletta, so det stend att i basen kva han var og naar han gjekk av —
-// ein rekneskap treng aa kunna svara for eit trekk som alt er gjort.
+// So: permission arrives, agreement steps down. It is *ended*, not
+// deleted, so the database still records what it was and when it stopped —
+// accounting needs to be able to answer for a charge already made.
 //
-// Det er ein einvegs port med vilje. Gjeng løyvet bort att, kjem ikkje
-// den gamle avtalen attende av seg sjølv: han vart avslutta, og det som
-// er avslutta lyt kjøpast paa nytt. Aa vekkja ein avtale til live og
-// taka til aa krevja pengar for honom att, utan at nokon bad um det, er
-// verre enn aa lata folk velja sjølve.
+// A one-way gate on purpose. If the permission goes away again the old
+// agreement does not return by itself: it was ended, and what is ended has
+// to be bought again. Reviving an agreement and starting to charge for it
+// unasked is worse than letting people choose.
 func (db *Database) SynkFriMedlemskap(userID int64) (bool, error) {
 	fri, err := db.HarFriMedlemskap(userID)
 	if err != nil || !fri {
@@ -176,28 +175,29 @@ func (db *Database) SynkFriMedlemskap(userID int64) (bool, error) {
 	return n > 0, err
 }
 
-// MedlemSidan gjev dagen kontoen vart oppretta.
+// MedlemSidan gives the day the account was created.
 //
-// «Medlem sidan» er ikkje det same som «denne avtalen tok til». Ein som
-// kom i 2019 og bytte medlemskap i fjor hev vore medlem sidan 2019;
-// tek ein datoen fraa user_memberships, vert han nullstilt kvar gong
-// nokon byter plan, og kortet ljug um noko folk er stolte av.
+// "Member since" is not the same as "this agreement started". Someone who
+// joined in 2019 and changed membership last year has been a member since
+// 2019; take the date from user_memberships and it resets every time
+// somebody switches plan, and the card lies about something people are
+// proud of.
 //
-// Det er ogso den einaste kjelda som *finst* for eit tildelt medlemskap:
-// Black hev ingi rad i user_memberships i det heile.
+// It is also the only source that *exists* for an assigned membership:
+// Black has no row in user_memberships at all.
 func (db *Database) MedlemSidan(userID int64) (time.Time, error) {
-	// Utan COALESCE i spurningi, med vilje. SQLite lagrar tidi som tekst,
-	// og drivaren gjer henne um til time.Time *berre* naar kolonna er
-	// utsagd DATETIME. Eit COALESCE er eit uttrykk og ikkje ei kolonna
-	// lenger, so verdet kom attende som streng og skanningi fall med
-	// «unsupported Scan». Fallet tek me i Go i staden.
-	var naar sql.NullTime
+	// Without COALESCE in the query, on purpose. SQLite stores time as text,
+	// and the driver converts it to time.Time *only* when the column is
+	// declared DATETIME. A COALESCE is an expression rather than a column, so
+	// the value came back as a string and the scan failed with "unsupported
+	// Scan". The fallback is done in Go instead.
+	var når sql.NullTime
 	if err := db.Conn.QueryRow(
-		`SELECT created_at FROM users WHERE id = ?`, userID).Scan(&naar); err != nil {
+		`SELECT created_at FROM users WHERE id = ?`, userID).Scan(&når); err != nil {
 		return time.Time{}, err
 	}
-	if !naar.Valid {
+	if !når.Valid {
 		return time.Time{}, nil
 	}
-	return naar.Time, nil
+	return når.Time, nil
 }

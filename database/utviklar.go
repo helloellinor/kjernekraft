@@ -11,10 +11,10 @@ import (
 // Utviklarane.
 //
 // Lærarrolla vert gjevi ut av ein administrator gjenom flata. Denne gjer
-// det ikkje. Ho stend i ei fil paa tenaren, og det er heile skilnaden:
-// ho gjev fri tilgang til huset, so ho skal koma fraa den som eig
-// maskini — ikkje fraa den som eig ein knapp i administrasjonen. Difor
-// stend ho ikkje i LoyveFinst, og difor ligg ho aldri i brukarloyve: det
+// det ikkje. Ho stend i ei fil på tenaren, og det er heile skilnaden:
+// ho gjev fri tilgang til huset, so ho skal koma frå den som eig
+// maskini — ikkje frå den som eig ein knapp i administrasjonen. Difor
+// stend ho ikkje i LøyveFinst, og difor ligg ho aldri i brukarløyve: det
 // finst ingi skriveveg til henne gjenom nettet i det heile.
 //
 // Fila er ei liste yver e-postar, ei per lina. Tome liner og liner som
@@ -31,7 +31,7 @@ import (
 const UtviklarfilEnv = "KJERNEKRAFT_UTVIKLARAR"
 
 var (
-	utviklarLaas  sync.RWMutex
+	utviklarLås   sync.RWMutex
 	utviklarSett  map[string]bool
 	utviklarTid   time.Time
 	utviklarStig  string
@@ -45,9 +45,9 @@ func utviklarfil() string {
 	return "./utviklarar"
 }
 
-// lesUtviklarar les fila naar ho er endra sidan sist.
+// lesUtviklarar les fila når ho er endra sidan sist.
 //
-// Ho vert stat-a og ikkje lesi paa nytt kvar gong: dette vert spurt for
+// Ho vert stat-a og ikkje lesi på nytt kvar gong: dette vert spurt for
 // kvar sida ein teiknar, og ei fillesing per sidevisning er ein pris ein
 // ikkje treng betala for ei fil som skifter eit par gonger i aaret.
 func lesUtviklarar() map[string]bool {
@@ -58,10 +58,10 @@ func lesUtviklarar() map[string]bool {
 		tid = info.ModTime()
 	}
 
-	utviklarLaas.RLock()
+	utviklarLås.RLock()
 	ferskt := utviklarLesen && stig == utviklarStig && tid.Equal(utviklarTid)
 	sett := utviklarSett
-	utviklarLaas.RUnlock()
+	utviklarLås.RUnlock()
 	if ferskt {
 		return sett
 	}
@@ -79,9 +79,9 @@ func lesUtviklarar() map[string]bool {
 		}
 	}
 
-	utviklarLaas.Lock()
+	utviklarLås.Lock()
 	utviklarSett, utviklarTid, utviklarStig, utviklarLesen = nytt, tid, stig, true
-	utviklarLaas.Unlock()
+	utviklarLås.Unlock()
 	return nytt
 }
 
@@ -103,10 +103,10 @@ func (db *Database) ErUtviklarID(userID int64) (bool, error) {
 }
 
 // nullstillUtviklarbuffer tvingar ei ny lesing. Prøvone byter fil under
-// føtene paa bufferet, og tvo filer skrivne i same augneblinken kann
+// føtene på bufferet, og tvo filer skrivne i same augneblinken kann
 // hava same tidsmerket.
 func nullstillUtviklarbuffer() {
-	utviklarLaas.Lock()
+	utviklarLås.Lock()
 	utviklarSett, utviklarTid, utviklarStig, utviklarLesen = nil, time.Time{}, "", false
-	utviklarLaas.Unlock()
+	utviklarLås.Unlock()
 }

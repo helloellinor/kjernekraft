@@ -1,0 +1,116 @@
+/* ===================================================================
+   the palette — what the colours *are*
+   This file holds values. 00-token.css holds their meaning.
+
+   ARKET §1 already said each flat colour is written once as --l-/--m-
+   and the four blocks only assign meaning. The files did not say it:
+   both lived in 00-token.css. Everything here is *this studio* rather
+   than the system — the flat colours, the kinds of class it runs, and
+   the mark. Change what the house looks like and this is the file you
+   rewrite.
+
+   It comes first because "00-palett" sorts before "00-token". Custom
+   properties resolve when used, not when written, so the order is not a
+   requirement — but it is the order you read in.
+   =================================================================== */
+:root {
+  /* ---- light ---- */
+  --l-ark:        #edeeea;
+  --l-ark-djup:   #e4e6e1;
+  --l-flate:      #f5f6f3;
+  --l-blekk:      #1c1f1b;
+  --l-blekk-lys:  #565b54;
+  --l-blekk-svakt:#868b83;
+  --l-haarlina:   #cfd2cb;
+  --l-kant:       #bec2b9;
+  --l-togu:       #d6006e;
+  --l-klas:       #00908c;
+  --l-tuneup:     #6d2e9e;
+  --l-student:    #8a6a00;
+  --l-svartkort:  #0b0d0a;
+  --l-merke-lys:  #00a8a2;
+  --l-aatvaring:  #8c3a2b;
+  --l-aatvaring-svak: #f0e0dc;
+  --l-glans:      color-mix(in srgb, #fff 55%, transparent);
+  --l-glans-svak: color-mix(in srgb, #fff 14%, transparent);
+  --l-glans-farga:color-mix(in srgb, #fff 55%, transparent);
+  --l-lippe-djup: color-mix(in srgb, var(--ned) 22%, transparent);
+  --l-lippe-ljos: color-mix(in srgb, var(--upp) 55%, transparent);
+  --l-skugge-flytande: 0 6px 20px rgb(28 31 27 / .14);
+  --l-skugge-kort:
+    0 1px 2px rgb(28 31 27 / .07),
+    0 6px 14px -3px rgb(28 31 27 / .13);
+
+  /* ---- dark, once ----
+     Flat values only. The derived tokens differ per theme (18 % against
+     12 %) and so must be written in each block. */
+  --m-ark:        #161815;
+  --m-ark-djup:   #101210;
+  --m-flate:      #1d201c;
+  --m-blekk:      #e2e5dd;
+  --m-blekk-lys:  #9aa094;
+  --m-blekk-svakt:#6f756a;
+  --m-haarlina:   #32362f;
+  --m-kant:       #3d423a;
+  --m-togu:       #ff5fa8;
+  --m-klas:       #2fd6c6;
+  --m-tuneup:     #b085f5;
+  --m-student:    #e8bf4d;
+  --m-svartkort:  #f2f4ee;
+  --m-merke-lys:  #6ae4d8;
+  --m-aatvaring:  #d08574;
+  --m-aatvaring-svak: #2b1c18;
+  --m-glans:      color-mix(in srgb, #fff 20%, transparent);
+  --m-glans-svak: color-mix(in srgb, #fff 7%, transparent);
+  --m-glans-farga:color-mix(in srgb, #fff 40%, transparent);
+  /* Maalt, ikkje gjetta: 55 % kvitt paa ei mest svart flate gjev eit
+     drag paa ΔL +0.318, mot +0.073 i det ljose. 26 % gjev +0.093 og er
+     difor den same lippa og ikkje ei sterkare. */
+  --m-lippe-djup: color-mix(in srgb, var(--ned) 40%, transparent);
+  --m-lippe-ljos: color-mix(in srgb, var(--upp) 26%, transparent);
+  --m-skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
+  --m-skugge-kort:
+    0 1px 2px rgb(0 0 0 / .45),
+    0 6px 16px -3px rgb(0 0 0 / .55);
+
+  /* ---- the kinds of class ----
+     Four kinds, four colours. They used to borrow var(--klas),
+     var(--tuneup) and var(--togu) through the map below. Same values,
+     but the fix ARKET §1 asks for is now these eight lines rather than a
+     rewrite of the map.
+
+     WARNING, unchanged: three of the four are still the product colours
+     seen twice. Turquoise means membership in the right column of the
+     home page and yoga in the left, four hundred pixels apart. One
+     channel, two meanings. The fix is four new hues clear of the product
+     colours — a colour decision, to be made by eye. */
+  --l-slag-fascia:   #c8901a;
+  --l-slag-yoga:     #00908c;
+  --l-slag-pilates:  #6d2e9e;
+  --l-slag-reformer: #d6006e;
+
+  --m-slag-fascia:   #f0c04a;
+  --m-slag-yoga:     #2fd6c6;
+  --m-slag-pilates:  #b085f5;
+  --m-slag-reformer: #ff5fa8;
+
+  /* ---- the mark ----
+     The file, not the shape. 65-merket.css masks it and takes its
+     colour from the surrounding text. */
+  --merke-maske: url("/static/img/kjernekraft.svg");
+}
+
+/* ---- kind to colour ----
+   Here because these are this studio's kinds: another studio runs other
+   classes, and then this block and the values above are what differ, not
+   the system. The names must match `Slagi` in handlers/slag.go, and
+   TestSlagfargarKjennerDeiSameSlagi fails if they drift.
+
+   The fallback lives inside var(--slagfarge, …) at the reader, never as
+   a declaration of its own: .hol and .slag-yoga carry equal weight, so a
+   fallback written outside var() wins whenever it comes later in the
+   sheet. */
+.slag-fascia   { --slagfarge: var(--slag-fascia); }
+.slag-yoga     { --slagfarge: var(--slag-yoga); }
+.slag-pilates  { --slagfarge: var(--slag-pilates); }
+.slag-reformer { --slagfarge: var(--slag-reformer); }

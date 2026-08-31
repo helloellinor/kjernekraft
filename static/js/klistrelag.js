@@ -38,21 +38,44 @@
     });
   }
 
-  maal();
-  document.addEventListener("DOMContentLoaded", maal);
-  // Skrifti kjem etter fyrste målingi og endrar høgdi.
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(maal);
-
   // Breidd, zoom, ei lenkje som bryt: alt som endrar høgdi på ei lina
   // skal skriva talet på nytt. `ResizeObserver` ser det `resize` ikkje
   // ser — hovudet kann verta høgare utan at glaset endrar seg.
-  if (window.ResizeObserver) {
-    var sjaaar = new ResizeObserver(maal);
+  var sjaaar = window.ResizeObserver ? new ResizeObserver(maal) : null;
+
+  // Eit sidebyte lyt maalast um att, og linone lyt sjaaast um att.
+  //
+  // `.timehovudlinje` bur inni <main>, og `hx-boost` byter <main>. Den
+  // gamle lina var burte og den nye vart aldri sedd, so `maal()` gjekk
+  // aldri um att: kom du til timeplanen fraa ei onnor sida, stod
+  // `--tittellinje-hogd` att paa 0px — verdet fraa sida utan tittellina —
+  // og daghovudet klistra seg 134 piksel for høgt, rett attum
+  // vikeveljaren. Eit friskt sidekall paa den same adressa gjorde det
+  // ikkje. Difor «det kjem an paa kvar eg kom fraa».
+  function start() {
+    maal();
+    if (!sjaaar) return;
+    sjaaar.disconnect();
     lag.forEach(function (l) {
       var el = document.querySelector(l.vel);
       if (el) sjaaar.observe(el);
     });
-  } else {
-    window.addEventListener("resize", maal);
+  }
+
+  start();
+  document.addEventListener("DOMContentLoaded", start);
+  // Skrifti kjem etter fyrste målingi og endrar høgdi.
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(maal);
+  (window.__sideskift = window.__sideskift || []).push(start);
+
+  if (!window.ResizeObserver) {
+    // Reserveløysingi for nettlesarar utan ResizeObserver. Han er
+    // strupa som dei hine — ResizeObserver samlar sjølv, denne ikkje.
+    var ventar = false;
+    window.addEventListener("resize", function () {
+      if (ventar) return;
+      ventar = true;
+      requestAnimationFrame(function () { ventar = false; maal(); });
+    });
   }
 })();

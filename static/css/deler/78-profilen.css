@@ -1,51 +1,50 @@
 /* ===================================================================
-   profilen
-   Ei adressa er éin ting med ei form alle kjenner. Set henne slik ho
-   ser ut paa ein konvolutt, og ingen treng merkelappar — det var 891
-   pikslar millom merkelappen og verdet fyrr, ni gonger nedyver.
-
-   Kvart felt er skrivbart der det stend. Ingen redigeringsmodus: fyrr
-   bytte heile sida ham for at du skulle retta eit telefonnummer.
-   =================================================================== */
-/* Spalta er breidare enn ei lesespalta. Namnet er sett som ei
-   sidetittel, og ei sidetittel i 34 rem gjev fjortan teikn paa lina —
-   daa fær ikkje «Kristiansen-» plass, og ordet renn ut or ruta si. */
+      the profile
+      An address is one thing with a shape everyone knows. Set it the way it
+      looks on an envelope and nobody needs labels — there were 891 pixels
+      between the label and the value, nine times down the page.
+   
+      Every field is editable where it stands. No edit mode: the whole page
+      used to change shape so you could correct a phone number.
+      =================================================================== */
+/* The column is wider than a reading measure. The name is set as a page
+      title, and a page title in 34 rem gives fourteen characters to the line
+      — then "Kristiansen-" does not fit, and the word runs out of its box. */
 .profilsida { max-width: 44rem; }
 
-/* Bolkarne staa for kvar sitt: kven du er, kvar du bur, korleis ein
-   naar deg. Lufti millom deim er det som segjer at dei er ulike ting —
-   utan ei einaste yverskrift. */
+/* The sections each stand for one thing: who you are, where you live, how
+      to reach you. The air between them is what says they are different
+      things — without a single heading. */
 .profilskjema { display: flex; flex-direction: column; gap: var(--rom-6); }
 
-/* `align-items: flex-start` — utan han strekkjer flexen kvart barn ut
-   til full breidd, og daa hjelper det ikkje kva feltet sjølv meiner um
-   storleiken sin. */
+/* align-items: flex-start — without it the flex stretches every child to
+      full width, and then it does not matter what the field itself thinks
+      about its size. */
 .lapp { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-1); }
 .lapp-kven { gap: var(--rom-2); }
 .lapprad { display: flex; gap: var(--rom-2); }
 
-/* Feltet ligg i arket. Fordjupingi er det einaste som segjer at det er
-   eit felt — ingi ramma, ingen understrek — og ho er der heile tidi, so
-   ein ser kva som let seg endra utan aa klikka seg gjenom sida. */
-/* Feltet er so breidt som det som stend i det, og ikkje breidare.
-   Fyrr var kvart felt 100 % — ei rekkja like lange bjelkar, same om det
-   stod «Oslo» eller ei heil gata i deim. Ei adressa er ikkje formatert
-   slik; ho hev ujamne linor, og det er nettupp dei ujamne linone som
-   gjer at ho les seg som ei adressa.
-
-   Taket er det same som breidda var: dei veks aldri forbi spalta. */
-/* Lappfeltet skriv ut si eiga form att.
+/* The field lies in the sheet. The recess is the only thing saying it is a
+      field — no frame, no underline — and it is there all the time, so you
+      can see what can be changed without clicking through the page. */
+/* The field is as wide as what stands in it, and no wider. Every field used
+      to be 100 % — a row of equally long bars, whether they held "Oslo" or a
+      whole street. An address is not formatted that way; it has uneven lines,
+      and it is exactly those uneven lines that make it read as an address.
    
-   Ein freistnad paa aa la grunnstilen bera henne aaleine gjekk gale:
-   grunnstilen stend i `:where()` og hev *null* spesifisitet — det er
-   heile poenget med honom, so kvar klassa kann yverstyra honom — og daa
-   er han ogso den fyrste som taper mot kva som helst anna. Ei klassa
-   som andre reglar kann slaa, er ikkje ei klassa ein kann lita paa.
+      The cap is what the width was: they never grow past the column. */
+/* The label field writes out its own form again.
    
-   Same forma stend difor tvo stader: i grunnstilen, so eit felt utan
-   klassa er rett av seg sjølv, og her, so eit felt *med* klassa er rett
-   same kva anna som stend i arket. Det er ikkje dobbelt arbeid — det er
-   ein grunnstil og ein garanti. */
+      An attempt to let the base style carry it alone went wrong: the base
+      style stands in :where() and has *zero* specificity — that is the whole
+      point of it, so any class can override it — and that makes it the first
+      to lose against anything else. A class other rules can beat is not a
+      class you can rely on.
+   
+      So the same form stands in two places: in the base style, so a field
+      without the class is right by itself, and here, so a field *with* the
+      class is right whatever else stands in the sheet. That is not duplicated
+      work — it is a base style and a guarantee. */
 .lappfelt {
   font: inherit;
   padding: var(--rom-2) var(--rom-3);
@@ -65,16 +64,16 @@
 
 /* Namnet er yverskrifti. Ho er stor av di ho er namnet ditt, og
    skrivbar av di ho er eit felt — det er den same tingen. */
-/* ---- namnet ----
-   Ei yverskrift, ikkje eit felt som ser ut som ei. Ho hev same skrift,
-   same storleik og same ombrot som kvar annan h1 paa staden — ho bryt
-   der ei yverskrift ville broti — og ho er skrivbar.
-
-   Eit <input> kunde ikkje gjera dette: det er einlina, og lange namn
-   vart klypte midt i ordet. */
+/* ---- the name ----
+      A heading, not a field that looks like one. It has the same face, size
+      and wrapping as any other h1 on the site — it breaks where a heading
+      would break — and it is editable.
+   
+      An <input> could not do this: it is single-line, and long names were
+      clipped mid-word. */
 .namnefelt {
-  /* Ruta hugsar teksti i staden for spalta. Ho veks med namnet og
-     stoggar ved spaltekanten — same taket som fyrr. */
+  /* The box remembers the text rather than the column. It grows with the name
+          and stops at the column edge — the same cap as before. */
   display: inline-block;
   max-width: 100%;
   margin: 0;
@@ -82,9 +81,9 @@
   border-radius: 2px;
   background: color-mix(in srgb, var(--blekk) 3%, var(--flate));
   box-shadow: var(--skraakant);
-  /* Yverskrifter elles hev `text-wrap: balance`, som flyttar ordi kvar
-     gong du skriv ein bokstav. Her skal teksti staa still medan du
-     skriv, so ho bryt som vanleg tekst. */
+  /* Headings elsewhere have text-wrap: balance, which moves the words every
+          time you type a letter. Here the text should stand still while you
+          type, so it wraps like ordinary text. */
   text-wrap: wrap;
   /* Ord skal ikkje klyppast. Den globale regelen gjev yverskrifter
      `overflow-wrap: break-word`, so «Kristiansen-Bjørnstad» vart broti
@@ -101,11 +100,11 @@
 .namnefelt.endra:focus { box-shadow: var(--skraakant-fasett), inset 3px 0 0 var(--togu); }
 .lappfelt.kort { min-width: 0; flex: 0 0 auto; }
 
-/* ---- det endra feltet ----
-   Ingen tekst segjer at noko er ulagra. Feltet ber merket sjølv: ei
-   full lina i merkefargen, og ein prikk i margen. Prikken er der av di
-   ei lina aaleine kann forvekslast med fokus — prikken stend att naar
-   du hev gjenge vidare til neste felt. */
+/* ---- the changed field ----
+      No text says something is unsaved. The field carries the mark itself: a
+      full line in the brand colour, and a dot in the margin. The dot is there
+      because a line alone can be mistaken for focus — the dot stays when you
+      have moved on to the next field. */
 .lappfelt.endra {
   box-shadow: var(--skraakant), inset 3px 0 0 var(--togu);
 }

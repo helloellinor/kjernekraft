@@ -13,8 +13,8 @@ main {
 }
 
 .page-title {
-  /* Klassa ber heile utsjaanaden sjølv (§15), so verkstaden kann syna
-     honom paa ein div utan aa laana elementstilen fraa h1. */
+  /* The class carries the whole appearance itself (§15), so the workshop can
+          show it on a div without borrowing the element style from h1. */
   font-family: var(--skrift-yver);
   line-height: 1.02;
   text-wrap: balance;
@@ -24,14 +24,14 @@ main {
   font-stretch: var(--vidd-tittel);
   font-weight: 700;
   letter-spacing: -.01em;
-  /* Bolkeoverskrifta under er ei overskrift no og ikkje ei merkelapp.
-     To overskrifter med rom-3 imellom les seg som éin blokk.
-
-     Eitt steg meir enn resten fekk (28.8.2026). Den stramme stigen tok
-     lufta under sidetittelen fraa 2rem til 1,5, og det var det eine
-     staden strammingi gjekk for langt: tittelen segjer *kvar du er*, og
-     han treng eit tydeleg brot ned til det fyrste ein kann gjera. Det er
-     eit steg paa stigen og ikkje eit nytt tal — §6 held. */
+  /* The section heading below is a heading now and not a label. Two headings
+          with rom-3 between them read as one block.
+     
+          One step more than the rest got (28.8.2026). The tight ladder took the
+          air under the page title from 2rem to 1.5, and that was the one place
+          the tightening went too far: the title says *where you are*, and it
+          needs a clear break down to the first thing you can do. It is a step
+          on the ladder and not a new number — §6 holds. */
   margin: 0 0 var(--rom-7);
   padding: 0;
   border: 0;
@@ -41,19 +41,19 @@ main {
 
 .content-section { margin-bottom: var(--rom-7); }
 
-/* ---- rangstigen ----
-   Fire steg, og kvart steg er *smalare* enn det yver seg. Breiddi ber
-   rangen, ikkje storleiken: difor kann tvo yverskrifter vera mest like
-   store og endaa segja klaart kva som ligg under kva.
-
-     .page-title    125%  kvar du er
-     .section-title  68%  ein bolk paa sida, med lina under
-     .undertittel    68%  ei gruppa inne i bolken, utan lina
-     dt / .held      68%  eit einskilt felt
-
-   Steg tvo og tri hadde same forma fyrr — ein h4 inne i ein h3 fekk
-   ingi ny tyding, berre ein litt mindre bokstav. Lina er skiljet: ein
-   bolk deler sida, ei gruppa deler berre bolken. */
+/* ---- the rank ladder ----
+      Four steps, and each step is *narrower* than the one above it. Width
+      carries rank, not size: so two headings can be nearly the same size and
+      still say clearly what lies under what.
+   
+        .page-title    125%  where you are
+        .section-title  68%  a section on the page, with the rule under it
+        .undertittel    68%  a group inside the section, without the rule
+        dt / .held      68%  a single field
+   
+      Steps two and three had the same form: an h4 inside an h3 got no new
+      meaning, only a slightly smaller letter. The rule is the distinction: a
+      section divides the page, a group divides only the section. */
 /* Ei bolkeoverskrift er ei overskrift, ikkje ei merkelapp.
 
    Ho stod på merkelapp-trinnet: 1,05 rem, 68 % breidd, versalar og
@@ -92,48 +92,49 @@ main {
 }
 .undertittel:first-child { margin-top: 0; }
 
-/* Tvo spaltor med kort i. Ho stend paa tri sidor — medlemskapet,
-   klippekortet og betalingane — og alle tri held kort.
+/* Two columns with cards in them. It stands on three pages — memberships,
+      klippekort and payments — and all three hold cards.
    
-   Spaltone var `1fr` fyrr, og daa voks dei med skjermen medan kortet i
-   deim stogga ved `--kortbreidd`. Avstanden ein *saag* millom dei tvo
-   korti var difor ikkje `gap`, han var gapet pluss den tome resten av
-   baae spaltone — paa ein brei skjerm eit godt stykke meir enn nokon
-   hadde vald. Med taket paa spalta er avstanden det han er sett til.
+      The columns were 1fr, so they grew with the screen while the card in
+      them stopped at --kortbreidd. The distance you *saw* between the two
+      cards was therefore not the gap, it was the gap plus the empty
+      remainder of both columns — on a wide screen a good deal more than
+      anyone chose. With a cap on the column, the distance is what it is set
+      to.
    
-   `justify-content: start` av di spaltone daa ikkje lenger fyller rada:
-   dei skal leggja seg mot venstre kanten som alt anna paa arket, og
-   ikkje flyta ut mot midten.
+      justify-content: start because the columns then no longer fill the row:
+      they should lie against the left edge like everything else on the
+      sheet, not float toward the middle.
    
-   Sjølve talet er stigen sitt: §6 gjev `--rom-5` til «gap millom
-   spaltor», og det er nettupp det dette er. */
+      The number itself belongs to the ladder: §6 gives --rom-5 to "gap
+      between columns", which is exactly what this is. */
 .two-column-grid {
   display: grid; gap: var(--rom-5);
   grid-template-columns: repeat(auto-fit, minmax(20rem, var(--kortbreidd)));
   justify-content: start;
 }
 
-/* ---- bolkhovudet ----
-   Ein bolk som lyt siktast i ber sikti si paa *tittellina*: overskrifti
-   til venstre, kontrollane til høgre, paa den same grunnlina.
-
-   Ho stod som ei rad for seg under overskrifti fyrr, med ein rama
-   veljar og ein synleg merkelapp. Det er tri liner aa lesa — tittel,
-   spursmaal, svar — fyre ein kjem til det ein kom for. Sikti er ikkje
-   eit skjema ein fyller ut; ho er ei innstilling paa noko ein alt ser,
-   og ho høyrer difor til overskrifti av det ein ser.
-
-   `justify-content: space-between` og ikkje `margin-left: auto`:
-   skilnaden syner seg fyrst naar lina bryt paa ein smal skjerm. Ein
-   auto-marg held sikti til høgre jamvel naar ho stend aaleine, og daa
-   flyt ho i lause lufti; med `space-between` gjeng ho til venstre
-   kanten, under tittelen, som alt anna som byrjar ei lina (§4). */
+/* ---- the section head ----
+      A section that needs filtering carries its filter on the *title line*:
+      the heading left, the controls right, on the same baseline.
+   
+      It stood as a row of its own under the heading, with a framed select and
+      a visible label. That is three lines to read — title, question, answer —
+      before reaching what you came for. A filter is not a form you fill in;
+      it is a setting on something you are already looking at, and so belongs
+      to the heading of what you see.
+   
+      justify-content: space-between and not margin-left: auto: the difference
+      shows when the line wraps on a narrow screen. An auto margin holds the
+      filter right even when it stands alone, and then it floats in mid-air;
+      with space-between it goes to the left edge, under the title, like
+      everything else that starts a line (§4). */
 .bolkhovud {
-  /* `center` og ikkje `baseline`: ein `<select>` fær ikkje grunnlina si
-     fraa skrifti si i Chrome, han fær henne fraa nedkanten av kassen.
-     Baseline-still rada, og ho skuvar overskrifti ned for aa naa den
-     falske grunnlina. Med `center` stend veljaren midt paa tittellina,
-     som er det ein ser etter, og tittelen stend still. */
+  /* center and not baseline: a <select> does not get its baseline from its
+          type in Chrome, it gets it from the bottom of the box. Baseline-align
+          the row and it pushes the heading down to reach that false baseline.
+          With center the select stands mid-title-line, which is what you look
+          for, and the title stands still. */
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: var(--rom-2) var(--rom-5);
   margin: 0 0 var(--rom-4);
@@ -141,59 +142,52 @@ main {
   border-bottom: 1px solid var(--haarlina);
 }
 
-/* Lina under høyrer til hovudet, ikkje til tittelen.
-   `.section-title` ber henne sjølv naar han stend aaleine. Let ein
-   honom ha henne her og, rekk ho berre so langt som ordet — og ei
-   bolkelina som stoggar midt paa sida er ikkje ei bolkelina. */
-/* Lina under høyrer til hovudet, ikkje til tittelen.
-   `.section-title` ber henne sjølv naar han stend aaleine. Let ein
-   honom ha henne her og, rekk ho berre so langt som ordet — og ei
-   bolkelina som stoggar midt paa sida er ikkje ei bolkelina. */
+/* The rule below belongs to the head, not to the title. .section-title
+      carries it itself when it stands alone. Let it have it here too and the
+      rule reaches only as far as the word — and a section rule stopping
+      mid-page is not a section rule. */
+/* The rule below belongs to the head, not to the title. .section-title
+      carries it itself when it stands alone. Let it have it here too and the
+      rule reaches only as far as the word — and a section rule stopping
+      mid-page is not a section rule. */
 .bolkhovud .section-title { padding: 0; border-bottom: 0; }
 
-/* Ingen flytmargar inne i hovudet. `gap` set avstanden her.
-
-   Dette er ikkje pynt. `:where(h2,h3,h4) + *` i token-blokka gjev alt
-   som kjem *etter* ei overskrift tolv piksel luft yver seg — rett i
-   vanleg flyt, men sikti stend ikkje etter tittelen her, ho stend
-   attmed honom. Margen gjorde rada 40 px høg der overskrifti er 30, og
-   daa fylgde tvo ting: tittelen datt ned i rada, og haarlina under
-   hovudet hamna ti piksel lenger nede enn lina under nabobolken. Tvo
-   like store overskrifter attmed kvarandre stod paa kvar si høgd og
-   las seg som tvo ulike rangar. */
+/* No flow margins inside the head. gap sets the spacing here.
+   
+      This is not decoration. :where(h2,h3,h4) + * in the token block gives
+      everything coming *after* a heading twelve pixels of air above it —
+      right in ordinary flow, but the filter does not stand after the title
+      here, it stands beside it. The margin made the row 40 px tall where the
+      heading is 30, and two things followed: the title dropped inside the
+      row, and the hairline under the head landed ten pixels lower than the
+      rule under the neighbouring section. Two equally large headings side by
+      side stood at different heights and read as two different ranks. */
 .bolkhovud > * { margin: 0; }
 
 
-/* ---- sikti ----
-   Veljarane er nakne: skrift og ein pil, ingi ramme og ingi flate. Ein
-   veljar som stend attmed ei overskrift skal ikkje sjaa ut som eit
-   skjema — han er ei innstilling paa det ein alt ser.
-
-   Ingen synleg merkelapp. Det fyrste valet *er* merkelappen — «Alle
-   typar», «Alle klassar» — so ein lapp attaat hadde sagt det same ein
-   gong til. Namnet bur i `aria-label` for dei som ikkje ser det.
-
-   Ingi breiddegrense: ein veljar er so brei som det breidaste valet
-   sitt (§9), og han fær vera det. Eit lærarnamn eller ei klassa paa
-   bokmaal vart klipt av lenge fyrr det var lese den gongen han hadde
-   ei.
-
-   Vald sikt syner seg som ljos og ikkje som ei ramme: `--merke-svak` i
-   flata, og blekket upp fraa `--blekk-lys` til `--blekk`. */
+/* ---- the filter ----
+      The selects are bare: type and an arrow, no frame and no surface. A
+      select standing beside a heading must not look like a form — it is a
+      setting on what you are already looking at.
+   
+      No visible label. The first option *is* the label — "All types", "All
+      classes" — so a label beside it would say the same thing again. The name
+      lives in aria-label for those who do not see it.
+   
+      No width limit: a select is as wide as its widest option (§9), and it
+      may be. A teacher name or a class in Bokmål was cut off long before it
+      was read back when it had one.
+   
+      A selected filter shows as light and not as a frame: --merke-svak in the
+      surface, and the ink up from --blekk-lys to --blekk. */
 .sikt { display: flex; flex-wrap: wrap; align-items: center; gap: var(--rom-2); }
 
-/* UNNATAK, og eit medvite eit (28.8.2026).
-   Designsystemet gjorde veljaren til ein kapsel med kuppel og glans —
-   «ein knapp med ei liste attum» — og det er rett i eit skjema. Sikti er
-   ikkje eit skjema. Ho er ei innstilling paa noko du alt ser, og bolken
-   yver segjer kvifor: ein veljar som stend attmed ei overskrift skal
-   ikkje sjaa ut som eit skjema.
-
-   Difor lyt han taka baade kuppelen og glansen av att — ikkje berre
-   ramma. `box-shadow: none` og `background-image: var(--pil)` er dei tvo
-   som gjer det; utan dei hadde den nakne sikti fenge ein kuppelskugge og
-   tri glanslag ho ikkje bad um, og pila hadde stade paa feil stad av di
-   posisjonslista er rekna for fem lag og ikkje tvo. */
+/* EXCEPTION, and a deliberate one (28.8.2026).
+      The design system made the select a capsule with dome and gloss — "a
+      button with a list behind it" — and that is right in a form. A filter is
+      not a form. It is a setting on something you already see, and the
+      section above says why: a select standing beside a heading must not look
+      like a form. */
 .sikt select {
   width: auto; max-width: 100%; min-width: 0;
   font: inherit; font-size: .82rem;

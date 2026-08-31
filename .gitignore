@@ -64,3 +64,6 @@ build.feil
 
 # Utviklarlista er lokal og skal ikkje fylgja repoet.
 utviklarar
+
+# Databasekopiar ein tek fyre ein reparasjon.
+*.bak

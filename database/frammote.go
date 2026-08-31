@@ -9,18 +9,18 @@ import (
 	"kjernekraft/models"
 )
 
-// Frammøtet.
+// Attendance.
 //
-// `event_signups` sa til no berre at du *hadde meldt deg paa*. Det er
-// ikkje det same som at du var der, og heile huset visste det: fotnoten
-// under oppmøtebrettet sa «Frammøte er ikkje registrert enno», og
-// spurningen bak brettet ber ein kommentar um at han skal byta
-// `event_signups` mot frammøtet den dagen det finst.
+// event_signups only said that you *had signed up*. That is not the same as
+// being there, and the whole house knew it: the footnote under the
+// attendance board said "attendance is not recorded yet", and the query
+// behind the board carried a comment saying it should swap event_signups
+// for attendance the day it existed.
 //
-// Det finst no. `attended_at` er tidspunktet nokon kryssa av i
-// vestibylen — NULL so lenge ingen hev gjort det.
+// It exists now. attended_at is the moment somebody ticked you off in the
+// lobby — NULL as long as nobody has.
 
-// MigrerFrammote legg til kolonna um ho ikkje er der.
+// MigrerFrammote adds the column if it is not there.
 func MigrerFrammote(db *sql.DB) error {
 	var finst bool
 	if err := db.QueryRow(
@@ -35,19 +35,19 @@ func MigrerFrammote(db *sql.DB) error {
 	return err
 }
 
-// TimarIVindauget gjev timane kiosken skal syna: dei som byrjar innan
-// `fyre`, og dei som gjeng no og ikkje hev slutta for meir enn `etter`
-// sidan.
+// TimarIVindauget gives the classes the kiosk should show: those starting
+// within `fyre`, and those running now that have not ended more than
+// `etter` ago.
 //
-// Vindauget er heile personvernet i denne sida. Ho er open — det stend
-// ein skjerm i vestibylen og ingen loggar seg paa han — so ho skal aldri
-// kunna svara paa «kven trenar her». Ho svarar paa «kven er her no», og
-// berre so lenge det er no.
-func (db *Database) TimarIVindauget(naa time.Time, fyre, etter time.Duration) ([]models.Event, error) {
-	// Kapasiteten er med av di kiosken no kann melda folk *paa*: han
-	// skal berre bjoda fram søket naar det finst ledige plassar. Same
-	// utrekningi som i SignupUserForEvent — timen sitt eige tal um det
-	// er sett, elles rommet sitt.
+// The window is the whole of the privacy on this page. It is open — there
+// is a screen in the lobby and nobody logs into it — so it must never be
+// able to answer "who trains here". It answers "who is here now", and only
+// while that is now.
+func (db *Database) TimarIVindauget(nå time.Time, fyre, etter time.Duration) ([]models.Event, error) {
+	// Capacity is included because the kiosk can now sign people *up*: it
+	// 	// should only offer the search when there are places left. Same
+	// 	// reckoning as in SignupUserForEvent — the class's own number if set,
+	// 	// otherwise the room's.
 	rows, err := db.Conn.Query(`
 		SELECT e.id, e.title, e.start_time, e.end_time,
 		       COALESCE(e.teacher_name, ''), COALESCE(r.name, e.location, ''),
@@ -56,8 +56,8 @@ func (db *Database) TimarIVindauget(naa time.Time, fyre, etter time.Duration) ([
 		FROM events e
 		LEFT JOIN rooms r ON r.id = e.room_id
 		WHERE e.start_time <= ? AND e.end_time > ?
-		ORDER BY e.start_time ASC`,
-		veggtekst(naa.Add(fyre)), veggtekst(naa.Add(-etter)))
+		ORDER BY e.start_time ASC, e.id ASC`,
+		veggtekst(nå.Add(fyre)), veggtekst(nå.Add(-etter)))
 	if err != nil {
 		return nil, err
 	}
@@ -76,47 +76,18 @@ func (db *Database) TimarIVindauget(naa time.Time, fyre, etter time.Duration) ([
 	return ut, rows.Err()
 }
 
-// Paameld er ein person paa lista til ein time, med eller utan kryss.
-type Paameld struct {
+// Påmeld er ein person på lista til ein time, med eller utan kryss.
+type Påmeld struct {
 	UserID   int64
 	Namn     string
 	Frammott *time.Time // nil = ikkje kryssa av
 }
 
-// PaameldeTil gjev lista kiosken kryssar av i.
-func (db *Database) PaameldeTil(eventID int64) ([]Paameld, error) {
-	rows, err := db.Conn.Query(`
-		SELECT u.id, u.name, es.attended_at
-		FROM event_signups es
-		INNER JOIN users u ON u.id = es.user_id
-		WHERE es.event_id = ?
-		ORDER BY u.name COLLATE NOCASE ASC`, eventID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var ut []Paameld
-	for rows.Next() {
-		var p Paameld
-		var naar sql.NullTime
-		if err := rows.Scan(&p.UserID, &p.Namn, &naar); err != nil {
-			return nil, err
-		}
-		if naar.Valid {
-			t := naar.Time
-			p.Frammott = &t
-		}
-		ut = append(ut, p)
-	}
-	return ut, rows.Err()
-}
-
 // PaameldeTilTimar hentar dei påmelde til fleire timar i éi søkning.
 // Innsjekkskjermen viser gjerne fleire timar samtidig; eitt kall per
 // time gjorde då sidebygginga til N+1 søkningar.
-func (db *Database) PaameldeTilTimar(eventIDs []int64) (map[int64][]Paameld, error) {
-	ut := make(map[int64][]Paameld, len(eventIDs))
+func (db *Database) PaameldeTilTimar(eventIDs []int64) (map[int64][]Påmeld, error) {
+	ut := make(map[int64][]Påmeld, len(eventIDs))
 	if len(eventIDs) == 0 {
 		return ut, nil
 	}
@@ -142,13 +113,13 @@ func (db *Database) PaameldeTilTimar(eventIDs []int64) (map[int64][]Paameld, err
 
 	for rows.Next() {
 		var eventID int64
-		var p Paameld
-		var naar sql.NullTime
-		if err := rows.Scan(&eventID, &p.UserID, &p.Namn, &naar); err != nil {
+		var p Påmeld
+		var når sql.NullTime
+		if err := rows.Scan(&eventID, &p.UserID, &p.Namn, &når); err != nil {
 			return nil, err
 		}
-		if naar.Valid {
-			t := naar.Time
+		if når.Valid {
+			t := når.Time
 			p.Frammott = &t
 		}
 		ut[eventID] = append(ut[eventID], p)
@@ -156,10 +127,10 @@ func (db *Database) PaameldeTilTimar(eventIDs []int64) (map[int64][]Paameld, err
 	return ut, rows.Err()
 }
 
-// MerkFrammote kryssar av. Han er *idempotent* med vilje: trykkjer nokon
-// tvo gonger, stend det fyrste tidspunktet — kiosken er ein skjerm mange
-// tek paa, og det andre trykket er som oftast eit uhell.
-func (db *Database) MerkFrammote(eventID, userID int64, naa time.Time) error {
+// MerkFrammote ticks someone off. It is *idempotent* deliberately: press
+// twice and the first timestamp stands — the kiosk is a screen many people
+// touch, and the second press is usually an accident.
+func (db *Database) MerkFrammote(eventID, userID int64, nå time.Time) error {
 	tx, err := db.Conn.Begin()
 	if err != nil {
 		return err
@@ -169,14 +140,14 @@ func (db *Database) MerkFrammote(eventID, userID int64, naa time.Time) error {
 	res, err := tx.Exec(`
 		UPDATE event_signups SET attended_at = ?
 		WHERE event_id = ? AND user_id = ? AND attended_at IS NULL`,
-		veggtekst(naa), eventID, userID)
+		veggtekst(nå), eventID, userID)
 	if err != nil {
 		return err
 	}
 
-	// `attended_at IS NULL` gjer krysset eingongs. Rørde me ingi rad, var
-	// ho alt kryssa av — og daa skal klippet *ikkje* takast ein gong til.
-	// Tvo trykk paa den same knappen i kiosken er ein ting som hender.
+	// attended_at IS NULL makes the tick one-shot. If we touched no row it was
+	// 	// already ticked — and then the clip must *not* be taken again. Two
+	// 	// presses on the same kiosk button is a thing that happens.
 	rørde, err := res.RowsAffected()
 	if err != nil {
 		return err
@@ -188,41 +159,39 @@ func (db *Database) MerkFrammote(eventID, userID int64, naa time.Time) error {
 	// Klippet gjeng i den same transaksjonen som krysset. Fell det eine,
 	// fell det andre: eit kryss utan klipp er ein gratis time, og eit
 	// klipp utan kryss er eit klipp ingen fekk noko for.
-	if err := brukKlipp(tx, eventID, userID, naa); err != nil {
+	if err := brukKlipp(tx, eventID, userID, nå); err != nil {
 		return err
 	}
 	return tx.Commit()
 }
 
-// NettFrammott gjev timen brukaren *var paa* og som slutta for mindre
+// NettFrammott gjev timen brukaren *var på* og som slutta for mindre
 // enn `innan` sidan — eller nil.
 //
 // Han krev kryss. Ei paamelding aaleine segjer at ho hadde tenkt seg
 // dit, og «Takk for no» til ein som ikkje kom er ei helsing som lyg.
-func (db *Database) NettFrammott(userID int64, naa time.Time, innan time.Duration) (*models.Event, error) {
-	var e models.Event
+func (db *Database) NettFrammott(userID int64, nå time.Time, innan time.Duration) (bool, error) {
+	var eitt int
 	err := db.Conn.QueryRow(`
-		SELECT e.id, e.title, e.start_time, e.end_time
+		SELECT 1
 		FROM events e
 		INNER JOIN event_signups es ON e.id = es.event_id
 		WHERE es.user_id = ? AND es.attended_at IS NOT NULL
 		  AND e.end_time <= ? AND e.end_time > ?
-		ORDER BY e.end_time DESC
 		LIMIT 1`,
-		userID, veggtekst(naa), veggtekst(naa.Add(-innan))).
-		Scan(&e.ID, &e.Title, &e.StartTime, &e.EndTime)
+		userID, veggtekst(nå), veggtekst(nå.Add(-innan))).Scan(&eitt)
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return false, nil
 	}
 	if err != nil {
-		return nil, err
+		return false, err
 	}
-	return &e, nil
+	return true, nil
 }
 
 // FjernFrammote tek krysset bort att: feil person vart kryssa av.
 // Paameldingi stend — det er berre krysset som gjekk gale. Kryssar
-// nokon same personen paa nytt, fær rada eit nytt tidspunkt, og det er
+// nokon same personen på nytt, fær rada eit nytt tidspunkt, og det er
 // rett: det gamle var jo aldri sant.
 func (db *Database) FjernFrammote(eventID, userID int64) error {
 	tx, err := db.Conn.Begin()
@@ -246,23 +215,23 @@ func (db *Database) FjernFrammote(eventID, userID int64) error {
 		return tx.Commit()
 	}
 
-	// Var krysset feil, var klippet det ogso. Det kjem attende paa det
-	// kortet det vart teke fraa — difor stend kort-id-et paa paameldingi.
+	// Var krysset feil, var klippet det ogso. Det kjem attende på det
+	// kortet det vart teke frå — difor stend kort-id-et på paameldingi.
 	if err := gjevAttKlipp(tx, eventID, userID); err != nil {
 		return err
 	}
 	return tx.Commit()
 }
 
-// SokTilInnsjekk finn folk etter namn, til drop-in i kiosken: nokon
-// stend i vestibylen utan aa ha tinga plass, og det er plass att.
+// SokTilInnsjekk finds people by name, for drop-in at the kiosk: somebody
+// is standing in the lobby without having booked, and there is room.
 //
-// Sida er open, so dette søket er den eine staden kiosken kann segja
-// noko um folk som *ikkje* er her no. Grensa og minstelengdi paa
-// spurninga ligg i handsamaren; her ligg resten av varsemdi: berre
-// namn, aldri noko meir, og dei som alt stend paa lista er utelatne —
-// dei høyrer til avkryssingi, ikkje søket.
-func (db *Database) SokTilInnsjekk(q string, eventID int64, grense int) ([]Paameld, error) {
+// The page is open, so this search is the one place the kiosk can say
+// anything about people who are *not* here now. The limit and the minimum
+// query length live in the handler; the rest of the caution lives here:
+// names only, never anything more, and those already on the list are left
+// out — they belong to the tick, not the search.
+func (db *Database) SokTilInnsjekk(q string, eventID int64, grense int) ([]Påmeld, error) {
 	monster := "%" + strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(q) + "%"
 	rows, err := db.Conn.Query(`
 		SELECT u.id, u.name
@@ -277,23 +246,13 @@ func (db *Database) SokTilInnsjekk(q string, eventID int64, grense int) ([]Paame
 	}
 	defer rows.Close()
 
-	var ut []Paameld
+	var ut []Påmeld
 	for rows.Next() {
-		var p Paameld
+		var p Påmeld
 		if err := rows.Scan(&p.UserID, &p.Namn); err != nil {
 			return nil, err
 		}
 		ut = append(ut, p)
 	}
 	return ut, rows.Err()
-}
-
-// VarFrammott segjer um brukaren er kryssa av paa ein time.
-func (db *Database) VarFrammott(eventID, userID int64) (bool, error) {
-	var n int
-	err := db.Conn.QueryRow(`
-		SELECT COUNT(*) FROM event_signups
-		WHERE event_id = ? AND user_id = ? AND attended_at IS NOT NULL`,
-		eventID, userID).Scan(&n)
-	return n > 0, err
 }

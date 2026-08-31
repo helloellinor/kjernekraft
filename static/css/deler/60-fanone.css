@@ -23,11 +23,26 @@
    Rommet under er sida sjølv. Ingen kant, ingen kasse.
 
    `.faneark` hev ingen regel her, og det er med vilje: han maalar ikkje
-   og legg ikkje ut. Han er *avgrensingi* — `faner.js` nyttar
-   `closest(".faneark")` til aa halda tvo fanerekkjor fraa aa stela
-   fanor fraa kvarandre (administrasjonen hev ei rekkja inni fana
-   «Prising»). Slett honom ikkje som ein leivning; daa opnar alle
-   bolkarne seg paa ein gong.
+   og legg ikkje ut. Han er *avgrensingi*. htmx byter ut nett det
+   elementet naar ein trykkjer paa ei fana — `hx-target` og `hx-select`
+   peikar baae paa id-en hans — og `bolkveljar.js` nyttar
+   `closest(".faneark")` til aa halda tvo rekkjor fraa aa stela fanor
+   fraa kvarandre. Slett honom ikkje som ein leivning.
+
+   ---- tvo slag fanor, éi form ----
+
+   Ei fana er **ei lenkja** dei fleste stader: `?fane=` stend i adressa,
+   tenaren teiknar den eine bolken, og `aria-current="page"` segjer kvar
+   ein stend. Sjaa handsamarar/faner.go.
+
+   Tvo stader er ho ein knapp, og daa er `aria-selected="true"` svaret:
+   brytaren i timestyringi (heile rekkja eller den eine timen) og
+   bunkeskyvaren yver folkelista. Baae byter noko *inne i* sida — eit
+   skjema ein hev skrive i, ei lista ein siktar — og ei lenkja hadde
+   teke det til tenaren og kome att med det burte.
+
+   Forma er den same av di tingen er den same: noko som stend i éi av
+   fleire stillingar. Difor tek kvar regel under baae svari.
    =================================================================== */
 .faner {
   display: inline-flex; flex-wrap: wrap;
@@ -41,6 +56,11 @@
 
 .fane {
   flex: none;
+  /* Ei lenkja er ikkje ein knapp av seg sjølv: ho hev understreking, ho
+     ber lenkjefargen, og ho legg seg ut som tekst. Dei tri lini gjer ei
+     <a> til den same flata som ein <button> — resten av regelen er alt
+     felles. */
+  display: inline-block; text-decoration: none; text-align: center;
   font-family: var(--skrift); font-size: .95rem; font-weight: 500;
   letter-spacing: 0; text-transform: none;
   padding: var(--knapp-loddrett) var(--rom-5);
@@ -55,7 +75,8 @@
 /* Den valde posisjonen er ein kuppel: glim paa yversida, myrkare mot
    foten. Det er den same tvo-lags forma som `.btn`, av di det er den
    same tingen — noko som stikk upp or flata. */
-.fane[aria-selected="true"] {
+.fane[aria-selected="true"],
+.fane[aria-current="page"] {
   color: var(--blekk);
   border-color: var(--kant);
   background:
@@ -70,13 +91,19 @@
 /* Rommet er arket. Kanten og fyllet gjekk ut med mappa (§6). */
 .fanerom { border: 0; background: none; padding: 0; }
 
-/* Alle bolkarne stend i dokumentet heile tidi; det er berre synet som
-   skifter. Vart dei bytte ut, laut nettlesaren leggja sida ut paa nytt
-   for kvart klikk, og daa hoppar det. Kva bolk som er synleg, avgjer
-   faner.js med `hidden`. */
+/* Ein bolk, ikkje alle.
+   Alle stod i dokumentet fyrr og eit skript sette `hidden` paa dei ein
+   ikkje saag. Grunngjevingi var at ingen ting daa flyttar seg naar ein
+   byter — og det held framleis for brytaren i timestyringi, som difor
+   gjer det endaa (`[data-bolk]` under). Men for fanone i huset var
+   prisen at heile administrasjonen — timestyringi, folkelista, alle
+   innstillingane — vart bygd og send for augo som saag meldingane. No
+   teiknar tenaren den eine, og fanearket er det einaste som skifter, so
+   hovudet yver det stend still likevel. */
 
 /* Fyrste yverskrifti i ein bolk stend alt under skyvaren og treng ikkje
    luft yver seg. */
+.fanerom > .bolk > :first-child,
 .fanerom > [data-bolk] > :first-child { margin-top: 0; }
 
 /* Smaating som fyrr stod som style-attributt med sine eigne hex-tal. */

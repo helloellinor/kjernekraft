@@ -1,0 +1,30 @@
+{{define "signed_up_classes_container"}}
+{{/* Bolken vert teikna av tenaren med det same, og henta att berre når
+     noko *hender*: melder du deg på eller av — kvar som helst på sida
+     — sender dokka «paamelding» på <body>, og båe listone hentar seg
+     sjølve att.
+
+     Han låg og lasta med `hx-trigger="load"` fyrr. Det var tvo ting
+     gale i det: sida stod med «Lastar paameldingar…» til svaret kom, og
+     svaret kom aldri — brotstykket vart teikna or si eigi fil, og der
+     finst korkje `timeliste` eller `dagmerke`. Tenaren svara 500, og
+     htmx byter ikkje ut noko når svaret er ein feil. Difor stod det
+     «lastar» for alltid.
+
+     Heile bolken vert bytt ut og ikkje berre innhaldet: er du ikkje
+     påmeld noko, skal det ikkje standa ei yverskrift som seier
+     «Påmeld» med ei tom melding under. */}}
+<div id="signed-up-classes" hx-get="/api/user/signups"
+     hx-trigger="paamelding from:body" hx-swap="innerHTML">
+    {{template "signed_up_classes_module" .}}
+</div>
+{{end}}
+
+{{define "signed_up_classes_module"}}
+{{if .EnrolledSessions}}
+<div class="content-section">
+    <h2 class="section-title">{{t .Lang "dashboard.signed_up"}}</h2>
+    {{template "timeliste" (dict "Lang" .Lang "Rader" .EnrolledSessions)}}
+</div>
+{{end}}
+{{end}}

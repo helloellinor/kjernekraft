@@ -1,0 +1,266 @@
+{{define "admin_users_table"}}
+{{/* People.
+     A table is right when you compare rows across. Here nobody compares
+     anything: you look up *one* person, because a person is standing in
+     front of you at the desk. So the search field is the screen, and it
+     has focus when the page opens.
+
+     Three facts per person — who, what they hold, when they were last
+     here — and the rest comes when the row is opened. The row opens in
+     place; you do not look someone up by leaving the list of people. */}}
+<div class="folk" id="folk">
+    {{/* The groups.
+             A group is who you belong to; a role is what you may do. So they
+             do not stand in the same list: the day "give access to reformer"
+             looks like "make an administrator", the two are the same thing to
+             the hand doing them. */}}
+    {{/* The groups and the people list are two sections on the same page, and
+             a section carries an h2 with the rule under it (§5: the step
+             follows depth in the document, and .section-title is what a
+             section *looks like*). This stood as an .undertittel — 0.78 rem
+             capitals, which is the measure for something naming a category
+             inside a section, not for the section itself. */}}
+    <div class="bolkhovud">
+        <h2 class="section-title">{{t .Lang "admin.group_admin"}}</h2>
+    </div>
+
+    {{if .Grupper}}
+    <ul class="gruppeliste" id="gruppeliste">
+        {{range .Grupper}}
+        <li class="grupperad" data-gruppe="{{.ID}}">
+            <span class="gruppenamn">{{.Namn}}</span>
+            <span class="gruppetal">{{.Medlem}} {{t $.Lang "admin.group_members"}}</span>
+            {{/* The warning stands on the page before the press, and the button
+                             asks for the second press itself (§7). The classes the
+                             group held become open to everyone again — they do not
+                             disappear with it. */}}
+            {{/* .btn-danger alongside the hook, not the hook alone (§9).
+                             .gruppeslett set only colour and size, and a button with a
+                             class but no family class falls through every rule in the
+                             house: it was drawn by the browser — system font, grey
+                             surface, wrong radius. Red because a group that goes does
+                             not come back; the second press lives in data-stadfest
+                             (§7). */}}
+            <button type="button" class="btn-danger gruppeslett"
+                    data-stadfest="{{t $.Lang "admin.delete_group_confirm"}}">{{t $.Lang "admin.delete_group"}}</button>
+        </li>
+        {{end}}
+    </ul>
+    {{else}}
+    <p class="tomt">{{t .Lang "admin.no_groups"}}</p>
+    {{end}}
+
+    <p class="setning nygruppe">
+        <input type="text" class="felt" id="ny-gruppe"
+               placeholder="{{t .Lang "admin.group_name"}}"
+               aria-label="{{t .Lang "admin.group_name"}}">
+        <button type="button" class="btn" id="lag-gruppe">{{t .Lang "admin.new_group"}}</button>
+    </p>
+
+    {{/* The people list is its own section, and carries its title.
+             The groups stand on the title line and not in a row under it: §9
+             says a section that filters carries its filter on the title line —
+             a filter is a setting on what you are already looking at, not a
+             question you have to answer first. A row of its own would have
+             made three lines to read before the list: title, question,
+             answer.
+    
+             The search field stays below. It is not the filter — it is what
+             you *do* in the section — and the number beside it is its
+             answer. */}}
+    <div class="bolkhovud">
+        <h2 class="section-title">{{t .Lang "admin.find_people"}}</h2>
+
+        {{/* The groups.
+                     The same slider as the tabs elsewhere in the house — .faner
+                     and .fane, not a new control that resembles them. It carries
+                     data-rolla and not data-bolk, so bolkveljar.js does not see
+                     it: it does not switch sections, it filters a list. Same move
+                     as the day slider in the schedule.
+        
+                     A button and not a link, for the same reason the scope switch
+                     in the class form is one: the tabs of the house are links now
+                     (?fane= in the address, one panel drawn by the server), and a
+                     link here would have gone to the server for a filter the page
+                     can apply to what it already holds.
+        
+                     "All" stands first and is selected when the page arrives. The
+                     search field is the screen in this section — you look up
+                     whoever is standing in front of you — and a filter that is the
+                     default state would have made a search for a teacher answer
+                     "nobody" because you were standing in the wrong group. It is
+                     you who take the others away, not the page.
+        
+                     No URL: the tab row owns the address (?fane=folk), and a
+                     second thing writing to it would take it from the first. */}}
+        <div class="faner rollefaner" role="tablist" aria-label="{{t .Lang "admin.vel_bunke"}}">
+            <button type="button" class="fane" role="tab" data-rolla=""
+                    aria-selected="true" aria-controls="folk-liste">{{t .Lang "admin.bunke_alle"}}</button>
+            <button type="button" class="fane" role="tab" data-rolla="elev"
+                    aria-selected="false" aria-controls="folk-liste">{{t .Lang "admin.bunke_elevar"}}</button>
+            <button type="button" class="fane" role="tab" data-rolla="laerar"
+                    aria-selected="false" aria-controls="folk-liste">{{t .Lang "admin.bunke_laerarar"}}</button>
+            <button type="button" class="fane" role="tab" data-rolla="sjef"
+                    aria-selected="false" aria-controls="folk-liste">{{t .Lang "admin.bunke_sjefar"}}</button>
+        </div>
+    </div>
+
+    <div class="folk-sok">
+        {{/* Ingen `autofocus` her, og det er med vilje: folk.js set fokus
+             med `preventScroll`.
+
+             Attributtet gjorde ingen skade so lenge bolken var `hidden`
+             naar sida vart lesi — nettlesaren gjekk forbi eit felt han
+             ikkje kunde sjaa, og faner.js sette fokus utan aa rulla naar
+             fana vart opna. No teiknar tenaren bolken, feltet stend
+             synlegt fraa fyrste stund, og daa gjer nettlesaren det
+             `autofocus` alltid hev gjort: han rullar det inn i glaset.
+             Paa ei skjerm som er 600 piksel høg hamna sida 451 piksel
+             nedrulla, med fanerekkja utanfor glaset. */}}
+        <input type="search" id="folk-sok" class="sok"
+               placeholder="{{t .Lang "admin.search_people"}}"
+               aria-label="{{t .Lang "admin.search_people"}}">
+        <span class="folk-tal" id="folk-tal" aria-live="polite" data-alle="{{t .Lang "admin.people"}}" data-av="{{t .Lang "timeplan.of"}}"></span>
+    </div>
+
+    <ul class="folk-liste" id="folk-liste">
+        {{/* A filter that gives nothing has to say so. Otherwise only an empty
+                     framed box is left, and it looks as though the page broke. It
+                     stands first in the list and not last, because
+                     .folk-rad:last-child removes the bottom border from the last
+                     row — a line after it would have taken that away. */}}
+        <li class="tomt midt" id="folk-inkje" hidden>{{t .Lang "admin.no_people_hit"}}</li>
+        {{range .Folk}}
+        <li class="folk-rad{{if .TrengSvar}} treng-svar{{end}}"
+            data-sok="{{.Namn}} {{.Epost}} {{.Telefon}}">
+            <button type="button" class="folk-hovud" aria-expanded="false">
+                <span class="folk-namn">{{.Namn}}</span>
+
+                <span class="folk-held">
+                    {{if .Medlemskap}}
+                    <span class="held held-medlem status-{{.MedlemStod}}">{{.Medlemskap}}</span>
+                    {{end}}
+                    {{if .KlippAtt}}
+                    <span class="held held-klipp">{{.KlippAtt}} {{t $.Lang "admin.clips_left"}}</span>
+                    {{end}}
+                    {{if not .Medlemskap}}{{if not .KlippAtt}}
+                    <span class="held held-ingen">{{t $.Lang "admin.holds_nothing"}}</span>
+                    {{end}}{{end}}
+                </span>
+
+                <span class="folk-sist">
+                    {{if .SistHer}}{{sidan $.Lang .SistHer}}{{else}}{{t $.Lang "admin.never_here"}}{{end}}
+                </span>
+            </button>
+
+            <div class="folk-meir" hidden>
+                <dl class="folk-detalj">
+                    <dt>{{t $.Lang "signup.email"}}</dt><dd><a href="mailto:{{.Epost}}">{{.Epost}}</a></dd>
+                    {{if .Telefon}}<dt>{{t $.Lang "signup.phone"}}</dt><dd>{{.Telefon}}</dd>{{end}}
+                    {{if .Fodd}}<dt>{{t $.Lang "signup.birthdate"}}</dt><dd>{{.Fodd}}</dd>{{end}}
+                    {{if .Medlemskap}}<dt>{{t $.Lang "navigation.membership"}}</dt>
+                    <dd>{{.Medlemskap}} &middot; {{kroner .MedlemPris}}/mnd</dd>{{end}}
+                    {{if .KlippTotalt}}<dt>{{t $.Lang "navigation.punch_cards"}}</dt>
+                    <dd>{{.KlippAtt}} {{t $.Lang "admin.of_clips"}} {{.KlippTotalt}}</dd>{{end}}
+                    <dt>{{t $.Lang "admin.classes_last_year"}}</dt><dd>{{.TimarIÅr}}</dd>
+                </dl>
+
+                {{/* The roles carry the same form as what they hold: a mark. The
+                                     difference is that these two can be pressed, and that
+                                     they stand there even when off — a role is not
+                                     something you *see* somebody lacking, so the list has
+                                     to show both outcomes.
+                
+                                     No heading above them. "Roles" would have been the same
+                                     word the buttons already say. */}}
+                {{/* Rollone er løyve. Gruppone under er noko anna, og
+                     difor ei anna line og eit anna merke. */}}
+                <p class="loyve">
+                    <button type="button" class="held loyvemerke" data-brukar="{{.ID}}"
+                            data-loyve="teacher" aria-pressed="{{if .ErLærar}}true{{else}}false{{end}}">
+                        {{t $.Lang "admin.loyve_laerar"}}
+                    </button>
+                    <button type="button" class="held loyvemerke" data-brukar="{{.ID}}"
+                            data-loyve="admin" aria-pressed="{{if .ErAdmin}}true{{else}}false{{end}}">
+                        {{t $.Lang "admin.loyve_admin"}}
+                    </button>
+                </p>
+
+                {{if $.Grupper}}
+                <p class="grupper" data-brukar="{{.ID}}">
+                    {{$sett := .GruppeSett}}
+                    {{range $.Grupper}}
+                    <button type="button" class="gruppemerke" data-gruppe="{{.ID}}"
+                            aria-pressed="{{if index $sett .ID}}true{{else}}false{{end}}">
+                        {{.Namn}}
+                    </button>
+                    {{end}}
+                </p>
+                {{end}}
+            </div>
+        </li>
+        {{else}}
+        <li class="tomt midt">{{t .Lang "admin.no_people"}}</li>
+        {{end}}
+    </ul>
+</div>
+
+<script>
+// Gruppone. Namnet er lagra i det du trykkjer — ingi dokka her, av di
+// det ikkje er eit skjema med fleire felt som heng saman: det er eitt
+// medlemskap av eller paa, og feltet sjølv er svaret.
+(function () {
+    var folk = document.getElementById('folk');
+    if (!folk) return;
+
+    function seg(el, ord) {
+        el.textContent = ord;
+        el.classList.add('gale');
+    }
+
+    folk.addEventListener('click', function (e) {
+        // Medlemskapet i ei gruppe.
+        var merke = e.target.closest('.gruppemerke');
+        if (merke) {
+            var paa = merke.getAttribute('aria-pressed') !== 'true';
+            var brukar = merke.closest('.grupper').dataset.brukar;
+            fetch('/api/admin/gruppemedlem?gruppe=' + merke.dataset.gruppe
+                + '&brukar=' + brukar + '&paa=' + (paa ? '1' : '0'), { method: 'POST' })
+                .then(function (svar) {
+                    if (!svar.ok) throw new Error();
+                    merke.setAttribute('aria-pressed', paa ? 'true' : 'false');
+                })
+                .catch(function () { merke.classList.add('gale'); });
+            return;
+        }
+
+        // Ny gruppe. Sida vert lasta paa nytt: gruppa skal stande i kvar
+        // person si rad og i veljaren paa timeplanfana, og dei er teikna
+        // av tenaren.
+        if (e.target.id === 'lag-gruppe') {
+            var felt = document.getElementById('ny-gruppe');
+            var namn = felt.value.trim();
+            if (!namn) { felt.focus(); return; }
+            fetch('/api/admin/gruppe?namn=' + encodeURIComponent(namn), { method: 'POST' })
+                .then(function (svar) {
+                    if (!svar.ok) throw new Error();
+                    window.location.reload();
+                })
+                .catch(function () { felt.classList.add('gale'); });
+            return;
+        }
+
+        var slett = e.target.closest('.gruppeslett');
+        if (slett) {
+            var rad = slett.closest('.grupperad');
+            fetch('/api/admin/gruppe/slett?gruppe=' + rad.dataset.gruppe, { method: 'POST' })
+                .then(function (svar) {
+                    if (!svar.ok) throw new Error();
+                    window.location.reload();
+                })
+                .catch(function () { seg(rad.querySelector('.gruppetal'), '—'); });
+        }
+    });
+})();
+</script>
+{{end}}

@@ -120,7 +120,7 @@ func TestMembershipActionsPropertyBased(t *testing.T) {
 				Phone:     "11111111",
 				Birthdate: "1990-01-01",
 				Password:  "testpassword",
-				Loyve:     []string{"user"},
+				Løyve:     []string{"user"},
 			}
 
 			id, err := db.CreateUser(user)
@@ -178,7 +178,7 @@ func TestMembershipActionsPropertyBased(t *testing.T) {
 				Phone:     "22222222",
 				Birthdate: "1990-01-01",
 				Password:  "testpassword",
-				Loyve:     []string{"user"},
+				Løyve:     []string{"user"},
 			}
 
 			id, err := db.CreateUser(user)
@@ -220,7 +220,7 @@ func TestMembershipInvariants(t *testing.T) {
 		Phone:     "33333333",
 		Birthdate: "1990-01-01",
 		Password:  "testpassword",
-		Loyve:     []string{"user"},
+		Løyve:     []string{"user"},
 	}
 
 	userID, err := db.CreateUser(user)
@@ -284,7 +284,7 @@ func BenchmarkMembershipActionSequence(b *testing.B) {
 		Phone:     "44444444",
 		Birthdate: "1990-01-01",
 		Password:  "testpassword",
-		Loyve:     []string{"user"},
+		Løyve:     []string{"user"},
 	}
 
 	userID, err := db.CreateUser(user)

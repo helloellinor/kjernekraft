@@ -12,9 +12,9 @@ func time_(romID, plassar int) models.Event {
 
 // Rommet held so mange som den største timen i det. Yogo hev ingi
 // romkapasitet — han hev `seats` per time — so det er der talet lyt
-// koma fraa.
+// koma frå.
 //
-// Kjernekraft: reformer-rommet stod paa 4 i basen, medan 36 timar i det
+// Kjernekraft: reformer-rommet stod på 4 i basen, medan 36 timar i det
 // hadde fem paameldingsplassar. Eit rom som er sett for laagt gjer
 // timar fulle fyre dei er det.
 func TestRommetHeldSoMangeSomDenStorsteTimenIDet(t *testing.T) {
@@ -40,12 +40,12 @@ func TestRommetHeldSoMangeSomDenStorsteTimenIDet(t *testing.T) {
 
 // Ein vanleg time arvar rommet; ein som er sett lægre ber talet sitt.
 //
-// Det er skilnaden paa «kor mange rommet held» og «kor mange me slepp
-// inn denne gongen», og han lyt vera i basen: null tyder «rommet raar»,
+// Det er skilnaden på «kor mange rommet held» og «kor mange me slepp
+// inn denne gongen», og han lyt vera i basen: null tyder «rommet rår»,
 // so fær Salen tvo matter til, fylgjer dei vanlege timane med av seg
-// sjølve. Skreiv me talet inn paa kvar time, var det tvo hundrad stader
-// aa retta, og dei hadde stade att paa det gamle talet.
-func TestTimenArvarRommetNaarHanIkkjeErSettLaegre(t *testing.T) {
+// sjølve. Skreiv me talet inn på kvar time, var det tvo hundrad stader
+// aa retta, og dei hadde stade att på det gamle talet.
+func TestTimenArvarRommetNårHanIkkjeErSettLægre(t *testing.T) {
 	timar := []models.Event{
 		time_(1, 18), // Salen full — arvar
 		time_(1, 10), // Klassisk Pilates Matte, sett lægre — ber sitt eige
@@ -68,7 +68,7 @@ func TestTimenArvarRommetNaarHanIkkjeErSettLaegre(t *testing.T) {
 }
 
 // Eit rom huset ikkje kjenner att kann ikkje arva noko. Timen ber talet
-// sitt sjølv, og det er rett: ingen ting aa arva fraa.
+// sitt sjølv, og det er rett: ingen ting aa arva frå.
 func TestTimeUtanRomBerAlltidSittEigeTal(t *testing.T) {
 	timar := []models.Event{time_(0, 12)}
 	if eigne := latArva(timar, map[int]int{1: 18}); eigne != 1 {

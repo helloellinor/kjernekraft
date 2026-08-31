@@ -1,20 +1,20 @@
 /* ===================================================================
-   kortet
-   Ei hårfin lina, ein grunn skugge, ingen rundingar utyver det vesle.
-
-   Skuggen kom inn 28.8.2026 og kann gaa ut att like snøgt: alle korti i
-   huset les `--skugge-kort`, so `--skugge-kort: none` i token-blokka
-   skrur heile greia av utan at nokon annan fil vert rørd.
-   =================================================================== */
-/* Éin definisjon. Fem klassar teikna den same boksen kvar for seg fyrr
-   — flate, hårline, to pikslar runding, fem i fyll — og dei hadde alt
-   drive fraa kvarandre i fyll og radavstand. Det som skil eit medlemskort
-   fraa eit klippekort er kva som stend i det og kva farge produktet hev,
-   ikkje kva slag boks det er.
-
-   `--produkt` er den eine kroken: kortet set han, og alt inni som skal
-   bera produktfargen les han. Ingen skriv turkis eller rosa i ein
-   komponent lenger — dei skriv `var(--produkt)`. */
+      the card
+      A hairline, a shallow shadow, no rounding beyond the small.
+   
+      The shadow arrived 28.8.2026 and can go out as quickly: every card in
+      the house reads --skugge-kort, so --skugge-kort: none in the token
+      block switches the whole idea off without touching another file.
+      =================================================================== */
+/* One definition. Five classes drew the same box separately — surface,
+      hairline, two pixels of radius, five of padding — and they had already
+      drifted apart in padding and row spacing. What separates a membership
+      card from a klippekort is what stands in it and what colour the
+      product has, not what kind of box it is.
+   
+      --produkt is the one hook: the card sets it, and everything inside
+      that should carry the product colour reads it. Nobody writes turquoise
+      or pink in a component any more — they write var(--produkt). */
 .kort, .charge-item, .no-data {
   background: var(--flate);
   border: 1px solid var(--haarlina);
@@ -25,32 +25,31 @@
 }
 .kort { display: flex; flex-direction: column; gap: var(--rom-2); }
 
-/* Eit kort som *er* noko — valt, i bruk, framheva — fær ei lina i
-   produktfargen langs vinstre kanten. Éi lina, ikkje ei ramme.
-
-   Lina er ein `inset`-skugge og ikkje ein `border-left`. Ho var ein
-   border fyrr, og daa laag ho *utanpaa* haarlina paa 1px: kanten voks
-   fraa 1 til 3, og av di alt i huset er `border-box`, kryest
-   innhaldsboksen med tvo pikslar og teksti flutte seg like langt inn.
-   Paa pakkekorti stend det heile rada attmed kvarandre, so det
-   framhevede kortet hadde teksti si tvo pikslar lenger inne enn
-   grannane sine, og eit kort som vart valt rykte i det du trykte
-   (§3: ingen ting skal flytta seg).
-
-   Ein `inset`-skugge tek ingen plass i utrekningi, og difor kann lina
-   koma og gaa utan at noko rører seg — same kva fyll varianten hev.
-   `.timerad` stiller um fyllet sitt, og ei paddingutrekning her hadde
-   slege det ut. Kortskuggen lyt vera med i den same lista, elles slær
-   ho honom av. (§2 held elles skuggen aat ljoset; dette er den eine
-   staden ein `inset` teiknar ei lina, av di §3 veg tyngre.)
-
-   Tvo pikslar inset og ikkje tri: haarlina som alt er der vert farga
-   med, so lina les tri pikslar breid som fyrr. Kanten skifter berre
-   farge og ikkje breidd, som §3 vil ha det.
-
-   `.medlemskort` hev framleis ein ekte `border-left`: han stend der
-   alltid, so han flytter ingen ting, og han lyt kunna vera `dashed`
-   naar medlemskapet ventar paa fryse. */
+/* A card that *is* something — selected, in use, highlighted — gets a
+      line in the product colour along the left edge. One line, not a frame.
+   
+      The line is an inset shadow and not a border-left. As a border it lay
+      *outside* the 1px hairline: the edge grew from 1 to 3, and since
+      everything in the house is border-box, the content box shrank by two
+      pixels and the text moved in the same amount. On the package cards
+      the whole row stands side by side, so the highlighted card had its
+      text two pixels further in than its neighbours, and a card twitched
+      as you clicked it (§3: nothing may move).
+   
+      An inset shadow takes no part in the layout, so the line can come and
+      go without anything moving — whatever padding the variant has.
+      .timerad adjusts its own padding, and a padding calculation here would
+      have broken it. The card shadow has to be in the same list or it
+      switches it off. (§2 otherwise reserves shadow for light; this is the
+      one place an inset draws a line, because §3 weighs more.)
+   
+      Two pixels inset and not three: the hairline already there is coloured
+      too, so the line reads three pixels wide as before. The edge changes
+      only colour and not width, as §3 wants.
+   
+      .medlemskort still has a real border-left: it is always there, so it
+      moves nothing, and it has to be able to be dashed while the membership
+      is waiting on a freeze. */
 .kort.valt, .kort.framheva, .kort[aria-pressed="true"] {
   border-left-color: var(--produkt, var(--merke));
   box-shadow: inset 2px 0 0 var(--produkt, var(--merke)), var(--skugge-kort);
@@ -67,12 +66,12 @@
 /* ---- livsmerket ----
    Fargen tyder «dette er i live». Alt anna er form og vekt:
    ein open ring ventar, ein strek er frosen, graatt er utgjenge. */
-/* Tilstanden. Namni er dei *basen* brukar — «active», «paused»,
-   «cancelled», «freeze_requested» — og ikkje omsette namn attmed dei.
-   Det stod tvo sett her fyrr: `.stod-aktiv` og `.status-active` var den
-   same regelen skriven tvo gonger med kvar sine namn, og malane nytta
-   baae. Ei klasse som heiter det same som verdet ho kjem av, treng
-   ingen omsetjingstabell — og ingen kan gløyma aa halda han i takt. */
+/* The state. The names are the ones the *database* uses — "active",
+      "paused", "cancelled", "freeze_requested" — and not translated names
+      beside them. There were two sets here: .stod-aktiv and .status-active
+      were the same rule written twice with different names, and the
+      templates used both. A class named after the value it comes from needs
+      no translation table — and nobody can forget to keep it in step. */
 .status, .popular-badge {
   font-stretch: var(--vidd-merkelapp);
   display: inline-flex; align-items: center; gap: var(--rom-2);
@@ -112,25 +111,25 @@
   grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
 }
 
-/* ---- kjøpsflyten: eitt steg um gongen ----
-   JS-en hev alltid flutt `active` og `selected` — klassane fanst berre
-   ikkje i stilarket, so alle seks «Steg 2»-bolkane og kjøpsbolken stod
-   framme samstundes. No syner sida berre det steget du er i: vald
-   kategori → hennar tri pakkor → stadfestingi.
-
-   Det valde kortet held kanten sin og skifter berre farge (§6), og
-   fargen er produktfargen aat klippekortet (§2). */
-/* Eitt steg um gongen. `hidden` ber det no, ikkje ein klasse. Den gamle
-   `.steg.active` fanst i JS-en men ikkje i stilarket, so alle stegi stod
-   framme samstundes (STRUCTURE_AUDIT F11) — og daa var det ingen flyt,
-   berre ei lang rulla. Attributtet er det nettlesaren alt hev til dette,
-   og det verkar utan at nokon skriv ein regel. */
+/* ---- the purchase flow: one step at a time ----
+      The JS had always moved `active` and `selected` — the classes simply
+      did not exist in the stylesheet, so all six "step 2" sections and the
+      purchase section stood open at once. Now the page shows only the step
+      you are in: chosen category → its three packages → the confirmation.
+   
+      The selected card keeps its border and changes only colour (§6), and
+      the colour is the klippekort's product colour (§2). */
+/* One step at a time. `hidden` carries it now, not a class. The old
+      .steg.active existed in the JS but not in the stylesheet, so every step
+      stood open at once — and then there was no flow, only a long scroll.
+      The attribute is what the browser already has for this, and it works
+      without anyone writing a rule. */
 [hidden] { display: none !important; }
 
-/* Kategori- og pakkekorti er knappar no og ikkje divar med onclick.
-   Knappestilen huset gjev alle knappar lyt difor skrellast av: han kjem
-   med store bokstavar, breiddesmal skrift og halvanna centimeter fyll,
-   og eit kort hev korkje. */
+/* The category and package cards are buttons now, not divs with onclick.
+      The button styling the house gives every button therefore has to be
+      stripped off: it comes with capitals, condensed type and a centimetre
+      and a half of padding, and a card has none of those. */
 .kategorival {
   display: grid; gap: var(--rom-4);
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
@@ -145,9 +144,9 @@
 }
 .kategorikort:hover, .package-card:hover { border-color: var(--produkt); color: inherit; }
 
-/* Det valde kortet ber produktfargen aat klippekortet — rosa (§2).
-   Kanten stend urørd; vengen ovanfyre er ein inset-skugge, so korkje
-   han eller flata flyttar noko naar ein vel. */
+/* The selected card carries the klippekort's product colour — pink (§2).
+      The border is untouched; the wing above is an inset shadow, so neither
+      it nor the surface moves anything when you select. */
 .kategorikort[aria-pressed="true"], .package-card[aria-pressed="true"] {
   background: var(--togu-svak);
 }
@@ -159,10 +158,11 @@
 .kategorital { font-size: .88rem; color: var(--blekk-svakt); }
 .package-gyldig { font-size: .85rem; color: var(--blekk-svakt); }
 
-/* ---- stadfestingi ----
-   Kva du hev valt, og kva som *ikkje* hender enno. Merknaden stend paa
-   sida og ikkje i ei rute som spring upp etter at du hev trykt: ei
-   varselrute som fortel deg noko du skulde visst fyrr, kjem for seint. */
+/* ---- the confirmation ----
+      What you have chosen, and what does *not* happen yet. The note stands
+      on the page and not in a dialog that springs up after you press: a
+      warning telling you something you should have known first arrives too
+      late. */
 .kjopsetning {
   font-size: 1.15rem; color: var(--blekk); margin: 0 0 var(--rom-3);
 }
@@ -172,31 +172,31 @@
    namn — eller lata vera, og ta ein `confirm()` i staden. Namni her
    segjer kva dei *gjer*: merknaden stend fyre trykket, svaret kjem
    etter. */
-/* Lina i margen tek fargen gjenom `--merknadsfarge` og ikkje beinveges,
-   same grepet som `--produkt` paa eit kort (§1). Standarden er aatvaring:
-   ein merknad stend som oftast fyre noko som ikkje kann gjerast um att.
-
-   `.opplysing` byter honom til `--merke`, husets eigen kulør. Ei ruta ber ofte baae
-   slagi attmed kvarandre, og ber dei same fargen sluttar raudt aa tyda
-   noko. Det som berre er sant skal du vita; det ugjenkallege skal stogga
-   handi di, og berre det siste er raudt. */
+/* The line in the margin takes its colour through --merknadsfarge rather
+      than directly, the same move as --produkt on a card (§1). The default
+      is warning: a note most often stands before something that cannot be
+      undone.
+   
+      .opplysing switches it to --merke, the house's own hue. A box often
+      carries both kinds side by side, and if they share a colour, red stops
+      meaning anything. What is merely true you should know; what is
+      irreversible should stop your hand, and only the second is red. */
 .merknad {
   --merknadsfarge: var(--aatvaring);
   font-size: .9rem; color: var(--blekk-lys);
   border-left: 3px solid var(--merknadsfarge); padding-left: var(--rom-4);
-  /* Luft paa baae sidor. Han bar berre botnmargin fyrr, og daa laag han
-     klistra inntil det som stod yver honom: paa betalingssida hekk han
-     fast i det siste kortet, og paa klippekortsida i det som stod fyre.
-     Merknaden høyrer til baae — han forklarar det yver seg og aatvarar
-     um det under — so han treng rom til baae kantar. */
+  /* Air on both sides. It carried only a bottom margin, and then it lay
+          stuck to whatever stood above it. The note belongs to both — it
+          explains what is above it and warns about what is below — so it needs
+          room at both edges. */
   margin: var(--rom-4) 0 var(--rom-5); max-width: 44ch;
 }
 .merknad.opplysing { --merknadsfarge: var(--merke); }
 
 .svar { margin: var(--rom-4) 0 0; font-size: .95rem; color: var(--blekk-lys); }
 .svar.gale { color: var(--aatvaring); }
-/* Ei tom line er framleis ei line: svaret hev si høgd fraa fyrste stund,
-   so sida ikkje flyttar seg naar han kjem (§3). */
+/* An empty line is still a line: the answer has its height from the first
+      moment, so the page does not move when it arrives (§3). */
 .svar:empty::before { content: ""; display: inline-block; }
 /* …men ikkje der svaret er det siste i spalta si. Daa veks spalta
    nedyver naar han kjem, og ingen ting du ser paa flyttar seg — medan

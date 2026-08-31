@@ -1,0 +1,35 @@
+{{define "charges_container"}}
+<section class="content-section kortbolk">
+    {{/* Sikti stend på tittellina og ikkje under henne: ho er ei
+         innstilling på lista ein alt ser, ikkje eit spursmål ein lyt
+         svara på fyrst. Same hovudet som timeplanen ber. */}}
+    <div class="bolkhovud">
+        <h2 class="section-title">{{t .Lang "charges.title"}}</h2>
+        <div class="sikt">
+            {{/* Merkelappen er usynleg av di det fyrste valet seier det
+                 same: «Alle typar». Namnet stend i `aria-label` for dei
+                 som ikkje ser lista. */}}
+            {{/* Veljaren hentar sjølv. Han kalla `filterCharges(this.value)`
+                 fyrr — ein `onchange` i malen som laut naa ein funksjon
+                 skriptet la paa `window` for at han skulde finnast i det
+                 heile. No er `name="type"` heile kontrakten: htmx sender
+                 honom som spurnadsdel til den same ruta. */}}
+            <select id="charges-type-filter" name="type"
+                    hx-get="/api/charges" hx-target="#charges-container" hx-swap="innerHTML"
+                    aria-label="{{t .Lang "payments.filter_by_type"}}">
+                <option value="">{{t .Lang "payments.all_types"}}</option>
+                <option value="medlemskap">{{t .Lang "payments.membership"}}</option>
+                <option value="klippekort">{{t .Lang "payments.klippekort"}}</option>
+            </select>
+        </div>
+    </div>
+    
+    {{/* Lista hentar seg sjølv, og ho gjer det kvar gong ho stig inn i
+         dokumentet. Eit skript gjorde det ein gong, naar dokumentet var
+         lasta — og daa fana vart eit byte og ikkje eit gøymsle, kom
+         bolken attende tom. */}}
+    <div id="charges-container" hx-get="/api/charges" hx-trigger="load" hx-swap="innerHTML">
+        <div class="loading-placeholder">{{t .Lang "payments.loading_charges"}}</div>
+    </div>
+</section>
+{{end}}

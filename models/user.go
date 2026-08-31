@@ -15,35 +15,36 @@ type User struct {
 	Password               string `json:"password"`
 	NewsletterSubscription bool   `json:"newsletter_subscription"`
 	TermsAccepted          bool   `json:"terms_accepted"`
-	// StudentSenior fortel at brukaren hev student- eller honnørbevis.
-	// Det avgjer kva medlemskap han fær sjaa.
+	// StudentSenior says the user has a student or senior card. It decides
+	// 	// which memberships they get to see.
 	StudentSenior bool `json:"student_senior"`
-	// Naar studentrabatten gjeng ut. Null tyder «ingen utgang» — honnør
-	// gjeng ikkje ut, og ein rabatt som aldri vart gjeven hev ingen dato.
+	// When the student discount expires. Zero means no expiry — senior does
+	// 	// not expire, and a discount never granted has no date.
 	StudentSeniorGjengUt time.Time `json:"student_senior_gjeng_ut"`
-	// Løyvi brukaren hev: kva han fær gjera med studioet. Ikkje det
-	// same som gruppone han er med i — dei segjer kven han høyrer til.
-	Loyve []string `json:"loyve"`
+	// The user's permissions: what they may do with the studio. Not the same
+	// 	// as the groups they are in — those say who they belong to.
+	Løyve []string `json:"loyve"`
 }
 
-// KvalifisertFor segjer um brukaren fær student- eller honnørprisen.
+// KvalifisertFor says whether the user gets the student or senior rate.
 //
-// Regelen bur her og ikkje i handsamaren, av di tvo stader spør um
-// honom: flata, som avgjer kva prisar du fær sjaa, og
-// `CanChangeMembership`, som avgjer um du fær byta til deim. Stod han
-// tvo stader, kunde lista syna deg ein pris du ikkje fekk kjøpa.
+// The rule lives here and not in the handler, because two places ask for
+// it: the surface, which decides which prices you see, and
+// CanChangeMembership, which decides whether you may switch to them. In two
+// places, the list could show you a price you were not allowed to buy.
 //
-// Tvo vegar inn, og dei er ulike av natur. Honnør kjem av fødselsdagen —
-// eit tal systemet alt hev — og gjeng aldri ut. Studentbeviset er noko
-// nokon i studioet hev sett, og det gjeng ut, av di eit bevis gjer det.
-func (u User) KvalifisertFor(naa time.Time) bool {
+// Two ways in, different in nature. Senior follows from the birth date — a
+// number the system already has — and never expires. The student card is
+// something someone at the studio has seen, and it expires, because a card
+// does.
+func (u User) KvalifisertFor(nå time.Time) bool {
 	if u.StudentSenior {
-		if u.StudentSeniorGjengUt.IsZero() || naa.Before(u.StudentSeniorGjengUt) {
+		if u.StudentSeniorGjengUt.IsZero() || nå.Before(u.StudentSeniorGjengUt) {
 			return true
 		}
 	}
 	if fodd, err := time.Parse("2006-01-02", u.Birthdate); err == nil {
-		if naa.Sub(fodd).Hours()/24/365.25 >= 67 {
+		if nå.Sub(fodd).Hours()/24/365.25 >= 67 {
 			return true
 		}
 	}

@@ -10,23 +10,42 @@
    =================================================================== */
 .heimeoppsett {
   display: grid; gap: var(--rom-6) var(--rom-7);
-  /* 1,7 mot 1 gav ei sidespalta paa kring 23 rem, og der er klippekortet
-     for trongt: tittelen bryt i tvo og utlaupet fær ikkje rom. Naa er ho
-     brei nok til at kortet stend som paa klippekortsida — hovudspalta
-     toler det, ho ber lister og ikkje eit tal paa fire og ein halv rem. */
+  /* 1.7 against 1 gave a side column of about 23 rem, and there the
+          klippekort is too tight: the title breaks in two and the expiry gets
+          no room. It is now wide enough for the card to stand as it does on the
+          klippekort page — the main column can take it, it carries lists and
+          not a number at four and a half rem. */
   grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 1fr);
   align-items: start;
 }
 .heimespalte { display: flex; flex-direction: column; gap: var(--rom-6); min-width: 0; }
-/* Ein tom kasse er ikkje ein bolk.
-   htmx-kassane stend i dokumentet fyre dei hev fenge noko aa syna — det
-   er med vilje, so sida ikkje hoppar naar svaret kjem (§3) — men ein
-   flex-child utan høgd et likevel *tvo* gap, eitt fyre seg og eitt
-   etter. Det er den doble margen under briefingen naar ein ikkje stend
-   paa nokon time.
-   `:has(*)` og ikkje `:empty`: kassane er ikkje tome for teikn, dei er
-   fulle av linjeskift fraa malen. Det som avgjer er om det stend eit
-   *element* i dei. */
+/* The side column is as wide as what it holds — the same rule as .kortbolk
+      (50-medlemskap-klippekort.css): a card stops growing at --kortbreidd,
+      and a column that keeps growing drags the rule under each h2 past the
+      card edge, saying "all this belongs together" about empty air. At full
+      width the column stood 24 px wider than the cards in it.
+   
+      The cap sits on the column div and not on the grid track: a
+      minmax(18rem, var(--kortbreidd)) in the grid is maximised *before* the
+      fr track gets its share, so at intermediate widths the side column ate
+      its fill first and left the main column with the remainder — 190 px on
+      a 900 px viewport. The div costs nothing: the tracks divide as before,
+      only the content stops where the card stops.
+   
+      The board and the bar row come along, and that is right: they have no
+      natural width of their own, so the column sets one measure for
+      everything in it, and the whole right edge becomes one edge. */
+.heimespalte-sida { max-width: var(--kortbreidd); }
+/* An empty box is not a section.
+      The htmx boxes stand in the document before they have anything to show
+      — deliberately, so the page does not jump when the answer arrives (§3) —
+      but a flex child without height still eats *two* gaps, one before it and
+      one after. That is the double margin under the briefing when you are not
+      signed up for anything.
+   
+      :has(*) and not :empty: the boxes are not empty of characters, they are
+      full of line breaks from the template. What decides is whether an
+      *element* stands in them. */
 .heimespalte > div:not(:has(*)) { display: none; }
 /* Tittelen og briefingen les seg som éin blokk — overskrifta og setninga
    som utdjupar henne — og står difor tettare enn bolkane under. Dei ber
@@ -44,20 +63,21 @@
    held (§6: rommet utanfor ein ting er større enn rommet inni). */
 .heimehovud { display: flex; flex-direction: column; gap: var(--rom-5); }
 .heimehovud > .page-title, .heimehovud > .briefing { margin: 0; }
-/* Sidespalta hadde ei mindre bolkoverskrift fyrr — eit trinn ned, av di
-   «Mitt medlemskap» braut i to linjer i ei spalte på femten rem. Spalta
-   er breiare no, og ei overskrift som er mindre enn dei andre seier at
-   bolken er mindre viktig. Det er han ikkje; han står berre til høgre.
-   Alle bolkoverskrifter er den same overskrifta. */
-/* Stødelina er ei bilinja til bolken under henne, ikkje ein bolk for seg
-   sjølv. Med det fulle bolkegapet under seg skuva ho fyrste yverskrifti
-   i sidespalta 55.6 px ned — 23.6 px lina sjølv og 32 px gapet — og daa
-   las sidespalta seg som om ho byrja seinare enn hovudspalta, endaa
-   baae kassane byrjar paa same høgd.
-
-   §6: lufta *utanfor* ein ting er større enn lufta inni honom. Lina og
-   bolken under er éin ting, so dei fær `--rom-2` og ikkje `--rom-6`.
-   Gapet i spalta er sett med `gap`, so det lyt trekkjast av her. */
+/* The side column used to have a smaller section heading — one step down,
+      because "Mitt medlemskap" broke across two lines in a fifteen-rem
+      column. The column is wider now, and a heading smaller than the others
+      says the section is less important. It is not; it just stands on the
+      right. Every section heading is the same heading. */
+/* The status line is a caption to the section below it, not a section of
+      its own. With the full section gap under it, it pushed the first heading
+      in the side column 55.6 px down — 23.6 px for the line itself and 32 px
+      for the gap — and then the side column read as though it started later
+      than the main column, even though both boxes start at the same height.
+   
+      §6: the air *outside* a thing is larger than the air inside it. The line
+      and the section below are one thing, so they get --rom-2 and not
+      --rom-6. The gap in the column is set with gap, so it has to be
+      subtracted here. */
 .heimespalte-sida > .stodalinje { margin-bottom: calc(var(--rom-2) - var(--rom-6)); }
 /* Bolkane står i ei spalte med luft imellom; marginen under kvar av dei
    ville lagt seg oppå den lufta. */
@@ -70,64 +90,62 @@
   .heimeoppsett { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* ---- timen som eit kort ----
-   Radene ber dei same klassane som i timeplanen — `.timerad`, same
-   markering, same reglar. Ein time skal kjennast som den same tingen
-   kvar ein ser honom, og det gjer han ikkje om kvar side skriv sine
-   eigne reglar for korleis han ser ut.
-
-   Det som skil er oppsettet: her er det éin dag og ikkje sju, so namnet
-   står til venstre og merket til høgre — og her står timen åleine i ei
-   liste, ikkje i eit rutenett, so han får vera eit kort.
-
-   `.kort` og ikkje ein ny boks: huset teiknar alt den same boksen for
-   hand sju stader utanom `.kort`, og det er den vanen som lagar nye
-   eingongsklassar (§10). Raden tek klassen og overstyrer berre fyllet.
-   `display` og `gap` treng ikkje overstyrast — `.timerad` står i ei
-   seinare fil enn `.kort`, so rutenettet vinn av seg sjølv. */
+/* ---- the class as a card ----
+      The rows carry the same classes as in the schedule — .timerad, same
+      marking, same rules. A class should feel like the same thing wherever
+      you see it, and it does not if every page writes its own rules for how
+      it looks.
+   
+      What differs is the layout: here there is one day and not seven, so the
+      name stands left and the mark right — and here the class stands alone in
+      a list, not in a grid, so it gets to be a card.
+   
+      .kort and not a new box: the house already draws the same box by hand in
+      seven places outside .kort, and that habit is what makes new one-off
+      classes (§10). The row takes the class and overrides only the padding. */
 .timeliste { display: flex; flex-direction: column; gap: var(--rom-2); }
 
 .timerad.heimerad {
   grid-template-columns: minmax(0, 1fr) auto;
-  /* Fyllet og gapet stend paa `.timerad` i 30-timeplanen.css, saman med
-     grunngjevingi. Dei stod ein gong til her med andre tal, og daa laag
-     merket tettare i toppen og lenger ut fraa namnet paa heimesida enn
-     i vika — same tingen, tvo maal. Det som skil dei tvo stadene er
-     oppsettet: éin dag her og sju der. Ikkje rommet kring merket.
-
-     `--merkestorleik` stend paa rada og ikkje paa merket, av di
-     botnfyllet der inne reknar klareringi aat bobla av henne. Sett paa
-     merket fanst ho ikkje i det `calc`-et, og rada rydda for ei bobla
-     som var ein rem større enn den som hekk der.
-
-     Merket ber dagen, klokkeslettet og plassane. Difor står ingen av
-     dei i teksten — det ville vore det same to gonger. */
-  /* Merket er den høgste tingen i rada, og difor er det *han* som set
-     høgdi hennar — ikkje teksten. I 4,4 rem vart merket 103 pikslar
-     høgt mot dei 47 som namnet og læraren tek, og resten var luft yver
-     og under teksten. Det var ikkje ro; det var eit hol. I 3,4 rem er
-     merket framleis lesbart — klokkeslettet og plasstalet stend i
-     skrifta si — og rada gjekk fraa 137 til 105 pikslar. Lista med ti
-     timar gjekk fraa 1362 til 1047, og fær difor plass paa ein
-     skjerm.
-
-     3,4 att (30.8.2026). Natti fyre vart merket her skalert til 3,9,
-     4,4, 5,4 og 5,7546 i tur — dei eldre lesarane las ikkje uret paa
-     3,4 — men kvar auke reiv i noko anna, og domen vart: «eg likar
-     sida slik ho er utlagd, endaa ho er ulesande for dei eldre».
-     Storleiken her er difor den utstelte att, og lesaranes løysing
-     skal koma som ei *innstilling* (stor skrift for den som vel det),
-     ikkje som ei umskriving av sida alle ser. — Og so kom svaret som
-     løyser baae (00-token.css, MAALESTOKKEN): heile arket veks eitt
-     halvsteg gjenom rot-skrifti, med alle tilhøvi urørde.
-
-     Siste vendingi (30.8.2026): yverstyringi som stod her — fyrst 3,4,
-     so e^(5/4) — er BURTE. «Why aren't they following the same code?»
-     var heile spursmaalet: uret er den same tingen kvar du ser det, og
-     daa skal det lesa den same storleiken — rota si, e^(7/4), same som
-     i vika. Raden vert høg av det; det er kjent, og det er uret sitt
-     aa setja høgdi (kommentaren yver). Ei rad der uret er mindre enn
-     i vika var det som aldri slutta aa skurra. */
+  /* The padding and the gap live on .timerad in 30-timeplanen.css, together
+          with the reasoning. They stood here again with different numbers, and
+          then the mark sat tighter at the top and further from the name on the
+          home page than in the week — same thing, two measures. What separates
+          the two places is the layout: one day here and seven there. Not the
+          room around the mark.
+     
+          --merkestorleik sits on the row and not on the mark, because the bottom
+          padding in there computes the bubble's clearance from it. Set on the
+          mark it did not exist in that calc, and the row cleared for a bubble a
+          rem larger than the one hanging there.
+     
+          The mark carries the day, the time and the places. So none of those
+          stand in the text — that would be the same thing twice. */
+  /* The mark is the tallest thing in the row, so it is *it* that sets the
+          row's height — not the text. At 4.4 rem the mark was 103 pixels tall
+          against the 47 the name and teacher take, and the rest was air above
+          and below the text. That was not calm; it was a hole. At 3.4 rem the
+          mark is still legible and the row went from 137 to 105 pixels. A list
+          of ten classes went from 1362 to 1047, and so fits on a screen.
+     
+          3.4 again (30.8.2026). The night before, the mark here was scaled to
+          3.9, 4.4, 5.4 and 5.7546 in turn — older readers could not read the
+          clock at 3.4 — but every increase tore at something else, and the
+          verdict was: "I like the page as it is laid out, even though it is
+          unreadable for the older ones". The size here is therefore the styled
+          one again, and the readers' solution should come as a *setting* (large
+          type for whoever chooses it), not as a rewrite of the page everyone
+          sees. — And then came the answer that solves both (00-token.css,
+          MAALESTOKKEN): the whole sheet grows half a step through the root
+          font, with every proportion untouched.
+     
+          Last turn (30.8.2026): the override that stood here — first 3.4, then
+          e^(5/4) — is GONE. "Why aren't they following the same code?" was the
+          whole question: the clock is the same thing wherever you see it, so it
+          should read the same size — the root's, e^(7/4), the same as in the
+          week. The row gets tall from that; that is known, and it is the
+          clock's business to set the height (comment above). A row where the
+          clock is smaller than in the week was what never stopped jarring. */
   /* Vengen ber slaget, ikkje produktet.
      Kortet ligg i vinstre spalta og medlemskortet i høgre, so dei tvo
      vengene stend på same skjermen — sjå åtvaringi i 00-token.css.

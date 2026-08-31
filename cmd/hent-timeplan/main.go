@@ -1,20 +1,21 @@
-// hent-timeplan hentar timeplanen fraa Yogo og legg honom inn i basen.
+// hent-timeplan fetches the schedule from Yogo and puts it in the
+// database.
 //
-// Studioet bokar i Yogo i dag. Dette er verktyet som flytter planen
-// hit — ikkje ein synkronisering som gjeng jamt, men ei henting ein
-// gjer nokre gonger medan ein flytter inn.
+// The studio books in Yogo today. This is the tool that moves the plan
+// here — not a sync that runs continuously, but a fetch you do a few times
+// while moving in.
 //
-//	go run ./cmd/hent-timeplan -veker 4            # syner kva som vilde hendt
-//	go run ./cmd/hent-timeplan -veker 4 -skriv     # gjer det
+//	go run ./cmd/hent-timeplan -veker 4            # shows what would happen
+//	go run ./cmd/hent-timeplan -veker 4 -skriv     # does it
 //
-// Han skriv ingen ting utan `-skriv`. Ein import er ikkje noko ein kann
-// gjera um att — timane fær id-ar, og paameldingar heng i deim — so
-// fyrste gongen skal vera ei liste ein les, ikkje ei endring ein
-// uppdagar (ARKET §7: aatvaringi stend fyre trykket).
+// It writes nothing without -skriv. An import cannot be undone — classes
+// get ids and signups hang off them — so the first run should be a list
+// you read, not a change you discover (ARKET §7: the warning comes before
+// the press).
 //
-// Han kann køyrast fleire gonger. Eit utslag som alt stend i basen vert
-// hoppa yver, og ei rekkje han kjenner att fær dei nye timane sine lagde
-// til den rekkja som finst — ikkje ei ny med det same namnet.
+// It can be run several times. An occurrence already in the database is
+// skipped, and a run it recognises gets its new classes added to the
+// existing series rather than a new one with the same name.
 package main
 
 import (
@@ -58,22 +59,22 @@ func køyr(attende, veker int, skriv, medAvlyste bool) error {
 		return fmt.Errorf("-attende kann ikkje vera negativ")
 	}
 
-	// Spennet er tvo vegar ut fraa i dag.
+	// The span reaches both ways from today.
 	//
-	// Framover er timeplanen; attende er *historia*, og ho er ikkje pynt:
-	// utan timar som hev vore finst det ingen ting aa merkja nokon
-	// frammøtt paa, og «kor mange timar i aar» paa folkekortet er null
-	// for alle. Eit halvt aar attende er 26 vikor.
+	// Forward is the schedule; backward is the *history*, and that is not
+	// decoration: without past classes there is nothing to mark anyone present
+	// on, and "classes this year" on the person card is zero for everyone.
+	// Half a year back is 26 weeks.
 	no := time.Now().In(k.Sone)
-	fraa := no.AddDate(0, 0, -7*attende)
+	frå := no.AddDate(0, 0, -7*attende)
 	til := no.AddDate(0, 0, 7*veker-1)
 
 	ctx, stopp := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer stopp()
 
 	fmt.Printf("Hentar %s – %s (%d vikor attende, %d fram) …\n",
-		fraa.Format("2.1.2006"), til.Format("2.1.2006"), attende, veker)
-	komande, err := k.Timar(ctx, fraa, til, yogo.Val{MedAvlyste: medAvlyste})
+		frå.Format("2.1.2006"), til.Format("2.1.2006"), attende, veker)
+	komande, err := k.Timar(ctx, frå, til, yogo.Val{MedAvlyste: medAvlyste})
 	if err != nil {
 		return err
 	}
@@ -94,10 +95,10 @@ func køyr(attende, veker int, skriv, medAvlyste bool) error {
 	}
 	db := &database.Database{Conn: kopling}
 
-	// Romi. Yogo hev sine, huset hev sine, og dei møtest paa namnet —
-	// «Salen» og «Reformer» stend i baae. Eit rom me ikkje kjenner att
-	// vert ikkje gjeta paa: timen fær `room_id = 0`, som tyder «ikkje
-	// noko rom», og namnet stend att i `location`.
+	// Rooms. Yogo has its own, the house has its own, and they meet on the
+	// name — "Salen" and "Reformer" stand in both. A room we do not recognise
+	// is not guessed at: the class gets room_id = 0, meaning no room, and the
+	// name stays in location.
 	rom, err := db.GetRooms()
 	if err != nil {
 		return fmt.Errorf("kunde ikkje henta romi: %w", err)
@@ -116,29 +117,28 @@ func køyr(attende, veker int, skriv, medAvlyste bool) error {
 		}
 	}
 
-	// ---- kor mange rommet held ----
+	// ---- how many the room holds ----
 	//
-	// Yogo hev ingi romkapasitet. Han hev `seats` per time, og det er
-	// tvo ting blanda i eitt: kor mange rommet *held*, og kor mange
-	// studioet slepp inn *denne* gongen.
+	// Yogo has no room capacity. It has seats per class, and that is two
+	// things mixed: how many the room *holds*, and how many the studio lets in
+	// *this* time.
 	//
-	// Det eine kann lesast av det andre: eit rom kann ikkje halda færre
-	// enn den største timen som hev gjenge i det. Difor er det høgste
-	// talet me ser rommet sitt tal, og alt under er eit val nokon hev
-	// teke for den timen.
+	// One can be read from the other: a room cannot hold fewer than the
+	// largest class that has run in it. So the highest number we see is the
+	// room's, and anything below is a choice made for that class.
 	//
-	// Berre uppyver. Ser me ingen time som fyller rommet, tyder det
-	// ikkje at rommet er mindre — berre at ingen fylte det i det spennet
-	// me spurde um. Aa setja talet *ned* paa det grunnlaget hadde gjort
-	// timar fulle som ikkje er det.
+	// Upward only. Seeing no class that fills the room does not mean the room
+	// is smaller — only that nobody filled it in the span we asked about.
+	// Setting the number *down* on that basis would make classes full that are
+	// not.
 	maks, fordeling := maksPerRom(komande)
 
 	romPlassar := map[int]int{}
 	fmt.Println("ROMMET      HELD  YOGO SITT STØRSTE  FORDELING")
 	fmt.Println(strings.Repeat("─", 78))
 	type romlyft struct {
-		id, fraa, til int
-		namn          string
+		id, frå, til int
+		namn         string
 	}
 	var lyft []romlyft
 	for _, r := range rom {
@@ -160,13 +160,13 @@ func køyr(attende, veker int, skriv, medAvlyste bool) error {
 	}
 	fmt.Println()
 
-	// Timen ber berre si eigi kapasitet naar ho *skil seg* fraa rommet.
+	// A class carries its own capacity only when it *differs* from the room's.
 	//
-	// Er dei like, skal talet vera null — «rommet raar» — og daa fylgjer
-	// timen med um rommet ein gong vert eit anna. Skreiv me talet inn
-	// paa kvar time, var det attthundrad stader aa retta den dagen
-	// Salen fekk tvo matter til, og timane hadde stade att paa det gamle
-	// talet utan at nokon saag det.
+	// If they are equal the number should be zero — "the room decides" — and
+	// then the class follows if the room ever changes. Written onto every
+	// class, there would be hundreds of places to fix the day the hall gained
+	// two more mats, and the classes would have stayed on the old number
+	// unnoticed.
 	eigne := latArva(komande, romPlassar)
 
 	// ---- det som alt stend her ----
@@ -274,20 +274,19 @@ func køyr(attende, veker int, skriv, medAvlyste bool) error {
 		return nil
 	}
 
-	// ---- skrivinga ----
+	// ---- the writing ----
 	//
-	// Ei rekkje um gongen, kvar i si eigi økt (`LagSerie` og
-	// `UtvidSerie` opnar kvar sin). Fell den femte, stend dei fire
-	// fyrste — og det er med vilje: verktyet kann køyrast ein gong til,
-	// og det som alt kom inn vert hoppa yver. Ei økt kring heile
-	// importen hadde gjeve alt-eller-ingen ting, men ogso ei lang laasing
-	// paa ein base tenaren les fraa samstundes.
+	// One run at a time, each in its own transaction (LagSerie and UtvidSerie
+	// each open one). If the fifth fails, the first four stand — deliberately:
+	// the tool can be run again and what is already in is skipped. One
+	// transaction around the whole import would give all-or-nothing, but also
+	// a long lock on a database the server is reading from at the same time.
 	fmt.Println()
 	for _, l := range lyft {
 		if err := db.SetRomPlassar(l.id, l.til); err != nil {
 			return fmt.Errorf("kunde ikkje setja plassane i %s: %w", l.namn, err)
 		}
-		fmt.Printf("  %s held %d no (stod %d)\n", l.namn, l.til, l.fraa)
+		fmt.Printf("  %s held %d no (stod %d)\n", l.namn, l.til, l.frå)
 	}
 
 	var lagde int
@@ -360,12 +359,12 @@ func fordelingstekst(m map[int]int) string {
 	return strings.Join(b, "  ")
 }
 
-// maksPerRom gjev det største talet me hev sett i kvart rom, og heile
-// fordelingi attaat.
+// maksPerRom gives the largest number seen in each room, and the whole
+// distribution alongside.
 //
-// Det største talet er rommet: eit rom kann ikkje halda færre enn den
-// største timen som hev gjenge i det. Fordelingi er beviset — ho syner
-// kva som er rommet og kva som er eit val («18×250  10×12  5×24»).
+// The largest is the room's: a room cannot hold fewer than the largest
+// class that has run in it. The distribution is the evidence — it shows
+// what is the room and what is a choice ("18×250  10×12  5×24").
 func maksPerRom(timar []models.Event) (map[int]int, map[int]map[int]int) {
 	maks := map[int]int{}
 	fordeling := map[int]map[int]int{}
@@ -384,15 +383,16 @@ func maksPerRom(timar []models.Event) (map[int]int, map[int]map[int]int) {
 	return maks, fordeling
 }
 
-// latArva nullar kapasiteten paa dei timane som held rommet sitt tal, og
-// gjev att kor mange som ber si eigi.
+// latArva zeroes the capacity on classes that hold the room's number, and
+// returns how many carry their own.
 //
-// Null i `capacity` tyder «rommet raar» (`COALESCE(NULLIF(...))`), og
-// det er det me vil ha for ein vanleg time: fær Salen tvo matter til,
-// fylgjer alle timane med. Ein time som er sett *lægre* med vilje —
-// fem paa apparati i Salen — ber talet sitt sjølv og skal ikkje fylgja.
+// Zero in capacity means "the room decides" (COALESCE(NULLIF(...))), which
+// is what you want for an ordinary class: if the hall gains two mats,
+// every class follows. A class deliberately set *lower* — five on the
+// apparatus in the hall — carries its own number and should not follow.
 //
-// Ein time utan rom kann ikkje arva noko og ber alltid sitt eige.
+// A class without a room cannot inherit anything and always carries its
+// own.
 func latArva(timar []models.Event, romPlassar map[int]int) (eigne int) {
 	for i := range timar {
 		if timar[i].RoomID != 0 && timar[i].Capacity == romPlassar[timar[i].RoomID] {

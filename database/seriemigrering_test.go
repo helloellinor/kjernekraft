@@ -10,7 +10,7 @@ import (
 
 // Etterfyllinga av serie_id gjeng no i same økta som ALTER TABLE, og ei
 // økt er eitt samband: lesinga lyt vera ferdig fyre skrivinga tek til.
-// Prøva held baae delane — at kolonna kjem, og at kvar time fær regelen
+// Prøva held båe delane — at kolonna kjem, og at kvar time fær regelen
 // sin.
 func TestRegelKolonneOgEtterfylling(t *testing.T) {
 	db, err := sql.Open("sqlite3", filepath.Join(t.TempDir(), "prøve.db"))
@@ -81,14 +81,14 @@ func TestRegelKolonneOgEtterfylling(t *testing.T) {
 // Dette er den farlege vegen: kvar time som alt ligg der ber serienamnet
 // sitt i den gamle kolonna, og eit feilsteg her gjev eit hus fullt av
 // timar som ikkje høyrer til noko — utan at noko feilar.
-func TestGamalKolonneVertDoeyptOgIkkjeLagdTilPaaNytt(t *testing.T) {
+func TestGamalKolonneVertDoeyptOgIkkjeLagdTilPåNytt(t *testing.T) {
 	db, err := sql.Open("sqlite3", filepath.Join(t.TempDir(), "gamal.db"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer db.Close()
 
-	// Ein base slik han saag ut fyre omdøypingi, med timar i seg.
+	// Ein base slik han såg ut fyre omdøypingi, med timar i seg.
 	if _, err := db.Exec(`CREATE TABLE events (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title TEXT NOT NULL, description TEXT,

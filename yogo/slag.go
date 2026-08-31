@@ -2,25 +2,23 @@ package yogo
 
 import "strings"
 
-// ---- kva slag trening ein Yogo-time er ----
+// ---- what kind of training a Yogo class is ----
 //
-// Yogo kjenner ikkje slaget. Han hev *timetypar* — 66 av deim, alt
-// studioet hev sett upp gjenom aari — og namnet er det einaste som
-// skil deim: «Vinyasa Flow», «Klassisk Pilates Matte», «Fascia Flyt».
-// Huset her hev fire slag, og dei ber vengefargen (§1 i ARKET, kartet
-// stend i 00-token.css):
+// Yogo does not know the kind. It has *class types* — 66 of them,
+// everything the studio has ever set up — and the name is all that
+// separates them: "Vinyasa Flow", "Klassisk Pilates Matte", "Fascia Flyt".
+// The house has four kinds, and they carry the wing colour (ARKET §1):
 //
 //	fascia · yoga · pilates · reformer
 //
-// Difor lyt namni umsetjast, og det er ei umsetjing og ikkje ei
-// utrekning: «Vinyasa Flow» er yoga, men ordet «yoga» stend ikkje i
-// namnet. Ingi regel kann vita det. Tabellen kann.
+// So the names have to be translated, and it is a translation and not a
+// computation: "Vinyasa Flow" is yoga, but the word "yoga" is not in the
+// name. No rule can know that. A table can.
 //
-// Han er skriven ut i staden for rekna av di namni hev stade stille i
-// tvo aar, og av di ei tabell ein kann lesa er ei tabell ein kan retta.
-// Det som *ikkje* stend her fær ingen farge — og det er meiningi:
-// «Ein graa venge seier «ingen farge», som er sant.» Ein ukjend time
-// skal ikkje utgje seg for yoga.
+// Written out rather than derived, because the names have stood still for
+// two years and a table you can read is a table you can correct. What is
+// *not* here gets no colour — deliberately: an unknown class must not pass
+// itself off as yoga.
 const (
 	SlagFascia   = "fascia"
 	SlagYoga     = "yoga"
@@ -28,14 +26,12 @@ const (
 	SlagReformer = "reformer"
 )
 
-// slagtabellen. Nykelen er Yogo-namnet vaska: smaa bokstavar, ingen
-// mellomrom i endane. Namni hjaa Yogo ber deim — «Fascia Flyt »,
-// «Hatha Yoga », «Reformer » — og eit namn med eit mellomrom bak er
-// eit anna namn enn det same utan.
+// The table. The key is the Yogo name washed: lower case, no surrounding
+// space. Yogo's names carry it — "Fascia Flyt ", "Hatha Yoga ",
+// "Reformer " — and a name with a trailing space is a different name.
 //
-// Rekkjefylgda her er alfabetisk so det gjeng an aa finna ein linje.
-// Kjem det eit nytt namn, seier importen ifraa (`UkjendeSlag`), og daa
-// er det ei linje her som er retting nok.
+// Alphabetical so a line can be found. A new name makes the import say so
+// (UkjendeSlag), and then one line here is correction enough.
 var slagtabellen = map[string]string{
 	"akroyoga":                            SlagYoga,
 	"basic yoga":                          SlagYoga,
@@ -80,18 +76,16 @@ var slagtabellen = map[string]string{
 	"yoga styrke 45":                      SlagYoga,
 }
 
-// Slag gjev slaget eit Yogo-namn høyrer til, eller tom streng.
+// Slag gives the kind a Yogo name belongs to, or the empty string.
 //
-// Tom streng er eit svar og ikkje ein feil: nokre av timetypane hjaa
-// Yogo er korkje yoga, pilates, reformer eller fascia — «Power Plate»,
-// «Stressmestringsgruppe», «Nevro-atletisk trening» — og eit slag me
-// ikkje hev er betre sagt med graatt enn gjeta paa.
+// The empty string is an answer, not an error: some of Yogo's class types
+// are neither yoga, pilates, reformer nor fascia — "Power Plate",
+// "Stressmestringsgruppe", "Nevro-atletisk trening" — and a kind we do not
+// have is better said in grey than guessed at.
 //
-// Det som *er* rekna, er dei nettbaserte og dei eingongshøvi: «Online
-// Vinyasa Flow» er den same treningi som «Vinyasa Flow», og eit namn
-// som endar paa eit aarstal eller ei hending er framleis slaget sitt.
-// Difor eit fyrste forsøk paa heile namnet, og so eit paa namnet utan
-// «online»-føreleddet.
+// What *is* computed are the online variants and the one-offs: "Online
+// Vinyasa Flow" is the same training as "Vinyasa Flow". Hence one attempt
+// on the whole name and one on the name without the "online" prefix.
 func Slag(namn string) string {
 	reint := strings.ToLower(strings.TrimSpace(namn))
 	if s, ok := slagtabellen[reint]; ok {
@@ -112,12 +106,12 @@ func Slag(namn string) string {
 	return ""
 }
 
-// UkjendeSlag gjev dei namni i lista som tabellen ikkje kjenner, ein
-// gong kvar.
+// UkjendeSlag gives the names in the list the table does not know, once
+// each.
 //
-// Importen skriv deim ut. Ein import som stilt gjev graa vengar til ei
-// heil vika er ein import som ser ut til aa ha gjenge bra; ei liste
-// yver kva han ikkje visste er skilnaden paa ei retting og ei gaata.
+// The import prints them. An import that quietly gives grey wings to a
+// whole week is an import that looks like it went fine; a list of what it
+// did not know is the difference between a correction and a riddle.
 func UkjendeSlag(namn []string) []string {
 	sett := map[string]bool{}
 	var ut []string

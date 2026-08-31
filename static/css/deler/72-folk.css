@@ -1,23 +1,22 @@
 /* ===================================================================
-   folk
-   Ein tabell er rett naar ein samanliknar rader paa tvers. Her
-   samanliknar ingen nokon ting: ein slær upp *ein* person, av di det
-   stend ein person framfor deg. Difor er søkjefeltet skjermen, og
-   rada opnar seg paa staden — ein slær ikkje upp ein person ved aa
-   forlata lista yver folk.
-   =================================================================== */
-/* Lina yver lista: feltet, bunkane og talet. Ho brydest — feltet, fire
-   fanor og eit tal fær ikkje plass paa ein telefon, og §4 gjev ingen
-   rullestong. Bunkane er ei rekkja som alt brydest i seg sjølv, so det
-   som hender paa smale glas er at ho legg seg under feltet. */
+      people
+      A table is right when you compare rows across. Here nobody compares
+      anything: you look up *one* person, because a person is standing in
+      front of you. So the search field is the screen, and the row opens in
+      place — you do not look someone up by leaving the list of people.
+      =================================================================== */
+/* The line above the list: the field, the groups and the count. It wraps —
+      the field, four tabs and a number will not fit on a phone, and §4 allows
+      no scrollbar. The groups are a row that already wraps by itself, so what
+      happens on narrow viewports is that it moves under the field. */
 .folk-sok {
   display: flex; flex-wrap: wrap; align-items: baseline;
   gap: var(--rom-3); margin-bottom: var(--rom-4);
 }
 
-/* Skyvaren ber si eigi luft under seg naar han stend yver ein bolk. Her
-   stend han *i* ei lina som alt hev ein marg, og tvo margar paa rad er
-   ikkje eit rom — det er eit rom skrive tvo gonger (§6). */
+/* The slider carries its own air below when it stands over a section. Here
+      it stands *in* a line that already has a margin, and two margins in a
+      row is not a space — it is a space written twice (§6). */
 .rollefaner { margin-bottom: 0; }
 
 /* Berre maal. Forma er `.sok` og grunnstilen sin — spalta set breiddi,
@@ -47,10 +46,10 @@
   gap: var(--rom-4); align-items: baseline;
   padding: var(--rom-3) var(--rom-4);
   background: none; border: 0; border-radius: 0;
-  /* Same grunnen som `.seriehovud`: ein klassa `<button>` arvar
-     `buttontext` um ingen segjer noko anna. Her hev kvart barn si eigi
-     farge, so det synte seg ikkje — men det er flaks og ikkje ei
-     ordning, og neste span utan farge hadde vore svart i myrkt tema. */
+  /* Same reason as .seriehovud: a classed <button> inherits buttontext
+          unless somebody says otherwise. Here every child has its own colour, so
+          it did not show — but that is luck and not an arrangement, and the next
+          span without a colour would have been black in dark theme. */
   color: var(--blekk);
   font-family: var(--skrift); text-transform: none; letter-spacing: 0;
   cursor: pointer;
@@ -58,8 +57,8 @@
 .folk-hovud:hover { background: var(--ark-djup); color: inherit; border: 0; }
 .folk-namn { font-size: 1.05rem; color: var(--blekk); font-weight: 500; }
 
-/* Kva han held, i produktfargen. Turkis medlemskap, rosa klipp — same
-   regelen som paa korti, so ein kjenner det att utan aa lesa. */
+/* What they hold, in the product colour. Turquoise membership, pink clips —
+      the same rule as on the cards, so you recognise it without reading. */
 .folk-held { display: flex; flex-wrap: wrap; gap: var(--rom-2); }
 .held {
   display: inline-block; flex: 0 0 auto;

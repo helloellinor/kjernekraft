@@ -6,8 +6,8 @@ import (
 )
 
 // Ei frysing stoggar klokka. Eit aarskort som stend frose i tredive
-// dagar skal ha tredive dagar meir att naar det vert sett i gang att —
-// elles kostar frysingi medlemen den tidi ho varde, og daa er tolv
+// dagar skal ha tredive dagar meir att når det vert sett i gang att —
+// elles kostar frysingi medlemen den tidi ho varde, og då er tolv
 // maanader ikkje tolv maanader.
 func TestFrysingSkuverUtlaupet(t *testing.T) {
 	db := prøvebase(t)

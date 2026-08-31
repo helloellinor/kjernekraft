@@ -1,9 +1,9 @@
 /* ===================================================================
    timeplanen
    =================================================================== */
-/* Tittelen og styringi paa same lina, so lista byrjar der auga alt er.
-   Fyrr stod det ei bolkeyverskrift, tvo merkelappa felt og ei
-   vikerekkja imillom — kring 150 pikslar fyre fyrste timen. */
+/* Title and controls on one line, so the list starts where the eye
+      already is. There used to be a section heading, two labelled fields
+      and a week row between — about 150 pixels before the first class. */
 /* Tittellina fylgjer med og. Ho ber vikeveljaren, og han er ein
    kontroll ein nyttar medan ein les — ikkje ei overskrift ein les ein
    gong og so er ferdig med. Ho stablar seg rett under hovudlina.
@@ -17,50 +17,47 @@
   display: flex; align-items: baseline; justify-content: space-between;
   gap: var(--rom-4) var(--rom-5); flex-wrap: wrap;
   background: var(--ark);
-  /* Lufta yver og under lina stend i *henne*, ikkje kring henne.
-     Ein marg er gjenomsynleg: eit kort som rullar forbi ville synast i
-     sprekken. Fyllet er flata hennar, og der kann ingen ting syna seg. */
-  /* Fyllet er knapt her, og det er med vilje.
-     Alt i den frosne stabelen er pikslar eit kort kverv attum: stabelen
-     sluttar der han sluttar, og kvar piksel luft i honom er ein piksel
-     timen din vert eten tidlegare.
-     Yver er `--rom-2` nok til aa skilja tittelen fraa hovudlina.
-
-     Rekneskapen: 12 px yver og 16 under gjorde stabelen 179,8 høg og
-     lina var midt paa skyvaren. Med 8 og 0 sluttar han paa 159,8 — nett
-     der midten laag.
-
-     Under stod 0, med den grunngjevingi at skyvaren ber si eigi renne og
-     sin eigen kant og difor er skild fraa tittelen utan hjelp. Det var
-     rett um *skiljet* og gale um *forma*: `.page-title` gjeng med
-     line-height 1,02, som er tettare enn skrifta sin nedgang, so
-     nedhalen paa ein «p» heng utanfor si eigi linekasse. «Timeplan» og
-     «Schedule» endar baae paa noko som heng ned, og halen la seg nedi
-     skyvaren. Eitt steg (`--rom-2`) er nok til aa taka honom.
-
-     Og det lyt vera *fyll* og ikkje marg: lina er klistra og ugjenomsynleg,
-     og ein marg er eit gjenomsynleg glas der korti under syner seg medan
-     dei rullar forbi (§9). Stabelen veks 8 px av dette, og det er prisen. */
+  /* The air above and below the line lives *in* it, not around it. A margin
+          is transparent: a card scrolling past would show in the gap. Padding
+          is its surface, and nothing can show through that. */
+  /* The padding is tight here, deliberately. Everything in the frozen stack
+          is pixels a card disappears behind: the stack ends where it ends, and
+          every pixel of air in it is a pixel your class is eaten earlier.
+     
+          12 px above and 16 below made the stack 179.8 tall with the line
+          mid-slider. With 8 and 0 it ends at 159.8 — right where the middle
+          was.
+     
+          Below stood 0, on the grounds that the slider carries its own gutter
+          and border. That was right about the *separation* and wrong about
+          the *shape*: .page-title runs at line-height 1.02, tighter than the
+          font's descent, so the tail of a "p" hangs outside its own line box.
+          Both "Timeplan" and "Schedule" end in something that hangs down, and
+          the tail landed in the slider. One step (--rom-2) takes it.
+     
+          And it has to be *padding* and not margin: the line is sticky and
+          opaque, and a margin is a transparent pane where the cards below
+          show as they scroll past (§9). */
   padding-block: var(--rom-2) var(--rom-2);
   margin-block: calc(var(--rom-2) * -1) 0;
-  /* Flata lyt gaa heilt ut i sidefyllet aat <main>.
-     Ho stod i innhaldskassen fyrr, og daa var ho *smalare* enn det som
-     rullar under henne: skuggen aat merki og trogget — som stikk fire
-     piksel ut til kvar sida — kom fram i sprekken millom flata og
-     skjermkanten. Ei klistra flate lyt vera minst so brei som alt ho
-     skal gøyma. */
+  /* The surface has to reach right out into <main>'s side padding. It sat
+          inside the content box, and was then *narrower* than what scrolls
+          under it: the shadow of the marks and the trough — which stick four
+          pixels out each side — appeared in the gap between the surface and
+          the screen edge. A sticky surface has to be at least as wide as
+          everything it hides. */
   padding-inline: var(--sidefyll);
   margin-inline: calc(var(--sidefyll) * -1);
 }
 .timehovudlinje .page-title { margin-bottom: 0; }
 
-/* ---- vikeveljaren ----
-   Vika i tittelen *er* kontrollen. Ho stod som tri element i ei eiga
-   eska under tittelen og sa det same ein gong til. No flankerer pilene
-   henne, og eit klikk paa henne opnar dei sju næraste vikone.
-
-   Pilene endrar ingi breidd naar dei vert avslegne, og korgi ligg
-   absolutt — so tittelen stend still same kva ein gjer med han. */
+/* ---- the week picker ----
+      The week in the title *is* the control. It stood as three elements in
+      a box of its own under the title, saying the same thing again. Now the
+      arrows flank it, and a click on it opens the seven nearest weeks.
+   
+      The arrows change no width when disabled, and the basket is
+      positioned absolutely — so the title stands still whatever you do. */
 .vekeveljar {
   position: relative;
   display: inline-flex; align-items: baseline; gap: .1em;
@@ -156,9 +153,9 @@
    Ingi flata. Talet ligg berre der, i tittelskrifta, og tek ljosstyrken
    sin fraa det som ligg bak. Ei rute kring hadde gjort det til eit
    skjema; utan rute er det framleis tittelen, berre skrivbar. */
-/* Menyen heng under ordet han høyrer til, ikkje under heile lina.
-   Ordet og menyen er *eitt* — ein nedfallsveljar — og daa lyt dei møtast
-   paa lina under ordet. */
+/* The menu hangs under the word it belongs to, not under the whole line.
+      The word and the menu are *one thing* — a dropdown — so they have to
+      meet on the line under the word. */
 .vekemeny {
   position: absolute; z-index: 20;
   top: 100%; left: 0;
@@ -167,7 +164,15 @@
   background: none; border: 0; box-shadow: none;
 }
 
+/* Pila var ein `<button onclick>` og er ei lenkja no: ho fører til ei
+   adressa (`?week=`), og det er det ei lenkja er til. `<span>` er den
+   same forma for steget attende som ikkje finst — det er ingen stad aa
+   ganga, so det er ingi lenkja heller.
+
+   `display: inline-block` og `text-decoration: none` er heile skilnaden
+   mellom ein knapp og ei lenkja her; resten stod alt. */
 .vekepil {
+  display: inline-block; text-decoration: none;
   font-family: inherit; font-stretch: var(--vidd-yver); font-weight: 400;
   font-size: .52em; letter-spacing: .01em;
   color: var(--blekk-lys); background: none; border: 0;
@@ -175,52 +180,52 @@
   cursor: pointer; white-space: nowrap;
 }
 
-.vekepil:hover:not(:disabled) { color: var(--blekk); background: none; border-color: var(--klas); }
+.vekepil:hover:not([aria-disabled="true"]) { color: var(--blekk); background: none; border-color: var(--klas); }
 
 .vekepil { color: var(--blekk-svakt); }
-.vekepil:disabled { opacity: .3; cursor: default; }
-/* Korgi flyt. Laag ho i flyten, skuva ho heile timeplanen ein tomme
-   ned kvar gong nokon opna henne — og det er nettupp det ein ikkje skal
-   gjera med noko ein opnar for aa *sjaa* paa noko anna.
-   Ho flyt verkeleg, og difor er ho ein av dei faa tingi som fær skugge. */
+.vekepil[aria-disabled="true"] { opacity: .3; cursor: default; }
+/* The basket floats. In the flow it would push the whole schedule an inch
+      down every time someone opened it — which is exactly what you must not
+      do with something opened in order to *look* at something else. It
+      really floats, and is therefore one of the few things that gets a
+      shadow. */
 
 
-/* `.filters` og `.filter-group` stod her fyrr, med `max-width: 11rem` paa
-   veljarane. Sikti i timeplanen var den einaste som nytta deim, og ho
-   budde i vikehovudet ei stund og er heilt burte no. Taket var det som
-   klipte lange lærarnamn av. */
+/* .filters and .filter-group stood here with max-width: 11rem on the
+      selects. The schedule filter was the only user, and it has gone. The
+      cap was what cut long teacher names off. */
 
 /* `.week-navigation`, `.week-nav-btn`, `.week-input` og `.week-controls`
    stod her og. Dei var vikeveljaren fyre han flytte inn i tittelen; no
    er han `.vekeveljar` med `.vekepil`, `.vekeord` og `.vekefelt`, og dei
    gamle namni stod att utan ein einaste brukar. */
 
-/* ---- den klemde vika ----
-   Éi rad per time, eitt merke per dag. Radi ber det ein skannar etter —
-   naar, kva, kven, kvar — og ikkje meir. Detaljen bur i dokka.
+/* ---- the folded week ----
+      One row per class, one mark per day. The row carries what you scan for
+      — when, what, who, where — and no more. The detail lives in the dock.
+   
+      Each card used to carry its whole detail, and the week became a tower
+      you had to scroll through. A row is 3.2 rem; a card was 11. */
+/* No box around the week.
+      The grid stood in a bordered box with its own surface, and the slider
+      sat inside it like a table header. Then there are two things to read:
+      first the box, then what is in it. §6 allows at most one painted box
+      between the sheet and the content, and here we need none. */
+/* No surface under the grid either.
+      It was there because the dead day cell is drawn as a *hole*, and a
+      hole needs something to be a hole in — without the surface it turned
+      into a light lump on the sheet.
+   
+      The card gives it that now. Each row carries its own surface, and the
+      hole is a hole in the card. The surface under the *list* then became
+      the second of two surfaces in a row, and that is what you saw as a
+      light box around the week. */
 
-   Fyrr bar kvart kort heile detaljen sin, og vika vart eit tårn ein
-   laut rulla gjenom. Ei rad er 3,2 rem; eit kort var 11. */
-/* Ingen kasse kring vika.
-   Nettet stod i ein ramma boks med eiga flate, og skyvaren laag inni
-   honom som eit hovud i ein tabell. Daa er det tvo ting aa lesa: fyrst
-   kassen, so det som er i honom. §6 gjev høgst éin maala kasse millom
-   arket og innhaldet, og her treng me ingen: dagane er ein skyvar som
-   flyt yver timane, og timane hev sine eigne haarlinor. */
-/* Ingi flate under nettet heller.
-   Ho stod her av di den daude dagcella er teikna som eit *hol*, og eit
-   hol treng noko aa vera eit hol i — utan flata snudde ho seg til ein
-   ljos klump paa arket.
-
-   Kortet gjev henne det no. Kvar rad ber si eigi flate, og hòlet er eit
-   hol i kortet. Flata under *lista* vart daa den andre av tvo flatar
-   paa rad, og det er henne ein saag som ein ljos kasse kring vika. */
-
-/* Rada og hovudet deler den same trappa, so merki stend i spaltone
-   sine og dagarne kann lesast nedyver. */
-/* Spaltestigen bur paa vika og ikkje paa lista: skyvaren yver lista
-   fylgjer den same stigen, so kvar dag stend yver spalta si. Stod han
-   paa lista, saag skyvaren honom ikkje. */
+/* The row and the header share the same track list, so the marks stand in
+      their columns and the days can be read downward. */
+/* The column ladder lives on the week and not on the list: the slider
+      above the list follows the same ladder, so each day stands over its
+      column. On the list, the slider would not see it. */
 .vika { --timetrapp: minmax(8rem, 1fr) repeat(7, minmax(0, var(--merkestorleik))); }
 
 /* Lista rullar ikkje i seg sjølv lenger. Ho gjorde det for at dagnamni
@@ -234,68 +239,54 @@
    som var poenget med kassen står att utan kassen. */
 .timeplan {
   display: flex; flex-direction: column; gap: var(--rom-2);
-  /* Lufta ned fraa skyvaren stend her og ikkje i botnfyllet hans: han
-     hev ingi flate, so eit fyll i honom er berre tome pikslar eit kort
-     kann rulla inn i. I lista er det ein marg fyrste kortet ber sjølv. */
+  /* The air below the slider lives here and not in its bottom padding: it
+          has no surface, so padding in it is only empty pixels a card can
+          scroll into. */
   margin-block-start: var(--rom-3);
 }
 
-/* Fyllet og gapet er rada sine eigne, og dei er dei same kvar rada
-   stend — i vika og i listone paa heimesida. Dei stod tvo stader med
-   tvo verdiar (12 px mot 8 px yver merket, 12 px mot 16 px attmed det),
-   og daa er ein time ikkje den same tingen paa dei tvo sidone. Han er
-   ein abstraksjon som ser litt ulik ut kvar gong.
-
-   Loddrett: ulikt i dei tvo endane, so *avstanden* vert lik. Lufta yver
-   er maald fraa fana — ho stikk elleve einingar upp yver kroppen og er
-   teikna, ho er ikkje luft. Under kassen heng plassmerket, som stend
-   med midten paa hyrna og difor gjeng um lag 0,10 av merkebreiddi
-   nedanfor; botnfyllet lyt rydda henne fyrst og *so* leggja til den
-   same lufta som stend yver fana. Klareringi er rekna av
-   `--merkestorleik` og fylgjer difor merket til kva storleik det hev.
-
-   Difor lyt `--merkestorleik` staa paa *rada* der ho vert stelt paa, og
-   ikkje paa merket: ein variabel sett paa barnet finst ikkje i
-   foreldret sitt `calc`, og daa reknar botnfyllet med ein annan
-   storleik enn den bobla faktisk hev.
-
-   Vassrett: `--rom-4` og ikkje `--rom-5` som paa eit kort som stend
-   aaleine. Ei lista er tettare enn eit einslegt kort, og fyllet er like
-   fullt breidt nok til at plassmerket — som heng ut til høgre av same
-   grunn som det heng ned — ikkje kjem borti kanten.
-
-   Gapet er `--rom-3`: det same som millom merki som stend for seg
-   sjølve (`.merkerad`), og det er det same rommet baae stader — inne i
-   ei gruppa (§6). Byter storleiken paa bobla (`.plettmerke` nedanfor),
-   lyt fyllet maatast paa nytt.
-
-   ---- toppen er maald fraa fana, ikkje fraa kassen ----
-
-   Fana byrjar *éi einheit inne i* kassen: `faneY = merkeKant = 1` i
-   merkeform.go, av 75 einheiter i høgdi. Toppfyllet stod til kassen,
-   og daa var lufta yver merket éi einheit mindre enn lufta under det.
-   Maalt paa heimesida: 8,00 px yver mot 8,99 under og 10,16 til høgre —
-   og det var toppen som stakk seg ut, av di merket der stend inntil tri
-   kantar av kortet og kvar skilnad difor er synleg.
-
-   `--merkeeining` er den einheiti: merket er teikna i eit viewBox som
-   er 58 breidt (`MarkWidth` i merkeform.go), so ei einheit er breiddi
-   delt paa 58. Endrar `kroppB` eller `merkeKant` seg der, endrar dette
-   talet seg med — det er den eine staden CSS-en lyt kjenna geometrien,
-   og han er skriven ned her av di han ikkje kann spyrja um honom.
-
-   Etter dette: 9,21 mot 8,99 paa heimesida, 9,49 mot 9,44 i vika. Lufta
-   er den same yver fana som under bobla, og botnen treng ingi retting —
-   `.10` viste seg aa vera rett gjeta.
-
-   `--merkeeining` stend paa rada og ikkje paa `:root`, og det er ikkje
-   ein smak: ein eigenskap som er skrivi som `calc(var(--x) / 58)` vert
-   *løyst der ho stend*, og so er det svaret som gjeng i arv. Paa roti
-   hadde ho vore rekna av dei 5,4 rem som stend der, og heimesida — som
-   set 4,4 rem paa rada — hadde arva ei einheit som høyrde til eit anna
-   merke. Maalt: baae sidone fekk 9,49 i staden for 9,21 og 9,49. Same
-   fella som `--merkestorleik` sjølv, som lyt staa paa rada og ikkje paa
-   merket for at botnfyllet skal rekna med rett tal. */
+/* The padding and the gap belong to the row, and are the same wherever
+      the row stands — in the week and in the lists on the home page. They
+      stood in two places with two values (12 px against 8 px above the
+      mark, 12 against 16 beside it), and then a class is not the same thing
+      on the two pages.
+   
+      Vertically: different at the two ends so the *distance* comes out
+      equal. The air above is measured from the tab — it sticks eleven units
+      up over the body and is drawn, it is not air. Under the case hangs the
+      seat mark, centred on the corner and so reaching about 0.10 of the
+      mark width below; the bottom padding has to clear that *first* and
+      then add the same air that stands above the tab.
+   
+      So --merkestorleik has to sit on the *row* where it is set, not on the
+      mark: a variable set on the child does not exist in the parent's calc,
+      and then the bottom padding reckons with a different size than the
+      bubble actually has.
+   
+      Horizontally: --rom-4 and not --rom-5 as on a card standing alone. A
+      list is tighter than a single card.
+   
+      ---- the top is measured from the tab, not the case ----
+   
+      The tab starts *one unit inside* the case: faneY = merkeKant = 1 in
+      merkeform.go. The top padding was measured to the case, so the air
+      above the mark was one unit less than the air below it. Measured on
+      the home page: 8.00 px above against 8.99 below and 10.16 right — and
+      it was the top that stood out, because the mark there sits against
+      three edges of the card.
+   
+      --merkeeining is that unit: the mark is drawn in a viewBox 58 wide
+      (MarkWidth in merkeform.go), so one unit is the width divided by 58.
+      Change kroppB or merkeKant there and this number changes with it — it
+      is the one place the CSS has to know the geometry, and it is written
+      down here because it cannot ask.
+   
+      --merkeeining sits on the row and not on :root, and that is not a
+      taste: a property written as calc(var(--x) / 58) is *resolved where it
+      stands*, and it is the answer that is inherited. On the root it would
+      have been computed from the 5.4 rem standing there, and the home page
+      — which sets 4.4 rem on the row — would have inherited a unit
+      belonging to a different mark. */
 .timerad {
   display: grid;
   grid-template-columns: var(--timetrapp);
@@ -307,74 +298,69 @@
            calc(var(--merkeluft) + var(--merkestorleik) * .10);
 }
 
-/* Hovudet var eit rutenett med den same spaltestigen som radene, av di
-   det bar eit dagnamn yver kvar spalta. Det gjer det ikkje lenger —
-   dagane er ein skyvar no, og kvart merke ber dagen sin sjølv — so
-   hovudet er ei linja med tvo ting i: sikti til venstre, dagane til
-   høgre.
-
-   Han *laut* slutta aa vera eit rutenett: med ein dag vald fell stigen
-   til tvo spaltor, og skyvaren vart pressa ned i den 5,4 rem breide
-   dagspalta og broten i aatte liner nedyver. */
-/* Hovudet held seg sjølv oppe.
-   Det var `sticky` inni rullekassen ein gong, og daa fylgde tri plagor
-   med: rullefeltet la seg yver skyvaren, flata las seg som ein kasse,
-   og kassen klypte kanten hans. Daa kassen gjekk, gjekk `sticky` med.
-
-   No er han attende — men mot *sida* og ikkje mot ein kasse. Det er
-   den skilnaden som gjer det: rullefeltet er sida sitt eige og ligg
-   heilt til høgre, ikkje inntil skyvaren, og der er ingen kassekant
-   aa verta klypt av.
-
-   Flata og z-index-en lyt fylgja med: timane rullar under hovudet no,
-   og eit hovud ein ser gjenom er ikkje eit hovud. `--ark` og ikkje
-   `--flate` — han er papiret sida er skoren av, ikkje eit kort.
-   Under dokka (z-index 30), som skal liggja yver alt. */
+/* The header was a grid on the same column ladder as the rows, because it
+      carried a day name over each column. It no longer does — the days are
+      a slider and each mark carries its own day — so the header is one line
+      with two things in it: the filter left, the days right.
+   
+      It *had* to stop being a grid: with one day selected the ladder falls
+      to two columns, and the slider was squeezed into the 5.4 rem day
+      column and broken across eight lines. */
+/* The header holds itself up.
+      It was sticky inside the scroll box once, and three ills came with
+      that: the scrollbar lay over the slider, the surface read as a box,
+      and the box clipped its edge.
+   
+      Now it is back — but against the *page* and not a box. That is the
+      difference: the scrollbar belongs to the page and sits far right, not
+      against the slider, and there is no box edge to be clipped by.
+   
+      The surface and the z-index have to come along: the classes scroll
+      under the header now, and a header you can see through is not a
+      header. --ark and not --flate — it is the paper the page is cut from,
+      not a card. Below the dock (z-index 30), which must lie over
+      everything. */
 .timehovud {
   display: flex; flex-direction: column;
   gap: var(--rom-3);
   position: sticky; top: calc(var(--sidehovud-hogd) + var(--tittellinje-hogd));
   z-index: 10;
-  /* Ingi flate, ingen fyll, ingen marg paa sjølve skyvaren.
-     Han er ikkje ei lina yver lista — han er sju bobblor som flyt paa
-     arket, og eit fyll paa noko gjenomsynleg er ikkje luft: det er
-     pikslar eit kort kann rulla inn i og syna seg gjenom. Lufta yver
-     stend i botnfyllet aat tittellina, som *hev* ei flate, og lufta
-     under i margen paa `.timeplan`. */
+  /* No surface, no padding, no margin on the slider itself.
+          It is not a line above the list — it is seven bubbles floating on the
+          sheet, and padding on something transparent is not air: it is pixels
+          a card can scroll into and show through. The air above lives in the
+          bottom padding of the title line, which *has* a surface. */
 }
-/* Ikkje lenger noko band attum sporet, og ingen strimlar i sidefylli.
-   Heile kapselen er glas no (sjaa `.dagfaner`): eit kort som rullar upp
-   syner seg som ein skugge gjenom mjølki i heile høgdi aat sporet, og
-   lina det kverv ved er *umrisset* aat kapselen — boga i endarne, der
-   kortet stend skarpt utanfor kurva og mjølkete innanfor, og
-   yverkanten der den tette tittellina tek yver.
+/* No band behind the track any more, and no strips in the side padding.
+      The whole capsule is glass now (see .dagfaner): a card scrolling up
+      shows as a shadow through the milk for the full height of the track,
+      and the line it vanishes at is the capsule's *outline* — the arcs at
+      the ends, where the card stands sharp outside the curve and milky
+      inside, and the top edge where the opaque title line takes over.
+   
+      Outside the capsule the midline governs: above it everything is
+      opaque, below it the page is open. */
 
-   Utanfor kapselen gjeld midtlina: yver henne er alt tett, under henne
-   er sida open. Det tette er borden paa `.dagfaner::before` i
-   88-betalingsmaatar.css — han fylgjer kurva og dekkjer sidefylli med,
-   so plassmerket som heng ut yver kortkanten kverv ved midten han og. */
+/* No surface on the slider itself.
+      It needs none: .faner fills it completely (measured), and the trough
+      carries its own. Another surface would be the second of two in a row,
+      and that is what you saw as a band across the page.
+   
+      It said here for a long time that cards *could not* vanish halfway up
+      the bubbles: "a track is a surface, and a surface eats what passes
+      under it for its full height". That was true of an opaque track, and
+      is why five attempts failed — each moved the band on ::before, and
+      none moved the line the cards vanished at, because that line lay in
+      the bottom edge of the opaque trough the whole time.
+   
+      The fix was to let the trough pass light without removing it: the fill
+      is milky now, the gutter and border stand as before, and the trough no
+      longer eats what passes under its lower half. */
 
-/* Ingi flate paa skyvaren sjølv.
-   Han treng ingi: `.faner` fyller honom heilt (maalt — baae 139,9–179,8),
-   og trogget ber si eigi flate. Ei flate til her hadde vore den andre av
-   tvo paa rad, og det var henne ein saag som eit band tvers yver sida.
-
-   Her stod det lenge at korti *ikkje* kunde kverva midt paa bobblone:
-   «eit spor er ei flate, og ei flate et det som gjeng under henne i
-   heile si høgd». Setningi var sann um eit tett spor, og det var difor
-   fem freistnader stranda — kvar av deim flutte bandet paa `::before`,
-   og ingen av deim flutte lina korti kvarv ved, for lina laag i
-   botnkanten aat det tette trogget heile tidi.
-
-   Løysingi var aa lata trogget sleppa ljos utan aa taka det burt:
-   fyllet er mjølkete no (sjaa `.dagfaner`), renna og kanten stend som
-   fyrr, og trogget et ikkje lenger det som gjeng under den nedre
-   helvti. Bandet yver den øvre helvti tek resten. */
-
-/* Sikti her er den same sikti som paa kvar annan bolk som lyt siktast
-   i: `.sikt` i 07-sida.css. Ho stod skriven ein gong til her under
-   namnet `.timesikt` — same reglar, same tal — og daa var det tvo
-   stader aa endra henne og ein sjanse til aa endra berre den eine. */
+/* The filter here is the same filter as on every other section that needs
+      one: .sikt in 07-sida.css. It was written out a second time here under
+      the name .timesikt — same rules, same numbers — and then there were two
+      places to change it and a chance to change only one. */
 
 /* Rada er eit kort, som paa heimesida — same boksen, same vengen, og
    ingen aattande handteikna boks (§9/§10). Vengen ber slaget; fell
@@ -387,16 +373,16 @@
   border-bottom: 1px solid var(--haarlina);
 }
 
-/* ---- radene som hev vore ----
-   Ei vika les ein nedyver, og det ein leitar etter er den fyrste timen
-   ein kan gaa paa. Ei rad der kvar einaste gong er gjengi svarar ikkje
-   paa det: ho stend og tek si fulle høgd, og den fyrste timen i dag
-   hamnar under skjermkanten. Difor ligg dei samanbrotne, med eitt tal
-   yver som segjer kor mange dei er.
-
-   Dei er ikkje burte. Ein knapp hentar dei fram att — daa stend dei der
-   dei høyrer heime i rekkja, berre bleikare, so ein ser med det same kva
-   som er historie og kva som er tilbod. */
+/* ---- the rows that have been ----
+      You read a week downward, and what you are looking for is the first
+      class you can attend. A row where every occurrence has passed does not
+      answer that: it stands at full height, and today's first class ends up
+      below the screen edge. So they lie collapsed, with one number above
+      saying how many they are.
+   
+      They are not gone. A button brings them back — and then they stand
+      where they belong in the sequence, only paler, so you see at once what
+      is history and what is on offer. */
 .timeplan .rad-umme { display: none; }
 .timeplan.syn-umme .rad-umme { display: grid; opacity: .45; }
 
@@ -425,10 +411,10 @@
   color: var(--blekk-svakt); white-space: nowrap;
 }
 
-/* Namnet paa timen er det ein leitar etter i lista, og difor det einaste
-   som skal lesast paa avstand. Det stod i 1,05 rem — same storleik som
-   læraren under — og daa maatte ein lesa båe for aa finna kva som var
-   kva. */
+/* The class name is what you look for in the list, and therefore the only
+      thing that should read at a distance. It stood at 1.05 rem — the same
+      size as the teacher below — and then you had to read both to find out
+      which was which. */
 .timetittel {
   font-family: var(--skrift-yver); font-stretch: var(--vidd-yver);
   font-weight: 600; font-size: 1.455rem; line-height: 1.05; margin: 0; /* e^(3/8) */
@@ -436,21 +422,21 @@
 .timekven { margin: .1rem 0 0; font-size: .8825rem; /* e^(-1/8) */ color: var(--blekk-lys); }
 .timerom { color: var(--blekk); font-weight: 500; }
 
-/* ---- timemerket ----
-   Eit ur, og eit ur er teikna og ikkje sett saman av kassar. Difor er
-   heile merket éin SVG med eit fast viewBox, og punkti er rekna i
-   merkeform.go.
-
-   Figuren er tri former under éi samanhengande lina: skiltet med dagen
-   paa toppkanten, kroppen med skiva og vindauga, og maalaren i nedre
-   hyrna. Umrisset er ikkje rekna som ein union — det er silhuetten
-   utvida éin einheit med feMorphology. Prøvde ein aa teikna dei tri
-   formene ein gong til litt større, vandra dei innhole hyrno innyver i
-   staden for utyver, og lina slapp upp nettupp i skøyten.
-
-   Storleiken er éin skala og ingen ting anna. Det er difor merket
-   kjennest som den same tingen som kjem nærare, og ikkje som ei ny
-   teikning ved kvar storleik. */
+/* ---- the class mark ----
+      A clock, and a clock is drawn, not assembled from boxes. So the whole
+      mark is one SVG with a fixed viewBox, and the points are computed in
+      merkeform.go.
+   
+      The figure is three shapes under one continuous line: the sign with
+      the day on the top edge, the body with the dial and the window, and
+      the gauge in the lower corner. The outline is not computed as a union —
+      it is the silhouette dilated one unit with feMorphology. Drawing the
+      three shapes again slightly larger made the concave corners travel
+      inward instead of outward, and the line broke open at the join.
+   
+      The size is one scale and nothing else. That is why the mark feels
+      like the same object coming closer rather than a new drawing at every
+      size. */
 .timedagar { display: contents; }
 
 /* Storleiken er éin knapp og ingen ting anna. Alt i figuren er rekna i
@@ -458,18 +444,18 @@
    forholdet — det er den same tingen som kjem nærare, ikkje ei ny
    teikning. Spaltone i vika er rekna av det same talet, so hovudet og
    radene stend paa lina utan at nokon maaler. */
-/* 5,4 att — dei utstelte tali fraa 29.8.2026 er attende der dei stod.
-   Den kvelden vart merket og radteksten skalerte og e-festa i ni
-   umgangar, kvar for seg godkjend, og heilskapen fall sund medan kvar
-   bit saag rett ut i sitt eige utsnitt: «eg likar sida slik ho er
-   utlagd» var domen. Lærdomen stend: *tilhøvi* var problemet, ikkje
-   tali — og tilhøve prøver ein paa heile sida, ikkje i eit utsnitt.
-   Det som VART verande er teikningi inne i merket (lippone som no
-   finst, den senka skiva, glaset innanfor falsen, lufta under
-   skjermen) — dei gjeld paa kvar storleik. Rutenett-eksperimentet
-   (static/js/rutenett.js) er neste freistnad paa aa faa ting til aa
-   *liggja* rett i staden for aa rekna seg rette. */
-:root { --merkestorleik: 5.7546rem; } /* e^(7/4) */
+/* 5.4 again — the styled numbers are back where they stood. That evening
+      the mark and the row text were scaled and e-fitted in nine rounds,
+      each approved on its own, and the whole fell apart while every piece
+      looked right in its own crop. The lesson stands: the *proportions*
+      were the problem, not the numbers — and proportions are tested on the
+      whole page, not in a crop.
+   
+      What DID survive is the drawing inside the mark (the lips that now
+      exist, the sunken dial, the glass inside the rebate, the air under the
+      window) — those hold at any size. */
+/* Rot-verdet for --merkestorleik stod her. Han er global — alt i huset
+   arva han herifraa — og han stend i 01-maalestokken.css no. */
 
 .dagmerke {
   position: relative;
@@ -483,19 +469,14 @@
 .dagmerke:hover:not(:disabled) { background: none; border: 0; color: inherit; }
 .dagmerke:focus-visible { outline: 2px solid var(--merke); outline-offset: 2px; }
 
-/* Merket sa ingen ting naar du var borti det. Regelen over slår av
-   knappestilen som huset gjev alle knappar — og det var alt som stod
-   der, so peikaren skifta form og ingen ting anna hende.
-
-   No svarar merket med si eiga form: kanten tek merkefargen og flata
-   lysnar eit hakk. Ingen kasse rundt, ingen skugge — det er den same
-   silhuetten som ligg der, berre vaken. */
-.dagmerke:hover:not(:disabled) .form-kant,
-.dagmerke:hover:not(:disabled) .fanekant { fill: var(--merke-lys); }
-.dagmerke:hover:not(:disabled) .form-flate { fill: color-mix(in srgb, var(--merke) 7%, var(--flate)); }
-@media (prefers-reduced-motion: no-preference) {
-  .form-kant, .form-flate, .fanekant, .faneflate { transition: fill .12s ease-out; }
-}
+/* The mark said nothing when you touched it. The rule above switches off
+      the button styling the house gives every button — and that was all
+      that stood there, so the pointer changed shape and nothing else
+      happened.
+   
+      Now the mark answers in its own form: the border takes the brand
+      colour and the surface lightens a step. No box around it, no shadow —
+      it is the same silhouette lying there, only awake. */
 
 /* Paameld. Dette stod som `border-color` og `background` på sjølve
    knappen — ein turkis kasse bak ein SVG som med vilje har `border: 0`
@@ -503,7 +484,105 @@
    merket i staden for som ein del av det. Regelen låg dessutan midt
    inne i dokk-reglane, langt frå alt anna som gjeld merket.
    Kanten seier det no, slik han seier «vald» to reglar lenger nede. */
-.dagmerke[data-paameld="true"] .form-kant { fill: var(--merke); }
+
+/* ---- merket i tri lag ----
+
+   Merket var éin SVG med alt i. Skiva og datovindauga er runda firkantar
+   med ei lippa i kvar kant, og dei bar tri filterkjedor kvar — seks av dei
+   ti filtri på eit merke, og filter vert rasteriserte på nytt kvar gong
+   noko skifter storleik.
+
+   No er dei `box-shadow: inset`, som er det same verkemiddelet gjort av
+   nettlesaren beint. Men dei lyt liggja på rett stad i stabelen: kroppen
+   under skiva, skiva under indeksane, indeksane under vindauga, vindauga
+   under visarane. Difor tri lag i staden for eitt, lagde uppå kvarandre
+   og teikna i den rekkjefylgda dei stend i malen.
+
+   `--me` er ei eining av merket: viewBoxen er 58 brei, so 1/58 av
+   breiddi. Alle tali under er dei same som i merkeform.go, og
+   TestMerkeboksaneFylgjerMerkeform held dei i takt. */
+/* ---- kroppen og fana som token ----
+
+   Dei seks formene som teiknar kroppen og dagfana er dei same på kvart
+   merke, so dei stend ein gong i `merke_defs` og vert henta med <use>.
+   Men fyllet deira skiftar med tilstanden — peika på, vald, påmeld, i
+   dag — og veljarane i dokumentet når ikkje inn i eit <use>-skuggetre.
+   
+   Difor er fyllet *arv* og ikkje veljar: verdi stend her, på merket, og
+   formene inni les dei. Same grepet som glaset (sjaa --glasmaal) og av
+   same grunnen.
+   
+   Rekkjefylgda tel: `:hover:not(:disabled)` og
+   `[aria-pressed="true"]:not(:disabled)` hev same spesifisitet, so den
+   siste vinn. Vald skal slaa peika-paa — «a mark you have already
+   selected should not pale when you pass over it». */
+.dagmerke {
+  --me: calc(var(--merkestorleik) / 58);
+  --fane-kant:  var(--kant);
+  --fane-flate: var(--faneflate);
+  --kropp-kant:  var(--kant);
+  --kropp-flate: var(--flate);
+  --kropp-djup:  color-mix(in srgb, var(--lippe-djup) 55%, transparent);
+  --ring-syn: hidden;
+  --fyllskift: 0s;
+}
+@media (prefers-reduced-motion: no-preference) { .dagmerke { --fyllskift: .12s; } }
+
+.dagmerke.idag { --fane-flate: var(--merke-svak); --fane-kant: var(--merke); }
+.dagmerke[data-paameld="true"] { --kropp-kant: var(--merke); }
+.dagmerke:hover:not(:disabled) {
+  --kropp-kant: var(--merke-lys);
+  --fane-kant:  var(--merke-lys);
+  --kropp-flate: color-mix(in srgb, var(--merke) 7%, var(--flate));
+}
+.dagmerke[aria-pressed="true"] {
+  --ring-syn: visible;
+  --kropp-kant: var(--merke);
+  --kropp-djup: color-mix(in srgb, var(--lippe-djup) 73%, transparent);
+}
+.dagmerke[aria-pressed="true"]:not(:disabled) {
+  --kropp-flate: color-mix(in srgb, var(--merke) 12%, var(--flate));
+}
+
+/* Stabelen ber storleiken. Knappen sjølv hev fyll i somme samanhengar
+   (sjaa dei smale glasi), og set ein storleik på *honom*, et fyllet av
+   merket i staden for å leggja seg kring det. */
+.merkestabel {
+  position: relative; display: block;
+  width: var(--merkestorleik);
+  height: calc(58 * var(--me) * 1.2840254); /* e^(1/4) — same steget som kassen */
+}
+.merkelag { position: absolute; display: block; }
+svg.merkelag { left: 0; top: 0; width: 100%; height: 100%; }
+
+/* Skiva: boxPath(kroppX+skiveMarg, kroppY+skiveMarg, kroppB-2*marg, kroppH-2*marg, kroppR-1) */
+.merkeskive {
+  left: calc(4 * var(--me)); top: calc(15 * var(--me));
+  width: calc(50 * var(--me)); height: calc(55.4735 * var(--me));
+  border-radius: calc(3 * var(--me));
+  background: color-mix(in srgb, var(--blekk) 6%, transparent);
+  /* Skuvet er det same talet som `dy` i filteret, og uskarpleiken er
+     2σ. Eg prøvde å rekna Y av bandbreiddi i staden (dy + 2σ mot
+     Y + B/2) — det vart *verre*: 0,72 % mot 0,50 %. Filteret sitt band
+     og ein inset-skugge fell ikkje av på same vis, og talet frå filteret
+     er nærare enn modellen min. */
+  box-shadow:
+    inset 0 calc(2.2 * var(--me)) calc(3.0 * var(--me)) var(--lippe-djup),
+    inset 0 calc(1.0 * var(--me)) calc(1.7 * var(--me)) var(--lippe-djup),
+    inset 0 calc(-1.0 * var(--me)) calc(1.6 * var(--me)) var(--lippe-ljos);
+}
+
+/* Vindauga: boxPath(ruteX, ruteY, ruteB, ruteH, ruteR) */
+.merkerute {
+  left: calc(13 * var(--me)); top: calc(53.9735 * var(--me));
+  width: calc(32 * var(--me)); height: calc(14.5 * var(--me));
+  border-radius: calc(1.8 * var(--me));
+  background: color-mix(in srgb, var(--blekk) 9%, var(--flate));
+  box-shadow:
+    inset 0 calc(2.2 * var(--me)) calc(3.0 * var(--me)) color-mix(in srgb, var(--lippe-djup) 60%, transparent),
+    inset 0 calc(0.9 * var(--me)) calc(1.0 * var(--me)) var(--lippe-djup),
+    inset 0 calc(-0.9 * var(--me)) calc(0.9 * var(--me)) var(--lippe-ljos);
+}
 
 .merkeform { display: block; overflow: visible; width: var(--merkestorleik); height: auto; }
 .merke-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
@@ -520,10 +599,6 @@
    sine fargar: den same lukka flata som ei ulesen fana i
    administrasjonen. Dagen det er i dag er den valde fana — merkefargen,
    og namnet i merkefargen — og dei hine trekkjer seg attende. */
-.faneflate { fill: var(--faneflate); }
-.fanekant  { fill: var(--kant); }
-.dagmerke.idag .faneflate { fill: var(--merke-svak); }
-.dagmerke.idag .fanekant  { fill: var(--merke); }
 
 /* Plassmerket: ei varselbobla i hyrna aat brikka.
    Han tek grunnstilen aat `.btn` (sjaa regelen der oppe — `.plettmerke`
@@ -538,12 +613,11 @@
   left: var(--hyrne-x); top: var(--hyrne-y);
   transform: translate(-50%, -50%);
   padding: .1em .42em;
-  /* Storleiken fylgjer brikka, som alt anna i henne: «Storleiken er éin
-     knapp og ingen ting anna». Han stod fast paa .62 rem — rett ved
-     5,4 rem og feil ved alle andre, so bobla vart stor paa ei lita
-     brikka og lita paa ei stor. .115 av brikka *er* .62 rem naar ho er
-     5,4 — den utstelte storleiken, attende 30.8.2026 saman med resten
-     av tali fraa den kvelden proporsjonane rakna. */
+  /* The size follows the piece, like everything else in it: "the size is
+          one knob and nothing else". It was fixed at .62 rem — right at 5.4
+          rem and wrong at every other, so the bubble was large on a small
+          piece and small on a large one. .115 of the piece *is* .62 rem when
+          it is 5.4. */
   font-size: calc(var(--merkestorleik) * .1054); font-weight: 500; /* e^(-9/4) */
   letter-spacing: -.01em;
   font-variant-numeric: tabular-nums;
@@ -553,38 +627,62 @@
 /* Tale av eit anna, ikkje eit tal med eit mindre under seg: same
    storleik, og berre eit hakk mindre blekk. */
 
-/* ---- glaset ----
-   Merket er ein klokke, og ein klokke hev eit glas. Ljoset fell ovanfraa
-   og døyr ut mot midten — same kurva som paa knappen, og av same grunn:
-   det er ei kvelv, ikkje ei bobla. Laget ligg yverst og fangar difor
-   visarane med, slik eit glas gjer. */
+/* ---- the glass ----
+      The mark is a clock, and a clock has a glass. The light falls from
+      above and dies out toward the middle — the same curve as on the button,
+      and for the same reason: it is a dome, not a bubble. The layer sits on
+      top and therefore catches the hands too, as a glass does. */
 .form-glas { pointer-events: none; }
-/* Trappa er den same som i `--glim-rund`: 72 → 40 → 11 → gjenomsynleg.
-   Ho er skrivi ut av di SVG ikkje kann lesa eit gradient-token.
+/* The falloff is the same as in --glim-rund: 72 → 40 → 11 → transparent.
+      It is written out because SVG cannot read a gradient token.
+   
+      The amount is --glans here and --glans-farga there, deliberately:
+      --glim-rund lies on the peg and the ball, which carry a kind colour,
+      while the glass here lies on --flate — paper. A paper-coloured body had
+      its gloss measured against paper and needs no correction. The falloff
+      is the same; only what it is made of differs. See 00-token.css. */
+/* Kva glas merket ber, fylgjer temaet der *merket* stend — ikkje der
+   gradienten stend. Difor `fill` frå stilarket og ikkje eit `fill=` i
+   malen: veljaren treffer kvart merke for seg, so verkstadssida kann ha
+   eit ljost og eit myrkt merke attmed kvarandre. Dei fire blokkene er
+   dei same fire som tokenfila hev. */
+/* Kva glas ein nyttar er eit *token*, ikkje ein veljar.
+   
+   Fyrste freistnaden skreiv `[data-theme="dark"] .form-glas { fill: … }`
+   og dei fire blokkene som etterkomar-veljarar. Det brast: regelen inni
+   media-blokka, `:root:not([data-theme="light"]) .form-glas`, hev høgare
+   spesifisitet enn `[data-theme="light"] .form-glas`, so det myrke
+   glaset vann *ogso inni den ljose ramma* — alle tri prøvone gav
+   `#glas-myrk`.
+   
+   Tokenfila hev aldri det problemet, av di ho ikkje kappast om
+   spesifisitet: ho set verdet *på* tema-elementet og let det arva ned.
+   Den næraste ramma vinn, av di ho er nærast — ikkje av di ho er
+   sterkare. Difor gjer me det same. */
+:root, [data-theme="light"] { --glasmaal: url(#glas-ljos); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --glasmaal: url(#glas-myrk); }
+}
+[data-theme="dark"]  { --glasmaal: url(#glas-myrk); }
+[data-theme="light"] { --glasmaal: url(#glas-ljos); }
 
-   Talet er `--glans` her og `--glans-farga` der, og det er med vilje:
-   `--glim-rund` ligg paa pinnen og kula, som ber ein slagfarge, medan
-   glaset her ligg paa `--flate` — papir. Ein papirfarga kropp fekk
-   glansen sin maalt mot papiret og treng ingi retting. Trappa er den
-   same; det er berre kva ho er mengd av som skil. Sjaa 00-token.css. */
+.form-glas { fill: var(--glasmaal); }
+
 .glas-topp { stop-color: color-mix(in srgb, var(--glans) 72%, transparent); }
 .glas-midt { stop-color: color-mix(in srgb, var(--glans) 40%, transparent); }
 .glas-svak { stop-color: color-mix(in srgb, var(--glans) 11%, transparent); }
 .glas-ut   { stop-color: transparent; }
 
-.form-ring  { fill: var(--merke); visibility: hidden; }
-.form-kant  { fill: var(--kant); }
-.form-flate { fill: var(--flate); }
-/* Fasetten i kroppen: same lippa som holi og vindauga, berre grunnare —
-   55 % av --lippe-djup gjev dei same 12 % i det ljose temaet som fyrr,
-   og fylgjer no kalibreringi i det myrke (22 mot 40 %, SKRAAKANTEN)
-   i staden for aa snu: 12 % av eit *ljost* blekk var ei ljos stripa i
-   yverkanten, og ei fordjuping med ljos yverkant er ein knott. */
-.form-djup { fill: color-mix(in srgb, var(--lippe-djup) 55%, transparent); }
+/* The bevel in the body: the same lip as the holes and the window, only
+      shallower — 55 % of --lippe-djup gives the same 12 % in the light theme
+      as before, and now follows the dark calibration (22 against 40 %,
+      SKRAAKANTEN) rather than flipping: 12 % of a *light* ink was a light
+      stripe along the top edge, and a recess with a light top edge is a
+      knob. */
 
-/* `.dagnamn` var alt namnet paa dagane i vikehovudet. Eit merke som tok
-   den klassa i bruk, sette 7,2 px paa yverskrifti yver rutenetet — ein
-   kollisjon som berre syner seg paa skjermen. */
+/* .dagnamn was already the name of the days in the week header. A mark
+      adopting that class set 7.2 px on the heading above the grid — a
+      collision that only shows on screen. */
 .merkedag {
   font-family: var(--skrift-yver); font-size: 10.0px; font-weight: 500;
   font-stretch: var(--vidd-merkelapp); letter-spacing: .06em;
@@ -595,75 +693,65 @@
    Indeksane ligg paa eit rektangulært spor og ikkje paa ein sirkel. Det
    er sporet som gjer at ho ser firkanta ut. Tolv indeksar, tal paa 12, 3
    og 9; sekstalet ligg under vindauga, som paa eit ur som er bygt slik. */
-.indeks { stroke: var(--blekk-svakt); stroke-width: 1.2; stroke-linecap: round; }
 /* 6.4, upp fraa 5.7: paa den minste storleiken (3,9 rem paa
    heimesida) var tali kring fem skjermpiksel — ikkje smaa, ulesande
    (sagt av augo 29.8.2026). Talet er i figureiningar og fylgjer
    skalaen, so det som er leseleg paa den minste storleiken er det
    yveralt. */
-.skivetal {
-  font-family: var(--skrift-tal); font-size: 6.4px;
-  fill: var(--blekk-svakt); text-anchor: middle; letter-spacing: -.04em;
-}
 
-/* Kakestykket heng i minuttvisaren — det er han som gjeng medan timen
-   gjeng — og maaler seg paa timevisaren si skala: ei runda er tolv
-   timar, so eit stykke er kor stor bit av dagen timen tek.
-
-   Det låg eit bleikt stykke attmed, tidi fram til timen byrja. Det er
-   burte: ingen kunde lesa kva det var, og skiva svarar paa naar timen
-   gjeng, ikkje kor lenge det er til. */
+/* The pie slice hangs off the minute hand — that is what moves while the
+      class runs — and measures itself on the hour hand's scale: one turn is
+      twelve hours, so a slice is how large a bite of the day the class
+      takes.
+   
+      There was a pale slice beside it, the time until the class began. It is
+      gone: nobody could read what it was, and the dial answers when the
+      class runs, not how long until it does. */
 .kake-timen { fill: color-mix(in srgb, var(--merke) 32%, transparent); }
 
 .visar { stroke-linecap: round; }
 .visar.time   { stroke: var(--blekk); stroke-width: 2.3; }
 .visar.minutt { stroke: var(--blekk-lys); stroke-width: 1.25; }
-/* Sluttvisaren *er* ein timevisar — same lengd, same tjukkleik — og
-   skil seg berre paa fargen: han syner kvar timen er ute. Han bar
-   minuttvisaren sine maal fyrr, og daa stod det tvo tunne peikarar paa
-   skiva som ikkje tydde det same. */
+/* The end hand *is* an hour hand — same length, same thickness — and
+      differs only in colour: it shows where the class is over. It carried
+      the minute hand's dimensions, and then two thin pointers stood on the
+      dial meaning different things. */
 .visar.slutt  { stroke: var(--merke); stroke-width: 2.3; }
 .pinne { fill: var(--blekk); }
 
 /* ---- vindauga ---- */
-/* Flata i vindauga.
-   Ho bar `filter: url(#rutedjup)`, og det filteret finst ikkje. Ei
-   vising til eit filter som ikkje finst er ein feil, og daa teiknar
-   nettlesaren ikkje elementet i det heile — so sjølve flata i skjermen
-   vart aldri maala. Att stod yverleppa og talet, og det er difor han
-   ikkje saag senka ut: det var ingen botn aa sjaa ned i.
-   Ho treng ikkje noko filter. Djupni bur i dei tvo lippone yver henne,
-   som paa merkekroppen (`.form-flate` + `.form-djup`). */
-/* 9 %, og ikkje meir: eit myrkare golv vart prøvt (15 %) og tok
-   kontrasten fraa tali utan aa gjeva djupn att — golvet er ikkje det
-   som gjer eit hol til eit hol. Det gjer skuggen fraa yverkanten,
-   sjaa .ruteskugge. */
-.ruteflate { fill: color-mix(in srgb, var(--blekk) 9%, var(--flate)); }
-/* Dei tvo lippone, i dei same tokeni som holet i vika og skraakanten
-   elles i huset — so vindauga snur med temaet av seg sjølv. */
-.rutedjup  { fill: var(--lippe-djup); }
-/* Skuggen som fell ned i vindauga. Ein skugge er tvo lag i dette huset
-   (jf. --skugge-kort): den tronge lina som teiknar kanten — .rutedjup
-   yver — og eit mjukt lag som ber resten. Vindauga hadde berre lina,
-   og las seg difor flatt: ei lina er ein strek, ikkje ein skugge
-   (sagt av augo 29.8.2026). Same fyllet som lina, so temaet
-   kalibrerer baae; det er breiddi og mjukleiken som er skilnaden. */
-/* 60 % av lippa, ikkje heile: med fullt fyll stakk lina og det mjuke
-   laget seg saman til kring 40 % svart i yverkanten, og det var eit
-   knip for starkt (sagt av augo 29.8.2026). Maalestokken er klippi
-   paa klippekortet — dei les seg stansa utan aa ropa. Lina yver ber
-   framleis full lippa; det er ho som teiknar kanten. */
-.ruteskugge { fill: color-mix(in srgb, var(--lippe-djup) 60%, transparent); }
+/* The surface in the window.
+      It carried filter: url(#rutedjup), and that filter does not exist. A
+      reference to a filter that does not exist is an error, and then the
+      browser does not draw the element at all — so the surface of the screen
+      was never painted. What was left was the top lip and the number, which
+      is why it did not look sunken: there was no floor to look down into.
+   
+      It needs no filter. The depth lives in the two lips above it, as on the
+      mark body. */
+/* 9 %, and no more: a darker floor was tried (15 %) and took the contrast
+      from the numbers without giving depth back — the floor is not what
+      makes a hole a hole. The shadow from the top edge does, see
+      .ruteskugge. */
+/* The two lips, in the same tokens as the hole in the week and the bevel
+      elsewhere in the house — so the window turns with the theme by
+      itself. */
+/* The shadow falling into the window. A shadow is two layers in this house
+      (cf. --skugge-kort): the tight line that draws the edge — .rutedjup
+      above — and a soft layer carrying the rest. The window had only the
+      line, and so read flat: a line is a stroke, not a shadow. Same fill as
+      the line, so the theme calibrates both; the width and the softness are
+      the difference. */
+/* 60 % of the lip, not all of it: at full strength the line and the soft
+      layer added up to about 40 % black at the top edge, and that was a
+      pinch too strong. The yardstick is the punches on the klippekort — they
+      read as stamped without shouting. The line above still carries the full
+      lip; it is what draws the edge. */
 
 /* Skiveflata — same tri lag som vindauga, sjaa dagmerke.html. Tinten
    er den same som holet sitt golv (6 %): plata er senka, men grunt;
    vindauga stansa ned i henne stakkar seg til kring 14 % og les seg
    difor djupare av seg sjølv. */
-.skiveflate  { fill: color-mix(in srgb, var(--blekk) 6%, transparent); }
-.skiveskugge { fill: var(--lippe-djup); }
-.skivedjup   { fill: var(--lippe-djup); }
-.skiveljos   { fill: var(--lippe-ljos); }
-.ruteljos  { fill: var(--lippe-ljos); }
 .rutetal {
   font-family: var(--skrift-tal); font-size: 9.2px;
   fill: var(--blekk); text-anchor: middle; letter-spacing: -.03em;
@@ -677,73 +765,79 @@
    att av fire ser ut som ein god sjanse når det i røynda er ein plass.
    Ein Reformer-time har fire plassar; ein time i salen har atten. Det er
    heile skilnaden, og han er borte i ein del. */
-/* Same storleik som tale fyre skiljeteiknet — det er éi lina, ikkje eit
-   tal med eit mindre tal hengande under seg. Styrken skil deim. */
+/* Same size as the number before the separator — it is one line, not a
+      number with a smaller number hanging off it. Weight separates them. */
 
 
 /* ---- stodene ---- */
-/* Vald er det same grepet som fokus i eit skrivefelt: lina tek
-   merkefargen, ein ring til legg seg utanpaa henne, og fordjupingi vert
-   djupare. Djupna segjer «dette kann du taka i», fargen «her er du no».
-
-   Flata tek fargen ogso, og det var ho som mangla. Ein kunde velja
-   merket paa tvo vegar — trykkja paa det, eller trykkja kvar som helst
-   i rada — og dei tvo saag ulike ut: trykte du paa merket, laag
-   peikaren yver det, so du fekk *hover* attaat og flata vart turkis.
-   Trykte du paa rada, stod peikaren ein annan stad, og daa fekk du
-   berre lina og ringen — ein turkis kasse kring eit merke som elles
-   var uendra. Same stoda, tvo bilete, og det eine kravde at handi laag
-   stille paa rett stad for aa syna seg.
-
-   Ei stoda skal ikkje vera avhengig av kvar peikaren er. `--merke` 12 %
-   mot flata er eit hakk sterkare enn dei 7 % hover legg paa: vald skal
-   lesast tyngre enn borti, og eit merke ein alt hev valt skal ikkje
-   bleikna naar ein fer yver det. Difor `:not(:disabled)` her ogso — han
-   gjev regelen den same vekti som hover-regelen, og han stend seinare i
-   fila, so han vinn. */
-.dagmerke[aria-pressed="true"] .form-ring { visibility: visible; }
-.dagmerke[aria-pressed="true"] .form-kant { fill: var(--merke); }
-/* Same tilhøvet som 16 mot 12 fyrr: eit hakk djupare naar han er valt. */
-.dagmerke[aria-pressed="true"] .form-djup { fill: color-mix(in srgb, var(--lippe-djup) 73%, transparent); }
-.dagmerke[aria-pressed="true"]:not(:disabled) .form-flate {
-  fill: color-mix(in srgb, var(--merke) 12%, var(--flate));
-}
+/* Selected is the same move as focus in a text field: the line takes the
+      brand colour, another ring lies outside it, and the recess deepens.
+      Depth says "you can touch this", colour says "you are here".
+   
+      The surface takes the colour too, and that was what was missing. You
+      could select the mark two ways — press it, or press anywhere in the row
+      — and the two looked different: pressing the mark put the pointer over
+      it, so you got *hover* as well and the surface went turquoise. Pressing
+      the row left the pointer elsewhere, and then you got only the line and
+      the ring — a turquoise box around a mark that was otherwise unchanged.
+      Same state, two pictures, and one of them required the hand to be still
+      in the right place to show.
+   
+      A state must not depend on where the pointer is. --merke at 12 % against
+      the surface is a step stronger than the 7 % hover adds: selected should
+      read heavier than touched, and a mark you have already selected should
+      not pale when you pass over it. */
+/* Same ratio as 16 against 12 before: a notch deeper when selected. */
 
 /* Umme: timen er gjenomgjengen. Han stend der av di rada skal ha sju
    plassar, men han dreg ikkje auga. */
 .dagmerke.umme { opacity: .42; cursor: default; }
 .dagmerke:disabled { cursor: default; }
 
-/* I dag er ikkje merket sitt. Det er *kvar du er*, og det høyrer til
-   spalta — eit band nedyver heile rutenetet. Vald er kva du peikar paa,
-   og det høyrer til merket. Var baae sagde med den same streken, tydde
-   streken tvo ting. */
+/* Today is not the mark's business. It is *where you are*, and it belongs
+      to the column — a band down the whole grid. Selected is what you are
+      pointing at, and that belongs to the mark. Said with the same stroke,
+      the stroke would mean two things. */
 .dagmerke.idag .merkedag { fill: var(--merke); }
 
-/* ---- ruta utan time ----
-   Ho var ein stipla kasse fyrr, og ein stipla kasse er eit *umriss* —
-   det ser ut som noko som skal koma. Her er det motsette som er sant:
-   det gjeng ingen time den dagen, og plassen er tom.
+/* ---- the cell without a class ----
+      It was a dashed box, and a dashed box is an *outline* — it looks like
+      something that is going to arrive. Here the opposite is true: no class
+      runs that day, and the place is empty.
+   
+      So it is a groove: a recess in the sheet in the shape of the body, with
+      the same bevel as the text fields — only deeper, because it is empty all
+      the way down. The clock does not lie in it. See docs/FASETTEN.md.
+   
+      It is a hole and not a button: pointer-events: none means it neither
+      takes clicks nor steals the pointer. */
+/* Den tome ruta. Geometrien er den same som SVG-en bar: kroppen i
+   merket, altso 56 av 58 breid, 61,47 av 58 høg, skuven 12 einingar ned
+   for fana som ikkje er der, med hyrne på 4. Summen av marg og høgd er
+   74,47/58 — same steget som merket elles, so radi stend på lina.
 
-   Difor er ho eit spor: ei fordjuping i arket i forma aat kroppen, med
-   den same fasetten som skrivefelti — berre djupare, av di ho er tom
-   heile vegen ned. Uret ligg ikkje i henne. Sjaa docs/FASETTEN.md.
-
-   Ho er eit hol og ikkje ein knapp: `pointer-events: none` gjer at ho
-   korkje tek klikk eller stel peikaren. */
-.dagmerke.daud { pointer-events: none; cursor: default; }
-.daudflate { fill: color-mix(in srgb, var(--blekk) 6%, transparent); }
-.dauddjup  { fill: var(--lippe-djup); }
-/* Den nedre lippa. Ho stod paa `--flate` fyrr, med den grunngjevingi at
-   `--flate` er den ljosaste flata i temaet og difor «lyser i baae».
-   Det er sant um *rangeringi* millom tokeni og usant um ljoset: aatti
-   prosent av ei mest svart flate er framleis mest svart. Maalt vart
-   lippone i det myrke temaet snudde — den øvre L=0.101 mot den nedre
-   L=0.014 — og eit hol med ljos yverkant og myrk fot er ein knott.
-   Difor `--upp` og `--ned`: dei er ei retning og ikkje ein farge, og
-   dei snur ikkje naar temaet gjer det. Sjaa docs/SKRAAKANTEN.md §3. */
-.daudljos  { fill: var(--lippe-ljos); }
-.dagmerke.daud.idag .daudflate { fill: color-mix(in srgb, var(--merke) 8%, transparent); }
+   Lippone kjem frå `--skraakant-djup` og ikkje frå eit filter. Sjaa
+   malen `daudmerke` i dagmerke.html for kvifor. */
+.dagmerke.daud {
+  pointer-events: none; cursor: default;
+  width:  calc(var(--merkestorleik) * 56 / 58);
+  height: calc(var(--merkestorleik) * 61.4735 / 58);
+  margin: calc(var(--merkestorleik) * 12 / 58)
+          calc(var(--merkestorleik) *  1 / 58)
+          calc(var(--merkestorleik) *  1 / 58);
+  border-radius: calc(var(--merkestorleik) * 4 / 58);
+  background: color-mix(in srgb, var(--blekk) 6%, transparent);
+  box-shadow: var(--skraakant-djup);
+}
+.dagmerke.daud.idag { background: color-mix(in srgb, var(--merke) 8%, transparent); }
+/* The lower lip. It stood on --flate, on the grounds that --flate is the
+      lightest surface in the theme and therefore "glows in both". That is
+      true of the *ranking* between tokens and false about the light: eighty
+      per cent of a nearly black surface is still nearly black. Measured, the
+      lips in the dark theme were inverted — the upper at L=0.101 against the
+      lower at L=0.014 — and a hole with a light top edge and a dark foot is a
+      knob. Hence --upp and --ned: they are a direction and not a colour, and
+      they do not flip when the theme does. See docs/SKRAAKANTEN.md §3. */
 
 /* Merke som stend for seg sjølve — paa heimesida, utan rutenet. Dei
    stend i spaltor av den same breiddi som i vika, so eit merke er like
@@ -756,46 +850,70 @@
 .merkerad .dagmerke { grid-column: auto; }
 
 
-/* Berre for skjermlesaren. Dagen stend i hovudet for auga; merket
-   treng honom likevel, av di ein som høyrer sida ikkje ser spalta. */
+/* For the screen reader only. The day stands in the header for the eye;
+      the mark needs it anyway, because someone hearing the page does not see
+      the column. */
 
 
-/* Under dette er sju spaltor for smalt til aa bera eit tal. Daa fell
-   rutenetet saman, merki flyt etter kvarandre, og dagen kjem attende i
-   merket sjølv — han kann ikkje lenger lesast av plasseringi.
-
-   90em og ikkje 60rem (30.8.2026): grensa vaktar *innhaldsrom*, og
-   maalestokken (00-token.css) gjer innhaldet større medan media-em
-   stend fast paa 16 px. Rekninga er den same som gjev --breidd:
-   netet med rom til namni (namnespalta e^3) treng ≈70.11rem, og ved
-   kvartsteget er det 70.11·e^(1/4) ≈ 90em glas — ein MacBook. Difor
-   er dette OG punktet der margane kjem: netet finst nett der sida hev
-   marg, og fell saman nett der ho fyller glaset — same talet, av same
-   rekning. Tvo rekningar braut ord midt i: fyrst utan maalestokk i
-   grensa, so med netet sitt minimum i staden for netet med rom. */
+/* Below this, seven columns are too narrow to carry a number. Then the
+      grid collapses, the marks flow after each other, and the day returns to
+      the mark itself — it can no longer be read from the position.
+   
+      90em and not 60rem (30.8.2026): the breakpoint guards *content room*,
+      and the scale (00-token.css) makes the content larger while media em
+      stays fixed at 16 px. The reckoning is the same one that gives --breidd:
+      the grid with room for the names (name column e^3) needs ≈70.11rem, and
+      at the quarter step that is 70.11·e^(1/4) ≈ 90em of viewport — a
+      MacBook. So this is ALSO the point where the margins appear: the grid
+      exists exactly where the page has margin, and collapses exactly where it
+      fills the viewport — same number, same reckoning. */
 @media (max-width: 90em) {
   .vika { --timetrapp: minmax(0, 1fr); }
 
-  /* Hovudet fall heilt burt her fyrr, av di det bar spalteoverskrifter
-     som ikkje kunde lesast naar stigen fall til éi spalta. Det ber ein
-     *kontroll* no — dagskyvaren — og ein kontroll skal ikkje kverva av
-     di rutenettet gjorde det. Han bryt til tvo rader i staden. */
+  /* The header used to disappear entirely here, because it carried column
+          headings that could not be read when the ladder fell to one column. It
+          carries a *control* now — the day slider — and a control must not
+          vanish because the grid did. It wraps to two rows instead. */
   .timedagar {
     display: flex; flex-wrap: wrap; gap: var(--rom-2);
     grid-column: 1 / -1;
   }
-  /* Scopa til rutenettet: desse tri er bøter paa at spaltone fell burt
-     paa smale glas, og det er ein ting som *berre* hender i timeplanen.
-     Uskopa slo dei ogso paa merki i listone paa heimesida, der det ikkje
-     er noko rutenet aa mista — og der la fyllet ovanfraa kassen 12 px
-     ned, so han ikkje lenger stod paa lina. */
+  /* Scoped to the grid: these three are remedies for the columns falling
+          away on narrow viewports, and that is something that *only* happens in
+          the schedule. Unscoped they also hit the marks in the lists on the home
+          page, where there is no grid to lose — and there the padding pushed the
+          case 12 px down, so it no longer stood on the line. */
   .timeplan .dagmerke { grid-column: auto; min-width: 3.6rem; padding-left: var(--rom-2); padding-right: var(--rom-2); }
   /* Den daude ruta er eit hol i eit rutenet. Er rutenetet burte, er ho
      berre ei tom eske ein lyt sjaa forbi. */
   .timeplan .dagmerke.daud { display: none; }
-  /* Paa smale glas kann ikkje dagen lesast av plasseringi lenger, so
-     lappen kjem fram — men berre med dagen. Klokka stend alt paa
-     kanten, og ho skal ikkje seiast tvo gonger. */
+  /* On narrow viewports the day can no longer be read from the position, so
+          the label appears — but only with the day. The time already stands on
+          the edge, and must not be said twice. */
   
   .timeplan .dagmerke { padding-top: var(--rom-3); }
+}
+
+/* ---- kva som ikkje er på skjermen, vert ikkje teikna ----
+
+   `content-visibility: auto` let nettlesaren hoppa yver layout, måling
+   og teikning for ei rad som ligg utanfor glaset. Radi er der framleis —
+   ho vert funni av søk, av tastaturet og av skjermlesaren — men arbeidet
+   med henne kjem fyrst når ho kjem til syne.
+
+   Grunnen til at det tyder mykje nett her: kvart merke ber SVG-filter
+   (feMorphology og feGaussianBlur, sjaa merke-defs.html), og eit filter
+   lyt rasteriserast på nytt kvar gong elementet skifter storleik. Ei
+   sida med 352 filtrerte element kostar difor mykje på resize og zoom.
+   Målt på verkstadssida: tolv storleikssteg tok 183 ms fyrr og 69 ms
+   etter — og der var det berre åtte rader. Ei full vike hev fleire, og
+   di fleire som ligg utanfor glaset, di større er skilnaden.
+
+   `contain-intrinsic-size` er gjettet på kor høg ei uteikna rad er, so
+   rullelina ikkje hoppar når ho vert teikna. `auto` tyder at
+   nettlesaren hugsar den *verkelege* høgdi so snart han hev sett henne
+   ein gong, og nyttar henne sidan. */
+.timerad {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 7rem;
 }

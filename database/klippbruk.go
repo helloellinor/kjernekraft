@@ -5,36 +5,34 @@ import (
 	"time"
 )
 
-// Klippet vert brukt naar nokon *var der*, ikkje naar dei melde seg paa.
+// A clip is spent when someone *was there*, not when they signed up.
 //
-// Til no vart eit klipp aldri brukt i det heile: `remaining_klipp` vart
-// berre skrive av kjøpet og av testdata-stokkinga. Ein kunde gaa paa
-// reformer heile hausten og framleis hava ti klipp att paa kortet.
+// Until now a clip was never spent at all: remaining_klipp was only
+// written by the purchase and by the test-data shuffle. You could do
+// reformer all autumn and still have ten clips left.
 //
-// Kvifor krysset og ikkje paameldingi: huset skil alt paa dei tvo — sjaa
-// NettFrammott, «ei paamelding aaleine segjer at ho hadde tenkt seg
-// dit». Eit klipp er betaling for ein time ein *fekk*, so det fylgjer
-// krysset. Avlyser ho, eller møter ho ikkje, kostar det ingen ting; tek
-// nokon krysset bort att, kjem klippet attende (sjaa FjernFrammote).
+// Why the check-in and not the signup: the house already distinguishes the
+// two — see NettFrammott, "a signup alone says she meant to go". A clip
+// pays for a class you *got*, so it follows the check-in. Cancel, or fail
+// to turn up, and it costs nothing; undo the check-in and the clip comes
+// back (see FjernFrammote).
 //
-// Kva ein time kostar er ikkje ei liste i koden. Gruppetimane i Salen
-// ligg i medlemskapet og kostar ingen klipp; Reformer og Personlig
-// Trening vert selde som klippekort. Bandet millom dei tvo er namnet:
-// timen sin `class_type` mot pakka si `category`. Difor finn me
-// kategorien ved eit uppslag og ikkje ved ein `switch` — legg nokon inn
-// ein ny klippekort-kategori, verkar han med ein gong, og ingen treng
-// hugsa at det ogso stend ei liste i Go.
+// What a class costs is not a list in the code. Group classes in the hall
+// are covered by the membership; Reformer and personal training are sold
+// as klippekort. The link between them is the name: the class's class_type
+// against the package's category. So the category is found by lookup and
+// not by a switch — add a new klippekort category and it works at once.
 
-// MigrerKlippbruk legg til kolonnorne krysset treng.
+// MigrerKlippbruk adds the columns the check-in needs.
 //
-//	klipp_kort_id  kortet klippet vart teke fraa. NULL = ikkje klippa.
-//	               Det er *kva kort* som gjer at eit angra kryss kann
-//	               leggja klippet attende paa rett stad — utan dette
-//	               laut ein gissa, og eit kort som gjekk ut i
-//	               millomtidi hadde fenge klippet.
-//	skulda         1 naar nokon vart kryssa inn utan klipp aa taka av.
-//	               Timen er gjeven og skal ikkje gaa tapt or rekneskapen
-//	               berre av di kortet var tomt i døri.
+//	klipp_kort_id  the card the clip was taken from. NULL = not clipped.
+//	               Knowing *which card* is what lets an undone check-in
+//	               put the clip back in the right place; without it you
+//	               would guess, and a card that expired meanwhile would
+//	               get it.
+//	skulda         1 when someone was checked in with no clip to take.
+//	               The class was given and should not fall out of the
+//	               accounts just because the card was empty at the door.
 func MigrerKlippbruk(db *sql.DB) error {
 	for _, k := range []struct{ namn, def string }{
 		{"klipp_kort_id", "ALTER TABLE event_signups ADD COLUMN klipp_kort_id INTEGER"},
@@ -56,11 +54,11 @@ func MigrerKlippbruk(db *sql.DB) error {
 	return nil
 }
 
-// klippKategori gjev klippekort-kategorien ein timetype skal betalast
-// med, og false naar timen ikkje kostar klipp.
+// klippKategori gives the klippekort category a class type should be paid
+// with, and false when the class costs no clips.
 //
-// Samanlikninga er slaakk med vilje: administrasjonen skriv `class_type`
-// fritt, so «Reformer», «reformer» og « Reformer » er den same timen.
+// The comparison is loose on purpose: admins write class_type freely, so
+// "Reformer", "reformer" and " Reformer " are the same class.
 func klippKategori(q rader, timetype string) (string, bool) {
 	if timetype == "" {
 		return "", false
@@ -76,8 +74,8 @@ func klippKategori(q rader, timetype string) (string, bool) {
 	return kat, true
 }
 
-// rader er det vesle av *sql.DB og *sql.Tx me nyttar her, so den same
-// koden kann gaa baade i og utanum ein transaksjon.
+// rader is the small part of *sql.DB and *sql.Tx used here, so the same
+// code runs inside and outside a transaction.
 type rader interface {
 	QueryRow(string, ...any) *sql.Row
 }
@@ -87,7 +85,7 @@ type rader interface {
 // Kortet som gjeng ut fyrst vert nytta fyrst. Elles kunde eit kort med
 // kort frist liggja urørt og gaa ut medan klippi vart tekne av eit kort
 // som varer til neste sumar.
-func brukKlipp(tx *sql.Tx, eventID, userID int64, naa time.Time) error {
+func brukKlipp(tx *sql.Tx, eventID, userID int64, nå time.Time) error {
 	var timetype string
 	if err := tx.QueryRow(
 		`SELECT COALESCE(class_type, '') FROM events WHERE id = ?`, eventID).
@@ -97,15 +95,15 @@ func brukKlipp(tx *sql.Tx, eventID, userID int64, naa time.Time) error {
 
 	kat, kostar := klippKategori(tx, timetype)
 	if !kostar {
-		// Gruppetime: medlemskapet dekkjer honom.
+		// Group class: the membership covers it.
 		return nil
 	}
 
-	// Er klippet alt teke, er det teke. Ei PT-økt vert klippa naar ho
-	// vert *sett upp* (sjaa BokPrivatTime) og ikkje i døri, so utan
-	// denne lina hadde ho kosta tvo klipp: eitt for tingingi og eitt for
-	// krysset. Prøva er generell av di ho skal vera det — aa klippa det
-	// same paameldet tvo gonger er gale kva vegen det skjer.
+	// If the clip is already taken, it is taken. A PT session is clipped when
+	// it is *set up* (see BokPrivatTime) and not at the door, so without this
+	// line it would cost two: one for the booking and one for the check-in.
+	// The check is general because it should be — clipping the same signup
+	// twice is wrong whichever way it happens.
 	var alt sql.NullInt64
 	if err := tx.QueryRow(`
 		SELECT klipp_kort_id FROM event_signups
@@ -122,12 +120,11 @@ func brukKlipp(tx *sql.Tx, eventID, userID int64, naa time.Time) error {
 		  AND uk.is_active = TRUE AND uk.remaining_klipp > 0
 		  AND uk.expiry_date > ?
 		ORDER BY uk.expiry_date ASC
-		LIMIT 1`, userID, kat, veggtekst(naa)).Scan(&kortID)
+		LIMIT 1`, userID, kat, veggtekst(nå)).Scan(&kortID)
 
 	if err == sql.ErrNoRows {
-		// Ingen klipp aa taka av. Ho stend i døri og timen byrjar; me
-		// skriv skuldi og lyfter henne fram for administrasjonen i
-		// staden for aa stogga henne her.
+		// No clip to take. She is at the door and the class is starting; we write
+		// the debt and raise it for the admins rather than stopping her here.
 		_, err := tx.Exec(`
 			UPDATE event_signups SET skulda = 1
 			WHERE event_id = ? AND user_id = ?`, eventID, userID)
@@ -148,7 +145,7 @@ func brukKlipp(tx *sql.Tx, eventID, userID int64, naa time.Time) error {
 	return err
 }
 
-// gjevAttKlipp legg klippet attende naar eit kryss vert teke bort.
+// gjevAttKlipp puts the clip back when a check-in is undone.
 func gjevAttKlipp(tx *sql.Tx, eventID, userID int64) error {
 	var kortID sql.NullInt64
 	if err := tx.QueryRow(`
@@ -161,10 +158,9 @@ func gjevAttKlipp(tx *sql.Tx, eventID, userID int64) error {
 	}
 
 	if kortID.Valid {
-		// Taket paa total_klipp: eit kort skal ikkje kunna gjeva fleire
-		// klipp attende enn det hadde. Kann berre henda um nokon hev
-		// rota i basen for haand, men eit kort med 11 av 10 er verre
-		// enn eit tapt klipp.
+		// Capped at total_klipp: a card must not be able to give back more clips
+		// than it had. Only possible if somebody edited the database by hand, but
+		// a card with 11 of 10 is worse than a lost clip.
 		if _, err := tx.Exec(`
 			UPDATE user_klippekort
 			SET remaining_klipp = MIN(remaining_klipp + 1, total_klipp)

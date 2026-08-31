@@ -6,23 +6,23 @@ import (
 	"time"
 )
 
-// Gruppa.
+// The group.
 //
-// Ein time kann vera open for somme og ikkje for alle. Reformer er
-// døme: apparati er faa, folk lyt vera lærde upp fyre dei fær bruka
-// deim, og timen skal difor berre syna seg for dei som er det.
+// A class can be open to some and not to all. Reformer is the example: the
+// machines are few, people have to be trained before they may use them, and
+// the class should therefore only show for those who are.
 //
-// Til no fanst berre `private_user_id` — éin time, éin person. Det er
-// rett for PT og gale for dette: skulde nitten reformer-timar opnast
-// for tolv personar, var det tvo hundre og tjuge val nokon laut gjera
-// for haand, og eitt gløymt var ein person som ikkje kom paa timen.
-// Gruppa er den same avgjerdi teki ein gong.
+// Until now there was only private_user_id — one class, one person. That is
+// right for PT and wrong for this: opening nineteen reformer classes to
+// twelve people would be two hundred and twenty choices made by hand, and
+// one forgotten is a person who did not get to the class. The group is that
+// decision taken once.
 //
-// Gruppa er *ikkje* eit løyve. `roles` i denne basen er `admin` og
-// `teacher` — det er kva du fær *gjera* med studioet, altso løyve. Ei
-// gruppe er kven du høyrer til. Blanda ein dei, vert «gjev tilgang til
-// reformer» og «gjer til administrator» den same handlingi med det same
-// skjemaet, og den dagen nokon feilklikkar er skilnaden stor.
+// A group is *not* a permission. `roles` in this database is admin and
+// teacher — what you may *do* with the studio. A group is who you belong
+// to. Mix them, and "give access to reformer" and "make an administrator"
+// become the same action with the same form, and the day someone misclicks
+// the difference is large.
 
 // MigrerGrupper set upp gruppone og kolonna som knyter ein time til ei.
 func MigrerGrupper(db *sql.DB) error {
@@ -61,12 +61,11 @@ func MigrerGrupper(db *sql.DB) error {
 	return err
 }
 
-// Gruppe er ei gruppe, med talet paa medlemer i seg.
+// Gruppe er ei gruppe, med talet på medlemer i seg.
 type Gruppe struct {
 	ID     int64
 	Namn   string
 	Medlem int
-	ErMed  bool // om ein viss brukar er med — sett av GruppeneMed
 }
 
 // Grupper gjev alle gruppone, med medlemstalet.
@@ -84,30 +83,6 @@ func (db *Database) Grupper() ([]Gruppe, error) {
 	for rows.Next() {
 		var g Gruppe
 		if err := rows.Scan(&g.ID, &g.Namn, &g.Medlem); err != nil {
-			return nil, err
-		}
-		ut = append(ut, g)
-	}
-	return ut, rows.Err()
-}
-
-// GruppeneMed gjev alle gruppone, og merkjer dei brukaren er med i.
-func (db *Database) GruppeneMed(userID int64) ([]Gruppe, error) {
-	rows, err := db.Conn.Query(`
-		SELECT g.id, g.namn, COUNT(m.user_id),
-		       EXISTS (SELECT 1 FROM gruppemedlem x
-		               WHERE x.gruppe_id = g.id AND x.user_id = ?)
-		FROM grupper g LEFT JOIN gruppemedlem m ON m.gruppe_id = g.id
-		GROUP BY g.id, g.namn ORDER BY g.namn`, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var ut []Gruppe
-	for rows.Next() {
-		var g Gruppe
-		if err := rows.Scan(&g.ID, &g.Namn, &g.Medlem, &g.ErMed); err != nil {
 			return nil, err
 		}
 		ut = append(ut, g)
@@ -133,11 +108,12 @@ func (db *Database) LagGruppe(namn string) (int64, error) {
 	return res.LastInsertId()
 }
 
-// SlettGruppe tek gruppa burt.
+// SlettGruppe removes the group.
 //
-// Timane som peika paa henne vert opne for alle att, og ikkje ståande
-// og peika paa noko som ikkje finst — ein time ingen kann sjaa av di
-// gruppa hans er sletta, er ein time som er burte utan at nokon sa det.
+// The classes that pointed at it become open to everyone again, rather than
+// standing pointing at something that does not exist — a class nobody can
+// see because its group was deleted is a class that is gone without anyone
+// saying so.
 func (db *Database) SlettGruppe(gruppeID int64) error {
 	tx, err := db.Conn.Begin()
 	if err != nil {
@@ -157,10 +133,10 @@ func (db *Database) SlettGruppe(gruppeID int64) error {
 	return tx.Commit()
 }
 
-// SettGruppemedlem slær medlemskapet av eller paa. Han toler aa gaast
-// tvo gonger same vegen, som løyvebrytaren attmed.
-func (db *Database) SettGruppemedlem(gruppeID, userID int64, paa bool) error {
-	if !paa {
+// SettGruppemedlem switches membership off or on. It survives being taken
+// twice the same way, like the permission switch beside it.
+func (db *Database) SettGruppemedlem(gruppeID, userID int64, på bool) error {
+	if !på {
 		_, err := db.Conn.Exec(
 			"DELETE FROM gruppemedlem WHERE gruppe_id = ? AND user_id = ?", gruppeID, userID)
 		return err
@@ -172,19 +148,19 @@ func (db *Database) SettGruppemedlem(gruppeID, userID int64, paa bool) error {
 
 // SetSerieGruppe knyter alle komande timar i serien til ei gruppe.
 // Null opnar dei for alle att.
-func (db *Database) SetSerieGruppe(serieID, gruppeID int64, fraa time.Time) error {
+func (db *Database) SetSerieGruppe(serieID, gruppeID int64, frå time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET gruppe_id = NULLIF(?, 0) WHERE serie_id = ? AND end_time > ?",
-		gruppeID, serieID, veggtekst(fraa))
+		gruppeID, serieID, veggtekst(frå))
 	return err
 }
 
-// KannSjaaTimen segjer om brukaren fær sjaa og melda seg paa timen.
+// KannSjåTimen says whether the user may see and sign up for the class.
 //
-// Same vilkåret som `synlegFor`, skrive ein gong til i Go av di
-// paamelding ikkje gjeng gjenom ei timeplan-spurning. Held dei tvo
-// fraa kvarandre, lek det: synlegheit er ikkje tryggleik.
-func (db *Database) KannSjaaTimen(eventID, userID int64) (bool, error) {
+// The same condition as synlegFor, written once more in Go because signup
+// does not go through a schedule query. Let the two drift and it leaks:
+// visibility is not security.
+func (db *Database) KannSjåTimen(eventID, userID int64) (bool, error) {
 	var eigar, gruppe sql.NullInt64
 	if err := db.Conn.QueryRow(
 		"SELECT private_user_id, gruppe_id FROM events WHERE id = ?", eventID).
@@ -206,15 +182,15 @@ func (db *Database) KannSjaaTimen(eventID, userID int64) (bool, error) {
 	return med > 0, nil
 }
 
-// SettGruppePaaTime knyter éin time til ei gruppe. Null opnar honom att.
-func (db *Database) SettGruppePaaTime(eventID, gruppeID int64) error {
+// SettGruppePåTime ties one class to a group. Null opens it again.
+func (db *Database) SettGruppePåTime(eventID, gruppeID int64) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET gruppe_id = NULLIF(?, 0) WHERE id = ?", gruppeID, eventID)
 	return err
 }
 
-// GruppeFinst segjer om gruppa finst. Ein time som peikar paa ei gruppe
-// som ikkje finst, er ein time ingen kann sjaa.
+// GruppeFinst says whether the group exists. A class pointing at a group
+// that does not is a class nobody can see.
 func (db *Database) GruppeFinst(gruppeID int64) (bool, error) {
 	var n int
 	err := db.Conn.QueryRow("SELECT COUNT(*) FROM grupper WHERE id = ?", gruppeID).Scan(&n)

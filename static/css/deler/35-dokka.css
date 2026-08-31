@@ -1,25 +1,25 @@
 /* ===================================================================
-   dokka
-   Ho held det du ser paa i ro medan resten rullar: du vel ein dag, og
-   timen stend her nede til du vel ein annan. Difor flyttar ingen ting
-   seg naar du samanliknar tvo dagar, og knappen er alltid paa den same
-   staden.
-
-   Botnen er festa og toppen flyt, so ho veks med innhaldet. Sida fær
-   luft under seg av same høgdi, elles ligg det siste ho hev aa syna
-   under dokka.
-   =================================================================== */
+      the dock
+      It holds what you are looking at still while the rest scrolls: you
+      pick a day, and the class stands down here until you pick another. So
+      nothing moves when you compare two days, and the button is always in
+      the same place.
+   
+      The bottom is fixed and the top floats, so it grows with its content.
+      The page gets air under it of the same height, or the last thing it
+      has to show lies under the dock.
+      =================================================================== */
 :root { --dokkhogd: 0px; }
 
-/* Yverkanten var ein maala strek: `2px solid var(--klas)`, tvo pikslar
-   rein turkis tvers yver skjermen. Hovudet hev eit *ljos* i den same
-   lina — fire lag glød som fylgjer den valde lenkja — og dei tvo enda
-   opp som tvo ulike slag ting i kvar sin ende av sida: eit lys upp,
-   ei maling ned.
-
-   No er kanten ei hårlina, og ljoset ligg yver henne og stig upp. Same
-   familien, roleg utgaava: dokka er ei heil flata og ikkje eit punkt,
-   so ho lyser jamt i staden for aa ha ein kjerne. */
+/* The top edge was a painted stroke: 2px solid var(--klas), two pixels of
+      pure turquoise across the screen. The header has a *light* in the same
+      line — four layers of glow following the selected link — and the two
+      ended up as two different kinds of thing at either end of the page: a
+      light above, a paint below.
+   
+      Now the edge is a hairline and the light lies over it, rising. Same
+      family, calm version: the dock is a whole surface and not a point, so
+      it glows evenly rather than having a core. */
 .dokk {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
   background: var(--flate);
@@ -49,80 +49,80 @@
 }
 .dokkkven { margin: 0; font-size: .88rem; color: var(--blekk-lys); }
 .dokknaar { display: flex; flex-direction: column; }
-/* capitalize tek *kvart* ord, og daa vart «torsdag 27. august» til
-   «Torsdag 27. August». Norsk skriv ikkje maanadsnamn med stor
-   bokstav; berre den fyrste bokstaven i linja skal upp. */
+/* capitalize takes *every* word, so "torsdag 27. august" became "Torsdag
+      27. August". Norwegian does not capitalise month names; only the first
+      letter of the line goes up. */
 .dokkdag { font-size: .82rem; color: var(--blekk-lys); }
 .dokkdag::first-letter { text-transform: uppercase; }
 .dokkklokke { font-family: var(--skrift-tal); font-size: 1.05rem; }
 .dokkplassar { min-width: 9rem; }
 .dokkhandling { margin-left: auto; display: flex; flex-direction: column; gap: var(--rom-2); align-items: stretch; }
 
-/* Svaret fraa tenaren stend i dokka, ikkje i ei varselrute. Ei
-   varselrute stel fokus og lyt lukkast; her stend det attmed knappen
-   som utløyste det, og kvarv naar du vel noko anna. */
+/* The server's answer stands in the dock, not in a dialog. A dialog steals
+      focus and has to be closed; here it stands beside the button that
+      triggered it, and disappears when you pick something else. */
 .dokkmelding { margin: 0; font-size: .82rem; color: var(--blekk-lys); max-width: 22rem; }
-/* Ei tom melding er null piksel høg — men gapet millom henne og knappen
-   stend likevel, av di `gap` gjeld millom flex-born same kor store dei
-   er. Handlingsbolken vart aatte piksel høgre enn knappen i honom, og
-   daa hamna knappen fire piksel yver midtlina i dokka medan krossen
-   stod paa henne. */
+/* An empty message is zero pixels tall — but the gap between it and the
+      button stands anyway, because gap applies between flex children whatever
+      their size. The action section became eight pixels taller than the
+      button in it, and then the button sat four pixels above the dock's
+      midline while the cross sat on it. */
 .dokkmelding:empty { display: none; }
 .dokkmelding.gale { color: var(--aatvaring); }
-/* Krossen laag absolutt i hyrna og hadde ingi eigi lane — og handlingane
-   i dokka ligg med `margin-left: auto`, altso heilt ute til høgre. Dei
-   tvo enda paa den same plassen: krossen laag uppaa knappen, og daa er
-   det tilfeldig kva ein treffer.
+/* The cross lay absolutely in the corner and had no lane of its own — and
+      the actions in the dock lie with margin-left: auto, that is, far right.
+      The two ended up in the same place: the cross lay on top of the button,
+      and then it is chance which one you hit.
    
-   Han er eit flex-barn no, sist i rada. Han tek plassen sin i staden for
-   aa laana han av nokon andre, og han stend midt i høgdi so han fylgjer
-   dokka naar ho veks. */
-/* Lukkeknappen er ein knapp som alle andre — han bar `background: none;
-   border: 0` fyrr og var difor eit teikn ein kunde trykkja paa, ikkje
-   noko som saag ut som ein knapp.
-   Han tek `.btn` og arvar line, glans, djupn og det eine pikselsiget
-   ved trykk. Det einaste som stend att her er forma: `.btn` er ein
-   kapsel (`--rund-knapp: 999px`), og ein kapsel med like sidor *er* ein
-   sirkel — so det held aa gjeva han same breidd som høgd og taka burt
-   fyllet som elles ville drege han ut i lengdi. */
-/* Krossen og handlingsknappen deler ei rad.
-   Høgdi kjem fraa rada og ikkje fraa ei rekning: `stretch` gjer krossen
-   nett so høg som knappen attmed, og `aspect-ratio` gjer honom like
-   brei som han er høg. Byter nokon `--knapp-loddrett` eller skriftgraden
-   paa knappane, fylgjer krossen med av seg sjølv — det trong tvo stader
-   aa halda i takt fyrr.
-
-   Gapet er høgst *halve* breiddi hans. Meir, og dei tvo les seg som tvo
-   handlingar; mindre, og dei les seg som éin knapp med eit hakk i. */
+      It is a flex child now, last in the row. It takes its own space rather
+      than borrowing someone else's, and stands centred vertically so it
+      follows the dock as it grows. */
+/* The close button is a button like any other — it carried background:
+      none; border: 0 and was therefore a glyph you could press, not something
+      that looked like a button.
+   
+      It takes .btn and inherits border, gloss, depth and the one-pixel press.
+      All that stands here is the form: .btn is a capsule (--rund-knapp:
+      999px), and a capsule with equal sides *is* a circle — so it is enough
+      to give it the same width as height and remove the padding that would
+      otherwise stretch it. */
+/* The cross and the action button share a row.
+      The height comes from the row and not from a calculation: stretch makes
+      the cross exactly as tall as the button beside it, and aspect-ratio
+      makes it as wide as it is tall. Change --knapp-loddrett or the type size
+      on the buttons and the cross follows by itself — that was two places to
+      keep in step before.
+   
+      The gap is at most *half* its width. More, and the two read as two
+      actions; less, and they read as one button with a notch in it. */
 .dokkrad {
-  /* Storleiken bur her og ikkje paa krossen, av di *baae* treng honom:
-     krossen til breidda si, og rada til gapet. Stod han paa krossen,
-     var `var(--lukkstorleik)` ukjend i `gap` — og ein ugyldig `min()`
-     gjev ikkje ein fallback, han gjev *ingen* gap. Difor rørte dei tvo
-     knappane kvarandre. */
+  /* The size lives here and not on the cross, because *both* need it: the
+          cross for its width, and the row for the gap. On the cross,
+          var(--lukkstorleik) would be unknown in gap — and an invalid min()
+          does not give a fallback, it gives *no* gap. Which is why the two
+          buttons touched. */
   --lukkstorleik: calc(var(--knapp-linehogd) * 1em + 2 * var(--knapp-loddrett) + 2px);
   display: flex; align-items: stretch;
-  /* Luft, men ikkje meir enn halve krossen: meir, og dei les seg som tvo
-     skilde handlingar; mindre, og dei les seg som éin knapp med eit hakk
-     i. Halve breiddi er taket du sette; `--rom-2` er det steget paa
-     romstigen som ligg under det. */
+  /* Air, but no more than half the cross: more, and they read as two
+          separate actions; less, and they read as one button with a notch in
+          it. Half the width is the ceiling; --rom-2 is the step on the spacing
+          ladder just below it. */
   gap: min(var(--rom-2), calc(var(--lukkstorleik) / 2));
 }
 
-/* Krossen er `.btn` og ikkje `.btn-danger`, og det er avgjort og ikkje
-   gløymt (28.8.2026).
-
-   Han stengjer dokka; merket opnar henne att med eitt klikk, so ingen
-   ting gjeng tapt. Den destruktive handlingi er `#dokk-knapp` naar han
-   stend paa «Meld deg av» — og `dokk.js` gjer *honom* raud alt. Vart
-   krossen ogso raud, stod tvo raude knappar attmed kvarandre i nettupp
-   den stoda: ein som slettar paameldingi og ein som lukkar eit panel.
-   Daa tyder raudt ingen ting (§1: `--aatvaring` er «gjekk gale, eller
-   kann ikkje angrast»). */
+/* The cross is .btn and not .btn-danger, and that is decided rather than
+      forgotten (28.8.2026).
+   
+      It closes the dock; the mark reopens it with one click, so nothing is
+      lost. The destructive action is #dokk-knapp when it reads "Cancel
+      signup" — and dokk.js already makes *that* one red. Were the cross red
+      too, two red buttons would stand side by side in exactly that state: one
+      deleting the signup and one closing a panel. Then red means nothing (§1:
+      --aatvaring is "went wrong, or cannot be undone"). */
 .dokklukk {
-  /* Breiddi er den same som `.btn` er høg — tvo gonger det loddrette
-     fyllet, pluss linehøgdi, pluss dei tvo kantpikslane — so krossen er
-     kvadratisk. Tale kjem fraa rada; sjaa `--lukkstorleik` der. */
+  /* The width is the same as .btn is tall — twice the vertical padding, plus
+          the line height, plus the two border pixels — so the cross is square.
+          The number comes from the row; see --lukkstorleik there. */
   flex: none;
   width: var(--lukkstorleik);
   aspect-ratio: 1;
@@ -133,13 +133,13 @@
 @media (max-width: 44rem) {
   .dokkinnhald { gap: var(--rom-3); padding: var(--rom-3) var(--rom-4); }
   .dokkhandling { margin-left: 0; flex: 1 1 100%; }
-  /* Handlingsknappen tek det som er att av lina naar krossen hev fenge
-     sitt. Fingeren treng ei brei flata; han treng ikkje at krossen fell
-     ned paa ei lina for seg.
-
-     Han er vald paa *plass* og ikkje paa klasse: `dokk.js` skriv heile
-     `className` paa nytt for kvar stoda — `btn-primary`, `btn`,
-     `btn-danger` — so ein regel paa ein av dei fall burt i dei hine.
-     Fyrste barnet i rada er handlingsknappen, kva han enn heiter. */
+  /* The action button takes what is left of the line once the cross has had
+          its share. A finger needs a wide surface; it does not need the cross to
+          drop onto a line of its own.
+     
+          It is selected by *position* and not by class: dokk.js rewrites the
+          whole className for each state — btn-primary, btn, btn-danger — so a
+          rule on one of them fell away in the others. The first child in the
+          row is the action button, whatever it is called. */
   .dokkrad > :first-child { flex: 1 1 auto; min-width: 0; }
 }

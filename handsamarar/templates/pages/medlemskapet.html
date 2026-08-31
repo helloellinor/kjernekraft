@@ -1,0 +1,232 @@
+{{define "content"}}
+{{/* Medlemskapet mitt.
+
+     Tre faner, og dei svarar på kvar sitt spørsmål: kva du har, kva du
+     kan byte til, og kva du har betalt. Før låg det to stader — «Behandle
+     medlemskap» spurde deg kor lenge du ville binde deg og tilrådde eit
+     medlemskap, som er rett for ein som ikkje har noko, men rart for ein
+     som alt har eit.
+
+     Ingen kasse rundt medlemskapet: fana er alt ein kasse, og du kan
+     ikkje ha to medlemskap på ein gong. */}}
+<h1 class="page-title">{{t .Lang "medlemskapet.title"}}</h1>
+
+{{/* Eit tildelt medlemskap hev korkje fornying eller binding, so
+     setningi hadde ingen ting aa segja: «neste fornying» på noko som
+     fylgjer rolla di er ein dato som aldri kjem. */}}
+{{if and .Noverande (not .Tildelt)}}
+{{/* Stoda som ei setning, ikkje som ei liste med rader.
+
+     Det stod «Neste fornying — 1. oktober 2026» og «Bindinga er
+     ute — 1. mars 2027» under kvarandre, og lesaren laut setje dei
+     saman sjølv. Det er den same feilen som tre flisor med eit tal
+     og ei merkelapp under: «13» og «MÅNADER BINDING» må setjast
+     saman, medan «Bindinga har 13 månader att» alt er sett saman.
+
+     Same forma som oversynet i administrasjonen: tale vidt og
+     feitt, ordet smalt attmed, resten som vanleg lesetekst. */}}
+<p class="briefing">
+  {{- if eq .Noverande.Status "paused"}}{{t .Lang "medlemskapet.setning_frose"}}
+  {{- else if eq .Noverande.Status "freeze_requested"}}{{t .Lang "medlemskapet.setning_venteande"}}
+  {{- else if eq .Noverande.Status "cancelled"}}
+    {{- template "setning" (dict "Lang" .Lang "Nykel" "medlemskapet.setning_sagt_opp" "Verd" (norskDatoÅr .Noverande.RenewalDate) "Slag" "ord") -}}
+  {{- else}}
+    {{- template "setning" (dict "Lang" .Lang "Nykel" "medlemskapet.setning_fornying" "Verd" (norskDatoÅr .Noverande.RenewalDate) "Slag" "ord") -}}
+  {{end}}
+</p>
+{{end}}
+
+<div class="faneark" id="{{.Faner.ID}}">
+  {{/* Ei fanerekkje med éi fane er ikkje ei fanerekkje. Byt-fana er
+       burte for eit tildelt medlemskap (sjå medlemskapet.go), og då
+       stend det att ein veljar med eitt val.
+
+       `.faneark` og `.fanerom` stend att med vilje: dei ber kassen og
+       tvospalta under, og tek ein deim med, misser ein kortet attmed
+       belastningane. Det er berre *veljaren* som gjeng. */}}
+  {{if not .Tildelt}}{{template "faner" .Faner}}{{end}}
+
+  <div class="fanerom">
+
+    {{if eq .Faner.Vald "medlemskapet"}}
+    <div class="bolk" id="bolk-medlemskapet">
+      {{/* Belastningane står attmed og ikkje i ei eiga fane: dei to svarar
+           på det same spørsmålet — kva dette kostar meg — og ein les dei
+           saman. */}}
+      <div class="two-column-grid">
+        <div class="kortbolk">
+      <h2 class="section-title">{{t .Lang "medlemskapet.medlemskortet"}}</h2>
+      {{if .Noverande}}
+      {{/* Sjølve medlemskapet som ein ting: dei nøyaktige datoane og
+           det ein kan gjere med det. Setninga over rundar av — «13
+           månader att» — medan kortet her seier kva dag det er. */}}
+      {{/* Kortet er ein ting ein *hev*, ikkje ei rad med datoar.
+
+           Det bar tri detaljrader og ingen ting anna fyrr: ingen namn
+           på kva medlemskapet var, inkje ljos, og vengen kom berre når
+           det var aktivt. Ein laut lesa setningi yver kortet for aa vita
+           kva kortet var eit kort *for*.
+
+           No ber det dei fire tingi eit medlemskort ber: kva slag det
+           er, kven det høyrer til, um det gjeld, og kva det kostar.
+           Vengen og ljoset seier stoda i tvo kanalar (§1) — forma i
+           vengen, gløden i lampa — so rada les seg ogso i graatt. */}}
+      {{template "medlemskort" (dict
+        "Medlemskap" .Noverande "Namn" .NoverandeNamn "UserName" .UserName
+        "Lang" .Lang "MedlemSidan" .MedlemSidan
+        "Handlingar" true "KannSeiaUpp" .KannSeiaUpp)}}
+
+      {{/* Kva som hender, sagt fyre du trykkjer. Det stod i ein
+             `confirm()` fyrr — ei rute som spring upp *etter* trykket og
+             spør «Sei opp?», som er knappen sitt eige ord med eit
+             spursmaalsteikn attaat. Ho fortalde deg ingen ting du ikkje
+             alt visste, og det ho *skulde* sagt — at frysing er ei bøn
+             studioet lyt godkjenna, og at ei uppseiing gjeld med ein
+             gong — stod ingen stad (§7). */}}
+        {{if and (eq .Noverande.Status "active") (not .Tildelt)}}
+        <p class="merknad">{{t .Lang "medlemskapet.freeze_note"}}</p>
+        {{end}}
+        {{if .KannSeiaUpp}}
+        <p class="merknad">{{tf .Lang "medlemskapet.cancel_note" (norskDatoÅr .Noverande.RenewalDate)}}</p>
+        {{end}}
+
+        <p class="svar" id="medlemssvar" role="status"></p>
+      {{else}}
+      <p class="no-data">{{t .Lang "medlemskapet.utan_medlemskap"}}</p>
+      {{/* Ei lenkja til fana, ikkje til ein hash. Ho byter ut det same
+           arket fanone byter. */}}
+      <p><a class="btn" href="/elev/medlemskap?fane=byt"
+            hx-boost="true" hx-target="#{{$.Faner.ID}}" hx-select="#{{$.Faner.ID}}"
+            hx-swap="outerHTML show:none">{{t .Lang "medlemskapet.sjaa_val"}}</a></p>
+      {{end}}
+        </div>
+
+        <div class="kortbolk">
+          <h2 class="section-title">{{t .Lang "medlemskapet.tab_belastningar"}}</h2>
+          {{/* Berre avgiftene for medlemskapet. Lista stod utan filter
+               fyrr og bar klippekorti med — dei høyrer til klippekortsida,
+               og attmed medlemskortet svarar dei på eit spursmål ingen
+               stelte. Klippekortsida gjer det same andre vegen med
+               `?type=klippekort`. */}}
+          <div hx-get="/api/charges?type=medlemskap" hx-trigger="load" hx-swap="innerHTML">
+            <div class="loading-placeholder">…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{end}}
+
+    {{/* Ingen byter frå Black. Sjå `tildelt` i medlemskapet.go — fana er
+         ogso burte, so `?fane=byt` fell attende paa den fyrste og
+         bolken hev ingen veg inn. */}}
+    {{if eq .Faner.Vald "byt"}}
+    <div class="bolk" id="bolk-byt">
+      {{/* Eit byte er ikkje eit kjøp. Du har alt eit medlemskap, så kvar
+           rad seier kva som *endrar seg* og ikkje berre kva det kostar.
+           Datoen står øvst av di det er han folk er utrygge på: betaler
+           eg to gonger, mistar eg dagar. */}}
+      {{if .Noverande}}
+      <p class="bytehovud">
+        {{tf .Lang "medlemskapet.lead" (norskDatoÅr .Noverande.RenewalDate)}}
+      </p>
+      {{else}}
+      <p class="bytehovud">{{t .Lang "medlemskapet.lead_utan"}}</p>
+      {{end}}
+
+      {{/* Svaret paa eit byte stend her, yver radene — der du alt les, og
+           ikkje nedanfor den knappen du tilfeldigvis trykte. Gjeng bytet
+           i gjenom, kjem du aldri hit: tenaren sender deg til
+           medlemskapsfana, som er der det nye medlemskapet stend. */}}
+      <p class="svar" id="bytesvar" role="status"></p>
+
+      {{range .SwitchOptions}}
+      <div class="byterad{{if .Disabled}} stengd{{end}}">
+        <span class="bytenamn">{{.Name}}</span>
+        <span class="bytepris">{{.Price}}</span>
+        <span class="bytesetning">
+          {{if .Savings}}<span class="bytemindre">{{.Savings}}</span>{{end}}{{.Summary}}
+          {{if .Disabled}} {{.Reason}}{{end}}
+        </span>
+        {{if .Disabled}}
+        <a class="byteveg" href="{{.LinkHref}}">{{.LinkText}}</a>
+        {{else}}
+        {{/* `hx-post` og ikkje eit blankt skjema.
+
+             Eit vanleg `<form method="post">` *navigerte* til
+             /api/membership/change, og den ruta svara med JSON: du trykte
+             «Byt til dette» og hamna paa ei kvit sida med
+             `{"success":true,…}`. No stend du der du stod, og svaret
+             kjem dit svar kjem. Sjaa membership_management.go — han
+             sender ei adressa naar bytet er gjort, og grunnen naar det
+             ikkje er det.
+
+             `action` stend att: utan skript er dette framleis eit skjema
+             som verkar, og tenaren svarar daa med ein 303. */}}
+        <form method="post" action="/api/membership/change"
+              hx-post="/api/membership/change"
+              hx-target="#bytesvar" hx-swap="innerHTML">
+          <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+          <input type="hidden" name="membership_id" value="{{.ID}}">
+          <button type="submit" class="btn-primary">{{t $.Lang "medlemskapet.switch_to"}}</button>
+        </form>
+        {{end}}
+      </div>
+      {{end}}
+
+    </div>
+    {{end}}
+
+  </div>
+</div>
+
+<script>
+// Handlingane paa medlemskapet.
+//
+// «Sei upp» gjekk til /api/membership/cancel. Den ruta hev aldri
+// funnest — ho heiter /remove — so kallet fekk 404. Og av di svaret
+// aldri vart lese lasta sida seg likevel paa nytt, med medlemskapet
+// staaande som fyrr: du trykte, alt blinka, ingen ting hende, og ingen
+// stad stod det kvifor.
+//
+// No er adressone dei som finst, og eit svar som ikkje er greidt stend
+// paa sida i staden for aa verta kasta.
+(function () {
+    "use strict";
+
+    var svar = document.getElementById("medlemssvar");
+    if (!svar) return;
+
+    var adresse = {
+        "freeze": "/api/membership/freeze",
+        "cancel-freeze": "/api/membership/cancel-freeze",
+        "unfreeze": "/api/membership/unfreeze",
+        "remove": "/api/membership/remove"
+    };
+
+    document.addEventListener("click", function (e) {
+        var knapp = e.target.closest("[data-handling]");
+        if (!knapp) return;
+        var url = adresse[knapp.dataset.handling];
+        if (!url) return;
+
+        knapp.disabled = true;
+        svar.textContent = "";
+        svar.classList.remove("gale");
+
+        fetch(url, { method: "POST" })
+            .then(function (r) {
+                if (!r.ok) return r.text().then(function (t) { throw new Error(t); });
+                location.reload();
+            })
+            .catch(function (feil) {
+                // Tenaren segjer kvifor. Bodskapen hans er meir nyttig
+                // enn ein me finn paa.
+                svar.textContent = feil.message ||
+                    {{t .Lang "medlemskapet.action_failed" | toJS}};
+                svar.classList.add("gale");
+                knapp.disabled = false;
+            });
+    });
+})();
+</script>
+{{end}}

@@ -17,6 +17,7 @@
 (function () {
     "use strict";
 
+    function start() {
     var felt = document.getElementById("veke-felt");
     var knapp = document.getElementById("veke-knapp");
     var meny = document.getElementById("veke-meny");
@@ -40,11 +41,27 @@
     // Kva `?week=`-offset skal til for aa koma til vike v?
     //
     // Tenaren tel vikor fram fraa den ein stend i, so det er skilnaden i
-    // vikenummer. Golvet er minus den vika ein alt hev bladd fram til:
-    // lenger attende enn den vika ein *er* i finst ikkje. Regelen og
-    // rekninga stend i `veketal.js`.
+    // vikenummer. Rekninga stend i `veketal.js`.
+    //
+    // `null` tyder «den vika er gjengi», og daa skal feltet nekta.
+    //
+    // Kvifor det trengst: `framover` legg til eit heilt aar naar tale
+    // peikar bakyver, av di ei vike som er gjengi ikkje finst — og den
+    // regelen er rett for eit *skjema*, der ein kann setja upp ein time i
+    // veke 3 til aaret medan ein stend i veke 51. Her er han ei fella.
+    // Stod du i veke 36 og skreiv 35 — vika som var — rekna han seg fram
+    // til veke 35 *neste* aar, gjekk til `?week=51`, og der stend det
+    // ingen timar i det heile. Sida vart tom, og tale i adressa hadde
+    // ingen ting med tale du skreiv aa gjera.
+    //
+    // Difor eit tak: eit sprang paa meir enn eit halvt aar er ikkje eit
+    // ynske um neste aar, det er ei vike som er gjengi. Under taket stend
+    // aarsskiftet: skriv du 2 i veke 51, er det tri vikor fram, og det er
+    // framleis rett.
     function offsetTil(v) {
-        return naaOffset + Veketal.framover(v, naa, vekerIAar, naaOffset);
+        var steg = Veketal.framover(v, naa, vekerIAar, naaOffset);
+        if (steg > vekerIAar / 2) return null;
+        return naaOffset + steg;
     }
 
     function gyldig(v) { return Veketal.gyldig(v, vekerIAar); }
@@ -57,7 +74,7 @@
         }
         if (!gyldig(v)) { Veketal.nekt(felt); return; }
         var offset = offsetTil(v);
-        if (offset < 0) { Veketal.nekt(felt); return; }
+        if (offset === null || offset < 0) { Veketal.nekt(felt); return; }
 
         var url = new URL(window.location);
         url.searchParams.set("week", offset);
@@ -69,4 +86,10 @@
         ferdig: gaa,
         escape: function () { felt.value = ""; opna(false); knapp.focus(); }
     });
+    }
+
+    start();
+    // Vekeveljaren stend inne i <main>, so han er ny etter kvart
+    // sidebyte. Sjaa sideskift.js.
+    (window.__sideskift = window.__sideskift || []).push(start);
 })();

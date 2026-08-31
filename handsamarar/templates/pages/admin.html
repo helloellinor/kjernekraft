@@ -1,0 +1,69 @@
+{{define "content"}}
+<h1 class="page-title">{{t .Lang "admin.title"}}</h1>
+
+    {{/* Helsinga. Tala er alt ei setning og ikkje flisar, og ei setning
+         høyrer heime der ein kjem inn — ikkje inne i ei fane ein må
+         velje. Ho stod i oversynsfana før, og då måtte ein vere på rett
+         fane for å vite kor stort huset var.
+
+         Ho står over arket og gjeld difor kva fane du enn står på. Talet
+         som ventar på svar er framleis det einaste som er ei lenkje, og
+         han fører no inn i fana som held dei. */}}
+    {{template "admin_stats_module" .Stats}}
+
+    <!-- Administrasjonen var sju bolkar under kvarandre paa ei einaste
+         rulla: innstillingar, tal, prisar, timar, reglar, folk,
+         frysingar. Fanone samlar deim etter kva ein er komen for aa
+         gjera, og bolkarne stend paa den same staden kvar gong. -->
+    <div class="faneark" id="{{.Faner.ID}}">
+        {{template "faner" .Faner}}
+
+        {{/* Éin bolk vert teikna, ikkje fem.
+
+             Alle fem stod i dokumentet fyrr og fire av deim var
+             `hidden`: heile timestyringi, heile folkelista og alle
+             innstillingane vart bygde, sende og lagde ut for kvar
+             lasting av sida — for augo som saag meldingane. No er det
+             `?fane=` som avgjer, og han vert lesen i admin.go. */}}
+        <div class="fanerom">
+            {{if eq .Faner.Vald "meldingar"}}
+            {{/* Meldingane er det som har kome inn og ventar på deg: ei
+                 frysing nokon har bede om i dag, eit trekk som feila i
+                 morgon. Tala flytte ut herifrå og opp i helsinga — det
+                 som står att er berre det som krev eit svar. */}}
+            <section class="bolk" id="bolk-meldingar">
+                {{template "admin_meldingar" .}}
+                {{template "admin_freeze_requests_table" .}}
+                {{template "admin_rabattkrav" .}}
+            </section>
+            {{end}}
+
+            {{if eq .Faner.Vald "timeplan"}}
+            <section class="bolk" id="bolk-timeplan">
+                {{template "admin_class_management" .}}
+            </section>
+            {{end}}
+
+            {{if eq .Faner.Vald "prisar"}}
+            <section class="bolk" id="bolk-prisar">
+                {{/* Reglane ligg i ei fane inne i prisbolken no. */}}
+                {{template "admin_pricing_management" .}}
+            </section>
+            {{end}}
+
+            {{if eq .Faner.Vald "folk"}}
+            <section class="bolk" id="bolk-folk">
+                {{template "admin_users_table" .}}
+            </section>
+            {{end}}
+
+            {{if eq .Faner.Vald "innstillingar"}}
+            <section class="bolk" id="bolk-innstillingar">
+                {{template "admin_settings" .}}
+            </section>
+            {{end}}
+        </div>
+    </div>
+
+{{template "admin_scripts" .}}
+{{end}}

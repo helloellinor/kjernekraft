@@ -41,6 +41,8 @@ TestMalaneBedBerreUmNyklarSomFinst     ingen mal ber om ein nykel som ikkje fins
 TestIngenUmsetjingErTom                ingen nykel står att som tom streng
 TestStandardmaaletErNynorsk            nynorsk er det du får utan å velje
 TestDeiTvoMyrkeBlokkaneErSamde         kvart myrkt token har eit ljost motstykke
+TestVerdiOgTydingBurKvarForSeg         paletten ber verdi, tokenfila tydingi
+TestSlagfargarKjennerDeiSameSlagi      stilarket og Go kjenner dei same slagi
 TestSundagenHoyrerTilVikaSomGjengUt    vikerekninga er samd med seg sjølv
 TestHelsingaSegjerDenSameKlokkaSomTimen  helsinga flyt ikkje to timar
 ```
@@ -86,7 +88,7 @@ ordet kjem gjennom `{{t}}`.
 
 ```
 server.go              rutene, og dermed tilgangen
-handlers/              ein fil per område; malane under templates/
+handlers/              ei fil per område; malane under templates/
   ├── modules/         Go-sida av malmodulane (klippekort, charges, admin-stats)
   ├── config/          innstillingar, m.a. tidssona
   └── templates/
@@ -96,7 +98,7 @@ handlers/              ein fil per område; malane under templates/
       └── modules/     funksjonsbolkar etter område (dashboard, admin, membership)
 database/              spurningar og migrering; ei fil per område
 models/                dei formene som går mellom base og mal
-locales/               nn, nb, en
+mål/               nn, nb, en
 static/css|js|img|fonts
 scripts/               eingongsskript: seed (medlemskap og prisar), testbrukar
 cmd/, test/            prøvedata og prøvene som treng ei eiga base
@@ -135,7 +137,7 @@ kake med eitt års levetid og verkar òg før innlogging; `?lang=en` på kva
 adresse som helst byter.
 
 All synleg tekst går gjennom `{{t .Lang "nykel.namn"}}`. Filene ligg i
-`locales/`. Sjå `docs/LOCALIZATION.md` for korleis ein legg til eit språk.
+`mål/`. Sjå `docs/LOCALIZATION.md` for korleis ein legg til eit språk.
 
 Legg du til ein nykel, legg han i alle tre filene. Prøvene i
 `./handlers` er det som seier frå.

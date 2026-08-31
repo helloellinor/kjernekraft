@@ -1,0 +1,97 @@
+{{define "content"}}
+    {{/* Vikeveljaren *er* tittelen. Han stod som tri kontrollar i ei
+         eiga eska under — ein pil, eit talfelt, ein pil til — og sa det
+         same som tittelen alt sa. No er vika i tittelen det ein klikkar
+         på, og pilene flankerer henne. */}}
+    {{/* Vikenummeret *er* kontrollen. Ein skriv talet ein vil til, som
+         i eit sidetal — og pilene tek deg eitt steg når ein ikkje veit
+         nummeret. Nedfallslista er burte: ho var eit steg til for noko
+         ein alt kunde skriva. */}}
+    {{/* «Timeplan denne uka» les seg som ei setning; vikenummeret gjer
+         det ikkje. Difor stend ordet i tittelen, og talet ligg i ein
+         meny under — for den som veit kva veke han vil til.
+
+         Menyen hev ingi flata. Talet ligg berre der, i tittelskrifta,
+         og tek ljosstyrken sin frå det som ligg bak. Ei rute kring
+         hadde gjort det til eit skjema; utan rute er det framleis
+         tittelen, berre skrivbar. */}}
+{{/* ---- vikebolken: det som skifter naar du bladar ----
+
+     Pilene lasta heile dokumentet um att fyrr — `onclick="navigateWeek()"`
+     sette `location.href` — og det var den eine staden paa heile staden
+     som endaa gjorde det. Alt anna byter eit stykke; vikebladingi bygde
+     sida upp fraa grunnen, med skrift, stilark og kvart skript um att.
+     Difor kjendest ho tung medan resten er kvikk.
+
+     No er pilene lenkjor, og dei byter denne eine kassen. Han held baade
+     tittellina og netet, av di baae skifter med vika: tale i tittelen,
+     kva lærarar som stend i sikti, og sjølve timane. Skripti nedanfor
+     ligg *utanfor* og vert difor ikkje køyrde um att.
+
+     `preload="mouseover"` hentar vika medan musa er paa veg til pila.
+     Same utvidingi som leidingi nyttar. */}}
+<div id="vekebolken" hx-ext="preload">
+    <header class="timehovudlinje">
+        <h1 class="page-title">
+            {{t .Lang "timeplan.title"}}<span class="vekeveljar">
+                {{/* Attende finst ikkje fyre den vika du er i. Daa er det
+                     ingi lenkja heller — ein `<span>` ber forma og segjer
+                     med `aria-disabled` at han ikkje fører nokon stad. */}}
+                {{if .CanGoBack}}<a class="vekepil" href="{{.ForrigeVeke}}"
+                        hx-boost="true" hx-target="#vekebolken" hx-select="#vekebolken"
+                        hx-swap="outerHTML show:none" preload="mouseover"
+                        aria-label="{{t .Lang "timeplan.prev_week"}}">&lsaquo;</a>{{else}}<span
+                        class="vekepil" aria-disabled="true"
+                        aria-label="{{t .Lang "timeplan.prev_week"}}">&lsaquo;</span>{{end}}<button
+                        type="button" class="vekeord" id="veke-knapp"
+                        aria-expanded="false" aria-controls="veke-meny">{{.WeekTitle}}</button><a
+                        class="vekepil" href="{{.NesteVeke}}"
+                        hx-boost="true" hx-target="#vekebolken" hx-select="#vekebolken"
+                        hx-swap="outerHTML show:none" preload="mouseover"
+                        aria-label="{{t .Lang "timeplan.next_week_btn"}}">&rsaquo;</a>
+
+                <div class="vekemeny" id="veke-meny" hidden>
+                    {{/* Talet er eit framlegg og ikkje ein verdi: markøren
+                         blinkar frå fyrste stund, og det du slår skriv seg
+                         i staden for å leggje seg attmed. */}}
+                    <input type="text" class="vekefelt bobla" id="veke-felt"
+                           placeholder="{{.WeekNumber}}" inputmode="numeric" maxlength="2"
+                           autocomplete="off" spellcheck="false"
+                           data-veke="{{.WeekNumber}}" data-offset="{{.WeekOffset}}"
+                           data-veker="{{.VikorIAaret}}"
+                           aria-label="{{t .Lang "timeplan.week"}}">
+                </div>
+            </span>
+        </h1>
+
+        {{if .Teachers}}
+        {{/* Sikti byter det same stykket som pilene. Attributti stend paa
+             kassen og ikkje paa kvar veljar: `change` bobler hit, og
+             `hx-include` tek med seg baae veljarane og vika — so eit val
+             ikkje slær det andre av. Fyrr kalla dei `applyFilters()`, som
+             sette `location.href` og lasta heile sida. */}}
+        <div class="sikt" hx-get="/elev/timeplan" hx-trigger="change"
+             hx-include="closest .sikt" hx-target="#vekebolken" hx-select="#vekebolken"
+             hx-swap="outerHTML show:none" hx-push-url="true">
+            <input type="hidden" name="week" value="{{.WeekOffset}}">
+            <select id="class-filter" name="class" aria-label="{{t .Lang "timeplan.class_filter"}}">
+                <option value="">{{t .Lang "timeplan.all_classes"}}</option>
+                {{range .ClassTypes}}
+                <option value="{{.}}" {{if eq . $.SelectedClass}}selected{{end}}>{{t $.Lang (printf "timeplan.cat_%s" .)}}</option>
+                {{end}}
+            </select>
+            <select id="teacher-filter" name="teacher" aria-label="{{t .Lang "timeplan.teacher_filter"}}">
+                <option value="">{{t .Lang "timeplan.all_teachers"}}</option>
+                {{range .Teachers}}
+                <option value="{{.}}" {{if eq . $.SelectedTeacher}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+        {{end}}
+    </header>
+
+    {{template "week_grid" .}}
+</div>
+
+{{template "timeplan_scripts" .}}
+{{end}}

@@ -7,7 +7,7 @@ import (
 )
 
 // Lærarrolla gjev Black, utan at nokon hev kjøpt noko.
-func TestLaerarFaarSvartMedlemskap(t *testing.T) {
+func TestLærarFårSvartMedlemskap(t *testing.T) {
 	db := prøvebase(t)
 	id := lagBrukar(t, db, "Ida")
 
@@ -19,7 +19,7 @@ func TestLaerarFaarSvartMedlemskap(t *testing.T) {
 		t.Fatalf("utan løyvet skal ho ikkje hava medlemskap, hadde %q", fyre.Membership.Name)
 	}
 
-	if err := db.SettLoyve(id, LoyveLaerar, true); err != nil {
+	if err := db.SettLøyve(id, LøyveLærar, true); err != nil {
 		t.Fatalf("SettLoyve: %v", err)
 	}
 	etter, err := db.GetUserMembership(id)
@@ -41,7 +41,7 @@ func TestLaerarFaarSvartMedlemskap(t *testing.T) {
 }
 
 // Utviklaren fær det same, men gjenom fila og ikkje gjenom eit løyve.
-func TestUtviklarFaarSvartMedlemskap(t *testing.T) {
+func TestUtviklarFårSvartMedlemskap(t *testing.T) {
 	db := prøvebase(t)
 	id := lagBrukar(t, db, "Carl")
 
@@ -58,7 +58,7 @@ func TestUtviklarFaarSvartMedlemskap(t *testing.T) {
 }
 
 // skrivUtviklarfil peikar lista mot ei fil prøva eig, og nullstiller
-// bufferet etterpaa so prøvone ikkje ser kvarandre si fil.
+// bufferet etterpå so prøvone ikkje ser kvarandre si fil.
 func skrivUtviklarfil(t *testing.T, innhald string) {
 	t.Helper()
 	stig := filepath.Join(t.TempDir(), "utviklarar")
@@ -70,17 +70,17 @@ func skrivUtviklarfil(t *testing.T, innhald string) {
 	t.Cleanup(nullstillUtviklarbuffer)
 }
 
-// Utviklarlista skal ikkje kunna skrivast gjenom flata. LoyveFinst er
+// Utviklarlista skal ikkje kunna skrivast gjenom flata. LøyveFinst er
 // porten administrasjonen skriv gjenom, og «developer» skal ikkje sleppa
 // gjenom honom.
 func TestUtviklarErIkkjeEiRollaAdminKannGjeva(t *testing.T) {
-	if LoyveFinst("developer") {
+	if LøyveFinst("developer") {
 		t.Error("ein administrator kunde gjeva ut utviklarløyvet")
 	}
 }
 
 // Ein som ikkje stend i fila fær ingen ting.
-func TestUtanforUtviklarfilaFaarIngenTing(t *testing.T) {
+func TestUtanforUtviklarfilaFårIngenTing(t *testing.T) {
 	db := prøvebase(t)
 	id := lagBrukar(t, db, "Bjørn")
 	skrivUtviklarfil(t, "carl@cbcustomhom.es\n")
@@ -108,18 +108,18 @@ func TestUtviklarfilaHopparYverKommentarar(t *testing.T) {
 // Det viktige med at medlemskapet er avleidd: tek ein løyvet bort,
 // gjeng medlemskapet med i same augneblinken. Ei lagra rad hadde vorte
 // liggjande att.
-func TestMedlemskapetGjengNaarRollaGjeng(t *testing.T) {
+func TestMedlemskapetGjengNårRollaGjeng(t *testing.T) {
 	db := prøvebase(t)
 	id := lagBrukar(t, db, "Ida")
 
-	if err := db.SettLoyve(id, LoyveLaerar, true); err != nil {
+	if err := db.SettLøyve(id, LøyveLærar, true); err != nil {
 		t.Fatalf("paa: %v", err)
 	}
 	if m, _ := db.GetUserMembership(id); m == nil {
 		t.Fatal("oppsettet: læraren skulde hava Black")
 	}
 
-	if err := db.SettLoyve(id, LoyveLaerar, false); err != nil {
+	if err := db.SettLøyve(id, LøyveLærar, false); err != nil {
 		t.Fatalf("av: %v", err)
 	}
 	m, err := db.GetUserMembership(id)
@@ -158,11 +158,11 @@ func TestSvartMedlemskapErUteAvPrislista(t *testing.T) {
 
 // Ei ukjend løyvet skal framleis avvisast — lista er ei lista yver noko.
 func TestUkjendRollaFinstIkkje(t *testing.T) {
-	if LoyveFinst("svartebørs") {
+	if LøyveFinst("svartebørs") {
 		t.Error("ukjend løyvet vart godteki")
 	}
-	for _, r := range []string{LoyveAdmin, LoyveLaerar} {
-		if !LoyveFinst(r) {
+	for _, r := range []string{LøyveAdmin, LøyveLærar} {
+		if !LøyveFinst(r) {
 			t.Errorf("%q skal vera ei kjend løyvet", r)
 		}
 	}
@@ -174,7 +174,7 @@ func TestUkjendRollaFinstIkkje(t *testing.T) {
 func TestSvartMedlemskapBerSkjultflagget(t *testing.T) {
 	db := prøvebase(t)
 	id := lagBrukar(t, db, "Ida")
-	if err := db.SettLoyve(id, LoyveLaerar, true); err != nil {
+	if err := db.SettLøyve(id, LøyveLærar, true); err != nil {
 		t.Fatalf("SettLoyve: %v", err)
 	}
 	m, err := db.GetUserMembership(id)

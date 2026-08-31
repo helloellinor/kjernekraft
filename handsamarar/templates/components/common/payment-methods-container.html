@@ -1,0 +1,29 @@
+{{define "payment_methods_container"}}
+{{/* Bolken ber breiddi, ikkje kortlista. Lina under yverskrifti er
+     bolken si, so ho gjekk forbi det siste kortet den gongen berre lista
+     var smal. Sjå 88-betalingsmaatar.css. */}}
+<section class="content-section kortbolk">
+    <h2 class="section-title">{{t .Lang "payments.payment_methods"}}</h2>
+
+    {{/* Lista hentar seg sjølv. `kortendra` er skriptet si melding um at
+         eit kort er fjerna eller sett til standard — det henta lista um
+         att sjølv fyrr, og daa laut det ha ein funksjon til aa gjera
+         det med. */}}
+    <div id="betalingsmaatar-plass"
+         hx-get="/api/payment-methods" hx-trigger="load, kortendra from:body" hx-swap="innerHTML">
+        <div class="loading-placeholder">{{t .Lang "payments.loading_payment_methods"}}</div>
+    </div>
+
+    {{/* Å fjerna eit kort er noko ein ikkje kann gjera um att, og det
+         stend her — ein gong, under lista — og ikkje som ein `confirm()`
+         etter kvart trykk (§7). Ein merknad per kort hadde sagt det same
+         tri gonger på rad.
+
+         «Legg til kort» stod her under fyrr, med si eigi grunngjeving
+         hengande under seg att. Det er ei eigi handling, og ho hev si
+         eigi fana no. */}}
+    <p class="merknad">{{t .Lang "payments.remove_note"}}</p>
+
+    <p class="svar" id="betalingssvar" role="status"></p>
+</section>
+{{end}}

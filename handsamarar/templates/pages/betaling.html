@@ -1,0 +1,58 @@
+{{define "content"}}
+
+<h1 class="page-title">{{t .Lang "payments.title"}}</h1>
+
+{{/* Same forma som klippekort- og medlemskapssida: tittel, ei lina som
+     seier kva som stend til, og so fanone.
+
+     Lina seier berre kor mange kort du hev. Det er lite, men det er det
+     ein kjem for aa vita — og talet kjem frå den same funksjonen som
+     teiknar lista, so dei kann ikkje segja kvar sitt. */}}
+{{if .KortTal}}
+<p class="briefing">
+  {{- if eq .KortTal 1 -}}
+    {{- template "setning" (dict "Lang" .Lang "Nykel" "payments.setning_kort_one" "Verd" .KortTal "Slag" "tal") -}}
+  {{- else -}}
+    {{- template "setning" (dict "Lang" .Lang "Nykel" "payments.setning_kort_many" "Verd" .KortTal "Slag" "tal") -}}
+  {{- end -}}
+</p>
+{{end}}
+
+<div class="faneark" id="{{.Faner.ID}}">
+{{template "faner" .Faner}}
+<div class="fanerom">
+
+{{/* Berre den valde bolken vert teikna. Kva ein stend paa er `?fane=`
+     i adressa, og betaling.go les honom. */}}
+{{if eq .Faner.Vald "korta"}}
+{{/* Ladningane stend attmed korta og ikkje i ei eigi fane: dei tvo
+     svarar på det same spursmaalet — kva dette kostar meg — og ein les
+     dei saman. Same grunnen som på dei tvo hine sidone. */}}
+<div class="bolk" id="bolk-korta">
+  <div class="two-column-grid">
+    {{template "payment_methods_container" .}}
+    {{template "charges_container" .}}
+  </div>
+</div>
+{{end}}
+
+{{/* Å leggja til eit kort er ei eigi handling, og ho fær si eigi fana —
+     slik «Kjøp klipp» og «Bytt» gjer det.
+
+     Grunnen til at knappen ikkje gjer noko stend *fyre* honom og ikkje
+     under (§7): ei melding under ein avslegen knapp er eit svar på eit
+     trykk som aldri kjem. */}}
+{{if eq .Faner.Vald "nytt-kort"}}
+<div class="bolk" id="bolk-nytt-kort">
+  <p class="page-description">{{t .Lang "payments.add_not_connected"}}</p>
+  <button type="button" class="btn" disabled>
+    + {{t .Lang "payments.add_payment_method"}}
+  </button>
+</div>
+{{end}}
+
+</div>
+</div>
+
+{{template "betaling_scripts" .}}
+{{end}}

@@ -15,12 +15,26 @@
    Maalet — kor breidt feltet er — høyrer heime der feltet stend, ikkje
    her. Eit søkjefelt i ei liste vil ha breidd; eitt yver ein disk vil
    ha ei fast rute som ikkje skubbar noko medan du skriv (§3). Difor er
-   det spalta som set breiddi, som ho set avstandi (§6), og `.sok` ber
-   berre eit tak so feltet ikkje renn tvers yver ei brei spalta.
+   det spalta som set breiddi, som ho set avstandi (§6).
+
+   Og difor stend det ikkje eit tak her lenger.
+
+   `max-width: 32rem` stod her, som ei trygging mot at feltet skulde
+   renna tvers yver ei brei spalta. Men eit tak vinn *alltid* yver ei
+   breidd: `max-width` slær `width`, so spalta fekk ikkje setja maalet
+   likevel — regelen yver sa éin ting og lina under gjorde ein annan.
+
+   Kva det kosta: 32 rem er 657 px paa denne skriftstigen. Søkjefeltet
+   yver timelista stod difor 657 px breidt under ei liste paa 681 — fire
+   og tjuge piksel for smalt, som ikkje les seg som eit val men som ein
+   feil. I folkelista stod det same feltet 657 px under ei liste paa
+   1 389.
+
+   Alle tri felti som er i bruk set maalet sitt sjølve — timelista med
+   `width: 100%`, folkelista med `flex`, disken med `width: 16rem` — so
+   taket verna ingen ting. Kjem det eit felt som *ikkje* set noko, er
+   det spalta hans som skal svara, ikkje denne fila.
    =================================================================== */
-.sok {
-  max-width: 32rem;
-}
 
 /* Ledeteksti er eit spursmaal, ikkje eit svar, og skal lesast som det
    svakaste blekket i feltet — same vali som `.setning .felt` og

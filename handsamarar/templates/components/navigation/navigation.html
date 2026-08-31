@@ -1,0 +1,118 @@
+{{define "navigation"}}
+{{/* Éi lina, ikkje tvo. Merket, sidone og namnet stend på den same
+     rada — dei høyrer til den same tingen, og tvo bjelkar tok dobbelt
+     so mykje høgd for aa segja det.
+
+     Maalveljaren stod her og var det breidaste i heile hovudet. Han
+     høyrer heime nedst: ein vel mål ein gong, ikkje kvar gong ein
+     opnar ei sida. */}}
+{{/* Boosten stend her og ikkje på <body>.
+
+     htmx *arvar* hx-target og hx-select nedyver treet. Lagde ein dei på
+     <body>, tok dei med seg kvart einaste hx-get på sida: dei fire som
+     ikkje hev sitt eige mål — /api/charges og dei tri admin-listone —
+     slutta å byta seg sjølve og tok til å skriva yver <main> med eit
+     stykke som ikkje hev noko <main> i seg. Medlemskapssida og
+     administrasjonen vart tome.
+
+     Her når arven berre lenkjene i leidingi, som er dei einaste som
+     skal byta sida.
+
+     `show:window:top` og ikkje `show:top`. Skilnaden er kva som vert
+     rulla til toppen. `show:top` tek *målet* — <main> — og set toppen
+     hans ved toppen av glaset; men hovudet er klistra og stend dei
+     fyrste 71 pikslane, so sida hamna 71 piksel nedrulla og yverskrifti
+     laag attum hovudet. Kvar einaste sidebyte gjorde det, og eit friskt
+     sidekall gjorde det ikkje — difor «det kjem an paa kvar eg kom
+     fraa». `show:window:top` rullar glaset til null, som er det ei ny
+     sida skal gjera. */}}
+{{/* Kva sida du stend paa er skrive **éin** stad: `aria-current="page"`.
+
+     Det stod tvo stader fyrr — attaat `aria-current` bar leidingi ein
+     `active`-klasse, merkeordet ein `paa-heim`, og namneknappen ein
+     `active` til. Malen skreiv deim daa sida vart teikna, og `hx-boost`
+     teiknar aldri hovudet um att: klassane vart staaande paa den sida du
+     kom *fraa*, medan `aria-current` fylgde med (sideskift.js skriv
+     honom). Daa lyste tvo lenkjor som «her er du», og LED-stripa —
+     som spurde etter `.active` fyrst — la seg under den gamle. Ho tok
+     `querySelector` sitt fyrste treff i dokumentrekkjefylgd, so ho
+     traff rett berre naar du gjekk *attende* i rekkja. Difor «av og til
+     syner ho ei onnor sida enn den eg er paa».
+
+     Éin fasit, og sideskift.js held honom. Sjaa 05-hovudet.css. */}}
+<header class="header" hx-ext="preload" preload="mouseover" hx-boost="true" hx-target="main" hx-select="main" hx-swap="outerHTML show:window:top">
+    <div class="header-content">
+        {{/* Merket er vegen heim. Difor stod «Hjem» ein gong for mykje i
+             leidingi — same grunnen som at namnet erstatta «Min profil». */}}
+        <a class="merkeord" href="/elev/hjem"
+           {{if eq .CurrentPage "hjem"}}aria-current="page"{{end}}>
+            <span class="merke" aria-hidden="true"></span>
+            <span class="merkenamn">{{t .Lang "site.title"}}</span>
+        </a>
+
+        <nav class="nav" aria-label="{{t .Lang "navigation.dashboard_title"}}">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/elev/timeplan" {{if eq .CurrentPage "timeplan"}}aria-current="page"{{end}}>{{t .Lang "navigation.schedule"}}</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/elev/klippekort" {{if eq .CurrentPage "klippekort"}}aria-current="page"{{end}}>{{t .Lang "navigation.punch_cards"}}</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/elev/medlemskap" {{if eq .CurrentPage "medlemskap"}}aria-current="page"{{end}}>{{t .Lang "navigation.membership"}}</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/elev/betaling" {{if eq .CurrentPage "betaling"}}aria-current="page"{{end}}>{{t .Lang "navigation.payments"}}</a>
+                </li>
+                {{if .IsAdmin}}
+                <li class="nav-item nav-admin">
+                    <a href="/admin" {{if eq .CurrentPage "admin"}}aria-current="page"{{end}}>{{t .Lang "navigation.admin"}}</a>
+                </li>
+                {{end}}
+            </ul>
+        </nav>
+
+        {{/* Namnet er ein veljar, som vikenummeret. To utgangar ligg
+             attum det — profilen og utloggingi — og dei tek ingi plass
+             fyre ein spør etter deim. */}}
+        <div class="auth-controls">
+            {{/* `aria-current` og ikkje ein `active`-klasse: sjaa nedanfor. */}}
+            <button type="button" class="user-name"{{if eq .CurrentPage "profil"}} aria-current="page"{{end}}
+                    id="namn-knapp" aria-expanded="false" aria-controls="namn-meny">{{.UserName}}</button>
+
+            <div class="namnemeny" id="namn-meny" hidden>
+                <a href="/elev/min-profil" class="namneval">{{t .Lang "navigation.my_profile"}}</a>
+                {{/* Utloggingi er det eine som ikkje kann boostast.
+
+                     Boosten byter <main> og let resten standa — og resten
+                     er nettupp det som ikkje lenger skal finnast: hovudet
+                     med namnet ditt og, for ein sjef, lenkja til
+                     administrasjonen. Ei boosta utlogging skreiv «/logout»
+                     i adressa, sette innloggingssida inn i <main> og let
+                     førre brukaren stå i hovudet. Det saag ut som om den
+                     nye brukaren hadde arva løyvi hans. (Han hadde det
+                     ikkje — RequireAdmin les økti og ikkje skjermen — men
+                     ein skal ikkje lita paa at nokon les kjeldekoden fyre
+                     dei trur det dei ser.)
+
+                     Ei heil sidelasting er rett her: dokumentet er eit
+                     anna dokument etterpaa. */}}
+                <form action="/logout" method="POST" class="auth-form" hx-boost="false">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <button type="submit" class="namneval namneval-ut">{{t .Lang "navigation.logout"}}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</header>
+{{end}}
+
+{{define "botnlina"}}
+{{/* Nedst: det ein vel ein gong. */}}
+<footer class="botnlina">
+    <div class="botninnhald">
+        {{template "language_selector" .}}
+        <span class="botnmerke">{{t .Lang "site.title"}} &middot; Storgata 23, Oslo</span>
+    </div>
+</footer>
+{{end}}

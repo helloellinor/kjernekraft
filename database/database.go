@@ -21,33 +21,31 @@ type Database struct {
 
 // DBPathEnv segjer kvar basefila ligg. Stigen var fast — «./kjernekraft.db»
 // — og det tydde at prøvorne skreiv i ei fil som laag att millom
-// køyringarne. Fyrste gongen gjekk dei; andre gongen fall dei paa
-// «e-post er allerede i bruk», av di brukaren fraa fyrre køyringi
+// køyringarne. Fyrste gongen gjekk dei; andre gongen fall dei på
+// «e-post er allerede i bruk», av di brukaren frå fyrre køyringi
 // framleis stod der.
 const DBPathEnv = "KJERNEKRAFT_DB"
 
-// Connect opnar basen. Stigen kjem or KJERNEKRAFT_DB naar han er sett.
+// Connect opens the database. The path comes from KJERNEKRAFT_DB when set.
 func Connect() (*sql.DB, error) {
 	path := os.Getenv(DBPathEnv)
 	if path == "" {
 		path = "./kjernekraft.db"
 	}
 
-	// Innstillingarne fylgjer med stigen. SQLite stend som standard i
-	// «rollback journal» med ein lesar *eller* ein skrivar um gongen, og
-	// utan tolmod: kjem tvo soknader samstundes, fell den eine med
-	// «database is locked» med ein gong. Det gjeng so lenge ein er aaleine
-	// paa maskini, og det er nett difor ein ikkje uppdagar det fyrr i drift.
+	// Settings travel with the path. SQLite defaults to a rollback journal
+	// with one reader *or* one writer at a time and no patience: two
+	// concurrent requests and one fails with "database is locked" at once.
+	// That is fine alone on your machine, which is exactly why it surfaces
+	// only in production.
 	//
-	//   _journal_mode=WAL   lesarar stengjer ikkje skrivaren ute, og
-	//                       umvendt. Ein som les timeplanen stoggar ikkje
-	//                       ei innmelding.
-	//   _busy_timeout=5000  ventar i inntil fem sekund paa laasen i staden
-	//                       for aa falla med ein gong.
-	//   _foreign_keys=on    SQLite handhevar *ikkje* framandnyklar utan at
-	//                       ein bed um det. Tabellane hev deim skrivne; utan
-	//                       dette er dei berre kommentarar.
-	//   _synchronous=NORMAL trygt saman med WAL, og mykje raskare enn FULL.
+	//   _journal_mode=WAL   readers do not block the writer, or the reverse.
+	//   _busy_timeout=5000  waits up to five seconds for the lock instead of
+	//                       failing immediately.
+	//   _foreign_keys=on    SQLite does *not* enforce foreign keys unless
+	//                       asked. The tables declare them; without this they
+	//                       are comments.
+	//   _synchronous=NORMAL safe together with WAL, and much faster than FULL.
 	dsn := path + "?_journal_mode=WAL&_busy_timeout=5000&_foreign_keys=on&_synchronous=NORMAL"
 
 	db, err := sql.Open("sqlite3", dsn)
@@ -55,17 +53,16 @@ func Connect() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// SQLite toler mange lesarar samstundes naar WAL er paa, men berre
-	// éin skrivar. Difor eit tak — ikkje paa éin, som hadde sett alle
-	// lesingar i kø etter kvarandre og gjort kvar soknad tregare, men
-	// lagom høgt: lesarane gjeng jamsides, og skrivarane ventar paa
-	// laasen gjenom _busy_timeout i staden for aa falla.
+	// SQLite takes many concurrent readers with WAL on, but one writer.
+	// Hence a cap — not at one, which would queue every read behind the
+	// last, but high enough that readers run alongside each other and
+	// writers wait on the lock through _busy_timeout rather than failing.
 	db.SetMaxOpenConns(8)
 	db.SetMaxIdleConns(8)
 	db.SetConnMaxLifetime(0)
 
-	// sql.Open opnar ingi tilkopling. Utan dette ser ein ikkje at
-	// stigen er ubrukande fyrr fyrste soknaden.
+	// sql.Open opens no connection. Without this you do not learn the path
+	// is unusable until the first request.
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("fekk ikkje kontakt med basen (%s): %w", path, err)
 	}
@@ -75,14 +72,13 @@ func Connect() (*sql.DB, error) {
 }
 
 func Migrate(db *sql.DB) error {
-	// Løyvi fyrst, og fyre alt anna.
+	// Permissions first, before anything else.
 	//
-	// `CREATE TABLE IF NOT EXISTS loyve` lenger nede vilde ha laga ein
-	// tom tabell i ein base som alt hev `roles`, og so hadde
-	// umdøypingi hoppa yver — av di `loyve` no fanst — og kvar einaste
-	// administrator og lærar hadde vorte liggjande att i ein tabell
-	// ingen les meir. Rekkjefylgda er heile skiljet.
-	if err := MigrerLoyve(db); err != nil {
+	// CREATE TABLE IF NOT EXISTS løyve further down would make an empty
+	// table in a database that still has `roles`, and the rename would then
+	// skip — because `loyve` now exists — leaving every admin and teacher in
+	// a table nobody reads. The order is the whole difference.
+	if err := MigrerLøyve(db); err != nil {
 		return err
 	}
 
@@ -104,14 +100,13 @@ func Migrate(db *sql.DB) error {
 		color TEXT DEFAULT ''
 	);
 	`
-	// Rommet er ein ressurs, ikkje ein tekststreng. Salen tek 18 og
-	// Reformer tek 4, og det er den skilnaden heile studioet dreiar um:
-	// eit medlemskap gjeld salen, reformeren vert seld for seg.
+	// A room is a resource, not a string. The hall takes 18 and the Reformer
+	// 4, and that difference is what the studio turns on: a membership covers
+	// the hall, the Reformer is sold separately.
 	//
-	// Fyrr laag rommet som fri tekst i events.location, og kapasiteten
-	// var eit tal nokon skreiv inn for haand per time — med 20 som
-	// utgangspunkt, uansett rom. Det er ei innbjoding til aa selja
-	// fjortan plassar som ikkje finst.
+	// The room used to be free text in events.location, with capacity typed
+	// in per class — 20 by default, whatever the room. That is an invitation
+	// to sell fourteen places that do not exist.
 	roomsTableSQL := `
 	CREATE TABLE IF NOT EXISTS rooms (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -257,10 +252,10 @@ func Migrate(db *sql.DB) error {
 	);
 	`
 
-	// Kvitteringane. Tabellen mangla heilt fram til 29.8.2026, endaa
-	// SimulateBilling hev skrive til honom heile tidi: kvar INSERT fall,
-	// vart logga og sloppen — so ingen kjøp hev sett spor etter seg.
-	// Kolonnone er nett dei den INSERT-en set.
+	// Receipts. The table was missing until 29.8.2026 even though
+	// SimulateBilling had been writing to it all along: every INSERT failed,
+	// was logged and dropped, so no purchase left a trace. The columns are
+	// exactly the ones that INSERT sets.
 	chargesTableSQL := `
 	CREATE TABLE IF NOT EXISTS charges (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -347,9 +342,9 @@ func Migrate(db *sql.DB) error {
 		log.Println("Added last_billed column to user_memberships table")
 	}
 
-	// Same mønsteret for `frozen_at`. Han skal *ikkje* fyllast ut for
-	// rader som alt finst: NULL tyder «ikkje frose», og eit medlemskap
-	// som stod frose fyre denne kolonna fanst hev me ingi klokka paa.
+	// Same pattern for frozen_at. It must *not* be filled in for existing
+	// rows: NULL means "not frozen", and for a membership frozen before this
+	// column existed we have no clock.
 	var frosenFinst bool
 	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('user_memberships') WHERE name='frozen_at'").Scan(&frosenFinst); err == nil && !frosenFinst {
 		if _, err := db.Exec("ALTER TABLE user_memberships ADD COLUMN frozen_at DATETIME"); err != nil {
@@ -358,10 +353,9 @@ func Migrate(db *sql.DB) error {
 		log.Println("La til frozen_at i user_memberships")
 	}
 
-	// Student- eller honnørbevis. Studioet gjev 20 % rabatt til den som
-	// hev det, og det er brukaren som fortel at han hev det — studioet
-	// ser beviset i resepsjonen. Alderen kjem av fødselsdagen; ho treng
-	// ingen kolonne.
+	// Student or senior proof. The studio gives 20 % to whoever has it, and
+	// the user is the one who says so — the studio sees the proof at the
+	// desk. Age follows from the birth date and needs no column.
 	var rabattKolonne bool
 	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('users') WHERE name='student_senior'").Scan(&rabattKolonne); err == nil && !rabattKolonne {
 		if _, err := db.Exec("ALTER TABLE users ADD COLUMN student_senior BOOLEAN DEFAULT FALSE"); err != nil {
@@ -370,19 +364,20 @@ func Migrate(db *sql.DB) error {
 		log.Println("La til student_senior paa users.")
 	}
 
-	// Gruppone: ein time kann vera open for somme og ikkje for alle.
+	// Groups: a class can be open to some rather than to all.
 	if err := MigrerGrupper(db); err != nil {
 		return err
 	}
 
-	// Rabattkravet: avkryssingi i profilen er eit krav som ventar paa at
-	// nokon hev sett beviset, ikkje ein rabatt som gjeld med ein gong.
+	// The discount claim: ticking the box in the profile is a claim waiting
+	// for someone to see the proof, not a discount that applies at once.
 	if err := migrerRabattkrav(db); err != nil {
 		return err
 	}
 
-	// Rommet paa ein time. Timane som fanst fyrr peika paa rom gjenom
-	// fri tekst i `location`; dei vert kopla yver der namnet stemmer.
+	// The room on a class. Classes that existed before pointed at rooms
+	// through free text in `location`; they are linked where the name
+	// matches.
 	var romKolonne bool
 	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='room_id'").Scan(&romKolonne); err == nil && !romKolonne {
 		if _, err := db.Exec("ALTER TABLE events ADD COLUMN room_id INTEGER REFERENCES rooms(id)"); err != nil {
@@ -394,25 +389,19 @@ func Migrate(db *sql.DB) error {
 		log.Println("La til room_id paa events og kopla dei mot romi.")
 	}
 
-	// Serien attum timane. «Kvar veke i aatte veker» vart skrive inn
-	// som aatte sjølvstendige rader, og kva som høyrde saman fanst
-	// berre som eit samantreff av like felt. No ber kvar time serien
-	// sin; dei gamle radene vert kopla saman etter det same
-	// samantreffet — same time, lærar, rom, vekedag og klokkeslett —
-	// éin gong, her, og serien fær det minste time-id-et sitt som
-	// namn.
-	// Feilen her vart svelgd fyrr — `err == nil && !serieKolonne`. Svara
-	// ikkje spurningi, hoppa migreringa over kolonna og sa ingen ting,
-	// og so fall kvart uppslag som les e.serie_id med «no such column»
-	// ein heilt annan stad. Ei migrering som ikkje kann prøva om ho
-	// trengst, skal stogga.
-	// Kolonna heitte `serie_id`. «Regel» tydde tvo ting i huset — ei
-	// timerekkje og ein medlemskapsregel — og eitt namn paa tvo ting gjer
-	// at ein ikkje kann vita kva ein les. Seriane heiter serie no, ogso
-	// her nede.
+	// The series behind the classes. "Every week for eight weeks" was
+	// written as eight independent rows, and what belonged together existed
+	// only as a coincidence of equal fields. Each class now carries its
+	// series; the old rows are joined by that same coincidence — same title,
+	// teacher, room, weekday and time — once, here.
 	//
-	// Omdøypingi kjem fyre prøva under: ein base som alt hev `serie_id`
-	// skal faa namnet skift, ikkje ei ny og tom kolonne attaat.
+	// A migration that cannot test whether it is needed must stop: this
+	// error was swallowed as `err == nil && !serieKolonne`, so the column was
+	// skipped silently and every lookup of e.serie_id failed with "no such
+	// column" somewhere else entirely.
+	//
+	// The rename comes before the check below: a database that already has
+	// serie_id should get the name changed, not a second empty column.
 	var gamaltNamn, nyttNamn bool
 	if err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('events') WHERE name='rule_id'").Scan(&gamaltNamn); err != nil {
 		return err
@@ -427,7 +416,7 @@ func Migrate(db *sql.DB) error {
 		// Det gamle registeret ber det gamle namnet. SQLite fylgjer
 		// kolonna gjenom omdøypingi, so han verkar — men han heiter
 		// framleis noko som ikkje finst, og det er ein av dei tingi som
-		// staar att og forvirrar den neste.
+		// står att og forvirrar den neste.
 		if _, err := db.Exec("DROP INDEX IF EXISTS idx_events_rule"); err != nil {
 			return err
 		}
@@ -444,17 +433,17 @@ func Migrate(db *sql.DB) error {
 		log.Println("La til serie_id paa events og kopla timane til seriane sine.")
 	}
 
-	// Frammøtet. Sjaa frammote.go.
+	// Frammøtet. Sjå frammote.go.
 	if err := MigrerFrammote(db); err != nil {
 		return err
 	}
 
-	// Klippet som vert brukt av krysset. Sjaa klippbruk.go.
+	// Klippet som vert brukt av krysset. Sjå klippbruk.go.
 	if err := MigrerKlippbruk(db); err != nil {
 		return err
 	}
 
-	// Den private timen. Sjaa privattime.go.
+	// Den private timen. Sjå privattime.go.
 	if err := MigrerLaga(db); err != nil {
 		return err
 	}
@@ -465,7 +454,7 @@ func Migrate(db *sql.DB) error {
 		return err
 	}
 
-	// Det usynlege medlemskapet. Sjaa svartmedlem.go.
+	// Det usynlege medlemskapet. Sjå svartmedlem.go.
 	if err := MigrerSvartMedlemskap(db); err != nil {
 		return err
 	}
@@ -476,16 +465,16 @@ func Migrate(db *sql.DB) error {
 	return nil
 }
 
-// lagRegister set upp registeri.
+// lagRegister sets up the indexes.
 //
-// Basen hadde ingi — utanum dei SQLite lagar sjølv for primærnyklar og
-// UNIQUE. Kvart uppslag paa «alt som høyrer denne brukaren til» las difor
-// heile tabellen. Med tjuge testbrukarar merkar ein det ikkje; det er
-// nett difor det ikkje vert uppdaga fyrr talet paa medlemer hev vakse.
+// There were none beyond what SQLite makes for primary keys and UNIQUE,
+// so every "everything belonging to this user" lookup read the whole
+// table. With twenty test users you do not notice — which is why it is
+// not found until the member count has grown.
 //
-// Kolonnorne her er dei ein faktisk søkjer paa: user_id i alle
-// kopletabellane, event_id naar ein tel plassar paa ein time, og
-// start_time naar timeplanen hentar ei veke um gongen.
+// The columns are the ones actually searched on: user_id in the join
+// tables, event_id when counting places, and start_time when the schedule
+// fetches a week at a time.
 func lagRegister(db *sql.DB) error {
 	register := []string{
 		`CREATE INDEX IF NOT EXISTS idx_event_signups_user ON event_signups(user_id)`,
@@ -495,7 +484,7 @@ func lagRegister(db *sql.DB) error {
 		`CREATE INDEX IF NOT EXISTS idx_user_memberships_status ON user_memberships(status)`,
 		`CREATE INDEX IF NOT EXISTS idx_brukarloyve_user ON brukarloyve(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_user_payment_methods_user ON user_payment_methods(user_id)`,
-		// Timeplanen hentar ei halvopen veke um gongen på start_time.
+		// The schedule fetches a half-open week at a time on start_time.
 		`CREATE INDEX IF NOT EXISTS idx_events_start ON events(start_time)`,
 		`CREATE INDEX IF NOT EXISTS idx_events_serie ON events(serie_id)`,
 		// Innloggingi slær upp e-post for kvar freistnad.
@@ -509,13 +498,13 @@ func lagRegister(db *sql.DB) error {
 	return nil
 }
 
-// leggTilSerieKolonne gjer kolonna og etterfyllinga til éi økt.
+// leggTilSerieKolonne makes the column and the backfill one transaction.
 //
-// Dei stod kvar for seg fyrr, og ALTER TABLE var alt lagra då
-// etterfyllinga gjekk. Datt tenaren midt i, fanst kolonna — so vakti
-// yver hoppa migreringa neste gong — medan resten av timane stod att
-// med serie_id NULL for alltid. Dei hamna då i den serielause gruppa,
-// der kvar endring på serien er eit stille ingen ting.
+// They were separate, and the ALTER TABLE was already committed when the
+// backfill ran. If the server died in between, the column existed — so
+// the guard skipped the migration next time — while the remaining classes
+// kept serie_id NULL forever, landing in the series-less group where
+// every change to the series is a silent nothing.
 func leggTilSerieKolonne(db *sql.DB) error {
 	tx, err := db.Begin()
 	if err != nil {
@@ -532,9 +521,9 @@ func leggTilSerieKolonne(db *sql.DB) error {
 	return tx.Commit()
 }
 
-// kopleTimarTilSeriar gjev kvar gamal time ein serie. Klokka vert lesi
-// som ho stend: den lagra tidi er veggklokka i heile huset, og skal
-// korkje reknast um her eller nokon annan stad.
+// kopleTimarTilSeriar gives every old class a series. The time is read
+// as it stands: the stored time is the wall clock, and must not be
+// converted here or anywhere else.
 func kopleTimarTilSeriar(tx *sql.Tx) error {
 	rows, err := tx.Query(`SELECT id, title, COALESCE(teacher_name,''), COALESCE(location,''),
 		COALESCE(room_id, 0), start_time, end_time FROM events`)
@@ -546,14 +535,14 @@ func kopleTimarTilSeriar(tx *sql.Tx) error {
 	grupper := map[string][]int64{}
 	for rows.Next() {
 		var id, romID int64
-		var tittel, laerar, stad string
+		var tittel, lærar, stad string
 		var start, slutt time.Time
-		if err := rows.Scan(&id, &tittel, &laerar, &stad, &romID, &start, &slutt); err != nil {
+		if err := rows.Scan(&id, &tittel, &lærar, &stad, &romID, &start, &slutt); err != nil {
 			return err
 		}
 		st := start
 		nykel := fmt.Sprintf("%s|%s|%s|%d|%d|%s|%d",
-			tittel, laerar, stad, romID, st.Weekday(), st.Format("15:04"),
+			tittel, lærar, stad, romID, st.Weekday(), st.Format("15:04"),
 			int(slutt.Sub(start).Minutes()))
 		grupper[nykel] = append(grupper[nykel], id)
 	}
@@ -582,42 +571,40 @@ func kopleTimarTilSeriar(tx *sql.Tx) error {
 	return nil
 }
 
-// RoomConflict gjev den fyrste timen som alt ligg i rommet og krossar
-// tidsrommet, eller nil.
+// RoomConflict gives the first class already in the room that overlaps
+// the interval, or nil.
 //
-// Tvo tidsrom krossa kvarandre naar den eine byrjar fyre den andre
-// endar og endar etter at den andre byrja. Det er heile prøva; ho vert
-// ofte skrivi som fire tilfelle, og daa gløymer ein eitt av deim.
-// veggtekst skriv eit tidspunkt slik tidene står i events-tabellen:
-// klokka på veggen, utan sone.
+// Two intervals overlap when one starts before the other ends and ends
+// after the other began. That is the whole test; written as four cases,
+// one of them gets forgotten.
 //
-// Drivaren skriv ein time.Time som «2026-08-27 17:00:00+00:00», medan
-// radene som alt låg der står som «2026-08-27 17:00:00». To format i
-// same kolonna, og SQLite samanliknar dei som tekst — det gjekk godt
-// berre av di sona står *etter* klokkeslettet. Ein einaste tid skriven
-// med norsk sone hadde velta det: date('2026-08-27 00:30:00+02:00') er
-// 26. august, og timen hadde hamna på feil dag i vekelista.
+// veggtekst writes a timestamp the way times stand in the events table:
+// the clock on the wall, without a zone.
 //
-// Difor gjeng kvar tid gjennom denne på veg inn og på veg ut att som
-// grense i ei spurning. Éin skrivemåte i kolonna, og samanlikningane
-// tyder det dei ser ut til å tyde.
+// The driver writes a time.Time as "2026-08-27 17:00:00+00:00" while
+// existing rows read "2026-08-27 17:00:00". Two formats in one column,
+// compared as text, and it only worked because the zone comes *after* the
+// time. One time written with a Norwegian zone would have broken it:
+// date('2026-08-27 00:30:00+02:00') is 26 August, and the class would
+// have landed on the wrong day.
 func veggtekst(t time.Time) string { return t.Format("2006-01-02 15:04:05") }
 
-func (db *Database) RoomConflict(romID int64, start, slutt time.Time) (*models.Event, error) {
-	var e models.Event
+func (db *Database) RoomConflict(romID int64, start, slutt time.Time) (*Romkollisjon, error) {
+	var k Romkollisjon
 	err := db.Conn.QueryRow(`
-		SELECT id, title, COALESCE(teacher_name, ''), start_time, end_time
+		SELECT title, COALESCE(teacher_name, ''), start_time, end_time
 		FROM events
 		WHERE room_id = ? AND start_time < ? AND end_time > ?
-		ORDER BY start_time LIMIT 1`,
-		romID, veggtekst(slutt), veggtekst(start)).Scan(&e.ID, &e.Title, &e.TeacherName, &e.StartTime, &e.EndTime)
+		ORDER BY start_time, id LIMIT 1`,
+		romID, veggtekst(slutt), veggtekst(start)).
+		Scan(&k.Tittel, &k.Lærar, &k.Start, &k.Slutt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return &e, nil
+	return &k, nil
 }
 
 // RoomConflictUtanSerie er den same prøva, men blind for serien sine
@@ -626,76 +613,31 @@ func (db *Database) RoomConflict(romID int64, start, slutt time.Time) (*models.E
 // Flytter ein heile serien til eit nytt klokkeslett, står dei gamle
 // radene framleis i det gamle sporet medan prøva gjeng. Utan unntaket
 // hadde serien kollidert med seg sjølv og ingen ting late seg flytta.
-func (db *Database) RoomConflictUtanSerie(romID, serieID int64, start, slutt time.Time) (*models.Event, error) {
-	var e models.Event
+func (db *Database) RoomConflictUtanSerie(romID, serieID int64, start, slutt time.Time) (*Romkollisjon, error) {
+	var k Romkollisjon
 	err := db.Conn.QueryRow(`
-		SELECT id, title, COALESCE(teacher_name, ''), start_time, end_time
+		SELECT title, COALESCE(teacher_name, ''), start_time, end_time
 		FROM events
 		WHERE room_id = ? AND COALESCE(serie_id, 0) <> ?
 		  AND start_time < ? AND end_time > ?
-		ORDER BY start_time LIMIT 1`,
+		ORDER BY start_time, id LIMIT 1`,
 		romID, serieID, veggtekst(slutt), veggtekst(start)).
-		Scan(&e.ID, &e.Title, &e.TeacherName, &e.StartTime, &e.EndTime)
+		Scan(&k.Tittel, &k.Lærar, &k.Start, &k.Slutt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return &e, nil
+	return &k, nil
 }
 
-// RoomConflictUtanTime er den same prøva, blind for éin einskild time.
+// GetRooms gives the studio's rooms with their capacity.
+// SetRomPlassar sets how many the room holds.
 //
-// Ho er syskenet til RoomConflictUtanSerie, og skilnaden er rekkjevidda.
-// Flytter ein *heile* serien, lyt prøva vera blind for alle timane hans.
-// Flytter ein éin einskild time — Leon er sjuk den eine tysdagen, og
-// timen gjeng ein time seinare — lyt ho vera blind berre for den eine:
-// dei andre utslagi av serien stend framleis, og eit av dei er nett det
-// ein kann koma til aa flytta seg oppi. Var ho blind for heile serien
-// her, kunde tvo utslag av den same serien leggja seg oppaa kvarandre i
-// det same rommet utan at nokon sa fraa.
-func (db *Database) RoomConflictUtanTime(romID, eventID int64, start, slutt time.Time) (*models.Event, error) {
-	var e models.Event
-	err := db.Conn.QueryRow(`
-		SELECT id, title, COALESCE(teacher_name, ''), start_time, end_time
-		FROM events
-		WHERE room_id = ? AND id <> ?
-		  AND start_time < ? AND end_time > ?
-		ORDER BY start_time LIMIT 1`,
-		romID, eventID, veggtekst(slutt), veggtekst(start)).
-		Scan(&e.ID, &e.Title, &e.TeacherName, &e.StartTime, &e.EndTime)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &e, nil
-}
-
-// TimeRom gjev rommet timen gjeng i. Null tyder ikkje noko rom — timane
-// som vart lagde inn fyre rommi vart ein ressurs hev det, og dei kann
-// ikkje kollidera med noko.
-//
-// GetEventByID hentar han ikkje: ho les ni kolonnor og room_id er ikkje
-// ei av deim. Ei spurning som hentar ein heil time for aa lesa eitt tal
-// er dessutan meir enn flyttinga treng.
-func (db *Database) TimeRom(eventID int64) (int64, error) {
-	var romID sql.NullInt64
-	err := db.Conn.QueryRow("SELECT room_id FROM events WHERE id = ?", eventID).Scan(&romID)
-	if err != nil {
-		return 0, err
-	}
-	return romID.Int64, nil
-}
-
-// GetRooms gjev romi studioet hev, med kapasiteten deira.
-// SetRomPlassar set kor mange rommet held.
-//
-// Talet er ikkje pynt: kvar time som ikkje ber si eigi kapasitet arvar
-// det (`COALESCE(NULLIF(e.capacity, 0), r.capacity, 0)`), so eit rom som
-// stend for laagt gjer timane fulle fyre dei er det.
+// The number is not decoration: every class without its own capacity
+// inherits it (COALESCE(NULLIF(e.capacity, 0), r.capacity, 0)), so a room
+// set too low makes classes full before they are.
 func (db *Database) SetRomPlassar(romID, plassar int) error {
 	_, err := db.Conn.Exec("UPDATE rooms SET capacity = ? WHERE id = ?", plassar, romID)
 	return err
@@ -719,43 +661,28 @@ func (db *Database) GetRooms() ([]models.Room, error) {
 	return romi, rows.Err()
 }
 
-// GjevLoyve gjev eit løyve til ein brukar.
-func (db *Database) GjevLoyve(userID, loyveID int64) error {
-	_, err := db.Conn.Exec("INSERT INTO brukarloyve (user_id, loyve_id) VALUES (?, ?)", userID, loyveID)
+// GjevLøyve gjev eit løyve til ein brukar.
+func (db *Database) GjevLøyve(userID, løyveID int64) error {
+	_, err := db.Conn.Exec("INSERT INTO brukarloyve (user_id, loyve_id) VALUES (?, ?)", userID, løyveID)
 	return err
 }
 
-// LoyveFor gjev løyvi ein brukar hev.
-func (db *Database) LoyveFor(userID int64) ([]string, error) {
+// LøyveFor gives the permissions a user has.
+func (db *Database) LøyveFor(userID int64) ([]string, error) {
 	rows, err := db.Conn.Query(`SELECT r.name FROM loyve r JOIN brukarloyve ur ON r.id = ur.loyve_id WHERE ur.user_id = ?`, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var loyve []string
+	var løyve []string
 	for rows.Next() {
 		var eit string
 		if err := rows.Scan(&eit); err != nil {
 			return nil, err
 		}
-		loyve = append(loyve, eit)
+		løyve = append(løyve, eit)
 	}
-	return loyve, nil
-}
-
-// AddPaymentMethod adds a payment method for a user
-func (db *Database) AddPaymentMethod(userID int64, provider, providerID string) (int64, error) {
-	res, err := db.Conn.Exec("INSERT INTO payment_methods (user_id, provider, provider_id) VALUES (?, ?, ?)", userID, provider, providerID)
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
-}
-
-// AssignPaymentMethodToUser links a payment method to a user
-func (db *Database) AssignPaymentMethodToUser(userID, paymentMethodID int64) error {
-	_, err := db.Conn.Exec("INSERT INTO user_payment_methods (user_id, payment_method_id) VALUES (?, ?)", userID, paymentMethodID)
-	return err
+	return løyve, nil
 }
 
 // GetUserPaymentMethods fetches all payment methods for a user
@@ -776,10 +703,9 @@ func (db *Database) GetUserPaymentMethods(userID int64) ([]struct{ Provider, Pro
 	return methods, nil
 }
 
-// CreateUser inserts a new user into the users table
-// Dei tvo maatane CreateUser kann segja nei paa. Merkte feil, so
-// handsamaren kann kjenna deim att med errors.Is og svara i brukaren
-// sitt maal — teksten her er for loggen, ikkje for skjermen.
+// The two ways CreateUser can say no. Marked errors, so the handler can
+// recognise them with errors.Is and answer in the user's language — the
+// text here is for the log, not the screen.
 var (
 	ErrEpostIBruk   = errors.New("e-posten er alt i bruk")
 	ErrTelefonIBruk = errors.New("telefonnummeret er alt i bruk")
@@ -813,12 +739,12 @@ func (db *Database) CreateUser(u models.User) (int64, error) {
 	}
 
 	// Løyvi brukaren skal ha
-	for _, loyveNamn := range u.Loyve {
-		loyveID, err := db.LoyveIDFor(loyveNamn)
+	for _, løyveNamn := range u.Løyve {
+		løyveID, err := db.LøyveIDFor(løyveNamn)
 		if err != nil {
 			return 0, err
 		}
-		if err := db.GjevLoyve(userID, loyveID); err != nil {
+		if err := db.GjevLøyve(userID, løyveID); err != nil {
 			return 0, err
 		}
 	}
@@ -864,20 +790,21 @@ func (db *Database) SimulateBilling(userID int64, amount int, description, charg
 	chargeQuery := `INSERT INTO charges (user_id, payment_method_id, amount, currency, status, description, type, charge_date, created_at)
 	                VALUES (?, ?, ?, 'NOK', 'succeeded', ?, ?, ?, ?)`
 
-	// veggtekst, som alle andre skriv tidspunkt: ein raa time.Time fraa
-	// drivaren ber tidssone-suffiks, og daa held kolonna tvo format.
+	// veggtekst, like everyone else writing timestamps: a raw time.Time from
+	// the driver carries a zone suffix, and then the column holds two
+	// formats.
 	now := veggtekst(time.Now())
 
 	_, err = db.Conn.Exec(chargeQuery, userID, paymentMethodID, amount, description, chargeType, now, now)
 	return err
 }
 
-func (db *Database) LoyveIDFor(name string) (int64, error) {
-	// Finst løyvet frå fyrr?
-	var loyveID int64
-	err := db.Conn.QueryRow("SELECT id FROM loyve WHERE name = ?", name).Scan(&loyveID)
+func (db *Database) LøyveIDFor(name string) (int64, error) {
+	// Does the permission already exist?
+	var løyveID int64
+	err := db.Conn.QueryRow("SELECT id FROM loyve WHERE name = ?", name).Scan(&løyveID)
 	if err == nil {
-		return loyveID, nil
+		return løyveID, nil
 	}
 
 	// Elles lagar me det.
@@ -890,17 +817,16 @@ func (db *Database) LoyveIDFor(name string) (int64, error) {
 
 // GetAllUsers fetches all users from the database
 func (db *Database) GetAllUsers() ([]models.User, error) {
-	// COALESCE paa kvar kolonne som kann vera NULL.
+	// COALESCE on every column that can be NULL.
 	//
-	// Ho las deim raatt, og eit einaste NULL i eit adressefelt tok heile
-	// administrasjonssida med seg: `Scan` gjev «converting NULL to string
-	// is unsupported», handsamaren svarar 500, og ingen kjem inn. Ho hev
-	// vore slik heile tidi — det trongst berre ein brukar utan adresse
-	// fyre det synte seg, og prøvebrukarane er nettupp det.
+	// Read raw, a single NULL in an address field took the whole admin page
+	// with it: Scan gives "converting NULL to string is unsupported", the
+	// handler answers 500, and nobody gets in. It had always been so; it took
+	// one user without an address to show it.
 	//
-	// GetUserByID rett nedanfor gjorde det rett fraa fyrr. Tvo spurningar
-	// mot den same tabellen som ikkje er samde um kva som kann mangla, er
-	// ei felle som ventar paa den fyrste rada som nyttar seg av det.
+	// GetUserByID just below already did this. Two queries against the same
+	// table that disagree about what can be missing is a trap waiting for the
+	// first row that uses it.
 	rows, err := db.Conn.Query(`SELECT id, name, COALESCE(birthdate, ''), email,
 		COALESCE(phone, ''), COALESCE(address, ''), COALESCE(postal_code, ''),
 		COALESCE(city, ''), COALESCE(country, ''),
@@ -918,50 +844,16 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 			return nil, err
 		}
 
-		// Løyvi denne brukaren hev
-		loyve, err := db.LoyveFor(int64(u.ID))
+		// This user's permissions
+		løyve, err := db.LøyveFor(int64(u.ID))
 		if err != nil {
 			return nil, err
 		}
-		u.Loyve = loyve
+		u.Løyve = løyve
 
 		users = append(users, u)
 	}
 	return users, nil
-}
-
-func (db *Database) GetFilteredEvents(startDate, endDate, location string) ([]models.Event, error) {
-	query := "SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '') FROM events e LEFT JOIN rooms r ON r.id = e.room_id WHERE 1=1"
-	var args []interface{}
-
-	if startDate != "" {
-		query += " AND start_time >= ?"
-		args = append(args, startDate)
-	}
-	if endDate != "" {
-		query += " AND end_time <= ?"
-		args = append(args, endDate)
-	}
-	if location != "" {
-		query += " AND location = ?"
-		args = append(args, location)
-	}
-
-	rows, err := db.Conn.Query(query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var events []models.Event
-	for rows.Next() {
-		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
-			return nil, err
-		}
-		events = append(events, event)
-	}
-	return events, nil
 }
 
 // CreateEvent creates a new event in the database
@@ -980,19 +872,17 @@ func (db *Database) CreateEvent(event models.Event) (int64, error) {
 	return res.LastInsertId()
 }
 
-// LagSerie skriv alle timane i ein ny serie i éi økt.
+// LagSerie writes every class in a new series in one transaction.
 //
-// Serien finst ikkje som ei eigi rad — han er talet timane hans ber
-// saman — og talet vart fyrr henta med eit eige `MAX(serie_id) + 1` fyre
-// innskrivinga tok til. To administratorar som la inn kvar sin time i
-// same augneblinken fekk då det same talet, og dei to urelaterte
-// seriane vart éin: eit lærarbyte på den eine skreiv seg inn på den
-// andre òg. Talet vert henta inni økta no, og økta held det til alle
-// timane står der.
+// A series is not a row of its own — it is the number its classes carry
+// together — and that number used to be fetched with a separate
+// MAX(serie_id) + 1 before the insert. Two admins adding a class at the
+// same moment got the same number, and the two unrelated series became
+// one: a teacher change on one wrote itself onto the other.
 //
-// Innskrivinga er dessutan alt eller ingen ting. Feila den femte av åtte
-// vekene fyrr, stod dei fire fyrste att i basen medan svaret var ein
-// feil — og den som prøvde ein gong til fekk dei fire ein gong til.
+// The insert is also all or nothing. When the fifth of eight weeks failed,
+// the first four stayed in the database while the answer was an error —
+// and whoever tried again got those four a second time.
 func (db *Database) LagSerie(timar []models.Event) (serieID int64, ider []int64, err error) {
 	if len(timar) == 0 {
 		return 0, nil, nil
@@ -1030,53 +920,53 @@ func (db *Database) LagSerie(timar []models.Event) (serieID int64, ider []int64,
 	return serieID, ider, nil
 }
 
-// UpdateSerieTeacher byter lærar paa alle komande timar i serien. Det
-// som alt er halde stend som det var — historia skriv seg ikkje um.
-func (db *Database) UpdateSerieTeacher(serieID int64, laerar string, fraa time.Time) error {
+// UpdateSerieTeacher changes teacher on every future class in the series.
+// What has already been held stands; history does not rewrite itself.
+func (db *Database) UpdateSerieTeacher(serieID int64, lærar string, frå time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET teacher_name = ? WHERE serie_id = ? AND end_time > ?",
-		laerar, serieID, veggtekst(fraa),
+		lærar, serieID, veggtekst(frå),
 	)
 	return err
 }
 
-// UpdateEventTeacher set vikar paa éin einskild time — tannlækjardagen.
+// UpdateEventTeacher set vikar på éin einskild time — tannlækjardagen.
 // Serien stend urørd; det er nett denne dagen som fær eit anna namn.
-func (db *Database) UpdateEventTeacher(eventID int64, laerar string) error {
+func (db *Database) UpdateEventTeacher(eventID int64, lærar string) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET teacher_name = ? WHERE id = ?",
-		laerar, eventID,
+		lærar, eventID,
 	)
 	return err
 }
 
-// UpdateSerieClassType set slaget paa alle komande timar i serien.
+// UpdateSerieClassType sets the kind on every future class in the series.
 //
-// Slaget er kva slag trening timen er — yoga, pilates, reformer,
-// fascia — og det er serien som hev det: alle utslagi av «Vinyasa Flow
-// maandag 18:00» er yoga. Det ber vengefargen i lista og i timeplanen
-// (`.slag-*` i 00-token.css), og det er ogso det klippekortpakkane
-// samanliknar `category` mot, so ein time utan slag kann ikkje betalast
-// med eit klipp som er øyremerkt.
-func (db *Database) UpdateSerieClassType(serieID int64, slag string, fraa time.Time) error {
+// The kind is what sort of training it is — yoga, pilates, reformer,
+// fascia — and the series owns it: every occurrence of "Vinyasa Flow
+// Monday 18:00" is yoga. It carries the wing colour in the list and the
+// schedule, and it is also what klippekort packages compare `category`
+// against, so a class without a kind cannot be paid for with an earmarked
+// clip.
+func (db *Database) UpdateSerieClassType(serieID int64, slag string, frå time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET class_type = ? WHERE serie_id = ? AND end_time > ?",
-		slag, serieID, veggtekst(fraa),
+		slag, serieID, veggtekst(frå),
 	)
 	return err
 }
 
-// Slagsortar gjev dei slagi som alt er i bruk, ein gong kvar.
+// Slagsortar gives the kinds already in use, once each.
 //
-// Feltet er fritekst — `slagklasse` vaskar det ned til ein CSS-krok, og
-// eit ukjent slag fær ingen farge i staden for feil farge — men fritekst
-// utan minne tyder at «Yoga», «yoga» og «Yoag» alle er nye sortar. Difor
-// hev feltet ei lista yver det huset alt hev sett, og ein plukkar i
-// staden for aa skriva paa nytt.
+// The field is free text — SlagKlasse washes it to a CSS hook, and an
+// unknown kind gets no colour rather than the wrong one — but free text
+// without memory means "Yoga", "yoga" and "Yoag" are all new kinds. Hence
+// a list of what the house has already seen, so you pick rather than
+// retype.
 //
-// Alle timar, ikkje berre dei komande: eit slag som gjekk i vaar er
-// framleis eit slag studioet driv med, og det er nettupp daa ein treng
-// aa finna det att.
+// All classes, not only future ones: a kind that ran in spring is still a
+// kind the studio does, and that is exactly when you need to find it
+// again.
 func (db *Database) Slagsortar() ([]string, error) {
 	rows, err := db.Conn.Query(`
 		SELECT DISTINCT TRIM(class_type) FROM events
@@ -1098,48 +988,47 @@ func (db *Database) Slagsortar() ([]string, error) {
 	return ut, rows.Err()
 }
 
-// UpdateSerieDescription set skildringi paa alle komande timar i
-// serien — det er serien som hev ei skildring, timane arvar henne.
-func (db *Database) UpdateSerieDescription(serieID int64, tekst string, fraa time.Time) error {
+// UpdateSerieDescription sets the description on every future class in
+// the series — the series has a description, the classes inherit it.
+func (db *Database) UpdateSerieDescription(serieID int64, tekst string, frå time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET description = ? WHERE serie_id = ? AND end_time > ?",
-		tekst, serieID, veggtekst(fraa),
+		tekst, serieID, veggtekst(frå),
 	)
 	return err
 }
 
-// UpdateSerieTitle byter namn paa alle komande timar i serien.
+// UpdateSerieTitle renames every future class in the series.
 //
-// Namnet er det du leitar etter i lista, og til no laut ein leggja
-// serien ned og laga honom paa nytt for aa retta ein skrivefeil i
-// honom — som tok med seg paameldingane.
-func (db *Database) UpdateSerieTitle(serieID int64, tittel string, fraa time.Time) error {
+// The name is what you look for in the list, and until now fixing a typo
+// in it meant deleting the series and rebuilding it — which took the
+// signups with it.
+func (db *Database) UpdateSerieTitle(serieID int64, tittel string, frå time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET title = ? WHERE serie_id = ? AND end_time > ?",
-		tittel, serieID, veggtekst(fraa),
+		tittel, serieID, veggtekst(frå),
 	)
 	return err
 }
 
-// UpdateSerieRoom flytter alle komande timar i serien til eit anna rom.
+// UpdateSerieRoom moves every future class in the series to another room.
 //
-// `location` fylgjer med. Han er namnet paa rommet skrive inn i rada, og
-// er det gamle namnet naar rommet er eit anna — timeplanen les rom-namnet
-// gjenom join-en, men fleire eldre stader les framleis `location`.
-func (db *Database) UpdateSerieRoom(serieID, romID int64, namn string, fraa time.Time) error {
+// `location` follows. It is the room name written into the row, and holds
+// the old name when the room changes — the schedule reads the room name
+// through the join, but several older places still read `location`.
+func (db *Database) UpdateSerieRoom(serieID, romID int64, namn string, frå time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET room_id = NULLIF(?, 0), location = ? WHERE serie_id = ? AND end_time > ?",
-		romID, namn, serieID, veggtekst(fraa),
+		romID, namn, serieID, veggtekst(frå),
 	)
 	return err
 }
 
-// UtvidSerie legg fleire timar til ein serie som alt finst.
+// UtvidSerie adds more classes to a series that already exists.
 //
-// LagSerie tek eit nytt serienamn kvar gong; ho kann ikkje brukast til
-// aa forlengja ein serie, av di dei nye timane daa hadde vorte ein
-// *annan* serie med det same namnet, og lista hadde synt tvo rader der
-// det er éin time.
+// LagSerie takes a new series number every time, so it cannot extend one:
+// the new classes would become a *different* series with the same name,
+// and the list would show two rows where there is one class.
 func (db *Database) UtvidSerie(serieID int64, timar []models.Event) ([]int64, error) {
 	if len(timar) == 0 {
 		return nil, nil
@@ -1174,23 +1063,17 @@ func (db *Database) UtvidSerie(serieID int64, timar []models.Event) ([]int64, er
 	return ider, nil
 }
 
-// SisteITimeserie gjev den siste komande timen i serien, heil.
+// SisteITimeserie gives the last future class in the series, whole.
 //
-// GetFutureEventsBySerie les fire kolonnor — nok til aa flytta ei rad,
-// for lite til aa laga ei ny. Forlengjer ein serien, lyt den nye timen
-// arva alt det den gamle bar: namn, lærar, rom, plassar, skildring.
-func (db *Database) SisteITimeserie(serieID int64, fraa time.Time) (*models.Event, error) {
+// GetFutureEventsBySerie reads four columns — enough to move a row, too
+// little to make a new one. Extending a series means the new class
+// inherits everything the old one carried.
+func (db *Database) SisteITimeserie(serieID int64, frå time.Time) (*models.Event, error) {
 	var e models.Event
-	err := db.Conn.QueryRow(`
-		SELECT id, title, COALESCE(description, ''), start_time, end_time,
-		       COALESCE(location, ''), COALESCE(organizer, ''), COALESCE(class_type, ''),
-		       COALESCE(teacher_name, ''), COALESCE(capacity, 0), COALESCE(color, ''),
-		       COALESCE(room_id, 0)
-		FROM events WHERE serie_id = ? AND end_time > ?
-		ORDER BY start_time DESC LIMIT 1`, serieID, veggtekst(fraa)).
-		Scan(&e.ID, &e.Title, &e.Description, &e.StartTime, &e.EndTime,
-			&e.Location, &e.Organizer, &e.ClassType, &e.TeacherName, &e.Capacity,
-			&e.Color, &e.RoomID)
+	rad := db.Conn.QueryRow(`SELECT `+eventKolonnar+eventFrå+`
+		WHERE e.serie_id = ? AND e.end_time > ?
+		ORDER BY e.start_time DESC, e.id DESC LIMIT 1`, serieID, veggtekst(frå))
+	err := skannTime(rad, &e)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -1200,59 +1083,40 @@ func (db *Database) SisteITimeserie(serieID int64, fraa time.Time) (*models.Even
 	return &e, nil
 }
 
-// UpdateSerieCapacity set plassane paa alle komande timar i serien.
+// UpdateSerieCapacity sets the places on every future class in the series.
 //
-// Null tyder «ingi eigi» og gjev rommet ordet attende — difor NULLIF.
-// Skreiv me 0 raatt, hadde timen havt null plassar, og COALESCE-en som
-// hentar rommet sitt tal hadde aldri sett noko aa henta.
-func (db *Database) UpdateSerieCapacity(serieID int64, plassar int, fraa time.Time) error {
+// Zero means "none of its own" and gives the room the word back — hence
+// NULLIF. Written raw, the class would have zero places and the COALESCE
+// that fetches the room's number would never see anything to fetch.
+func (db *Database) UpdateSerieCapacity(serieID int64, plassar int, frå time.Time) error {
 	_, err := db.Conn.Exec(
 		"UPDATE events SET capacity = NULLIF(?, 0) WHERE serie_id = ? AND end_time > ?",
-		plassar, serieID, veggtekst(fraa),
+		plassar, serieID, veggtekst(frå),
 	)
 	return err
 }
 
-// PaameldeYver gjev den fyrste komande timen i serien som hev fleire
-// paamelde enn `plassar`, um nokon hev det.
+// PaameldeYver gives the first future class in the series with more
+// signups than `plassar`, if any.
 //
-// Set ein plassane ned under det som alt er selt, er ikkje spursmaalet
-// kva basen toler — det er kven som misser plassen sin. Difor vert det
-// spurt fyre, og svaret ber datoen og talet med seg.
-func (db *Database) PaameldeYver(serieID int64, plassar int, fraa time.Time) (*models.Event, error) {
-	var e models.Event
+// Setting places below what is already sold is not a question of what the
+// database tolerates — it is a question of who loses their place. So it
+// is asked first, and the answer carries the date and the number.
+func (db *Database) PaameldeYver(serieID int64, plassar int, frå time.Time) (*Overfylt, error) {
+	var o Overfylt
 	err := db.Conn.QueryRow(`
-		SELECT id, title, start_time, current_enrolment
+		SELECT start_time, current_enrolment
 		FROM events
 		WHERE serie_id = ? AND end_time > ? AND current_enrolment > ?
-		ORDER BY start_time LIMIT 1`, serieID, veggtekst(fraa), plassar).
-		Scan(&e.ID, &e.Title, &e.StartTime, &e.CurrentEnrolment)
+		ORDER BY start_time, id LIMIT 1`, serieID, veggtekst(frå), plassar).
+		Scan(&o.Start, &o.Paamelde)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return &e, nil
-}
-
-// SettVikarFleire set same vikaren paa eit knippe timar i éi økt.
-func (db *Database) SettVikarFleire(ider []int64, laerar string) error {
-	if len(ider) == 0 {
-		return nil
-	}
-	tx, err := db.Conn.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	for _, id := range ider {
-		if _, err := tx.Exec("UPDATE events SET teacher_name = ? WHERE id = ?", laerar, id); err != nil {
-			return err
-		}
-	}
-	return tx.Commit()
+	return &o, nil
 }
 
 // AvlysFleire avlyser eit knippe timar i éi økt.
@@ -1279,37 +1143,26 @@ func (db *Database) AvlysFleire(ider []int64) error {
 }
 
 // GetFutureEventsBySerie gjev dei komande timane i ein serie, etter dato.
-func (db *Database) GetFutureEventsBySerie(serieID int64, fraa time.Time) ([]models.Event, error) {
+func (db *Database) GetFutureEventsBySerie(serieID int64, frå time.Time) ([]SerieTime, error) {
 	rows, err := db.Conn.Query(
-		`SELECT id, start_time, end_time, COALESCE(room_id, 0)
-		 FROM events WHERE serie_id = ? AND end_time > ? ORDER BY start_time`,
-		serieID, veggtekst(fraa),
+		`SELECT id, start_time FROM events
+		 WHERE serie_id = ? AND end_time > ? ORDER BY start_time, id`,
+		serieID, veggtekst(frå),
 	)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var timar []models.Event
+	var ut []SerieTime
 	for rows.Next() {
-		var e models.Event
-		if err := rows.Scan(&e.ID, &e.StartTime, &e.EndTime, &e.RoomID); err != nil {
+		var t SerieTime
+		if err := rows.Scan(&t.ID, &t.Start); err != nil {
 			return nil, err
 		}
-		timar = append(timar, e)
+		ut = append(ut, t)
 	}
-	return timar, rows.Err()
-}
-
-// FlyttEvent set ny start og slutt paa éin time. Tidene gjeng inn som
-// time.Time og ut att som veggtekst, same vegen som CreateEvent — so
-// kolonna held éin skrivemåte.
-func (db *Database) FlyttEvent(eventID int64, start, slutt time.Time) error {
-	_, err := db.Conn.Exec(
-		"UPDATE events SET start_time = ?, end_time = ? WHERE id = ?",
-		veggtekst(start), veggtekst(slutt), eventID,
-	)
-	return err
+	return ut, rows.Err()
 }
 
 // FlyttFleire flytter alle timane i eit knippe i éi økt.
@@ -1347,119 +1200,32 @@ func (db *Database) FlyttFleire(flyttingar []Flytting) error {
 
 // GetAllEvents fetches all events from the database
 func (db *Database) GetAllEvents() ([]models.Event, error) {
-	rows, err := db.Conn.Query("SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, ''), COALESCE(e.serie_id, 0), COALESCE(e.room_id, 0), COALESCE(e.capacity, 0), COALESCE(r.capacity, 0), COALESCE(e.gruppe_id, 0) FROM events e LEFT JOIN rooms r ON r.id = e.room_id")
+	rows, err := db.Conn.Query(`SELECT ` + eventKolonnar + eventFrå)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	var events []models.Event
-	for rows.Next() {
-		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName, &event.SerieID, &event.RoomID, &event.EigenPlassar, &event.RoomCapacity, &event.GruppeID); err != nil {
-			return nil, err
-		}
-		events = append(events, event)
-	}
-	return events, nil
-}
-
-// GetTodaysEvents fetches events for today
-func (db *Database) GetTodaysEvents() ([]models.Event, error) {
-	query := `
-		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '')
-		FROM events e LEFT JOIN rooms r ON r.id = e.room_id 
-		WHERE DATE(start_time) = DATE('now', 'localtime')
-		ORDER BY start_time ASC
-	`
-	rows, err := db.Conn.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var events []models.Event
-	for rows.Next() {
-		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
-			return nil, err
-		}
-		events = append(events, event)
-	}
-	return events, nil
-}
-
-// GetThisWeeksEvents fetches events for the current week
-func (db *Database) GetThisWeeksEvents() ([]models.Event, error) {
-	query := `
-		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time, COALESCE(e.location, ''), COALESCE(e.organizer, ''), COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''), COALESCE(NULLIF(e.capacity, 0), r.capacity, 0), e.current_enrolment, COALESCE(e.color, ''), COALESCE(r.name, e.location, '')
-		FROM events e LEFT JOIN rooms r ON r.id = e.room_id 
-		WHERE DATE(start_time) >= DATE('now', 'weekday 0', '-6 days', 'localtime') 
-		AND DATE(start_time) <= DATE('now', 'weekday 0', 'localtime')
-		ORDER BY start_time ASC
-	`
-	rows, err := db.Conn.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var events []models.Event
-	for rows.Next() {
-		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime, &event.Location, &event.Organizer, &event.ClassType, &event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.Color, &event.RoomName); err != nil {
-			return nil, err
-		}
-		events = append(events, event)
-	}
-	return events, nil
+	return timane(rows)
 }
 
 // GetEventsForWeek fetches events for a specific week starting from the given Monday
-// GetEventsForWeek gjev veka slik `sjaaarID` skal sjaa henne: alle opne
-// timar, og dei private som er hans eigne. Sjaa privattime.go.
-func (db *Database) GetEventsForWeek(mondayDate time.Time, sjaaarID int64) ([]models.Event, error) {
+// GetEventsForWeek gjev veka slik `sjaaarID` skal sjå henne: alle opne
+// timar, og dei private som er hans eigne. Sjå privattime.go.
+func (db *Database) GetEventsForWeek(mondayDate time.Time, sjaårID int64) ([]models.Event, error) {
 	// Halvopen veke: måndag 00:00 til neste måndag 00:00. Han let
 	// SQLite nytta idx_events_start; DATE(e.start_time) gjorde kvar
 	// time til ei funksjonsutrekning og tvinga fram tabellskann.
-	nesteMaandag := mondayDate.AddDate(0, 0, 7)
+	nesteMåndag := mondayDate.AddDate(0, 0, 7)
 
-	// Kapasiteten kjem av rommet. Timen kann setja henne lægre — ein
-	// workshop i salen med ti plassar — men han kann ikkje setja henne
-	// høgre enn rommet. Difor NULLIF: 0 tyder «ikkje sett».
-	query := `
-		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time,
-		       COALESCE(e.location, ''), COALESCE(e.organizer, ''),
-		       COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''),
-		       COALESCE(NULLIF(e.capacity, 0), r.capacity, 0) AS plassar,
-		       e.current_enrolment, e.color,
-		       COALESCE(r.id, 0), COALESCE(r.name, e.location, ''), COALESCE(r.capacity, 0)
-		FROM events e
-		LEFT JOIN rooms r ON r.id = e.room_id
+	rows, err := db.Conn.Query(`SELECT `+eventKolonnar+eventFrå+`
 		WHERE e.start_time >= ?
 		AND e.start_time < ?
-		AND ` + synlegFor + `
-		ORDER BY e.start_time ASC
-	`
-	rows, err := db.Conn.Query(query,
-		veggtekst(mondayDate), veggtekst(nesteMaandag), sjaaarID, sjaaarID)
+		AND `+synlegFor+`
+		ORDER BY e.start_time ASC, e.id ASC`,
+		veggtekst(mondayDate), veggtekst(nesteMåndag), sjaårID, sjaårID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	var events []models.Event
-	for rows.Next() {
-		var event models.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime,
-			&event.Location, &event.Organizer, &event.ClassType, &event.TeacherName,
-			&event.Capacity, &event.CurrentEnrolment, &event.Color,
-			&event.RoomID, &event.RoomName, &event.RoomCapacity); err != nil {
-			return nil, err
-		}
-		events = append(events, event)
-	}
-	return events, nil
+	return timane(rows)
 }
 
 // GetDistinctTeachers fetches all distinct teacher names from events
@@ -1482,34 +1248,13 @@ func (db *Database) GetDistinctTeachers() ([]string, error) {
 	return teachers, nil
 }
 
-// GetDistinctClassTypes fetches all distinct class titles from events
-func (db *Database) GetDistinctClassTypes() ([]string, error) {
-	query := `SELECT DISTINCT title FROM events WHERE title != '' ORDER BY title`
-	rows, err := db.Conn.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var classTypes []string
-	for rows.Next() {
-		var classType string
-		if err := rows.Scan(&classType); err != nil {
-			return nil, err
-		}
-		classTypes = append(classTypes, classType)
-	}
-	return classTypes, nil
-}
-
 // Membership-related database methods
 
-// MedlemskapFor gjev dei medlemskapi ein brukar kann velja.
+// MedlemskapFor gives the memberships a user can choose.
 //
-// Studioet gjev 20 % til den som hev student- eller honnørbevis, og hev
-// difor eigne planar for det. Fyrr stod alle side um side, og den som
-// ikkje hadde bevis laut lesa seg forbi helvti av lista for aa finna
-// sine eigne. Det er arbeid lagt paa lesaren for noko systemet alt veit.
+// The studio gives 20 % to whoever has student or senior proof, and keeps
+// separate plans for it. They all used to stand side by side, so anyone
+// without proof had to read past half the list to find their own.
 func (db *Database) MedlemskapFor(kvalifisert bool) ([]models.Membership, error) {
 	alle, err := db.GetAllMemberships()
 	if err != nil {
@@ -1520,9 +1265,8 @@ func (db *Database) MedlemskapFor(kvalifisert bool) ([]models.Membership, error)
 		if m.IsStudentSenior && !kvalifisert {
 			continue
 		}
-		// Black kann ikkje kjøpast. Han fylgjer eit løyve, og ein pris
-		// paa 0 kr i lista hadde vore ei innbjoding til aa klikka paa
-		// honom. Sjaa svartmedlem.go.
+		// Black cannot be bought. It follows a permission, and a price of 0 kr in
+		// the list would have been an invitation to click it. See svartmedlem.go.
 		if m.Skjult {
 			continue
 		}
@@ -1550,11 +1294,18 @@ func (db *Database) GetAllMemberships() ([]models.Membership, error) {
 	return memberships, nil
 }
 
-// GetUserMembership fetches a user's current membership
+// GetUserMembership returns the membership the user holds now.
+//
+// m.id and m.skjult must stay in the select list. Without m.id,
+// Membership.ID is zero for every ordinary member — and three callers
+// compare against it, so the switch list stops excluding the plan you
+// already have, and the studio's own product names get looked up at
+// key 0 and never found. svartMedlemskapFor always selected id, which
+// is why only Black was right.
 func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetails, error) {
 	query := `
 		SELECT um.id, um.user_id, um.membership_id, um.status, um.start_date, um.renewal_date, um.end_date, um.binding_end, um.last_billed, um.frozen_at, um.created_at,
-		       m.name, m.price, m.commitment_months, m.is_student_senior, m.is_special_offer, m.description, m.features, m.active
+		       m.id, m.name, m.price, m.commitment_months, m.is_student_senior, m.is_special_offer, m.description, m.features, m.active, m.skjult
 		FROM user_memberships um
 		JOIN memberships m ON um.membership_id = m.id
 		WHERE um.user_id = ? AND (um.status = 'active' OR um.status = 'paused' OR um.status = 'freeze_requested')
@@ -1562,22 +1313,22 @@ func (db *Database) GetUserMembership(userID int64) (*models.MembershipWithDetai
 		LIMIT 1
 	`
 
-	// Løyvet gjeng fyre. Ein lærar hev Black so lenge han er lærar, og
-	// det skal ikkje spela nokor løyvet kva som elles ligg i basen paa
-	// honom. Sjaa svartmedlem.go.
+	// The permission wins. A teacher has Black as long as they teach, whatever
+	// else the database says about them. See svartmedlem.go.
 	if fri, err := db.HarFriMedlemskap(userID); err == nil && fri {
 		return db.svartMedlemskapFor(userID)
 	}
 
 	var membership models.MembershipWithDetails
 	err := db.Conn.QueryRow(query, userID).Scan(
-		&membership.UserMembership.ID, &membership.UserMembership.UserID, &membership.UserMembership.MembershipID,
+		&membership.UserMembership.RadID, &membership.UserMembership.UserID, &membership.UserMembership.MembershipID,
 		&membership.UserMembership.Status, &membership.UserMembership.StartDate, &membership.UserMembership.RenewalDate,
 		&membership.UserMembership.EndDate, &membership.UserMembership.BindingEnd, &membership.UserMembership.LastBilled,
 		&membership.UserMembership.FrozenAt, &membership.UserMembership.CreatedAt,
-		&membership.Membership.Name, &membership.Membership.Price, &membership.Membership.CommitmentMonths,
-		&membership.Membership.IsStudentSenior, &membership.Membership.IsSpecialOffer, &membership.Membership.Description,
-		&membership.Membership.Features, &membership.Membership.Active,
+		&membership.Membership.ID, &membership.Membership.Name, &membership.Membership.Price,
+		&membership.Membership.CommitmentMonths, &membership.Membership.IsStudentSenior,
+		&membership.Membership.IsSpecialOffer, &membership.Membership.Description,
+		&membership.Membership.Features, &membership.Membership.Active, &membership.Membership.Skjult,
 	)
 
 	if err != nil {
@@ -1618,22 +1369,13 @@ func (db *Database) GetAllKlippekortPackages() ([]models.KlippekortPackage, erro
 	return packages, nil
 }
 
-// GetUserKlippekort hentar dei klippekorti ein brukar *kann bruka*.
+// GetUserKlippekort returns the cards the user has clips left on.
 //
-// Eit kort med null klipp att er brukt upp. Det stod likevel paa
-// heimeskjermen med alle ti hòli klipte, av di spurningi berre spurde
-// etter is_active og utlaupsdag — og ingen stad i koden set is_active
-// til FALSE, so eit oppbrukt kort kunde aldri gaa burt av seg sjølv.
-// Det laag der til det gjekk ut paa dato, kanskje eit halvt aar seinare.
-//
-// Talet paa heimeskjermen kunde serien fraa fyrr (sjaa dashboard.go:
-// «tome kort er ikkje noko ein hev att»), men *kortlista* kunde honom
-// ikkje, so dei sa tvo ulike ting um det same kortet: null att i talet,
-// og eit kort paa skjermen.
+// kp.id must stay in the select list, for the same reason as m.id above.
 func (db *Database) GetUserKlippekort(userID int64) ([]models.KlippekortWithDetails, error) {
 	query := `
 		SELECT uk.id, uk.user_id, uk.package_id, uk.total_klipp, uk.remaining_klipp, uk.expiry_date, uk.purchase_date, uk.is_active,
-		       kp.name, kp.category, kp.klipp_count, kp.price, kp.price_per_session, kp.description, kp.valid_days, kp.active, kp.is_popular
+		       kp.id, kp.name, kp.category, kp.klipp_count, kp.price, kp.price_per_session, kp.description, kp.valid_days, kp.active, kp.is_popular
 		FROM user_klippekort uk
 		JOIN klippekort_packages kp ON uk.package_id = kp.id
 		WHERE uk.user_id = ? AND uk.is_active = TRUE AND uk.remaining_klipp > 0
@@ -1651,10 +1393,10 @@ func (db *Database) GetUserKlippekort(userID int64) ([]models.KlippekortWithDeta
 	for rows.Next() {
 		var k models.KlippekortWithDetails
 		if err := rows.Scan(
-			&k.UserKlippekort.ID, &k.UserKlippekort.UserID, &k.UserKlippekort.PackageID,
+			&k.UserKlippekort.RadID, &k.UserKlippekort.UserID, &k.UserKlippekort.PackageID,
 			&k.UserKlippekort.TotalKlipp, &k.UserKlippekort.RemainingKlipp,
 			&k.UserKlippekort.ExpiryDate, &k.UserKlippekort.PurchaseDate, &k.UserKlippekort.IsActive,
-			&k.KlippekortPackage.Name, &k.KlippekortPackage.Category, &k.KlippekortPackage.KlippCount,
+			&k.KlippekortPackage.ID, &k.KlippekortPackage.Name, &k.KlippekortPackage.Category, &k.KlippekortPackage.KlippCount,
 			&k.KlippekortPackage.Price, &k.KlippekortPackage.PricePerSession, &k.KlippekortPackage.Description,
 			&k.KlippekortPackage.ValidDays, &k.KlippekortPackage.Active, &k.KlippekortPackage.IsPopular,
 		); err != nil {
@@ -1677,21 +1419,16 @@ func (db *Database) AuthenticateUser(email, password string) (*models.User, erro
 	var user models.User
 	var hashedPassword string
 
-	// COALESCE paa dei fire som kann vera NULL i skjemaet — adresse,
-	// postnummer, by og land. Dei stod nakne her, og daa fall `Scan`
-	// med «converting NULL to string is unsupported» for kvar brukar som
-	// ikkje hadde fylt ut adressa si.
+	// COALESCE on the four that can be NULL — address, postcode, city and
+	// country. Bare, Scan failed with "converting NULL to string is
+	// unsupported" for every user who had not filled in an address.
 	//
-	// Det aaleine hadde vore ein feil ein fann med ein gong. Det som
-	// gjorde honom farleg var at han kom ut som *feil passord*: kvar
-	// feil herifraa vart til «ugyldig e-post eller passord» i
-	// handsamaren. Brukaren fekk vita at han hugsa gale, og det gjorde
-	// han ikkje — han kunde ikkje logga inn i det heile, og ingen ting
-	// nokon stad sa kvifor. Seks av aatte brukarar i basen var i den
-	// stoda daa dette vart funne.
-	//
-	// `GetUserByID` hadde COALESCE paa dei same fire fraa fyrr. Denne
-	// var berre gløymd.
+	// That alone would have been found at once. What made it dangerous is
+	// that it came out as *wrong password*: every error from here became
+	// "invalid email or password" in the handler. The user was told they
+	// misremembered, and they had not — they could not log in at all, and
+	// nothing anywhere said why. Six of eight users were in that state when
+	// this was found.
 	query := `SELECT id, name, email, COALESCE(phone, ''), COALESCE(address, ''),
 	                 COALESCE(postal_code, ''), COALESCE(city, ''), COALESCE(country, ''),
 	                 password, newsletter_subscription, terms_accepted
@@ -1707,8 +1444,8 @@ func (db *Database) AuthenticateUser(email, password string) (*models.User, erro
 		if err == sql.ErrNoRows {
 			return nil, ErrUgyldigInnlogging
 		}
-		// Ein feil i basen er ikkje eit gale passord, og skal ikkje
-		// segjast som um han var det.
+		// A database error is not a wrong password, and must not be reported as
+		// though it were.
 		return nil, fmt.Errorf("uppslag av brukar: %w", err)
 	}
 
@@ -1718,12 +1455,12 @@ func (db *Database) AuthenticateUser(email, password string) (*models.User, erro
 		return nil, ErrUgyldigInnlogging
 	}
 
-	// Løyvi brukaren hev
-	loyve, err := db.LoyveFor(int64(user.ID))
+	// The user's permissions
+	løyve, err := db.LøyveFor(int64(user.ID))
 	if err != nil {
 		return nil, err
 	}
-	user.Loyve = loyve
+	user.Løyve = løyve
 
 	return &user, nil
 }
@@ -1744,12 +1481,12 @@ func (db *Database) GetUserByID(userID int64) (*models.User, error) {
 	          GROUP BY u.id`
 
 	var gjengUt sql.NullTime
-	var loyveTekst string
+	var løyveTekst string
 	err := db.Conn.QueryRow(query, userID).Scan(
 		&user.ID, &user.Name, &user.Birthdate, &user.Email, &user.Phone, &user.Address,
 		&user.PostalCode, &user.City, &user.Country,
 		&user.NewsletterSubscription, &user.TermsAccepted, &user.StudentSenior,
-		&gjengUt, &loyveTekst,
+		&gjengUt, &løyveTekst,
 	)
 
 	if err != nil {
@@ -1760,8 +1497,8 @@ func (db *Database) GetUserByID(userID int64) (*models.User, error) {
 	}
 
 	user.StudentSeniorGjengUt = gjengUt.Time
-	if loyveTekst != "" {
-		user.Loyve = strings.Split(loyveTekst, ",")
+	if løyveTekst != "" {
+		user.Løyve = strings.Split(løyveTekst, ",")
 	}
 
 	return &user, nil
@@ -1802,12 +1539,12 @@ func (db *Database) GetPendingFreezeRequests() ([]models.FreezeRequest, error) {
 	return requests, nil
 }
 
-// ApproveFreezeRequest godkjenner ei fryseføresprunad.
+// ApproveFreezeRequest approves a freeze request.
 //
-// Han set klokka med det same: `frozen_at` er tidspunktet utlaupet
-// sluttar aa telja. Utan honom hadde ei frysing kosta medlemen den tidi
-// ho varde — eit aarskort frose i tvo maanader hadde gjeve ti maanader
-// bruk — og det er ikkje det studioet sel.
+// It sets the clock immediately: frozen_at is when the expiry stops
+// counting. Without it a freeze would cost the member the time it lasted
+// — a yearly card frozen two months would give ten months of use — and
+// that is not what the studio sells.
 func (db *Database) ApproveFreezeRequest(userID int64) error {
 	query := `UPDATE user_memberships SET status = 'paused', frozen_at = CURRENT_TIMESTAMP
 	          WHERE user_id = ? AND status = 'freeze_requested'`
@@ -1815,17 +1552,17 @@ func (db *Database) ApproveFreezeRequest(userID int64) error {
 	return err
 }
 
-// UnfreezeMembership set eit frose medlemskap i gang att og skuver
-// utlaupet fram med den tidi det stod.
+// UnfreezeMembership restarts a frozen membership and pushes the expiry
+// forward by the time it stood.
 //
-// Dette er den *einaste* vegen ut or 'paused'. `UpdateMembershipStatus`
-// tek kva stoda som helst og veit ingen ting um klokka; kallar nokon
-// honom med "active" paa eit frose medlemskap, stend `frozen_at` att og
-// utlaupet driv for alltid. Difor eige kall, og difor stend det her.
+// This is the *only* way out of 'paused'. UpdateMembershipStatus takes any
+// status and knows nothing about the clock; called with "active" on a
+// frozen membership it leaves frozen_at behind and the expiry drifts
+// forever.
 //
-// Tidi vert lagd til baade `renewal_date` og `binding_end`: den fyrste
-// er kva du hev betalt for, den andre er terminen du kjøpte, og ei
-// frysing tek ikkje av nokon av dei.
+// The time is added to both renewal_date and binding_end: the first is
+// what you have paid for, the second is the term you bought, and a freeze
+// takes from neither.
 func (db *Database) UnfreezeMembership(userID int64) error {
 	var frosen sql.NullTime
 	var fornying time.Time
@@ -1834,17 +1571,15 @@ func (db *Database) UnfreezeMembership(userID int64) error {
 	                         WHERE user_id = ? AND status = 'paused'
 	                         ORDER BY created_at DESC LIMIT 1`, userID).Scan(&frosen, &fornying, &binding)
 	if err == sql.ErrNoRows {
-		// Ikkje frose. Daa er dette ei vanleg stoda-endring, og den
-		// gamle vegen er rett.
+		// Not frozen. Then this is an ordinary status change, and the old way is right.
 		return db.UpdateMembershipStatus(userID, "active")
 	}
 	if err != nil {
 		return err
 	}
 
-	// Stod han frose fyre kolonna fanst, hev me ingi klokka. Daa set me
-	// honom i gang att utan aa skuva noko: aa gissa paa ei lengd er
-	// verre enn aa lata vera.
+	// Frozen before the column existed means no clock. Then restart without
+	// pushing anything: guessing at a length is worse than leaving it.
 	if !frosen.Valid {
 		return db.UpdateMembershipStatus(userID, "active")
 	}
@@ -2008,7 +1743,7 @@ func (db *Database) GetMembershipByID(membershipID int64) (*models.Membership, e
 }
 
 // CanChangeMembership checks if a user can change to a specific membership
-func (db *Database) CanChangeMembership(userID int64, newMembershipID int64, naa time.Time) (bool, string) {
+func (db *Database) CanChangeMembership(userID int64, newMembershipID int64, nå time.Time) (bool, string) {
 	// Get membership rules
 	rules, err := db.GetMembershipRules()
 	if err != nil {
@@ -2052,17 +1787,16 @@ func (db *Database) CanChangeMembership(userID int64, newMembershipID int64, naa
 		return false, "Nedgraderinger er ikke tillatt ifølge gjeldende regler"
 	}
 
-	// Studentprisen krev at nokon hev sett beviset.
+	// The student rate requires that someone has seen the proof.
 	//
-	// Her stod eit blankt nei: *ingen* kunde byta til studentprisen, ogso
-	// den som hadde vist beviset, av di det ikkje fanst nokon veg til aa
-	// godkjenna det. No finst han (sjaa rabattkrav.go), og daa er
-	// spursmaalet ikkje «er dette ein rabatt» men «hev denne fenge
-	// honom». Same serien som lista yver prisar les, so ho ikkje syner
-	// deg noko du ikkje fær kjøpa.
+	// This was a flat no: *nobody* could switch to it, including those who had
+	// shown proof, because there was no way to approve it. There is now (see
+	// rabattkrav.go), so the question is not "is this a discount" but "has
+	// this person been granted it". Same query the price list reads, so it
+	// cannot show you something you may not buy.
 	if newMembership.IsStudentSenior && !currentMembership.IsStudentSenior {
 		brukar, err := db.GetUserByID(userID)
-		if err != nil || !brukar.KvalifisertFor(naa) {
+		if err != nil || !brukar.KvalifisertFor(nå) {
 			return false, "Studentprisen krev at studioet hev sett beviset"
 		}
 	}
@@ -2169,33 +1903,24 @@ func (db *Database) PurchaseKlippekort(userID int64, packageID int64) error {
 // GetEventByID fetches a single event by ID
 func (db *Database) GetEventByID(eventID int64) (*models.Event, error) {
 	var event models.Event
-	query := `SELECT id, title, description, start_time, end_time, teacher_name, capacity, current_enrolment, class_type
-	          FROM events WHERE id = ?`
-
-	err := db.Conn.QueryRow(query, eventID).Scan(
-		&event.ID, &event.Title, &event.Description, &event.StartTime, &event.EndTime,
-		&event.TeacherName, &event.Capacity, &event.CurrentEnrolment, &event.ClassType,
-	)
-
-	if err != nil {
+	rad := db.Conn.QueryRow(`SELECT `+eventKolonnar+eventFrå+` WHERE e.id = ?`, eventID)
+	if err := skannTime(rad, &event); err != nil {
 		return nil, err
 	}
-
 	return &event, nil
 }
 
-// SignupUserForEvent signs up a user for an event
-// SignupUserForEvent melder ein brukar paa ein time.
+// SignupUserForEvent signs a user up for a class.
 //
-// Tvo ting var gale her. Han las kapasiteten beinveges or events-rada,
-// og etter at rommet vart ein ressurs stend det 0 der naar timen ikkje
-// set si eigi — so `7 >= 0` var sant og *kvar* paamelding svara «event
-// is full». Han lyt rekna ut den same kapasiteten som resten av huset.
+// Two things were wrong. It read capacity straight from the events row,
+// and once rooms became a resource that column is 0 when the class sets no
+// capacity of its own — so `7 >= 0` was true and *every* signup answered
+// "event is full". It has to compute the same capacity as the rest of the
+// house.
 //
-// Og han las fyrst og skreiv etterpaa, utan transaksjon. Reformeren hev
-// fire plassar; tvo som trykkjer paa den siste samstundes kom baae
-// gjenom kontrollen og båe vart melde paa. Talet er ikkje stort nok til
-// at ein kann sjaa burt fraa det.
+// And it read first and wrote after, without a transaction. The Reformer
+// has four places; two people pressing the last one at the same moment
+// both got through the check.
 func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 	tx, err := db.Conn.Begin()
 	if err != nil {
@@ -2203,11 +1928,10 @@ func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 	}
 	defer tx.Rollback()
 
-	// Ein privat time høyrer éin person til. Sjekken lyt liggja her og
-	// ikkje berre i timeplanen: synlegheit er ikkje tryggleik. Ein som
-	// gissar eit id kann POSta seg paa ein time han aldri saag, og
-	// kiosken melder folk paa utanum timeplanen med — baae vegar gjeng
-	// gjenom denne funksjonen.
+	// A private class belongs to one person. The check must live here and not
+	// only in the schedule: visibility is not security. Someone guessing an id
+	// could POST themselves onto a class they never saw, and the kiosk signs
+	// people up outside the schedule too — both go through this function.
 	var eigar sql.NullInt64
 	if err := tx.QueryRow(
 		`SELECT private_user_id FROM events WHERE id = ?`, eventID).Scan(&eigar); err != nil {
@@ -2217,8 +1941,8 @@ func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 		return fmt.Errorf("timen er sett av til ein annan")
 	}
 
-	// Og same spursmaalet for gruppa. Ein reformer-time som berre dei
-	// upplærde ser, er framleis eit id nokon kann POSta seg paa.
+	// And the same question for the group. A reformer class only the trained
+	// can see is still an id somebody can POST themselves onto.
 	var gruppe sql.NullInt64
 	if err := tx.QueryRow(
 		`SELECT gruppe_id FROM events WHERE id = ?`, eventID).Scan(&gruppe); err != nil {
@@ -2246,8 +1970,8 @@ func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 		return fmt.Errorf("brukaren er alt paameld denne timen")
 	}
 
-	// Same utrekningi som i GetEventsForWeek: timen si eigi kapasitet um
-	// ho er sett, elles rommet si.
+	// Same reckoning as GetEventsForWeek: the class's own capacity if set,
+	// otherwise the room's.
 	var paameldte, plassar int
 	if err := tx.QueryRow(`
 		SELECT e.current_enrolment, COALESCE(NULLIF(e.capacity, 0), r.capacity, 0)
@@ -2268,9 +1992,8 @@ func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 		return err
 	}
 
-	// Vilkoret stend i UPDATE-en med, so tvo samstundes paameldingar
-	// ikkje kann koma forbi kvarandre jamvel um kontrollen yver skulde
-	// sleppa baae gjenom.
+	// The condition stands in the UPDATE too, so two simultaneous signups
+	// cannot pass each other even if the check above let both through.
 	res, err := tx.Exec(`
 		UPDATE events SET current_enrolment = current_enrolment + 1
 		WHERE id = ? AND current_enrolment < COALESCE(NULLIF(capacity, 0),
@@ -2285,14 +2008,14 @@ func (db *Database) SignupUserForEvent(userID, eventID int64) error {
 	return tx.Commit()
 }
 
-// CancelUserSignupForEvent tek ein brukar av ein time att.
+// CancelUserSignupForEvent takes a user off a class again.
 //
-// Same disiplinen som SignupUserForEvent ovanfor, og av same grunn: han
-// las fyrst og skreiv etterpaa, paa tri einskilde samband. Tvo som melder
-// seg av samstundes kom baae gjenom kontrollen, og teljaren gjekk ned
-// tvo gonger for eitt avhopp. Slettingi sjølv er kontrollen no: raakar
-// ho ingi rad, var brukaren ikkje paameld. Og MAX(…, 0) i UPDATE-en, so
-// ein teljar som alt var i utakt ikkje kann verta negativ.
+// Same discipline as SignupUserForEvent above, and for the same reason: it
+// read first and wrote after, on three separate connections. Two people
+// cancelling at once both got through the check and the counter went down
+// twice for one drop-out. The delete is the check now: if it hits no row,
+// the user was not signed up. And MAX(…, 0) in the UPDATE, so a counter
+// already out of step cannot go negative.
 func (db *Database) CancelUserSignupForEvent(userID, eventID int64) error {
 	tx, err := db.Conn.Begin()
 	if err != nil {
@@ -2360,49 +2083,20 @@ func (db *Database) GetUserSignupsForEvents(userID int64, eventIDs []int64) (map
 
 // GetUserUpcomingSignups returns all upcoming events that the user is signed up for
 func (db *Database) GetUserUpcomingSignups(userID int64) ([]models.Event, error) {
-	// role_requirements og attendees vart henta og skanna inn i eit
-	// kart og ei liste. SQLite kann ikkje det, so spurningen feila —
-	// kvar gong, sidan alltid. Ingen saag det, av di kallaren berre
-	// sjekka `err == nil` og lét det vera. Ingen av felti vert nytta av
-	// nokon som kallar; dei er ute.
-	query := `
-		SELECT e.id, e.title, COALESCE(e.description, ''), e.start_time, e.end_time,
-		       COALESCE(e.location, ''), COALESCE(e.organizer, ''),
-		       COALESCE(e.class_type, ''), COALESCE(e.teacher_name, ''),
-		       COALESCE(NULLIF(e.capacity, 0), r.capacity, 0),
-		       e.current_enrolment, COALESCE(e.color, ''),
-		       COALESCE(r.name, e.location, '')
+	// role_requirements and attendees were fetched and scanned into a map and
+	// a slice. SQLite cannot do that, so the query failed — every time, since
+	// always. Nobody saw it because the caller only checked `err == nil` and
+	// let it be. Neither field is used by any caller; they are out.
+	rows, err := db.Conn.Query(`SELECT `+eventKolonnar+`
 		FROM events e
 		INNER JOIN event_signups es ON e.id = es.event_id
 		LEFT JOIN rooms r ON r.id = e.room_id
 		WHERE es.user_id = ? AND e.start_time > ?
-		ORDER BY e.start_time ASC
-	`
-
-	now := time.Now()
-	rows, err := db.Conn.Query(query, userID, now)
+		ORDER BY e.start_time ASC, e.id ASC`, userID, time.Now())
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	var events []models.Event
-	for rows.Next() {
-		var event models.Event
-		err := rows.Scan(
-			&event.ID, &event.Title, &event.Description,
-			&event.StartTime, &event.EndTime, &event.Location, &event.Organizer,
-			&event.ClassType, &event.TeacherName,
-			&event.Capacity, &event.CurrentEnrolment, &event.Color,
-			&event.RoomName,
-		)
-		if err != nil {
-			return nil, err
-		}
-		events = append(events, event)
-	}
-
-	return events, rows.Err()
+	return timane(rows)
 }
 
 // GetMembershipRules retrieves the current membership rules configuration
@@ -2459,13 +2153,6 @@ func (db *Database) SaveMembershipRules(rules *models.MembershipRules) error {
 			rules.AllowDowngrades, rules.AllowChangeDuringBinding, rules.DefaultMembershipID)
 	}
 
-	return err
-}
-
-// UpdateMembershipPrice updates the price of a membership
-func (db *Database) UpdateMembershipPrice(membershipID int64, newPrice int) error {
-	query := `UPDATE memberships SET price = ? WHERE id = ?`
-	_, err := db.Conn.Exec(query, newPrice, membershipID)
 	return err
 }
 
@@ -2545,27 +2232,27 @@ func (db *Database) UpdateEvent(event models.Event) error {
 	return err
 }
 
-// Person er ein medlem slik han stend i folkelista.
+// Person is a member as they stand in the people list.
 //
-// Tri fakta, ikkje sju: kven, kva han held, og naar han sist var her.
-// Fødselsdag og telefon er ikkje noko ein skannar ei liste for — dei
-// høyrer til naar rada er open.
+// Three facts, not seven: who, what they hold, and when they were last
+// here. Birthday and phone are not what you scan a list for — they belong
+// when the row is open.
 type Person struct {
 	ID          int
 	Namn        string
 	Epost       string
 	Telefon     string
 	Fodd        string
-	Loyve       string
+	Løyve       string
 	Medlemskap  string
 	MedlemStod  string
 	MedlemPris  int
 	KlippAtt    int
 	KlippTotalt int
 	SistHer     *time.Time
-	TimarIAar   int
+	TimarIÅr    int
 	TrengSvar   bool // frysing som ventar
-	ErLaerar    bool
+	ErLærar     bool
 	ErAdmin     bool
 	// Gruppone personen er med i. Settet er det malen slær upp i;
 	// strengen er berre vegen ut or basen.
@@ -2573,14 +2260,14 @@ type Person struct {
 	GruppeSett map[int64]bool
 }
 
-// FolkOversyn hentar alle medlemene med det ein treng for aa kjenna
-// deim att og sjaa kven som treng noko.
+// FolkOversyn fetches every member with what you need to recognise them
+// and see who needs something.
 //
-// Sorteringi er ikkje alfabetisk. Ho er *kven som treng deg*: fyrst dei
-// med ei frysing som ventar svar, so dei som ikkje hev vore her paa
-// lenge, so resten. Ei alfabetisk liste er rett naar ein leitar; men
-// den som leitar brukar søkjefeltet, og den som *ser* paa lista vil
-// vita kva som krev noko av henne.
+// The sort is not alphabetical. It is *who needs you*: first those with a
+// freeze awaiting an answer, then those who have not been here for a
+// while, then the rest. Alphabetical is right when you are searching — but
+// whoever is searching uses the search field, and whoever is *looking* at
+// the list wants to know what is asking something of them.
 func (db *Database) FolkOversyn() ([]Person, error) {
 	rows, err := db.Conn.Query(`
 		WITH
@@ -2633,10 +2320,10 @@ func (db *Database) FolkOversyn() ([]Person, error) {
 		// MAX() gjev ein streng ut or SQLite, ikkje ei tid — aggregatet
 		// misser typen som kolonna hadde. Difor lyt han tolkast her.
 		var sist sql.NullString
-		if err := rows.Scan(&p.ID, &p.Namn, &p.Epost, &p.Telefon, &p.Fodd, &p.Loyve,
+		if err := rows.Scan(&p.ID, &p.Namn, &p.Epost, &p.Telefon, &p.Fodd, &p.Løyve,
 			&p.GruppeIDar,
 			&p.Medlemskap, &p.MedlemStod, &p.MedlemPris,
-			&p.KlippAtt, &p.KlippTotalt, &sist, &p.TimarIAar); err != nil {
+			&p.KlippAtt, &p.KlippTotalt, &sist, &p.TimarIÅr); err != nil {
 			return nil, err
 		}
 		if sist.Valid && sist.String != "" {
@@ -2651,8 +2338,8 @@ func (db *Database) FolkOversyn() ([]Person, error) {
 			}
 		}
 		p.TrengSvar = p.MedlemStod == "freeze_requested"
-		p.ErLaerar = harLoyve(p.Loyve, LoyveLaerar)
-		p.ErAdmin = harLoyve(p.Loyve, LoyveAdmin)
+		p.ErLærar = harLøyve(p.Løyve, LøyveLærar)
+		p.ErAdmin = harLøyve(p.Løyve, LøyveAdmin)
 		p.GruppeSett = map[int64]bool{}
 		for _, t := range strings.Split(p.GruppeIDar, ",") {
 			if id, err := strconv.ParseInt(strings.TrimSpace(t), 10, 64); err == nil {

@@ -18,7 +18,9 @@ type KlippekortPackage struct {
 
 // UserKlippekort represents a user's purchased klippekort
 type UserKlippekort struct {
-	ID             int       `json:"id"`
+	// RadID is this row's own key in user_klippekort. Not ID, for the
+	// same reason as UserMembership.RadID.
+	RadID          int       `json:"rad_id"`
 	UserID         int       `json:"user_id"`
 	PackageID      int       `json:"package_id"`
 	TotalKlipp     int       `json:"total_klipp"`
@@ -40,8 +42,8 @@ type KlippekortWithDetails struct {
 
 // HolPerKort er kor mange klippehol eit kort hev — alltid det same
 // talet, same kor mange klipp pakka inneheldt. Stilboki teiknar ti, og
-// det er ei *form* og ikkje ei mengd: hakkrekkja svarar paa «er kortet
-// brukt», ikkje «kor mange gonger». Talet attmed svarar paa det andre.
+// det er ei *form* og ikkje ei mengd: hakkrekkja svarar på «er kortet
+// brukt», ikkje «kor mange gonger». Talet attmed svarar på det andre.
 //
 // Fylgja er at eit kort med tjuge klipp fær eit hol for kvart andre
 // klipp. Det er meiningi: elles laut anten kortet verta dobbelt so
@@ -49,7 +51,7 @@ type KlippekortWithDetails struct {
 const HolPerKort = 10
 
 // KlipteHolAv reknar ut kor mange av dei ti hola som er klipte.
-// Avrunding til nærmaste, so eit kort som er halvvegs brukt syner fem.
+// Avrunding til næraste, so eit kort som er halvvegs brukt syner fem.
 // Eit ubrukt kort syner null — vengen stend heil — og eit tomt kort
 // syner alle ti.
 func KlipteHolAv(brukte, alle int) int {
@@ -62,7 +64,7 @@ func KlipteHolAv(brukte, alle int) int {
 	return (brukte*HolPerKort + alle/2) / alle
 }
 
-// NaermastUtlop finn det kortet som gjeng ut fyrst av dei som framleis
+// NærastUtløp finn det kortet som gjeng ut fyrst av dei som framleis
 // hev klipp att.
 //
 // Kort som er tome eller alt utgjengne tel ikkje med: eit tomt kort som
@@ -70,17 +72,17 @@ func KlipteHolAv(brukte, alle int) int {
 //
 // Han budde i klippekort-brotstykket fyrr. Sida treng den same
 // utrekningi til briefingen sin, og tvo utgaavor av den same regelen
-// driv frå kvarandre — difor bur han her, der baae kann naa honom.
-func NaermastUtlop(kort []KlippekortWithDetails) *KlippekortWithDetails {
-	var naermast *KlippekortWithDetails
+// driv frå kvarandre — difor bur han her, der båe kann nå honom.
+func NærastUtløp(kort []KlippekortWithDetails) *KlippekortWithDetails {
+	var nærast *KlippekortWithDetails
 	for i := range kort {
 		k := &kort[i]
 		if k.RemainingKlipp <= 0 || k.DaysUntilExpiry < 0 {
 			continue
 		}
-		if naermast == nil || k.DaysUntilExpiry < naermast.DaysUntilExpiry {
-			naermast = k
+		if nærast == nil || k.DaysUntilExpiry < nærast.DaysUntilExpiry {
+			nærast = k
 		}
 	}
-	return naermast
+	return nærast
 }

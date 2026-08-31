@@ -15,6 +15,13 @@ Canonical sources, in this order:
    number that puts it in the right place, not the next free one.
    (Split 2026-08-28: it was one 4,000-line file, and one bad edit across the
    token block took the whole house with it, dark theme included.)
+
+   **`00-palett.css` is the values; `00-token.css` is what they mean.** The
+   palette holds every flat `--l-*`/`--m-*`, the four training kinds, and the
+   file the mark is masked from — everything that is *this studio* rather than
+   the system. Change what the house looks like and that is the one file you
+   write in. The split is 2026-08-31; both halves lived in `00-token.css`
+   before, which is why that file was doing five jobs at 824 lines.
 2. `docs/DESIGN_GUIDELINES.md` — the reasoning in long form. Also `FASETTEN.md`,
    `SKRAAKANTEN.md`, `KORREKTUREN.md`.
 3. `/arket` — the workshop: components drawn by the same code the pages use.
@@ -50,7 +57,11 @@ order. Same effect, and the tokens live in a selector you can look up instead of
 inside an expression nobody can grep for.
 
 Every flat colour is written **once**, as `--l-*` for light and `--m-*` for dark
-at the top of `00-token.css`; the four blocks only assign meaning to them. The
+in `00-palett.css`; the four blocks in `00-token.css` only assign meaning to
+them. `handlers/prover/palett_test.go` holds the line both ways: a `--l-*`/`--m-*`
+*declaration* in the token file fails, and so does a `var(--l-noko)` the palette
+never declares — an unset custom property is not an error, it is an invisible
+one. The
 *derived* tokens — `--merke`, `--merke-svak`, `--togu-svak`, `--tuneup-svak`,
 `--glodkjerne` — still appear in each block and must: the percentage differs in
 the dark (18 % against 12 %), and `--glodkjerne` inverts, because light on paper
@@ -124,19 +135,28 @@ like a klippekort. Put the warning on the number and the expiry line.
 A *class* is not a product. You do not buy a yoga class; you spend a klipp on it
 or walk in on a membership. So a class carries a second, independent thing:
 which kind of training it is. It travels on `--slagfarge`, set by a `.slag-*`
-class, and the map lives in `00-token.css`:
+class, and the map lives in `00-palett.css` beside the values it points at:
 
 ```css
-.slag-fascia   { --slagfarge: var(--fjellraeven); }
-.slag-yoga     { --slagfarge: var(--klas); }
-.slag-pilates  { --slagfarge: var(--tuneup); }
-.slag-reformer { --slagfarge: var(--togu); }
+.slag-fascia   { --slagfarge: var(--slag-fascia); }
+.slag-yoga     { --slagfarge: var(--slag-yoga); }
+.slag-pilates  { --slagfarge: var(--slag-pilates); }
+.slag-reformer { --slagfarge: var(--slag-reformer); }
 ```
 
-`slagklasse` in the Go func map washes the free-text `events.class_type` down to
-that class name. An unknown type gets no `.slag-*` at all, and the wing falls
-back to `--haarlina` — grey says "no colour", which is true. It must never fall
-back to `--merke`, or an unknown class impersonates yoga.
+**The kinds are one list, in `handlers/slag.go`, and nowhere else.** They were
+four: an allow-list in `aktivitet.go`, the stack order beside it, the map above,
+and — worst — `slagklasse` in `template_manager.go`, which had no list at all
+and returned `"slag-" + washed(anything)`. So the board and the home page did not
+agree: an unknown type got no class on the board, and `class="… slag-hotyoga"` on
+the home page — a class nobody has drawn, which `scripts/daude-klassar.sh` cannot
+find because it never appears whole in any source file. `Slagi` is now the list;
+`TestSlagfargarKjennerDeiSameSlagi` fails if the stylesheet knows a kind Go does
+not, or the other way round.
+
+An unknown type gets no `.slag-*` at all, and the wing falls back to
+`--haarlina` — grey says "no colour", which is true. It must never fall back to
+`--merke`, or an unknown class impersonates yoga.
 
 **Three of the four are product colours, and they now appear on the same screen
 as products.** This used to be safe: the class colour lived in a hole on the
@@ -148,10 +168,17 @@ That is one channel carrying two meanings — exactly what this section forbids.
 
 The fix is four values in one block: give the kinds their own hues, clear of the
 three product colours, and the board and the wing stay in step by themselves
-because both read `.slag-*`. It has not been done. It is a colour decision, not
-a bug fix — the whole house changes hue with it, the wheel is already crowded
-(`--fjellraeven` at 44° is one hue away from `--student` at 46°), and any new
-hue must clear 4.5:1 on `--flate` in both themes, as `--student` does.
+because both read `.slag-*`. **Still not done — but it is now literally that.**
+Since 2026-08-31 the kinds have their own tokens, `--l-slag-*` and `--m-slag-*`
+in `00-palett.css`, holding the same eight values they used to borrow through
+`var(--klas)`, `var(--tuneup)`, `var(--togu)` and a `--fjellraeven` that existed
+for nothing else and is gone. Nothing changed hue; what changed is that the
+remaining fix is eight lines in one file instead of a rewrite of the map.
+
+It stays a colour decision and not a bug fix — the whole house changes hue with
+it, the wheel is crowded (the fascia ochre at 44° is one hue away from
+`--student` at 46°), and any new hue must clear 4.5:1 on `--flate` in both
+themes, as `--student` does.
 
 ---
 
@@ -500,7 +527,7 @@ cannot ask.
 ## 7. Words
 
 Every string is a translation key: `{{t .Lang "bolk.nykel"}}`, and the key exists
-in all three files under `locales/`. A hardcoded string exists in one language and
+in all three files under `mål/`. A hardcoded string exists in one language and
 nobody notices until someone switches.
 
 - A button is a **verb in sentence case**: «Lag timen», not «LAG TIMEN».
@@ -582,7 +609,7 @@ grows nowhere else: a mark standing large on every page is a background.
 | a selected row in a list | **Light, never a wing.** A list you pick from — the rule list in admin › Timeplan — marks the selected row with `--merke-svak` in the surface and the ink up to `--blekk`, which is what an active select in `.sikt` already does. It must not take the `border-left: 3px` wing: that line is the channel that says *what kind* a thing is — the product on a card, the training on a class (§1) — and a page where the same 3px line means "membership" in one column and "this is the one you clicked" in the other is one channel carrying two meanings, which §1 forbids. Light is unclaimed, and light is already what the house uses for "this one is on". |
 | a count beside a name | **Say the word, never `×`.** «8 ×» was meant as "eight times" and read as a close button — a × in the corner of a row is what the whole web uses for *remove this*. It is also, three files away in the same admin page, literally the delete control (`.slettmerke`). One glyph, two meanings, one screen: §1 forbids that for colour and the reason does not change for a glyph. It was not even inert — it sat inside the button that selects the row, so it promised "delete" and performed "select". Write «8 gonger», and pick singular or plural with the `gonger` func map helper: the number and the word were written separately, so the word never saw the number and «1 gonger» shipped. Anything that rewrites the count after load must make the same choice — the JS helper beside it exists for that. |
 | `.status-*` | class names are the values the database uses (`active`, `paused`, `cancelled`, `freeze_requested`). No translation table. |
-| `.faneark` / `.faner` / `.fane` / `.fanerom` | **a slider with positions, not a folder** (changed 2026-08-27). The track is a groove (`--skraakant`, the light of a field); the selected position is a dome sitting in it (`--knappedjup`, the light of a button). Same two-layer form as `.btn`, because it is the same thing — something raised out of the surface. The label is the reading font in sentence case: §5 reserves uppercase + tracking + 68 % for what *names a category* — «never a button» — and a tab is a `<button role="tab">`. `.fanerom` paints nothing: §6 allows one box between sheet and content, and the folder's room made it two. `.faneark` carries no rule at all and must stay — `faner.js` uses `closest('.faneark')` so two tab rows don't steal each other's tabs (admin has a row inside *Prising*, and one inside every class-series form). The choice lives in the URL, and only the **outermost** sheet owns it; an inner row opens on its first tab. **The `faner` partial's contract is `.Tabs`, each with `Key` and `Name`** — those names come from `handlers.Tab`, where a wrong field is a compile error you see. A template that builds the list with `dict` gets no such error: a missed lookup is the empty string and nothing else, so the row renders buttons with no label and `data-bolk=""`, no tab matches any panel, and clicking does nothing. That shipped in *Prising* (fixed 2026-08-28). Build the list with `Key`/`Name`, and if a tab row ever does nothing, look there first. |
+| `.faneark` / `.faner` / `.fane` / `.fanerom` | **a slider with positions, not a folder** (changed 2026-08-27). The track is a groove (`--skraakant`, the light of a field); the selected position is a dome sitting in it (`--knappedjup`, the light of a button). Same two-layer form as `.btn`, because it is the same thing — something raised out of the surface. The label is the reading font in sentence case: §5 reserves uppercase + tracking + 68 % for what *names a category* — «never a button». `.fanerom` paints nothing: §6 allows one box between sheet and content, and the folder's room made it two. `.faneark` carries no rule at all and must stay — it is the boundary: htmx swaps exactly that element (its id is both `hx-target` and `hx-select`), and `bolkveljar.js` uses `closest('.faneark')` so two rows don't steal each other's tabs. **A tab is a link** (changed 2026-08-31). The choice is `?fane=` in the URL, the *server* reads it and renders the one panel, and `aria-current="page"` says where you stand — the same word the header nav uses. There is no `role="tablist"` and no arrow-key handling, because nothing here is a tablist any more: the address changes, so Tab is the right key between links. All five admin panels used to be built and sent on every load with four of them `hidden`. **Two places keep buttons and `aria-selected="true"`**: the scope switch inside each class-series form, and the group slider above the people list. Both change something *inside* the page — a form you have typed in, a list you are filtering — and a link would have taken it to the server and come back with it gone. Same form, because it is the same thing; every rule in `60-fanone.css` answers to both attributes. **The `faner` partial takes a `Fanerekkje`** (`handsamarar/faner.go`), not a `dict`: the struct is the contract, and a wrong field name is a compile error you see. A template that built the list with `dict` got no such error — a missed lookup is the empty string — and *Prising* shipped a row of three blank buttons that way (fixed 2026-08-28). |
 | `.setning` (a sentence of controls) | **The line must make room for the tallest thing in it, and the sentence carries no reading measure.** Two failures, both recurring. (1) A sentence sets `line-height` for *text*, but a button is taller than text — it carries its own vertical padding and a border — so when the sentence wrapped, the button scraped the underside of the field on the line above. That is neither a button bug nor a field bug: the line was never asked to clear the tallest control it holds. Give controls in a sentence `margin-block: var(--rom-1)` off the space ladder rather than nudging one offender. (2) `max-width: 54ch` is the measure for *prose* — how far the eye tracks without losing the line — and a row of controls written as a sentence is not prose. The cap made the admin form wrap halfway across a wide screen with the other half standing empty. The column sets the width; the sentence breaks when the column makes it break and not before. |
 | fields | `:where(input…, textarea)` with no border, `--skraakant`, and `--rund`. Depth means "you can write here", so it is on every field at rest, not only on focus. A `select` **has the field's form, and the arrow is the difference** (settled 2026-08-30, reversing the change of two days earlier). It briefly wore the button's capsule, dome and gloss, on the reasoning that it *is* a button with a list behind it. That is true of what it does and turned out to be wrong about what it is on a page, for three reasons, all of which were visible before anyone argued about them:
 
@@ -683,7 +710,9 @@ So: 3 % ink fill, `--rund`, `--skraakant` — the same box as every field — an
    and the four theme blocks only read them. The two dark blocks are now
    word-for-word identical — if they ever differ again it is a bug, not a
    nuance — and `handlers/stilark_test.go` asserts it, plus the new invariant
-   that light-by-choice agrees with the light default. And the box is still drawn by hand in
+   that light-by-choice agrees with the light default. The values then moved out
+   of the token file entirely (`00-palett.css`, 2026-08-31), so the file that
+   says what a colour *means* no longer says what it *is*. And the box is still drawn by hand in
    seven places besides `.kort` (`.timeplan`, `.login-container`, `.bolk`,
    `.folk-liste`, `.regel-liste`, …); folding those into `.kort` is the next
    cleanup, and it is the thing that keeps generating new one-off classes.

@@ -7,7 +7,7 @@ import (
 	"kjernekraft/models"
 )
 
-func time_(dag int, klokke string, tittel, laerar, rom string, minutt int) models.Event {
+func time_(dag int, klokke string, tittel, lærar, rom string, minutt int) models.Event {
 	oslo, _ := time.LoadLocation("Europe/Oslo")
 	t, err := time.ParseInLocation("2006-01-02 15:04",
 		time.Date(2026, 8, dag, 0, 0, 0, 0, oslo).Format("2006-01-02")+" "+klokke, oslo)
@@ -16,7 +16,7 @@ func time_(dag int, klokke string, tittel, laerar, rom string, minutt int) model
 	}
 	return models.Event{
 		Title:       tittel,
-		TeacherName: laerar,
+		TeacherName: lærar,
 		RoomName:    rom,
 		StartTime:   t,
 		EndTime:     t.Add(time.Duration(minutt) * time.Minute),
@@ -26,7 +26,7 @@ func time_(dag int, klokke string, tittel, laerar, rom string, minutt int) model
 // Fire utslag av den same timen er éi rekkje, ikkje fire timar. Det er
 // heile poenget med importen: huset endrar rekkjor.
 func TestSameTimenKvarVikeVertEiRekkje(t *testing.T) {
-	// 17., 24. og 31. august er tri maandagar paa rad.
+	// 17., 24. og 31. august er tri maandagar på rad.
 	inn := []models.Event{
 		time_(31, "17:30", "Classical Pilates", "Cyrena", "Salen", 50),
 		time_(24, "17:30", "Classical Pilates", "Cyrena", "Salen", 50),
@@ -47,8 +47,8 @@ func TestSameTimenKvarVikeVertEiRekkje(t *testing.T) {
 }
 
 // Ein vikar er ikkje den same rekkja. Byter læraren, er det ei anna
-// rekkje — og det er rett: rekkja er «yoga med Leon maandag 18:00».
-func TestUlikLaerarGjevUlikRekkje(t *testing.T) {
+// rekkje — og det er rett: rekkja er «yoga med Leon måndag 18:00».
+func TestUlikLærarGjevUlikRekkje(t *testing.T) {
 	seriar := GrupperISeriar([]models.Event{
 		time_(17, "17:30", "Pilates Apparatus", "Cyrena", "Salen", 50),
 		time_(24, "17:30", "Pilates Apparatus", "Carla", "Salen", 50),
@@ -60,7 +60,7 @@ func TestUlikLaerarGjevUlikRekkje(t *testing.T) {
 
 // Tvo timar med det same namnet til den same tidi er tvo timar.
 //
-// Kjernekraft hev det maandag 17:30: «Pilates Apparatus» med tvo
+// Kjernekraft hev det måndag 17:30: «Pilates Apparatus» med tvo
 // lærarar samstundes. Nykelen lyt skilja deim, elles les ein import den
 // andre som ein han alt hev og legg honom aldri inn.
 func TestTvoLikeNamnSamstundesErTvoTimar(t *testing.T) {
@@ -75,8 +75,8 @@ func TestTvoLikeNamnSamstundesErTvoTimar(t *testing.T) {
 	}
 }
 
-// Nykelen er den same som `GrupperTimar` i handlers-pakka nyttar paa
-// timar utan serie-id. Driv dei fraa kvarandre, lagar importen ei anna
+// Nykelen er den same som `GrupperTimar` i handlers-pakka nyttar på
+// timar utan serie-id. Driv dei frå kvarandre, lagar importen ei anna
 // gruppering enn den administrasjonen syner.
 func TestSerieNykelenErDenSameSomListaBrukar(t *testing.T) {
 	e := time_(31, "17:30", "Classical Pilates", "Cyrena", "Salen", 50)
@@ -87,7 +87,7 @@ func TestSerieNykelenErDenSameSomListaBrukar(t *testing.T) {
 }
 
 // Slagtabellen dekkjer timeplanen slik han stend. Ho er skriven ut av
-// di namni hev stade stille; denne prøva er det som seier ifraa den
+// di namni hev stade stille; denne prøva er det som seier ifrå den
 // dagen dei ikkje gjer det lenger.
 func TestSlagtabellenDekkjerDenTimeplanenSomGjeng(t *testing.T) {
 	for namn, vil := range map[string]string{
@@ -121,10 +121,10 @@ func TestOnlineErDetSameSlaget(t *testing.T) {
 	}
 }
 
-// Eit slag me ikkje kjenner fær ingen farge, og importen seier ifraa.
+// Eit slag me ikkje kjenner fær ingen farge, og importen seier ifrå.
 // Ein graa venge er sann; ein turkis er ei gjeting som ser ut som eit
 // svar (ARKET §1).
-func TestUkjendtSlagVertGraattOgVertSagtIfraaUm(t *testing.T) {
+func TestUkjendtSlagVertGraattOgVertSagtIfråUm(t *testing.T) {
 	if got := Slag("Power Plate"); got != "" {
 		t.Errorf("Slag(«Power Plate») = %q, venta tom streng", got)
 	}

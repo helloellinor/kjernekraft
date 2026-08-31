@@ -8,11 +8,11 @@ import (
 func ptOppsett(t *testing.T, db *Database, namn string, klipp int) (int64, int64) {
 	t.Helper()
 	userID := lagBrukar(t, db, namn)
-	naa := time.Now()
+	nå := time.Now()
 	res, err := db.Conn.Exec(`
 		INSERT INTO events (title, start_time, end_time, class_type, capacity)
 		VALUES ('PT', ?, ?, ?, 1)`,
-		veggtekst(naa.Add(48*time.Hour)), veggtekst(naa.Add(49*time.Hour)), PTKategori)
+		veggtekst(nå.Add(48*time.Hour)), veggtekst(nå.Add(49*time.Hour)), PTKategori)
 	if err != nil {
 		t.Fatalf("timen: %v", err)
 	}
@@ -24,7 +24,7 @@ func ptOppsett(t *testing.T, db *Database, namn string, klipp int) (int64, int64
 		if _, err := db.Conn.Exec(`INSERT INTO user_klippekort
 			(user_id, package_id, total_klipp, remaining_klipp, expiry_date, purchase_date, is_active)
 			VALUES (?, 7, 5, ?, ?, ?, TRUE)`,
-			userID, klipp, veggtekst(naa.AddDate(0, 6, 0)), veggtekst(naa)); err != nil {
+			userID, klipp, veggtekst(nå.AddDate(0, 6, 0)), veggtekst(nå)); err != nil {
 			t.Fatalf("kortet: %v", err)
 		}
 	}
@@ -41,16 +41,16 @@ func ptAtt(t *testing.T, db *Database, userID int64) int {
 // sett upp, so ho vert klippa der — og ho gjeng aldri i minus. Tri ting
 // skal halda, og alle tri hev ein grunn i BokPrivatTime:
 //
-//   - med kort: eitt klipp av, og kortet ført paa paameldingi
+//   - med kort: eitt klipp av, og kortet ført på paameldingi
 //   - tvo gonger: eitt klipp, ikkje tvo
 //   - utan kort: økta stend, ingi skuld
 func TestPrivatTimeKlipp(t *testing.T) {
 	db := prøvebase(t)
-	naa := time.Now()
+	nå := time.Now()
 
 	// Med kort: eitt klipp gjeng av, og paameldingi ber kortet.
 	e1, u1 := ptOppsett(t, db, "MedKort", 5)
-	if err := db.BokPrivatTime(e1, u1, naa); err != nil {
+	if err := db.BokPrivatTime(e1, u1, nå); err != nil {
 		t.Fatalf("booking: %v", err)
 	}
 	if att := ptAtt(t, db, u1); att != 4 {
@@ -66,7 +66,7 @@ func TestPrivatTimeKlipp(t *testing.T) {
 	}
 
 	// Tvo gonger tek ikkje tvo klipp.
-	if err := db.BokPrivatTime(e1, u1, naa); err != nil {
+	if err := db.BokPrivatTime(e1, u1, nå); err != nil {
 		t.Fatalf("booking 2: %v", err)
 	}
 	if att := ptAtt(t, db, u1); att != 4 {
@@ -75,7 +75,7 @@ func TestPrivatTimeKlipp(t *testing.T) {
 
 	// Utan kort: økta stend, ingi skuld, ingen minus.
 	e2, u2 := ptOppsett(t, db, "UtanKort", 0)
-	if err := db.BokPrivatTime(e2, u2, naa); err != nil {
+	if err := db.BokPrivatTime(e2, u2, nå); err != nil {
 		t.Fatalf("booking utan kort: %v", err)
 	}
 	if att := ptAtt(t, db, u2); att != 0 {
@@ -91,37 +91,37 @@ func TestPrivatTimeKlipp(t *testing.T) {
 	}
 }
 
-// Segjer den eine fraa seg økta si, skal tri ting henda i lag: klippet
+// Segjer den eine frå seg økta si, skal tri ting henda i lag: klippet
 // kjem attende, paameldingi gjeng, og meldingi stend i fana. Alle tri i
 // ein transaksjon — ei melding um ei avlysing som vart rulla attende
 // sender nokon av garde etter ein time som stend.
 func TestAvlystPrivatTimeGjevKlippAttOgMelder(t *testing.T) {
 	db := prøvebase(t)
-	naa := time.Now()
+	nå := time.Now()
 
 	eventID, userID := ptOppsett(t, db, "Angrar", 5)
-	laerarID := lagBrukar(t, db, "Leon")
-	if err := db.SettLagaAv(eventID, laerarID); err != nil {
+	lærarID := lagBrukar(t, db, "Leon")
+	if err := db.SettLagaAv(eventID, lærarID); err != nil {
 		t.Fatalf("laga-av: %v", err)
 	}
-	if err := db.BokPrivatTime(eventID, userID, naa); err != nil {
+	if err := db.BokPrivatTime(eventID, userID, nå); err != nil {
 		t.Fatalf("booking: %v", err)
 	}
 	if att := ptAtt(t, db, userID); att != 4 {
 		t.Fatalf("oppsettet: venta 4 klipp att, fekk %d", att)
 	}
 
-	if err := db.AvlysPrivatTime(eventID, userID, naa); err != nil {
+	if err := db.AvlysPrivatTime(eventID, userID, nå); err != nil {
 		t.Fatalf("avlysing: %v", err)
 	}
 
 	if att := ptAtt(t, db, userID); att != 5 {
 		t.Errorf("klippet kom ikkje attende: %d att", att)
 	}
-	var paameld int
+	var påmeld int
 	db.Conn.QueryRow(`SELECT COUNT(*) FROM event_signups WHERE event_id=? AND user_id=?`,
-		eventID, userID).Scan(&paameld)
-	if paameld != 0 {
+		eventID, userID).Scan(&påmeld)
+	if påmeld != 0 {
 		t.Errorf("paameldingi stend att")
 	}
 
@@ -136,8 +136,8 @@ func TestAvlystPrivatTimeGjevKlippAttOgMelder(t *testing.T) {
 	if m.Slag != MeldingAvlystPrivat {
 		t.Errorf("slaget var %q", m.Slag)
 	}
-	if m.FraaNamn != "Angrar" {
-		t.Errorf("fraa var %q", m.FraaNamn)
+	if m.FråNamn != "Angrar" {
+		t.Errorf("fraa var %q", m.FråNamn)
 	}
 	if m.TilNamn != "Leon" {
 		t.Errorf("meldingi fann ikkje læraren som sette timen upp: %q", m.TilNamn)
@@ -148,7 +148,7 @@ func TestAvlystPrivatTimeGjevKlippAttOgMelder(t *testing.T) {
 
 	// Handsama tek henne ut or fana, men ho vert ikkje sletta: ei tom
 	// fana tyder «ingen ting ventar», ikkje «ingen ting hev hendt».
-	if err := db.HandsamaMelding(m.ID, naa); err != nil {
+	if err := db.HandsamaMelding(m.ID, nå); err != nil {
 		t.Fatalf("handsaming: %v", err)
 	}
 	if att, _ := db.VentandeMeldingar(); len(att) != 0 {

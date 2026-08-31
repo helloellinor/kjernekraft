@@ -5,55 +5,53 @@ import (
 	"time"
 )
 
-// Meldingane.
+// Notices.
 //
-// Noko hender som eit menneske lyt vita um, og som ingi spurning i huset
-// ville ha funne av seg sjølv: nokon segjer fraa seg ei PT-økt som er
-// sett av til honom. Timen stend att tom, læraren hev sett av tidi, og
-// utan ei melding er det ingen som veit det fyre nokon møter upp.
+// Something happens that a person needs to know about and that no query in
+// the house would find on its own: someone gives up a PT session set aside
+// for them. The class stands empty, the teacher has reserved the time, and
+// without a notice nobody knows until someone turns up.
 //
-// Ho er lagra og ikkje send. Det er med vilje, og det er tvo ting:
+// It is stored, not sent. Deliberately, for two reasons:
 //
-//   - Ei melding som berre vert send er ei melding som er burte um
-//     sendingi feilar. Denne stend i basen til nokon hev sagt at ho er
-//     handsama, og fana «Meldingar» i administrasjonen er der ho vert
-//     lesi.
-//   - `sendt` er søkket for ein e-postsendar som ikkje finst enno. Naar
-//     han kjem, er arbeidet hans ei spurning etter rader der `sendt` er
-//     NULL — og ingen ting anna i huset treng røra seg. Kolonna er
-//     tom til det hender.
+//   - A notice that is only sent is gone if the sending fails. This one
+//     stands in the database until someone marks it handled, and the
+//     Meldingar tab is where it is read.
+//   - `sendt` is the socket for an email sender that does not exist yet.
+//     When it arrives, its job is a query for rows where sendt is NULL —
+//     and nothing else in the house has to move.
 //
-// `slag` er kva som hende. Han er der fraa fyrste dagen med éin verdi,
-// av di ein sendar som lyt vita kva han sender er ein sendar som lyt
-// endrast for kvar ny ting som kann henda.
+// `slag` is what happened. It is there from day one with a single value,
+// because a sender that has to know what it is sending is a sender that
+// has to change for every new thing that can happen.
 const (
-	// MeldingAvlystPrivat: den eine hev sagt fraa seg økta si.
+	// MeldingAvlystPrivat: the one person gave up their session.
 	MeldingAvlystPrivat = "avlyst-privattime"
 )
 
-// utfoerar er det vesle av *sql.DB og *sql.Tx meldingi treng, so ho kann
-// skrivast i den same transaksjonen som det ho fortel um. Ei melding um
-// noko som so vart rulla attende er verre enn ingi melding. Syskenet
-// `rader` gjer det same for spurningar (klippbruk.go).
+// utfoerar is the small part of *sql.DB and *sql.Tx a notice needs, so it
+// can be written in the same transaction as what it reports. A notice about
+// something that then rolled back is worse than no notice. Its sibling
+// `rader` does the same for queries (klippbruk.go).
 type utfoerar interface {
 	Exec(string, ...any) (sql.Result, error)
 }
 
-// Melding er ei rad i fana. Tittelen og tidi er skrivne av *her* og
-// ikkje slegne upp naar ho vert lesi: timen kann vera avlyst, flutt
-// eller sletta i millomtidi, og meldingi skal framleis fortelja kva som
-// hende — ikkje kva som stend no.
+// Melding is a row in the tab. The title and the time are written down
+// *here* rather than looked up when it is read: the class may have been
+// cancelled, moved or deleted meanwhile, and the notice should still say
+// what happened — not what stands now.
 type Melding struct {
 	ID        int64
 	Slag      string
 	EventID   int64
 	Tittel    string
 	TimeStart time.Time
-	// Den som sa fraa seg timen, og læraren som sette honom upp.
-	FraaNamn  string
-	FraaEpost string
-	TilNamn   string
-	Laga      time.Time
+	// The one who gave up the class, and the teacher who set it up.
+	FråNamn  string
+	FråEpost string
+	TilNamn  string
+	Laga     time.Time
 }
 
 func MigrerMeldingar(db *sql.DB) error {
@@ -72,20 +70,20 @@ func MigrerMeldingar(db *sql.DB) error {
 	return err
 }
 
-// LagMelding skriv meldingi. `til` er læraren som sette timen upp; null
-// naar timen er eldre enn den kolonna og ingen veit kven det var.
-// Administrasjonen ser henne uansett — fana er alt det dei ser.
-func (db *Database) LagMelding(q utfoerar, slag string, eventID, fraa int64, til sql.NullInt64,
-	tittel string, timestart, naa time.Time) error {
+// LagMelding writes the notice. `til` is the teacher who set the class up;
+// null when the class predates that column and nobody knows who it was.
+// The admins see it either way — the tab is all they see.
+func (db *Database) LagMelding(q utfoerar, slag string, eventID, frå int64, til sql.NullInt64,
+	tittel string, timestart, nå time.Time) error {
 	_, err := q.Exec(`
 		INSERT INTO meldingar (slag, event_id, fraa_user_id, til_user_id, tittel, timestart, laga)
 		VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		slag, eventID, fraa, til, tittel, veggtekst(timestart), veggtekst(naa))
+		slag, eventID, frå, til, tittel, veggtekst(timestart), veggtekst(nå))
 	return err
 }
 
-// VentandeMeldingar er dei som ikkje er handsama. Rekkjefylgdi er den
-// nyaste fyrst: det som nett hende er det ein kann gjera noko med.
+// VentandeMeldingar are the unhandled ones, newest first: what just
+// happened is what you can still do something about.
 func (db *Database) VentandeMeldingar() ([]Melding, error) {
 	rows, err := db.Conn.Query(`
 		SELECT m.id, m.slag, m.event_id, m.tittel, m.timestart, m.laga,
@@ -105,7 +103,7 @@ func (db *Database) VentandeMeldingar() ([]Melding, error) {
 		var m Melding
 		var start, laga string
 		if err := rows.Scan(&m.ID, &m.Slag, &m.EventID, &m.Tittel, &start, &laga,
-			&m.FraaNamn, &m.FraaEpost, &m.TilNamn); err != nil {
+			&m.FråNamn, &m.FråEpost, &m.TilNamn); err != nil {
 			return nil, err
 		}
 		m.TimeStart, _ = time.Parse("2006-01-02 15:04:05", start)
@@ -115,12 +113,12 @@ func (db *Database) VentandeMeldingar() ([]Melding, error) {
 	return ut, rows.Err()
 }
 
-// HandsamaMelding tek meldingi ut or fana. Ho vert ikkje sletta: det som
-// hende, hende, og ei tom fana skal tyda «ingen ting ventar» og ikkje
-// «ingen ting hev hendt».
-func (db *Database) HandsamaMelding(id int64, naa time.Time) error {
+// HandsamaMelding takes the notice out of the tab. It is not deleted: what
+// happened, happened, and an empty tab should mean "nothing is waiting",
+// not "nothing has happened".
+func (db *Database) HandsamaMelding(id int64, nå time.Time) error {
 	_, err := db.Conn.Exec(
 		`UPDATE meldingar SET handsama = ? WHERE id = ? AND handsama IS NULL`,
-		veggtekst(naa), id)
+		veggtekst(nå), id)
 	return err
 }

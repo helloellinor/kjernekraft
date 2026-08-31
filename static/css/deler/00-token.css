@@ -1,127 +1,110 @@
 /* ===================================================================
-   Kjernekraft — arket
+      Kjernekraft — the sheet
+   
+      The principles are the ones from measuring instruments: hairlines
+      instead of boxes, one colour on the whole sheet, and the colour means
+      something. The subject is different — a studio is not a dictionary.
+   
+      The sheet is limestone: cool, light, slightly grey-green. The ink is
+      near black with the same green in it, so it belongs to the surface
+      rather than lying on top of it. The brand colour is pine, and it
+      stands only where something *is alive*: a membership that runs, a
+      klippekort with clips left, a class you are signed up for. Everything
+      else — frozen, expired, pending — gets weight and form instead of
+      colour.
+   
+      Shadows do not exist here. What separates a card from the sheet is a
+      one-pixel line. What floats — a dropdown, a dialog — gets a shadow,
+      because it *actually* lies above.
+      =================================================================== */
 
-   Prinsippi er dei same som i maalverktoy: hårfine linor i staden for
-   kassar, éin farge paa heile arket, og fargen tyder noko. Tilfanget er
-   eit anna — eit studio er ikkje ei ordbok.
-
-   Arket er kalkstein: kjøld, ljos, litt graagrøn. Blekket er mest svart
-   med same grøne draget i seg, so det høyrer til flata og ikkje ligg
-   uppaa henne. Merkefargen er furu, og han stend berre der noko *er i
-   live*: eit medlemskap som gjeng, eit klippekort som enno hev klipp,
-   ein time du er paameld. Alt anna — frose, utgjenge, ventande — fær
-   vekt og form i staden for farge.
-
-   Skuggar finst ikkje her. Det som skil eit kort fraa arket er ei lina
-   paa éin piksel. Det som flyt — ei nedfallsliste, ein dialog — fær
-   skugge, av di det *faktisk* ligg yver.
-   =================================================================== */
-
-/* ---- skrifterne ----
-   Ubuntu, sjølvvertsett. Ikkje eit einaste kall ut paa netet: sida skal
-   sjaa lik ut same kvar ho vert opna, og ho skal teikna seg ferdig
-   jamvel naar studioet sitt nett ligg nede. Smale utsnitt — latinsk
-   pluss dei nordiske teikni — so alle fem skriftene til saman er under
-   180 kB. Ubuntu Condensed ber yverskriftene; Ubuntu Mono ber tal som
-   skal staa i kolonne. */
+/* ---- the faces ----
+      Um `font-display`: dei tvo som base.html lastar på fyrehand
+      (Ubuntu-R og Union Gothic) hev `optional`. Dei er komne fyre fyrste
+      teikning, so dei vert nytta med ein gong — og skulde dei mot form
+      ikkje vera det, byter dei seg *ikkje* inn etterpå, og sida slepp å
+      brekka um att medan du les.
+      Dei fire hine er ikkje lasta på fyrehand og hev `fallback`: eit
+      kort blokkevindauga, tri sekund der dei framleis kann koma, og so
+      er det avgjort. `swap`, som stod her, gav dei lov til å bryta
+      umbrekkingi kva tid som helst. */
+      Ubuntu, self-hosted. Not a single call out to the network: the page
+      should look the same wherever it is opened, and should finish drawing
+      even when the studio's connection is down. Narrow subsets — Latin plus
+      the Nordic characters — so all five faces together are under 180 kB.
+      Ubuntu Condensed carries the headings; Ubuntu Mono carries numbers
+      that stand in columns. */
 @font-face {
   font-family: "Ubuntu"; src: url("/static/fonts/Ubuntu-R.woff2") format("woff2");
-  font-weight: 400; font-style: normal; font-display: swap;
+  font-weight: 400; font-style: normal; font-display: optional;
 }
 @font-face {
   font-family: "Ubuntu"; src: url("/static/fonts/Ubuntu-M.woff2") format("woff2");
-  font-weight: 500; font-style: normal; font-display: swap;
+  font-weight: 500; font-style: normal; font-display: fallback;
 }
 @font-face {
   font-family: "Ubuntu"; src: url("/static/fonts/Ubuntu-B.woff2") format("woff2");
-  font-weight: 700; font-style: normal; font-display: swap;
+  font-weight: 700; font-style: normal; font-display: fallback;
 }
 @font-face {
   font-family: "Ubuntu Condensed"; src: url("/static/fonts/Ubuntu-C.woff2") format("woff2");
-  font-weight: 400; font-style: normal; font-display: swap;
+  font-weight: 400; font-style: normal; font-display: fallback;
 }
-/* Union Gothic ber yverskriftene. Han hev tvo aksar — breidd 50–200 og
-   vekt 400–1000 — og det er heile poenget med honom: breiddi kann tyda
-   noko, ikkje berre pynta.
+/* Union Gothic carries the headings. It has two axes — width 50–200 and
+      weight 400–1000 — and that is the point of it: width can mean
+      something rather than only decorate.
    
-   MELLOMBILS. Fila er CC BY-NC-ND og ligg difor i .gitignore: ho skal
-   ikkje fylgja med ut or maskini. Manglar ho, fell alt attende paa
-   Ubuntu Condensed av seg sjølv, og sida ser framleis rett ut. Naar ei
-   lisensiert skrift kjem, er det denne eine blokki som vert bytt. */
+      TEMPORARY. The file is CC BY-NC-ND and is therefore in .gitignore: it
+      must not travel out of this machine. If it is missing, everything
+      falls back to Ubuntu Condensed by itself and the page still looks
+      right. When a licensed face arrives, this one block is what changes. */
 @font-face {
   font-family: "Union Gothic"; src: url("/static/fonts/UnionGothic-Variable.woff2") format("woff2-variations"),
                                     url("/static/fonts/UnionGothic-Variable.woff2") format("woff2");
-  font-weight: 400 1000; font-stretch: 50% 200%; font-style: normal; font-display: swap;
+  font-weight: 400 1000; font-stretch: 50% 200%; font-style: normal; font-display: optional;
 }
 @font-face {
   font-family: "Ubuntu Mono"; src: url("/static/fonts/UbuntuMono-R.woff2") format("woff2");
-  font-weight: 400; font-style: normal; font-display: swap;
+  font-weight: 400; font-style: normal; font-display: fallback;
 }
 
-/* ---- tokeni ----
-   Alle fargar stend her og ingen annan stad. Finn du eit hex-tal ute i
-   ein komponent, er det ein feil: det verkar i eitt av dei tvo temaom
-   og lyg i det hine.
-
-   Veljarane tek med [data-theme] paa kva element som helst, ikkje berre
-   paa rot-elementet. Eit tema er daa noko ein kann setja paa ein bolk:
-   verkstaden paa /arket set ljost og myrkt attmed kvarandre paa den
-   same sida, og det gjeng berre naar tokeni kann bu paa ein div. */
+/* ---- the tokens ----
+      Every colour stands here and nowhere else. A hex value out in a
+      component is a bug: it works in one of the two themes and lies in the
+      other.
+   
+      The selectors take [data-theme] on any element, not only the root. A
+      theme is then something you can set on a section: the workshop at
+      /arket puts light and dark side by side on one page, and that only
+      works when the tokens can live on a div. */
 :root, [data-theme="light"] {
-  /* ---- kva nettlesaren skal teikna sine eigne ting i ----
-     Alt me teiknar sjølve les tokeni yver. Men nokre ting teiknar
-     nettlesaren, og dei les *ikkje* tokeni: rullefelt, nedfallslista
-     aat ein `select`, dato- og klokkeveljarane, krysset i eit
-     søkjefelt — og `buttontext`, som er blekket ein `<button>` fær um
-     ingen segjer noko anna.
-
-     Utan denne lina er alt det ljost same kva temaet er. `buttontext`
-     er svart, og eit ord i ein knapp som ingen hev gjeve farge stend
-     daa svart paa myrk grunn. Det hende: klokka i timeserielista
-     (`.serienaar`) var uleseleg i myrkt tema, av di rada er ein
-     `<button>` med klasse og difor fell utanum baade `.btn`-fylgjet og
-     `button:not([class])` (ARKET §9).
-
-     Ho er arvd, so ho fylgjer `[data-theme]` paa kva element som helst,
-     som tokeni gjer — og /arket kann syna baae tema paa éi side. */
+  /* ---- what the browser draws its own things in ----
+          Everything we draw ourselves reads the tokens above. But some things
+          the browser draws, and those do *not* read them: scrollbars, a
+          select's dropdown, the date and time pickers, the clear cross in a
+          search field — and buttontext, the ink a <button> gets when nobody
+          says otherwise.
+     
+          Without this line all of that stays light whatever the theme.
+          buttontext is black, so a word in a button nobody has coloured
+          stands black on a dark ground. It happened: the clock in the series
+          list (.serienaar) was unreadable in dark, because the row is a
+          <button> with a class and so falls outside both the .btn group and
+          button:not([class]) (ARKET §9).
+     
+          It inherits, so it follows [data-theme] on any element as the tokens
+          do — and /arket can show both themes on one page. */
   color-scheme: light;
 
-  /* ---- verdi, og so tydingane ----
-     Kvar flat farge stend éin gong, med `--l-` for ljost og `--m-` for
-     myrkt (nedst i blokki). Dei fire tema-blokkene under les deim og
-     gjev deim tyding. Fyrr stod verdi skrivne inn i kvar blokk, og den
-     myrke blokki var skrivi tvo gonger ord for ord — dei hadde alt
-     drive fraa kvarandre i innrykk (ARKET §10.4, utført 28.8.2026).
-
-     Dei *avleidde* — --merke, --merke-svak, --togu-svak, --tuneup-svak,
-     --glodkjerne — stend framleis i kvar blokk: prosenttalet er eit
-     anna i myrkret (18 % mot 12 %), so dei kann ikkje delast. */
-  --l-ark:        #edeeea;
-  --l-ark-djup:   #e4e6e1;
-  --l-flate:      #f5f6f3;
-  --l-blekk:      #1c1f1b;
-  --l-blekk-lys:  #565b54;
-  --l-blekk-svakt:#868b83;
-  --l-haarlina:   #cfd2cb;
-  --l-kant:       #bec2b9;
-  --l-togu:       #d6006e;
-  --l-klas:       #00908c;
-  --l-tuneup:     #6d2e9e;
-  --l-fjellraeven: #c8901a;
-  --l-student:    #8a6a00;
-  --l-svartkort:  #0b0d0a;
-  --l-merke-lys:  #00a8a2;
-  --l-aatvaring:  #8c3a2b;
-  --l-aatvaring-svak: #f0e0dc;
-  --l-glans:      color-mix(in srgb, #fff 55%, transparent);
-  --l-glans-svak: color-mix(in srgb, #fff 14%, transparent);
-  --l-glans-farga:color-mix(in srgb, #fff 55%, transparent);
-  --l-lippe-djup: color-mix(in srgb, var(--ned) 22%, transparent);
-  --l-lippe-ljos: color-mix(in srgb, var(--upp) 55%, transparent);
-  --l-skugge-flytande: 0 6px 20px rgb(28 31 27 / .14);
-  --l-skugge-kort:
-    0 1px 2px rgb(28 31 27 / .07),
-    0 6px 14px -3px rgb(28 31 27 / .13);
+  /* ---- the meanings ----
+          The values live in 00-palett.css: each flat colour once, --l- for
+          light and --m- for dark. The four blocks here give them meaning and
+          do nothing else.
+     
+          The *derived* ones — --merke, --merke-svak, --togu-svak,
+          --tuneup-svak, --glodkjerne — still stand in each block: the
+          percentage is different in the dark (18 % against 12 %), so they
+          cannot be shared. */
   /* flatone */
   --ark:        var(--l-ark);
   --ark-djup:   var(--l-ark-djup);
@@ -132,46 +115,48 @@
   --blekk-lys:  var(--l-blekk-lys);
   --blekk-svakt:var(--l-blekk-svakt);
 
-  /* linone. --haarlina teiknar eit kort; --kant skil tvo bolkar. */
+  /* the lines. --haarlina draws a card; --kant separates two sections. */
   --haarlina:   var(--l-haarlina);
   --kant:       var(--l-kant);
 
-  /* ---- fargane ----
-     Dei er tekne av tingi som ligg i salen: den rosa Togu-ballen, den
-     turkise sprayflaska, den lilla Tune Up-ballen. Det er ikkje pynt —
-     det er dei tri tingi studioet sel, og kvar farge er eitt av deim:
-
-       turkis  medlemskapet   — det som gjeng og gjeng
-       rosa    klippekortet   — det som vert talt
-       lilla   kurs, PT og rettleiding — det som hender ein gong
-
-     Fargen segjer *kva*. Forma segjer *korleis*: fylt, open, streka,
-     prikka. Dei tvo ligg paa kvar sin kanal og kolliderer difor ikkje.
-
-     Merket er turkisen: han er den rolegaste av dei tri og toler aa
-     staa paa knappar og lenkjor heile dagen. */
+  /* ---- the colours ----
+          They are taken from the things lying in the studio: the pink Togu
+          ball, the turquoise spray bottle, the purple Tune Up ball. That is
+          not decoration — they are the three things the studio sells, and
+          each colour is one of them:
+     
+            turquoise  the membership   — the thing that keeps running
+            pink       the klippekort   — the thing that is counted
+            purple     courses, PT, guidance — the thing that happens once
+     
+          Colour says *what*. Form says *how*: filled, open, ruled, dotted.
+          The two lie on separate channels and therefore never collide.
+     
+          The mark is the turquoise: the calmest of the three, and it can
+          stand on buttons and links all day. */
   --togu:       var(--l-togu);
   --klas:       var(--l-klas);
   --tuneup:     var(--l-tuneup);
-  /* Fjällräven-gul. Fjerde slaget trening, naar dei tri produktfargane
-     er upptekne av produkt. Ochre og ikkje sitron: han skal halda seg
-     paa kalksteinen utan aa skrika, og han skal ha nok blekk til aa
-     lesast mot arket. */
-  --fjellraeven: var(--l-fjellraeven);
+  /* The kind of training, not the product it is paid with. These have
+     their own values in 00-palett.css, so the fix §1 asks for is eight
+     lines in one file. The kind-to-colour map is there too. */
+  --slag-fascia:   var(--l-slag-fascia);
+  --slag-yoga:     var(--l-slag-yoga);
+  --slag-pilates:  var(--l-slag-pilates);
+  --slag-reformer: var(--l-slag-reformer);
   --student:    var(--l-student);
 
-  /* Det tildelte medlemskapet — Black. Han er ikkje eit produkt ein
-     kjøper, so han deler ikkje farge med dei tri: han *er* svart, og
-     namnet er heile identiteten.
-
-     Han kann ikkje vera den same verdien i baae tema. Ekte svart paa
-     mørkt ark er ingen ting — kortet hadde mist kanten sin og vorte
-     eit kort utan slag. So: svart blekk paa ljost ark, og folie paa
-     mørkt. Det er den same tingen sedd i tvo ljos, og i baae les han
-     som det djupaste kortet i huset.
-
-     Ljosare enn `--blekk` i mørkt tema med vilje: er han lik brødteksti,
-     les kanten som tekst og ikkje som eit slag. */
+  /* The assigned membership — Black. It is not a product you buy, so it
+          shares no colour with the three: it *is* black, and the name is the
+          whole identity.
+     
+          It cannot be the same value in both themes. True black on a dark
+          sheet is nothing — the card would lose its edge. So: black ink on a
+          light sheet, foil on a dark one. The same thing seen in two lights,
+          and in both it reads as the deepest card in the house.
+     
+          Lighter than --blekk in dark deliberately: equal to the body text,
+          the edge reads as text rather than as a kind. */
   --svartkort:  var(--l-svartkort);
 
   --merke:      var(--klas);
@@ -180,32 +165,32 @@
   --togu-svak:   color-mix(in srgb, var(--togu) 12%, var(--ark));
   --tuneup-svak: color-mix(in srgb, var(--tuneup) 12%, var(--ark));
 
-  /* Aatvaringi er ikkje merket. Ho stend berre paa noko som gjekk gale
-     eller ikkje kann gjerast um att, og difor lyt ho vera ein annan
-     farge — elles tyder merket tvo ting. */
+  /* The warning is not the brand. It stands only on something that went
+          wrong or cannot be undone, and so has to be a different colour —
+          otherwise the brand means two things. */
   --aatvaring:  var(--l-aatvaring);
 
   /* Slagfargen. Kva *slag* trening timen er — ikkje kva produkt han
      vert betalt med. Sjaa kartet nedanfor `:root`-blokkene. */
 
-  /* Kjernen i ljosbandet under hovudet. Ljos paa papir er ikkje kvitt —
-     det er *metting*: streken vert djupare der lampa stend, ikkje ljosare.
-     I myrkret er det andre vegen, og daa er kjernen utbrend mot kvitt.
-     Sjaa .header::before. */
+  /* The core of the light band under the header. Light on paper is not
+          white — it is *saturation*: the stroke goes deeper where the lamp
+          stands, not lighter. In the dark it is the other way round, and then
+          the core is blown out toward white. See .header::before. */
   --glodkjerne: color-mix(in srgb, var(--merke) 72%, #000);
 
-  /* Flata i ei lukka fana. Han er rekna av blekket og arket, so han
-     fylgjer temaet av seg sjølv og skal ikkje skrivast um att. */
+  /* The surface of a closed tab. It is computed from the ink and the sheet,
+          so it follows the theme by itself and must not be rewritten. */
   --faneflate: color-mix(in srgb, var(--blekk) 6%, var(--ark));
   --aatvaring-svak: var(--l-aatvaring-svak);
 
   /* skriftene */
   --skrift-yver: "Union Gothic", "Ubuntu Condensed", "Ubuntu", ui-sans-serif, system-ui, sans-serif;
 
-  /* ---- breiddetrappa ----
-     Breiddi tyder rang. Det vidaste stend øvst i hierarkiet og det
-     smalaste nedst, so ein ser kva som er kva fyre ein hev lese eit ord.
-     Ein merkelapp skal ikkje taka meir plass enn han er verd. */
+  /* ---- the width ladder ----
+          Width means rank. The widest stands highest in the hierarchy and the
+          narrowest lowest, so you see what is what before reading a word. A
+          label must not take more room than it is worth. */
   --vidd-tittel:  125%;   /* kvar du er */
   --vidd-yver:    105%;   /* yverskrift i sida */
   --vidd-leiding:  90%;   /* leidingi */
@@ -213,81 +198,80 @@
   --skrift:      "Ubuntu", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --skrift-tal:  "Ubuntu Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* ---- rundingi ----
-     Tvo verd, og skiljet er kva tingen *er*.
-
-     `--rund` er arket og alt som er laga av det: kort, felt, faner,
-     merke. To pikslar — ei kant som er broti, ikkje ei runding. Regelen
-     i stilboki gjeld desse: ingen rundingar utyver det vesle.
-
-     `--rund-knapp` er kontrollane. Ein knapp er ikkje eit ark. Han er
-     ein fysisk ting som ligg *paa* arket og ventar paa fingeren, og
-     difor er han forma som noko ein trykkjer paa: ein kapsel. Det er
-     den same tanken som gamle knappar hadde — pilleforma — men utan
-     glansen og hovdingi, som FASETTEN §6 alt hev sagt nei til.
-
-     To verd, tvo tydingar. Alt anna er drift. */
+  /* ---- the radius ----
+          Two values, and the distinction is what the thing *is*.
+     
+          --rund is the sheet and everything made of it: cards, fields, tabs,
+          marks. Two pixels — an edge that is broken, not a rounding.
+     
+          --rund-knapp is the controls. A button is not a sheet. It is a
+          physical thing lying *on* the sheet waiting for a finger, and so it
+          is shaped like something you press: a capsule. The same idea old
+          buttons had — pill-shaped — but without the gloss and the bevel,
+          which FASETTEN §6 has already refused.
+     
+          Two values, two meanings. Anything else is drift. */
   --rund:       2px;
   --rund-knapp: 999px;
 
-  /* ---- glansen ----
-     Knappen er den eine tingen i huset med djupn utyver fasetten, og
-     han hev henne av di han er den eine tingen som er ein *ting* og
-     ikkje papir. Ljoset kjem ovanfraa, som overalt elles: han er ljosare
-     i yverkanten, mørkare mot foten, og det fell eit glim paa den øvre
-     halvdelen.
-
-     Tali er lave med vilje. Ein glans paa 55 % er ei kvelv; ein paa 90 %
-     er plast. */
+  /* ---- the gloss ----
+          The button is the one thing in the house with depth beyond the
+          bevel, and it has it because it is the one thing that is a *thing*
+          and not paper. The light comes from above, as everywhere else:
+          lighter at the top edge, darker toward the foot, with a highlight on
+          the upper half.
+     
+          The numbers are low on purpose. A gloss at 55 % is a dome; one at
+          90 % is plastic. */
   --glans:       var(--l-glans);
   --glans-svak:  var(--l-glans-svak);
 
-  /* ---- glansen paa ein *farga* kropp ----
-     Talet ovanfor er maalt mot papiret: 20 % kvitt paa ei mest svart
-     flate gjev det same draget som 55 % gjev paa ei ljos. Ein pinne, ei
-     kula og ein bjelke er ikkje papir. Dei ber ein slag- eller
-     produktfarge, og i det myrke temaet er den fargen *ljos* — `--klas`
-     stend paa L* 78 der han stend paa L* 54 i det ljose — so kvitt hev
-     mest ingen stad aa gjera av seg. Maalt paa den fulle pinnen: glimet
-     drog ΔL +17 i det ljose og +2,5 i det myrke. Det er ikkje ei kula
-     med mindre ljos paa seg; det er ei farga skiva med ein skugge paa.
-
-     Difor eit eige tal for dei farga kroppane. 55 % i det ljose er det
-     same som fyrr, so det ljose temaet stend urørt; 40 % i det myrke
-     gjev ΔL +5,5 paa den fulle pinnen og +19 paa den veike. Den veike
-     fær meir enn han fær i det ljose (+7), og det er rett veg: ein myrk
-     kropp hev meir rom yver seg enn ein ljos, og det er nettupp difor
-     eitt tal ikkje kann tena baae flatene.
-
-     Den myrke sida — `--ned` i `--glim-rund` — stend som ho stod. Ho
-     hadde spelerom nok fraa fyrst av (ΔL -23 i myrkret mot -17 i det
-     ljose); det som mangla var ljoset, ikkje skuggen.
-
-     `--glans` sjølv er urørt og gjeld framleis alt som ligg paa ein
-     *papirfarga* kropp: knappen, veljaren, den valde fana og glaset i
-     dagmerket. Sjaa ARKET §2. */
+  /* ---- the gloss on a *coloured* body ----
+          The number above is measured against paper: 20 % white on a nearly
+          black surface gives the same lift 55 % gives on a light one. A peg,
+          a ball and a bar are not paper. They carry a kind or product colour,
+          and in the dark theme that colour is *light* — --klas sits at L* 78
+          where it sits at L* 54 in the light — so white has almost nowhere to
+          go. Measured on the full peg: the highlight drew ΔL +17 in light and
+          +2.5 in dark. That is not a ball with less light on it; it is a
+          coloured disc with a shadow.
+     
+          Hence a separate number for coloured bodies. 55 % in light is what
+          it was, so the light theme is untouched; 40 % in dark gives ΔL +5.5
+          on the full peg and +19 on the faint one. The faint one gets more
+          than it gets in light (+7), and that is the right direction: a dark
+          body has more room above it than a light one, which is exactly why
+          one number cannot serve both grounds.
+     
+          The dark side — --ned in --glim-rund — stands as it stood. It had
+          room enough from the start (ΔL -23 in dark against -17 in light);
+          what was missing was the light, not the shadow.
+     
+          --glans itself is untouched and still governs everything lying on a
+          *paper-coloured* body: the button, the select, the selected tab and
+          the glass on the day mark. See ARKET §2. */
   --glans-farga: var(--l-glans-farga);
 
-  /* ---- sola ----
-     Ljoset kjem ovanfraa og til venstre, og *dette er talet*. Bjelkane
-     sette han fyrst — glimet deira toppar paa 34 % av breiddi — og daa
-     lyt kvar annan rund og heva ting i det same biletet taka speglingi
-     si fraa den same staden. Tvo ting attmed kvarandre kann ikkje ha
-     kvar si sol.
-
-     Han stend i *prosent* og ikkje i px: den same pinnen er 11 px i
-     skalaen under brettet og 20 px paa brettet, og ljoset lyt sitja
-     likt paa baae. */
+  /* ---- the sun ----
+          The light comes from above and to the left, and *this is the
+          number*. The bars set it first — their highlight peaks at 34 % of
+          the width — so every other round or raised thing in the same picture
+          takes its reflection from the same place. Two things side by side
+          cannot each have their own sun.
+     
+          It is in *percent* and not px: the same peg is 11 px in the scale
+          under the board and 20 px on the board, and the light has to sit the
+          same way on both. */
   --sol: 34% 22%;
 
-  /* ---- glansen paa ei kula ----
-     Tvo lag, og baae lyt vera med. Fyrst speglingi: brei og mjuk — eit
-     lite kvast punkt gjer ein ting *flatare* og ikkje rundare. So
-     kroppen, og det er *han* som gjer kula rund.
-
-     Vidddi er sett (82 % 82 %) og ikkje reikna av seg sjølv: med
-     `farthest-corner` hadde 100 % lege i hyrna paa kassen, langt
-     utanfor sirkelen, og den mørkaste tonen aldri vorte synleg. */
+  /* ---- the gloss on a ball ----
+          Two layers, and both are needed. First the specular: broad and soft
+          — a small sharp point makes a thing *flatter*, not rounder. Then the
+          body, and it is *that* which makes the ball round.
+     
+          The width is set (82 % 82 %) and not left to itself: with
+          farthest-corner, 100 % would lie in the corner of the box far
+          outside the circle, and the darkest tone would never be seen. */
   --glim-rund:
     radial-gradient(ellipse 62% 50% at var(--sol),
       color-mix(in srgb, var(--glans-farga) 72%, transparent) 0%,
@@ -300,15 +284,15 @@
       color-mix(in srgb, var(--ned) 19%, transparent) 78%,
       color-mix(in srgb, var(--ned) 32%, transparent) 100%);
 
-  /* ---- glansen paa ein kapsel ----
-     Den same sola, den same tanken, ei onnor form. Ein kapsel er ein
-     *liggjande sylinder*: han fangar ljoset i ein strek og ikkje i eit
-     punkt, so speglingi er ein brei flat oval — ikkje det gamle bandet
-     tvers yver heile breiddi, som var flatt av di det ikkje visste noko
-     um forma under seg. Endane bøygjer seg burt fraa ljoset.
-
-     Rimet — den tunne ljose lina langs toppen — bur i `--knappedjup` og
-     ikkje her. Det er *han* som gjer tingen vaat. */
+  /* ---- the gloss on a capsule ----
+          The same sun, the same idea, another form. A capsule is a *lying
+          cylinder*: it catches light in a line and not at a point, so the
+          specular is a wide flat oval — not the old band straight across the
+          full width, which was flat precisely because it knew nothing of the
+          form beneath it. The ends curve away from the light.
+     
+          The rim — the thin bright line along the top — lives in --knappedjup
+          and not here. It is *that* which makes the thing look wet. */
   --glim-kapsel:
     radial-gradient(ellipse 42% 78% at var(--sol),
       color-mix(in srgb, var(--glans) 78%, transparent) 0%,
@@ -332,51 +316,50 @@
   /* Pila i ein veljar. Ho stend som eit token av di kvar stad som tek
      glansen av att lyt kunna setja henne attende aaleine. */
   --pil: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
-  /* ---- rommet pila treng ----
-     Pila er tvo trekantar som er skuva ein kvart rem fraa kvarandre, og
-     teksti i veljaren lyt stogga fyre den vinstre av dei. Det er tvo
-     tal som lyt fylgjast aat — kvar pila stend, og kor mykje fyll som
-     held teksti unna henne — og dei stod skrivne kvar for seg fire
-     stader i huset:
-
-       grunnstilen        pila 1,05/0,80 rem, fyll 1,5 rem   → 2,2 px glipe
-       `.setning`         pila 0,85/0,60 rem, fyll 1,25 rem  → 1,4 px glipe
-       `.sikt`            pila 0,55/0,35 rem, fyll 1,25 rem
-       maalveljaren       pila 0,45/0,25 rem, fyll 1,25 rem
-
-     Fire gissingar paa den same tingen, og dei tvo fyrste so trongt at
-     pila stend inntil bokstaven. Paa ein telefon, der setningi bryt og
-     veljaren vert klemd, les det seg som eit samanstøyt.
-
-     No er det eitt tal: `--pil-inn` er kvar pila stend, og `--pilrom`
-     er fyllet som fylgjer av det. Fyllet kann ikkje drifta fraa pila
-     lenger, av di det er rekna av henne. */
+  /* ---- the room the arrow needs ----
+          The arrow is two triangles offset a quarter rem from each other, and
+          the text in the select has to stop before the left one. That is two
+          numbers that have to move together — where the arrow stands, and how
+          much padding keeps the text off it — and they were written out
+          separately in four places:
+     
+            base style      arrow 1.05/0.80 rem, padding 1.5 rem   → 2.2 px gap
+            .setning        arrow 0.85/0.60 rem, padding 1.25 rem  → 1.4 px gap
+            .sikt           arrow 0.55/0.35 rem, padding 1.25 rem
+            language picker arrow 0.45/0.25 rem, padding 1.25 rem
+     
+          Four guesses at the same thing, and the first two so tight the arrow
+          stands against the letter. On a phone, where the sentence wraps and
+          the select is squeezed, it reads as a collision.
+     
+          One number now: --pil-inn is where the arrow stands, and --pilrom is
+          the padding that follows from it. The padding can no longer drift
+          from the arrow, because it is computed from it. */
   --pil-storleik: 5px;
   --pil-inn: .8rem;
   --pil-glipe: var(--rom-2);
   --pilrom: calc(var(--pil-inn) + .25rem + var(--pil-storleik) + var(--pil-glipe));
 
 
-  /* ---- lippone ----
-     Skraakanten sine tvo kantar. `--ned` og `--upp` er ikkje fargar,
-     dei er ei *retning*: ljoset kjem ovanfraa i baae temaom, og tyngdi
-     snur ikkje naar fargane gjer det. Var lippone rekna av `--blekk` og
-     `--flate`, snudde dei baae i det myrke temaet, og eit hol med ljos
-     yverkant og myrk fot er ein knott.
-
-     Dette er ikkje eit nytt paafunn: `--glans` ovanfor gjer alt det
-     same, og av same grunnen — glimet paa knappen kjem ovanfraa i baae
-     temaom. Skraakanten fylgjer honom, og han gjev ogso talet: glansen
-     fell fraa 55 % til 20 % i det myrke, av di ei mest svart flate treng
-     mindre kvitt for aa syna det same. Sjaa docs/SKRAAKANTEN.md §3. */
+  /* ---- the lips ----
+          The bevel's two edges. --ned and --upp are not colours, they are a
+          *direction*: the light comes from above in both themes, and gravity
+          does not turn when the colours do. Computed from --blekk and
+          --flate, both would flip in the dark theme, and a hole with a light
+          top edge and a dark foot is a knob.
+     
+          --glans above does the same thing for the same reason. It also gives
+          the number: the gloss falls from 55 % to 20 % in the dark, because a
+          nearly black surface needs less white to show the same. See
+          docs/SKRAAKANTEN.md §3. */
   --ned: #000;
   --upp: #fff;
   --lippe-djup: var(--l-lippe-djup);
   --lippe-ljos: var(--l-lippe-ljos);
-  /* Fallet er tvo skuggar og ikkje ein. Den tette segjer at han ligg
-     paa noko; den vide og veike segjer kor høgt. Fyrr var det ei einaste
-     line paa tvo pikslar, og daa laag knappen klistra paa arket i staden
-     for aa liggja paa det. */
+  /* The drop is two shadows and not one. The tight one says it lies on
+          something; the wide faint one says how high. It was a single line at
+          two pixels, and then the button lay glued to the sheet rather than
+          on it. */
   --knappedjup:
     inset 0 1px 0 var(--glans),
     inset 0 -1px 1px color-mix(in srgb, #fff 40%, transparent),
@@ -388,152 +371,99 @@
     inset 0 -1px 0 var(--glans-svak);
 
   /* romet. Ei einaste trapp, so ingen finn paa 13px. */
-  /* Kor høgt dei klistra linone stend. Ei klistra lina veit ikkje um ei
-     onnor, so den andre lyt vita kor høg den fyrste er.
-
-     Talet kann ikkje standa her: hovudet er 56 px paa eit breidt glas og
-     96 paa eit smalt, av di leidingi bryt til ei lina til. Det er
-     klistrelag.js som maaler og skriv. Verdi her er berre det sida stend
-     med til skriptet hev kome — difor 0: ingi lina gøymd bak ei onnor,
-     berre eit hopp naar maalingi kjem. */
+  /* How tall the sticky lines stand. A sticky line does not know about
+          another, so the second has to know how tall the first is.
+     
+          The number cannot stand here: the header is 56 px on a wide viewport
+          and 96 on a narrow one, because the leading wraps to another line.
+          klistrelag.js measures and writes it. The value here is only what
+          the page stands with until the script arrives — hence 0: no line
+          hidden behind another, only a jump when the measurement lands. */
   --sidehovud-hogd: 0px;
   --tittellinje-hogd: 0px;
 
-  /* Sidefyllet — lufta millom innhaldet og skjermkanten. Det stod som
-     `--rom-5` i <main> og som `--rom-4` att i den smale brotstaden, og
-     daa fanst talet tvo stader. Noko som skal *dekkja* fyllet — ei
-     klistra lina som lyt gaa heilt ut i kanten — treng aa kunna spyrja
-     etter det, og eit tal ein ikkje kann spyrja etter lyt gissast. */
-  --sidefyll: var(--rom-5);
+  /* --sidefyll stend i 01-maalestokken.css. */
 
-  /* Vengen — produktlina eller slaglina langs vinstre kanten av eit
-     kort. Ho er ei *breidd* andre lyt rekna med: dagskyvaren yver
-     timeplanen stiller spaltone sine etter innhaldskassen i kortet, og
-     den kassen byrjar ein venge inn. */
+  /* The wing — the product line or kind line along a card's left edge. It is
+          a *width* others have to reckon with: the day slider over the schedule
+          aligns its columns to the card's content box, and that box begins one
+          wing in. */
   --venge: 3px;
 
-  /* Renna — dei tri pikslane millom kanten paa eit fanespor og bobla som
-     ligg nedi. Ho er ei *breidd* nokon lyt rekna med: dagskyvaren yver
-     timeplanen skuvar den siste bobla si ut i sporfyllet sitt, og skal
-     landa nett paa renna, ikkje paa kanten. */
+  /* The gutter — the three pixels between the edge of a tab track and the
+          bubble lying in it. It is a *width* somebody has to reckon with: the
+          day slider over the schedule pushes its last bubble out into the
+          track's padding, and should land exactly on the gutter, not on the
+          edge. */
   --renne: 3px;
 
-  /* AVGJORD (ARKET §10.3, 28.8.2026): den stramme stigen.
-     Stramt tyder *mindre* rom og *større* skrift, av di det var romet
-     som gjorde sidone lange. Stegi under 1rem er finmotorikk og er
-     urørde — dei er avstandar inne i ein ting, ikkje millom ting. */
-  --rom-1: .25rem; --rom-2: .5rem;  --rom-3: .75rem;
-  --rom-4: 1rem;   --rom-5: 1.25rem; --rom-6: 1.5rem;  --rom-7: 2rem;
-  /* Lufta over og under teksti i ein knapp. Mindre enn --rom-2, som
-     stod her fyrr: han er eit steg i romskalaen, og eit steg i den
-     skalaen er for mykje til dette. */
+  /* Romstigen (--rom-1..7) stend i 01-maalestokken.css. */
+  /* The air above and below the text in a button. Less than --rom-2, which
+          stood here: that is a step in the spacing ladder, and a step in that
+          ladder is too much for this. */
   --knapp-loddrett: .34rem;
-  /* Lufta i endane. Ho er ikkje eit steg i romskalaen som dei hine
-     maali her — ho er ei *fylgje av forma*, og difor stend ho i emme og
-     ikkje i rem.
-
-     Kapselen endar i ein halvsirkel, og radien hans er halve høgdi.
-     Skal kurva taka til nett der ordet slepper, lyt lufta i enden vera
-     nøyaktig den radien: er ho større, ligg det eit stykke rett kant
-     millom ordet og kurva, og knappen vert brei utan at noko fyller
-     breiddi. `--rom-5` stod her fyrr, og det er fire og ein halv piksel
-     daudt i kvar ende. */
+  /* The air at the ends. It is not a step in the spacing ladder like the
+          other measures here — it is a *consequence of the form*, and so it
+          stands in em and not rem.
+     
+          The capsule ends in a semicircle, and its radius is half the height.
+          For the curve to begin exactly where the word ends, the air at the end
+          has to be exactly that radius: larger, and there is a stretch of
+          straight edge between the word and the curve, and the button gets wide
+          without anything filling the width. --rom-5 stood here, which is four
+          and a half dead pixels at each end. */
   --knapp-vassrett: 1.1em;
 
-  /* Ordet som er rispa ned i glaset. Ljoset kjem ovanfraa, og daa er den
-     nedre lippa i ei rispa den einaste kanten som fangar det: eit glim
-     paa éin piksel under bokstaven, og ingen ting yver honom. Det er den
-     same fysikken som fordjupingi i eit felt, berre paa ein bokstav.
-
-     Han stend i kvila og ikkje berre i trykket. Ei rispa er noko som er
-     *skore* i ei flate, og eit snitt gjeng ikkje att av di ingen held
-     fingeren nede. */
+  /* The word scored into the glass. The light comes from above, so the lower
+          lip of a score is the only edge that catches it: a one-pixel glint
+          under the letter, and nothing over it. Same physics as the recess in a
+          field, only on a letter.
+     
+          It stands at rest and not only when pressed. A score is something
+          *cut* into a surface, and a cut does not close because nobody is
+          holding a finger down. */
   --ordet-inn: 0 1px 0 var(--glans);
-  /* Linehøgdi i ein knapp. Ho er eit token av di runde knappar reknar
-     storleiken sin av henne — sjaa `.dokklukk`.
-
-     `.btn` sette henne tvo gonger: 1,25 øvst i regelen og 1,35 tretti
-     liner lenger nede, i den same regelen. Den nedste vann, so den
-     øvste hadde aldri gjort noko — og krossen som rekna høgdi si av
-     henne vart halvanna piksel for laag. Ho stend éin stad no. */
+  /* The line height in a button. It is a token because round buttons compute
+          their size from it — see .dokklukk.
+     
+          .btn set it twice: 1.25 at the top of the rule and 1.35 thirty lines
+          further down, in the same rule. The lower one won, so the upper had
+          never done anything — and the cross that computed its height from it
+          was a pixel and a half too short. It stands in one place now. */
   --knapp-linehogd: 1.35;
 
-  /* Tvo skuggar, og skilnaden er kor høgt tingen ligg.
-
-     `--skugge-flytande` er til det som *flyt*: nedfellingar og dialogar,
-     ting som ligg yver sida og skuggar paa henne.
-
-     `--skugge-kort` er til det som ligg *paa* henne. Eit kort er
-     framleis papir og skal ikkje sveva; det ligg berre eit blad upp fraa
-     arket. Difor tvo lag: eit tett som ligg rett under nedkanten og
-     teiknar han, og eit mjukt som ber resten. Faller det fyrste burt,
-     flyt kortet; faller det andre burt, er kortet klistra ned. */
+  /* Two shadows, and the difference is how high the thing lies.
+     
+          --skugge-flytande is for what *floats*: dropdowns and dialogs, things
+          lying over the page and casting on it.
+     
+          --skugge-kort is for what lies *on* it. A card is still paper and must
+          not hover; it lies one leaf up from the sheet. Hence two layers: a
+          tight one directly under the bottom edge that draws it, and a soft one
+          carrying the rest. Drop the first and the card floats; drop the second
+          and the card is glued down. */
   --skugge-flytande: var(--l-skugge-flytande);
   --skugge-kort: var(--l-skugge-kort);
 
-  /* Breiddi er REKNA, ikkje vald (30.8.2026; ho stod som 68): taket er
-     det breidaste tinget i huset — vikerutenetet med ROM til namni.
-     Fyrste rekninga tok netet sitt minimum (namnespalta paa 8rem-
-     golvet sitt), og daa braut «Hatha Yoga» midt i ordet att: utstelt
-     fekk namnespalta all strekken, kring 20.5rem — som skygde eit
-     steg. No er ho steget: e^3 = 20.086rem. Rekninga: e^3 + sju merke
-     à e^(7/4) + sju gap à --rom-3 + radfyllet 2·--rom-4 + sidefyllet
-     2·--sidefyll ≈ 70.11rem — nett der den kjære 68-aren stod. Som
-     calc, so ho reknar seg sjølv um att um uret byter steg. Margane
-     kjem fraa 90em glas (70.11·e^(1/4) — ein MacBook er nett 90em) og
-     kverv heilt paa staaande iPad (48em: 70rem ved skala 1 er breidare
-     enn glaset). Same talet stakkar netet (30-timeplanen.css). */
-  --breidd: calc(20.086rem + 7*var(--merkestorleik) + 7*var(--rom-3) + 2*var(--rom-4) + 2*var(--sidefyll));
+  /* --breidd stend i 01-maalestokken.css. */
 
-  /* ---- det myrke temaet, éin gong ----
-     Berre dei *flate* verdi stend her; dei avleidde fylgjer temaet av
-     seg sjølv og lyt skrivast i kvar blokk, av di prosenttalet er eit
-     anna i myrkret. */
-  --m-ark:        #161815;
-  --m-ark-djup:   #101210;
-  --m-flate:      #1d201c;
-  --m-blekk:      #e2e5dd;
-  --m-blekk-lys:  #9aa094;
-  --m-blekk-svakt:#6f756a;
-  --m-haarlina:   #32362f;
-  --m-kant:       #3d423a;
-  --m-togu:       #ff5fa8;
-  --m-klas:       #2fd6c6;
-  --m-tuneup:     #b085f5;
-  --m-fjellraeven: #f0c04a;
-  --m-student:    #e8bf4d;
-  --m-svartkort:  #f2f4ee;
-  --m-merke-lys:  #6ae4d8;
-  --m-aatvaring:  #d08574;
-  --m-aatvaring-svak: #2b1c18;
-  --m-glans:      color-mix(in srgb, #fff 20%, transparent);
-  --m-glans-svak: color-mix(in srgb, #fff 7%, transparent);
-  --m-glans-farga:color-mix(in srgb, #fff 40%, transparent);
-  /* Maalt, ikkje gjetta: 55 % kvitt paa ei mest svart flate gjev eit
-     drag paa ΔL +0.318, mot +0.073 i det ljose. 26 % gjev +0.093 og er
-     difor den same lippa og ikkje ei sterkare. */
-  --m-lippe-djup: color-mix(in srgb, var(--ned) 40%, transparent);
-  --m-lippe-ljos: color-mix(in srgb, var(--upp) 26%, transparent);
-  --m-skugge-flytande: 0 6px 20px rgb(0 0 0 / .5);
-  --m-skugge-kort:
-    0 1px 2px rgb(0 0 0 / .45),
-    0 6px 16px -3px rgb(0 0 0 / .55);
 
 }
 
-/* Dei tvo myrke blokkene er no ordrett like, og det er meiningi: den
-   fyrste er myrkt av systemet, den andre myrkt av val. Skil dei seg ein
-   dag, er det ein feil og ikkje ein finesse.
+/* The two dark blocks are now word for word identical, and that is the
+      point: the first is dark by system, the second dark by choice. If they
+      differ one day it is a bug and not a nuance.
+   
+      NOTE: the design system wrote color-mix(in srgb, var(--merke)
+      var(--merke) 22%, #fff) in three of the four blocks — var(--merke)
+      twice, which is not valid color-mix syntax. That would have knocked out
+      the glow under the header in dark theme and in every explicit theme
+      choice. Fixed here. */
 
-   MERK: designsystemet skreiv `color-mix(in srgb, var(--merke) var(--merke)
-   22%, #fff)` i tri av dei fire blokkene — `var(--merke)` tvo gonger, som
-   ikkje er gild `color-mix`-syntaks. Det hadde slege ut glødi under
-   hovudet i myrkt tema og i kvart uttrykkeleg temaval. Retta her. */
-
-/* Systemet segjer myrkt. `:root` og ikkje `:root:not([data-theme="light"])`:
-   eit uttrykkeleg ljost val vinn i staden i blokki *etter* denne, som kjem
-   seinare i arket og hev same vekt. Same verknad, og tokeni bur i ein
-   veljar ein kann slaa upp. */
+/* The system says dark. :root and not :root:not([data-theme="light"]): an
+      explicit light choice wins instead in the block *after* this one, which
+      comes later in the sheet and carries the same weight. Same effect, and
+      the tokens live in a selector you can look up. */
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
@@ -548,7 +478,10 @@
     --togu: var(--m-togu);
     --klas: var(--m-klas);
     --tuneup: var(--m-tuneup);
-    --fjellraeven: var(--m-fjellraeven);
+    --slag-fascia:   var(--m-slag-fascia);
+    --slag-yoga:     var(--m-slag-yoga);
+    --slag-pilates:  var(--m-slag-pilates);
+    --slag-reformer: var(--m-slag-reformer);
     --student: var(--m-student);
     --svartkort: var(--m-svartkort);
     --merke-lys: var(--m-merke-lys);
@@ -569,7 +502,7 @@
   }
 }
 
-/* Ljost av val. Han lyt staa etter media-blokki for aa vinna yver henne. */
+/* Light by choice. It has to stand after the media block to win over it. */
 [data-theme="light"] {
   color-scheme: light;
   --ark: var(--l-ark);
@@ -583,7 +516,10 @@
   --togu: var(--l-togu);
   --klas: var(--l-klas);
   --tuneup: var(--l-tuneup);
-  --fjellraeven: var(--l-fjellraeven);
+  --slag-fascia:   var(--l-slag-fascia);
+  --slag-yoga:     var(--l-slag-yoga);
+  --slag-pilates:  var(--l-slag-pilates);
+  --slag-reformer: var(--l-slag-reformer);
   --student: var(--l-student);
   --svartkort: var(--l-svartkort);
   --merke-lys: var(--l-merke-lys);
@@ -603,7 +539,7 @@
   --glodkjerne: color-mix(in srgb, var(--merke) 72%, #000);
 }
 
-/* Myrkt av val. Ordrett lik media-blokki yver. */
+/* Dark by choice. Word for word identical to the media block above. */
 [data-theme="dark"] {
   color-scheme: dark;
   --ark: var(--m-ark);
@@ -617,7 +553,10 @@
   --togu: var(--m-togu);
   --klas: var(--m-klas);
   --tuneup: var(--m-tuneup);
-  --fjellraeven: var(--m-fjellraeven);
+  --slag-fascia:   var(--m-slag-fascia);
+  --slag-yoga:     var(--m-slag-yoga);
+  --slag-pilates:  var(--m-slag-pilates);
+  --slag-reformer: var(--m-slag-reformer);
   --student: var(--m-student);
   --svartkort: var(--m-svartkort);
   --merke-lys: var(--m-merke-lys);
@@ -639,25 +578,26 @@
 
 
 /* ---- grunnen ---- */
-/* hidden-merket skal alltid vinna.
-   Nettlesaren gjev [hidden] display:none gjenom si eigi stilbok, og ei
-   kvar klassa med display: flex slær henne. Vikemenyen stod difor open
-   yver rutenetet fraa fyrste augneblinken, utan at nokon hadde bede um
-   det — og fanebolkarne hadde same lyten, dei stod berre alltid opne.
-
-   Dette er den eine staden i stilarket der !important er rett: det er
-   ikkje ein farge eller ei breidd, det er «finst eller finst ikkje». */
+/* The hidden attribute must always win.
+      The browser gives [hidden] display:none through its own style sheet, and
+      any class with display: flex beats it. The week menu therefore stood open
+      over the grid from the first moment without anyone asking — and the tab
+      sections had the same fault, they were just always open.
+   
+      This is the one place in the stylesheet where !important is right: it is
+      not a colour or a width, it is "exists or does not exist". */
 [hidden] { display: none !important; }
 
 *, *::before, *::after { box-sizing: border-box; }
 
-/* Tekst skal halda seg innanfor det ho stend i. Eit langt ord — og
-   norsk lagar deim heile tidi, «medlemskapsadministrasjon» — skal
-   brjota, ikkje skuva spalta ut or glaset.
-   `min-width: 0` er den andre halvparten: eit rute- eller flexbarn hev
-   `min-width: auto` som standard, og daa nektar det aa verta smalare
-   enn innhaldet sitt same kva ein segjer um breidd. Det er den eine
-   regelen som gjer at rutenet renn ut or sida. */
+/* Text must stay inside what it stands in. A long word — and Norwegian
+      makes them constantly, "medlemskapsadministrasjon" — should break, not
+      push the column out of the viewport.
+   
+      min-width: 0 is the other half: a grid or flex child has min-width: auto
+      by default, and then it refuses to become narrower than its content
+      whatever you say about width. That is the one rule that makes grids run
+      off the page. */
 :where(body *) { min-width: 0; }
 :where(p, li, td, th, dd, dt, figcaption, label, h1, h2, h3, h4, h5, h6) {
   overflow-wrap: break-word;
@@ -680,8 +620,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  /* Luft under sida av same høgd som dokka. Utan denne ligg det siste
-     sida hev aa syna under henne, og ein kann ikkje naa det. */
+  /* Air under the page of the same height as the dock. Without it, the last
+          thing the page has to show lies under it and cannot be reached. */
   padding-bottom: var(--dokkhogd, 0px);
   background: var(--ark);
   color: var(--blekk);
@@ -696,51 +636,44 @@ h1, h2, h3, h4 {
   margin: 0;
   text-wrap: balance;
 }
-/* MAALESTOKKEN (30.8.2026). Framgangsmaaten er brukaren sin, ord for
-   ord: mæl dei relative storleikane (h1, h2, h3, meny, logo, ur, rad),
-   finn tilhøvi deira som potensar av e, og auk so heile maalestokken
-   til uret paa heimesida stend der timeplan-uret stod — daa fylgjer
-   alt anna med i same tilhøvet, og sida ER den same sida, berre
-   nærare. Det var dette som mangla dei tvo kveldane fyre: uret voks
-   aaleine, og tilhøvi rakna.
-
-   Uppmaalingi synte at yverskriftstigen ALT var eksakt (h1 clamp
-   e^(3/4)–e, h2 e^(3/4), h3 e^(1/2), h4 e^(1/4), brødtekst e^0), og
-   resten skygde kvar sitt steg — no stend dei PAA det:
-
-     ordmerket   1.45 → e^(3/8) 1.4550   menylekkja  .84 → e^(-1/8) .8825
-     merket      5.4  → e^(7/4) 5.7546   (EITT ur, EIN kode: heimesida
-                                          si yverstyring er burte)
-     radtittel   1.55 → e^(3/8) 1.4550   (EIN tekst, EIN kode: ogso
-                                          heimesida si tittel-yverstyring
-                                          er burte, 30.8.2026)
-     læraren     .92  → e^(-1/8) .8825   lengdi/botn .78 → e^(-1/4) .7788
-     plassbobla  .62  → e^(-1/2) .6065   (som faktor: e^(-9/4) av uret)
-
-   Aattandedelssteg er lov der designet aldri stod paa eit kvartsteg —
-   det er framleis potensar av e. Logoen (.72em) er unnateken: han er
-   alt eit tilhøve, og talet er optisk MAALT mot kapitélhøgdi
-   (05-hovudet.css); eit steg hadde flutt ringen av lina.
-
-   Sjølve maalestokken: e^(1/2) gjenom rot-skrifti. Alt i rem veks i
-   same tilhøvet; hairlinor og skuggar stend i px og fylgjer ikkje
-   med — ein strek er ein strek. Uret paa heimesida landar paa
-   e^(5/4)·e^(1/2) = e^(7/4), nett den gamle timeplan-storleiken:
-   maalet, naadd med eitt tal. Attende til utstelt storleik er
-   --maalestokk: 1. */
+/* THE SCALE (30.8.2026). The method is the user's, word for word: measure
+      the relative sizes (h1, h2, h3, menu, logo, clock, row), find their
+      ratios as powers of e, and then raise the whole scale until the clock on
+      the home page stands where the schedule clock stood — then everything
+      else follows in the same ratio, and the page IS the same page, only
+      closer. This is what was missing the two evenings before: the clock grew
+      alone, and the proportions came apart.
+   
+      The measurement showed the heading ladder was ALREADY exact (h1 clamp
+      e^(3/4)–e, h2 e^(3/4), h3 e^(1/2), h4 e^(1/4), body e^0), and the rest
+      shadowed a step each — now they stand ON them:
+   
+        wordmark    1.45 → e^(3/8) 1.4550   menu link   .84 → e^(-1/8) .8825
+        the mark    5.4  → e^(7/4) 5.7546   (ONE clock, ONE code: the home
+                                             page override is gone)
+        row title   1.55 → e^(3/8) 1.4550   (ONE text, ONE code: the home
+                                             page title override is gone too)
+        teacher     .92  → e^(-1/8) .8825   length/foot .78 → e^(-1/4) .7788
+        place bubble .62 → e^(-1/2) .6065   (as a factor: e^(-9/4) of the clock)
+   
+      Eighth steps are allowed where the design never stood on a quarter step —
+      they are still powers of e. The logo (.72em) is excepted: it is already a
+      ratio, and the number is optically MEASURED against the cap height
+      (05-hovudet.css); a step would have moved the ring off the line.
+   
+      The scale itself: e^(1/2) through the root font. Everything in rem grows
+      in the same ratio; hairlines and shadows stand in px and do not follow —
+      a line is a line. The clock on the home page lands on
+      e^(5/4)·e^(1/2) = e^(7/4), exactly the old schedule size: the goal,
+      reached with one number. Back to the styled size is --maalestokk: 1. */
 :root { --maalestokk: 1.284; } /* e^(1/4) */
 html { font-size: calc(100% * var(--maalestokk)); }
 
-/* Kvifor e^(1/4) og ikkje e^(1/2): halvsteget var «too big at 100%
-   zoom» (30.8.2026), og «near 75%» av det ER eit steg — e^(-1/4) =
-   .7788. Uret vert daa 118 px mot dei 86 det utstelte gav: framleis
-   eit røynleg lyft for dei eldre augo, utan at arket sprengjer glaset.
-
-   Maalestokken stig NED til utstelt skala naar glaset smalnar, og
-   grensa er REKNA, ikkje vald: ho er 48em = 768 px — ståande iPad, og
-   nett breiddi der --breidd (sjaa nedanfor) fyller glaset utan marg
-   ved skala 1. Telefonen og brettet fær sida som ho var utstelt;
-   det var breie skjermar dei eldre augo sleit paa. */
+/* Why e^(1/4) and not e^(1/2): the half step was "too big at 100% zoom"
+      (30.8.2026), and "near 75%" of that IS a step — e^(-1/4) = .7788. The
+      clock then comes out at 118 px against the 86 the styled size gave:
+      still a real lift for older eyes, without the sheet bursting the
+      viewport. */
 @media (max-width: 48em) { :root { --maalestokk: 1; } } /* e^0 */
 
 /* Den stramme stigen: steg e^¼ ≈ 1.284, med taket paa e rem.
@@ -793,32 +726,6 @@ hr { border: 0; border-top: 1px solid var(--haarlina); margin: var(--rom-5) 0; }
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--blekk-svakt); background-clip: content-box; }
 
-/* ===================================================================
-   slagi — kva slag trening ein time er
-   Fire slag, fire fargar, jamt fordelte kring fargehjulet so dei kann
-   skiljast: gult 44°, turkis 174°, lilla 262°, rosa 334°.
+/* Kartet fraa slag til farge stend i 00-palett.css saman med verdi
+   det peikar paa. Slagi er dette huset sine, ikkje systemet sine. */
 
-   Kartet stod i 90-aktiviteten.css so lenge brettet var den einaste
-   staden eit slag bar ein farge. No ber timekorti paa heimesida den
-   same fargen paa vengen sin, og daa lyt kartet staa ein stad baae
-   kann sjaa det — her, der tydingi aat fargane vert avgjord (§1).
-
-   ADVARSEL, og ho stod alt her fyrr flyttingi: tri av dei fire *er*
-   produktfargar. Turkisen tyder medlemskap, rosa klippekort, lilla
-   kurs. Det gjekk so lenge slagfargen budde i eit hol paa brettet og
-   produktfargen paa vengen aat eit kort — eit hol er aldri eit kort,
-   so dei møttest aldri. Med timekorti møtest dei: heimesida ber
-   timelista i vinstre spalta og medlemskortet i høgre, og eit turkis
-   venge tyder daa «yoga» i den eine spalta og «medlemskap» i den
-   andre. Kanalen ber tvo tydingar paa ein gong, som §1 segjer han
-   ikkje skal.
-
-   Rettingi er fire verd i denne blokka — gjev slagi sine eigne
-   hue-ar, utanum dei tri produktfargane, so ber brettet og vengen
-   framleis det same. Ikkje gjort: det er eit fargeval, ikkje ei
-   feilretting, og heile huset skifter farge med det.
-   =================================================================== */
-.slag-fascia   { --slagfarge: var(--fjellraeven); }
-.slag-yoga     { --slagfarge: var(--klas); }
-.slag-pilates  { --slagfarge: var(--tuneup); }
-.slag-reformer { --slagfarge: var(--togu); }

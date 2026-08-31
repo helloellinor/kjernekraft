@@ -10,15 +10,16 @@
    siste seier noko. Og knappane låg klemde inntil kortet: ingen luft
    mellom korta, og ingen mellom det siste kortet og «legg til».
    =================================================================== */
-/* Ingen botnmargin. Knappen under ber lufta si sjølv (`.nyrad`), og
-   tvo margar som møtest her gav tri og ein halv rem mellom det siste
-   kortet og «Legg til kort» — nok til at knappen såg ut til å høyre til
-   noko anna. */
-/* Breiddi ligg paa bolken (`.kortbolk` i 50-medlemskap-klippekort.css)
-   og ikkje her. Ho stod ein augneblink som `.betalingsbolk: 30rem` — eit
-   eige tal for den same tingen, og so var det tvo tal aa halda i takt
-   der eitt gjer arbeidet. Kortet sluttar aa veksa ved `--kortbreidd`;
-   bolken som held det gjer det same. */
+/* No bottom margin. The button below carries its own air (.nyrad), and
+      two margins meeting here gave three and a half rem between the last
+      card and "Add card" — enough that the button looked like it belonged
+      to something else. */
+/* The width lives on the section (.kortbolk in
+      50-medlemskap-klippekort.css) and not here. It stood briefly as
+      .betalingsbolk: 30rem — a separate number for the same thing, and then
+      there were two numbers to keep in step where one does the work. The
+      card stops growing at --kortbreidd; the section holding it does the
+      same. */
 
 .kortliste {
   list-style: none; margin: 0; padding: 0;
@@ -31,13 +32,14 @@
 
 
 .kortkva { display: flex; align-items: baseline; gap: var(--rom-3); flex-wrap: wrap; }
-/* Stoda stend til høgre, som paa kvart anna kort i huset: medlemskortet
-   set henne der med `space-between` i `.card-header`, og klippekortet
-   set utlaupet der paa den same lina. Ein indikator som fylgjer rett
-   etter teksti les seg som endaa eit ord i rada; ytst til høgre les han
-   seg som ei *stoda*, og auga finn honom paa den same staden kvar gong.
-   `margin-left: auto` og ikkje `space-between`, av di rada hev tri ting
-   i seg og dei tvo fyrste høyrer saman. */
+/* The state stands on the right, as on every other card in the house: the
+      membership card puts it there with space-between in .card-header, and
+      the klippekort puts the expiry there on the same line. An indicator
+      following straight after the text reads as one more word in the row;
+      at the far right it reads as a *state*, and the eye finds it in the
+      same place every time. margin-left: auto and not space-between,
+      because the row has three things in it and the first two belong
+      together. */
 .kortkva .stodalinje { margin-left: auto; }
 .kortmerke {
   font-family: var(--skrift-yver); font-size: 1.15rem; font-weight: 500;
@@ -62,136 +64,136 @@
    torsdagen er full medan tysdagen ikkje er det.
 
    Difor er dette gjennomsikt og ikkje `display: none`. */
-/* ---- sikti ----
-   Klassa og læraren, yver nettet og ikkje i det.
-
-   Ho stod i tittellina ein gong, med `max-width: 11rem` paa veljarane —
-   og eit lærarnamn eller ei klassa paa bokmaal vart klipt av lenge fyrr
-   det var lese. So flutte ho inn i vikehovudet; der bur dagveljaren no,
-   og tvo kontrollar i den same klistrande lina er ein for mykje.
-
-   Ingen breiddegrense her: ein veljar er so brei som det breidaste
-   valet sitt (§9), og han fær vera det. */
-/* Sikti stend paa tittellina, ikkje under henne.
-   Ho stod som ei rad for seg millom tittelen og nettet, og det var ei
-   rad til aa lesa fyre ein kom til timane. Ho høyrer til det same
-   spursmaalet som vika: *kva* ser eg paa.
-
-   Ho tek høgre enden av lina gjenom `justify-content: space-between` paa
-   `.timehovudlinje` — ikkje gjenom `margin-left: auto`. Skilnaden syner
-   seg fyrst naar ho bryt: ein auto-marg held henne til høgre jamvel naar
-   ho stend aaleine paa ei lina, og daa flyt ho i lause lufti. Med
-   `space-between` gjeng ho til venstre kanten, under tittelen, som alt
-   anna som byrjar ei lina (§4 — ingen brotstad, ingen skjermspørjing). */
+/* ---- the filter ----
+      The class and the teacher, above the grid and not in it.
+   
+      It stood in the title line once, with max-width: 11rem on the selects —
+      and a teacher name or a class in Bokmål was cut off long before it was
+      read. Then it moved into the week header; the day picker lives there
+      now, and two controls in the same sticky line is one too many.
+   
+      No width limit here: a select is as wide as its widest option (§9), and
+      it may be. */
+/* The filter stands on the title line, not under it.
+      It was a row of its own between the title and the grid, which was one
+      more row to read before reaching the classes. It belongs to the same
+      question as the week: *what* am I looking at.
+   
+      It takes the right end of the line through justify-content:
+      space-between on .timehovudlinje — not through margin-left: auto. The
+      difference shows when it wraps: an auto margin holds it right even when
+      it stands alone on a line, and then it floats in mid-air. With
+      space-between it goes to the left edge, under the title, like
+      everything else that starts a line (§4 — no breakpoint, no media
+      query). */
 /* (Sikti er `.sikt` i 07-sida.css no — same kontroll paa timeplanen og
    paa kvar annan bolk med ei sikt.) */
 
-/* ---- dagveljaren ----
-   Skyvaren i vikehovudet. Han er `.faner` — den same kontrollen som
-   medlemskaps-, klippekort- og betalingssida ber — og ikkje ein ny
-   som liknar. Eg skreiv fyrst ein eigen boblerad her; det var nettupp
-   den drifta som gjer at tvo ting som skal vera like sluttar aa vera
-   det.
-
-   Han spenner yver dagspaltone og ikkje yver heile hovudet: sikti eig
-   den fyrste spalta, og ho siktar i spalta under seg. Dagnamni som
-   stod i kvar spalta er burte — kvart merke ber dagen sin sjølv, og
-   namnet stod tvo gonger. */
-/* Dagane stend yver spalta si.
-   Skyvaren ber den *same* stigen som radene (`--timetrapp`), so «Onsdag»
-   stend rett yver onsdagsmerket. Han er ein grid og ikkje ein flex:
-   ein flex deler breiddi etter kor langt ordet er, og «Måndag» og
-   «Sundag» er ikkje like lange.
-
-   Sporet ber 1 px kant og 3 px fyll, og det skuvar innhaldet fire piksel
-   inn. Den negative margen tek det att, so innhaldskassen i sporet fell
-   saman med innhaldskassen i rada under. */
-/* Sporet stiller seg etter innhaldskassen i kortet, ikkje etter kanten.
-   Dei sju dagspaltone er faste (`--merkestorleik`) og fyrste spalta er
-   `1fr`, so stigen er *høgreforankra*: fell den høgre innhaldskanten
-   saman, fell alle sju saman. Gjer han det ikkje, skyv heile rekkja
-   like mykje — maalt til nett 17 px daa raden vart eit kort.
-
-   Difor stend rettingi paa kassen og ikkje paa bobblone: eit fyll inni
-   ei boble flyttar skrifti i sporet sitt, det flyttar ikkje sporet.
-   Spori vert lagde ut etter innhaldskassen aat rutenettet, og ingen ting
-   inni ei celle kann endra det.
-
-   Høgre sida er `--rom-4`: kortfyllet. Kortkanten og sporkanten er båe
-   1 px og gjeng upp i kvarandre. Vinstre sida rører me ikkje — fyrste
-   spalta er `1fr` og et alt som vert til overs, so ho treng ingi
-   retting, og renna stend som i alle andre skyvarar. */
+/* ---- the day picker ----
+      The slider in the week header. It is .faner — the same control the
+      membership, klippekort and payment pages carry — and not a new one that
+      resembles it. I first wrote a separate bubble row here; that is exactly
+      the drift that makes two things which should be alike stop being so.
+   
+      It spans the day columns and not the whole header: the filter owns the
+      first column, and it filters the column beneath it. The day names that
+      stood in each column are gone — each mark carries its own day, and the
+      name stood twice. */
+/* The days stand over their column.
+      The slider carries the *same* ladder as the rows (--timetrapp), so
+      "Wednesday" stands right over the Wednesday mark. It is a grid and not
+      a flex: a flex divides the width by how long the word is, and "Måndag"
+      and "Sundag" are not the same length.
+   
+      The track carries a 1 px border and 3 px of padding, which pushes the
+      content four pixels in. The negative margin takes that back, so the
+      content box in the track coincides with the content box in the row
+      below. */
+/* The track aligns to the content box of the card, not to its border.
+      The seven day columns are fixed (--merkestorleik) and the first column
+      is 1fr, so the ladder is *right-anchored*: if the right content edge
+      lines up, all seven line up. If it does not, the whole row shifts by
+      the same amount — measured at exactly 17 px when the row became a card.
+   
+      So the correction stands on the box and not on the bubbles: padding
+      inside a bubble moves the type in its track, it does not move the
+      track. The tracks are laid out from the grid's content box, and
+      nothing inside a cell can change that.
+   
+      The right side is --rom-4: the card padding. The card border and the
+      track border are both 1 px and cancel. The left side we leave alone —
+      the first column is 1fr and eats whatever is left over. */
 .dagfaner {
   display: grid; grid-template-columns: var(--timetrapp);
   gap: var(--rom-3);
   margin: 0;
   padding-right: var(--rom-4);
-  /* Heile kapselen er glas: mjølkete som bobla i tittelen
-     (30-timeplanen.css), same flatestyrke, same uskarpleik. Eit kort
-     som rullar upp under sporet syner seg som ein uskarp skugge gjenom
-     mjølki i heile høgdi, og kverv der glaset sluttar: ved umrisset.
-     Endarne aat kapselen er boga, so der er sjølve kurva skjerelina —
-     skarpt kort utanfor, mjølk innanfor — og yverkanten tek den tette
-     tittellina seg av. Det stend ikkje lenger noko tett band attum
-     sporet; berre sidefylli hev band (sjaa `.timehovud::before/after`).
-
-     Renna (`--skraakant`) og haarlina stend urørde — det er berre
-     fyllet som slepper ljos, so trogget les seg tett so lenge ingen
-     ting rullar under det: mjølk paa `--ark` er same fargen som mjølk
-     paa band av `--ark`. Den valde bobla er framleis tett — ho er ein
-     kuppel, ein ting, og gjenom ein ting ser ein ikkje. */
+  /* The whole capsule is glass: milky like the bubble in the title
+          (30-timeplanen.css), same surface strength, same blur. A card
+          scrolling up under the track shows as a blurred shadow through the
+          milk for the full height, and vanishes where the glass ends: at the
+          outline. The capsule's ends are curved, so there the curve itself is
+          the cutting line — sharp card outside, milk inside — and the opaque
+          title line handles the top edge.
+     
+          The gutter (--skraakant) and the hairline are untouched — only the
+          fill passes light, so the trough reads opaque as long as nothing
+          scrolls under it: milk on --ark is the same colour as milk on a band
+          of --ark. The selected bubble is still opaque — it is a dome, a
+          thing, and you do not see through a thing. */
   background: color-mix(in srgb, var(--ark-djup, var(--ark)) 62%, transparent);
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
 }
 
-/* Den siste bobla fyller sporfyllet.
-   Rettingi yver legg 13 px tomt spor til høgre for «Sundag» — sporet
-   held fram, men der er ingi boble i det, og eit spor som held fram
-   utan noko nedi les seg som at nokon gløymde noko.
-
-   So bobla fær taka den plassen: kassen hennar veks ut i fyllet, og
-   fyllet hennar veks like mykje attende. Innhaldskassen — og dermed
-   skrifti, og dermed midten som skal stå yver merket — stend still.
-   Det er berre flata og kuppelen som strekkjer seg ut til renna.
-
-   `--renne` og ikkje null: bobla skal landa der bobblor landar i dette
-   huset, tri piksel fraa kanten, ikkje uppaa han. */
+/* The last bubble fills the track padding.
+      The correction above leaves 13 px of empty track to the right of
+      "Sundag" — the track continues, but there is no bubble in it, and a
+      track that continues with nothing in it reads as though somebody forgot
+      something.
+   
+      So the bubble takes that space: its box grows into the padding, and its
+      own padding grows back by the same amount. The content box — and so the
+      type, and so the centre that has to stand over the mark — stands still.
+      Only the surface and the dome stretch out to the gutter.
+   
+      --renne and not zero: the bubble should land where bubbles land in this
+      house, three pixels from the edge, not on it. */
 .dagfaner .fane:last-child {
   margin-right: calc(var(--renne) - var(--rom-4));
   padding-right: calc(var(--rom-2) + var(--rom-4) - var(--renne));
 }
 
-/* Ringen kring den øvre helvti.
-   Utanfor kapselen gjeld midtlina: yver henne er alt tett, under henne
-   er sida open — der gjeng vengen aat kortet skarp langs skuldri, og
-   kurva er skjerelina. Det tette er *ein* ting: ein brei bord som ligg
-   kring kapselen og er klypt av ved midtlina.
-
-   Borden er ein verkeleg `border`: pseudo-elementet er kapselen
-   utvida med bordbreiddi til alle kantar, og 999-rundingi klemmer seg
-   daa til R pluss bordbreiddi — so den *indre* kanten aat borden er
-   ein boge med same sentrum og radius R, det vil segja umrisset aat
-   sporet sjølv. Same geometri, ikkje ei etterlikning. (Fyrst stod her
-   tvo hyrnestykke med radial-gradientar som skulde treffa bogen; dei
-   laag ein brøkdels piksel utanpaa han, og det saag ein. So ein skugge
-   med spreiding og eit klypp — men eit klypp hev berre harde kantar,
-   og det skar kortskuggen av i lause lufti ved midtlina.)
-
-   Difor maska i staden for klypp: ho er tett ned til midten og fell
-   til gjenomsynleg yver eit lite stykke nedanfor. Kortet og skuggen
-   hans tonar daa ut mot midtlina i staden for aa verta hogne av.
-   Utvidingi er lik til alle kantar, so midtlina aat kapselen ligg
-   nett paa 50 % av pseudo-kassen — ingen maalte tal i maska.
-
-   `-1px` i innfellingi av di backdrop-filter gjer sporet til
-   festeramme for sine eigne absolutte pseudo-element, so dei mæler
-   seg etter fyllkassen, éin piksel innanfor kantkassen.
-
-   Borden er breidare enn sidefyllet og dekkjer det, so plassmerket
-   som heng ut yver kortkanten kverv ved midten det og. Uppyver ligg
-   den tette tittellina alt. `z-index: -1` legg ringen attum flata og
-   kanten aat sporet, men framleis framfyre korti som rullar under. */
+/* The ring around the upper half.
+      Outside the capsule the midline governs: above it everything is opaque,
+      below it the page is open — there the card's wing runs sharp along the
+      shoulder, and the curve is the cutting line. The opaque part is *one*
+      thing: a wide border lying around the capsule, cut off at the midline.
+   
+      The border is a real border: the pseudo-element is the capsule expanded
+      by the border width on every side, and the 999 radius then clamps to R
+      plus the border width — so the *inner* edge of the border is an arc with
+      the same centre and radius R, that is, the outline of the track itself.
+      Same geometry, not an imitation. (First there were two corner pieces with
+      radial gradients meant to meet the arc; they lay a fraction of a pixel
+      outside it, and you could see that. Then a shadow with spread and a clip
+      — but a clip has only hard edges, and it cut the card shadow off in
+      mid-air at the midline.)
+   
+      Hence the mask rather than a clip: it is opaque down to the middle and
+      falls to transparent over a short stretch below. The card and its shadow
+      then fade toward the midline instead of being chopped. The expansion is
+      equal on all sides, so the capsule's midline lies exactly at 50 % of the
+      pseudo-box — no measured numbers in the mask.
+   
+      -1px in the inset because backdrop-filter makes the track the containing
+      block for its own absolute pseudo-elements, so they measure from the
+      padding box, one pixel inside the border box.
+   
+      The border is wider than the side padding and covers it, so the seat mark
+      hanging out over the card edge vanishes at the middle too. z-index: -1
+      puts the ring behind the track's surface and border, but still in front
+      of the cards scrolling under. */
 .dagfaner::before {
   --bord: calc(var(--sidefyll) + 2px);
   content: "";
@@ -212,34 +214,35 @@
 .dagfaner .fane.idag { color: var(--klas); }
 .dagfaner .dag-kort { display: none; }
 
-/* Paa ein telefon kann skyvaren ikkje fylgja spaltestigen — nettet er
-   éi spalta der — so dagane fær si eigi rekkja: aatte like celler paa
-   éi lina, med stutte namn.
-
-   Fyrr braut dei aatte fulle namni inni sporet og vart aatte rader
-   nedyver, med den lyfte kuppelen halvt utanfor den runda kanten. Eit
-   spor med fleire rader i er ikkje ein skyvar lenger.
-
-   Denne blokki lyt staa *etter* grunnregelen ovanfor. Ho stod fyre, og
-   daa vann den seinare regelen same kva breidd glaset hadde — media-
-   spurnaden aukar ikkje spesifisiteten.
-
-   90em og ikkje 62rem (30.8.2026): grensa her lyt vera DEN SAME som
-   stakkar rutenetet (30-timeplanen.css) — det er same hendingi.
-   Skyvaren speglar vikespaltone (--timetrapp); fell dei til éi, fell
-   han med, og daa lyt denne blokki taka yver. Med kvar sin terskel
-   stod det eit vindauga (62–90em) der netet var stakka men skyvaren
-   framleis spegla den eine spalta: éin dag per line i eit kjempespor. */
+/* On a phone the slider cannot follow the column ladder — the grid is one
+      column there — so the days get a row of their own: eight equal cells on
+      one line, with short names.
+   
+      The eight full names used to wrap inside the track and became eight rows,
+      with the raised dome half outside the rounded edge. A track with several
+      rows in it is not a slider any more.
+   
+      This block has to stand *after* the base rule above. It stood before, and
+      then the later rule won whatever the viewport width — a media query does
+      not raise specificity.
+   
+      90em and not 62rem (30.8.2026): the breakpoint here has to be THE SAME as
+      the one that stacks the grid (30-timeplanen.css) — it is the same event.
+      The slider mirrors the week columns (--timetrapp); if they fall to one,
+      it falls with them, and then this block has to take over. With separate
+      thresholds there was a window (62–90em) where the grid was stacked but
+      the slider still mirrored the single column: one day per line in a giant
+      track. */
 @media (max-width: 90em) {
-  /* Gapet lyt ned med. `--rom-3` millom aatte celler er 84 av dei 352
-     pikslane ei telefonlina hev — daa vert kvar celle 33 px, og «Alle»
-     og «Mån» vart klypte til «A…» og «M…». Med `--rom-1` er dei 40, og
-     namni stend heile. Ein skyvar der ein ikkje kann lesa posisjonane
-     er ikkje ein skyvar. */
-  /* Paa smale glas fell spaltone burt — merki ligg i ei flex-rad og ikkje
-     i eit rutenett — so der er ingen ting aa retta seg etter. Fyllet og
-     den utstrekte siste bobla gjeng ut att; elles klemde dei aatte
-     spaltone seg inn paa 16 px som ikkje skulde vera der. */
+  /* The gap has to come down too. --rom-3 between eight cells is 84 of the
+          352 pixels a phone line has — each cell then becomes 33 px, and "Alle"
+          and "Mån" were clipped to "A…" and "M…". With --rom-1 they are 40, and
+          the names stand whole. A slider whose positions you cannot read is not
+          a slider. */
+  /* On narrow viewports the columns fall away — the marks lie in a flex row
+          and not a grid — so there is nothing to align to. The padding and the
+          stretched last bubble go out again; otherwise the eight columns
+          squeezed themselves onto 16 px that should not have been there. */
   .dagfaner { grid-template-columns: repeat(8, minmax(0, 1fr)); margin: 0; gap: var(--rom-1); padding-right: var(--renne); }
   .dagfaner .fane { padding-left: var(--rom-1); padding-right: var(--rom-1); font-size: .88rem; }
   .dagfaner .fane:last-child { margin-right: 0; padding-right: var(--rom-1); }
@@ -247,10 +250,9 @@
   .dagfaner .dag-kort { display: inline; }
 }
 
-/* Ein dag vald: nettet vert éi spalta, og alt som ikkje er den dagen
-   gjeng ut. Dette er eit *filter* og ikkje ei demping — sjaa toppen av
-   dagfokus.js for kvifor det er greidt naar «Alle dagar» er
-   utgangsstoda. */
+/* One day selected: the grid becomes one column, and everything that is not
+      that day goes out. This is a *filter* and not a dimming — see the top of
+      dagfokus.js for why that is fine when "All days" is the default state. */
 .utanfor-dagen, .rad-utanfor { display: none; }
 
 /* Medlemskapet som ein ting inne i fana. Setninga over sida rundar av —
@@ -276,13 +278,13 @@
 .medlemskort .card-header { margin-bottom: 0; align-items: center; }
 .medlemskort .card-title { display: flex; align-items: center; gap: var(--rom-2); }
 
-/* Merket paa kortet.
-   Stilboki §8 sa til no at merket stend tvo stader: 1,7 rem attmed
-   namnet i hovudet, og 4 rem paa doerne. Grunnen er at eit merke som
-   stend stort paa kvar side vert ein bakgrunn — og den grunnen held
-   ikkje her: dette er *eitt* merke, i hovudstorleik, paa eitt kort paa
-   éi side. Eit medlemskort utan merket til huset er eit prisskilt.
-   Framlegg: §8 fær ein tridje stad, og det er denne. */
+/* The mark on the card.
+      Style book §8 has said until now that the mark stands in two places:
+      1.7 rem beside the name in the header, and 4 rem on the doors. The
+      reason is that a mark standing large on every page becomes a background —
+      and that reason does not hold here: this is *one* mark, at header size,
+      on one card on one page. A membership card without the house's mark is a
+      price tag. Proposal: §8 gets a third place, and this is it. */
 .medlemskort .card-title .merke { --merkestorleik: 1.7rem; color: var(--produkt); }
 
 /* Den som eig kortet. Taldskrifti av di namnet er *prenta* paa kortet
@@ -309,10 +311,10 @@
 .medlemskort .merknad { margin: 0; }
 .medlemskort .svar { margin-top: 0; }
 
-/* Ei tom line reserverer høgd elles, so sida ikkje flyttar seg naar
-   svaret kjem (§3). Paa kortet er det ikkje naudsynt: kortet er det
-   siste i spalta si, so han veks *nedyver* naar svaret kjem, og
-   knappen du nettupp trykte stend der han stod. Utan dette stod det
-   ei tom line og eit gap nedst paa kvart kort, kvar gong. */
+/* An empty line reserves height elsewhere, so the page does not move when
+      the answer arrives (§3). On the card it is not needed: the card is the
+      last thing in its column, so it grows *downward* when the answer comes,
+      and the button you just pressed stays where it was. Without this there
+      stood an empty line and a gap at the bottom of every card, every time. */
 .medlemskort .svar:empty { display: none; }
 

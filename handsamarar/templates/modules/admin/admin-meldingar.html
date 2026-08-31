@@ -1,0 +1,78 @@
+{{define "admin_meldingar"}}
+{{/* Det som hev hendt og som ingi spurning i huset ville ha funne av seg
+     sjølv: nokon hev sagt frå seg ei PT-økt. Timen stend att tom,
+     læraren hev sett av tidi si, og utan denne lina er det ingen som
+     veit det fyre nokon møter upp.
+
+     Ho stend fyrst i fana. Ei frysing kann venta til i morgon; ein time
+     som gjeng i kveld kann ikkje.
+
+     Same forma som krav-lista under: eit kort med ei rad per hending,
+     og rada stend att med svaret i seg når du hev teke henne — lista
+     hoppar ikkje, og du ser kva du nett gjorde (§3). */}}
+<div class="content-section">
+    <h2 class="section-title">{{t .Lang "admin.messages_title"}}</h2>
+    {{if .Meldingar}}
+    {{/* Klippet er alt lagt attende — det hender i avlysingi og ikkje
+         her. Knappen tek meldingi ut or fana; han rører ikkje timen. */}}
+    <p class="merknad opplysing">{{t .Lang "admin.messages_note"}}</p>
+
+    <ul class="folk-liste" id="meldingar">
+        {{range .Meldingar}}
+        <li class="folk-rad">
+            <div class="meldingsrad" data-melding="{{.ID}}">
+                {{/* Ei setning og ikkje ei rad i ein tabell: det er éi
+                     hending med fire ledd, ikkje fire tal ein
+                     samanliknar nedyver. */}}
+                <span class="meldingsord">
+                    {{.FråNamn}} {{t $.Lang "admin.msg_cancelled"}}
+                    <span class="meldingstime">{{.Tittel}}</span>
+                    {{t $.Lang "admin.msg_which_ran"}}
+                    <span class="meldingstid">{{.TimeStart.Format "2.1. 15:04"}}</span>{{if .TilNamn}},
+                    {{t $.Lang "admin.msg_set_up_by"}} {{.TilNamn}}{{end}}.
+                </span>
+                <a class="meldingsepost" href="mailto:{{.FråEpost}}">{{.FråEpost}}</a>
+                <span class="meldingsnaar">{{.Laga.Format "2.1. 15:04"}}</span>
+                <span class="meldingshandling">
+                    <button type="button" class="btn melding-kvitt">{{t $.Lang "admin.msg_handled"}}</button>
+                </span>
+                <span class="meldingssvar"></span>
+            </div>
+        </li>
+        {{end}}
+    </ul>
+    {{else}}
+    {{/* Ei tom fana tyder «ingen ting ventar», ikkje «ingen ting hev
+         hendt» — difor vert meldingane merkte som handsama og ikkje
+         sletta. */}}
+    <p class="tomt">{{t .Lang "admin.no_messages"}}</p>
+    {{end}}
+</div>
+
+<script>
+// Meldingi vert teki der ho stend. Rada stend att med ordet i seg, so du
+// ser kva du gjorde utan at lista flyttar seg under handi di (§3).
+(function () {
+    var liste = document.getElementById('meldingar');
+    if (!liste) return;
+
+    liste.addEventListener('click', function (e) {
+        var knapp = e.target.closest('.melding-kvitt');
+        if (!knapp || knapp.disabled) return;
+        var rad = knapp.closest('.meldingsrad');
+
+        fetch('/api/admin/melding?melding_id=' + rad.dataset.melding, { method: 'POST' })
+            .then(function (svar) {
+                if (!svar.ok) return svar.text().then(function (t) { throw new Error(t); });
+                rad.classList.add('kvittert');
+                rad.querySelector('.meldingssvar').textContent = '{{t .Lang "admin.msg_done"}}';
+                knapp.disabled = true;
+            })
+            .catch(function (feil) {
+                rad.querySelector('.meldingssvar').textContent = feil.message;
+                rad.classList.add('gale');
+            });
+    });
+})();
+</script>
+{{end}}

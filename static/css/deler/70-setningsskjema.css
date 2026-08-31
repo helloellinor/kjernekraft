@@ -1,34 +1,33 @@
 /* ===================================================================
-   setningsskjemaet
-   Timen skriven som ei setning i staden for tolv felt under kvarandre.
-   Rekkjefylgdi er arbeidet — kva, kven, kvar, naar, kor lenge — og
-   ikkje rekkjefylgdi paa spaltone i tabellen.
-
-   Felti veks etter innhaldet (`field-sizing`), so linja les seg som ei
-   linja og ikkje som eit skjema med hol i. Der nettlesaren ikkje kann
-   det, stend dei paa ei rimeleg fast breidd; setningi held.
-   =================================================================== */
+      the sentence form
+      The class written as a sentence instead of twelve fields under each
+      other. The order is the work — what, who, where, when, how long — and
+      not the order of columns in a table.
+   
+      The fields grow with their content (field-sizing), so the line reads
+      as a line and not as a form with holes in it. Where the browser cannot
+      do that, they stand at a reasonable fixed width; the sentence holds.
+      =================================================================== */
 .setningsskjema { display: flex; flex-direction: column; gap: var(--rom-4); align-items: start; }
 
-/* Ingi lesebreidd. 54ch er maalet for *tekst* — so mange teikn auga
-   fylgjer utan aa mista lina — og ei setning av felt er ikkje tekst; ho
-   er ein rad kontrollar skrivi som ei setning. Kappa stod der, og daa
-   braut skjemaet midt paa ein brei skjerm medan halve rada laag tom
-   attmed. Spalta set breiddi her: i administrasjonen er ho heile arket,
-   i benken til høgre er ho halve, og setningi bryt naar spalta krev det
-   og ikkje fyrr. */
+/* No reading measure. 54ch is the measure for *text* — as many characters
+      as the eye follows without losing the line — and a sentence of fields
+      is not text; it is a row of controls written as a sentence. The cap
+      was there, and then the form broke mid-way on a wide screen with half
+      the row lying empty beside it. The column sets the width here: in the
+      admin it is the whole sheet, in the bench on the right it is half, and
+      the sentence breaks when the column demands it and not before. */
 .setning {
   font-size: 1.15rem; line-height: 2.4;
   margin: 0; color: var(--blekk-lys);
-  /* Ingi lesebreidd — og det er *denne* lina som ser til det.
-     Kommentaren yver hev sagt sidan 54ch-kappa gjekk ut at ei setning av
-     felt ikkje er tekst, men `.setning` er eit `<p>`, og `p` i
-     token-blokka ber `max-width: 62ch`. Han er svakare enn klassa berre
-     paa dei eigenskapane klassa nemner, og max-width var ikkje ein av
-     deim — so kappa stod att, berre aatte teikn lenger ute, og skjemaet
-     braut midt paa ei brei spalta med den andre helvti tom. Spalta set
-     breiddi; setningi bryt naar spalta krev det og ikkje fyrr.
-     Vil ein ha eit brot ein stad, set ein <br> der ein vil ha honom. */
+  /* No reading measure — and it is *this* line that sees to it.
+          The comment above has said since the 54ch cap went out that a
+          sentence of fields is not text, but .setning is a <p>, and p in the
+          token block carries max-width: 62ch. It is weaker than the class only
+          on the properties the class names, and max-width was not one of them
+          — so the cap stood, only eight characters further out, and the form
+          broke mid-way on a wide column with the other half empty. Want a
+          break somewhere, put a <br> where you want it. */
   max-width: none;
 }
 
@@ -58,68 +57,64 @@
 .setning .felt::placeholder { color: var(--blekk-svakt); font-weight: 400; }
 .setning .felt-tal { min-width: 3.2rem; text-align: center; font-family: var(--skrift-tal); }
 
-/* Ein veljar plukkar; han skriv ikkje — og det er *pili* som segjer det,
-   ikkje ei onnor form. Difor stend det berre maal her.
-
-   Her stod flate, haarlina og `box-shadow: none` fyrr, skrivi den gongen
-   veljaren skulde skilja seg fraa feltet ved forma si (FASETTEN §3).
-   Daa veljaren vart kapsel i grunnstilen, tok desse tri lineone flata og
-   kanten attende — men ikkje rundingi — og resultatet var ein pilleforma
-   boks med tunn ramme og eit glans-drag yver ei flate som ikkje var
-   kvelvd. Uleseleg i det ljose temaet, og ulikt kvar einaste kasse
-   kring seg.
-
-   To reglar som skulde einast um forma, og som møttest i ei tridje som
-   ingen hadde teikna. No er det éi form i grunnstilen, og setningi
-   stiller ingen ting.
-
-   Her stod eit smalare fyll og ei pil flutt inn etter det: 1,4 px
-   millom bokstaven og pila, mot 2,2 i grunnstilen — som ogso var for
-   lite. Paa ein telefon, der setningi bryt og veljaren vert klemd, las
-   det seg som at pila laag yver teksti.
-
-   Grunnen ligg eit hakk høgare: `.setning .felt` set eit *trongt* fyll
-   (.1rem .4rem) med `field-sizing: content`, av di eit felt i ei setning
-   skal vera so breidt som ordet i det. Paa eit skrivefelt er det rett.
-   Paa ein veljar er det ikkje: han ber ei pil i fyllet til høgre, og
-   6,4 px er ikkje rom aat henne — ho vert teikna under bokstavane.
-
-   Difor stend fyllet til høgre att, men det er ikkje lenger eit tal
-   nokon hev gissa: `--pilrom` er rekna av kvar pila faktisk stend
-   (00-token.css), so dei tvo kann ikkje drifta fraa kvarandre meir. Dei
-   tri andre sidone er framleis setningi sine. Same rettingi som
-   `select.lappfelt` i 84-prisane.css — det er dei tvo stadene i huset
-   der ei feltklassa set fyll paa alle fire sidone.
-
-   Pila si eigi plassering stend ikkje her lenger: ho er den same i kvar
-   veljar i huset. `:focus` stod her og med, og `.setning .felt:focus`
-   ovanfor seier alt det same. */
+/* A select picks; it does not write — and it is the *arrow* that says so,
+      not a different form. So only measures stand here.
+   
+      Surface, hairline and box-shadow: none stood here, written when the
+      select was to differ from the field by its form (FASETTEN §3). When the
+      select became a capsule in the base style, these three lines took the
+      surface and the border back — but not the radius — and the result was a
+      pill-shaped box with a thin frame and a gloss over a surface that was
+      not domed. Unreadable in the light theme, and unlike every box around
+      it.
+   
+      Two rules that were meant to agree about the form, meeting in a third
+      nobody had drawn. Now there is one form in the base style, and the
+      sentence adjusts nothing.
+   
+      There was a narrower padding here and an arrow moved in after it: 1.4 px
+      between the letter and the arrow, against 2.2 in the base style — which
+      was also too little. On a phone, where the sentence wraps and the select
+      is squeezed, it read as the arrow lying over the text.
+   
+      The cause is one step up: .setning .felt sets a *tight* padding
+      (.1rem .4rem) with field-sizing: content, because a field in a sentence
+      should be as wide as the word in it. On a text field that is right. On a
+      select it is not: it carries an arrow in its right padding, and 6.4 px
+      is no room for it — it gets drawn under the letters.
+   
+      So the right padding stays, but it is no longer a number anyone guessed:
+      --pilrom is computed from where the arrow actually stands
+      (00-token.css), so the two cannot drift apart. The other three sides are
+      still the sentence's. Same correction as select.lappfelt in
+      84-prisane.css — the two places in the house where a field class sets
+      padding on all four sides. */
 .setning select.felt { padding-right: var(--pilrom); }
 
-/* Her stod `.innelabel` og ein regel for avkryssingar i setningi. Baae
-   er burte med «kvar veke»-avkryssingi: ei setning hev ingen
-   avkryssingar lenger, av di eit val millom tvo tilstandar er eit val og
-   ikkje ei utsegn ein hukar av. Finn du att ein bruk for deim, skriv
-   deim paa nytt — men sjaa etter um det ikkje er ein veljar du treng. */
+/* There were .innelabel and a rule for checkboxes in the sentence here.
+      Both went with the "every week" checkbox: a sentence has no checkboxes
+      any more, because a choice between two states is a choice and not a
+      statement you tick. If you find a use for them, write them again — but
+      check first whether it is not a select you need. */
 
-/* Det systemet reknar ut. Det stend under setningi og ikkje inni
-   henne: du skreiv det ikkje, og du kann ikkje endra det. */
+/* What the system computes. It stands under the sentence and not inside
+      it: you did not write it, and you cannot change it. */
 .fylgja {
   font-family: var(--skrift-tal); font-size: .88rem;
   color: var(--blekk-svakt); margin: 0; min-height: 1.4em;
 }
 .fylgja.gale { color: var(--aatvaring); }
 
-/* ---- knappen som sluttar setningi ----
-   Han stod fyrst som eit tridje jamstelt barn i spalta, so i ein eigen
-   fot med ei haarlina yver. Baae gongene laag han paa ei lina for seg
-   sjølv, og ei lina for seg sjølv er ei ny setning — men han er ikkje
-   det, han er punktumet i den som stend der.
-
-   No stend han inne i `<p class="setning">`, etter siste punktumet, og
-   fylgjer teksti naar ho bryt. Ingi haarlina, ingen fot, ingen kasse:
-   §6 segjer at rommet utanfor ein ting er større enn rommet inni, og
-   ein fot kring éin knapp er ein kasse kring ingen ting. */
+/* ---- the button that ends the sentence ----
+      It stood first as a third equal child in the column, then in a footer of
+      its own with a hairline above. Both times it lay on a line of its own,
+      and a line of its own is a new sentence — but it is not one, it is the
+      full stop of the sentence standing there.
+   
+      Now it stands inside <p class="setning">, after the last full stop, and
+      follows the text when it wraps. No hairline, no footer, no box: §6 says
+      the space outside a thing is larger than the space inside it, and a
+      footer around one button is a box around nothing. */
 /* Heile knappefamilien og ikkje berre hovudknappen. Regelen stod paa
    `.btn-primary` aaleine av di det var den einaste knappen i ei setning
    den gongen; ein `.btn-danger` i den same lina arva line-høgdi 1,9 og
@@ -130,14 +125,14 @@
   line-height: 1.25;
   vertical-align: baseline;
   margin-left: var(--rom-2);
-  /* Og han lyt ha luft yver og under.
+  /* And it has to have air above and below.
      
-     Ei setning set lina si etter *teksti*, men ein knapp er høgre enn
-     teksti: han ber si eigi loddrette fyll og ei ramme attaat. Med berre
-     leidingi fraa line-height 2,4 att, skrapa han undersida av feltet paa
-     lina yver kvar gong setningi braut. Det er ikkje ein knapp-feil og
-     ikkje ein felt-feil — det er at lina aldri vart bedi um aa gjera plass
-     til det høgste ho ber. Margen her er den plassen, teken av det same
-     stiget som alt anna (§6). */
+          A sentence sets its line from the *text*, but a button is taller than
+          the text: it carries its own vertical padding and a border besides.
+          With only the leading from line-height 2.4 left, it scraped the
+          underside of the field on the line above every time the sentence
+          wrapped. That is not a button fault and not a field fault — it is that
+          the line was never asked to make room for the tallest thing it
+          carries. */
   margin-block: var(--rom-1);
 }

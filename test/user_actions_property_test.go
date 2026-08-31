@@ -40,7 +40,7 @@ func (a *RegisterUserAction) Apply(state *UserState, db *database.Database) erro
 		Phone:     a.Phone,
 		Birthdate: a.Birthdate,
 		Password:  "defaultpassword",
-		Loyve:     []string{"user"},
+		Løyve:     []string{"user"},
 	}
 
 	id, err := db.CreateUser(user)
@@ -126,7 +126,7 @@ func setupTestDB() (*database.Database, func()) {
 	}
 	tmpfile.Close()
 
-	// Kvar prøva fær si eigi fil. Dette stod her fraa fyrr, men det
+	// Kvar prøva fær si eigi fil. Dette stod her frå fyrr, men det
 	// verka ikkje: setup sette «DB_PATH», og database.Connect() las
 	// ingen umgjevnadsvariabel i det heile — stigen var fast skriven til
 	// «./kjernekraft.db». Difor delte alle prøvorne den same fila, og
@@ -211,7 +211,7 @@ func TestUserActionsPropertyBased(t *testing.T) {
 				Phone:     "12345678",
 				Birthdate: "1990-01-01",
 				Password:  "testpassword",
-				Loyve:     []string{"user"},
+				Løyve:     []string{"user"},
 			}
 
 			id, err := db.CreateUser(user)
@@ -251,7 +251,7 @@ func TestUserActionsPropertyBased(t *testing.T) {
 				Phone:     "12345678",
 				Birthdate: "1990-01-01",
 				Password:  "testpassword",
-				Loyve:     []string{"user"},
+				Løyve:     []string{"user"},
 			}
 
 			id, err := db.CreateUser(user)

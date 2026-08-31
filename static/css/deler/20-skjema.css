@@ -1,12 +1,11 @@
 /* ===================================================================
    skjema
    =================================================================== */
-/* `align-items` stend paa `stretch` som standard, og daa vert kvart barn
-   so breidt som bolken same kva `width` segjer. Ein veljar som var sett
-   til aa vera so brei som innhaldet vart strekt likevel — reglane var
-   rette, men fyresetnaden var det ikkje. Her byrjar dei ved venstre
-   kanten og tek den breiddi dei sjølve bad um; eit skrivefelt hev
-   `width: 100%` og fyller framleis. */
+/* align-items defaults to stretch, and then every child is as wide as the
+      section whatever width says. A select set to be as wide as its content
+      was stretched anyway — the rules were right, the premise was not. Here
+      they start at the left edge and take the width they asked for; a text
+      field has width: 100% and still fills. */
 .form-group { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rom-2); margin-bottom: var(--rom-4); }
 .form-row { display: grid; gap: var(--rom-4); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
 
@@ -14,20 +13,20 @@ label, .detail-label {
   font-size: .88rem; color: var(--blekk-lys);
 }
 
-/* :where() gjev null i spesifisitet, so kvar klassa slær denne regelen.
-   Utan det er `input[type="text"]` (0,1,1) sterkare enn `.lappfelt`
-   (0,1,0), og eit felt som skulde vera nake fekk ramma og flata
-   attende. Det hende tvo gonger — fyrst med vikefeltet, so med
-   adresselappen — og det er den slags ein ikkje ser i koda, berre paa
-   skjermen. Grunnstilen skal vera lettast aa yverstyra av alle. */
-/* Eitt felt, og det er det som heitte `.lappfelt`: inga ramme, ein grunn
-   skraakant, og ei flate eit hakk mørkare enn arket.
+/* :where() gives zero specificity, so any class beats this rule. Without
+      it, input[type="text"] (0,1,1) is stronger than .lappfelt (0,1,0), and
+      a field meant to be bare got the border and surface back. It happened
+      twice — first the week field, then the address label — and it is the
+      sort of thing you do not see in the code, only on the screen. The base
+      style should be the easiest of all to override. */
+/* One field, and it is the one that was called .lappfelt: no border, a
+      shallow bevel, and a surface a step darker than the sheet.
    
-   Fyrr gav grunnstilen kant *og* flate, medan `.lappfelt` tok kanten av
-   att — so kvart felt i huset laut velja side, og fem former for éi
-   meining vart resultatet. No er grunnstilen den rette forma, og
-   klassane som stend att er berre *maal*: kor breidt feltet er, ikkje
-   korleis det ser ut. */
+      The base style used to give border *and* surface while .lappfelt took
+      the border off again — so every field in the house had to pick a side,
+      and five forms for one meaning was the result. Now the base style is
+      the right form, and the classes that remain are only *measures*: how
+      wide the field is, not how it looks. */
 :where(input[type="text"], input[type="email"], input[type="password"],
        input[type="date"], input[type="tel"], input[type="number"],
        input[type="search"], input[type="time"], textarea) {
@@ -40,8 +39,8 @@ label, .detail-label {
   width: 100%;
 }
 
-/* Veljaren hev den same forma som feltet, og pili er heile skilnaden.
-   Sjaa den lange grunngjevingi nede ved `select`. */
+/* The select has the same form as the field, and the arrow is the whole
+      difference. See the long explanation down at `select`. */
 :where(select) {
   font: inherit;
   padding: var(--rom-2) var(--rom-3);
@@ -52,47 +51,46 @@ label, .detail-label {
   width: 100%;
 }
 
-/* Djupni stend paa alt ein kann taka i. Ho sa «her kann du skriva» og
-   stod difor ikkje paa veljaren — sjaa `select` nedanfor for kvifor det
-   ikkje heldt. */
+/* Depth stands on everything you can touch. It said "you can type here"
+      and therefore did not stand on the select — see `select` below for why
+      that did not hold. */
 :where(input:not([type="checkbox"]):not([type="radio"]), textarea, select) {
   box-shadow: var(--skraakant);
 }
-/* ---- fasetten ----
-   Eit felt ligg *i* arket og ikkje paa det. Skuggen fell inn i det
-   ovanfraa, som i ei fasettsliping, og det er den vesle djupna som
-   segjer «her kann du skriva» — utan eit einaste ord, og utan ei ramma
-   som ropar.
-
-   Difor stend han paa *alle* felt heile tidi, ikkje berre paa det ein
-   held paa med. Var han berre i fokus, laut ein klikka rundt for aa
-   finna ut kva som let seg endra. Ved fokus kjem merkefargen attaat:
-   djupna segjer «skrivbar», fargen segjer «her er du no».
-
-   Han er skriven ein stad og nytta av alle, so kvar ny kontroll fell i
-   det same sporet utan at nokon tenkjer paa det. */
+/* ---- the bevel ----
+      A field lies *in* the sheet and not on it. The shadow falls into it
+      from above, as in a bevel cut, and that small depth is what says "you
+      can type here" — without a single word, and without a frame that
+      shouts.
+   
+      So it stands on *every* field all the time, not only the one you are
+      working in. Were it only in focus, you would have to click around to
+      find out what can be changed. On focus the brand colour joins it:
+      depth says "writable", colour says "you are here".
+   
+      It is written in one place and used by all, so every new control falls
+      into the same groove without anyone thinking about it. */
 :root {
   --fordjuping: inset 0 1px 2px color-mix(in srgb, var(--blekk) 12%, transparent);
   --fasett:
     inset 0 1px 2px color-mix(in srgb, var(--blekk) 16%, transparent),
     0 0 0 1px var(--merke);
 }
-/* Dei tvo ovanfor er ikkje nytta av noko lenger — skraakanten tok yver
-   den 27. august 2026. Dei stend att med vilje so lenge skraakanten er
-   ny: heile umbytet er `var(--skraakant)` → `var(--fordjuping)` og
-   `var(--skraakant-fasett)` → `var(--fasett)`, og det er ein sed unna aa
-   gjera um. Vert skraakanten verande, skal dei tvo ut, og FASETTEN §1
-   med deim. */
+/* The two above are no longer used by anything — the bevel took over on
+      27 August 2026. They stand deliberately while the bevel is new: the
+      whole swap is var(--skraakant) → var(--fordjuping) and
+      var(--skraakant-fasett) → var(--fasett), one sed away from being undone.
+      If the bevel stays, those two go out, and FASETTEN §1 with them. */
 
-/* ---- skraakanten ----
-   Fasetten er éi lippa. Skraakanten er tvo: den myrke uppe og ei ljos
-   nede. Tvo lippor er ikkje ein sterkare fasett — det er ei anna form.
-   Éi segjer «her byrjar noko»; tvo segjer «her er eit hol med ein botn
-   du ser ned i». Sjaa docs/SKRAAKANTEN.md.
-
-   Lippone og retningi deira stend i `:root` uppe med `--glans`, av di
-   dei skifter med temaet og lyt staa fyre `[data-theme="dark"]` i fila.
-   Her stend berre formene som er bygde av deim. */
+/* ---- the bevel ----
+      The facet is one lip. The bevel is two: the dark one above and a light
+      one below. Two lips are not a stronger facet — they are a different
+      form. One says "something starts here"; two say "here is a hole with a
+      floor you look down into". See docs/SKRAAKANTEN.md.
+   
+      The lips and their direction live in :root with --glans, because they
+      change with the theme and have to stand before [data-theme="dark"] in
+      the file. Only the forms built from them stand here. */
 :root {
   /* Den myrke lippa er ein skugge og skal vera mjuk; den ljose er
      kanten sjølv som fangar ljoset, og er difor skarpare. */
@@ -100,19 +98,19 @@ label, .detail-label {
     inset 0  1px 2px var(--lippe-djup),
     inset 0 -1px 1px var(--lippe-ljos);
 
-  /* Vika og den tome dagen. Same lippone, berre lenger inn: tvo pikslar
-     i staden for éin, og eit spreidingstal som held draget smalt. Djupni
-     er *geometri* og ikkje farge — hadde ho vore farge med, hadde ho
-     trunge sitt eige tema-tal, og daa er det tvo ting aa halda i takt
-     der det held med eitt. */
+  /* The week and the empty day. The same lips, only deeper: two pixels
+          instead of one, and a spread that keeps the gradient narrow. Depth is
+          *geometry* and not colour — had it been colour too, it would have
+          needed its own theme value, and then there are two things to keep in
+          step where one will do. */
   --skraakant-djup:
     inset 0  2px 2px -1px var(--lippe-djup),
     inset 0 -2px 1px -1px var(--lippe-ljos);
 
-  /* Djupna vert ikkje djupare i fokus. Det grepet fanst av di ringen
-     aaleine var for lite; med tvo lippor er forma alt tydeleg i kvila,
-     og eit felt som ogso skifter djupn naar du tek i det, rører seg
-     meir enn det seier. */
+  /* The depth does not deepen on focus. That move existed because the ring
+          alone was too little; with two lips the form is already clear at
+          rest, and a field that also changes depth when you touch it moves
+          more than it says. */
   --skraakant-fasett: var(--skraakant), 0 0 0 1px var(--merke);
 }
 
@@ -121,23 +119,23 @@ input:hover:not([type="checkbox"]):not([type="radio"]), textarea:hover {
 }
 input:focus, textarea:focus { outline: none; box-shadow: var(--skraakant-fasett); }
 
-/* ---- neiet ----
-   Eit felt som ikkje kann taka det du skreiv fer ein augneblink i
-   aatvaringsfargen og vert tomt. Ikkje ein ring, og ingi melding som
-   lyt lesast og lukkast: du saag kva som hende, og du er alt i feltet.
-
-   Han stend etter `:hover` med vilje. Same vekt, og daa er det
-   rekkjefylgda som avgjer — laag han fyrr, tok hover neiet burt i det
-   same augneblinken du saag det, av di peikaren stend i feltet.
-
-   Tri vekefelt i huset nyttar honom (`veketal.js`), og berre eitt av
-   dei er ei bobla, so han kann ikkje bu der lenger. */
+/* ---- the refusal ----
+      A field that cannot take what you typed flashes the warning colour and
+      empties. Not a ring, and no message to read and close: you saw what
+      happened, and you are already in the field.
+   
+      It stands after :hover deliberately. Same weight, so source order
+      decides — placed before, hover removed the refusal the very moment you
+      saw it, because the pointer is in the field.
+   
+      Three week fields in the house use it (veketal.js), and only one of
+      them is a bubble, so it can no longer live there. */
 .nekta { background-color: color-mix(in srgb, var(--aatvaring) 22%, transparent); }
 @media (prefers-reduced-motion: no-preference) {
   .nekta { transition: background-color .18s ease-out; }
 }
-/* Fokus legg ringen utanpaa kuppelen og tek honom ikkje burt: djupna
-   segjer kva tingen *er*, ringen kvar du er. */
+/* Focus lays the ring outside the dome and does not remove it: the depth
+      says what the thing *is*, the ring says where you are. */
 select:focus { outline: none; box-shadow: var(--skraakant-fasett); }
 select {
   /* Eit skrivefelt strekkjer seg, av di ingen veit kor langt det ein

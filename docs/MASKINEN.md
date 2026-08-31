@@ -12,7 +12,7 @@ smallest set of mechanisms it should collapse into?
 **The headline: the machine is not missing abstractions — it stopped
 adopting the ones it already grew.** `renderPage`, `RequireAuth`/
 `RequireAdmin`, `teiknFragment`, `veggtekst`, `stadfest.js`, `endringar.js`,
-`faner.js`, the `faner` partial, `lesSerieskjema` — every one of these is the
+the `faner` partial, `lesSerieskjema` — every one of these is the
 right mechanism, already written, already commented as the intended way. And
 at half the call sites the old hand-rolled version still stands beside it.
 The stylesheet had the same disease before the 2026-08-28 split, and the cure
@@ -42,10 +42,10 @@ these, and this section becomes the rulebook (the ARKET of the machinery):
 | write a timestamp | `veggtekst` | 31 sites use it, 4 bypass it → mixed formats in one column → a 5-layout fallback parse loop exists to cope |
 | read a timestamp | `lesTid(s)` (to write, from the loop at `database.go:2606`) | 3 strict single-layout copies that silently yield the zero time |
 | add a column/table | one `[]migrasjon` registry + `harKolonne`/`harTabell` | 6 coexisting migration mechanisms, 15 pragma probes with inconsistent error handling |
-| load a fragment into a div | `hx-get` + `hx-trigger="load"` | also two divergent hand-written `hent()`s for the same endpoints |
+| load a fragment into a div | `hx-get` + `hx-trigger="load"` | both hand-written `hent()`s are gone (2026-08-31) |
 | confirm a destructive press | `data-stadfest` (`stadfest.js`) | also `confirm()` ×2 and ad-hoc disable-on-click |
 | show a server error to the user | one channel: `.svar[role=status]` + `.gale`, fed by `svarFeil` + `feil.js` | **nine** distinct client-side mechanisms, incl. `alert()` and an unstyled `.message` block |
-| tabs | `faner` partial + `faner.js` | also 3 hand-written tab strips, 16 hand-written panels, and 2 more tab controllers (`dagfokus.js`, `folk.js`) |
+| tabs | `faner` partial + `?fane=` read in Go (`handsamarar/faner.go`) | *was* 3 hand-written tab strips, 16 hand-written panels, 3 controllers; `faner.js` is gone as of 2026-08-31, `dagfokus.js` and `folk.js` still filter with `.fane` buttons of their own |
 | a small popover | `veljar(knapp, meny)` (to write) | 4 copies of the same open/outside-click/aria dance |
 | a translated string in JS | `data-t-*` on the target element | 4 incompatible conventions (`toJS`, `data-t-*`, `ADMIN_TEXTS`, inline `'{{t}}'`) |
 | load templates in a test | `lastMalane` (`loyvemerke_test.go:12`) | 3 competing idioms across 12 sites, one of which mutates cwd and the singleton |
@@ -206,8 +206,10 @@ the specimen sheet). The problems are structural.
   one block styling classes that don't exist in the stylesheet; verbatim
   display of `http.Error` bodies that are not localized and not even in one
   language.
-- **F30 — three tab controllers, four popover implementations** — merge into
-  `faner.js` (pluggable "what a tab shows") and one `veljar()` helper.
+- **F30 — three tab controllers, four popover implementations** — the tabs
+  half is done (2026-08-31): the choice moved into `?fane=` and the server,
+  `faner.js` is deleted, and what is left (`bolkveljar.js`) is the in-form
+  scope switch only. The popovers still want one `veljar()` helper.
 - **F31 — CSRF has one mechanism and one bypass** (`innsjekk.html` reads a
   meta tag by hand; `csrf.js` already covers fetch globally).
 - **F32 — re-binding after swaps is a lottery**: 2 files re-bind on

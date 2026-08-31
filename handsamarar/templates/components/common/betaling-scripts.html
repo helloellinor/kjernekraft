@@ -1,0 +1,57 @@
+{{define "betaling_scripts"}}
+<script>
+// Betalingssida.
+//
+// Ingen alert, ingen confirm. Kvart einaste ord her stod paa bokmaal
+// inne i skriptet — «Feil ved fjerning av betalingsmetode» — paa ei
+// sida som elles kann lesast paa tri maal, og ingen saag det fyrr nokon
+// bytte maal. No kjem dei fraa `locales/` som alt anna (§7).
+//
+// Det som gjekk gale stend i lina under lista, der ein alt les. Ei rute
+// som spring upp og lyt lukkast stoggar heile sida for aa fortelja deg
+// noko ho kunde ha skrive der du saag.
+(function () {
+    "use strict";
+
+    var svar = document.getElementById("betalingssvar");
+
+    var ord = {
+        handlingGale: {{t .Lang "payments.action_failed" | toJS}}
+    };
+
+    function syn(bod) {
+        if (!svar) return;
+        svar.textContent = bod || "";
+        svar.classList.toggle("gale", Boolean(bod));
+    }
+
+    function send(url, id) {
+        syn("");
+        var kropp = new FormData();
+        kropp.append("payment_method_id", id);
+
+        fetch(url, { method: "POST", body: kropp })
+            .then(function (r) {
+                if (!r.ok) return r.text().then(function (t) { throw new Error(t); });
+                // Lista hentar seg sjølv naar ho høyrer dette; sjaa
+                // payment-methods-container.html.
+                htmx.trigger(document.body, "kortendra");
+            })
+            .catch(function (feil) { syn(feil.message || ord.handlingGale); });
+    }
+
+    // Éin lyttar for heile lista. Korti vert teikna paa nytt etter kvar
+    // handling, so ein lyttar per knapp hadde vore burte att og fram.
+    document.addEventListener("click", function (e) {
+        var knapp = e.target.closest("[data-kort]");
+        if (!knapp) return;
+        if (knapp.dataset.handling === "standard") {
+            send("/api/payment-methods/set-default", knapp.dataset.kort);
+        } else if (knapp.dataset.handling === "fjern") {
+            send("/api/payment-methods/remove", knapp.dataset.kort);
+        }
+    });
+
+})();
+</script>
+{{end}}

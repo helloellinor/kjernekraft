@@ -1,21 +1,19 @@
-// Package yogo hentar timeplanen fraa bokingsystemet studioet driv i dag.
+// Package yogo fetches the schedule from the booking system the studio
+// runs today.
 //
-// Kjernekraft bokar gjenom Yogo. Sida kundane ser er
-// `kjernekraftoslo.yogo.no`, og ho er ein einsides-app som sjølv hentar
-// alt fraa `api.yogo.dk` — so det finst eit JSON-svar bak lista, og det
-// er det me spør um. Aa skrapa HTML-en hadde vore aa lesa ei teikning av
-// det talet me kann faa direkte, og teikningi endrar seg kvar gong nokon
-// rører framsida.
+// The customer-facing page is a single-page app that fetches everything
+// from api.yogo.dk, so there is a JSON response behind the list and that
+// is what we ask for. Scraping the HTML would be reading a drawing of a
+// number we can have directly, and the drawing changes whenever someone
+// touches the front end.
 //
-// Pakka *hentar* og gjer om; ho lagrar ingen ting. Det er tvo jobbar:
-// den eine kann køyrast so tidt ein vil og gjer ingen skade, den andre
-// skriv i basen og skal sjaast paa fyrst. Difor gjev ho att
-// `[]models.Event` — det huset alt bruker — og let kallaren avgjera kva
-// som skal verta ein serie.
+// The package fetches and converts; it stores nothing. Those are two
+// jobs: one can be run as often as you like and does no harm, the other
+// writes to the database and should be looked at first. So it returns
+// []models.Event and leaves the caller to decide what becomes a series.
 //
-// Ingi innlogging. Timeplanen er den same lista kven som helst ser paa
-// bokingsida, og me spør berre etter henne — ingen kundar, ingen
-// paameldingar, ingen personopplysningar.
+// No login. The schedule is the same list anyone sees on the booking
+// page — no customers, no signups, no personal data.
 package yogo
 
 import (
@@ -34,11 +32,11 @@ import (
 
 const (
 	// APIbasen er den same for alle studio Yogo driv; kven som spør
-	// avgjerd `X-Yogo-Client-ID` og kva `Origin` det kjem fraa.
+	// avgjerd `X-Yogo-Client-ID` og kva `Origin` det kjem frå.
 	APIbase = "https://api.yogo.dk"
 
-	// Studioet si eigi side. Han stend her av di API-en godtek spurnaden
-	// paa `Origin`, og ein spurnad utan honom er ein spurnad utan studio.
+	// The studio's own site. It is here because the API accepts the request
+	// on Origin, and a request without one is a request without a studio.
 	Opphav = "https://kjernekraftoslo.yogo.no"
 
 	// Kjernekraft Oslo hjaa Yogo. Talet stend i kvart einaste svar som
@@ -49,27 +47,26 @@ const (
 	dagformat = "2006-01-02"
 )
 
-// Klient er ein oppslag mot Yogo. Han ber ingen tilstand utanum kva
-// studio han spør for, so ein kann laga honom kvar gong eller halda paa
-// honom — det er det same.
+// Klient is one lookup against Yogo. It carries no state beyond which
+// studio it asks for, so build it each time or keep it — same thing.
 type Klient struct {
 	HTTP     *http.Client
 	Base     string
 	Opphav   string
 	Klientnr int
 
-	// Sona timane vert lesne i. Yogo gjev dagen og klokka kvar for seg —
-	// «2026-08-31» og «17:30» — og det *er* klokka paa veggen i Oslo.
-	// Huset lagrar den same klokka (sjaa `veggtekst` i database-pakka),
-	// so tali gjeng heilt gjenom utan aa flytta seg.
+	// The zone the classes are read in. Yogo gives the day and the time
+	// separately — "2026-08-31" and "17:30" — and that *is* the clock on the
+	// wall in Oslo. The house stores the same clock (see veggtekst in the
+	// database package), so the numbers pass straight through.
 	Sone *time.Location
 }
 
-// Ny lagar ein klient for Kjernekraft med rimelege innstillingar.
+// Ny makes a client with sensible settings.
 //
-// Tidsgrensa er ikkje pynt: dette kallet gjeng mot ein tenar me ikkje
-// raar yver, og ein spurnad som aldri kjem attende er verre enn ein som
-// feilar — han held den som ventar.
+// The timeout is not decoration: this call goes to a server we do not
+// control, and a request that never returns is worse than one that
+// fails — it holds whoever is waiting.
 func Ny() (*Klient, error) {
 	sone, err := time.LoadLocation("Europe/Oslo")
 	if err != nil {
@@ -84,33 +81,33 @@ func Ny() (*Klient, error) {
 	}, nil
 }
 
-// Val er det som kann stillast paa ei henting. Nullverdet er det ein
-// vil ha: berre timar som gjeng.
+// Val is what can be set on a fetch. The zero value is what you want:
+// only classes that run.
 type Val struct {
-	// MedAvlyste tek med timar som er avlyste. Skal ein *importera* ein
-	// timeplan, vil ein ikkje ha deim — ein avlyst time er ei melding um
-	// noko som ikkje hender, ikkje ein time. Skal ein *samanlikna* tvo
-	// planar, vil ein det, av di skilnaden er poenget.
+	// MedAvlyste includes cancelled classes. Importing a schedule, you do
+	// not want them — a cancelled class is a notice about something not
+	// happening, not a class. Comparing two schedules, you do, because the
+	// difference is the point.
 	MedAvlyste bool
 }
 
-// Timar hentar alle timane i spennet, baae dagane med.
+// Timar hentar alle timane i spennet, båe dagane med.
 //
 // Spennet er dagar og ikkje augneblink: Yogo reknar i datoar, og ein
-// time høyrer til den dagen han byrjar. Fraa og til vert difor klipte
+// time høyrer til den dagen han byrjar. Frå og til vert difor klipte
 // ned til dagen sin.
-func (k *Klient) Timar(ctx context.Context, fraa, til time.Time, val Val) ([]models.Event, error) {
-	if til.Before(fraa) {
+func (k *Klient) Timar(ctx context.Context, frå, til time.Time, val Val) ([]models.Event, error) {
+	if til.Before(frå) {
 		return nil, fmt.Errorf("spennet gjeng baklengs: %s til %s",
-			fraa.Format(dagformat), til.Format(dagformat))
+			frå.Format(dagformat), til.Format(dagformat))
 	}
 
 	spurnad := url.Values{}
-	spurnad.Set("startDate", fraa.Format(dagformat))
+	spurnad.Set("startDate", frå.Format(dagformat))
 	spurnad.Set("endDate", til.Format(dagformat))
-	// Namnet paa slaget, rommet og læraren bur i eigne tabellar hjaa
-	// Yogo; utan dette fær me berre id-ane deira, og ein id er ikkje
-	// noko ein kann setja i ein timeplan.
+	// The names of the kind, the room and the teacher live in separate
+	// tables at Yogo; without this we get only their ids, and an id is not
+	// something you can put in a schedule.
 	spurnad.Add("populate[]", "class_type")
 	spurnad.Add("populate[]", "room")
 	spurnad.Add("populate[]", "teachers")
@@ -132,8 +129,8 @@ func (k *Klient) Timar(ctx context.Context, fraa, til time.Time, val Val) ([]mod
 
 	ut := make([]models.Event, 0, len(kropp.Klassar))
 	for _, kl := range kropp.Klassar {
-		// Belte og bukseseler: flagget yver seier det same til tenaren,
-		// men eit filter me *ser* er eit filter me kann prøva.
+		// Belt and braces: the flag above tells the server the same thing, but a
+		// filter we can *see* is a filter we can test.
 		if kl.Avlyst && !val.MedAvlyste {
 			continue
 		}
@@ -147,19 +144,20 @@ func (k *Klient) Timar(ctx context.Context, fraa, til time.Time, val Val) ([]mod
 	return ut, nil
 }
 
-// NesteVeker er «det neste tidsrommet»: fraa i dag og so mange heile
-// vikor fram.
+// NesteVeker is "the next stretch": from today and that many whole weeks
+// forward.
 //
-// Vika er eininga av di det er henne timeplanen gjentek seg i — ein
-// serie er «yoga maandag 18:00», og han sannar seg kvar vike. Ein spør
-// etter tri vikor og fær tri gjentak av kvar serie, som er nettupp det
-// ein treng for aa sjaa kva som er ein serie og kva som er eit unnatak.
+// The week is the unit because that is what a schedule repeats in — a
+// series is "yoga Monday 18:00", and it comes true every week. Ask for
+// three weeks and you get three repetitions of each series, which is
+// exactly what you need to see what is a series and what is an
+// exception.
 func (k *Klient) NesteVeker(ctx context.Context, no time.Time, veker int, val Val) ([]models.Event, error) {
 	if veker < 1 {
 		return nil, fmt.Errorf("talet paa vikor lyt vera minst éi, ikkje %d", veker)
 	}
-	fraa := no.In(k.Sone)
-	return k.Timar(ctx, fraa, fraa.AddDate(0, 0, 7*veker-1), val)
+	frå := no.In(k.Sone)
+	return k.Timar(ctx, frå, frå.AddDate(0, 0, 7*veker-1), val)
 }
 
 // hent gjer sjølve kallet.
@@ -168,13 +166,13 @@ func (k *Klient) hent(ctx context.Context, veg string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Yogo finn studioet paa desse tri. Utan deim svarar API-en for
-	// ingen — eller for feil studio.
+	// Yogo finds the studio from these three. Without them the API answers
+	// for nobody — or for the wrong studio.
 	sp.Header.Set("Origin", k.Opphav)
 	sp.Header.Set("X-Yogo-Request-Context", "frontend")
 	sp.Header.Set("X-Yogo-Client-ID", strconv.Itoa(k.Klientnr))
-	// Ei ærleg merkelapp. Den som eig tenaren skal kunna sjaa i loggen
-	// kven som spør, og kven han skal ringja um det er for mykje.
+	// An honest label. Whoever owns the server should be able to see in the
+	// log who is asking, and who to call if it is too much.
 	sp.Header.Set("User-Agent", "kjernekraft/1.0 (timeplanhenting; post@kjernekraftoslo.no)")
 	sp.Header.Set("Accept", "application/json")
 
@@ -184,8 +182,8 @@ func (k *Klient) hent(ctx context.Context, veg string) ([]byte, error) {
 	}
 	defer res.Body.Close()
 
-	// Eit tak paa lesingi. Ei vike er kring 125 kB; ti megabyte er rikeleg
-	// for eit heilt aar og lite nok til at eit svar som gjeng ihop ikkje
+	// Eit tak på lesingi. Ei vike er kring 125 kB; ti megabyte er rikeleg
+	// for eit heilt år og lite nok til at eit svar som gjeng ihop ikkje
 	// tek minnet med seg.
 	kropp, err := io.ReadAll(io.LimitReader(res.Body, 10<<20))
 	if err != nil {
@@ -197,11 +195,11 @@ func (k *Klient) hent(ctx context.Context, veg string) ([]byte, error) {
 	return kropp, nil
 }
 
-// ---- det Yogo sender ----
+// ---- what Yogo sends ----
 //
-// Berre felti me nyttar. Svaret ber fire gonger so mange — flagg for
-// ClassPass, Bruce og Urban Sports Club, bilete, lange skildringar — og
-// eit felt me ikkje les er eit felt som ikkje kann driva fraa oss.
+// Only the fields we use. The response carries four times as many — flags
+// for ClassPass, Bruce and Urban Sports Club, images, long descriptions —
+// and a field we do not read is a field that cannot drift away from us.
 
 type klasse struct {
 	ID     int    `json:"id"`
@@ -228,7 +226,7 @@ type klasse struct {
 	} `json:"teachers"`
 }
 
-// tilEvent gjer ein Yogo-time um til den timen huset kjenner.
+// tilEvent turns a Yogo class into the class the house knows.
 func (k klasse) tilEvent(sone *time.Location) (models.Event, error) {
 	start, err := klokkeslett(k.Dato, k.Start, sone)
 	if err != nil {
@@ -238,29 +236,30 @@ func (k klasse) tilEvent(sone *time.Location) (models.Event, error) {
 	if err != nil {
 		return models.Event{}, err
 	}
-	// Ein time som sluttar fyre han byrjar gjeng yver midnatt. Det
-	// hender ikkje i eit yogastudio, men eit svar me ikkje raar yver
-	// skal ikkje kunna gjeva ein time med negativ lengd.
+	// A class that ends before it starts runs past midnight. That does not
+	// happen in a yoga studio, but a response we do not control must not be
+	// able to give a class a negative length.
 	if !slutt.After(start) {
 		slutt = slutt.AddDate(0, 0, 1)
 	}
 
 	namn := reint(k.slagnamn())
+	sete := k.Sete
 	e := models.Event{
 		Title: namn,
-		// Namnet er kva timen *heiter*; slaget er kva han *er*. Yogo hev
-		// berre det fyrste — «Vinyasa Flow» — so slaget vert slege upp
-		// (sjaa slag.go). Eit namn tabellen ikkje kjenner gjev tom
-		// streng, og daa vert vengen graa i staden for aa lyga (§1).
+		// The name is what the class is *called*; the kind is what it *is*. Yogo
+		// has only the first — "Vinyasa Flow" — so the kind is looked up (see
+		// slag.go). A name the table does not know gives an empty string, and
+		// then the wing goes grey rather than lying (§1).
 		ClassType:   Slag(namn),
 		Description: reint(k.Emne),
 		StartTime:   start,
 		EndTime:     slutt,
-		TeacherName: k.laerar(),
+		TeacherName: k.lærar(),
 		Capacity:    k.Sete,
-		// Plassane er rommet sitt her — Yogo hev inga eigi/arva-skiljing —
-		// so talet er timen sitt eige.
-		EigenPlassar: k.Sete,
+		// Places are the room's here — Yogo has no own/inherited distinction — so
+		// the number is the class's own.
+		EigenPlassar: &sete,
 	}
 	if k.Rom != nil {
 		e.RoomName = reint(k.Rom.Namn)
@@ -279,14 +278,14 @@ func (k klasse) slagnamn() string {
 	return k.Slag.Namn
 }
 
-// laerar gjev eitt namn.
+// lærar gives one name.
 //
-// Yogo let fleire lærarar staa paa ein time; huset hev eitt felt, av di
-// det er eitt namn som stend i lista og paa merket. Fyrste namnet er den
-// som held timen — dei hine er assistentar — og fleire enn éin er
-// sjeldan nok til at det er betre aa taka den fyrste enn aa føra eit
-// felt til gjenom heile huset for eit tilfelle som mest ikkje finst.
-func (k klasse) laerar() string {
+// Yogo allows several teachers on a class; the house has one field,
+// because it is one name that stands in the list and on the mark. The
+// first is the one holding the class, the rest are assistants, and more
+// than one is rare enough that taking the first beats threading a field
+// through the whole house for a case that barely exists.
+func (k klasse) lærar() string {
 	if len(k.Laerarar) == 0 {
 		return ""
 	}
@@ -295,7 +294,7 @@ func (k klasse) laerar() string {
 }
 
 // klokkeslett byggjer eit tidspunkt av dagen og klokka Yogo gjev kvar
-// for seg. Det er klokka paa veggen, og ho vert merkt med Oslo.
+// for seg. Det er klokka på veggen, og ho vert merkt med Oslo.
 func klokkeslett(dag, klokke string, sone *time.Location) (time.Time, error) {
 	t, err := time.ParseInLocation("2006-01-02 15:04", dag+" "+strings.TrimSpace(klokke), sone)
 	if err != nil {
@@ -304,15 +303,15 @@ func klokkeslett(dag, klokke string, sone *time.Location) (time.Time, error) {
 	return t, nil
 }
 
-// reint vaskar mellomrom or endane.
+// reint strips whitespace from the ends.
 //
-// Yogo-namni ber deim: «Fascia Flyt », «Hatha Yoga », «Reformer ». Eit
-// namn med eit mellomrom bak er eit anna namn enn det same utan, og daa
-// vert det tvo seriar av éin — og tvo ulike vengar i lista.
+// Yogo names carry it: "Fascia Flyt ", "Hatha Yoga ", "Reformer ". A name
+// with a trailing space is a different name from the same one without, and
+// then one series becomes two — and two different wings in the list.
 func reint(s string) string { return strings.TrimSpace(s) }
 
-// stutt klipper eit feilsvar so det kann staa i ei feilmelding utan aa
-// taka med seg ei heil HTML-side.
+// stutt trims an error response so it can stand in a message without
+// dragging a whole HTML page with it.
 func stutt(b []byte) string {
 	s := strings.TrimSpace(string(b))
 	if len(s) > 200 {
@@ -321,8 +320,8 @@ func stutt(b []byte) string {
 	return s
 }
 
-// sorterEtterTid set timane i den rekkjefylgda ein les deim i.
-// Yogo gjev deim i den rekkjefylgda basen hans finn deim.
+// sorterEtterTid puts the classes in the order you read them in. Yogo
+// gives them in whatever order its database finds them.
 func sorterEtterTid(timar []models.Event) {
 	for i := 1; i < len(timar); i++ {
 		for j := i; j > 0 && timar[j].StartTime.Before(timar[j-1].StartTime); j-- {

@@ -1,33 +1,33 @@
 /* ===================================================================
-   hovudet
-   Éi lina. Merket, sidone og namnet høyrer til den same tingen, og tvo
-   bjelkar tok dobbelt so mykje høgd for aa segja det.
-
-   Alt stend midt paa lina: `align-items: center` paa rada, og kvar bit
-   sentrert i seg sjølv. Det var dette som ikkje stemde — merket laag
-   paa grunnlina si eiga, teksti paa si, og bjelken kring deim visste
-   ikkje um nokon av deim.
-   =================================================================== */
-/* ---- hovudet og lina under det ----
-   Lina er den same som under hovudet i ordboka: ikkje ein kant, men tvo
-   strekar med ei renne imellom, måla som flate. Ein kant kan ikkje bera
-   ljos. Renna er ikkje gjennomsynleg — ho ligg i bakgrunnen åt hovudet,
-   under glødi, so ljoset lyser *gjennom* henne medan dei to strekane
-   står som ribbene i lista. Sjå .hovud::after i slaaupp. */
-/* Hovudlina fylgjer med nedyver.
-   Ho rulla burt fyrr, og daa var vegen til ei onnor sida aa rulla heilt
-   upp att fyrst — ei rekkje ein ikkje bad um millom «eg vil til
-   klippekortet» og klippekortet. Ho er sida sitt eige hovud og høyrer
-   like mykje til botnen av sida som toppen.
-
-   `--sidehovud-hogd` er høgdi hennar som eit tal andre kann rekna med:
-   sider som legg sine eigne klistra linor under henne stablar seg fraa
-   denne. Maalt til 56 px (32 px innhald + fyllet i `.header-content`);
-   endrar hovudet seg, lyt talet fylgja med — det finst ingen veg for
-   CSS aa lesa høgdi av eit element.
-
-   `z-index: 20`: yver innhaldet, under dokka (30), som skal liggja yver
-   alt. */
+      the header
+      One line. The mark, the pages and the name belong to the same thing,
+      and two bars took twice the height to say so.
+   
+      Everything stands on the middle of the line: align-items: center on the
+      row, and each piece centred in itself. That was what did not add up —
+      the mark lay on its own baseline, the text on its, and the bar around
+      them knew about neither.
+      =================================================================== */
+/* ---- the header and the line under it ----
+      The line is the same as under the header in the dictionary: not a
+      border, but two strokes with a gutter between, painted as surface. A
+      border cannot carry light. The gutter is not transparent — it lies in
+      the header's background, under the glow, so the light shines *through*
+      it while the two strokes stand like the ribs in the list. */
+/* The header line comes along down the page.
+      It used to scroll away, and then the way to another page was to scroll
+      all the way back up first — a step nobody asked for between "I want the
+      klippekort" and the klippekort. It is the page's own header and belongs
+      to the bottom of the page as much as the top.
+   
+      --sidehovud-hogd is its height as a number others can reckon with: pages
+      that put their own sticky lines under it stack from this. Measured at
+      56 px (32 px content + the padding in .header-content); if the header
+      changes, the number has to follow — there is no way for CSS to read an
+      element's height.
+   
+      z-index: 20: above the content, below the dock (30), which must lie over
+      everything. */
 .header {
   position: sticky; top: 0; z-index: 20;
   background:
@@ -78,15 +78,14 @@
   gap: var(--rom-5); flex-wrap: wrap;
 }
 
-/* ---- merket og namnet ----
-   Ringen er nett so høg som ein stor bokstav og stend paa den same
-   grunnlina. `1cap` er kapitélhøgdi i skrifti som gjeld.
-
-   Ingen yverskyting: blekket i merket naar heilt ut i kanten av ruta
-   si — det er aatte K-ar som strekkjer seg ut i hyrnone, ikkje ein
-   glatt sirkel — so ei rute som er høgre enn kapitélhøgdi set toppen
-   aat ringen yver toppen aat K-en. Ein glatt sirkel hadde trengt
-   yverskyting; denne treng henne ikkje. */
+/* ---- the mark and the name ----
+      The ring is exactly as tall as a capital letter and stands on the same
+      baseline. 1cap is the cap height in the face that applies.
+   
+      No overshoot: the ink in the mark reaches right to the edge of its box —
+      it is eight Ks stretching into the corners, not a smooth circle — so a
+      box taller than the cap height puts the top of the ring above the top of
+      the K. A smooth circle would have needed overshoot; this one does not. */
 .merkeord {
   /* Skrifti stend her og ikkje paa namnet, av di `cap` vert løyst mot
      den skrifti elementet sjølv hev. Laag ho lenger inn, rekna ringen
@@ -106,7 +105,7 @@
 }
 /* Er du heime, stend merket i merkefargen. Det er den same meldingi som
    streken under ei vald sida, sagd med det som alt er der. */
-.merkeord.paa-heim .merke { color: var(--klas); }
+.merkeord[aria-current="page"] .merke { color: var(--klas); }
 
 /* Peikar du på det, tek heile merkeordet fargen — ringen og namnet.
    Det stod `color: var(--blekk)` her, som *låste* fargen: merket var
@@ -176,7 +175,10 @@
 /* ---- den valde sida ----
    Ho tek berre fargen. Ljoset hennar ligg i lina under hovudet, ikkje på
    henne: sjå .header::before. */
-.nav-item.active a, .nav-item a[aria-current="page"] { color: var(--blekk); }
+/* Éin fasit: `aria-current`. `.active` stod her og, og han var
+   den som vart staaande att paa den sida du kom fraa. Sjaa
+   navigation.html. */
+.nav-item a[aria-current="page"] { color: var(--blekk); }
 
 .nav-item.nav-admin a { color: var(--blekk-svakt); }
 .nav-item.nav-admin a:hover { color: var(--blekk-lys); }
@@ -203,7 +205,7 @@
   transform: translateY(.12em);
 }
 .user-name:hover { color: var(--blekk); background: none; border-bottom-color: var(--haarlina); }
-.user-name.active { color: var(--blekk); border-bottom-color: var(--klas); }
+.user-name[aria-current="page"] { color: var(--blekk); border-bottom-color: var(--klas); }
 .user-name[aria-expanded="true"] { color: var(--blekk); border-bottom-color: var(--klas); }
 
 .namnemeny {

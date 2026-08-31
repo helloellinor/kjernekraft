@@ -13,7 +13,7 @@ All user-facing text is stored in JSON translation files and accessed through te
 
 > **Translations are cached per process** (`sync.Once` in
 > `handlers/localization.go`). Templates hot-reload in development, but
-> a new key in `locales/*/common.json` is not picked up until the
+> a new key in `mål/*/common.json` is not picked up until the
 > server restarts — until then the raw key (e.g. `admin.rule_time`)
 > renders where the label should be. If labels look wrong after adding
 > keys, restart before debugging anything else.
@@ -21,7 +21,7 @@ All user-facing text is stored in JSON translation files and accessed through te
 ## File Structure
 
 ```
-locales/
+mål/
 ├── nb/
 │   └── common.json     # Norwegian Bokmål translations
 ├── nn/
@@ -103,13 +103,13 @@ Languages can be switched via URL parameter:
 ### 1. Create Language Directory
 
 ```bash
-mkdir locales/[language_code]
+mkdir mål/[language_code]
 ```
 
 ### 2. Create Translation File
 
 ```bash
-cp locales/nb/common.json locales/[language_code]/common.json
+cp mål/nb/common.json mål/[language_code]/common.json
 ```
 
 ### 3. Update Localization System
@@ -261,8 +261,8 @@ Create a simple script to verify key consistency:
 
 ```bash
 # Check that all language files have the same keys
-diff <(jq -r 'paths | join(".")' locales/nb/common.json | sort) \
-     <(jq -r 'paths | join(".")' locales/en/common.json | sort)
+diff <(jq -r 'paths | join(".")' mål/nb/common.json | sort) \
+     <(jq -r 'paths | join(".")' mål/en/common.json | sort)
 ```
 
 ## Maintenance

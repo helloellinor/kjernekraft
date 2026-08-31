@@ -7,7 +7,7 @@
 # er dette ei prøve og ikkje eit raad.
 #
 # Skriv ut kvar klasse som er definert i `kjernekraft.css` men aldri
-# nemnd i handlers/, static/js/, models/ eller database/. Gjeng ut med 1
+# nemnd i handsamarar/, static/js/, models/ eller database/. Gjeng ut med 1
 # um det finst nokon, so han kann standa i ein pre-commit-krok.
 #
 # Kommentarane i stilarket vert skrella av fyrst: prosa som nemner
@@ -28,7 +28,7 @@ defined = set(re.findall(r"\.(-?[_a-zA-Z][_a-zA-Z0-9-]*)",
                          re.sub(r"/\*.*?\*/", "", css, flags=re.S)))
 
 words = set()
-for base in ("handlers", "static/js", "models", "database"):
+for base in ("handsamarar", "static/js", "models", "database"):
     for dirpath, dirnames, filenames in os.walk(base):
         dirnames[:] = [d for d in dirnames if d not in (".git", "worktrees", "node_modules")]
         for fn in filenames:

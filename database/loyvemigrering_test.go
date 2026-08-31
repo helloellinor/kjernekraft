@@ -16,14 +16,14 @@ import (
 // hoppa yver av di `loyve` no fanst — kvar administrator og lærar hadde
 // vorte liggjande att i ein tabell ingen les meir, og flata hadde synt
 // eit hus utan administratorar utan aa segja eit ord.
-func TestGamleLoyveTabellarVertDoeyptOgHeldFolket(t *testing.T) {
+func TestGamleLøyveTabellarVertDoeyptOgHeldFolket(t *testing.T) {
 	db, err := sql.Open("sqlite3", filepath.Join(t.TempDir(), "gamal.db"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer db.Close()
 
-	// Basen slik han saag ut fyrr.
+	// Basen slik han såg ut fyrr.
 	if _, err := db.Exec(`
 		CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL,
 			birthdate TEXT NOT NULL, email TEXT NOT NULL UNIQUE,
@@ -59,18 +59,18 @@ func TestGamleLoyveTabellarVertDoeyptOgHeldFolket(t *testing.T) {
 		t.Error("role_id stend der endaa")
 	}
 
-	// Og — det som tel — Kristina er framleis baade lærar og administrator.
+	// Og — det som tel — Kristina er framleis båe lærar og administrator.
 	dbb := &Database{Conn: db}
-	loyve, err := dbb.LoyveFor(1)
+	løyve, err := dbb.LøyveFor(1)
 	if err != nil {
 		t.Fatal(err)
 	}
 	har := map[string]bool{}
-	for _, l := range loyve {
+	for _, l := range løyve {
 		har[l] = true
 	}
-	if !har[LoyveAdmin] || !har[LoyveLaerar] {
-		t.Errorf("Kristina misste løyvi sine i umdøypingi: %v", loyve)
+	if !har[LøyveAdmin] || !har[LøyveLærar] {
+		t.Errorf("Kristina misste løyvi sine i umdøypingi: %v", løyve)
 	}
 }
 

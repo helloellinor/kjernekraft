@@ -1,0 +1,92 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="{{if .Lang}}{{.Lang}}{{else}}nn{{end}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} — Kjernekraft</title>
+
+    <!-- Eitt stilark for heile staden. Det stod i tjugofem <style>-blokkar
+         fyrr, og seks av deim vart lasta inn i kvar einaste sida. -->
+    <link rel="icon" href="{{asset "img/kjernekraft.svg"}}" type="image/svg+xml">
+
+    {{/* Skriftene vert henta fyrr stilarket bed um deim. Utan dette
+         finn nettlesaren dei fyrst når han hev lese ferdig CSS-en og
+         funne ut kva som skal teiknast med kva — og då er fyrste
+         teikninga alt gjord med reserveskrifti. Dei tvo som ber sida
+         er lista her; dei hine kjem når dei trengst.
+
+         `crossorigin` lyt stå. Skrifter vert alltid henta anonymt, og
+         ein preload utan honom hentar fila ein gong til. */}}
+    <link rel="preload" href="{{asset "fonts/UnionGothic-Variable.woff2"}}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{asset "fonts/Ubuntu-R.woff2"}}" as="font" type="font/woff2" crossorigin>
+
+    <link rel="stylesheet" href="{{asset "css/kjernekraft.css"}}">
+
+    {{if .ExternalCSS}}{{range .ExternalCSS}}
+    <link rel="stylesheet" href="{{.}}">
+    {{end}}{{end}}
+
+    {{block "head" .}}{{end}}
+</head>
+<body>
+    <!-- Leidingi stend her, éin gong. Ho vart teikna av kvar av dei sju
+         sidone kvar for seg fyrr — og README-en hev heile tidi paastade
+         at ho stod her. -->
+    {{/* Filtri timemerket nyttar. Éin gong på sida: dei ber ingen farge,
+         so alle merki kann dela deim. */}}
+    {{template "merke_defs" .}}
+
+    {{if .UserName}}{{template "navigation" .}}{{end}}
+
+    <main>
+        {{block "content" .}}{{end}}
+    </main>
+
+    {{if .UserName}}{{template "botnlina" .}}{{end}}
+
+    <!-- htmx ligg i repoet og vert lasta her. Han var aldri lasta paa ei
+         einaste sida som gjeng gjenom denne malen, so `hx-get` paa
+         paameldingslista henta aldri noko — ho stod og lasta i all
+         æva. csrf.js hektar seg paa honom, og lyt difor koma etter. -->
+    {{/* Dei fire fyrste tener fleire sidone. `defer` let HTML-en verta
+         teikna fyrst og held rekkjefylgda (htmx før CSRF). */}}
+    {{/* Alle skripti, paa kvar sida.
+
+         Dei vart lasta etter kva sida du stod paa. Med `hx-boost` gjeng du
+         til timeplanen utan at dokumentet vert bytt ut, og daa kjem aldri
+         timeplanen sitt skript — det stod i den nye <head>-en me ikkje
+         hentar. Difor alle, alltid: til saman kring 110 kB, bufra etter
+         fyrste lastingi, og dei ligg utanfor <main> so dei aldri vert
+         koeyrde um att.
+
+         `defer` held rekkjefylgda: htmx fyrst, so csrf.js som hektar seg
+         paa honom. */}}
+    <script defer src="{{asset "js/htmx.min.js"}}"></script>
+    <script defer src="{{asset "js/htmx-preload.js"}}"></script>
+    <script defer src="{{asset "js/csrf.js"}}"></script>
+    <script defer src="{{asset "js/feil.js"}}"></script>
+    <script defer src="{{asset "js/rutenett.js"}}"></script>
+    <script defer src="{{asset "js/ljosband.js"}}"></script>
+    <script defer src="{{asset "js/klistrelag.js"}}"></script>
+    <script defer src="{{asset "js/namnemeny.js"}}"></script>
+    <script defer src="{{asset "js/klippfyll.js"}}"></script>
+    <script defer src="{{asset "js/bolkveljar.js"}}"></script>
+    <script defer src="{{asset "js/dokk.js"}}"></script>
+    <script defer src="{{asset "js/stadfest.js"}}"></script>
+    <script defer src="{{asset "js/folk.js"}}"></script>
+    <script defer src="{{asset "js/endringar.js"}}"></script>
+    <script defer src="{{asset "js/prisar.js"}}"></script>
+    <script defer src="{{asset "js/veketal.js"}}"></script>
+    <script defer src="{{asset "js/timeplan-veke.js"}}"></script>
+    <script defer src="{{asset "js/dagfokus.js"}}"></script>
+    <script defer src="{{asset "js/sideskift.js"}}"></script>
+
+    {{if .JS}}<script>{{.JS}}</script>{{end}}
+    {{if .ExternalJS}}{{range .ExternalJS}}
+    <script src="{{.}}"></script>
+    {{end}}{{end}}
+    {{block "scripts" .}}{{end}}
+</body>
+</html>
+{{end}}

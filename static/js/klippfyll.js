@@ -1,9 +1,13 @@
 // klippfyll.js — «Fyll på» paa eit klippekort.
 //
 // Knappen fører til kjøpsbolken med den kategorien alt vald, so ein
-// slepp aa finna henne att sjølv: `?fill=<kategori>#kjop-klipp`.
-// Spyrjedelen lyt staa fyre emneknaggen — «#kjop-klipp?fill=» legg
-// spyrjinga inni knaggen, og sida ser henne aldri.
+// slepp aa finna henne att sjølv: `?fane=kjop-klipp&fill=<kategori>`.
+//
+// Fana var ein emneknagg fyrr — `?fill=…#kjop-klipp` — og daa laut
+// spyrjedelen staa fyre knaggen, av di «#kjop-klipp?fill=» legg
+// spyrjinga inni knaggen og sida ser henne aldri. Den fella er burte:
+// fana er `?fane=` som alle hine no, og tenaren les henne. Sjaa
+// handsamarar/faner.go.
 //
 // KVIFOR HAN BUR HER, OG IKKJE I MALEN:
 //
@@ -37,6 +41,6 @@
         var kategori = knapp.getAttribute("data-fyll-kategori");
         if (!kategori) return;
         window.location.href =
-            "/elev/klippekort?fill=" + encodeURIComponent(kategori) + "#kjop-klipp";
+            "/elev/klippekort?fane=kjop-klipp&fill=" + encodeURIComponent(kategori);
     });
 })();

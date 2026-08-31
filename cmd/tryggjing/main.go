@@ -2,7 +2,7 @@
 //
 //	go run ./cmd/tryggjing                    # kopi til ./tryggjing/
 //	go run ./cmd/tryggjing -til /sti -hald 14 # annan stad, 14 dagar att
-//	go run ./cmd/tryggjing -sjaa              # list det som ligg der
+//	go run ./cmd/tryggjing -sjå              # list det som ligg der
 //
 // Kvifor ikkje berre `cp kjernekraft.db`:
 //
@@ -20,7 +20,7 @@
 //
 // Kvar kopi vert prøvd med `PRAGMA integrity_check` fyre han vert lagd
 // til side. Ei tryggjing ein ikkje hev opna er ikkje ei tryggjing; ho er
-// ei fil ein trur paa.
+// ei fil ein trur på.
 package main
 
 import (
@@ -43,7 +43,7 @@ func main() {
 	base := flag.String("base", "", "basefila (standard: KJERNEKRAFT_DB eller ./kjernekraft.db)")
 	til := flag.String("til", "tryggjing", "kvar kopiane skal liggja")
 	hald := flag.Int("hald", 14, "kor mange dagar kopiane skal liggja")
-	sjaa := flag.Bool("sjaa", false, "list kopiane som finst, og gjer ingen ting")
+	sjå := flag.Bool("sjaa", false, "list kopiane som finst, og gjer ingen ting")
 	flag.Parse()
 
 	stig := *base
@@ -54,7 +54,7 @@ func main() {
 		stig = "./kjernekraft.db"
 	}
 
-	if *sjaa {
+	if *sjå {
 		if err := list(*til); err != nil {
 			log.Fatal(err)
 		}
@@ -100,7 +100,7 @@ func tryggja(base, mappe string) (string, error) {
 	_ = os.Remove(mellom)
 
 	// VACUUM INTO toler ikkje eit spursmaalsteikn i strengen, so stigen
-	// vert lagd inn beinveges. Han kjem fraa oss og ikkje fraa nettet.
+	// vert lagd inn beinveges. Han kjem frå oss og ikkje frå nettet.
 	if _, err := db.Exec("VACUUM INTO '" + strings.ReplaceAll(mellom, "'", "''") + "'"); err != nil {
 		_ = os.Remove(mellom)
 		return "", fmt.Errorf("VACUUM INTO: %w", err)
@@ -117,7 +117,7 @@ func tryggja(base, mappe string) (string, error) {
 }
 
 // prov opnar kopien og spør honom um han er heil. Ei tryggjing ein ikkje
-// hev opna er ei fil ein trur paa, og ikkje ei ein veit noko um.
+// hev opna er ei fil ein trur på, og ikkje ei ein veit noko um.
 func prov(stig string) error {
 	db, err := sql.Open("sqlite3", stig+"?mode=ro")
 	if err != nil {
@@ -133,7 +133,7 @@ func prov(stig string) error {
 		return fmt.Errorf("kopien er ikkje heil: %s", svar)
 	}
 	// Og ein spurnad som treng at skjemaet finst. `integrity_check` ser
-	// paa sidone; han ser ikkje um det er ein *kjernekraft*-base.
+	// på sidone; han ser ikkje um det er ein *kjernekraft*-base.
 	var tal int
 	if err := db.QueryRow("SELECT count(*) FROM users").Scan(&tal); err != nil {
 		return fmt.Errorf("kopien hev ingi brukartabell: %w", err)

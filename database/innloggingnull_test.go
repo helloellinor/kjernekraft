@@ -15,7 +15,7 @@ import (
 // Dette er tridje gongen den same lyten syner seg, og han ser ulik ut
 // kvar gong av di han kjem ut ein ny stad:
 //
-//  1. GetAllUsers las kolonnone raatt -> 500 paa /admin.
+//  1. GetAllUsers las kolonnone raatt -> 500 på /admin.
 //     (TestBrukarUtanAdresseTekIkkjeLista, i denne mappa)
 //  2. GetUserByID fekk COALESCE og var trygg.
 //  3. AuthenticateUser vart gløymd — og der kom han ut som *feil
@@ -25,12 +25,12 @@ import (
 // vanskelegare: `Scan` fall med «converting NULL to string is
 // unsupported», handsamaren gjorde kvar feil um til «ugyldig e-post
 // eller passord», og brukaren fekk vita at han hugsa gale. Han hugsa
-// rett. Ei feilmelding som peikar paa brukaren naar det er huset som er
+// rett. Ei feilmelding som peikar på brukaren når det er huset som er
 // gale, er ei melding som gjer at ingen leitar der feilen er. Seks av
-// aatte brukarar i basen stod slik daa det vart funne.
+// aatte brukarar i basen stod slik då det vart funne.
 //
 // Lærdomen som stend att: kolonnor som *kann* vera NULL lyt lesast som
-// um dei er det, kvar einaste stad dei vert lesne — og ein feil fraa
+// um dei er det, kvar einaste stad dei vert lesne — og ein feil frå
 // basen skal aldri kle seg ut som eit gale passord.
 func TestBrukarUtanAdresseKannLoggaInn(t *testing.T) {
 	conn, err := sql.Open("sqlite3", filepath.Join(t.TempDir(), "prøve.db"))

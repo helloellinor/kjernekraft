@@ -1,0 +1,78 @@
+/* ===================================================================
+   maalestokken — kor stort, og kor langt fraa kvarandre
+
+   00-palett ber verdi, 00-token ber tyding. Denne ber *maal*: rommet
+   millom ting, storleiken paa merket, og breiddi paa sida.
+
+   Dei stod spreidde fyrr, og éin av dei stod farleg til: rot-verdet for
+   --merkestorleik laag i 30-timeplanen.css. Alt anna i huset arva
+   merkestorleiken sin fraa timeplanen sitt stilark utan aa vita det, og
+   ei endring der flytte seg til sidor som ikkje hev ein timeplan paa
+   seg. Ein global standard høyrer heime i ei fil som segjer at ho er
+   global.
+
+   ---- kva som stend her, og kva som ikkje gjer det ----
+
+   Her: verd paa `:root` som heile huset reknar av.
+
+   Ikkje her: yverstyringar som høyrer til éin komponent.
+   `.doermerke { --merkestorleik: 4rem }` bur i 65-merket.css av di ho
+   er ein eigenskap ved døra og ikkje ved huset; det same gjeld
+   `.merkeord .merke` i hovudet og `.medlemskort` i kortet. Regelen er:
+   *standarden* stend her, *unnataket* stend hjaa den som gjer det.
+
+   Ikkje her heller: brotstaden. Han stend i 45-smale-glas.css, som er
+   den eine staden han er skriven, og som skriv nokre av desse verdi um
+   att naar glaset er smalt.
+
+   Talet 01 av di maal vert lesne av alt anna. Egenskapane vert løyste
+   naar dei vert *nytta* og ikkje naar dei vert skrivne, so rekkjefylgdi
+   er ikkje eit krav — men det er den rekkjefylgdi ein les i.
+   =================================================================== */
+:root {
+  /* AVGJORD (ARKET §10.3, 28.8.2026): den stramme stigen.
+     Stramt tyder *mindre* rom og *større* skrift, av di det var romet
+     som gjorde sidone lange. Stegi under 1rem er finmotorikk og er
+     urørde — dei er avstandar inne i ein ting, ikkje millom ting. */
+  --rom-1: .25rem; --rom-2: .5rem;  --rom-3: .75rem;
+  --rom-4: 1rem;   --rom-5: 1.25rem; --rom-6: 1.5rem;  --rom-7: 2rem;
+
+  /* The side padding — the air between the content and the screen edge. It
+     was --rom-5 in <main> and --rom-4 again at the narrow breakpoint, so
+     the number existed in two places. Something that has to *cover* the
+     padding — a sticky line reaching right out to the edge — needs to be
+     able to ask for it, and a number you cannot ask for has to be
+     guessed. */
+  --sidefyll: var(--rom-5);
+
+  /* Storleiken er éin knapp og ingen ting anna. Alt i figuren er rekna i
+     eit viewBox, so skrift, strekar, hyrne og rom fylgjer med i det same
+     forholdet — det er den same tingen som kjem nærare, ikkje ei ny
+     teikning. Spaltone i vika er rekna av det same talet, so hovudet og
+     radene stend paa lina utan at nokon maaler.
+
+     5.4 again — the styled numbers are back where they stood. That evening
+     the mark and the row text were scaled and e-fitted in nine rounds,
+     each approved on its own, and the whole fell apart while every piece
+     looked right in its own crop. The lesson stands: the *proportions*
+     were the problem, not the numbers — and proportions are tested on the
+     whole page, not in a crop.
+
+     What DID survive is the drawing inside the mark (the lips that now
+     exist, the sunken dial, the glass inside the rebate, the air under the
+     window) — those hold at any size. */
+  --merkestorleik: 5.7546rem; /* e^(7/4) */
+
+  /* The width is COMPUTED, not chosen (it stood as 68): the cap is the
+     widest thing in the house — the week grid with ROOM for the names. The
+     first calculation took the grid's minimum (the name column at its 8rem
+     floor), and then "Hatha Yoga" broke mid-word again: as styled, the name
+     column got all the stretch, about 20.5rem — which shadowed a step. Now
+     it *is* the step: e^3 = 20.086rem. The reckoning: e^3 + seven marks at
+     e^(7/4) + seven gaps at --rom-3 + row padding 2·--rom-4 + side padding
+     2·--sidefyll ≈ 70.11rem — exactly where the old 68 stood. As a calc, so
+     it recomputes itself if the clock changes step. The margins come from a
+     90em viewport (70.11·e^(1/4) — a MacBook is exactly 90em) and vanish on
+     a portrait iPad. */
+  --breidd: calc(20.086rem + 7*var(--merkestorleik) + 7*var(--rom-3) + 2*var(--rom-4) + 2*var(--sidefyll));
+}

@@ -1,0 +1,44 @@
+{{/* Briefingen: kva som stend til, i klaartekst.
+
+     Ho stod inni dashboard.html fyrr. Ho er eit namn for seg no av di
+     samansetjinga hennar er det som kann segja noko rart — «… denne
+     veka og har» utan noko fyre «og», eller eit punktum som stend
+     aaleine — og då lyt ho kunna teiknast aaleine i ei prøve, utan
+     heile heimesida kring seg.
+
+     Lekkane og formene deira vert valde i `NyBriefing` (helsing.go).
+     Malen set berre saman og set merkelappane på tale og ordet; han
+     veit ikkje kva som stend fyre eller etter, og skal ikkje vita det.
+
+     Klypp-merki (`{{-`) er ikkje pynt: utan deim legg malen eit
+     linjeskift millom lekkane, og setningi vert «… tidleg , og du har».
+     Mellomrommet fyre komma er malen sitt, ikkje språket sitt. */}}
+{{define "briefing"}}
+<p class="briefing">
+  {{- if .Briefing.Når -}}
+    {{- template "setning" (dict "Lang" .Lang "Nykel" "greeting.next_is" "Verd" .Briefing.Når "Slag" "ord") -}}
+    {{- /* Kven og kvar. Punktumet stend her og ikkje i `next_is`, av di
+           lekkane etter honom er valfrie: laag det i strengen, kom det
+           fyre læraren. */ -}}
+    {{- if .Briefing.Med -}}
+      {{- template "setning" (dict "Lang" .Lang "Nykel" "greeting.next_with" "Verd" .Briefing.Med "Slag" "ord") -}}
+    {{- end -}}
+    {{- if .Briefing.Stad -}}
+      {{- template "setning" (dict "Lang" .Lang "Nykel" "greeting.next_where" "Verd" .Briefing.Stad "Slag" "ord") -}}
+    {{- end -}}.
+    {{- if .Briefing.VekeNykel -}}
+      {{" "}}
+      {{- template "setning" (dict "Lang" .Lang "Nykel" .Briefing.VekeNykel "Verd" .Briefing.VekeTal "Slag" "tal") -}}
+      {{- if not .Briefing.KlippNykel -}}.{{- end -}}
+    {{- end -}}
+  {{- else if .Briefing.TomNykel -}}
+    {{- template "setning" (dict "Lang" .Lang "Nykel" .Briefing.TomNykel "Verd" .Briefing.KlippTal "Slag" "tal") -}}
+  {{- else -}}
+    {{- t .Lang "greeting.ingen_timar" -}}
+  {{- end -}}
+  {{- if .Briefing.KlippNykel -}}
+    {{" "}}
+    {{- template "setning" (dict "Lang" .Lang "Nykel" .Briefing.KlippNykel "Verd" .Briefing.KlippTal "Slag" "tal") -}}
+  {{- end -}}
+</p>
+{{end}}

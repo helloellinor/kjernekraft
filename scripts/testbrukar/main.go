@@ -1,41 +1,35 @@
-// testbrukar lagar éin prøvebrukar som det er noko aa sjaa paa.
+// testbrukar makes one test user with something worth looking at.
 //
 //	go run ./scripts/testbrukar
-//	go run ./scripts/testbrukar -slett     # tek henne burt att
+//	go run ./scripts/testbrukar -slett     # removes her again
 //
-// Han er ikkje ein administrator. Det er heile poenget: alt ein syner
-// fram paa ein skjerm skal syna det ein elev ser, og ein administrator
-// ser noko anna. Ho fær `user` og ingen ting meir, so `/admin` svarar
-// 403 for henne.
+// She is not an admin. That is the point: what you show on a screen should
+// show what a student sees, and an admin sees something else. She gets
+// `user` and nothing more, so /admin answers 403 for her.
 //
-// Skriptet er *ikkje* tilfeldig. Ein tilfeldig brukar gjev eit
-// varmekart med jamn stoy i, og jamn stoy ser ut som ein feil — ein
-// les ingen ting av det. Ei rekkje ein kjenner att les ein med ein
-// gong, og difor hev Solfrid ei soga:
+// The script is *not* random. A random user gives a heat board of even
+// noise, and even noise looks like a fault — you read nothing from it. A
+// pattern you recognise reads at once, so Solfrid has a story:
 //
-//	mars    ho byrjar, og ho er varsam — ein time i vika
-//	april   det sit; tvo i vika, og ein yoga attaat
-//	mai     tri i vika, og ho finn fascia
-//	juni    toppen. Fire i vika, og fyrste reformeren
-//	juli    burte i tvo vikor, og so varsamt attende
-//	august  tri i vika att, heilt fram til i dag
+//	March   she starts, cautiously — one class a week
+//	April   it sticks; two a week, and a yoga on top
+//	May     three a week, and she finds fascia
+//	June    the peak. Four a week, and her first reformer
+//	July    away for two weeks, then carefully back
+//	August  three a week again, right up to today
 //
-// Det gjev eit brett med ei stigning, eit hol og ei attkoma — og ei
-// bjelkerad der slagi skifter yver aaret. Baae bileti hev daa noko aa
-// segja, som er det dei er der for.
+// That gives a board with a rise, a gap and a return — and a bar row where
+// the kinds shift across the year.
 //
-// Soga endar i den vika me stend i, og ikkje ei vika fyre. Eit brett
-// som er tomt i enden les seg som ein som hev slutta, kva so det stend
-// i kortet ved sida av.
+// The story ends in the current week, not one before. A board empty at the
+// end reads as somebody who has stopped, whatever the card beside it says.
 //
-// Reformer stend berre i vaarmaanadene: timeplanen ber ingen reformer
-// i juli og august, og ein brukar kann ikkje melda seg paa ein time som
-// ikkje gjeng. Soga fylgjer timeplanen og ikkje umvendt.
+// Reformer only in the spring months: the schedule carries no reformer in
+// July and August, and a user cannot sign up for a class that does not
+// run. The story follows the schedule, not the other way round.
 //
-// Timane er verkelege timar or basen. Skriptet finn dei som gjekk i den
-// vika det er tale um, av det slaget det er tale um, og melder henne
-// paa dei. Ei paamelding paa ein time som ikkje finst er ei line i ein
-// tabell og ikkje ein time i eit liv.
+// The classes are real classes from the database. A signup for a class
+// that does not exist is a row in a table, not a class in a life.
 package main
 
 import (
@@ -57,26 +51,25 @@ const (
 	loyord  = "password123"
 	telefon = "90000042"
 
-	// Ida finst fraa fyrr og vert ikkje laga her; ho skal berre
-	// meldast paa timar so bolken hennar ikkje stend tom.
+	// Ida exists already and is not created here; she only needs signups so
+	// her section is not empty.
 	idaEpost = "ida@kj.no"
 )
 
-// vike er ei vika i soga: kor mange timar, og kva slag dei var.
+// vike is one week in the story: how many classes, and what kinds.
 //
-// Tali er ikkje jamne med vilje. Ei vika med tri timar og ei med tvo
-// attmed kvarandre er slik ein person trenar; tri kvar vika i tjue
-// vikor er slik ein tabell ser ut.
+// The numbers are uneven on purpose. A week of three and a week of two
+// side by side is how a person trains; three every week for twenty weeks
+// is how a table looks.
 type vike struct {
 	tal  int
 	slag []string
 }
 
-// soga, vika for vika, fraa den fyrste heile vika i mars.
+// The story, week by week, from the first whole week in March.
 //
-// Slagi stend i den rekkjefylgda dei skal veljast i. Er `tal` større
-// enn lista, gjeng ho rundt paa nytt — so «pilates, yoga» og fire timar
-// er tvo pilates og tvo yoga.
+// The kinds stand in the order they are picked in. If `tal` exceeds the
+// list it wraps, so "pilates, yoga" with four classes is two of each.
 var solfridSoga = []vike{
 	// mars — ho byrjar, og ho er varsam
 	{1, []string{"pilates"}},
@@ -112,18 +105,18 @@ var solfridSoga = []vike{
 	{2, []string{"pilates", "yoga"}},
 }
 
-// Ida si soga er ei onnor form, og det er heile grunnen til at ho stend
-// her i staden for at me gjev henne den same.
+// Ida's story is a different shape, and that is the whole reason it stands
+// here rather than us giving her the same one.
 //
-// Ho driv huset. Ho er her likevel, og difor trenar ho *jamt* og ikkje i
-// bylgjor: tvo i vika, aar ut og aar inn, med ei glipe naar det stend
-// paa som verst og ikkje naar ho reiser burt. Ingen stigning, ingen
-// topp — og det er nettupp det som gjer at dei tvo brettene ikkje ser
-// ut som det same brettet tvo gonger. Set ein tvo like rekkjor attmed
-// kvarandre, les ein deim som ei feilkopiering og ikkje som tvo folk.
+// She runs the house. She is here anyway, so she trains *steadily* and not
+// in waves: twice a week, year in and year out, with a gap when things are
+// busiest and not when she travels. No rise, no peak — and that is exactly
+// what stops the two boards looking like the same board twice. Put two
+// identical sequences side by side and you read them as a bad copy, not as
+// two people.
 //
-// Slagi hennar heller mot yoga og fascia. Ho lærer pilates sjølv, og det
-// ein gjer heile dagen er sjeldan det ein melder seg paa om kvelden.
+// Her kinds lean toward yoga and fascia. She teaches pilates herself, and
+// what you do all day is rarely what you sign up for in the evening.
 var idaSoga = []vike{
 	// mars
 	{2, []string{"yoga", "fascia"}},
@@ -171,9 +164,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Nytt loyord paa ein brukar som finst. Det er ikkje seiing av
+	// Nytt loyord på ein brukar som finst. Det er ikkje seiing av
 	// prøvedata, men det høyrer til den same jobben: ein prøvekonto ein
-	// ikkje kjem inn paa er ikkje ein prøvekonto.
+	// ikkje kjem inn på er ikkje ein prøvekonto.
 	if *settLoyord != "" {
 		if *settEpost == "" {
 			log.Fatal("-loyord krev -epost")
@@ -198,7 +191,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		tal, err := meldPaa(db, id, idaSoga, 43)
+		tal, err := meldPå(db, id, idaSoga, 43)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -213,7 +206,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tal, err := meldPaa(db, id, solfridSoga, 17)
+	tal, err := meldPå(db, id, solfridSoga, 17)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -231,7 +224,7 @@ func main() {
 	fmt.Println("  ikkje administrator — /admin svarar 403")
 }
 
-// finnBrukar hentar ein brukar som skal finnast fraa fyrr.
+// finnBrukar fetches a user that should already exist.
 func finnBrukar(conn *sql.DB, epost string) (int64, error) {
 	var id int64
 	err := conn.QueryRow(`SELECT id FROM users WHERE email = ?`, epost).Scan(&id)
@@ -241,13 +234,13 @@ func finnBrukar(conn *sql.DB, epost string) (int64, error) {
 	return id, err
 }
 
-// settNyttLoyord skriv eit nytt bcrypt-hash paa ein brukar.
+// settNyttLoyord writes a new bcrypt hash on a user.
 //
-// Det gjeng gjenom bcrypt og ikkje rett i basen med SQL: seks av
-// prøvebrukarane i denne basen ber strengen «x» i loyordfeltet av di
-// nokon ein gong skreiv verdet beint inn, og dei kann difor ikkje logga
-// inn i det heile. `bcrypt.CompareHashAndPassword` godtek ingen ting som
-// ikkje er eit hash, og han segjer det ikkje høgt — han berre nektar.
+// It goes through bcrypt and not straight into the database with SQL: six
+// of the test users in this database carry the string "x" in the password
+// field because somebody once wrote the value in directly, and so they
+// cannot log in at all. bcrypt.CompareHashAndPassword accepts nothing that
+// is not a hash, and it does not say so out loud — it simply refuses.
 func settNyttLoyord(conn *sql.DB, epost, nytt string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(nytt), bcrypt.DefaultCost)
 	if err != nil {
@@ -267,7 +260,7 @@ func settNyttLoyord(conn *sql.DB, epost, nytt string) error {
 	return nil
 }
 
-// lagBrukar lagar henne, eller finn henne att um ho alt stend der.
+// lagBrukar creates her, or finds her again if she is already there.
 func lagBrukar(conn *sql.DB) (int64, error) {
 	var id int64
 	err := conn.QueryRow(`SELECT id FROM users WHERE email = ?`, epost).Scan(&id)
@@ -297,7 +290,7 @@ func lagBrukar(conn *sql.DB) (int64, error) {
 		return 0, err
 	}
 
-	// `user` og ingen ting meir. Ho skal *ikkje* sjaa administrasjonen.
+	// `user` og ingen ting meir. Ho skal *ikkje* sjå administrasjonen.
 	if _, err := conn.Exec(`
 		INSERT OR IGNORE INTO brukarloyve (user_id, loyve_id)
 		SELECT ?, id FROM loyve WHERE name = 'user'`, id); err != nil {
@@ -313,30 +306,30 @@ func byrjinga() time.Time {
 	return t
 }
 
-// meldPaa gjeng soga vika for vika og melder henne paa verkelege timar.
-func meldPaa(conn *sql.DB, brukar int64, soga []vike, fro int64) (int, error) {
-	// Fast frø. Skriptet skal gjeva den same brukaren kvar gong det
-	// gjeng — elles er det ikkje eit prøveoppsett, det er ei ny sak aa
-	// setja seg inn i kvar gong. Kvar person hev sitt eige frø, so dei
-	// ikkje endar paa dei same timane.
+// meldPå gjeng soga vika for vika og melder henne på verkelege timar.
+func meldPå(conn *sql.DB, brukar int64, soga []vike, fro int64) (int, error) {
+	// Fixed seed. The script should give the same user every time it runs —
+	// 	// otherwise it is not a test setup, it is a new thing to get to know
+	// 	// each time. Each person has their own seed, so they do not end up in
+	// 	// the same classes.
 	tilf := rand.New(rand.NewSource(fro))
 
-	naa := time.Now()
+	nå := time.Now()
 	sett := 0
 	for i, v := range soga {
 		if v.tal == 0 {
 			continue
 		}
-		fraa := byrjinga().AddDate(0, 0, 7*i)
-		til := fraa.AddDate(0, 0, 7)
-		if fraa.After(naa) {
+		frå := byrjinga().AddDate(0, 0, 7*i)
+		til := frå.AddDate(0, 0, 7)
+		if frå.After(nå) {
 			break
 		}
 
 		brukte := map[int64]bool{}
 		for n := 0; n < v.tal; n++ {
 			slag := v.slag[n%len(v.slag)]
-			id, err := finnTime(conn, slag, fraa, til, tilf, brukte)
+			id, err := finnTime(conn, slag, frå, til, tilf, brukte)
 			if err != nil {
 				return sett, err
 			}
@@ -345,17 +338,17 @@ func meldPaa(conn *sql.DB, brukar int64, soga []vike, fro int64) (int, error) {
 			}
 			brukte[id] = true
 
-			// Ho melde seg paa nokre dagar fyre timen gjekk.
-			paameld := fraa.AddDate(0, 0, -tilf.Intn(4)-1)
+			// Ho melde seg på nokre dagar fyre timen gjekk.
+			påmeld := frå.AddDate(0, 0, -tilf.Intn(4)-1)
 			res, err := conn.Exec(`
 				INSERT OR IGNORE INTO event_signups (user_id, event_id, signup_date)
-				VALUES (?, ?, ?)`, brukar, id, veggtekst(paameld))
+				VALUES (?, ?, ?)`, brukar, id, veggtekst(påmeld))
 			if err != nil {
 				return sett, err
 			}
 			if n, _ := res.RowsAffected(); n > 0 {
 				sett++
-				// Timen ber talet paa kor mange som stend i honom.
+				// The class carries the count of how many are in it.
 				if _, err := conn.Exec(
 					`UPDATE events SET current_enrolment = current_enrolment + 1 WHERE id = ?`,
 					id); err != nil {
@@ -369,13 +362,13 @@ func meldPaa(conn *sql.DB, brukar int64, soga []vike, fro int64) (int, error) {
 
 // finnTime plukkar ein time av eit slag i ei vika, og helst ein ho ikkje
 // alt stend i.
-func finnTime(conn *sql.DB, slag string, fraa, til time.Time, tilf *rand.Rand, brukte map[int64]bool) (int64, error) {
+func finnTime(conn *sql.DB, slag string, frå, til time.Time, tilf *rand.Rand, brukte map[int64]bool) (int64, error) {
 	rows, err := conn.Query(`
 		SELECT id FROM events
 		WHERE class_type = ? AND start_time >= ? AND start_time < ?
 		  AND start_time < ?
 		ORDER BY start_time`,
-		slag, veggtekst(fraa), veggtekst(til), veggtekst(time.Now()))
+		slag, veggtekst(frå), veggtekst(til), veggtekst(time.Now()))
 	if err != nil {
 		return 0, err
 	}
@@ -402,13 +395,26 @@ func finnTime(conn *sql.DB, slag string, fraa, til time.Time, tilf *rand.Rand, b
 
 // gjevMedlemskap gjev henne eit medlemskap som gjeng.
 func gjevMedlemskap(conn *sql.DB, brukar int64) error {
-	// Det billegaste som ikkje er ein «Prøve»: prøvedataen i basen ber
-	// tilfeldige prisar, og eit medlemskap til 1 446 kr i maanaden er
-	// det fyrste nokon kjem til aa peika paa.
+	// The cheapest thing that is not a "trial": the test data in the database
+	// 	// carries random prices, and a membership at 1 446 kr a month is the
+	// 	// first thing anyone will point at.
+	//
+	// `NOT skjult` lyt staa der, og det er heile poenget med denne
+	// spyrjingi. Black kostar null — han er ein tilgang og ikkje ein
+	// avtale — so «det billegaste» *er* Black, kvar einaste gong.
+	// Solfrid fekk difor det usynlege medlemskapet lærarar og utviklarar
+	// ber, og ho er nettupp den som ikkje skal ha det: ho finst for at
+	// ein skal kunna sjaa kva ein vanleg elev ser.
+	//
+	// `skjult` er det rette vilkaaret og ikkje `price > 0`: flagget tyder
+	// «ikkje noko ein kann velja», og det er den eigenskapen me vil ha
+	// burt. Kjem det ein gaava-medlemskap til 0 kr som *kann* veljast,
+	// skal han vera med her. Sjaa database/svartmedlem.go.
 	var medlemskap int64
 	err := conn.QueryRow(`
 		SELECT id FROM memberships
-		WHERE name NOT LIKE 'Prøve%' ORDER BY price LIMIT 1`).Scan(&medlemskap)
+		WHERE name NOT LIKE 'Prøve%' AND NOT skjult AND active
+		ORDER BY price LIMIT 1`).Scan(&medlemskap)
 	if err != nil {
 		return err
 	}
@@ -423,8 +429,8 @@ func gjevMedlemskap(conn *sql.DB, brukar int64) error {
 	return err
 }
 
-// gjevKlippekort gjev henne tvo: eitt ho hev teke hol paa, og eitt som
-// snart er tomt. Eit kort med alle klippi i behald syner ingen ting.
+// gjevKlippekort gives her two: one she has started on, and one nearly
+// empty. A card with every clip intact shows nothing.
 func gjevKlippekort(conn *sql.DB, brukar int64) error {
 	kort := []struct {
 		pakke   int64
@@ -456,7 +462,7 @@ func taBurt(conn *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	// Timane ho stod i skal ikkje halda paa talet sitt naar ho gjeng.
+	// The classes she was in should not keep their count when she goes.
 	if _, err := conn.Exec(`
 		UPDATE events SET current_enrolment = MAX(current_enrolment - 1, 0)
 		WHERE id IN (SELECT event_id FROM event_signups WHERE user_id = ?)`, id); err != nil {
@@ -481,8 +487,8 @@ func fyrsteIMaanad(t time.Time) time.Time {
 }
 
 // veggtekst skriv ei tid slik basen ber henne: veggklokka i Oslo, utan
-// sone. Sjaa handlers/tid.go — drivaren les desse som UTC, so dei lyt
-// skrivast ut med dei tali som faktisk skal staa der.
+// sone. Sjå handlers/tid.go — drivaren les desse som UTC, so dei lyt
+// skrivast ut med dei tali som faktisk skal stå der.
 func veggtekst(t time.Time) string {
 	return t.Format("2006-01-02 15:04:05")
 }

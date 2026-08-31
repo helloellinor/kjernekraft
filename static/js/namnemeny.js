@@ -5,7 +5,7 @@
 //
 // Han bur i si eigi fil, og det er ikkje ei smakssak. Han stod i
 // `faner.js` fyrr, av di han er ein veljar og fanone er veljarar — men
-// `faner.js` vert berre send til dei sidone som *hev* ei fanerekkje
+// `faner.js` vart berre send til dei sidone som *hadde* ei fanerekkje
 // (klippekort, medlemskap, betaling, admin, arket). Hovudet stend paa
 // kvar side. Paa heimesida og timeplanen fanst difor knappen utan at
 // noko lydde paa honom: du trykte, og ingen ting hende — ikkje seint,

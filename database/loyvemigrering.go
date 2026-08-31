@@ -40,17 +40,17 @@ func harKolonne(db *sql.DB, tabell, kolonne string) (bool, error) {
 	return false, rows.Err()
 }
 
-// MigrerLoyve døyper om tabellane og kolonna.
+// MigrerLøyve døyper om tabellane og kolonna.
 //
-// Kvar prøve ser etter *baae* namni: ein base som alt er døypt om skal
+// Kvar prøve ser etter *båe* namni: ein base som alt er døypt om skal
 // ikkje faa noko gjort med seg, og ein som ikkje er det skal ikkje faa
 // tvo tabellar.
-func MigrerLoyve(db *sql.DB) error {
-	for _, p := range []struct{ fraa, til string }{
+func MigrerLøyve(db *sql.DB) error {
+	for _, p := range []struct{ frå, til string }{
 		{"roles", "loyve"},
 		{"user_roles", "brukarloyve"},
 	} {
-		gamal, err := harTabell(db, p.fraa)
+		gamal, err := harTabell(db, p.frå)
 		if err != nil {
 			return err
 		}
@@ -59,10 +59,10 @@ func MigrerLoyve(db *sql.DB) error {
 			return err
 		}
 		if gamal && !ny {
-			if _, err := db.Exec("ALTER TABLE " + p.fraa + " RENAME TO " + p.til); err != nil {
+			if _, err := db.Exec("ALTER TABLE " + p.frå + " RENAME TO " + p.til); err != nil {
 				return err
 			}
-			log.Printf("Døypte om %s til %s.", p.fraa, p.til)
+			log.Printf("Døypte om %s til %s.", p.frå, p.til)
 		}
 	}
 

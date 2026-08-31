@@ -1,0 +1,223 @@
+{{define "dagmerke"}}
+{{/* The mark. One definition, two uses: in the week grid and in the list of
+     what you are signed up for. That is the point — a mark should feel
+     like *the same object* wherever you see it.
+
+     The whole figure is one SVG with a fixed viewBox. Resizing changes a
+     single scale; strokes, type and spacing follow in the same
+     proportion, so it is the same object coming closer and not a new
+     drawing.
+
+     The points are computed in merkeform.go. A template shows what is in
+     the figure; where each point lies is another kind of knowledge. */}}
+<button type="button" style="--dag: {{.Column}}"
+        class="dagmerke{{if .IsToday}} idag{{end}}{{if .IsPast}} umme{{end}}{{if .Full}} full{{end}}"
+        data-event="{{.Event.ID}}"
+        data-tittel="{{.Event.Title}}"
+        data-laerar="{{.Event.TeacherName}}"
+        data-rom="{{.Event.RoomName}}"
+        data-dag="{{.DatoTekst}}"
+        data-klokke="{{.Event.StartTime.Format "15:04"}}–{{.Event.EndTime.Format "15:04"}}"
+        data-teke="{{.Event.CurrentEnrolment}}"
+        data-plassar="{{.Event.Capacity}}"
+        data-full="{{.Full}}"
+        data-umme="{{.IsPast}}"
+        data-paameld="{{.Event.IsUserSignedUp}}"
+        {{if .IsPast}}disabled{{end}}
+        aria-label="{{.Label}}">
+  {{/* Stabelen ber storleiken; knappen ber fyllet kring honom. Laga
+       ligg uppå kvarandre inni her, so dei er uavhengige av kva fyll
+       knappen hev i ulike samanhengar. */}}
+  <span class="merkestabel">
+  <svg class="merkelag merkeform" viewBox="{{.Form.ViewBox}}"
+       width="{{.Form.Width}}" height="{{.Form.Height}}" aria-hidden="true" focusable="false">
+    {{/* The glass. A clock has a glass over the dial, and the glass catches the
+             light from above — which is why this layer sits *on top* and not
+             under the hands. The gradient lives inside each mark and not in
+             the shared def set: the colour in a stop-color resolves where the
+             gradient stands, so a shared set would give every mark the root
+             theme's colours, and a light mark on a dark page would get the
+             wrong gloss. Same trap as with the filters. */}}
+
+    {{/* The tab lies behind the body. It goes down under its top edge, the body
+             covers its lower edge, and what sticks up is the tab — the same
+             move as the tabs in the admin, only drawn. They used to be one
+             shape, and then there was no tab: there was one outline with a
+             bump on it. */}}
+    {{/* Fana og kroppen stend i merke_defs — sjaa #merkekropp. */}}
+    <use href="#merkekropp"/>
+    <text class="merkedag" x="{{.Form.DayX}}" y="{{.Form.DayY}}">{{.DayAbbrev}}</text>
+
+    {{/* The body: the ring (only when the mark is selected), the line, the
+             surface and the recess — all four from the same silhouette. */}}
+
+    {{/* The dial face: the sunken plate filling the face. Same three layers as
+             the window and the hole — surface, the shadow from the top edge
+             (two layers: the line and the soft one), the light foot — because
+             it is the same physics: case, sunken dial, and the window punched
+             another step down into the plate. A carved cell beside a flat dial
+             read as two different things. */}}
+  </svg>
+
+  {{/* Skiva er ein runda firkant, og lippone hennar er `box-shadow: inset`.
+       Ho var fire stigar med tri filterkjedor. Sjaa merkeboksane i
+       30-timeplanen.css for geometrien og TestMerkeboksaneFylgjerMerkeform
+       for at han fylgjer merkeform.go. */}}
+  <span class="merkelag merkeskive" aria-hidden="true"></span>
+
+  <svg class="merkelag merkeform" viewBox="{{.Form.ViewBox}}"
+       width="{{.Form.Width}}" height="{{.Form.Height}}" aria-hidden="true" focusable="false">
+
+    {{/* The dial. The pie slice is the class laid out on the day: where the
+             hands would stand from when it begins to when it is over. That is
+             what you see first, and it is what saves you reading the clock to
+             know when in the day the class lies.
+    
+             The slice is drawn with radius kakeR around the dial centre and so
+             stays inside the dial by itself. There was a clip here, with the
+             same circle written out again with fixed numbers — and when the
+             dial moved, the slice was clipped against where it *had* been. */}}
+    <g class="skiva">
+      {{/* The pie slice lies at the bottom — under the indices, the numerals and
+                 the hands.
+      
+                 It used to lie on top, on the grounds that it was "a transparent
+                 wash laid over the clock". But a wash over the hand *colours* it:
+                 the turquoise surface lay over the black hour hand and made it
+                 green where they crossed, so the pointer that tells the time
+                 changed colour according to how long the class was. The colour
+                 belongs to the slice, not to the hand.
+      
+                 At the bottom it is background, which is exactly what it should
+                 be: the surface the class covers, with the hands drawn right on
+                 top. */}}
+      {{range .Form.Slices}}<path class="{{.Class}}" d="{{.D}}"/>{{end}}
+      {{/* Indeksane er dei same på kvart merke og stend i merke_defs. */}}
+      <use href="#merkeindeks"/>
+    </g>
+
+    {{/* The lips and the shadow of the dial face — AFTER the print,
+             deliberately. The shadow falls into the well and lies over
+             everything there, the print included; and an index reaching the
+             edge should pass *under* the rebate, not lie on the seam like a
+             sticker. They came before the dial group at first, and then "12"
+             and the corner indices stood painted on top of the shadow and the
+             edge. The hands are the opposite: they swing *over* the dial and
+             therefore stand late in the document, together with the glass. */}}
+
+    {{/* The bottom strip. The time in plain figures at the lower left, with the
+             same recess in miniature; the seat mark at the lower right. Both
+             used to lie differently — the window on top of the dial, the mark
+             hanging outside the corner — and both stand inside the body now. */}}
+    {{/* Three layers, like the empty hole in the week: the surface, the dark
+             upper lip, the light lower lip. (The mark body itself has no lower
+             lip — it is a shallow bevel, not a hole.) It had only two of them,
+             and the surface was not drawn at all. What was left was a dark
+             stripe and a number floating on the body, which does not read as
+             something cut down into it.
+    
+             The lower lip is the light hitting the bottom of the recess and
+             throwing back up. It is what makes the eye see *into* something
+             rather than at a stripe. ARKET §2: the light comes from above, so
+             the dark lip is at the top and the light one at the bottom. */}}
+  </svg>
+
+  {{/* Datovindauga, same greia. Det lyt liggja *yver* indeksane og
+       *under* visarane — difor ligg det millom dei tvo laga og ikkje
+       fyre eller etter dei. */}}
+  <span class="merkelag merkerute" aria-hidden="true"></span>
+
+  <svg class="merkelag merkeform" viewBox="{{.Form.ViewBox}}"
+       width="{{.Form.Width}}" height="{{.Form.Height}}" aria-hidden="true" focusable="false">
+    <text class="rutetal" x="{{.Form.BoxTextX}}" y="{{.Form.BoxTextY}}" dominant-baseline="central">{{.Clock}}</text>
+
+    {{/* The hands last, over the window.
+    
+             They lay inside .skiva, and the window was painted after it — so
+             the long minute hand went *under* the cell and was clipped by it.
+             That is the wrong physics for what this thing is: the cell is cut
+             down into the body, and the hands lie on top of it and swing
+             freely over everything. Something cut *into* a surface cannot lie
+             over something standing out of it.
+    
+             SVG has no z-index: document order *is* depth order. So they stand
+             down here rather than where they belong logically. The glass comes
+             after them, as before — it lies over everything.
+    
+             The pin comes along. It is the hub the hands turn around, and a hub
+             lying under its own hands is not a hub. */}}
+    {{/* The end hand is an hour hand: same length, same thickness. Only the
+             colour separates them, and it says what it is — where the class is
+             over. It was as long as the minute hand, and then it read as a
+             second minute hand. */}}
+    <line class="visar slutt"  x1="{{.Form.DialX}}" y1="{{.Form.DialY}}" x2="{{.Form.DialX}}" y2="{{.Form.HourHand}}"
+          transform="rotate({{.Form.EndAngle}} {{.Form.DialX}} {{.Form.DialY}})"/>
+    <line class="visar time"   x1="{{.Form.DialX}}" y1="{{.Form.DialY}}" x2="{{.Form.DialX}}" y2="{{.Form.HourHand}}"
+          transform="rotate({{.Form.HourAngle}} {{.Form.DialX}} {{.Form.DialY}})"/>
+    <line class="visar minutt" x1="{{.Form.DialX}}" y1="{{.Form.DialY}}" x2="{{.Form.DialX}}" y2="{{.Form.MinuteHand}}"
+          transform="rotate({{.Form.MinuteAngle}} {{.Form.DialX}} {{.Form.DialY}})"/>
+    <circle class="pinne" cx="{{.Form.DialX}}" cy="{{.Form.DialY}}" r="1.5"/>
+
+    {{/* The glass last: over the dial, over the hands — but *inside* the
+             rebate. It lay on the whole silhouette, and then the gloss lay on
+             the very edge of the case as well. A glass covering its own frame
+             does not exist, and it looked like it. The crystal sits in the
+             case; the gloss ends where the dial face ends. */}}
+    <path class="form-glas" d="{{.Form.Skive}}"/>
+  </svg>
+
+  {{/* The seat mark. It is an HTML element and not a shape in the SVG,
+         because it should look like a button — and then the simplest thing is
+         to *be* one: .plettmerke stands in the same rule as .btn, so border,
+         radius, dome, depth and colours follow the button by themselves and
+         cannot drift from it.
+  
+         Its centre lies on the lower-right corner, not inside the body:
+         --hyrne-x/y come from merkeform.go as percentages of the case, and
+         translate(-50%, -50%) puts the centre there. That is how a badge
+         sits.
+
+         Han stend inni stabelen og ikkje i knappen: prosenti er av
+         *merket*, og knappen ber fyll som skiftar med glaset. Låg han i
+         knappen, vart hyrna han sat på eit anna hyrne kvar gong fyllet
+         endra seg — og då gleid merkelappen ut or hyrnet sitt når ein
+         drog i glaskanten. Berre på timeplanen, av di det er der
+         `.dagmerke` fær fyll. */}}
+  <span class="plettmerke" aria-hidden="true"
+        style="--hyrne-x: {{printf "%.3f" .Form.HyrneX}}%; --hyrne-y: {{printf "%.3f" .Form.HyrneY}}%">
+    {{/* One number, and the number is how many places are *left*.
+    
+             It stood as "4/18" — a fraction of what was left, and that is wrong
+             both ways. A fraction cannot be told apart: two left of ten looks
+             like four left of twenty (§9). And where the house *does* have a
+             fraction — the dock, the list — it shows how many places are
+             *taken*. The mark carries one number, and one number says how many
+             you can have. */}}
+    {{- if .Form.Full}}FULL{{else}}{{.Form.Remaining}}{{end -}}
+  </span>
+  </span>
+</button>
+{{end}}
+
+{{define "daudmerke"}}
+{{/* The dead cell: the day without a class. It makes the row seven places
+     and not two — you see what does *not* run, and that is half the
+     question when setting up a week. A hole all the way through, so it
+     carries both lips at full size.
+
+     It stood written by hand in two places — the grid and the workshop —
+     and the light lip had already been patched into each copy separately.
+     The workshop's own principle is that the sample *is* the component,
+     not a drawing of it; so it and the grid have to read the same
+     template. */}}
+{{/* Ruta er ein runda firkant med ei lippa i kvar kant, og det er
+     nettupp det `--skraakant-djup` er — sjaa 20-skjema.css, der han
+     stend skriven som «the week and the empty day». Han var teikna som
+     ein SVG med tri stigar og tvo filterkjedor i staden.
+     
+     Ei full vike på ein brei skjerm hev 144 tome ruter. Det er 432
+     element og 288 filterbruk — 43 % av alle filtri på sida — brukte på
+     å teikna ingen ting. Ein `box-shadow` gjer det same utan noko av
+     det, og geometrien stend i CSS-en attmed. */}}
+<span class="dagmerke daud{{if .Idag}} idag{{end}}{{if .Umme}} umme{{end}}"{{if .Column}} style="--dag: {{.Column}}"{{end}} aria-hidden="true"></span>
+{{end}}

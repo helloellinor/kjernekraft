@@ -1,39 +1,38 @@
-// Veketal — reglane for eit vekefelt, skrivne ein gong.
+// Week numbers — the rules for a week field, written once.
 //
-// Tri stader i huset let ein skriva eit vekenummer: vikeveljaren i
-// timeplanen, «fraa veke» i skjemaet for ein ny time, og feltet som
-// plukkar ut éin time or ei timerekkje. Alle tri fylgjer dei same
-// reglane, og reglane er ikkje sjølvsagde — dei er lærde:
+// Three places let you type a week number: the week picker in the
+// schedule, "from week" in the new-class form, and the field that picks
+// one class out of a run. All three follow the same rules, and the rules
+// are learnt rather than obvious:
 //
-//   * Berre siffer. Alt anna fell burt medan du skriv.
-//   * Tvo siffer *er* ferdig skrive. Daa treng ein ikkje trykkja noko.
-//     Eitt siffer er det ikkje: «3» er ikkje eit ynske um veke tri, det
-//     er halve vegen til «37».
-//   * Ei vike som er gjengi finst ikkje. Bed du um veke 2 medan du
-//     stend i veke 51, er det den *komande* veke 2 du meiner — studioet
-//     syner ikkje vikor som er ute, so det finst ikkje noka onnor.
-//   * Eit nei er ein farge, ikkje ei melding. Feltet fer ein augneblink
-//     i aatvaringsfargen; ingi rute som lyt lesast og lukkast.
+//   * Digits only. Anything else falls away as you type.
+//   * Two digits *is* finished. You do not have to press anything. One
+//     digit is not: "3" is not a wish for week three, it is halfway to
+//     "37".
+//   * A week that has passed does not exist. Ask for week 2 while standing
+//     in week 51 and you mean the *coming* week 2 — the studio does not
+//     show weeks that are over, so there is no other one.
+//   * A refusal is a colour, not a message. The field flashes the warning
+//     colour; no dialog to read and close.
 //
-// Fyrr laag alt dette i `timeplan-veke.js` og galdt berre der. Det er
-// her no, og den fila les det som dei hine.
+// This all lived in timeplan-veke.js and applied only there.
 window.Veketal = (function () {
     "use strict";
 
-    // Er talet ei vike i det heile? Aaret hev 52 vikor, stundom 53.
+    // Is the number a week at all? A year has 52 weeks, sometimes 53.
     function gyldig(v, vekerIAar) {
         return !isNaN(v) && v >= 1 && v <= vekerIAar;
     }
 
-    // Kor mange vikor fram fraa `naa` ligg vike `v`?
+    // How many weeks ahead of `naa` is week `v`?
     //
-    // Skilnaden i vekenummer, heilt til aaret skiftar. Peikar
-    // reknestykket bakum golvet, legg me eit aar til: det er regelen um
-    // at ei gjengi vike ikkje finst, skrivi som aritmetikk.
+    // The difference in week number, until the year turns. If the arithmetic
+    // points below the floor we add a year: that is the rule about a past week
+    // not existing, written as arithmetic.
     //
-    // `golv` er kor langt attende ein *kann* koma. I timeplanen er det
-    // minus den vika du alt hev bladd fram til; i eit skjema er det
-    // null, av di ein ny time ikkje kann byrja i gaar.
+    // `golv` is how far back you *can* go. In the schedule it is minus the
+    // week you have already paged to; in a form it is zero, because a new
+    // class cannot start yesterday.
     function framover(v, naa, vekerIAar, golv) {
         golv = golv || 0;
         var skilnad = v - naa;

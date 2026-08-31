@@ -11,8 +11,9 @@
   width: var(--merkestorleik, 1.5em);
   height: var(--merkestorleik, 1.5em);
   background: currentColor;
-  -webkit-mask: url("/static/img/kjernekraft.svg") center / contain no-repeat;
-          mask: url("/static/img/kjernekraft.svg") center / contain no-repeat;
+  /* Which file the mask reads is set in 00-palett.css. */
+  -webkit-mask: var(--merke-maske) center / contain no-repeat;
+          mask: var(--merke-maske) center / contain no-repeat;
 }
 
 /* Merket attmed namnet er skrive i hovudbolken lenger uppe. Ein

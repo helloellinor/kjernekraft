@@ -1,0 +1,24 @@
+{{define "admin_stats_module"}}
+{{/* Tali som ei setning.
+     Tri flisor med eit tal og ei merkelapp under er ein maate aa unngaa
+     aa skriva ei setning på. «6» og «TOTALT ANTALL BRUKERE» lyt setjast
+     saman av lesaren; «6 medlemer» er alt sett saman.
+
+     Breiddeaksa gjer det leseleg utan kassar: tale stend vidt og feitt,
+     ordet smalt attmed. Det er den same regelen som elles i huset —
+     breidd tyder rang — berre nytta i ei linja i staden for i eit
+     hierarki av yverskrifter. */}}
+<p class="briefing">
+    {{t .Lang "admin.stats_lead"}}
+    <b class="tal">{{.TotalUsers}}</b> <span class="ord">{{t .Lang "admin.stats_members"}}</span>.
+    {{t .Lang "admin.stats_middle"}}
+    <b class="tal">{{.TotalEvents}}</b> <span class="ord">{{t .Lang "admin.stats_classes"}}</span>{{if .PendingFreezeRequests}},
+    {{t .Lang "admin.stats_and"}}
+    {{/* Fyrr peika ho paa ein hash og faner.js tok henne. No er ho ei
+         vanleg lenkja til fana, og ho byter ut det same arket fanone
+         gjer — id-en stend i admin.go. */}}
+    <a href="/admin?fane=meldingar" class="briefing-lenkje"
+       hx-boost="true" hx-target="#faneark-admin" hx-select="#faneark-admin" hx-swap="outerHTML show:none"><b class="tal">{{.PendingFreezeRequests}}</b>
+    <span class="ord">{{if eq .PendingFreezeRequests 1}}{{t .Lang "admin.stats_waiting_one"}}{{else}}{{t .Lang "admin.stats_waiting_many"}}{{end}}</span></a>{{end}}.
+</p>
+{{end}}

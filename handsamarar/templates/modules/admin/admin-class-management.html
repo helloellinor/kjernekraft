@@ -1,0 +1,1266 @@
+{{define "admin_class_management"}}
+{{/* The tab already says "Timeplan", so a heading repeating it says nothing.
+It says what you do here instead. */}}
+<h2 class="section-title">{{t .Lang "admin.create_new_class"}}</h2>
+<form id="new-class-form" class="setningsskjema" onsubmit="createClass(event)">
+                {{/* The class as a sentence. The order is the work — what, who, where,
+                when, how long — not the order of columns in a table.
+                
+                Five fields are gone because the system already knows: capacity comes
+                from the room, colour from the class type, end time from the length.
+                Length is also what a teacher thinks in; nobody plans a class that
+                "ends 18:25". */}}
+                <p class="setning">
+                    <input type="text" id="class-title" class="felt" required
+                           placeholder="{{t .Lang "admin.eg_class"}}"
+                           aria-label="{{t .Lang "admin.class_title"}}">
+                    {{t .Lang "admin.is_kind"}}
+                    {{/* The kind was not in the form at all — the JS sent class_type: '' — so
+                    every class the house made is without one. Two things at once: the wing
+                    falls to grey (§1), and a clip earmarked for a category never finds its
+                    class. */}}
+                    <input type="text" id="class-slag" class="felt" list="slagsortar"
+                           placeholder="{{t .Lang "admin.eg_category"}}"
+                           aria-label="{{t .Lang "admin.class_category"}}">
+                    {{t .Lang "admin.with"}}
+                    <input type="text" id="class-teacher" class="felt" required list="laerarar"
+                           placeholder="{{t .Lang "admin.eg_teacher"}}"
+                           aria-label="{{t .Lang "admin.teacher_name"}}">
+                    <datalist id="laerarar">
+                        {{range $.Teachers}}<option value="{{.}}"></option>{{end}}
+                    </datalist>
+                    {{/* The kind field's memory: what the house has already seen. The field is
+                    free text because SlagKlasse washes it and an unknown kind gets no
+                    colour rather than the wrong one — but free text without memory makes
+                    "Yoga", "yoga" and a typo into three kinds, each with its own wing. One
+                    list, three fields read it. */}}
+                    <datalist id="slagsortar">
+                        {{range $.Slagsortar}}<option value="{{.}}"></option>{{end}}
+                    </datalist>
+                    {{t .Lang "admin.in_room"}}
+                    {{/* No empty option, and the hall as the default. "Choose room" was a
+                    choice you made because the form demanded it, not because you had
+                    something to choose: the studio has two rooms and group classes are in
+                    the hall. If the hall is missing, the first room stands as it is. */}}
+                    <select id="class-location" class="felt" required aria-label="{{t .Lang "admin.location"}}">
+                        {{range $.Rooms}}
+                        <option value="{{.Name}}" data-plassar="{{.Capacity}}" data-rom="{{.ID}}"{{if eq .Name "Salen"}} selected{{end}}>{{.Name}}</option>
+                        {{end}}
+                    </select>,
+                    {{/* A series has a weekday, not a date. The first occurrence is computed on
+                    the server: the next time that day comes round — today, if the hour has
+                    not passed. */}}
+                    {{/* Dagen bøyer seg i tal, som resten av setningi: ein
+                         time gjeng «måndag», ei rekkje gjeng
+                         «maandagar». Bøygningi ligg i `data-`, so ho
+                         gjeng gjenom umsetjingi (§7), og JS-en byter
+                         berre ordi — ikkje verdet, som er vekedagstalet
+                         tenaren ventar. */}}
+                    <select id="class-day" class="felt" required aria-label="{{t .Lang "admin.weekday"}}">
+                        <option value="1" data-ein="{{t .Lang "timeplan.monday"}}" data-fleire="{{t .Lang "timeplan.mondays"}}">{{t .Lang "timeplan.monday"}}</option>
+                        <option value="2" data-ein="{{t .Lang "timeplan.tuesday"}}" data-fleire="{{t .Lang "timeplan.tuesdays"}}">{{t .Lang "timeplan.tuesday"}}</option>
+                        <option value="3" data-ein="{{t .Lang "timeplan.wednesday"}}" data-fleire="{{t .Lang "timeplan.wednesdays"}}">{{t .Lang "timeplan.wednesday"}}</option>
+                        <option value="4" data-ein="{{t .Lang "timeplan.thursday"}}" data-fleire="{{t .Lang "timeplan.thursdays"}}">{{t .Lang "timeplan.thursday"}}</option>
+                        <option value="5" data-ein="{{t .Lang "timeplan.friday"}}" data-fleire="{{t .Lang "timeplan.fridays"}}">{{t .Lang "timeplan.friday"}}</option>
+                        <option value="6" data-ein="{{t .Lang "timeplan.saturday"}}" data-fleire="{{t .Lang "timeplan.saturdays"}}">{{t .Lang "timeplan.saturday"}}</option>
+                        <option value="0" data-ein="{{t .Lang "timeplan.sunday"}}" data-fleire="{{t .Lang "timeplan.sundays"}}">{{t .Lang "timeplan.sunday"}}</option>
+                    </select>
+                    {{t .Lang "admin.from_time"}}
+                    <input type="time" id="class-start-time" class="felt" required step="300"
+                           aria-label="{{t .Lang "admin.start_time"}}">
+                    {{t .Lang "admin.for_duration"}}
+                    <input type="number" id="class-length" class="felt felt-tal" value="60"
+                           min="15" max="240" step="5" required
+                           aria-label="{{t .Lang "admin.length_minutes"}}"> {{t .Lang "admin.minutes"}}
+                    {{/* Places. The room's number stands as a *value*, not as grey placeholder
+                    text — same decision as the series form. An empty field with the room's
+                    number behind it has to explain the difference between inherited and
+                    chosen, and a field that needs explaining is too clever. The number is
+                    there; type another and that one applies.
+                    
+                    It follows the room when you change room, because the room decides how
+                    many fit. */}}
+                    {{t .Lang "admin.room_for"}}
+                    <input type="number" id="class-seats" class="felt felt-tal"
+                           min="0" max="500"
+                           aria-label="{{t .Lang "admin.capacity"}}"><span
+                       class="gjentak-bolk">, {{/* Either the class repeats or it does not — two states, so it is a choice
+                                              and not a checkbox. A checkbox is a *statement* you tick; it has an
+                                              empty state that says nothing, and in a sentence that reads as a hole.
+                                              
+                                              The value is the switch: "kvar" means it repeats. Three places read it,
+                                              and all three ask for the same word. */}}<select id="class-gjentak" class="felt"
+                            aria-label="{{t .Lang "admin.repeat_label"}}">
+                        <option value="ein">{{t .Lang "admin.once"}}</option>
+                        <option value="kvar">{{t .Lang "admin.every_week"}}</option>
+                    </select> <span id="veker-bolk" hidden>{{t .Lang "admin.for_weeks"}}
+                        <input type="number" id="recurring-weeks" class="felt felt-tal" value="8" min="2" max="52"
+                               aria-label="{{t .Lang "admin.weeks"}}"> {{t .Lang "admin.weeks"}}</span></span>{{/*
+                    */}},
+                    {{/* Which week the series starts from. It always started in the first
+                    coming week, which is right for the ordinary case — but an autumn series
+                    entered in August does not start in August.
+                    
+                    Same rules as the week picker in the schedule, and the same code
+                    (veketal.js): digits only, two digits is complete, and a week that has
+                    passed does not exist. The placeholder is the current week, so an empty
+                    field means "as soon as possible". */}}
+                    {{/* The preposition follows the choice: a one-off class is *in* a week, a
+                    series runs *from* one. The inflection sits in data-, like
+                    timen/timane below, so it goes through the translation (§7) and is
+                    written in one place. */}}
+                    <span id="vekeord"
+                          data-ein="{{t .Lang "admin.in_week"}}"
+                          data-fleire="{{t .Lang "admin.from_week"}}">{{t .Lang "admin.in_week"}}</span>
+                    <input type="text" id="class-fraa-veke" class="felt felt-tal vekefelt-skjema"
+                           inputmode="numeric" maxlength="2" autocomplete="off" spellcheck="false"
+                           placeholder="{{.VekeNo}}"
+                           data-veke="{{.VekeNo}}" data-veker="{{.VikorIAaret}}"
+                           aria-label="{{t .Lang "admin.from_week_label"}}">.
+                </p>
+
+                {{/* Who the class is open to, as its own sentence. It was a clause in the
+                sentence above, and then one word — "only for" — had to fit every
+                option. It fit one of them. Here each option carries its whole clause.
+                
+                The words inflect for number. A series of eight weeks is eight classes,
+                and "The class is open to all" is then untrue the way grammar is untrue.
+                The inflection lives in data-ein/data-fleire so it goes through the
+                translation like everything else (§7). */}}
+                <p class="setning opasetning">
+                    <span id="opa-namn" data-ein="{{t .Lang "admin.the_class_one"}}"
+                          data-fleire="{{t .Lang "admin.the_class_many"}}">{{t .Lang "admin.the_class_one"}}</span>
+                    <select id="class-opa" class="felt" aria-label="{{t .Lang "admin.who_for"}}">
+                        <option value="alle"
+                                data-ein="{{t .Lang "admin.open_all_one"}}"
+                                data-fleire="{{t .Lang "admin.open_all_many"}}">{{t .Lang "admin.open_all_one"}}</option>
+                        {{/* A choice with nothing to choose between is not a choice. With no groups,
+                        no class can require certification, and the line must not promise it. */}}
+                        {{if .Grupper}}
+                        <option value="sert"
+                                data-ein="{{t .Lang "admin.needs_cert_one"}}"
+                                data-fleire="{{t .Lang "admin.needs_cert_many"}}">{{t .Lang "admin.needs_cert_one"}}</option>
+                        {{end}}
+                        <option value="privat"
+                                data-ein="{{t .Lang "admin.is_private_one"}}"
+                                data-fleire="{{t .Lang "admin.is_private_many"}}">{{t .Lang "admin.is_private_one"}}</option>
+                    </select>{{/*
+                    */}}<span id="opa-sert" hidden>:
+                        <select id="class-gruppe" class="felt" aria-label="{{t .Lang "admin.which_cert"}}">
+                            {{range .Grupper}}<option value="{{.ID}}">{{.Namn}}</option>{{end}}
+                        </select></span>{{/*
+                    */}}<span id="opa-privat" hidden>:
+                        {{/* An address, not a list of everyone. The list was ninety names deep and
+                        asked you to find someone you already know; the address is what you
+                        have. The server looks it up — the browser should not hold a register of
+                        who exists. */}}
+                        <input type="email" id="class-privat-epost" class="felt"
+                               autocomplete="off" spellcheck="false"
+                               placeholder="{{t .Lang "admin.private_email_hint"}}"
+                               aria-label="{{t .Lang "admin.private_email_label"}}"></span>.
+                    {{/* The button ends the sentence and does not stand alone. It used to be in
+                    the first sentence because that was the only one; now it is in the last,
+                    which is the one it is the full stop of. See setningsknapp_test.go. */}}
+                    <button type="submit" class="btn-primary">{{t .Lang "admin.create_class"}}</button>
+                </p>
+
+                {{/* Fylgja: kva det vert. Ho er rekna medan du skriv, so
+                     konflikten stend *fyre* du trykkjer og ikkje etter. */}}
+                {{/* data-plassar went with the places: the number is in the field in the
+                sentence now, so the follower has nothing left to report about it. */}}
+                <p class="fylgja" id="fylgja" role="status" data-sluttar="{{t .Lang "admin.ends"}}"></p>
+            </form>
+
+{{/* ---- two columns ----
+     Series on the left, days on the right.
+
+     It was one long list where each row opened in place and carried both
+     the series and its days. Two things were wrong: the two scopes —
+     "all coming classes" and "this one day" — lay on top of each other in
+     the same accordion row, and you had to open a row to see anything at
+     all, so the list itself said nothing.
+
+     minmax(0, …) and not auto: a teacher name in a sentence should wrap,
+     not push the column out of the window (§4). */}}
+<div class="timestyring">
+
+    <section class="timestyring-seriar">
+        {{/* Sikti stend på tittellina, ikkje under henne — same
+             komponenten som timeplanen og belastningane ber (§9). */}}
+        <div class="bolkhovud">
+            <h2 class="section-title">{{t .Lang "admin.classes"}}</h2>
+            <div class="sikt">
+                {{/* A filter with one option filters nothing. It appears only when there is
+                     something to choose between.
+                
+                     The room used to be here too. Three selects plus a search field broke
+                     the line in half a column, and nobody filtered on the room: the studio
+                     has two, and you are looking for a class. */}}
+                {{with .Siktval}}
+                {{if gt (len .Dagar) 1}}
+                <select id="sikt-dag" aria-label="{{t $.Lang "timeplan.vel_dag"}}">
+                    <option value="">{{t $.Lang "timeplan.alle_dagar"}}</option>
+                    {{range .Dagar}}
+                    <option value="{{.Tal}}">{{t $.Lang .Nykel}}</option>
+                    {{end}}
+                </select>
+                {{end}}
+                {{if gt (len .Laerarar) 1}}
+                <select id="sikt-laerar" aria-label="{{t $.Lang "timeplan.teacher_filter"}}">
+                    <option value="">{{t $.Lang "timeplan.all_teachers"}}</option>
+                    {{range .Laerarar}}<option value="{{.}}">{{.}}</option>{{end}}
+                </select>
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+
+        {{/* The search field sits under the line, not on it. It is not a setting on
+                     a word — it is the way into the list, and it needs width to be that. */}}
+        <input type="search" id="seriesok" class="sok"
+               placeholder="{{t .Lang "admin.search_classes"}}"
+               aria-label="{{t .Lang "admin.search_classes"}}"
+               autocomplete="off" spellcheck="false">
+
+        {{/* Ein klasse er ikkje ein dato — han er ein serie: «yoga med
+             Leon, måndag 18:00». Lista her er seriane, ikkje utslagi
+             deira: femti rader var aatte seriar. */}}
+        {{if .Timereglar}}
+        <ul class="serieliste" id="timeseriar">
+            {{range $nr, $r := .Timereglar}}
+            {{/* data-nr and not the series id: a class carrying no series has id 0, and
+                             several of them share it. The number in the list is the only one
+                             that is unique. */}}
+            <li class="serierad" data-nr="{{$nr}}" data-vekedag="{{t $.Lang $r.VekedagNykel}}"
+                data-vekedag-tal="{{printf "%d" $r.Vekedag}}"
+                data-laerar="{{$r.Lærar}}" data-rom="{{$r.Rom}}">
+                <button type="button" class="seriehovud" aria-pressed="false"
+                        aria-controls="serie-{{$nr}}">
+                    <span class="serienamn">{{$r.Tittel}}</span>
+                    {{/* Everyone who teaches in the run, not only the one the series "has":
+                                             "Leon og Vikar" when somebody stepped in for a week. The
+                                             names are already in the classes — no extra query — and the
+                                             list no longer lies that the run is one teacher throughout. */}}
+                    <span class="seriekven">{{namneliste $.Lang $r.Laerarar}}{{if $r.Rom}} · {{$r.Rom}}{{end}}</span>
+                    {{/* A run that happens more than once happens on "maandagar", not
+                                             "maandag". The list is the runs and not their occurrences, so
+                                             it has to speak of the day as it is: repeated. */}}
+                    <span class="serienaar">{{if gt (len $r.Timar) 1}}{{t $.Lang $r.VekedagFleirtalNykel}}{{else}}{{t $.Lang $r.VekedagNykel}}{{end}} {{$r.Klokke}}</span>
+                    {{/* The word, not the symbol. It read "8 ×", meant as "eight times" — but a
+                                             cross in the corner of a row is the symbol the whole world uses
+                                             for "remove this", and that same cross *is* the delete button
+                                             two tabs away. Same symbol, two meanings, same screen: §1
+                                             forbids it for colour, and the reason holds for a glyph. Worse,
+                                             the cross was not dead — it sits inside the button that selects
+                                             the row, so it promised "delete" and did "select". */}}
+                    <span class="serietal">{{len $r.Timar}} {{gonger $.Lang (len $r.Timar)}}</span>
+                </button>
+            </li>
+            {{end}}
+        </ul>
+        {{/* Ei tom liste av di du siktar er ikkje det same som ei tom
+             liste av di det ikkje finst timar (§9). */}}
+        <p class="tomt" id="ingen-treff" hidden>{{t .Lang "admin.no_match"}}</p>
+        {{else}}
+        <p class="tomt">{{t .Lang "admin.no_upcoming_classes"}}</p>
+        {{end}}
+    </section>
+
+    <section class="timestyring-timar">
+        {{/* The heading says what you do here, not what the class is called. The
+                     name used to be here, so the page said the same thing twice — once as
+                     a heading and once in the first field below, where it is also what you
+                     can *change*. A heading that changes every time you click is not a
+                     heading, it is a label. */}}
+        {{/* The heading names the *scope*, not the class. It said "Endra timen"
+                     while the sentence below wrote teacher, time and weekday to every
+                     coming class in the series — so the word promised one thing and the
+                     button did eight. It becomes "Endra timen" the moment you pick out a
+                     single class.
+        
+                     The words live in data-, because JS swaps them and §7 wants every
+                     string through the translation. */}}
+        <div class="bolkhovud">
+            <h2 class="section-title" id="benkjetittel"
+                data-rekkja="{{t .Lang "admin.edit_series"}}"
+                data-ein="{{t .Lang "admin.edit_class"}}"
+                data-fleire="{{t .Lang "admin.edit_classes"}}">{{t .Lang "admin.edit_series"}}</h2>
+            <span class="valt-naar" id="valt-naar"></span>
+        </div>
+
+        <p class="tomt" id="valt-tomt">{{t .Lang "admin.pick_class_hint"}}</p>
+
+        {{range $nr, $r := .Timereglar}}
+        {{/* Two questions, and they are not the same:
+        
+                     $utanserie — is there a *rule* to change? It governs whether the
+                     series fields are disabled and whether "add weeks" means anything.
+        
+                     $ein — is there more than *one class* here? It governs the week
+                     field, the day list and the substitute: all three are ways of
+                     picking some out of several.
+        
+                     It is tempting to use $utanserie for both, since a class without a
+                     series is almost always one class. Not *always*: GrupperTimar
+                     groups series-less classes on matching title, teacher, room,
+                     weekday, time and length, so two identical drop-ins two weeks
+                     running become one group of two. */}}
+        {{$utanserie := eq $r.SerieID 0}}
+        {{$ein := eq (len $r.Timar) 1}}
+        {{/* The tabs separate "the whole run" from "one class", and the two are the
+                     same thing when there is only one. */}}
+        {{$fanor := and (not $utanserie) (not $ein)}}
+        {{$dag := printf "%d" $r.Vekedag}}
+        {{/* One form per series, all in the document, hidden decides what you see
+                     (§3).
+        
+                     The form does not save by itself. It used to — one call per field,
+                     sent as you left it — and then there was no "I changed my mind", and
+                     a coherent change could be half accepted. The profile and the prices
+                     get it right: the field marks itself, the dock at the bottom carries
+                     the action, and the irreversible thing is saving (ARKET §9). */}}
+        <form class="seriebolk" id="serie-{{$nr}}" data-nr="{{$nr}}"
+              data-serie-id="{{$r.SerieID}}"
+              data-naar="{{t $.Lang $r.VekedagNykel}} {{$r.Klokke}}{{if $r.Rom}} · {{$r.Rom}}{{end}}"
+              method="post" action="/api/admin/serie/lagra"
+              data-endringar data-dokk="timedokk-{{$nr}}" hidden>
+            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+            <input type="hidden" name="serie_id" value="{{$r.SerieID}}">
+
+            {{/* What you are changing: the whole run, or one class in it. It was a
+                             sentence — "to change only one class, type its week number" — and a
+                             sentence that asks is one you have to read before you know what the
+                             surface does. Two positions say the same without asking, and they
+                             say it *before* you have typed rather than after.
+            
+                             Both sections stand in the document; hidden decides what you see
+                             (§3). So nothing moves when you switch, and what you typed in the
+                             other section is still there.
+            
+                             A class belonging to no series gets no tabs: there is no run to
+                             choose between, and a choice with one option is not a choice. */}}
+            {{if $fanor}}
+            {{/* Denne rekkja er ikkje fanone i huset elles, og ho nyttar
+                             difor ikkje malen deira.
+            
+                             Fanone er lenkjor no: dei skifter `?fane=` i adressa og
+                             tenaren teiknar den eine bolken. Dette er noko anna. Det er
+                             ein brytar inni eit skjema — kva du held paa, heile rekkja
+                             eller den eine timen — og baae bolkarne lyt standa i
+                             dokumentet av di det du hev skrive i den andre skal vera der
+                             endaa. Ei lenkja hadde teke skjemaet med seg til tenaren og
+                             kome att med tomme felt.
+            
+                             So: knappar, `role="tab"`, og bolkveljar.js gjer bytet. Det
+                             er alt som er att av dei 139 linone. */}}
+            <div class="faneark rekkjevidd">
+                <div class="faner" role="tablist" aria-label="{{t $.Lang "admin.scope_label"}}">
+                    <button type="button" class="fane" role="tab" data-bolk="rekkja-{{$nr}}"
+                            aria-selected="true" tabindex="0"
+                            aria-controls="bolk-rekkja-{{$nr}}">{{t $.Lang "admin.scope_series"}}</button>
+                    <button type="button" class="fane" role="tab" data-bolk="ein-{{$nr}}"
+                            aria-selected="false" tabindex="-1"
+                            aria-controls="bolk-ein-{{$nr}}">{{t $.Lang "admin.scope_one"}}</button>
+                </div>
+
+            <div class="fanerom" data-bolk="rekkja-{{$nr}}">
+            <div data-bolk="rekkja-{{$nr}}" id="bolk-rekkja-{{$nr}}" role="tabpanel" tabindex="0">
+            {{else if $utanserie}}
+            <p class="merknad opplysing utanseriehint">{{t $.Lang "admin.serie_none_hint"}}</p>
+            {{end}}
+
+            <h3 class="undertittel bolksteg">{{t $.Lang "admin.step_class"}}</h3>
+
+            <p class="setning seriesetning">
+                <input type="text" class="felt serietittel" name="tittel" value="{{$r.Tittel}}"
+                       aria-label="{{t $.Lang "admin.class_title"}}"{{if $utanserie}} disabled{{end}}>
+                {{t $.Lang "admin.is_kind"}}
+                {{/* Slaget høyrer til rekkja og ikkje til dagen: alle
+                     utslagi av «Vinyasa Flow måndag 18:00» er yoga. */}}
+                <input type="text" class="felt" name="slag" list="slagsortar" value="{{$r.Slag}}"
+                       placeholder="{{t $.Lang "admin.eg_category"}}"
+                       aria-label="{{t $.Lang "admin.class_category"}}"{{if $utanserie}} disabled{{end}}>
+                {{t $.Lang "admin.with"}}
+                <input type="text" class="felt" name="laerar" list="laerarar" value="{{$r.Lærar}}"
+                       aria-label="{{t $.Lang "admin.teacher_name"}}"{{if $utanserie}} disabled{{end}}>
+                {{/* What stood in the field when the page was drawn. The field writes to
+                                     *every* class in the run, and it held a name whatever you came to
+                                     do — so a save meant for the title took every substitute with it.
+                                     The server compares the two and writes only when the field was
+                                     touched. */}}
+                <input type="hidden" name="laerar_fyrr" value="{{$r.Lærar}}"{{if $utanserie}} disabled{{end}}>
+                {{t $.Lang "admin.in_room"}}
+                <select class="felt" name="room_id" aria-label="{{t $.Lang "admin.location"}}"{{if $utanserie}} disabled{{end}}>
+                    <option value="0" disabled {{if eq $r.RomID 0}}selected{{end}}>{{t $.Lang "admin.select_location"}}</option>
+                    {{range $.Rooms}}
+                    <option value="{{.ID}}" {{if eq .ID $r.RomID}}selected{{end}}>{{.Name}}</option>
+                    {{end}}
+                </select>,
+                {{/* The weekday inflects for how many classes the run has, as it does in
+                                     the list on the left: a run happens on "maandagar", one class on
+                                     "maandag". Here the number is known when the page is drawn, so it
+                                     needs no JS. */}}
+                <select class="felt" name="vekedag" aria-label="{{t $.Lang "admin.weekday"}}"{{if $utanserie}} disabled{{end}}>
+                    <option value="1" {{if eq $dag "1"}}selected{{end}}>{{if $ein}}{{t $.Lang "timeplan.monday"}}{{else}}{{t $.Lang "timeplan.mondays"}}{{end}}</option>
+                    <option value="2" {{if eq $dag "2"}}selected{{end}}>{{if $ein}}{{t $.Lang "timeplan.tuesday"}}{{else}}{{t $.Lang "timeplan.tuesdays"}}{{end}}</option>
+                    <option value="3" {{if eq $dag "3"}}selected{{end}}>{{if $ein}}{{t $.Lang "timeplan.wednesday"}}{{else}}{{t $.Lang "timeplan.wednesdays"}}{{end}}</option>
+                    <option value="4" {{if eq $dag "4"}}selected{{end}}>{{if $ein}}{{t $.Lang "timeplan.thursday"}}{{else}}{{t $.Lang "timeplan.thursdays"}}{{end}}</option>
+                    <option value="5" {{if eq $dag "5"}}selected{{end}}>{{if $ein}}{{t $.Lang "timeplan.friday"}}{{else}}{{t $.Lang "timeplan.fridays"}}{{end}}</option>
+                    <option value="6" {{if eq $dag "6"}}selected{{end}}>{{if $ein}}{{t $.Lang "timeplan.saturday"}}{{else}}{{t $.Lang "timeplan.saturdays"}}{{end}}</option>
+                    <option value="0" {{if eq $dag "0"}}selected{{end}}>{{if $ein}}{{t $.Lang "timeplan.sunday"}}{{else}}{{t $.Lang "timeplan.sundays"}}{{end}}</option>
+                </select>
+                {{t $.Lang "admin.from_time"}}
+                <input type="time" class="felt" name="klokke" value="{{$r.Klokke}}"
+                       aria-label="{{t $.Lang "admin.serie_time"}}"{{if $utanserie}} disabled{{end}}>
+                {{t $.Lang "admin.for_duration"}}
+                <input type="number" class="felt felt-tal" name="minutt" value="{{$r.Lengd}}"
+                       min="15" max="240" step="5"
+                       aria-label="{{t $.Lang "admin.length_minutes"}}"{{if $utanserie}} disabled{{end}}>
+                {{t $.Lang "admin.minutes"}}
+                {{/* The room's number stands as a value. It was an empty field with the
+                                     room's number in grey, so you could see the difference between
+                                     inherited and chosen — but that needed a help line to explain
+                                     itself, and a field that needs explaining is too clever. */}}
+                {{t $.Lang "admin.room_for"}}
+                <input type="number" class="felt felt-tal" name="plassar"
+                       value="{{if $r.Plassar}}{{$r.Plassar}}{{else}}{{$r.RomPlassar}}{{end}}"
+                       min="0" max="500"
+                       aria-label="{{t $.Lang "admin.capacity"}}"{{if $utanserie}} disabled{{end}}>,
+                {{/* Who the run is open to. Groups only: a run set aside for one person is
+                                     a PT series, and is set up that way rather than converted here.
+                
+                                     "only for" sits inside the option and not in front of the select.
+                                     Outside it had to fit every option, and it fit one. A word that is
+                                     only right for one option belongs to that option. The first option
+                                     *is* the label, and the control's name is in aria-label (§9). */}}
+                <select class="felt" name="gruppe_id" aria-label="{{t $.Lang "admin.who_for"}}"{{if $utanserie}} disabled{{end}}>
+                    <option value="0">{{t $.Lang "admin.open_to_all"}}</option>
+                    {{range $.Grupper}}
+                    <option value="{{.ID}}" {{if eq (int64 .ID) (int64 $r.GruppeID)}}selected{{end}}>{{t $.Lang "admin.only_for"}} {{.Namn}}</option>
+                    {{end}}
+                </select>.
+            </p>
+
+            <textarea class="serieskildring" name="skildring" rows="2"
+                      placeholder="{{t $.Lang "admin.description"}}"
+                      aria-label="{{t $.Lang "admin.description"}}"{{if $utanserie}} disabled{{end}}>{{$r.Beskriving}}</textarea>
+
+            {{if not $utanserie}}
+            {{/* Two sentences, so two lines. They stood in one paragraph, and then the
+                             line broke in the middle of one — "The run happens 56 more times
+                             through 24.9.2027. Add [0] weeks." is a *statement* and an
+                             *action*, not one long sentence.
+            
+                             The number in the first is a fact, not a field: a number you could
+                             type downwards would have deleted classes with signups in them
+                             (§7). You add here, and shorten by marking days and cancelling. */}}
+            <h3 class="undertittel bolksteg">{{t $.Lang "admin.step_length"}}</h3>
+
+            <p class="setning lengdfakta">
+                {{t $.Lang "admin.series_runs"}}
+                <span class="lengdtal">{{len $r.Timar}} {{gonger $.Lang (len $r.Timar)}}</span>
+                {{t $.Lang "admin.series_until"}} {{$r.Sluttar.Format "2.1.2006"}}.
+            </p>
+
+            <p class="setning lengdsetning">
+                {{t $.Lang "admin.add_weeks"}}
+                <input type="number" class="felt felt-tal" name="veker" value=""
+                       placeholder="0" min="0" max="52"
+                       aria-label="{{t $.Lang "admin.add_weeks_unit"}}">
+                {{t $.Lang "admin.add_weeks_unit"}}.
+            </p>
+
+            {{/* The whole run can be cancelled. It had to be done day by day, and for a
+                             fifty-week series that is not an action, it is a job.
+            
+                             The button does not write to the server. It marks every living
+                             day, exactly as cancelling the marked ones does, and the dock
+                             performs it when you save. That is why it needs no confirm dialog:
+                             the warning stands above it before you press, and the second press
+                             is "Save" in the dock (§7). */}}
+            {{end}}
+
+            {{/* Cancelling is the same action for one class or fifty: it marks every
+                             living day in the group and the dock performs it. Hence one button
+                             and not two — only the words change, because "Cancel all classes"
+                             is untrue when there is one.
+            
+                             No label in front of the button. It said "The whole run:" and the
+                             button said it again. The verb carries it: "Avlys heile rekkja"
+                             says both what happens and what it happens to. */}}
+            <h3 class="undertittel bolksteg">{{t $.Lang "admin.step_cancel"}}</h3>
+
+            <p class="merknad">{{if $ein}}{{t $.Lang "admin.cancel_one_warning"}}{{else}}{{t $.Lang "admin.cancel_series_warning"}}{{end}}</p>
+
+            <p class="setning avlysrekkja">
+                <button type="button" class="btn-danger avlys-rekkja">{{if $ein}}{{t $.Lang "admin.cancel_one"}}{{else}}{{t $.Lang "admin.cancel_series"}}{{end}}</button>
+            </p>
+
+            {{if $fanor}}
+            {{/* The seam between the two sections — it exists only when there are two. */}}
+            </div>
+
+            <div data-bolk="ein-{{$nr}}" id="bolk-ein-{{$nr}}" role="tabpanel" tabindex="0" hidden>
+            {{end}}
+
+            {{/* A run repeats every week, so the week number is the one thing that
+                             separates one class in it from the others — and the schedule counts
+                             in the same number, so "week 37" means the same in two places.
+            
+                             The field changes nothing itself. It *marks* the class, and the
+                             mark is what the day list and the sentence below already act on:
+                             one way for one day and for five (§9). Hence data-ikkje-endring —
+                             it is a tool, not a change to be saved. */}}
+            {{/* The section does three things, and each gets its name. They stood as
+                             three sentences in a row with nothing saying where one ended and
+                             the next began. §5: the step follows depth in the document, and
+                             these are rows inside a section, so h3 with .undertittel. */}}
+            {{if and $r.Timar (not $ein)}}
+            <h3 class="undertittel bolksteg">{{t $.Lang "admin.step_pick_week"}}</h3>
+            <p class="setning vekesetning">
+                {{t $.Lang "admin.week_word"}}
+                <input type="text" class="felt vekeval-serie" data-ikkje-endring
+                       autocomplete="off" spellcheck="false"
+                       placeholder="{{veketal (index $r.Timar 0).StartTime}}"
+                       data-veker="{{$.VikorIAaret}}"
+                       aria-label="{{t $.Lang "admin.week_scope_label"}}">
+                {{/* The line has its height before it has words, so an answer moves nothing
+                                     when it arrives (§3). */}}
+                <span class="vekesvar" role="status"
+                      data-ingen="{{t $.Lang "admin.week_scope_none"}}"
+                      data-avlyst="{{t $.Lang "admin.week_scope_cancelled"}}"></span>
+            </p>
+            {{/* Help text, because the format is not obvious. It sits under the field
+                             rather than in the placeholder: a placeholder disappears the moment
+                             you start typing, which is exactly when you need to see what is
+                             allowed.
+            
+                             .merknad.opplysing and not .serievink: it stood in the weakest
+                             type on the page — what the house uses for what you *may* read —
+                             while it is the only thing saying what the field accepts. */}}
+            <p class="merknad opplysing vekehjelp">{{t $.Lang "admin.week_help"}}</p>
+            <p class="valtal"><span class="valde">0</span> {{t $.Lang "admin.selected_count"}}</p>
+            {{end}}
+
+
+            {{/* The sentence acting on the selected ones stands *above* the list. A
+                             series can be fifty days long, and a button under fifty rows is a
+                             button you have to scroll for.
+            
+                             Day and time are gone. The selected classes in a run happen at the
+                             same time — that is what a run *is* — so a time picker here asked
+                             something already answered.
+            
+                             The fields are tools, not changes: they carry data-ikkje-endring,
+                             so the dock does not count what you type in the instrument. */}}
+            {{if not $ein}}
+            {{/* The substitute and the cancellation are two things, and they stood in
+                             one sentence because both act on the same selection. The count has
+                             moved up to the week field, where you *make* the selection —
+                             "three selected" is the answer to what you picked, not the opening
+                             of what you do with it. */}}
+            <h3 class="undertittel bolksteg">{{t $.Lang "admin.step_vikar"}}</h3>
+            <p class="setning">
+                <input type="text" class="felt val-vikar" list="laerarar" disabled data-ikkje-endring
+                       placeholder="{{t $.Lang "admin.eg_teacher"}}"
+                       aria-label="{{t $.Lang "admin.with_vikar"}}">
+            </p>
+
+            <h3 class="undertittel bolksteg">{{t $.Lang "admin.step_cancel"}}</h3>
+            <p class="merknad">{{t $.Lang "admin.cancel_warning"}}</p>
+            <p class="setning">
+                <button type="button" class="btn-danger val-avlys" disabled>{{t $.Lang "admin.cancel_class"}}</button>
+            </p>
+            {{end}}
+
+            {{/* The heading stands on its list. It lay three sections higher — above
+                             the week field, the warning and the sentence — promising a list
+                             that did not come until later. A heading that does not touch what
+                             it names is not a heading.
+            
+                             "Select all" went with it: a range in the week field ("1-52") does
+                             the same, and then there were two ways to do one thing (§9). */}}
+            {{if not $ein}}
+            <h3 class="undertittel bolksteg daghovud">{{t $.Lang "admin.the_days"}}</h3>
+            {{end}}
+
+            {{/* The day looks like the run in the list on the left: same row, same two
+                             lines, same placement of time and number — so the eye reads one
+                             column as it reads the other.
+            
+                             In front stands the week stamp: the number large, the month
+                             under. The week number is what you aim with in the field above, so
+                             it should be what you find again without searching. */}}
+            {{/* The list stands in the document even when hidden, and that is not a
+                             leftover. The mark that cancels lives on the row — the button sets
+                             a hidden field there and lets the dock perform it — so if the row
+                             is gone there is nothing to cancel. With one class there is nothing
+                             to *see* in a one-row list, but the mechanism is the same for one
+                             as for fifty (§9). */}}
+            <ul class="daglista"{{if $ein}} hidden{{end}}>
+                {{range $r.Timar}}
+                <li>
+                    <label class="dagrad" data-time-id="{{.ID}}"
+                           data-veke="{{veketal .StartTime}}"
+                           data-dato="{{.StartTime.Format "2006-01-02"}}"
+                           data-klokke="{{.StartTime.Format "15:04"}}"
+                           data-laerar="{{.TeacherName}}"
+                           data-lengd="{{.LengdMin}}">
+                        <input type="checkbox" class="time-val" data-ikkje-endring
+                               aria-label="{{t $.Lang "admin.week_scope_label"}} {{veketal .StartTime}}">
+                        <span class="dagveke">{{veketal .StartTime}}</span>
+                        {{/* Month and day stand together: "sep 8". The week number says which week,
+                                                     the stamp below says which day of the year — same type, because
+                                                     they are the same answer in two branches. */}}
+                        <span class="dagmaanad">{{t $.Lang (maanadnykel .StartTime)}} {{.StartTime.Format "2"}}</span>
+                        <span class="daglaerar">{{.TeacherName}}</span>
+                        {{/* The weekday belongs to the time, not the date: "maandag 18:00" is
+                                                     *when* in the week, and that is one answer. Singular here — it
+                                                     is one class, not a run. The run says "maandagar", and that
+                                                     word is in the list on the left. */}}
+                        <span class="dagklokke">{{t $.Lang (vekedagnykel .StartTime)}} {{.StartTime.Format "15:04"}}</span>
+                        <span class="dagplassar">{{.CurrentEnrolment}} {{t $.Lang "timeplan.of"}} {{.Capacity}}</span>
+                        <span class="dagord">{{t $.Lang "admin.mark_cancelled"}}</span>
+                    </label>
+                </li>
+                {{end}}
+            </ul>
+
+            <p class="fylgja dagfylgja" role="status"></p>
+
+            {{if $fanor}}
+            </div>
+            </div>
+            </div>
+            {{end}}
+
+            {{/* The dock. It appears only when something has changed, and carries both
+                             the way forward and the way back. */}}
+            <aside class="dokk endringsdokk" id="timedokk-{{$nr}}" hidden>
+                <div class="dokkinnhald">
+                    <span class="endringstal" aria-live="polite"
+                          data-ein="{{t $.Lang "profile.changed_one"}}"
+                          data-fleire="{{t $.Lang "profile.changed_many"}}"></span>
+                    <div class="dokkhandling">
+                        <button type="button" class="btn" data-angra>{{t $.Lang "profile.discard"}}</button>
+                        <button type="submit" class="btn-primary">{{t $.Lang "profile.save"}}</button>
+                    </div>
+                </div>
+            </aside>
+        </form>
+        {{end}}
+    </section>
+</div>
+
+<script>
+// ---- the new-class form ----
+// The derived parts. Capacity from the room, end time from the length,
+// and conflicts from the server — all while you type.
+//
+// The next date that weekday comes round, as YYYY-MM-DD — today if the
+// hour has not passed. The conflict check needs a concrete date to ask
+// about.
+function nesteDato(vekedag, klokke) {
+    var no = new Date();
+    var fram = (vekedag - no.getDay() + 7) % 7;
+    if (fram === 0 && klokke) {
+        var d = klokke.split(':');
+        if (parseInt(d[0], 10) * 60 + parseInt(d[1], 10) <= no.getHours() * 60 + no.getMinutes()) fram = 7;
+    }
+    var dato = new Date(no.getFullYear(), no.getMonth(), no.getDate() + fram);
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return dato.getFullYear() + '-' + pad(dato.getMonth() + 1) + '-' + pad(dato.getDate());
+}
+
+(function () {
+    var rom = document.getElementById('class-location');
+    var dag = document.getElementById('class-day');
+    var start = document.getElementById('class-start-time');
+    var lengd = document.getElementById('class-length');
+    var gjentak = document.getElementById('class-gjentak');
+    var veker = document.getElementById('recurring-weeks');
+    var vekerBolk = document.getElementById('veker-bolk');
+    var plassar = document.getElementById('class-seats');
+    var ut = document.getElementById('fylgja');
+    if (!rom || !ut) return;
+
+    // Rommet set talet. Fyrste gongen ogso, so feltet aldri stend tomt.
+    function fyllPlassar() {
+        var val = rom.selectedOptions[0];
+        if (val && val.dataset.plassar) plassar.value = val.dataset.plassar;
+    }
+    rom.addEventListener('change', fyllPlassar);
+    fyllPlassar();
+
+    function slutt() {
+        if (!start.value || !lengd.value) return null;
+        var d = start.value.split(':');
+        var m = parseInt(d[0], 10) * 60 + parseInt(d[1], 10) + parseInt(lengd.value, 10);
+        m = ((m % 1440) + 1440) % 1440;
+        return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+    }
+
+    var tidsavbrot = null;
+    async function teikn() {
+        var bitar = [];
+        var val = rom.selectedOptions[0];
+        // Places are in the field now, not here. The follower is what is
+        // *computed* — end time from length, collision from the server — and a
+        // number sitting in a field you can type in is not computed any more.
+        var s = slutt();
+        if (s) bitar.push(ut.dataset.sluttar + ' ' + s);
+        ut.textContent = bitar.join(' · ');
+        ut.classList.remove('gale');
+
+        if (!(val && val.dataset.rom && dag.value && start.value && s)) return;
+
+        // Konflikten kjem fraa tenaren, av di det er han som veit kva
+        // som alt stend i rommet. Han vert spurd med ei lita venting, so
+        // det ikkje gjeng eit kall per tastetrykk.
+        clearTimeout(tidsavbrot);
+        tidsavbrot = setTimeout(async function () {
+            var q = new URLSearchParams({ room_id: val.dataset.rom, date: nesteDato(parseInt(dag.value, 10), start.value), start: start.value, end: s });
+            try {
+                var svar = await fetch('/api/admin/class/conflict?' + q);
+                if (!svar.ok) return;
+                var d = await svar.json();
+                if (d.conflict) {
+                    ut.textContent = bitar.join(' · ') + ' · ' + d.message;
+                    ut.classList.add('gale');
+                }
+            } catch (e) { /* konflikten er ei hjelp, ikkje eit vilkor */ }
+        }, 250);
+    }
+
+    [rom, dag, start, lengd].forEach(function (f) {
+        f.addEventListener('input', teikn);
+        f.addEventListener('change', teikn);
+    });
+
+    // One listener on the choice, not two. There was another further down
+    // that set the number back to 4 while the field said 8, so what you got
+    // depended on which fired last.
+    function gjentek() { return gjentak.value === 'kvar'; }
+    gjentak.addEventListener('change', function () {
+        vekerBolk.hidden = !gjentek();
+        veker.disabled = !gjentek();
+    });
+    vekerBolk.hidden = !gjentek();
+    veker.disabled = !gjentek();
+
+    // Fyrste gongen: dagen i dag, so det vanlegaste tilfellet — «denne
+    // timen, fraa no av» — ikkje krev noko val.
+    dag.value = String(new Date().getDay());
+    teikn();
+})();
+
+// ---- who the class is open to, and how many classes ----
+//
+// One choice governs what stands beside it: certification shows a kind,
+// private shows an address, "open to all" shows nothing. Only one can be
+// true, so it is one select and not three checkboxes that can contradict
+// each other.
+//
+// The words inflect for number because the sentence is otherwise untrue:
+// eight classes are not "the class". The inflection sits in data-, so it
+// goes through the translation (§7) and is written in one place.
+(function () {
+    var opa = document.getElementById('class-opa');
+    var namn = document.getElementById('opa-namn');
+    var sert = document.getElementById('opa-sert');
+    var privat = document.getElementById('opa-privat');
+    var gjentak = document.getElementById('class-gjentak');
+    var veker = document.getElementById('recurring-weeks');
+    if (!opa) return;
+
+    var vekeord = document.getElementById('vekeord');
+
+    function gjentek() { return gjentak.value === 'kvar'; }
+    function fleire() {
+        return gjentek() && (parseInt(veker.value, 10) || 1) > 1;
+    }
+
+    var dag = document.getElementById('class-day');
+    function boyg() {
+        var f = fleire();
+        namn.textContent = f ? namn.dataset.fleire : namn.dataset.ein;
+        // Kven timen er open for, og kva dag han gjeng. Det er den same
+        // setningi, so ho bøyer seg heilt eller ikkje i det heile.
+        // `data-ein` er vakti: eit val utan bøygning stend som det er.
+        [opa, dag].forEach(function (v) {
+            if (!v) return;
+            [].forEach.call(v.options, function (o) {
+                if (o.dataset.ein) o.textContent = f ? o.dataset.fleire : o.dataset.ein;
+            });
+        });
+        // The preposition asks something different from the inflection: a series
+        // of one week is still a series, so it follows the choice and not the
+        // count. "in week 36" against "from week 36".
+        vekeord.textContent = gjentek() ? vekeord.dataset.fleire : vekeord.dataset.ein;
+    }
+
+    var plassefelt = document.getElementById('class-seats');
+    function syn() {
+        sert.hidden = opa.value !== 'sert';
+        privat.hidden = opa.value !== 'privat';
+        // A private session is one participant — that is what it *is*. The field
+        // is disabled, not hidden: the depth changes, nothing moves (§3), and you
+        // see the number does not apply rather than wondering where it went.
+        if (plassefelt) plassefelt.disabled = opa.value === 'privat';
+    }
+
+    opa.addEventListener('change', syn);
+    [gjentak, veker].forEach(function (f) {
+        f.addEventListener('change', boyg);
+        f.addEventListener('input', boyg);
+    });
+    boyg();
+    syn();
+})();
+
+// ---- from which week ----
+// The field answers how many weeks ahead the run starts. Empty is zero:
+// as soon as possible. The rules — digits, two digits, and that a past
+// week does not exist — live in veketal.js and govern all three week
+// fields in the house.
+var fraaVeke = 0;
+(function () {
+    var felt = document.getElementById('class-fraa-veke');
+    if (!felt || !window.Veketal) return;
+    var naa = parseInt(felt.dataset.veke, 10);
+    var vekerIAar = parseInt(felt.dataset.veker, 10) || 52;
+
+    function gyldig(v) { return Veketal.gyldig(v, vekerIAar); }
+
+    Veketal.bind(felt, {
+        gyldig: gyldig,
+        tomt: function () { fraaVeke = 0; },
+        ferdig: function () {
+            var v = parseInt(felt.value, 10);
+            if (isNaN(v) && felt.value.trim() === '') { fraaVeke = 0; return; }
+            if (!gyldig(v)) { Veketal.nekt(felt); fraaVeke = 0; return; }
+            fraaVeke = Veketal.framover(v, naa, vekerIAar);
+        }
+    });
+})();
+
+function createClass(event) {
+    event.preventDefault();
+
+    var start = document.getElementById('class-start-time').value;
+    var lengd = parseInt(document.getElementById('class-length').value, 10);
+    var d = start.split(':');
+    var m = parseInt(d[0], 10) * 60 + parseInt(d[1], 10) + lengd;
+    var slutt = String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+
+    var rom = document.getElementById('class-location');
+    var gjentak = document.getElementById('class-gjentak').value === 'kvar';
+    var opaVal = document.getElementById('class-opa').value;
+
+    fetch('/api/admin/class', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            title: document.getElementById('class-title').value,
+            class_type: document.getElementById('class-slag').value.trim(),
+            teacher_name: document.getElementById('class-teacher').value,
+            location: rom.value,
+            room_id: parseInt(rom.selectedOptions[0].dataset.rom, 10),
+            weekday: parseInt(document.getElementById('class-day').value, 10),
+            start_time: start,
+            end_time: slutt,
+            // Zero for a private session: the server sets it to one, because that is
+            // the number a PT session *has*. The field is disabled then, so the number
+            // shown is the room's and not a choice.
+            capacity: opaVal === 'privat' ? 0 : (parseInt(document.getElementById('class-seats').value, 10) || 0),
+            // One question, one answer. The server sets capacity to 1 for a private
+            // class when nothing else is said, and looks the address up itself — the
+            // browser should not carry a register of who exists.
+            gruppe_id: opaVal === 'sert' ? parseInt(document.getElementById('class-gruppe').value, 10) || 0 : 0,
+            private_email: opaVal === 'privat' ? document.getElementById('class-privat-epost').value.trim() : '',
+            // Kor mange vikor fram fyrste timen ligg. Null er den fyrste
+            // komande gongen vekedagen kjem.
+            start_week_offset: fraaVeke,
+            description: '',
+            is_recurring: gjentak,
+            recurring_weeks: gjentak ? parseInt(document.getElementById('recurring-weeks').value, 10) : 1
+        })
+    })
+    .then(function (svar) {
+        if (!svar.ok) return svar.text().then(function (t) { throw new Error(t); });
+        location.reload();
+    })
+    .catch(function (feil) {
+        var ut = document.getElementById('fylgja');
+        ut.textContent = feil.message;
+        ut.classList.add('gale');
+    });
+}
+
+// ---- the list, the filter and the bench ----
+//
+// Series on the left, the one you picked on the right. The form does not
+// save by itself: fields mark themselves, the dock at the bottom carries
+// the action, and the irreversible thing is saving (ARKET §9). This script
+// sets the marks and holds the list; endringar.js counts them and owns the
+// dock.
+(function () {
+    var liste = document.getElementById('timeseriar');
+    var benk = document.querySelector('.timestyring-timar');
+    if (!liste || !benk) return;
+
+    var rader = [].slice.call(liste.querySelectorAll('.serierad'));
+    var skjema = {};
+    [].forEach.call(benk.querySelectorAll('.seriebolk'), function (f) { skjema[f.dataset.nr] = f; });
+
+    var naar = document.getElementById('valt-naar');
+    var tomt = document.getElementById('valt-tomt');
+    var ingenTreff = document.getElementById('ingen-treff');
+
+    function seg(form, ord) {
+        var f = form.querySelector('.dagfylgja');
+        f.textContent = ord || '';
+        f.classList.toggle('gale', !!ord);
+    }
+    function dokkaTil(form) { return document.getElementById(form.dataset.dokk); }
+    function ulagra(form) {
+        var d = dokkaTil(form);
+        return d && !d.hidden;
+    }
+
+    // ---- valet ----
+    function skrivAdresse(nr) {
+        if (!(window.history && window.history.replaceState)) return;
+        var u = new URL(window.location.href);
+        u.searchParams.set('time', nr);
+        window.history.replaceState(null, '', u.pathname + u.search + u.hash);
+    }
+
+    var opa = null;
+    function vel(rad, skriv) {
+        // A series with unsaved changes does not let you leave until you have
+        // answered the dock. The form sits inside what gets hidden, so a switch
+        // would have taken both the changes and the dock that reported them —
+        // without a word.
+        if (opa && opa !== rad && ulagra(skjema[opa.dataset.nr])) {
+            var d = dokkaTil(skjema[opa.dataset.nr]);
+            d.classList.remove('ropar');
+            void d.offsetWidth;
+            d.classList.add('ropar');
+            return;
+        }
+        rader.forEach(function (r) {
+            var paa = r === rad;
+            r.classList.toggle('valt', paa);
+            r.querySelector('.seriehovud').setAttribute('aria-pressed', paa ? 'true' : 'false');
+        });
+        Object.keys(skjema).forEach(function (nr) { skjema[nr].hidden = nr !== rad.dataset.nr; });
+        naar.textContent = skjema[rad.dataset.nr].dataset.naar;
+        tomt.hidden = true;
+        // The heading reads its scope from the form it now stands above, so it
+        // does not carry the word from the previous series.
+        synkVal(skjema[rad.dataset.nr]);
+        opa = rad;
+        if (skriv !== false) skrivAdresse(rad.dataset.nr);
+    }
+
+    liste.addEventListener('click', function (e) {
+        var hovud = e.target.closest('.seriehovud');
+        if (hovud) vel(hovud.closest('.serierad'));
+    });
+
+    // ---- sikti ----
+    // Ho gøymer rader; ho rører ikkje valet. Siktar du burt den timen du
+    // held paa med, stend han framleis paa benken.
+    var sok = document.getElementById('seriesok');
+    var siktDag = document.getElementById('sikt-dag');
+    var siktLaerar = document.getElementById('sikt-laerar');
+
+    function sikt() {
+        var ord = (sok.value || '').trim().toLowerCase();
+        var synlege = 0;
+        rader.forEach(function (r) {
+            var ute = false;
+            if (ord && r.textContent.toLowerCase().indexOf(ord) === -1) ute = true;
+            if (siktDag && siktDag.value && r.dataset.vekedagTal !== siktDag.value) ute = true;
+            if (siktLaerar && siktLaerar.value && r.dataset.laerar !== siktLaerar.value) ute = true;
+            r.hidden = ute;
+            if (!ute) synlege++;
+        });
+        ingenTreff.hidden = synlege > 0;
+    }
+    sok.addEventListener('input', sikt);
+    [siktDag, siktLaerar].forEach(function (v) { if (v) v.addEventListener('change', sikt); });
+
+    // ---- the marks ----
+    // An action on the marked days does not write to the server. It sets a
+    // hidden field on the row and lets the row show it, and the dock performs
+    // everything when you save. Same move as the delete mark in the prices,
+    // and for the same reason: what cannot be undone is the *saving*, so that
+    // is what should require a press.
+    function levande(form) {
+        return [].slice.call(form.querySelectorAll('.dagrad:not(.avlyst)'));
+    }
+    function merkte(form) {
+        return levande(form).filter(function (rad) { return rad.querySelector('.time-val').checked; });
+    }
+
+    // Eitt løynt felt per rad og namn. Skriv ein det same to gonger, skal
+    // det ikkje verta to felt og to endringar.
+    function merk(rad, namn, verd) {
+        var f = rad.querySelector('input[name="' + namn + '"]');
+        if (!f) {
+            f = document.createElement('input');
+            f.type = 'hidden';
+            f.name = namn;
+            // data-tel is what endringar.js counts hidden fields on, and also what it
+            // removes again when you undo.
+            f.setAttribute('data-tel', '');
+            rad.appendChild(f);
+        }
+        f.value = verd;
+    }
+    function nyeFelt(form) {
+        form.dispatchEvent(new CustomEvent('endringar:nye', { bubbles: true }));
+    }
+
+    // ---- the scope ----
+    // The heading above the bench names what you are holding, and the tab is
+    // what decides it. It used to read the marks in the day list — the only
+    // thing there was to read — and so followed what you did instead of saying
+    // beforehand. Now the choice is in the tab and the heading confirms it. It
+    // is written here and nowhere else, so it cannot say anything other than
+    // the tab does (§7).
+    //
+    // The number still counts: mark several days at once and it is "timane"
+    // rather than "timen". The tab picks the mode, the count inflects the
+    // word.
+    var benkjetittel = document.getElementById('benkjetittel');
+    function skrivTittel(form) {
+        if (!benkjetittel || !form) return;
+        // No tab row means the class belongs to no series. Then it is one class
+        // whatever happens, and the heading must not promise a run that does not
+        // exist.
+        var vald = form.querySelector('.rekkjevidd .fane[aria-selected="true"]');
+        var ein = !form.querySelector('.rekkjevidd')
+            || (vald && vald.getAttribute('data-bolk').indexOf('ein-') === 0);
+        if (!ein) {
+            benkjetittel.textContent = benkjetittel.dataset.rekkja;
+            return;
+        }
+        benkjetittel.textContent = merkte(form).length > 1
+            ? benkjetittel.dataset.fleire
+            : benkjetittel.dataset.ein;
+    }
+
+    // The tab writes the heading. bolkveljar.js switches the section itself;
+    // here it is only the word above that has to follow.
+    benk.addEventListener('click', function (e) {
+        var fane = e.target.closest('.rekkjevidd .fane');
+        if (fane) skrivTittel(fane.closest('.seriebolk'));
+    });
+
+    // A run with one coming class left has no week field, count, substitute
+    // field or cancel button: those three are ways of picking *some* out of
+    // many, and with one there is nothing to pick. The template leaves them
+    // out, so each has to be asked for here rather than assumed.
+    //
+    // Without that this threw a null error on the first run that came down to
+    // its last class — and the throw stopped vel(), so the bench stood
+    // empty.
+    function synkVal(form) {
+        var valde = merkte(form);
+
+        var tal = form.querySelector('.valde');
+        if (tal) tal.textContent = valde.length;
+        skrivTittel(form);
+
+        var vikar = form.querySelector('.val-vikar');
+        var avlys = form.querySelector('.val-avlys');
+        if (vikar) vikar.disabled = valde.length === 0;
+        if (avlys) avlys.disabled = valde.length === 0;
+    }
+
+    // ---- vekefeltet ----
+    // Ei timerekkje gjentek seg kvar vike, so vekenummeret er det eine
+    // talet som skil éin time i rekkja fraa dei hine — og timeplanen tel
+    // i det same talet, so «veke 37» tyder det same tvo stader.
+    //
+    // Feltet tek eit *sett*: «37», «37-40», «37,39,41» og blandingar.
+    // Difor er «vel alle» burte — «1-52» er det same, og ein knapp som
+    // gjer det eit felt attmed alt gjer er den andre maaten aa gjera éin
+    // ting paa (§9). Tolkingi stend i `veketal.js` med dei hine
+    // vekereglane; her stend berre kva ho vert brukt til.
+    //
+    // Feltet endrar ingen ting sjølv. Det *merkjer* timane, og merket er
+    // det setningi under alt verkar paa.
+    function sikta(felt) {
+        var form = felt.closest('.seriebolk');
+        var svar = form.querySelector('.vekesvar');
+        var vekerIAar = parseInt(felt.dataset.veker, 10) || 52;
+
+        function reinsk() {
+            levande(form).forEach(function (r) { r.querySelector('.time-val').checked = false; });
+        }
+
+        if (!felt.value.trim()) { reinsk(); svar.textContent = ''; synkVal(form); return; }
+
+        var vekor = window.Veketal ? Veketal.tolk(felt.value, vekerIAar) : null;
+        if (!vekor || !vekor.length) {
+            // «Eg skjøna deg ikkje» og «ingen time den vika» er tvo
+            // svar. Det fyrste er eit nei paa feltet; det andre er ei
+            // melding um rekkja.
+            reinsk(); synkVal(form);
+            if (!vekor) { Veketal.nekt(felt); svar.textContent = ''; }
+            else { svar.textContent = svar.dataset.ingen; }
+            return;
+        }
+
+        var sett = {};
+        vekor.forEach(function (v) { sett[v] = true; });
+
+        var traff = levande(form).filter(function (r) { return sett[r.dataset.veke]; });
+        levande(form).forEach(function (r) {
+            r.querySelector('.time-val').checked = !!sett[r.dataset.veke];
+        });
+
+        if (!traff.length) {
+            // Ein avlyst time stend framleis i lista, og det er eit anna
+            // svar enn at det ikkje finst nokon time dei vikone.
+            var avlyst = [].slice.call(form.querySelectorAll('.dagrad.avlyst'))
+                .filter(function (r) { return sett[r.dataset.veke]; });
+            svar.textContent = avlyst.length ? svar.dataset.avlyst : svar.dataset.ingen;
+            synkVal(form);
+            return;
+        }
+
+        svar.textContent = '';
+        synkVal(form);
+        // Syner det du bad um. `nearest` rullar berre um rada er utanfor.
+        traff[0].scrollIntoView({ block: 'nearest' });
+    }
+
+    // `Veketal.bind` er for eit felt som tek *eitt* tal: han vaskar burt
+    // alt som ikkje er siffer og gjeng av seg sjølv ved tvo teikn. Dette
+    // feltet tek komma og bindestrek og kann verta langt, so det gjeng
+    // naar du er ferdig — blur eller Enter — og ikkje fyrr. Reglane det
+    // *deler* med dei hine er tolkingi og neiet, og dei stend i
+    // `veketal.js`.
+    [].forEach.call(benk.querySelectorAll('.vekeval-serie'), function (felt) {
+        felt.addEventListener('blur', function () { sikta(felt); });
+        felt.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); felt.blur(); }
+            if (e.key === 'Escape') { felt.value = ''; sikta(felt); }
+        });
+    });
+
+    benk.addEventListener('change', function (e) {
+        var form = e.target.closest('.seriebolk');
+        if (!form) return;
+        var mal = e.target;
+
+        if (mal.classList.contains('time-val')) { synkVal(form); return; }
+
+        // Vikaren paa dei merkte. Feltet er reiskapen; merket i rada er
+        // endringi.
+        if (mal.classList.contains('val-vikar')) {
+            var namn = mal.value.trim();
+            if (!namn) return;
+            merkte(form).forEach(function (rad) {
+                merk(rad, 'vikar-' + rad.dataset.timeId, namn);
+                rad.querySelector('.daglaerar').textContent = namn;
+            });
+            mal.value = '';
+            nyeFelt(form);
+            return;
+        }
+
+    });
+
+    benk.addEventListener('click', function (e) {
+        var form = e.target.closest('.seriebolk');
+        if (!form) return;
+
+        // Avlysing merkjer; ho slettar ikkje. Rada stend att, merkt, til
+        // du lagrar — eller til du angrar.
+        //
+        // Heile rekkja er den same handlingi paa alle levande dagar, so
+        // ho gjeng gjenom den same koda. Ingi ruta som spør: aatvaringi
+        // stod paa sida fyre du trykte, og trykk nummer tvo er «Lagra» i
+        // dokka (§7). Difor er dette knappen som *merkjer*, og ikkje
+        // knappen som gjer.
+        var rekkja = e.target.closest('.avlys-rekkja');
+        var avlys = e.target.closest('.val-avlys');
+        if (rekkja || (avlys && !avlys.disabled)) {
+            (rekkja ? levande(form) : merkte(form)).forEach(function (rad) {
+                // Avlysing tek yver dei hine merki paa rada: ein dag som
+                // gjeng burt treng korkje vikar eller ny klokke.
+                [].forEach.call(rad.querySelectorAll('input[data-tel]'), function (f) { f.remove(); });
+                merk(rad, 'avlys', rad.dataset.timeId);
+                rad.classList.add('avlyst');
+                rad.querySelector('.time-val').checked = false;
+                rad.querySelector('.time-val').disabled = true;
+            });
+            synkVal(form);
+            nyeFelt(form);
+        }
+    });
+
+    // Angre. `endringar.js` tek dei løynde felti og merkeklassone; teksti
+    // i rada er vaar, og ho lyt attende til det som stend lagra.
+    //
+    // Berre læraren no. Dagen og klokka vart skrivne um her ogso den
+    // gongen ein kunde flytta ein einskild time herifraa — og daa laut
+    // datoen byggjast upp att av `data-dato` med ei eigi vekedagsliste i
+    // JS, som er den tridje staden i huset som visste kva ein maandag
+    // heiter. Ingen ting skriv deim lenger, so ingen ting treng byggja
+    // deim att. */
+    benk.addEventListener('click', function (e) {
+        if (!e.target.closest('[data-angra]')) return;
+        var form = e.target.closest('.seriebolk');
+        if (!form) return;
+        setTimeout(function () {
+            [].forEach.call(form.querySelectorAll('.dagrad'), function (rad) {
+                rad.querySelector('.daglaerar').textContent = rad.dataset.laerar;
+                rad.querySelector('.time-val').disabled = false;
+                rad.querySelector('.time-val').checked = false;
+            });
+            synkVal(form);
+            seg(form, '');
+        }, 0);
+    });
+
+    // ---- lagringi ----
+    // Eitt kall med heile serien. Gjeng noko gale, stend dokka att og
+    // segjer kvifor — ho hadde alt gøymt seg av di `endringar.js` reknar
+    // eit trykk paa «Lagre» som slutten paa saka.
+    benk.addEventListener('submit', function (e) {
+        var form = e.target.closest('.seriebolk');
+        if (!form) return;
+        e.preventDefault();
+        seg(form, '');
+        // `URLSearchParams` og ikkje `FormData`: den siste gjeng som
+        // `multipart`, og det er ei drakt eit skjema utan filer ikkje
+        // treng. Urlkoda er det same ein vanleg skjemapost sender, so
+        // tenaren les det same anten skriptet grip inn eller ikkje.
+        fetch(form.action, { method: 'POST', body: new URLSearchParams(new FormData(form)) })
+            .then(function (svar) {
+                if (!svar.ok) return svar.text().then(function (t) { throw new Error(t); });
+                window.location.reload();
+            })
+            .catch(function (feil) {
+                var d = dokkaTil(form);
+                if (d) d.hidden = false;
+                seg(form, feil.message);
+            });
+    });
+
+    // Fyrste serien stend framme med ein gong — eller den du stod i fyre
+    // sida lasta seg paa nytt.
+    var fraaAdressa = new URL(window.location.href).searchParams.get('time');
+    var start = rader.filter(function (r) { return r.dataset.nr === fraaAdressa; })[0] || rader[0];
+    if (start) vel(start, false);
+    Object.keys(skjema).forEach(function (nr) { synkVal(skjema[nr]); });
+})();
+</script>
+{{end}}

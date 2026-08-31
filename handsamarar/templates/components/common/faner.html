@@ -1,0 +1,49 @@
+{{define "faner"}}
+{{/* Fanerekkja, éin definisjon.
+
+     Ho tek ein `Fanerekkje` — sjaa handsamarar/faner.go — og ikkje ein
+     `dict`. Structen er kontrakten: eit felt som heiter noko anna er ein
+     køyrefeil ein ser, medan eit uppslag som bommar i ein `dict` er tom
+     tekst og ingen ting meir. Prisbolken skreiv «Bolk» og «Namn» ein
+     gong, og fanerekkja hans stod med tri tome knappar.
+
+     Ei fana er ei **lenkja**, ikkje ein knapp.
+
+     Ho var ein `<button role="tab">` fyrr, og daa laut 139 liner
+     JavaScript til: alle bolkarne stod i dokumentet, skriptet sette
+     `hidden` paa deim ein ikkje saag, og det skreiv ein hash i adressa
+     so eit sidebyte kom attende paa rett stad. No gjer tenaren det. Han
+     les `?fane=`, teiknar den eine bolken, og lenkja peikar dit.
+
+     Difor er det ingi `role="tablist"` her lenger. Eit tablist krev
+     piltastar millom fanone og roving tabindex — det er det ein *skal*
+     gjera naar bolkarne stend i dokumentet og ingen ting navigerar. Her
+     navigerar dei: adressa skifter, og daa er Tab-tasten rett veg
+     millom lenkjor. `aria-current="page"` segjer kvar ein stend, same
+     ordet leidingi i hovudet nyttar.
+
+     htmx byter ut `.faneark` — hovudet med — og ikkje `<main>`: dei
+     inline-skripti som stend nedst paa desse sidone ligg utanfor arket
+     og skal ikkje køyrast um att. `hx-boost` og ikkje `hx-get`, av di
+     sideskift.js kjenner att eit boost-byte og bind upp att det som
+     batt seg inni. Utan JavaScript er dette framleis ei lenkja til ei
+     heil sida.
+
+     `show:none` lyt staa der. htmx set `show:top` av seg sjølv paa kvar
+     boosta lenkja (`scrollIntoViewOnBoost`, som stend paa i standard),
+     og «rull maalet inn i glaset» tyder her: dreg fanerekkja upp til
+     toppen og let yverskrifti og helsingi rulla ut. Maalt: eit klikk paa
+     ei fana i administrasjonen sette skrollen til 265 og la rekkja rett
+     attum det klistra hovudet. Ei fana byter innhaldet under seg — ho er
+     ikkje ei ny sida — og daa skal ingen ting flytta seg. */}}
+<nav class="faner" aria-label="{{.Label}}"
+     hx-boost="true" hx-target="#{{.ID}}" hx-select="#{{.ID}}" hx-swap="outerHTML show:none">
+  {{range .Tabs}}
+  {{/* id-en er her for at htmx skal kunna gjeva fokus attende til den
+       lenkja ein trykte paa: elementet er eit anna etter byte, og han
+       finn det gamle att paa id. */}}
+  <a class="fane" id="{{$.ID}}-{{.Key}}" href="{{.Href}}"
+     {{if .Vald}}aria-current="page"{{end}}>{{.Name}}</a>
+  {{end}}
+</nav>
+{{end}}

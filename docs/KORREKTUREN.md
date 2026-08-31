@@ -71,9 +71,9 @@ containeren `data-eitt`.
 
 ## Det som ikkje kan gjerast om att, vert markert — ikkje gjort
 
-Å slette ein rad slettar han ikkje. Raden vert **merkt**: gjennomstroken,
+Å slette ei rad slettar henne ikkje. Rada vert **merkt**: gjennomstroken,
 veik, med åtvaringsfargen i margen, og eit lite «vert sletta» attmed.
-Han forsvinn når du lagrar.
+Ho forsvinn når du lagrar.
 
 Det er dette som gjer forma trygg nok til å sløyfe stadfestingsdialogar.
 Den ugjenkallelege handlinga er **å lagre**, og ho er éin knapp på éin
